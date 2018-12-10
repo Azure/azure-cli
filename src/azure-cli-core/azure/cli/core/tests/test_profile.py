@@ -655,6 +655,34 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_service_principal', autospec=True)
+    def test_get_raw_token_for_sp(self, mock_get_token, mock_read_cred_file):
+        cli = DummyCli()
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [TestProfile.token_entry1]
+        mock_get_token.return_value = (some_token_type, TestProfile.raw_token1,
+                                       TestProfile.token_entry1)
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        consolidated = profile._normalize_properties('sp1',
+                                                     [self.subscription1],
+                                                     True)
+        profile._set_subscriptions(consolidated)
+        # action
+        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+
+        # verify
+        self.assertEqual(creds[0], self.token_entry1['tokenType'])
+        self.assertEqual(creds[1], self.raw_token1)
+        # the last in the tuple is the whole token entry which has several fields
+        self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
+        mock_get_token.assert_called_once_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
+        self.assertEqual(mock_get_token.call_count, 1)
+        self.assertEqual(sub, '1')
+        self.assertEqual(tenant, self.tenant_id)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     def test_get_raw_token_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
@@ -867,7 +895,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'systemAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSI')
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSI')
+        self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -904,7 +933,8 @@ class TestProfile(unittest.TestCase):
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSIClient-{}'.format(test_client_id))
+        self.assertEqual(s['name'], self.display_name1)
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSIClient-{}'.format(test_client_id))
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -954,7 +984,7 @@ class TestProfile(unittest.TestCase):
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_object_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIObject-{}'.format(test_object_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
@@ -987,7 +1017,7 @@ class TestProfile(unittest.TestCase):
         subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_res_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIResource-{}'.format(test_res_id))
+        self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIResource-{}'.format(test_res_id))
 
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)
@@ -1048,7 +1078,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
-        subs = finder.find_from_user_account(self.user1, 'bar', 'NiceTenant', 'http://someresource')
+        subs = finder.find_from_user_account(self.user1, 'bar', self.tenant_id, 'http://someresource')
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -1120,7 +1150,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
-        subs = finder.find_through_interactive_flow('NiceTenant', 'http://someresource')
+        subs = finder.find_through_interactive_flow(self.tenant_id, 'http://someresource')
 
         # assert
         self.assertEqual([self.subscription1], subs)
@@ -1389,6 +1419,26 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [new_creds])
         self.assertTrue(mock_open_for_write.called)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
+    def test_credscache_match_service_principal_correctly(self, _, mock_open_for_write, mock_read_file):
+        cli = DummyCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = [test_sp]
+        factory = mock.MagicMock()
+        factory.side_effect = ValueError('SP was found')
+        creds_cache = CredsCache(cli, factory, async_persist=False)
+
+        # action and verify(we plant an exception to throw after the SP was found; so if the exception is thrown,
+        # we know the matching did go through)
+        self.assertRaises(ValueError, creds_cache.retrieve_token_for_service_principal, 'myapp', 'resource1', 'mytenant', False)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)

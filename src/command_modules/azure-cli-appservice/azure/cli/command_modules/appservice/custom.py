@@ -42,7 +42,10 @@ from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
-
+from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
+                           should_create_new_rg, set_location, check_if_asp_exists, check_app_exists,
+                           get_lang_from_content)
+from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
 logger = get_logger(__name__)
 
@@ -67,7 +70,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
-    node_default_version = "6.9.1"
+    node_default_version = '8.11.1'
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
@@ -240,7 +243,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
@@ -258,11 +261,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
         zip_content = fs.read()
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
-    response = requests.get(deployment_status_url, headers=authorization)
-    response = response.json()
-    if response.get('status', 0) != 4:
-        logger.warning(response.get('progress', ''))
-        response = _check_zip_deployment_status(deployment_status_url, authorization)
+    response = _check_zip_deployment_status(deployment_status_url, authorization, timeout)
     return response
 
 
@@ -798,11 +797,12 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
         linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
-        update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version)
+        update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version, slot=slot)
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
-    return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings))
+    return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
+                                                                          slot=slot))
 
 
 def _get_acr_cred(cli_ctx, registry_name):
@@ -984,10 +984,13 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
             'python_framework': python_framework,
             'python_version': python_version
         }
-        status = vsts_provider.setup_continuous_delivery(cmd.cli_ctx, resource_group_name, name, repo_url,
-                                                         branch, git_token, slot_swap, cd_app_type_details,
-                                                         cd_project_url, cd_account_create, location, test,
-                                                         private_repo_username, private_repo_password, webapp_list)
+        try:
+            status = vsts_provider.setup_continuous_delivery(cmd.cli_ctx, resource_group_name, name, repo_url,
+                                                             branch, git_token, slot_swap, cd_app_type_details,
+                                                             cd_project_url, cd_account_create, location, test,
+                                                             private_repo_username, private_repo_password, webapp_list)
+        except RuntimeError as ex:
+            raise CLIError(ex)
         logger.warning(status.status_message)
         return status
     else:
@@ -1089,7 +1092,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), is_xenon=(hyper_v or None), name=name)
+                              reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name)
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
@@ -1358,16 +1361,20 @@ def show_container_cd_url(cmd, resource_group_name, name, slot=None):
 
 
 def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
+    url = _get_url(cmd, resource_group_name, name, slot)
+    open_page_in_browser(url)
+    if logs:
+        get_streaming_log(cmd, resource_group_name, name, provider=None, slot=slot)
+
+
+def _get_url(cmd, resource_group_name, name, slot=None):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(name))
     url = site.enabled_host_names[0]  # picks the custom domain URL incase a domain is assigned
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
-    url = ('https' if ssl_host else 'http') + '://' + url
-    open_page_in_browser(url)
-    if logs:
-        get_streaming_log(cmd, resource_group_name, name, provider=None, slot=slot)
+    return ('https' if ssl_host else 'http') + '://' + url
 
 
 # TODO: expose new blob suport
@@ -1445,12 +1452,8 @@ def list_slots(cmd, resource_group_name, webapp):
 def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
     if action == 'swap':
-        if target_slot is None:
-            poller = client.web_apps.swap_slot_with_production(resource_group_name,
-                                                               webapp, slot, True)
-        else:
-            poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                    slot, target_slot, True)
+        poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
+                                                slot, (target_slot or 'production'), True)
         return poller
     elif action == 'preview':
         if target_slot is None:
@@ -1466,8 +1469,6 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='
             client.web_apps.reset_production_slot_config(resource_group_name, webapp)
         else:
             client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
-
-        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, slot)
         return None
 
 
@@ -1873,7 +1874,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='6.5.0'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
     if consumption_plan_location is None:
         site_config.always_on = True
@@ -1964,25 +1965,25 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def _check_zip_deployment_status(deployment_status_url, authorization):
+def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
     import time
-    num_trials = 1
-    while num_trials < 10:
-        time.sleep(15)
+    total_trials = (int(timeout) // 2) if timeout else 450
+    for _num_trials in range(total_trials):
+        time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
-        num_trials = num_trials + 1
-        if res_dict['status'] == 5:
+        if res_dict.get('status', 0) == 3:
             logger.warning("Zip deployment failed status %s", res_dict['status_text'])
             break
-        elif res_dict['status'] == 4:
+        elif res_dict.get('status', 0) == 4:
             break
-        logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
+        if 'progress' in res_dict:
+            logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
-    if res_dict['status'] != 4:
-        logger.warning("""Deployment is taking longer than expected. Please verify status at '%s'
-            beforing launching the app""", deployment_status_url)
+    if res_dict.get('status', 0) != 4:
+        raise ValueError("""Deployment is taking longer than expected. Please verify
+                            status at '{}' beforing launching the app""".format(deployment_status_url))
     return res_dict
 
 
@@ -2040,3 +2041,154 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     if slot:
         return client.web_apps.list_triggered_web_job_history_slot(resource_group_name, name, webjob_name, slot)
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
+
+
+def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # pylint: disable=too-many-statements
+    import os
+    client = web_client_factory(cmd.cli_ctx)
+    # the code to deploy is expected to be the current directory the command is running from
+    src_dir = os.getcwd()
+    # if dir is empty, show a message in dry run
+    do_deployment = False if os.listdir(src_dir) == [] else True
+    _create_new_rg = True
+    _create_new_asp = True
+    _create_new_app = True
+    _set_build_appSetting = False
+
+    # determine the details for app to be created from src contents
+    lang_details = get_lang_from_content(src_dir)
+    # we support E2E create and deploy for selected stacks, any other stack, set defaults for os & runtime
+    # and skip deployment
+    if lang_details['language'] is None:
+        do_deployment = False
+        sku = sku | 'F1'
+        os_val = OS_DEFAULT
+        detected_version = '-'
+        runtime_version = '-'
+    else:
+        # update SKU to user set value
+        if sku is None:
+            sku = lang_details.get("default_sku")
+        else:
+            sku = sku
+        language = lang_details.get("language")
+        is_skip_build = language.lower() == STATIC_RUNTIME_NAME
+        os_val = "Linux" if language.lower() == NODE_RUNTIME_NAME \
+            or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
+        # detect the version
+        data = get_runtime_version_details(lang_details.get('file_loc'), language)
+        version_used_create = data.get('to_create')
+        detected_version = data.get('detected')
+        runtime_version = "{}|{}".format(language, version_used_create) if \
+            version_used_create != "-" else version_used_create
+
+    full_sku = get_sku_name(sku)
+    loc_name = set_location(cmd, sku, location)
+    is_linux = True if os_val == 'Linux' else False
+    asp = "appsvc_asp_{}_{}".format(os_val, loc_name)
+    rg_name = "appsvc_rg_{}_{}".format(os_val, loc_name)
+    # Resource group: check if default RG is set
+    default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
+    _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
+
+    src_path = "{}".format(src_dir.replace("\\", "\\\\"))
+    rg_str = "{}".format(rg_name)
+    dry_run_str = r""" {
+            "name" : "%s",
+            "serverfarm" : "%s",
+            "resourcegroup" : "%s",
+            "sku": "%s",
+            "os": "%s",
+            "location" : "%s",
+            "src_path" : "%s",
+            "version_detected": "%s",
+            "version_to_create": "%s"
+            }
+            """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
+                   detected_version, runtime_version)
+    create_json = json.loads(dry_run_str)
+
+    if dryrun:
+        logger.warning("Web app will be created with the below configuration,re-run command "
+                       "without the --dryrun flag to create & deploy a new app")
+        return create_json
+
+    # create RG if the RG doesn't already exist
+    if _create_new_rg:
+        logger.warning("Creating Resource group '%s' ...", rg_name)
+        create_resource_group(cmd, rg_name, location)
+        logger.warning("Resource group creation complete")
+        _create_new_asp = True
+    else:
+        logger.warning("Resource group '%s' already exists.", rg_name)
+        _create_new_asp = check_if_asp_exists(cmd, rg_name, asp, location)
+    # create new ASP if an existing one cannot be used
+    if _create_new_asp:
+        logger.warning("Creating App service plan '%s' ...", asp)
+        sku_def = SkuDescription(tier=full_sku, name=sku, capacity=(1 if is_linux else None))
+        plan_def = AppServicePlan(location=loc_name, app_service_plan_name=asp,
+                                  sku=sku_def, reserved=(is_linux or None))
+        client.app_service_plans.create_or_update(rg_name, asp, plan_def)
+        logger.warning("App service plan creation complete")
+        _create_new_app = True
+    else:
+        logger.warning("App service plan '%s' already exists.", asp)
+        _create_new_asp = False
+        _create_new_app = check_app_exists(cmd, rg_name, name)
+    # create the app
+    if _create_new_app:
+        logger.warning("Creating app '%s' ....", name)
+        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
+        logger.warning("Webapp creation complete")
+        _set_build_appSetting = True
+    else:
+        logger.warning("App '%s' already exists", name)
+        if do_deployment:
+            # setting the appsettings causes a app restart so we avoid if not needed
+            _app_settings = get_app_settings(cmd, rg_name, name)
+            if all(not d for d in _app_settings):
+                _set_build_appSetting = True
+            elif '"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true"' not in json.dumps(_app_settings[0]):
+                _set_build_appSetting = True
+            else:
+                _set_build_appSetting = False
+
+    # update create_json to include the app_url
+    url = _get_url(cmd, rg_name, name)
+
+    if do_deployment and not is_skip_build and _set_build_appSetting:
+        # setting to build after deployment
+        logger.warning("Updating app settings to enable build after deployment")
+        update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
+        # work around until the timeout limits issue for linux is investigated & fixed
+        # wakeup kudu, by making an SCM call
+        import time
+        time.sleep(5)
+        _ping_scm_site(cmd, rg_name, name)
+
+        logger.warning("Creating zip with contents of dir %s ...", src_dir)
+        # zip contents & deploy
+        zip_file_path = zip_contents_from_dir(src_dir, language)
+
+        logger.warning("Preparing to deploy %s contents to app.",
+                       '' if is_skip_build else 'and build')
+        enable_zip_deploy(cmd, rg_name, name, zip_file_path)
+        # Remove the file afer deployment, handling exception if user removed the file manually
+        try:
+            os.remove(zip_file_path)
+        except OSError:
+            pass
+    create_json.update({'app_url': url})
+    logger.warning("All done.")
+    return create_json
+
+
+def _ping_scm_site(cmd, resource_group, name):
+    #  wakeup kudu, by making an SCM call
+    import requests
+    #  work around until the timeout limits issue for linux is investigated & fixed
+    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group, name)
+    scm_url = _get_scm_url(cmd, resource_group, name)
+    import urllib3
+    authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
+    requests.get(scm_url + '/api/settings', headers=authorization)

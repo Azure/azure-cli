@@ -67,6 +67,7 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
+_ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -229,7 +230,8 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None):
+    def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
+                              user_assigned_identity_id=None):
         consolidated = []
         for s in subscriptions:
             consolidated.append({
@@ -246,6 +248,8 @@ class Profile(object):
             })
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
+            if user_assigned_identity_id:
+                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
         return consolidated
 
     def _build_tenant_level_accounts(self, tenants):
@@ -305,9 +309,9 @@ class Profile(object):
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
         user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
-        for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = base_name
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
+                                                  user_assigned_identity_id=base_name)
+
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
@@ -469,9 +473,12 @@ class Profile(object):
 
     @staticmethod
     def _try_parse_msi_account_name(account):
-        subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
+        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
+
         if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            parts = subscription_name.split('-', 1)
+            if not msi_info:
+                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
+            parts = msi_info.split('-', 1)
             if parts[0] in MsiAccountTypes.valid_msi_account_types():
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
@@ -489,7 +496,8 @@ class Profile(object):
         for ext_sub in ext_subs:
             sub = self.get_subscription(ext_sub)
             if sub[_TENANT_ID] != account[_TENANT_ID]:
-                external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
+                # external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
+                external_tenants_info.append(sub)
 
         if identity_type is None:
             def _retrieve_token():
@@ -500,12 +508,18 @@ class Profile(object):
                                                                      account[_TENANT_ID], resource)
                 use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
+                                                                              account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
             def _retrieve_tokens_from_external_tenants():
                 external_tokens = []
-                for u, t in external_tenants_info:
-                    external_tokens.append(self._creds_cache.retrieve_token_for_user(u, t, resource))
+                for s in external_tenants_info:
+                    if user_type == _USER:
+                        external_tokens.append(self._creds_cache.retrieve_token_for_user(
+                            username_or_sp_id, s[_TENANT_ID], resource))
+                    else:
+                        external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
+                            username_or_sp_id, resource, s[_TENANT_ID], resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -555,7 +569,8 @@ class Profile(object):
                                                               account[_TENANT_ID], resource)
         else:
             creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                           resource)
+                                                                           resource,
+                                                                           account[_TENANT_ID])
         return (creds,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
@@ -871,9 +886,10 @@ class CredsCache(object):
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
-    def retrieve_token_for_service_principal(self, sp_id, resource, use_cert_sn_issuer=False):
+    def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
-        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID] and
+                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]

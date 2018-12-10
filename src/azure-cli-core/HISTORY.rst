@@ -2,9 +2,15 @@
 
 Release History
 ===============
+
+2.0.52
+++++++
+* core: support cross tenant resource provisioning for multi-tenant service principal
+* Fix bug where ids piped from a command with tsv output is improperly parsed.
+
 2.0.51
 ++++++
-* Minor fixes
+* msi login: do not reuse subscription name for identity info
 
 2.0.50
 ++++++

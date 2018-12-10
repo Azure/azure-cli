@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import base64
 import datetime
 import json
 import re
@@ -497,6 +498,11 @@ def list_apps(client, app_id=None, display_name=None, identifier_uri=None, query
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
+
     return client.list(filter=(' and '.join(sub_filters)))
 
 
@@ -525,6 +531,10 @@ def list_sps(client, spn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
+    if not sub_filters:
+        logger.warning('In a future release, if no filter arguments are provided, CLI will output only the first'
+                       ' 100 objects to to minimize wait times. You can still use --all for the old behavior,'
+                       ' though it is not recommended')
     return client.list(filter=(' and '.join(sub_filters)))
 
 
@@ -634,7 +644,8 @@ def _resolve_group(client, identifier):
 def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None):
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None,
+                       credential_description=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     if native_app:
@@ -644,8 +655,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
     else:
         if not identifier_uris:
             raise CLIError("'--identifier-uris' is required for creating an application")
-        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                             key_usage, start_date, end_date)
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage,
+                                                             start_date, end_date, credential_description)
 
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
@@ -780,7 +791,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     from azure.cli.core.commands.arm import make_camel_case, make_snake_case
     password_creds, key_creds, required_accesses = None, None, None
-    if any([key_value, key_type, key_usage, start_date, end_date]):
+    if any([password, key_value]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
 
@@ -799,8 +810,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         homepage=homepage or _get_property('homepage'),
         identifier_uris=identifier_uris or _get_property('identifier_uris'),
         reply_urls=reply_urls or _get_property('reply_urls'),
-        key_credentials=key_creds or _get_property('key_credentials'),
-        password_credentials=password_creds or _get_property('password_credentials'),
+        key_credentials=key_creds or None,
+        password_credentials=password_creds or None,
         available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
         required_resource_access=required_accesses or _get_property('required_resource_access'),
         oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
@@ -847,8 +858,8 @@ def _resolve_application(client, identifier):
     return result[0].object_id if result else identifier
 
 
-def _build_application_creds(password=None, key_value=None, key_type=None,
-                             key_usage=None, start_date=None, end_date=None):
+def _build_application_creds(password=None, key_value=None, key_type=None, key_usage=None,
+                             start_date=None, end_date=None, key_description=None):
     if password and key_value:
         raise CLIError('specify either --password or --key-value, but not both.')
 
@@ -862,18 +873,21 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
+    custom_key_id = None
+    if key_description and password:
+        custom_key_id = _encode_custom_key_description(key_description)
+
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
 
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date,
-                                             key_id=str(_gen_guid()), value=password)]
+        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date, key_id=str(_gen_guid()),
+                                             value=password, custom_key_identifier=custom_key_id)]
     elif key_value:
-        key_creds = [KeyCredential(start_date=start_date, end_date=end_date,
-                                   key_id=str(_gen_guid()), value=key_value,
-                                   usage=key_usage, type=key_type)]
+        key_creds = [KeyCredential(start_date=start_date, end_date=end_date, key_id=str(_gen_guid()), value=key_value,
+                                   usage=key_usage, type=key_type, custom_key_identifier=custom_key_id)]
 
     return (password_creds, key_creds)
 
@@ -1021,7 +1035,6 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
             _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, cert)
     elif keyvault:
-        import base64
         # 6 - Use existing cert from KeyVault
         kv_client = _get_keyvault_client(cli_ctx)
         vault_base = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
@@ -1103,7 +1116,8 @@ def create_service_principal_for_rbac(
                                          password=password,
                                          key_value=public_cert_string,
                                          start_date=app_start_date,
-                                         end_date=app_end_date)
+                                         end_date=app_end_date,
+                                         credential_description='rbac')
     # pylint: disable=no-member
     app_id = aad_application.app_id
 
@@ -1243,7 +1257,6 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
 
 
 def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
-    import base64
     import time
 
     kv_client = _get_keyvault_client(cli_ctx)
@@ -1314,7 +1327,6 @@ def _try_x509_pem(cert):
 
 def _try_x509_der(cert):
     import OpenSSL.crypto
-    import base64
     try:
         cert = base64.b64decode(cert)
         return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_ASN1, cert)
@@ -1332,8 +1344,8 @@ def _get_public(x509):
     return stripped
 
 
-def reset_service_principal_credential(cmd, name, password=None, create_cert=False,
-                                       cert=None, years=None, keyvault=None, append=False):
+def reset_service_principal_credential(cmd, name, password=None, create_cert=False, cert=None, years=None,
+                                       keyvault=None, append=False, credential_description=None):
     client = _graph_client_factory(cmd.cli_ctx)
 
     # pylint: disable=no-member
@@ -1368,6 +1380,10 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     app_creds = None
     cert_creds = None
 
+    custom_key_identifier = None
+    if credential_description and password:
+        custom_key_identifier = _encode_custom_key_description(credential_description)
+
     if password:
         app_creds = []
         if append:
@@ -1376,7 +1392,8 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             start_date=app_start_date,
             end_date=app_end_date,
             key_id=str(_gen_guid()),
-            value=password
+            value=password,
+            custom_key_identifier=custom_key_identifier
         ))
 
     if public_cert_string:
@@ -1389,7 +1406,8 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             value=public_cert_string,
             key_id=str(_gen_guid()),
             usage='Verify',
-            type='AsymmetricX509Cert'
+            type='AsymmetricX509Cert',
+            custom_key_identifier=custom_key_identifier
         ))
 
     app_create_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
@@ -1405,6 +1423,12 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
     return result
+
+
+def _encode_custom_key_description(key_description):
+    # utf16 is used by AAD portal. Do not change it to other random encoding
+    # unless you know what you are doing.
+    return key_description.encode('utf-16')
 
 
 def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):

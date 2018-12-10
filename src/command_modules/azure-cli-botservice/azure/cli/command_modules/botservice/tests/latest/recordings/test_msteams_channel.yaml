@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-08-30T21:24:33Z"}}'
+    body: '{"tags": {"product": "azurecli", "cause": "automation", "date": "2018-11-29T06:26:08Z"},
+      "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -9,24 +9,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.46]
+      ParameterSetName: [--location --name --tag]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-08-30T21:24:33Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-11-29T06:26:08Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['274']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Aug 2018 21:24:35 GMT']
+      date: ['Thu, 29 Nov 2018 06:26:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -37,7 +37,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 subscriptionclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+                     msrest_azure/0.4.34 subscriptionclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.46]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2016-06-01
@@ -77,7 +77,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['5269']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Aug 2018 21:24:35 GMT']
+      date: ['Thu, 30 Aug 2018 21:32:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -85,9 +85,9 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"location": "global", "sku": {"name": "F0"}, "kind": "bot", "properties":
-      {"displayName": "cli000002", "endpoint": "https://www.google.com/api/messages",
-      "msaAppId": "eb5893fa-828f-4657-b039-eb152bcab1a9"}}'''
+    body: 'b''{"location": "global", "sku": {"name": "F0"}, "properties": {"displayName":
+      "cli000002", "msaAppId": "c1a6f6f9-aff5-4103-bd94-698386cd19db", "endpoint":
+      "https://www.google.com/api/messages"}, "kind": "bot"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -95,30 +95,31 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['208']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [-k -g -n -e --appid]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"W/\"datetime''2018-08-30T21%3A24%3A38.3817977Z''\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"//bot-framework.azureedge.net/bot-icons-v1/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"eb5893fa-828f-4657-b039-eb152bcab1a9","developerAppInsightKey":"","developerAppInsightsApplicationId":"","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"W/\"datetime''2018-11-29T06%3A26%3A11.2888722Z''\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"c1a6f6f9-aff5-4103-bd94-698386cd19db","developerAppInsightKey":"","developerAppInsightsApplicationId":"","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":"","storageResourceId":null,"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['827']
+      content-length: ['953']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Aug 2018 21:24:38 GMT']
-      etag: [W/"datetime'2018-08-30T21%3A24%3A38.3817977Z'"]
+      date: ['Thu, 29 Nov 2018 06:26:11 GMT']
+      etag: [W/"datetime'2018-11-29T06%3A26%3A11.2888722Z'"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
-    body: '{"location": "global", "properties": {"channelName": "MsTeamsChannel",
-      "properties": {"enableCalling": true, "callingWebHook": "https://www.google.com",
-      "isEnabled": true}}}'
+    body: '{"location": "global", "properties": {"properties": {"enableCalling": true,
+      "isEnabled": true, "callingWebHook": "https://www.google.com"}, "channelName":
+      "MsTeamsChannel"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -126,21 +127,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['173']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [-g -n --enable-calling --calling-web-hook]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","name":"cli000002/MsTeamsChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"2926b4deac4f3034ab3b17c80d405fb08/30/2018
-        9:24:41 PM\"","location":"global","properties":{"properties":{"enableCalling":true,"callingWebhook":"https://www.google.com","isEnabled":true},"etag":"W/\"2926b4deac4f3034ab3b17c80d405fb08/30/2018
-        9:24:41 PM\"","channelName":"MsTeamsChannel","location":"global","provisioningState":"Accepted"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","name":"cli000002/MsTeamsChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"57f00d83402759e31535564aadaea66111/29/2018
+        6:26:14 AM\"","location":"global","properties":{"properties":{"enableCalling":true,"incomingCallRoute":null,"callingWebhook":"https://www.google.com","isEnabled":true},"etag":"W/\"57f00d83402759e31535564aadaea66111/29/2018
+        6:26:14 AM\"","channelName":"MsTeamsChannel","location":"global","provisioningState":"Accepted"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['608']
+      content-length: ['635']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Aug 2018 21:24:41 GMT']
-      etag: ['W/"2926b4deac4f3034ab3b17c80d405fb08/30/2018 9:24:41 PM"']
+      date: ['Thu, 29 Nov 2018 06:26:13 GMT']
+      etag: ['W/"57f00d83402759e31535564aadaea66111/29/2018 6:26:14 AM"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -148,7 +150,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -157,21 +159,22 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [bot msteams show]
       Connection: [keep-alive]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","name":"cli000002/MsTeamsChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"faed8acf5591d48738f43725afbe00c48/30/2018
-        9:24:42 PM\"","location":"global","properties":{"properties":{"enableCalling":true,"callingWebhook":"https://www.google.com/","isEnabled":true},"etag":"W/\"faed8acf5591d48738f43725afbe00c48/30/2018
-        9:24:42 PM\"","channelName":"MsTeamsChannel","location":"global","provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","name":"cli000002/MsTeamsChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"67cbfd001c09c8d3643a1068b0b4929611/29/2018
+        6:26:14 AM\"","location":"global","properties":{"properties":{"enableCalling":true,"incomingCallRoute":null,"callingWebhook":"https://www.google.com/","isEnabled":true},"etag":"W/\"67cbfd001c09c8d3643a1068b0b4929611/29/2018
+        6:26:14 AM\"","channelName":"MsTeamsChannel","location":"global","provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['610']
+      content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Aug 2018 21:24:42 GMT']
-      etag: ['W/"faed8acf5591d48738f43725afbe00c48/30/2018 9:24:42 PM"']
+      date: ['Thu, 29 Nov 2018 06:26:14 GMT']
+      etag: ['W/"67cbfd001c09c8d3643a1068b0b4929611/29/2018 6:26:14 AM"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -188,20 +191,21 @@ interactions:
       CommandName: [bot msteams show]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [-g -n --with-secrets]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel/listChannelWithKeys?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","location":"global","properties":{"properties":{"enableCalling":true,"callingWebhook":"https://www.google.com/","isEnabled":true},"etag":"W/\"faed8acf5591d48738f43725afbe00c48/30/2018
-        9:24:44 PM\"","channelName":"MsTeamsChannel","location":"global"},"provisioningState":"Succeeded","entityTag":"W/\"7efb3b31e66750ae0685a423cafabc0b8/30/2018
-        9:24:43 PM\"","changedTime":"0001-01-01T00:00:00Z"}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","location":"global","properties":{"properties":{"enableCalling":true,"incomingCallRoute":null,"callingWebhook":"https://www.google.com/","isEnabled":true},"etag":"W/\"67cbfd001c09c8d3643a1068b0b4929611/29/2018
+        6:26:15 AM\"","channelName":"MsTeamsChannel","location":"global"},"provisioningState":"Succeeded","entityTag":"W/\"9ea06999c07c93d344b8d080b0e4aee111/29/2018
+        6:26:15 AM\"","changedTime":"0001-01-01T00:00:00Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['566']
+      content-length: ['593']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Aug 2018 21:24:45 GMT']
+      date: ['Thu, 29 Nov 2018 06:26:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -209,7 +213,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -219,8 +223,9 @@ interactions:
       CommandName: [bot msteams delete]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [-g -n]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel?api-version=2018-07-12
@@ -229,7 +234,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Aug 2018 21:24:48 GMT']
+      date: ['Thu, 29 Nov 2018 06:26:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -246,9 +251,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.46]
+      ParameterSetName: [--name --yes --no-wait]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.15063-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
@@ -257,12 +262,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Aug 2018 21:24:48 GMT']
+      date: ['Thu, 29 Nov 2018 06:26:19 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkcyUUlSWlFOWldMLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdXSFdGQUlUNFA0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
     status: {code: 202, message: Accepted}
 version: 1

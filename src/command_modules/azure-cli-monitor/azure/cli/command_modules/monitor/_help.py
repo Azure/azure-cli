@@ -873,7 +873,7 @@ helps['monitor activity-log list'] = """
             provided, then --offset will be ignored.
     examples:
         - name: List all events from July 1st, looking forward one week.
-          text: az monitor activity-log list --start-date 2018-07-01 --offset 7d
+          text: az monitor activity-log list --start-time 2018-07-01 --offset 7d
         - name: List events within the past six hours based on a correlation ID.
           text: az monitor activity-log list --correlation-id b5eac9d2-e829-4c9a-9efb-586d19417c5f
         - name: List events within the past hour based on resource group.

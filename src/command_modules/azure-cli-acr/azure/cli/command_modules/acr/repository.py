@@ -31,7 +31,6 @@ logger = get_logger(__name__)
 UNTAG_NOT_SUPPORTED = 'Untag is only supported for managed registries.'
 DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
 SHOW_MANIFESTS_NOT_SUPPORTED = 'Show manifests is only supported for managed registries.'
-DETAIL_NOT_SUPPORTED = 'Detail is only supported for managed registries.'
 ATTRIBUTES_NOT_SUPPORTED = 'Attributes are only supported for managed registries.'
 METADATA_NOT_SUPPORTED = 'Metadata is only supported for managed registries.'
 
@@ -166,14 +165,11 @@ def acr_repository_show_tags(cmd,
                              username=None,
                              password=None,
                              detail=False):
-    if detail:
-        _, resource_group_name = validate_managed_registry(
-            cmd.cli_ctx, registry_name, resource_group_name, DETAIL_NOT_SUPPORTED)
-    else:
-        if top is not None:
-            logger.warning("The specified --top is ignored as it is only supported with --detail.")
-        if orderby:
-            logger.warning("The specified --orderby is ignored as it is only supported with --detail.")
+    is_managed_registry = True
+    try:
+        _, resource_group_name = validate_managed_registry(cmd.cli_ctx, registry_name, resource_group_name)
+    except CLIError:
+        is_managed_registry = False
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
@@ -184,14 +180,31 @@ def acr_repository_show_tags(cmd,
         repository=repository,
         permission='pull')
 
-    return _obtain_data_from_registry(
+    if not is_managed_registry:
+        if detail:
+            detail = None
+            logger.warning("The specified --detail is ignored as it is only supported for managed registries.")
+        if top:
+            top = None
+            logger.warning("The specified --top is ignored as it is only supported for managed registries.")
+        if orderby:
+            orderby = None
+            logger.warning("The specified --orderby is ignored as it is only supported for managed registries.")
+
+    raw_result = _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/{}/_tags'.format(repository) if detail else '/v2/{}/tags/list'.format(repository),
+        path='/acr/v1/{}/_tags'.format(repository) if is_managed_registry else '/v2/{}/tags/list'.format(repository),
         username=username,
         password=password,
         result_index='tags',
         top=top,
         orderby=orderby)
+
+    # For backward compatibility, convert the results to the old schema
+    if is_managed_registry and not detail:
+        return [item['name'] for item in raw_result]
+
+    return raw_result
 
 
 def acr_repository_show_manifests(cmd,
@@ -215,14 +228,24 @@ def acr_repository_show_manifests(cmd,
         repository=repository,
         permission='pull')
 
-    return _obtain_data_from_registry(
+    raw_result = _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/{}/_manifests'.format(repository) if detail else '/v2/_acr/{}/manifests/list'.format(repository),
+        path='/acr/v1/{}/_manifests'.format(repository),
         username=username,
         password=password,
         result_index='manifests',
         top=top,
         orderby=orderby)
+
+    # For backward compatibility, convert the results to the old schema
+    if not detail:
+        return [{
+            'digest': item['digest'] if 'digest' in item else '',
+            'tags': item['tags'] if 'tags' in item else [],
+            'timestamp': item['lastUpdateTime'] if 'lastUpdateTime' in item else ''
+        } for item in raw_result]
+
+    return raw_result
 
 
 def acr_repository_show(cmd,

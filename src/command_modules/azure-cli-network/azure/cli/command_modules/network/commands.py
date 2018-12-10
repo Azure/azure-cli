@@ -291,6 +291,8 @@ def load_command_table(self, _):
         {'prop': 'probes', 'name': 'probe'},
         {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace}
     ]
+    if self.supported_api_version(min_api='2018-08-01'):
+        subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
 
     def _make_singular(value):
         try:

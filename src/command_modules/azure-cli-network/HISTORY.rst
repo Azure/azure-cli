@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.2.10
+++++++
+* `dns zone update`: Finished issue where using "" to clear resolution and registration VNets didn't work.
+* `application-gateway waf-config set`: Added `--exclusion` argument to support WAF exclusions.
+
+2.2.9
++++++
+* `application-gateway`: Added `root-cert` subcommands to handle trusted root certifcates.
+* `application-gateway create/update`:
+   Added `--min-capacity` for configuring autoscale on v2 app gateways.
+   Added `--custom-error-pages` for configuring custom error pages.
+* `application-gateway create`: Added `--zones` for availability zone support.
+* `application-gateway waf-config set`: Added arguments `--file-upload-limit`, `--max-request-body-size` and `--request-body-check`.
+
 2.2.8
 +++++
 * Deprecated `network interface-endpoint` command names in favor of `network private-endpoint`.
