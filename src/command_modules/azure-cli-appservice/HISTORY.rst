@@ -5,6 +5,8 @@ Release History
 0.2.9
 +++++
 * webapp: az webapp config container now honors --slot parameter
+* functionapp: add support for --runtime flag in windows function apps
+
 
 0.2.8
 +++++
