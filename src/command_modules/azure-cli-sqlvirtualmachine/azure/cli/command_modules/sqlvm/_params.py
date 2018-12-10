@@ -115,7 +115,6 @@ def load_arguments(self, _):
                    nargs='+',
                    help='Space-separated list of SQL virtual machine instance resource id\'s that are enrolled into the availability group listener.')
 
-
     ###############################################
     #      sql virtual machine params             #
     ###############################################

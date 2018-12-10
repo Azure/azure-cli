@@ -5,6 +5,7 @@
 
 # pylint:disable=line-too-long
 
+
 def transform_sqlvm_group_output(result):
     '''
     Transforms the result of SQL virtual machine group to eliminate unnecessary parameters.
@@ -14,7 +15,7 @@ def transform_sqlvm_group_output(result):
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         wsfc_object = format_wsfc_domain_profile(result.wsfc_domain_profile)
-        #Create a dictionary with the relevant parameters
+        # Create a dictionary with the relevant parameters
         output = OrderedDict([('id', result.id),
                               ('location', result.location),
                               ('name', result.name),
@@ -46,7 +47,7 @@ def transform_sqlvm_output(result):
     from msrestazure.tools import parse_resource_id
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
-        #Create a dictionary with the relevant parameters
+        # Create a dictionary with the relevant parameters
         output = OrderedDict([('id', result.id),
                               ('location', result.location),
                               ('name', result.name),
@@ -58,7 +59,7 @@ def transform_sqlvm_output(result):
                               ('virtualMachineResourceId', result.virtual_machine_resource_id),
                               ('tags', result.tags)])
 
-        #Note, wsfcDomainCredentials will not display
+        # Note, wsfcDomainCredentials will not display
         if result.sql_virtual_machine_group_resource_id is not None:
             output['sqlVirtualMachineGroupResourceId'] = result.sql_virtual_machine_group_resource_id
 
@@ -84,14 +85,14 @@ def transform_aglistener_output(result):
     from msrestazure.tools import parse_resource_id
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
-        #Create a dictionary with the relevant parameters
+        # Create a dictionary with the relevant parameters
         output = OrderedDict([('id', result.id),
                               ('name', result.name),
                               ('provisioningState', result.provisioning_state),
                               ('port', result.port),
                               ('resourceGroup', resource_group)])
 
-        #Note, wsfcDomainCredentials will not display
+        # Note, wsfcDomainCredentials will not display
         if result.load_balancer_configurations is not None:
             output['loadBalancerConfigurations'] = format_load_balancer_configuration_list(result.load_balancer_configurations)
 

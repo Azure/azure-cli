@@ -21,6 +21,7 @@ from ._util import (
     get_sqlvirtualmachine_sql_virtual_machines_operations,
 )
 
+
 # pylint: disable=too-many-statements,line-too-long,too-many-locals
 def load_command_table(self, _):
 
@@ -62,7 +63,6 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('create', 'sqlvm_group_create', transform=transform_sqlvm_group_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
 
-
     ###############################################
     #      availability group listener            #
     ###############################################
@@ -75,7 +75,6 @@ def load_command_table(self, _):
     with self.command_group('sqlvm aglistener',
                             sqlvm_agl_operations,
                             client_factory=get_sqlvirtualmachine_availability_group_listeners_operations) as g:
-        #g.generic_update_command('update', custom_func_name='sqlvm_aglistener_update', transform=transform_aglistener_output)
         g.generic_update_command('add-sqlvm', custom_func_name='add_sqlvm_to_aglistener', transform=transform_aglistener_output)
         g.generic_update_command('remove-sqlvm', custom_func_name='remove_sqlvm_from_aglistener', transform=transform_aglistener_output)
         g.command('show', 'get', transform=transform_aglistener_output)
