@@ -1,8 +1,6 @@
-RPM Packaging
-================
+# RPM Packaging
 
-Building the RPM package
-------------------------
+## Building the RPM package
 
 On a machine with Docker, execute the following command from the root directory of this repository:
 
@@ -33,8 +31,6 @@ RPMs must be built using a Red Hat distro or derivative. By default, this build 
 it to include slightly different packages for distribution.
 
 ### Verification
-
-
 
 Run the RPM package
 -------------------
