@@ -615,6 +615,26 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
+    def applyPolicyAtScope(self, scope, policy):
+        # create a policy assignment at the given scope
+        self.kwargs.update({
+            'pol': policy,
+            'pan': self.create_random_name('cli-test-polassg', 24),   # limit is 24 characters at MG scope
+            'padn': self.create_random_name('test_assignment', 20),
+            'scope': scope
+        })
+
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope}', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free')
+        ])
+
+        # delete the assignment and validate it's gone
+        self.cmd('policy assignment delete -n {pan} --scope {scope}')
+        self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
+
     def resource_policy_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -666,7 +686,14 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # apply assignments
-        if not management_group and not subscription:
+        if management_group:
+            scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+            policy = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(pn=self.kwargs['pn'], scope=scope)
+            self.applyPolicyAtScope(scope, policy)
+        elif subscription:
+            policy = '/subscriptions/{sub}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(sub=subscription, pn=self.kwargs['pn'])
+            self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy)
+        else:
             self.applyPolicy()
 
         # delete the policy
@@ -775,7 +802,7 @@ class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse()
     def test_resource_policy_management_group(self, resource_group):
-        self.resource_policy_operations(resource_group, 'AzGovTest8')
+        self.resource_policy_operations(resource_group, 'AzGovLiveTest')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse()
@@ -790,7 +817,7 @@ class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
     @AllowLargeResponse()
     def test_resource_policyset_management_group(self, resource_group):
-        self.resource_policyset_operations(resource_group, 'AzGovTest8')
+        self.resource_policyset_operations(resource_group, 'AzGovLiveTest')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
     @AllowLargeResponse()
