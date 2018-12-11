@@ -22,7 +22,7 @@ EXTENSIONS_LIST = ["{}-{}".format(ext.name, ext.version) for ext in get_extensio
 
 # return true if the cache exists and caching is enabled.
 def cache_exists():
-    use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'False').lower() == 'true'
+    use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'True').lower() == 'true'
     logger.debug('use_cache is {}'.format(use_cache))
     return use_cache
 
@@ -64,7 +64,7 @@ def load_command_table(main_loader, args):
                 if line_item[0] == VERSION_STR and line_item[1] != current_cli_version:
                     logger.debug("Command index cache CLI version does not match current CLI version.")
                     return None
-                if line_item[0] == EXTENSIONS_STR: #todo: Consider optimizing this if the command is not an extension command.
+                if line_item[0] == EXTENSIONS_STR:  # todo: Consider optimizing this if the command is not an extension command.
                     cached_extensions_set = set(line_item[1:])
                     installed_extensions_set = set(EXTENSIONS_LIST)
                     if cached_extensions_set != installed_extensions_set:
