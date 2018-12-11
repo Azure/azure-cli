@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.7
++++++
+* `storage logging update`- Add ability to update log schema version for storage services.
+
 2.2.6
 +++++
 * Minor fixes.

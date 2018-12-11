@@ -6,6 +6,7 @@ Release History
 2.1.10
 ++++++
 * Minor fixes.
+* Condense the table layout for task list.
 
 2.1.9
 +++++

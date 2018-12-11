@@ -235,6 +235,13 @@ helps['aks create'] = """
           type: string
           short-summary: The Kubernetes network plugin to use.
           long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+        - name: --network-policy
+          type: string
+          short-summary: (PREVIEW) The Kubernetes network policy to use.
+          long-summary: |
+              Using together with "azure" network plugin.
+              Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
+              Defaults to "" (network policy disabled).
         - name: --no-ssh-key -x
           type: string
           short-summary: Do not use or create a local SSH key.
