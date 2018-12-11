@@ -447,21 +447,24 @@ class AcrCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
-        '''There are nine test cases in the function.
+        '''There are ten test cases in the function.
         Case 1: Import image from a registry in a different subscription from the current one
         Case 2: Import image from one registry to another where both registries belong to the same subscription
         Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
         Case 4: Import image to enable multiple tags in the target registry
         Case 5: Import image within the same registry
         Case 6: Import image by manifest digest
-        Case 7: Import image from a registry in Docker Hub
-        Case 8: Import image from an Azure Container Registry with Service Principal's credentials
-        Case 9: Import image from an Azure Container Registry with personal access token
+        Case 7: Import image from a public registry in Docker Hub
+        Case 8: Import image from a private registry in Docker Hub
+        Case 9: Import image from an Azure Container Registry with Service Principal's credentials
+        Case 10: Import image from an Azure Container Registry with personal access token
         '''
 
         source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
         registry_name = self.create_random_name("targetregistry", 20)
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
+        DockerHubUsername = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/DockerHubUsername').get_output_in_json()['value']
+        DockerHubPassword = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/DockerHubPassword').get_output_in_json()['value']
 
         '''
         To be able to run the tests, we are assuming the following resources before the test:
@@ -488,7 +491,10 @@ class AcrCommandsTests(ScenarioTest):
             'tag_multitag2': 'repository_multi2:tag_multi2',
             'tag_same_registry': 'repository_same_registry:tag_same_registry',
             'tag_by_digest': 'repository_by_digest:tag_by_digest',
-            'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
+            'source_image_public_registry_dockerhub': 'docker.io/library/hello-world',
+            'source_image_private_registry_dockerhub': 'docker.io/{}/first:redis'.format(DockerHubUsername),
+            'dockerhub_username': DockerHubUsername,
+            'dockerhub_password': DockerHubPassword,
             'service_principal_name': 'sp_access_source_registry',
             'service_principal_role': 'owner',
             'token': token
@@ -533,8 +539,11 @@ class AcrCommandsTests(ScenarioTest):
         # Case 6: Import image by manifest digest
         self.cmd('acr import -n {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')
 
-        # Case 7: Import image from a public registry in dockerhub
+        # Case 7: Import image from a public registry in Docker Hub
         self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
+
+        # case 8: Import image from a private registry in Docker Hub
+        self.cmd('acr import -n {registry_name} --source {source_image_private_registry_dockerhub} -u {dockerhub_username} -p {dockerhub_password}')
 
         # create a service principal for accessing source registry
         serviceprincipal = self.cmd('ad sp create-for-rbac --name {service_principal_name} --scopes {resource_id} --role {service_principal_role}').get_output_in_json()
@@ -544,10 +553,10 @@ class AcrCommandsTests(ScenarioTest):
             'service_principal_password': serviceprincipal['password']
         })
 
-        # Case 8: Import image from an Azure Container Registry with Service Principal's credentials
+        # Case 9: Import image from an Azure Container Registry with Service Principal's credentials
         self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {service_principal_username} -p {service_principal_password}')
 
-        # Case 9: Import image from an Azure Container Registry with personal access token
+        # Case 10: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
 
         # Clean source registry resource group, target registry and service principal with deletion confirmation
