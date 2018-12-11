@@ -4,7 +4,7 @@ Release History
 ===============
 0.1.5
 +++++
-* Update command was calling wrong api. Change api from creteOrUpdate to update
+* Fix update command API call.
 
 0.1.4
 +++++
