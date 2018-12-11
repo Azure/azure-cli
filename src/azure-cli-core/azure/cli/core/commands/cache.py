@@ -22,8 +22,8 @@ EXTENSIONS_LIST = ["{}-{}".format(ext.name, ext.version) for ext in get_extensio
 
 # return true if the cache exists and caching is enabled.
 def cache_exists():
-    use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'True').lower() == 'true'
-    logger.debug('use_cache is {}'.format(use_cache))
+    use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'False').lower() == 'true'
+    logger.debug('use_cache is %', use_cache)
     return use_cache
 
 
@@ -34,6 +34,7 @@ def cache_command_table(cli_ctx, cmd_to_loader_map):
             f_cache.write("{},{}\n".format(EXTENSIONS_STR, ",".join(EXTENSIONS_LIST)))
             for cmd, loader in cmd_to_loader_map.items():
                 f_cache.write("{},{}\n".format(cmd, loader[0].__class__.__module__))
+            logger.warning("Wrote command index to %.", CACHE_FILE)
 
     except IOError:
         raise CLIError("Error: Failed to ")
@@ -64,7 +65,7 @@ def load_command_table(main_loader, args):
                 if line_item[0] == VERSION_STR and line_item[1] != current_cli_version:
                     logger.debug("Command index cache CLI version does not match current CLI version.")
                     return None
-                if line_item[0] == EXTENSIONS_STR:  # todo: Consider optimizing this if the command is not an extension command.
+                if line_item[0] == EXTENSIONS_STR:  # todo: Consider optimizing this for non-extensions?
                     cached_extensions_set = set(line_item[1:])
                     installed_extensions_set = set(EXTENSIONS_LIST)
                     if cached_extensions_set != installed_extensions_set:

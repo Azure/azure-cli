@@ -46,6 +46,13 @@ jobs:
       script: ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify
+      env:
+      - PURPOSE='Automation'
+      - REDUCE_SDK='True'
+      - AZ_USE_CACHE='True'
+      script: ./scripts/ci/test_automation.sh
+      python: 3.6
+    - stage: verify
       env: PURPOSE='Automation'
       script: ./scripts/ci/test_automation.sh
       python: 2.7
