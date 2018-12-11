@@ -14,9 +14,7 @@ from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
 from azure.storage.blob import BlockBlobService
 from ._azure_utils import get_blob_info
-from ._constants import (
-    TASK_VALID_VSTS_URLS,
-)
+from ._constants import TASK_VALID_VSTS_URLS
 
 logger = get_logger(__name__)
 
