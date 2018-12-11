@@ -137,7 +137,7 @@ class BotTemplateDeployer:
 
         # Application insights prep
         appInsightsLocation = azure_region_mapper.AzureRegionMapper\
-            .get_app_insights_location(location.lower().replace(' ', ''))
+            .get_app_insights_location(appInsightsLocation.lower().replace(' ', ''))
 
         logger.debug('Application insights location resolved to %s.', appInsightsLocation)
 
