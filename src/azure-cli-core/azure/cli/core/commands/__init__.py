@@ -213,7 +213,8 @@ class AzCliCommandInvoker(CommandInvoker):
         if not success or not cache.cache_exists():
             logger.debug("not using cache")
             self.commands_loader.load_command_table(args)
-            if os.getenv('AZ_USE_CACHE', 'False').lower() == 'true':
+            # only cache if there is a a cmd_to_loader_map, handles "TestCommandsLoader"
+            if os.getenv('AZ_USE_CACHE', 'False').lower() == 'true' and hasattr(self.commands_loader, 'cmd_to_loader_map'): # pylint: disable=line-too-long
                 logger.debug("persisting cache")
                 cache.cache_command_table(self.cli_ctx, self.commands_loader.cmd_to_loader_map)
 

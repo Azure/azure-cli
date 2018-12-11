@@ -37,7 +37,7 @@ def cache_command_table(cli_ctx, cmd_to_loader_map):
             logger.warning("Wrote command index to %s", CACHE_FILE)
 
     except IOError:
-        raise CLIError("Error: Failed to ")
+        raise CLIError("Error: Failed to cache command index.")
 
     logger.debug("Updated command module index cache in %s", CACHE_FILE)
     return CACHE_FILE
