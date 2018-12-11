@@ -8,13 +8,13 @@ import timeit
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.extension import EXTENSIONS_DIR, get_extensions
-from automation.utilities.path import get_repo_root
+from azure.cli.core.extension import get_extensions
+from azure.cli.core._environment import get_config_dir
 
 logger = get_logger(__name__)
 
 
-CACHE_FILE = os.path.join(get_repo_root(), '.cache.txt')
+CACHE_FILE = os.path.join(get_config_dir(), 'command_module_index')
 VERSION_STR = "VERSION"
 EXTENSIONS_STR = "EXTENSIONS"
 EXTENSIONS_LIST = ["{}-{}".format(ext.name, ext.version) for ext in get_extensions()]
