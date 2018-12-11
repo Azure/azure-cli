@@ -88,6 +88,7 @@ def cli_cosmosdb_create(cmd, client,
     return docdb_account
 
 
+# pylint: disable=too-many-branches
 def cli_cosmosdb_update(client,
                         resource_group_name,
                         account_name,
@@ -135,7 +136,8 @@ def cli_cosmosdb_update(client,
                 ip_range_filter is None and \
                 enable_automatic_failover is None and \
                 enable_virtual_network is None and \
-                virtual_network_rules is None:
+                virtual_network_rules is None and \
+                enable_multiple_write_locations is None:
             async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
             docdb_account = async_docdb_create.result()
             docdb_account = client.get(resource_group_name, account_name)
