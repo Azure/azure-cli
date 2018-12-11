@@ -23,7 +23,7 @@ def load_command_table(self, _):
         client_factory=vaults_cf)
 
     backup_storage_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.recoveryservices.operations.backup_storage_configs_operations#BackupStorageConfigsOperations.{}',
+        operations_tmpl='azure.mgmt.recoveryservicesbackup.operations.backup_resource_storage_configs_operations#BackupResourceStorageConfigsOperations.{}',
         client_factory=vaults_cf)
 
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf) as g:

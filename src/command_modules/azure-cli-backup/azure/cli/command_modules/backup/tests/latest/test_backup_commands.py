@@ -9,7 +9,7 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer
-from azure.mgmt.recoveryservices.models import StorageModelType
+from azure.mgmt.recoveryservicesbackup.models import StorageType
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -102,23 +102,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault4}'])", 1)
         ])
 
-        storage_model_types = [e.value for e in StorageModelType]
+        storage_model_types = [e.value for e in StorageType]
         vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            JMESPathCheckExists("contains({}, storageModelType)".format(storage_model_types)),
+            JMESPathCheckExists("contains({}, storageType)".format(storage_model_types)),
             self.check('storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        if vault_properties['storageModelType'] == StorageModelType.geo_redundant.value:
-            new_storage_model = StorageModelType.locally_redundant.value
+        if vault_properties['storageType'] == StorageType.geo_redundant.value:
+            new_storage_model = StorageType.locally_redundant.value
         else:
-            new_storage_model = StorageModelType.geo_redundant.value
+            new_storage_model = StorageType.geo_redundant.value
 
         self.kwargs['model'] = new_storage_model
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
         self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            self.check('storageModelType', new_storage_model)
+            self.check('storageType', new_storage_model)
         ])
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
