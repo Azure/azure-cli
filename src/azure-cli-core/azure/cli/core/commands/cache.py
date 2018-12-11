@@ -80,7 +80,8 @@ def load_command_table(main_loader, args):
                        config.get(VERSION_STR, VERSION_STR), current_cli_version)
         return None
 
-    cached_extensions_set = set(config.get(EXTENSIONS_STR, EXTENSIONS_STR).strip().split(","))
+    cached_extensions = config.get(EXTENSIONS_STR, EXTENSIONS_STR).strip()
+    cached_extensions_set = set(cached_extensions.strip().split(",")) if cached_extensions else set()
     installed_extensions_set = set(EXTENSIONS_LIST)
     if cached_extensions_set != installed_extensions_set:
         msg = "Command index cache extensions list does not match installed extensions:" \
