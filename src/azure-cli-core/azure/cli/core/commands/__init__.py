@@ -353,7 +353,7 @@ class AzCliCommandInvoker(CommandInvoker):
             for task in as_completed(tasks):
                 try:
                     results.append(task.result())
-                except Exception as ex:  # pylint: disable=broad-except
+                except (Exception, SystemExit) as ex:  # pylint: disable=broad-except
                     exceptions.append(ex)
 
         # handle exceptions
