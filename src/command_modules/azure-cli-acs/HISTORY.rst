@@ -6,6 +6,7 @@ Release History
 2.3.13
 ++++++
 * Remove "(PREVIEW)" from AAD arguments to "az aks create"
+* Mark "az acs" commands as deprecated (the ACS service will retire on January 31, 2020)
 * Add support of Network Policy when creating new AKS clusters
 
 2.3.12

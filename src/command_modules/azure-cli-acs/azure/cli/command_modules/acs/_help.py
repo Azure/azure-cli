@@ -17,6 +17,10 @@ AKS_SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'aksServicePrincip
 helps['acs'] = """
      type: group
      short-summary: Manage Azure Container Services.
+     long-summary: |
+         ACS will be retired as a standalone service on January 31, 2020.
+
+         If you use the Kubernetes orchestrator, please migrate to AKS by January 31, 2020.
 """
 
 helps['acs browse'] = """
