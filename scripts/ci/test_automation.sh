@@ -53,4 +53,4 @@ then
 fi
 
 title 'Running tests'
-python -m automation test --ci --profile $target_profile
+time python -m automation test --ci --profile $target_profile

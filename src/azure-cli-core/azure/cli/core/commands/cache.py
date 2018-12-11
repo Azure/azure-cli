@@ -23,7 +23,7 @@ EXTENSIONS_LIST = ["{}-{}".format(ext.name, ext.version) for ext in get_extensio
 # return true if the cache exists and caching is enabled.
 def cache_exists():
     use_cache = os.path.isfile(CACHE_FILE) and os.getenv('AZ_USE_CACHE', 'False').lower() == 'true'
-    logger.debug('use_cache is %', use_cache)
+    logger.debug('use_cache is %s', use_cache)
     return use_cache
 
 
@@ -34,7 +34,7 @@ def cache_command_table(cli_ctx, cmd_to_loader_map):
             f_cache.write("{},{}\n".format(EXTENSIONS_STR, ",".join(EXTENSIONS_LIST)))
             for cmd, loader in cmd_to_loader_map.items():
                 f_cache.write("{},{}\n".format(cmd, loader[0].__class__.__module__))
-            logger.warning("Wrote command index to %.", CACHE_FILE)
+            logger.warning("Wrote command index to %s", CACHE_FILE)
 
     except IOError:
         raise CLIError("Error: Failed to ")
@@ -91,7 +91,7 @@ def load_command_table(main_loader, args):
     main_loader.command_group_table.update(module_group_table)
 
     elapsed_time = timeit.default_timer() - start_time
-    logger.debug("Loaded relevant modules' in %.3f seconds.", elapsed_time)
+    logger.debug("Loaded relevant module' in %.3f seconds.", elapsed_time)
 
     return main_loader.command_table
 
