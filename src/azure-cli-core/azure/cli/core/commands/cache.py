@@ -74,6 +74,7 @@ def load_command_table(main_loader, args):
                         logger.debug(msg, cached_extensions_set, installed_extensions_set)
                         return None
     except IOError:
+        logger.warning("Error opening cache.")
         return None
 
     command = _rudimentary_get_command(cmd_to_mod_name.keys(), args)
