@@ -1678,8 +1678,8 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.kwargs['id2'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
         self.cmd('network vnet show --ids {id1} {id2} --query "[].name"', checks=[
             self.check('length(@)', 2),
-            self.check('@[0]', '{vnet1}'),
-            self.check('@[1]', '{vnet2}')
+            self.check("contains(@, '{vnet1}')", True),
+            self.check("contains(@, '{vnet2}')", True),
         ])
 
         # This test ensures you can pipe a list of IDs to --ids
