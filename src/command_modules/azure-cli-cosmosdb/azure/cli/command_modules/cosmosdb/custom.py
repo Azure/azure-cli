@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -192,7 +190,7 @@ def cli_cosmosdb_update(client,
             enable_multiple_write_locations:
         raise CLIError("Cannot convert account from single master to multi master")
     elif enable_multiple_write_locations != existing.enable_multiple_write_locations:
-        print("This operation will take 24 hours to complete")
+        logger.warning("Updating the account from multi master to single master will take 24 hours to complete.")
 
     params = DatabaseAccountCreateUpdateParameters(
         location=existing.location,
