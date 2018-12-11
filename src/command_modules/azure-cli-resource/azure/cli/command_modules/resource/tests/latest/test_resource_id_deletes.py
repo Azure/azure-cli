@@ -2,11 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import os
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, live_only
 
 
+@live_only()
 class ResourceDeleteTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources', location='southcentralus')
     def test_delete_dependent_resources(self, resource_group):
