@@ -2,7 +2,9 @@
 
 set -e
 
-. $(cd $(dirname $0); pwd)/artifacts.sh
+WD=`cd $(dirname $0); pwd`
+
+. $(WD)/artifacts.sh
 
 ls -la $share_folder/build
 
@@ -17,4 +19,7 @@ echo "Installed."
 
 cd doc/sphinx; make xml
 
+python $(WD)/test_help_doc_arguments.py "./_build/xml/ind.xml"
+
 echo "OK."
+
