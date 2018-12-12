@@ -10,6 +10,13 @@ import zipfile
 import requests
 import urllib3
 
+try:
+    # Try importing Python 3 urllib.parse
+    from urllib.parse import quote
+except ImportError:
+    # If urllib.parse was not imported, use Python 2 module urlparse
+    from urllib import quote  # pylint: disable=import-error
+
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
@@ -71,6 +78,26 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         zip_ref.extractall(folder_path)
         zip_ref.close()
         os.remove(download_path)
+
+    def get_bot_file(self, bot_file):
+        """Retrieve the .bot file from Kudu.
+
+        :param bot_file:
+        :return:
+        """
+        if not self.__initialized:
+            self.__initialize()
+
+        if bot_file.startswith('./') or bot_file.startswith('.\\'):
+            bot_file = bot_file[2:]
+        # Format backslashes to forward slashes and URL escape
+        bot_file = quote(bot_file.replace('\\', '/'))
+        request_url = self.__scm_url + '/api/vfs/site/wwwroot/' + bot_file
+        self.__logger.info('Attempting to retrieve .bot file content from %s' % request_url)
+        response = requests.get(request_url, headers=self.__get_application_octet_stream_headers())
+        HttpResponseValidator.check_response_status(response)
+        self.__logger.info('Bot file successfully retrieved from Kudu.')
+        return json.loads(response.text)
 
     def install_node_dependencies(self):
         """Installs Node.js dependencies at `site/wwwroot/` for Node.js bots.

@@ -141,7 +141,7 @@ def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
         resource_name=resource_name
     )
     if bot_json:
-        return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name,
+        return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name, logger,
                                                 raw_bot_properties=raw_bot_properties)
 
     return raw_bot_properties
