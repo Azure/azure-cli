@@ -76,7 +76,7 @@ def _print_hit(hit):
 
     print('`az {0}`'.format(hit['cmd_name']))
     print_para('short_summary')
-    if hit['long_summary']:
+    if 'long_summary' in hit and hit['long_summary']:
         print_para('long_summary')
     print('')
 
