@@ -42,6 +42,7 @@ def main(xml_file, commands=[]):
         try:
             assert help_args == doc_args
         except AssertionError as e:
+            logger.error("Test failed. Help args are different.\n")
             logger.error("CLI help args: %s\n\nDoc help args: %s\n.", ", ".join(help_args), ", ".join(doc_args))
             logger.error(e)
             exit(1)
