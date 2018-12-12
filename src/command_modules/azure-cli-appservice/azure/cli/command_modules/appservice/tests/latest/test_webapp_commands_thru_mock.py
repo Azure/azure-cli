@@ -297,7 +297,7 @@ class TestWebappMocked(unittest.TestCase):
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
         request = DeletedAppRestoreRequest(deleted_site_id='12345', recover_configuration=False)
-        
+
         # action
         restore_deleted_webapp(cmd_mock, '12345', 'rg', 'web1', None, True)
 
@@ -380,6 +380,7 @@ class TestWebappMocked(unittest.TestCase):
         self.assertFalse(validate_container_app_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, None, None))
+
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
