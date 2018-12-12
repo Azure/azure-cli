@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
+from collections import Counter
 import sys
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -17,7 +18,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
 
     @staticmethod
     def create_bot_json(cmd, client, resource_group_name, resource_name, logger, app_password=None,
-                        raw_bot_properties=None):
+                        raw_bot_properties=None, password_only=True):
         """
 
         :param cmd:
@@ -47,13 +48,14 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
                 resource_group_name=resource_group_name,
                 name=site_name
             )
-            # TODO: Clean this up.
+
             app_password_values = [item['value'] for item in app_settings if item['name'] == 'MicrosoftAppPassword']
             app_password = app_password_values[0] if len(app_password_values) > 0 else None
-            bot_file_values = [item['value'] for item in app_settings if item['name'] == 'botFilePath']
-            bot_file = bot_file_values[0] if len(bot_file_values) > 0 else None
-            bot_file_secret_values = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
-            bot_file_secret = bot_file_secret_values[0] if len(bot_file_secret_values) > 0 else None
+            if not app_password:
+                bot_file_values = [item['value'] for item in app_settings if item['name'] == 'botFilePath']
+                bot_file = bot_file_values[0] if len(bot_file_values) > 0 else None
+                bot_file_secret_values = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
+                bot_file_secret = bot_file_secret_values[0] if len(bot_file_secret_values) > 0 else None
 
         if not bot_file and not app_password:
             bot_site_name = WebAppOperations.get_bot_site_name(raw_bot_properties.properties.endpoint)
@@ -79,7 +81,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             # We have the information we need to obtain the MSA App app password via bot file data from Kudu.
             kudu_client = KuduClient(cmd, resource_group_name, resource_name, raw_bot_properties, logger)
             bot_file_data = kudu_client.get_bot_file(bot_file)
-            return BotJsonFormatter.__decrypt_bot_file(bot_file_data, bot_file_secret, logger)
+            app_password = BotJsonFormatter.__decrypt_bot_file(bot_file_data, bot_file_secret, logger, password_only)
 
         return {
             'type': 'abs',
@@ -95,7 +97,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
         }
 
     @staticmethod
-    def __decrypt_bot_file(bot_file_data, bot_file_secret, logger):
+    def __decrypt_bot_file(bot_file_data, bot_file_secret, logger, password_only=True):
         """Decrypt .bot file retrieved from Kudu.
 
         :param bot_file_data:
@@ -109,6 +111,32 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             decrypt = BotJsonFormatter.__decrypt_py3
         else:
             decrypt = BotJsonFormatter.__decrypt_py2
+
+        if password_only:
+            # Get all endpoints that have potentially valid appPassword values
+            endpoints = [service for service in services
+                         if service.get('type') == 'endpoint' and len(service.get('appPassword', '')) > 0]
+            # Reduce the retrieved endpoints to just their passwords
+            app_passwords = [e['appPassword'] for e in endpoints]
+
+            if len(app_passwords) == 1:
+                return decrypt(bot_file_secret, app_passwords[0], logger)
+            elif len(app_passwords) > 1:
+                logger.info('More than one Microsoft App Password found in bot file. Evaluating if more than one '
+                            'unique App Password exists.')
+                app_passwords = [decrypt(bot_file_secret, pw, logger) for pw in app_passwords]
+                unique_passwords = list(Counter(app_passwords))
+                if len(unique_passwords) == 1:
+                    logger.info('One unique Microsoft App Password found, returning password.')
+                    return unique_passwords[0]
+                else:
+                    logger.warning('More than one unique Microsoft App Password found in the bot file, please '
+                                   'manually retrieve your bot file from Kudu to retrieve this information.')
+                    logger.warning('No Microsoft App Password returned.')
+                    return
+            else:
+                logger.warning('No Microsoft App Passwords found in bot file.')
+                return
 
         for service in services:
             # For Azure Blob Storage
