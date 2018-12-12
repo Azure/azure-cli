@@ -399,7 +399,7 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
 
 
 def _parse_management_group_reference(name):
-    if name.casefold().startswith('/providers/microsoft.management/managementgroups'):
+    if name.lower().startswith('/providers/microsoft.management/managementgroups'):
         parts = name.split('/')
         if len(parts) >= 9:
             return parts[4], parts[8]
