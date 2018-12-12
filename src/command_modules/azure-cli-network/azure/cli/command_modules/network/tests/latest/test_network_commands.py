@@ -13,7 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 
 from knack.util import CLIError
 
@@ -1665,6 +1665,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
         import json
