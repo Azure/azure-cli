@@ -602,6 +602,11 @@ helps['resource update'] = """
     short-summary: Update a resource.
 """
 
+helps['resource wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a resources is met.
+"""
+
 helps['resource invoke-action'] = """
     type: command
     short-summary: Invoke an action on the resource.
