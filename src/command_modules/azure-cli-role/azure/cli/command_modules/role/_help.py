@@ -110,7 +110,7 @@ helps['ad sp create'] = """
 helps['ad sp list'] = """
     type: command
     short-summary: List service principals.
-    long-summary: For low latency, by default, only the first 100 will be returned unless you prvoide filter arguments or use "--all"
+    long-summary: For low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad sp owner'] = """
     type: group
@@ -135,7 +135,7 @@ helps['ad app delete'] = """
 helps['ad app list'] = """
     type: command
     short-summary: List applications.
-    long-summary: for low latency, by default, only the first 100 will be returned unless you prvoide filter arguments or use "--all"
+    long-summary: for low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad app show'] = """
     type: command
