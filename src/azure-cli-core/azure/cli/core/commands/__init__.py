@@ -281,8 +281,8 @@ class AzCliCommandInvoker(CommandInvoker):
         expanded_args = list(_explode_list_args(parsed_args))
         cmd = parsed_args.func
         self.cli_ctx.data['command'] = parsed_args.command
-        self.cli_ctx.data['safe_params'] = [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
-                                            (p.startswith('-') and len(p) > 1)]
+
+        self.cli_ctx.data['safe_params'] = AzCliCommandInvoker._extract_parameter_names(args)
 
         command_source = self.commands_loader.command_table[command].command_source
 
@@ -294,7 +294,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 extension_version = get_extension(command_source.extension_name).version
         except Exception:  # pylint: disable=broad-except
             pass
-
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
                                       extension_name=extension_name, extension_version=extension_version)
@@ -355,6 +354,12 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    @staticmethod
+    def _extract_parameter_names(args):
+        # note: name start with more than 2 '-' will be treated as value e.g. certs in PEM format
+        return [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
+                (p.startswith('-') and not p.startswith('---') and len(p) > 1)]
 
     def resolve_warnings(self, cmd, parsed_args):
         self._resolve_deprecation_warnings(cmd, parsed_args)
