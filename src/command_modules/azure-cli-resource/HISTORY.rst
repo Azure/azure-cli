@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.7
++++++
+* add new command of `az resource wait`
+
 2.1.6
 +++++
 * `policy definition/set-definition create/list/delete/show/update`: add support for management groups and subscriptions

@@ -28,12 +28,14 @@ class ServiceProperties(object):
     def get_logging(self, timeout=None):
         return self.get_service_properties()(timeout=timeout).__dict__['logging']
 
-    def set_logging(self, read, write, delete, retention, timeout=None):
+    def set_logging(self, read, write, delete, retention, timeout=None, version=None):
         t_logging, t_retention_policy = get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, 'Logging', 'RetentionPolicy',
                                                 mod='common.models')
 
         retention_policy = t_retention_policy(enabled=retention != 0, days=retention)
         logging = t_logging(delete, read, write, retention_policy)
+        if version:
+            logging.version = str(version)
         return self.set_service_properties()(logging=logging, timeout=timeout)
 
     def get_cors(self, timeout=None):
