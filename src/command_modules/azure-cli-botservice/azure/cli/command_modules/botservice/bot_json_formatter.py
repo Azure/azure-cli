@@ -71,7 +71,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             host = 'https://portal.azure.com/' if is_public_azure else 'https://portal.azure.us/'
             subscription_id = get_subscription_id(cmd.cli_ctx)
             tenant_id = profile.get_subscription(subscription=client.config.subscription_id)['tenantId']
-            settings_url = host + f'#@{tenant_id}/resource/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.BotService/botServices/{resource_name}/app_settings'  # pylint: disable=line-too-long
+            settings_url = host + '#@{}/resource/subscriptions/{}/resourceGroups/{}/providers/Microsoft.BotService/botServices/{}/app_settings'.format(tenant_id, subscription_id, resource_group_name, resource_name)  # pylint: disable=line-too-long
 
             logger.warning('"MicrosoftAppPassword" and "botFilePath" not found in application settings')
             logger.warning('To see your bot\'s application settings, visit %s' % settings_url)
