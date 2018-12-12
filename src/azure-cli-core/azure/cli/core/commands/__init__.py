@@ -347,21 +347,23 @@ class AzCliCommandInvoker(CommandInvoker):
 
         from concurrent.futures import ThreadPoolExecutor, as_completed
         tasks, results, exceptions = [], [], []
+        ids = getattr(parsed_args, '_ids', [None] * len(jobs))
         with ThreadPoolExecutor(max_workers=10) as executor:
             for expanded_arg, cmd_copy in jobs:
                 tasks.append(executor.submit(_run_job, expanded_arg, cmd_copy))
-            for task in as_completed(tasks):
+            for index, task in enumerate(as_completed(tasks)):
                 try:
                     results.append(task.result())
                 except (Exception, SystemExit) as ex:  # pylint: disable=broad-except
-                    exceptions.append(ex)
+                    exceptions.append((ex, ids[index]))
 
         # handle exceptions
         if len(exceptions) == 1 and not results:
-            raise exceptions[0]
+            ex, id_arg = exceptions[0]
+            raise ex
         elif exceptions:
-            for exception in exceptions:
-                logger.warning(str(exception))
+            for exception, id_arg in exceptions:
+                logger.warning('%s: "%s"', id_arg, str(exception))
             if not results:
                 return CommandResultItem(None, exit_code=1, error=CLIError('Encountered more than one exception.'))
             else:
