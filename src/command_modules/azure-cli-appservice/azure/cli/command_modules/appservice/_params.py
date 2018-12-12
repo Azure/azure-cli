@@ -305,6 +305,9 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
 
+    with self.argument_context('webapp config snapshot list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
     with self.argument_context('webapp config snapshot restore') as c:
         c.argument('time', help='Timestamp of the snapshot to restore.')
         c.argument('restore_content_only', help='Restore the web app files without restoring the settings.')

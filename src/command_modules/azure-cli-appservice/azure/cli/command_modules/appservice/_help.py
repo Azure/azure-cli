@@ -4,6 +4,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
+
 from knack.help_files import helps
 
 
@@ -233,6 +235,11 @@ short-summary: Delete an SSL certificate from a web app.
 helps['webapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a web app.
+"""
+
+helps['webapp config snapshot'] = """
+type: group
+short-summary: Manage web app snapshots.
 """
 
 helps['webapp config snapshot list'] = """
