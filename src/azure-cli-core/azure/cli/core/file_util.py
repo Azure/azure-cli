@@ -51,7 +51,7 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     # turn off applicability check for all loaders
     for loaders in invoker.commands_loader.cmd_to_loader_map.values():
         for loader in loaders:
-            loader.skip_applicability = False
+            loader.skip_applicability = True
 
     for command in invoker.commands_loader.command_table:
         invoker.commands_loader.load_arguments(command)
