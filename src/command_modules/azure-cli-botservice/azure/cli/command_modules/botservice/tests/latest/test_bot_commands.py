@@ -317,8 +317,7 @@ class BotTests(ScenarioTest):
                  })
 
         self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
-            self.check('appId', self.kwargs.get('app_id')),
-            self.check('appPassword', self.kwargs.get('password')),
+            self.exists('appPassword'),
             self.check('id', '{botname}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type', 'abs')
@@ -351,8 +350,7 @@ class BotTests(ScenarioTest):
                  })
 
         self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
-            self.check('appId', self.kwargs.get('app_id')),
-            self.check('appPassword', self.kwargs.get('password')),
+            self.exists('appPassword'),
             self.check('id', '{botname}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type', 'abs')
@@ -385,8 +383,7 @@ class BotTests(ScenarioTest):
                  })
 
         self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
-            self.check('appId', self.kwargs.get('app_id')),
-            self.check('appPassword', self.kwargs.get('password')),
+            self.exists('appPassword'),
             self.check('id', '{botname}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type', 'abs')
@@ -419,8 +416,7 @@ class BotTests(ScenarioTest):
                  })
 
         self.cmd('az bot show -g {rg} -n {botname} --msbot', checks=[
-            self.check('appId', self.kwargs.get('app_id')),
-            self.check('appPassword', self.kwargs.get('password')),
+            self.exists('appPassword'),
             self.check('id', '{botname}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type', 'abs')
