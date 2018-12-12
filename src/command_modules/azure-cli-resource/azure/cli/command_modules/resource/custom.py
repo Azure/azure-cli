@@ -397,6 +397,7 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
             policy_id = policy_set_def.id
     return policy_id
 
+
 def _parse_management_group_reference(name):
     if name.casefold().startswith('/providers/microsoft.management/managementgroups'):
         parts = name.split('/')
