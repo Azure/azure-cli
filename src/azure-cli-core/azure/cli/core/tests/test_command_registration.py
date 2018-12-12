@@ -152,9 +152,9 @@ class TestCommandRegistration(unittest.TestCase):
         return ext_name
 
     def _mock_get_extensions():
-        MockExtension = namedtuple('Extension', ['name', 'preview'])
-        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False),
-                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False)]
+        MockExtension = namedtuple('Extension', ['name', 'preview', 'path'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, path=None),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, path=None)]
 
     def _mock_load_command_loader(loader, args, name, prefix):
 

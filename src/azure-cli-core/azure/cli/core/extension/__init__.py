@@ -101,7 +101,7 @@ class Extension(object):
 
 class WheelExtension(Extension):
 
-    def __init__(self, name, path):
+    def __init__(self, name, path=None):
         super(WheelExtension, self).__init__(name, 'whl', path)
 
     def get_version(self):
@@ -109,22 +109,26 @@ class WheelExtension(Extension):
 
     def get_metadata(self):
         from wheel.install import WHEEL_INFO_RE
-
+        from glob import glob
         if not extension_exists(self.name):
             return None
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-        dist_info_dirs = [f for f in os.listdir(ext_dir) if f.endswith('.dist-info')]
+        info_dirs = glob(os.path.join(ext_dir, '*.*-info'))
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
 
-        for dist_info_dirname in dist_info_dirs:
+        for dist_info_dirname in info_dirs:
             parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
-            if parsed_dist_info_dir and parsed_dist_info_dir.groupdict().get('name') == self.name.replace('-', '_'):
-                whl_metadata_filepath = os.path.join(ext_dir, dist_info_dirname, WHL_METADATA_FILENAME)
-                with open(whl_metadata_filepath) as f:
-                    metadata.update(json.loads(f.read()))
+            if parsed_dist_info_dir:
+                parsed_dist_info_dir = parsed_dist_info_dir.groupdict().get('name')
+
+            if os.path.split(parsed_dist_info_dir)[-1] == self.name.replace('-', '_'):
+                whl_metadata_filepath = os.path.join(dist_info_dirname, WHL_METADATA_FILENAME)
+                if os.path.isfile(whl_metadata_filepath):
+                    with open(whl_metadata_filepath) as f:
+                        metadata.update(json.loads(f.read()))
 
         return metadata
 
@@ -148,9 +152,9 @@ class WheelExtension(Extension):
         if os.path.isdir(EXTENSIONS_DIR):
             for ext_name in os.listdir(EXTENSIONS_DIR):
                 ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.dist-info')
+                pattern = os.path.join(ext_path, '*.*-info')
                 if os.path.isdir(ext_path) and glob(pattern):
-                    exts.append(WheelExtension(ext_name, get_extension_path(ext_name)))
+                    exts.append(WheelExtension(ext_name, ext_path))
         return exts
 
 
@@ -221,9 +225,6 @@ class DevExtension(Extension):
             else:
                 for item in os.listdir(path):
                     _collect(os.path.join(path, item), depth + 1, max_depth)
-        # always check extension dir for dev extensions since that is where
-        # they previously were located
-        _collect(EXTENSIONS_DIR)
         for source in DEV_EXTENSION_SOURCES:
             _collect(source)
         return exts
