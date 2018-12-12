@@ -17,7 +17,7 @@ from azure.cli.command_modules.botservice.kudu_client import KuduClient
 class BotJsonFormatter:  # pylint:disable=too-few-public-methods
 
     @staticmethod
-    def create_bot_json(cmd, client, resource_group_name, resource_name, logger, app_password=None,
+    def create_bot_json(cmd, client, resource_group_name, resource_name, logger, app_password=None,  # pylint:disable=too-many-locals
                         raw_bot_properties=None, password_only=True):
         """
 
@@ -50,12 +50,12 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             )
 
             app_password_values = [item['value'] for item in app_settings if item['name'] == 'MicrosoftAppPassword']
-            app_password = app_password_values[0] if len(app_password_values) > 0 else None
+            app_password = app_password_values[0] if app_password_values else None
             if not app_password:
                 bot_file_values = [item['value'] for item in app_settings if item['name'] == 'botFilePath']
-                bot_file = bot_file_values[0] if len(bot_file_values) > 0 else None
+                bot_file = bot_file_values[0] if bot_file_values else None
                 bot_file_secret_values = [item['value'] for item in app_settings if item['name'] == 'botFileSecret']
-                bot_file_secret = bot_file_secret_values[0] if len(bot_file_secret_values) > 0 else None
+                bot_file_secret = bot_file_secret_values[0] if bot_file_secret_values else None
 
         if not bot_file and not app_password:
             bot_site_name = WebAppOperations.get_bot_site_name(raw_bot_properties.properties.endpoint)
@@ -115,7 +115,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
         if password_only:
             # Get all endpoints that have potentially valid appPassword values
             endpoints = [service for service in services
-                         if service.get('type') == 'endpoint' and len(service.get('appPassword', '')) > 0]
+                         if service.get('type') == 'endpoint' and service.get('appPassword')]
             # Reduce the retrieved endpoints to just their passwords
             app_passwords = [e['appPassword'] for e in endpoints]
 
@@ -129,14 +129,14 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
                 if len(unique_passwords) == 1:
                     logger.info('One unique Microsoft App Password found, returning password.')
                     return unique_passwords[0]
-                else:
-                    logger.warning('More than one unique Microsoft App Password found in the bot file, please '
-                                   'manually retrieve your bot file from Kudu to retrieve this information.')
-                    logger.warning('No Microsoft App Password returned.')
-                    return
-            else:
-                logger.warning('No Microsoft App Passwords found in bot file.')
-                return
+
+                logger.warning('More than one unique Microsoft App Password found in the bot file, please '
+                               'manually retrieve your bot file from Kudu to retrieve this information.')
+                logger.warning('No Microsoft App Password returned.')
+                return ''
+
+            logger.warning('No Microsoft App Passwords found in bot file.')
+            return ''
 
         for service in services:
             # For Azure Blob Storage
@@ -164,7 +164,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
             if service.get('key'):
                 service['key'] = decrypt(bot_file_secret, service['key'], logger)
             # For generic services
-            if service.get('configuration') and type(service.get('configuration')) == dict:
+            if service.get('configuration') and isinstance(service.get('configuration'), dict):
                 for key in service['configuration']:
                     service['configuration'][key] = decrypt(bot_file_secret, service['configuration'][key], logger)
 
@@ -173,7 +173,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
     @staticmethod
     def __decrypt_py3(secret, encrypted_value, logger):
         # If the string length is 0 or no secret was passed in, return the empty string.
-        if len(encrypted_value) == 0 or not secret:
+        if not encrypted_value or not secret:
             return encrypted_value
 
         parts = encrypted_value.split("!")
@@ -203,7 +203,7 @@ class BotJsonFormatter:  # pylint:disable=too-few-public-methods
     @staticmethod
     def __decrypt_py2(secret, encrypted_value, logger):
         # If the string length is 0 or no secret was passed in, return the empty string.
-        if len(encrypted_value) == 0 or not secret:
+        if not encrypted_value or not secret:
             return encrypted_value
 
         parts = encrypted_value.split("!")
