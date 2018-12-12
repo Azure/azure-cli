@@ -42,8 +42,8 @@ def main(xml_file, commands=[]):
         try:
             assert help_args == doc_args
         except AssertionError as e:
-            logger.warning("CLI help args: %s\n\nDoc help args: %s\n.", ", ".join(help_args), ", ".join(doc_args))
-            logger.warning(e)
+            logger.error("CLI help args: %s\n\nDoc help args: %s\n.", ", ".join(help_args), ", ".join(doc_args))
+            logger.error(e)
             exit(1)
 
 
@@ -57,7 +57,7 @@ def get_args_from_help_text(cmd_name):
     completedprocess = subprocess.run(cmd_args, stdout=subprocess.PIPE, encoding="utf-8")
 
     if completedprocess.returncode != 0:
-        logger.warning("Error running %s", " ".join(cmd))
+        logger.error("Error running %s", " ".join(cmd))
         exit(1)
 
     lines = completedprocess.stdout.splitlines()
@@ -82,9 +82,6 @@ def get_args_from_doc_dict(cmd_name, cmd_to_content_dict):
     arguments = set()
     # Only add arguments that don't have the deprecated field. #todo: tidy up logic.
     for arg, arg_fields in arg_info_dict.items():
-        if "enable-rbac" in arg:
-            foo = 5
-            pass
         is_deprecated = False
         for field in arg_fields:
             if field['field_name'].lower() == 'deprecated':
@@ -103,7 +100,7 @@ def _get_long_option(options):
 if __name__ == "__main__":
     usage_msg = "USAGE: PATH-TO-DOC-XML [optional command (without az)]"
 
-    # rudimentary arg parsing
+    # very rudimentary arg parsing TODO: update to argparse so list of commands can be passed in.
     if len(sys.argv) < 2:
         logger.warning(usage_msg)
         exit(1)

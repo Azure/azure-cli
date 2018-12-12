@@ -17,9 +17,9 @@ pip install $ALL_MODULES
 pip install "sphinx==1.6.7" -q
 echo "Installed."
 
-cd doc/sphinx; make xml
+cd doc/sphinx; python ./__main__.py
 
-python $(WD)/test_help_doc_arguments.py "./_build/xml/ind.xml"
+python $WD/test_help_doc_arguments.py "./_build/xml/ind.xml"
 
 echo "OK."
 
