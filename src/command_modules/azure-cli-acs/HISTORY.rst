@@ -8,6 +8,7 @@ Release History
 * Remove "(PREVIEW)" from AAD arguments to "az aks create"
 * Mark "az acs" commands as deprecated (the ACS service will retire on January 31, 2020)
 * Add support of Network Policy when creating new AKS clusters
+* Don't require --nodepool-name in "az aks scale" if there's only one nodepool
 
 2.3.12
 ++++++
