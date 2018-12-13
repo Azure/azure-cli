@@ -17,7 +17,7 @@ logger = logging.getLogger('az-publish')
 
 DEFAULT_TEST_CMDS = []
 
-pattern = r".*?\s+((--\S+)+( --\S+)*( -\S)*).*?:"   # meaning: escape ansi color codes then
+pattern = r".*?\s+((--\S+)( --\S+)*( -\S)*).*?:"   # meaning: escape ansi color codes then
                                         #       match one or more long options ('--') followed by an (optional) short option ('-')
                                         #       and then the first semicolon after 0 or more chars (':')
                                         #       Also handles cases where there are multiple long options see --edition in az sql mi
