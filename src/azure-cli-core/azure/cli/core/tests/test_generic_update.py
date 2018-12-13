@@ -10,7 +10,7 @@ import sys
 from msrest.serialization import Model
 from azure.cli.core import AzCommandsLoader
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
 
@@ -36,7 +36,7 @@ class ObjectTestObject(object):
         self.additional_properties = None
 
 
-class TestObject(Model):
+class ComplexTestObject(Model):
 
     def __init__(self):
         self.my_prop = 'my_value'
@@ -70,7 +70,7 @@ class TestObject(Model):
 
 def _prepare_test_loader():
 
-    my_obj = TestObject()
+    my_obj = ComplexTestObject()
 
     class GenericUpdateTestCommandsLoader(AzCommandsLoader):
 
@@ -104,7 +104,7 @@ class GenericUpdateTest(unittest.TestCase):
     def test_generic_update_scenario(self):  # pylint: disable=too-many-statements
 
         my_obj, loader_cls = _prepare_test_loader()
-        cli = TestCli(commands_loader_cls=loader_cls)
+        cli = DummyCli(commands_loader_cls=loader_cls)
 
         # Test simplest ways of setting properties
         cli.invoke('genupdate --set myProp=newValue'.split())
@@ -220,7 +220,7 @@ class GenericUpdateTest(unittest.TestCase):
     def test_generic_update_errors(self):  # pylint: disable=no-self-use
 
         my_obj, loader_cls = _prepare_test_loader()
-        cli = TestCli(commands_loader_cls=loader_cls)
+        cli = DummyCli(commands_loader_cls=loader_cls)
 
         def _execute_with_error(command, error, message):
             try:
@@ -297,7 +297,7 @@ class GenericUpdateTest(unittest.TestCase):
     def test_generic_update_empty_nodes(self):
 
         my_obj, loader_cls = _prepare_test_loader()
-        cli = TestCli(commands_loader_cls=loader_cls)
+        cli = DummyCli(commands_loader_cls=loader_cls)
 
         # add to prop
         cli.invoke('genupdate --add emptyProp a=b'.split())

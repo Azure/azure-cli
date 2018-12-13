@@ -11,14 +11,12 @@ import re
 import shlex
 from subprocess import check_output, CalledProcessError
 
-from colorama import Fore
-
 from automation.utilities.display import display, output
 from automation.utilities.path import filter_user_selected_modules_with_tests, get_config_dir
 
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
-TEST_INDEX_FILE = 'testIndex.json'
+TEST_INDEX_FORMAT = 'testIndex_{}.json'
 
 
 def extract_module_name(path):
@@ -32,7 +30,7 @@ def extract_module_name(path):
 
 
 def execute(args):
-    from .main import run_tests, collect_test
+    from .main import run_tests
 
     validate_usage(args)
     current_profile = get_current_profile(args)
@@ -41,7 +39,9 @@ def execute(args):
 
     if args.ci:
         # CI Mode runs specific modules
-        selected_modules = [('CI mode', 'azure.cli', 'azure.cli')]
+        output('Running in CI Mode')
+        selected_modules = [('All modules', 'azure.cli', 'azure.cli'),
+                            ('CLI Linter', 'automation.cli_linter', 'automation.cli_linter')]
     elif not (args.tests or args.src_file):
         # Default is to run with modules (possibly via environment variable)
         if os.environ.get('AZURE_CLI_TEST_MODULES', None):
@@ -79,10 +79,10 @@ def execute(args):
         args.tests = test_paths
 
     success, failed_tests = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
-    if args.dest_file:
-        with open(args.dest_file, 'w') as f:
-            for failed_test in failed_tests:
-                f.write(failed_test + '\n')
+    # if args.dest_file:
+    #     with open(args.dest_file, 'w') as f:
+    #         for failed_test in failed_tests:
+    #             f.write(failed_test + '\n')
     sys.exit(0 if success else 1)
 
 
@@ -103,20 +103,24 @@ def validate_usage(args):
 
 
 def get_current_profile(args):
+    import colorama
+
+    colorama.init(autoreset=True)
     try:
-        fore_red = Fore.RED if not IS_WINDOWS else ''
-        fore_reset = Fore.RESET if not IS_WINDOWS else ''
+        fore_red = colorama.Fore.RED if not IS_WINDOWS else ''
+        fore_reset = colorama.Fore.RESET if not IS_WINDOWS else ''
         current_profile = check_output(shlex.split('az cloud show --query profile -otsv'),
                                        shell=IS_WINDOWS).decode('utf-8').strip()
-        if not args.profile:
+        if not args.profile or current_profile == args.profile:
             args.profile = current_profile
             display('The tests are set to run against current profile {}.'
                     .format(fore_red + current_profile + fore_reset))
         elif current_profile != args.profile:
             display('The tests are set to run against profile {} but the current az cloud profile is {}.'
                     .format(fore_red + args.profile + fore_reset, fore_red + current_profile + fore_reset))
-            display('Please use "az cloud set" command to change the current profile.')
-            sys.exit(1)
+            display('SWITCHING TO PROFILE {}.'.format(fore_red + args.profile + fore_reset))
+            display('az cloud update --profile {}'.format(args.profile))
+            check_output(shlex.split('az cloud update --profile {}'.format(args.profile)), shell=IS_WINDOWS)
         return current_profile
     except CalledProcessError:
         display('Failed to retrieve current az profile')
@@ -124,7 +128,7 @@ def get_current_profile(args):
 
 
 def get_test_index(args):
-    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FILE)
+    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FORMAT.format(args.profile))
     test_index = {}
     if args.discover:
         test_index = discover_tests(args)
@@ -143,7 +147,6 @@ def get_test_index(args):
 
 def get_extension_modules():
     from importlib import import_module
-    import os
     import pkgutil
     from azure.cli.core.extension import get_extensions, get_extension_path, get_extension_modname
     extension_whls = get_extensions()
@@ -167,12 +170,11 @@ def discover_tests(args):
         full path. 
     """
     from importlib import import_module
-    import os
     import pkgutil
 
     CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
-
-    profile = args.profile
+    profile_split = args.profile.split('-')
+    profile_namespace = '_'.join([profile_split[-1]] + profile_split[:-1])
 
     mods_ns_pkg = import_module('azure.cli.command_modules')
     core_ns_pkg = import_module('azure.cli')
@@ -191,7 +193,7 @@ def discover_tests(args):
     module_data = {}
     for mod in all_modules:
         mod_name = mod[1]
-        if mod_name == 'core':
+        if mod_name == 'core' or mod_name == 'telemetry':
             mod_data = {
                 'filepath': os.path.join(mod[0].path, mod_name, 'tests'),
                 'base_path': 'azure.cli.{}.tests'.format(mod_name),
@@ -199,14 +201,14 @@ def discover_tests(args):
             }
         elif mod_name.startswith('azext_'):
             mod_data = {
-                'filepath': os.path.join(mod[0].path, 'tests', profile),
-                'base_path': '{}.tests.{}'.format(mod_name, profile),
+                'filepath': os.path.join(mod[0].path, 'tests', profile_namespace),
+                'base_path': '{}.tests.{}'.format(mod_name, profile_namespace),
                 'files': {}
             }
         else:
             mod_data = {
-                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile),
-                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile),
+                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile_namespace),
+                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile_namespace),
                 'files': {}
             }
         # get the list of test files in each module
@@ -227,7 +229,6 @@ def discover_tests(args):
                 display('Unable to import {}. Reason: {}'.format(test_file_path, ex))
                 continue
             module_dict = module.__dict__
-            classes = {}
             possible_test_classes = {x: y for x, y in module_dict.items() if not x.startswith('_')}
             for class_name, class_def in possible_test_classes.items():
                 try:

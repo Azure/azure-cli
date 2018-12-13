@@ -7,7 +7,7 @@ ls -la $share_folder/build
 ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 
 [ -d privates ] && pip install privates/*.whl
-pip install pylint
+pip install pylint==1.9.2
 pip install $ALL_MODULES
 
 echo '=== List installed packages'

@@ -177,6 +177,8 @@ def guess_content_type(file_path, original, settings_class):
         return original
 
     import mimetypes
+    mimetypes.add_type('application/json', '.json')
+    mimetypes.add_type('application/javascript', '.js')
 
     content_type, _ = mimetypes.guess_type(file_path)
     return settings_class(
@@ -221,8 +223,5 @@ def check_precondition_success(func):
             # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
             if ex.status_code not in [304, 412]:
                 raise
-            from knack.log import get_logger
-            logger = get_logger(__name__)
-            logger.warning('Failed precondition')
             return False, None
     return wrapper

@@ -3,6 +3,70 @@
 Release History
 ===============
 
+2.2.7
++++++
+* `storage logging update`- Add ability to update log schema version for storage services.
+
+2.2.6
++++++
+* Minor fixes.
+
+2.2.5
++++++
+* Improve handling of corner cases for storage copy commands.
+* Fix issue with `storage blob copy start-batch` not using login credentials when the destination and source accounts are the same.
+* `storage blob/file url`- fix bug with sas_token not being incorporated into url.
+* Warn users about future breaking change: `blob/container list` will output first 5000 results by default.
+
+2.2.4
++++++
+* Allow connection to storage services only with SAS and endpoints (without an account name or a key) as described in
+  `Configure Azure Storage connection strings <https://docs.microsoft.com/azure/storage/common/storage-configure-connection-string>`_.
+
+2.2.3
++++++
+* Fix `az storage cors list` output formatting, all items show correct "Service" key
+* `--bypass-immutability-policy` parameter for immutability-policy blocked container deletion
+
+2.2.2
++++++
+* `--auth-mode login` parameter allows use of user's login credentials for blob and queue authorization.
+* Added `storage container immutability-policy/legal-hold` to manage immutable storage.
+
+2.2.1
++++++
+* `storage share policy show`: exception handling to exit with code 3 upon a missing resource for consistency.
+
+2.2.0
++++++
+* BREAKING CHANGE: `storage account show-usage` now requires `--location` parameter and will list by region.
+* Make '--resource-group' parameter optional for 'storage account' commands.
+* Remove 'Failed precondition' warnings for individual failures in batch commands for single aggregated message.
+* blob/file delete-batch commands no longer output array of nulls.
+* blob download/upload/delete-batch commands will read sas-token from container url
+
+2.1.1
++++++
+* Allows download of large files using a single connection.
+* Converted 'show' commands that were missed from failing with exit code 3 upon a missing resource.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Added `pageRanges` property to `storage blob show` output that will be populated for page blobs.
+
+2.0.36
+++++++
+* Minor fixes
+
+2.0.35
+++++++
+* Changed table output for `storage blob download` to be more readable.
+
+2.0.34
+++++++
+* Added extra mimetypes for json and javascript to be inferred from file extensions.
+
 2.0.33
 ++++++
 * Added completer for `--account-name` argument.

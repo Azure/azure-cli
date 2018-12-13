@@ -8,14 +8,16 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
+
 try:
     from azure_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
+
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.33"
+VERSION = "2.0.52"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -26,6 +28,7 @@ except OSError:
 else:
     import re
     import sys
+
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
         print('Could not find __version__ in azure/cli/core/__init__.py')
@@ -50,33 +53,28 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'applicationinsights>=0.11.1',
+    'futures',
+    'adal>=1.2.0',
     'argcomplete>=1.8.0',
+    'azure-cli-telemetry',
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
-    'knack==0.3.3',
+    'knack==0.5.1',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
-    'paramiko',
+    'paramiko>=2.0.8',
     'pip',
     'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml',
-    'requests',
+    'pyyaml~=3.13',
+    'requests>=2.20.0',
     'six',
     'tabulate>=0.7.7,<=0.8.2',
     'wheel==0.30.0',
+    'azure-mgmt-resource==2.0.0'
 ]
-
-if sys.version_info < (3, 4):
-    DEPENDENCIES.append('enum34')
-
-if sys.version_info < (2, 7, 9):
-    DEPENDENCIES.append('pyopenssl')
-    DEPENDENCIES.append('ndg-httpsclient')
-    DEPENDENCIES.append('pyasn1')
 
 with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
@@ -99,9 +97,16 @@ setup(
         'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
-        'azure.cli.core.extensions',
+        'azure.cli.core.extension',
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
+    extras_require={
+        ":python_version<'3.4'": ['enum34'],
+        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
+        ":python_version<'3.0'": ['antlr4-python2-runtime'],
+        ":python_version>='3.0'": ['antlr4-python3-runtime']
+    },
+    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )

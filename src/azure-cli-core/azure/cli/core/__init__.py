@@ -4,26 +4,28 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.33"
+__version__ = "2.0.52"
 
 import os
 import sys
 import timeit
 
-from knack.arguments import ArgumentsContext
+import six
+
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
 
-import six
 
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
+EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
 
 class AzCli(CLI):
@@ -31,12 +33,12 @@ class AzCli(CLI):
     def __init__(self, **kwargs):
         super(AzCli, self).__init__(**kwargs)
 
-        from azure.cli.core.commands.arm import add_id_parameters
+        from azure.cli.core.commands.arm import (
+            register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
-        from azure.cli.core.extensions import register_extensions
+        from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 
-        import knack.events as events
         from knack.util import ensure_dir
 
         self.data['headers'] = {}
@@ -53,8 +55,9 @@ class AzCli(CLI):
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
 
-        register_extensions(self)
-        self.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
+        register_global_transforms(self)
+        register_global_subscription_argument(self)
+        register_ids_argument(self)  # global subscription must be registered first!
 
         self.progress_controller = None
 
@@ -74,6 +77,9 @@ class AzCli(CLI):
 
         self.progress_controller.init_progress(progress.get_progress_view(det))
         return self.progress_controller
+
+    def get_cli_version(self):
+        return __version__
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
@@ -107,8 +113,6 @@ class MainCommandsLoader(CLICommandsLoader):
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
 
-        cmd_to_mod_map = {}
-
         def _update_command_table_from_modules(args):
             '''Loads command table(s)
             When `module_name` is specified, only commands from that module will be loaded.
@@ -127,9 +131,11 @@ class MainCommandsLoader(CLICommandsLoader):
             for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
                 try:
                     start_time = timeit.default_timer()
-                    module_command_table = _load_module_command_loader(self, args, mod)
+                    module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+                    for cmd in module_command_table.values():
+                        cmd.command_source = mod
                     self.command_table.update(module_command_table)
-                    cmd_to_mod_map.update({cmd: mod for cmd in list(module_command_table.keys())})
+                    self.command_group_table.update(module_group_table)
                     elapsed_time = timeit.default_timer() - start_time
                     logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
                     cumulative_elapsed_time += elapsed_time
@@ -162,9 +168,10 @@ class MainCommandsLoader(CLICommandsLoader):
             if extensions:
                 logger.debug("Found %s extensions: %s", len(extensions), [e.name for e in extensions])
                 allowed_extensions = _handle_extension_suppressions(extensions)
+                module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
                     ext_name = ext.name
-                    ext_dir = get_extension_path(ext_name)
+                    ext_dir = ext.path or get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
@@ -172,18 +179,21 @@ class MainCommandsLoader(CLICommandsLoader):
                         # from an extension requires this map to be up-to-date.
                         # self._mod_to_ext_map[ext_mod] = ext_name
                         start_time = timeit.default_timer()
-                        extension_command_table = _load_extension_command_loader(self, args, ext_mod)
+                        extension_command_table, extension_group_table = \
+                            _load_extension_command_loader(self, args, ext_mod)
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
                                 extension_name=ext_name,
-                                overrides_command=cmd_name in cmd_to_mod_map,
+                                overrides_command=cmd_name in module_commands,
                                 preview=ext.preview)
 
                         self.command_table.update(extension_command_table)
+                        self.command_group_table.update(extension_group_table)
                         elapsed_time = timeit.default_timer() - start_time
                         logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
                     except Exception:  # pylint: disable=broad-except
+                        self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
                         logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
                         logger.debug(traceback.format_exc())
 
@@ -232,13 +242,14 @@ class MainCommandsLoader(CLICommandsLoader):
         command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            with ArgumentsContext(self, '') as c:
-                c.argument('resource_group_name', resource_group_name_type)
-                c.argument('location', get_location_type(self.cli_ctx))
-                c.argument('deployment_name', deployment_name_type)
-                c.argument('cmd', ignore_type)
-
             for loader in command_loaders:
+                # register global args
+                with loader.argument_context('') as c:
+                    c.argument('resource_group_name', resource_group_name_type)
+                    c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('deployment_name', deployment_name_type)
+                    c.argument('cmd', ignore_type)
+
                 loader.command_name = command
                 self.command_table[command].load_arguments()  # this loads the arguments via reflection
                 loader.load_arguments(command)  # this adds entries to the argument registries
@@ -249,12 +260,14 @@ class MainCommandsLoader(CLICommandsLoader):
 
 class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False):
+    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
+                 recommend_update=False):
         self.mod_name = mod_name
         self.suppress_extension_name = suppress_extension_name
         self.suppress_up_to_version = suppress_up_to_version
         self.reason = reason
         self.recommend_remove = recommend_remove
+        self.recommend_update = recommend_update
 
     def handle_suppress(self, ext):
         from pkg_resources import parse_version
@@ -268,6 +281,8 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
                          "to %s", ext.name, ext.version, self.mod_name)
             if self.recommend_remove:
                 logger.warning("Remove this extension with 'az extension remove --name %s'", ext.name)
+            if self.recommend_update:
+                logger.warning("Update this extension with 'az extension update --name %s'", ext.name)
         return should_suppress
 
 
@@ -383,12 +398,18 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
             kwargs['command_type'] = command_type
+        if 'deprecate_info' in kwargs:
+            kwargs['deprecate_info'].target = group_name
         return self._command_group_cls(self, group_name, **kwargs)
 
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
+
+        from knack.deprecation import Deprecated
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
         if operation and not isinstance(operation, six.string_types):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))
@@ -407,8 +428,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
+            cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
-            client = client_factory(self.cli_ctx, command_args) if client_factory else None
+            client = client_factory(cmd.cli_ctx, command_args) if client_factory else None
             supports_no_wait = kwargs.get('supports_no_wait', None)
             if supports_no_wait:
                 no_wait_enabled = command_args.pop('no_wait', False)
@@ -417,8 +439,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
-            result = op(**command_args)
-            return result
+            return op(**command_args)
 
         def default_arguments_loader():
             op = handler or self.get_op_handler(operation)
@@ -438,6 +459,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                       min_api=kwargs.get('min_api'),
                                       max_api=kwargs.get('max_api'),
                                       operation_group=kwargs.get('operation_group')):
+            self._populate_command_group_table_with_subgroups(' '.join(name.split()[:-1]))
             self.command_table[name] = self.command_cls(self, name,
                                                         handler or default_command_handler,
                                                         **kwargs)
@@ -481,6 +503,7 @@ def get_default_cli():
     from azure.cli.core.parser import AzCliCommandParser
     from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
     from azure.cli.core._help import AzCliHelp
+    from azure.cli.core._output import AzOutputProducer
 
     return AzCli(cli_name='az',
                  config_dir=GLOBAL_CONFIG_DIR,
@@ -489,4 +512,5 @@ def get_default_cli():
                  invocation_cls=AzCliCommandInvoker,
                  parser_cls=AzCliCommandParser,
                  logging_cls=AzCliLogging,
+                 output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)

@@ -19,7 +19,8 @@ class BatchCommandsLoader(AzCommandsLoader):
             exception_handler=batch_exception_handler)
         super(BatchCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=batch_custom,
-                                                  command_group_cls=BatchCommandGroup)
+                                                  command_group_cls=BatchCommandGroup,
+                                                  min_profile='2017-03-10-profile')
         self.module_name = __name__
 
     def load_command_table(self, args):

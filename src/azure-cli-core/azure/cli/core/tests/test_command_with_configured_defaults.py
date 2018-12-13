@@ -13,7 +13,7 @@ import sys
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand, CliCommandType
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
 from knack.config import CLIConfig
 
@@ -54,7 +54,7 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
                     c.argument('resource_group_name', options_list=['--resource-group-name', '-g'],
                                configured_default='group', required=required_arg)
                 self._update_command_definitions()  # pylint: disable=protected-access
-        return TestCli(commands_loader_cls=TestCommandsLoader)
+        return DummyCli(commands_loader_cls=TestCommandsLoader)
 
     @mock.patch.dict(os.environ, {'AZURE_DEFAULTS_GROUP': 'myRG'})
     def test_apply_configured_defaults_on_required_arg(self):

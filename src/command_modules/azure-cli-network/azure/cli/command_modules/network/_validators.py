@@ -60,8 +60,8 @@ def get_vnet_validator(dest):
         names_or_ids = getattr(namespace, dest)
         ids = []
 
-        if names_or_ids == [""] or not names_or_ids:
-            names_or_ids = []
+        if names_or_ids == [''] or not names_or_ids:
+            return
 
         for val in names_or_ids:
             if not is_valid_resource_id(val):
@@ -179,11 +179,12 @@ def read_base_64_file(filename):
             return str(base64_data)
 
 
-def validate_auth_cert(namespace):
-    namespace.cert_data = read_base_64_file(namespace.cert_data)
-
-
 def validate_cert(namespace):
+    if namespace.cert_data:
+        namespace.cert_data = read_base_64_file(namespace.cert_data)
+
+
+def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]
     if all([not x for x in params]):
         # no cert supplied -- use HTTP
@@ -192,7 +193,7 @@ def validate_cert(namespace):
     else:
         # cert supplied -- use HTTPS
         if not all(params):
-            raise argparse.ArgumentError(
+            raise CLIError(
                 None, 'To use SSL certificate, you must specify both the filename and password')
 
         # extract the certificate data from the provided file
@@ -207,6 +208,19 @@ def validate_cert(namespace):
             pass
 
 
+def validate_delegations(cmd, namespace):
+    if namespace.delegations:
+        Delegation = cmd.get_models('Delegation')
+        delegations = []
+        for i, item in enumerate(namespace.delegations):
+            if '/' not in item and len(item.split('.')) == 3:
+                # convert names to serviceNames
+                _, service, resource_type = item.split('.')
+                item = 'Microsoft.{}/{}'.format(service, resource_type)
+            delegations.append(Delegation(name=str(i), service_name=item))
+        namespace.delegations = delegations
+
+
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
@@ -217,6 +231,28 @@ def validate_dns_record_type(namespace):
             else:
                 namespace.record_set_type = token
             return
+
+
+def validate_er_peer_circuit(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+
+    if not is_valid_resource_id(namespace.peer_circuit):
+        peer_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='expressRouteCircuits',
+            name=namespace.peer_circuit,
+            child_type_1='peerings',
+            child_name_1=namespace.peering_name)
+    else:
+        peer_id = namespace.peer_circuit
+
+    # if the circuit ID is provided, we need to append /peerings/{peering_name}
+    if namespace.peering_name not in peer_id:
+        peer_id = '{}/peerings/{}'.format(peer_id, namespace.peering_name)
+
+    namespace.peer_circuit = peer_id
 
 
 def validate_inbound_nat_rule_id_list(cmd, namespace):
@@ -250,6 +286,19 @@ def validate_ip_tags(cmd, namespace):
         namespace.ip_tags = ip_tags
 
 
+def validate_frontend_ip_configs(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
+    if namespace.frontend_ip_configurations:
+        config_ids = []
+        for item in namespace.frontend_ip_configurations:
+            if not is_valid_resource_id(item):
+                config_ids.append(_generate_lb_subproperty_id(
+                    cmd.cli_ctx, namespace, 'frontendIpConfigurations', item))
+            else:
+                config_ids.append(item)
+        namespace.frontend_ip_configurations = config_ids
+
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -261,6 +310,17 @@ def validate_peering_type(namespace):
         if not namespace.advertised_public_prefixes:
             raise CLIError(
                 'missing required MicrosoftPeering parameter --advertised-public-prefixes')
+
+
+def validate_public_ip_prefix(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.public_ip_prefix and not is_valid_resource_id(namespace.public_ip_prefix):
+        namespace.public_ip_prefix = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            name=namespace.public_ip_prefix,
+            namespace='Microsoft.Network',
+            type='publicIPPrefixes')
 
 
 def validate_private_ip_address(namespace):
@@ -380,6 +440,22 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
     return complex_validator_with_type if has_type_field else simple_validator
 
 
+def validate_service_endpoint_policy(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.service_endpoint_policy:
+        policy_ids = []
+        for policy in namespace.service_endpoint_policy:
+            if not is_valid_resource_id(policy):
+                policy = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    name=policy,
+                    namespace='Microsoft.Network',
+                    type='serviceEndpointPolicies')
+            policy_ids.append(policy)
+        namespace.service_endpoint_policy = policy_ids
+
+
 def get_servers_validator(camel_case=False):
     def validate_servers(namespace):
         servers = []
@@ -391,6 +467,15 @@ def get_servers_validator(camel_case=False):
                 servers.append({'fqdn': item})
         namespace.servers = servers
     return validate_servers
+
+
+def validate_subresource_list(cmd, namespace):
+    if namespace.target_resources:
+        SubResource = cmd.get_models('SubResource')
+        subresources = []
+        for item in namespace.target_resources:
+            subresources.append(SubResource(id=item))
+        namespace.target_resources = subresources
 
 
 def validate_target_listener(cmd, namespace):
@@ -525,22 +610,18 @@ def process_ag_url_path_map_rule_create_namespace(cmd, namespace):  # pylint: di
 
 def process_ag_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
-
     get_servers_validator(camel_case=True)(namespace)
 
     # process folded parameters
     if namespace.subnet or namespace.virtual_network_name:
         get_subnet_validator(has_type_field=True, allow_new=True)(cmd, namespace)
-
     validate_address_prefixes(namespace)
-
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
-
-    validate_cert(namespace)
-
+    validate_ssl_cert(namespace)
     validate_tags(namespace)
+    validate_custom_error_pages(namespace)
 
 
 def process_auth_create_namespace(cmd, namespace):
@@ -579,10 +660,20 @@ def process_lb_create_namespace(cmd, namespace):
 
 
 def process_lb_frontend_ip_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
             'incorrect usage: --subnet NAME --vnet-name NAME | '
             '--subnet ID | --public-ip NAME_OR_ID')
+
+    if namespace.public_ip_prefix:
+        if not is_valid_resource_id(namespace.public_ip_prefix):
+            namespace.public_ip_prefix = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='publicIpPrefixes',
+                name=namespace.public_ip_prefix)
 
     if namespace.subnet:
         get_subnet_validator()(cmd, namespace)
@@ -605,6 +696,7 @@ def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
 
+    validate_ag_address_pools(cmd, namespace)
     validate_address_pool_id_list(cmd, namespace)
     validate_inbound_nat_rule_id_list(cmd, namespace)
     get_asg_validator(cmd.loader, 'application_security_groups')(cmd, namespace)
@@ -617,6 +709,8 @@ def process_nic_create_namespace(cmd, namespace):
 
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_public_ip_prefix(cmd, namespace)
+    validate_ip_tags(cmd, namespace)
     validate_tags(namespace)
 
 
@@ -688,7 +782,10 @@ def process_vnet_create_namespace(cmd, namespace):
     validate_tags(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
-        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
+        if cmd.supported_api_version(min_api='2018-08-01'):
+            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefixes PREFIXES]')
+        else:
+            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
     if namespace.subnet_name and not namespace.subnet_prefix:
         if isinstance(namespace.vnet_prefixes, str):
@@ -697,7 +794,8 @@ def process_vnet_create_namespace(cmd, namespace):
         address = prefix_components[0]
         bit_mask = int(prefix_components[1])
         subnet_mask = 24 if bit_mask < 24 else bit_mask
-        namespace.subnet_prefix = '{}/{}'.format(address, subnet_mask)
+        subnet_prefix = '{}/{}'.format(address, subnet_mask)
+        namespace.subnet_prefix = [subnet_prefix] if cmd.supported_api_version(min_api='2018-08-01') else subnet_prefix
 
 
 def process_vnet_gateway_create_namespace(cmd, namespace):
@@ -798,9 +896,8 @@ def get_network_watcher_from_vm(cmd, namespace):
 
 
 def get_network_watcher_from_resource(cmd, namespace):
-    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
-    resource = resource_client.get_by_id(namespace.resource,
-                                         cmd.get_api_version(ResourceType.MGMT_NETWORK))
+    from azure.cli.core.commands.arm import get_arm_resource_by_id
+    resource = get_arm_resource_by_id(cmd.cli_ctx, namespace.resource)
     namespace.location = resource.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(cmd, namespace)
 
@@ -884,6 +981,16 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
             type='virtualMachines',
             name=namespace.dest_resource)
 
+    if namespace.headers:
+        HTTPHeader = cmd.get_models('HTTPHeader')
+        headers = []
+        for item in namespace.headers:
+            parts = item.split('=')
+            if len(parts) != 2:
+                raise CLIError("usage error '{}': --headers KEY=VALUE [KEY=VALUE ...]".format(item))
+            headers.append(HTTPHeader(name=parts[0], value=parts[1]))
+        namespace.headers = headers
+
 
 def process_nw_flow_log_set_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
@@ -899,7 +1006,8 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
 
 
 def process_nw_flow_log_show_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.cli.core.commands.arm import get_arm_resource_by_id
 
     if not is_valid_resource_id(namespace.nsg):
         namespace.nsg = resource_id(
@@ -909,11 +1017,7 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
             type='networkSecurityGroups',
             name=namespace.nsg)
 
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_security_groups
-    id_parts = parse_resource_id(namespace.nsg)
-    nsg_name = id_parts['name']
-    rg = id_parts['resource_group']
-    nsg = network_client.get(rg, nsg_name)
+    nsg = get_arm_resource_by_id(cmd.cli_ctx, namespace.nsg)
     namespace.location = nsg.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(cmd, namespace)
 
@@ -1047,7 +1151,7 @@ def process_nw_troubleshooting_start_namespace(cmd, namespace):
 def process_nw_troubleshooting_show_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
-                              '--resource-group-name NAME')
+                              '--resource-group NAME')
     id_params = [namespace.resource_type, namespace.resource_group_name]
     if not is_valid_resource_id(namespace.resource):
         if not all(id_params):
@@ -1067,3 +1171,130 @@ def process_nw_troubleshooting_show_namespace(cmd, namespace):
             raise resource_usage
 
     get_network_watcher_from_resource(cmd, namespace)
+
+
+def process_nw_config_diagnostic_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    # validate target resource
+    resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
+                              '--resource-group NAME [--parent PATH]')
+
+    # omit --parent since it is optional
+    id_params = [namespace.resource_type, namespace.resource_group_name]
+    if not is_valid_resource_id(namespace.resource):
+        if not all(id_params):
+            raise resource_usage
+        # infer resource namespace
+        NAMESPACES = {
+            'virtualMachines': 'Microsoft.Compute',
+            'applicationGateways': 'Microsoft.Network',
+            'networkInterfaces': 'Microsoft.Network'
+        }
+        resource_namespace = NAMESPACES[namespace.resource_type]
+        if namespace.parent:
+            # special case for virtualMachineScaleSets/NetworkInterfaces, since it is
+            # the only one to need `--parent`.
+            resource_namespace = 'Microsoft.Compute'
+        namespace.resource = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace=resource_namespace,
+            type=namespace.resource_type,
+            parent=namespace.parent,
+            name=namespace.resource)
+    elif any(id_params) or namespace.parent:
+        raise resource_usage
+
+    # validate query
+    query_usage = CLIError('usage error: --queries JSON | --destination DEST --source SRC --direction DIR '
+                           '--port PORT --protocol PROTOCOL')
+    query_params = [namespace.destination, namespace.source, namespace.direction, namespace.protocol,
+                    namespace.destination_port]
+    if namespace.queries:
+        if any(query_params):
+            raise query_usage
+    elif not all(query_params):
+        raise query_usage
+
+    get_network_watcher_from_resource(cmd, namespace)
+
+
+def process_lb_outbound_rule_namespace(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
+
+    validate_frontend_ip_configs(cmd, namespace)
+
+    if namespace.backend_address_pool:
+        if not is_valid_resource_id(namespace.backend_address_pool):
+            namespace.backend_address_pool = _generate_lb_subproperty_id(
+                cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
+
+
+def process_list_delegations_namespace(cmd, namespace):
+
+    if not namespace.resource_group_name and not namespace.location:
+        raise CLIError('usage error: --location LOCATION | --resource-group NAME [--location LOCATION]')
+
+    if not namespace.location:
+        get_default_location_from_resource_group(cmd, namespace)
+
+
+def validate_ag_address_pools(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    address_pools = namespace.app_gateway_backend_address_pools
+    gateway_name = namespace.application_gateway_name
+    delattr(namespace, 'application_gateway_name')
+    if not address_pools:
+        return
+    ids = []
+    for item in address_pools:
+        if not is_valid_resource_id(item):
+            if not gateway_name:
+                raise CLIError('usage error: --app-gateway-backend-pools IDS | --gateway-name NAME '
+                               '--app-gateway-backend-pools NAMES')
+            item = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='applicationGateways',
+                name=gateway_name,
+                child_type_1='backendAddressPools',
+                child_name_1=item)
+            ids.append(item)
+    namespace.app_gateway_backend_address_pools = ids
+
+
+def validate_custom_error_pages(namespace):
+
+    if not namespace.custom_error_pages:
+        return
+
+    values = []
+    for item in namespace.custom_error_pages:
+        try:
+            (code, url) = item.split('=')
+            values.append({'statusCode': code, 'customErrorPageUrl': url})
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
+    namespace.custom_error_pages = values
+
+
+# pylint: disable=too-few-public-methods
+class WafConfigExclusionAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        cmd = namespace._cmd  # pylint: disable=protected-access
+        ApplicationGatewayFirewallExclusion = cmd.get_models('ApplicationGatewayFirewallExclusion')
+        if not namespace.exclusions:
+            namespace.exclusions = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        try:
+            variable, op, selector = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --exclusion VARIABLE OPERATOR VALUE')
+        namespace.exclusions.append(ApplicationGatewayFirewallExclusion(
+            match_variable=variable,
+            selector_match_operator=op,
+            selector=selector
+        ))

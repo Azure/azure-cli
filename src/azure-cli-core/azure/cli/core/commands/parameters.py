@@ -36,7 +36,7 @@ def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: d
 # pylint: disable=redefined-builtin
 def get_datetime_type(help=None, date=True, time=True, timezone=True):
 
-    help_string = help + ' ' or ''
+    help_string = help + ' ' if help else ''
     accepted_formats = []
     if date:
         accepted_formats.append('date (yyyy-mm-dd)')
@@ -44,7 +44,7 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
         accepted_formats.append('time (hh:mm:ss.xxxxx)')
     if timezone:
         accepted_formats.append('timezone (+/-hh:mm)')
-    help_string = help_string + 'Format: ' + ', '.join(accepted_formats)
+    help_string = help_string + 'Format: ' + ' '.join(accepted_formats)
 
     # pylint: disable=too-few-public-methods
     class DatetimeAction(argparse.Action):
@@ -52,6 +52,7 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
         def __call__(self, parser, namespace, values, option_string=None):
             """ Parse a date value and return the ISO8601 string. """
             import dateutil.parser
+            import dateutil.tz
 
             value_string = ' '.join(values)
             dt_val = None
@@ -62,9 +63,11 @@ def get_datetime_type(help=None, date=True, time=True, timezone=True):
                 pass
 
             # TODO: custom parsing attempts here
-
             if not dt_val:
                 raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+
+            if not dt_val.tzinfo and timezone:
+                dt_val = dt_val.replace(tzinfo=dateutil.tz.tzlocal())
 
             # Issue warning if any supplied data will be ignored
             if not date and any([dt_val.day, dt_val.month, dt_val.year]):
@@ -246,7 +249,8 @@ def get_location_type(cli_ctx):
         options_list=('--location', '-l'),
         completer=get_location_completion_list,
         type=get_location_name_type(cli_ctx),
-        help="Location. You can configure the default location using `az configure --defaults location=<location>`",
+        help="Location. Values from: `az account list-locations`. "
+             "You can configure the default location using `az configure --defaults location=<location>`.",
         metavar='LOCATION',
         configured_default='location')
     return location_type
@@ -317,7 +321,6 @@ class AzArgumentContext(ArgumentsContext):
         super(AzArgumentContext, self).__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
         self.group_kwargs = merge_kwargs(kwargs, command_loader.module_kwargs, CLI_PARAM_KWARGS)
-        self.is_stale = False
 
     def __enter__(self):
         return self
@@ -325,32 +328,25 @@ class AzArgumentContext(ArgumentsContext):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.is_stale = True
 
-    def _applicable(self):
-        if self.command_loader.skip_applicability:
-            return True
-        command_name = self.command_loader.command_name
-        scope = self.scope
-        return command_name.startswith(scope)
-
-    def _check_stale(self):
-        if self.is_stale:
-            message = "command authoring error: argument context '{}' is stale! " \
-                      "Check that the subsequent block for has a corresponding `as` statement.".format(self.scope)
-            logger.error(message)
-            raise CLIError(message)
-
-    def _flatten_kwargs(self, kwargs, arg_type, supported_kwargs=None):
-        merged_kwargs = self._merge_kwargs(kwargs, supported_kwargs=supported_kwargs)
+    def _flatten_kwargs(self, kwargs, arg_type):
+        merged_kwargs = self._merge_kwargs(kwargs)
         if arg_type:
             arg_type_copy = arg_type.settings.copy()
             arg_type_copy.update(merged_kwargs)
             return arg_type_copy
         return merged_kwargs
 
-    def _merge_kwargs(self, kwargs, base_kwargs=None, supported_kwargs=None):
+    def _merge_kwargs(self, kwargs, base_kwargs=None):
         from azure.cli.core.commands import _merge_kwargs as merge_kwargs
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
-        return merge_kwargs(kwargs, base, supported_kwargs or CLI_PARAM_KWARGS)
+        return merge_kwargs(kwargs, base, CLI_PARAM_KWARGS)
+
+    def _ignore_if_not_registered(self, dest):
+        scope = self.scope
+        arg_registry = self.command_loader.argument_registry
+        match = arg_registry.arguments[scope].get(dest, {})
+        if not match:
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
 
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
@@ -363,34 +359,24 @@ class AzArgumentContext(ArgumentsContext):
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
         operation_group = merged_kwargs.get('operation_group', None)
-        if merged_kwargs.get('options_list') == []:
+
+        if merged_kwargs.get('options_list', None) == []:
             del merged_kwargs['options_list']
+
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
-            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+            self._ignore_if_not_registered(dest)
 
     def positional(self, dest, arg_type=None, **kwargs):
         self._check_stale()
         if not self._applicable():
             return
 
-        if self.scope not in self.command_loader.command_table:
-            raise ValueError("command authoring error: positional argument '{}' cannot be registered to a group-level "
-                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
-
-        # Before adding the new positional arg, ensure that there are no existing positional arguments
-        # registered for this command.
-        command_args = self.command_loader.argument_registry.arguments[self.scope]
-        positional_args = {k: v for k, v in command_args.items() if v.settings.get('options_list') == []}
-        if positional_args and dest not in positional_args:
-            raise CLIError("command authoring error: commands may have, at most, one positional argument. '{}' already "
-                           "has positional argument: {}.".format(self.scope, ' '.join(positional_args.keys())))
-
-        merged_kwargs = self._flatten_kwargs(kwargs, arg_type, supported_kwargs=CLI_POSITIONAL_PARAM_KWARGS)
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
         merged_kwargs = {k: v for k, v in merged_kwargs.items() if k in CLI_POSITIONAL_PARAM_KWARGS}
         merged_kwargs['options_list'] = []
 
@@ -402,9 +388,9 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
-            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+            super(AzArgumentContext, self).positional(dest, **merged_kwargs)
         else:
-            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+            self._ignore_if_not_registered(dest)
 
     def expand(self, dest, model_type, group_name=None, patches=None):
         # TODO:
@@ -473,13 +459,6 @@ class AzArgumentContext(ArgumentsContext):
             super(AzArgumentContext, self).ignore(arg)
 
     def extra(self, dest, arg_type=None, **kwargs):
-        self._check_stale()
-        if not self._applicable():
-            return
-
-        if self.scope not in self.command_loader.command_table:
-            raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
-                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
 
         merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
         resource_type = merged_kwargs.get('resource_type', None)
@@ -490,5 +469,22 @@ class AzArgumentContext(ArgumentsContext):
                                                      min_api=min_api,
                                                      max_api=max_api,
                                                      operation_group=operation_group):
+            # Restore when knack #132 is fixed
+            # merged_kwargs.pop('dest', None)
+            # super(AzArgumentContext, self).extra(dest, **merged_kwargs)
+            from knack.arguments import CLICommandArgument
+            self._check_stale()
+            if not self._applicable():
+                return
+
+            if self.command_scope in self.command_loader.command_group_table:
+                raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
+                                 "scope '{}'. It must be registered to a specific command.".format(
+                                     dest, self.command_scope))
+
+            deprecate_action = self._handle_deprecations(dest, **merged_kwargs)
+            if deprecate_action:
+                merged_kwargs['action'] = deprecate_action
             merged_kwargs.pop('dest', None)
-            super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)
+            self.command_loader.extra_argument_registry[self.command_scope][dest] = CLICommandArgument(
+                dest, **merged_kwargs)

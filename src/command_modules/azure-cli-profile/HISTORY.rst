@@ -2,9 +2,29 @@
 
 Release History
 ===============
+2.1.2
+++++++
+* az login: expose --use-cert-sn-issuer flag for service principal login with cert auto-rolls
+
+2.1.1
+++++++
+* Moving _load_subscriptions into the core
+
+2.1.0
+++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+2.0.27
+++++++
+* login: use browser for interactive login
+
+2.0.26
+++++++
+* Minor fixes
+
 2.0.25
 ++++++
-* minor changes
+* Minor fixes
 
 2.0.24
 ++++++

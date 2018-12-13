@@ -2,6 +2,95 @@
 
 Release History
 ===============
+
+2.2.9
+++++++
+* `vm extension show / wait`: deprecated --expand parameter.
+* `vm restart`: Added `--force` which redeploys unresponsive VMs.
+* `vm/vmss create`: `--authentication-type` now accepts/infers "all" to create a VM with both password and ssh authentication.
+* `image create`: Added `--os-disk-caching` parameter to set os disk caching for an image.
+
+2.2.8
+++++++
+* `vm/vmss create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
+* `sig image-version`: Version names now consistently specified by  `--image-version -e`. `--image-version-name` deprecated.
+* `vm/vmss create --ephemeral-os-disk`: exposed parameter to create a vm/vmss with a local os disk.
+* `snapshot create/update`: Added support for `--no-wait`.
+* `snapshot`: Added `wait` command.
+* `vm/vmss extension set --extension-instance-name`: can now specify the instance name of an extension.
+
+2.2.7
+++++++
+* `image create`: expose storage-sku argument for setting the image's default storage account type
+* `vm resize`: fix bug where `--no-wait` option causes command to crash
+* `vm encryption show`: table output format shows status
+* `vm secret format`: requires json/jsonc output. Warns user and defaults to json output if an undesired output format is selected.
+* `vm create --image`: improved validation of image argument
+
+2.2.6
+++++++
+* `vm/vmss create`: enforce disk caching mode be `None` for Lv/Lv2 series of machines
+* `vm create`: update supported size list supporting networking accelerator
+* `disk update`: expose strong typed arguments for ultrassd iops and mbps configs
+
+2.2.5
+++++++
+* Fix SDK issue that caused Homebrew installation to fail.
+
+2.2.4
+++++++
+* `az disk grant-access`: fix the empty "accessSas" field
+* `vmss create`: reserve large enough frontend port range to handle overprovisioning
+* `az sig`: fix update commands, support --no-wait on managing image versions
+* `vm list-ip-addresses`: now shows availability zone of public IP addresses.
+* `az vm\vmss disk attach`: default disk's lun to the first available spot
+
+2.2.3
+++++++
+* support shared image gallery through `az sig`.
+
+2.2.2
+++++++
+* `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+* `vm create`: deprecate `--storage-caching` option.
+
+2.2.1
+++++++
+* vm list-skus: add a few common filters to make the command easier to use 
+
+2.2.0
+++++++
+* availability set: support list by subscription
+* vm/vmss: support StandardSSD_LRS
+* vm/vmss: support application security group on creating VM scale set
+* BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
+                   in dictionary format
+* Consuming multi api azure.mgmt.authorization package for azure stack support
+
+2.1.0
++++++
+* BREAKING CHANGE: update `vmss create` to use `Standard_DS1_v2` as the default instance size
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* `vm/vmss extension set/delete`: Added `--no-wait` support.
+* Added `vm extension wait`.
+
+2.0.35
+++++++
+* msi: support removing system assigned identity
+
+2.0.34
+++++++
+* vm create: refine vm size check for accelerated networking support
+* vmss create: warn about the default vm size will be switched from "Standard_D1_v2" to "Standard_DS1_v2"
+* vm/vmss extension set: Expose `--force-update` flag to update the extension even when the configuration has not changed.
+
+2.0.33
+++++++
+* `vm list-skus`: make sure we have fixed columns; warn about `Tier` and "Size" columns will be removed
+* `vm create`: support `--accelerated-networking`
+* `vm/vmss extension image list`: absorb 404 when an image type is not found
+* `identity create`: support `--tags`
+
 2.0.32
 ++++++
 * BREAKING CHANGE: remove `--write-accelerator` from `vm create`. The same support

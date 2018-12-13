@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
+from knack.util import CLIError
 
 from azure.mgmt.maps.models import (
     MapsAccountCreateParameters,
@@ -14,7 +16,23 @@ ACCOUNT_LOCATION = 'global'
 logger = get_logger(__name__)
 
 
-def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None):
+def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None, force=None):
+    terms = 'By creating an Azure Maps account, you agree that you have read and agree to the ' \
+            '\nLicense (https://azure.microsoft.com/en-us/support/legal/) and ' \
+            '\nPrivacy Statement (https://privacy.microsoft.com/en-us/privacystatement).'
+    hint = 'Please select.'
+    client_denied_terms = 'You must agree to the License and Privacy Statement to create an account.'
+
+    # Show ToS message to the user
+    logger.warning(terms)
+
+    # Prompt yes/no for the user, if --force parameter is not passed in.
+    if not force:
+        option = prompt_y_n(hint)
+        if not option:
+            raise CLIError(client_denied_terms)
+
+    # Submit query
     sku = Sku(name=sku_name)
     maps_account_create_params = MapsAccountCreateParameters(location=ACCOUNT_LOCATION, sku=sku, tags=tags)
     return client.create_or_update(resource_group_name, account_name, maps_account_create_params)

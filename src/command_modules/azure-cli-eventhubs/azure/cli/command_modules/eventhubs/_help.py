@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -74,7 +75,7 @@ helps['eventhubs namespace create'] = """
     examples:
         - name: Creates a new namespace.
           text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus
-           --tags tag1=value1 tag2=value2 --sku-name Standard --sku-tier Standard --is-auto-inflate-enabled False --maximum-throughput-units 30
+           --tags tag1=value1 tag2=value2 --sku Standard --enable-auto-inflate False --maximum-throughput-units 30
 """
 
 helps['eventhubs namespace update'] = """
@@ -82,7 +83,7 @@ helps['eventhubs namespace update'] = """
     short-summary: Updates the Event Hubs Namespace
     examples:
         - name: Update a new namespace.
-          text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --is-auto-inflate-enabled True
+          text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
 """
 
 helps['eventhubs namespace show'] = """
@@ -140,7 +141,7 @@ helps['eventhubs namespace authorization-rule list'] = """
     short-summary: Shows the list of Authorizationrule by Namespace
     examples:
         - name: Shows the list of Authorizationrule by Namespace
-          text: az eventhubs namespace authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
+          text: az eventhubs namespace authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['eventhubs namespace authorization-rule keys list'] = """
@@ -148,7 +149,7 @@ helps['eventhubs namespace authorization-rule keys list'] = """
     short-summary: Shows the connection strings for namespace
     examples:
         - name: Shows the connection strings of Authorizationrule for the namespace.
-          text: az eventhubs namespace authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+          text: az eventhubs namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['eventhubs namespace authorization-rule keys renew'] = """
@@ -156,7 +157,7 @@ helps['eventhubs namespace authorization-rule keys renew'] = """
     short-summary: Regenerate the connection strings of Authorizationrule for the namespace.
     examples:
         - name: Regenerate the connection strings of Authorizationrule for the namespace.
-          text: az eventhubs namespace authorization-rule regenerate-keys --resource-group myresourcegroup
+          text: az eventhubs namespace authorization-rule keys renew --resource-group myresourcegroup
            --namespace-name mynamespace --name myauthorule --key PrimaryKey
 """
 
@@ -173,7 +174,7 @@ helps['eventhubs eventhub create'] = """
     short-summary: Creates the Event Hubs Eventhub
     examples:
         - name: Create a new Eventhub.
-          text: az eventhubs eventhub create --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 4 ---partition-count 15
+          text: az eventhubs eventhub create --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 4 --partition-count 15
 """
 
 helps['eventhubs eventhub update'] = """
@@ -181,7 +182,7 @@ helps['eventhubs eventhub update'] = """
     short-summary: Updates the Event Hubs Eventhub
     examples:
         - name: Updates a new Eventhub.
-          text: az eventhubs eventhub update --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 3 ---partition-count 12
+          text: az eventhubs eventhub update --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 3 --partition-count 12
 """
 
 helps['eventhubs eventhub show'] = """
@@ -234,10 +235,10 @@ helps['eventhubs eventhub authorization-rule show'] = """
 
 helps['eventhubs eventhub authorization-rule list'] = """
     type: command
-    short-summary: shows the list of Authorizationrule by Eventhub
+    short-summary: shows the list of Authorization-rules by Eventhub
     examples:
-        - name: shows the list of Authorizationrule by Eventhub
-          text: az eventhubs eventhub authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
+        - name: shows the list of Authorization-rules by Eventhub
+          text: az eventhubs eventhub authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
 """
 
 helps['eventhubs eventhub authorization-rule keys list'] = """
@@ -253,7 +254,7 @@ helps['eventhubs eventhub authorization-rule keys renew'] = """
     short-summary: Regenerate the connection strings of Authorizationrule for the namespace.
     examples:
         - name: Regenerate the connection strings of Authorizationrule for the namespace.
-          text: az eventhubs eventhub authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --key PrimaryKey
+          text: az eventhubs eventhub authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --key PrimaryKey
 """
 
 helps['eventhubs eventhub authorization-rule delete'] = """
@@ -292,8 +293,8 @@ helps['eventhubs eventhub consumer-group list'] = """
     type: command
     short-summary: List the ConsumerGroup by Eventhub
     examples:
-        - name: Shows the ConsumerGroup by Eventhub.
-          text: az eventhubs eventhub consumer-group get --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
+        - name: List the ConsumerGroup by Eventhub.
+          text: az eventhubs eventhub consumer-group list --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub
 """
 
 helps['eventhubs eventhub consumer-group delete'] = """
@@ -309,7 +310,7 @@ helps['eventhubs georecovery-alias exists'] = """
     short-summary: Check the availability of Geo-Disaster Recovery Configuration Alias Name
     examples:
         - name: Check the availability of Geo-Disaster Recovery Configuration Alias Name
-          text: az eventhubs georecovery-alias check-name-availability --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
+          text: az eventhubs georecovery-alias exists --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias set'] = """

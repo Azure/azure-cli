@@ -161,6 +161,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
     poller = compute_client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, extension['name'], ext)
+    LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()
 
     # verify the extension was ok
@@ -258,6 +259,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     poller = compute_client.virtual_machine_extensions.create_or_update(resource_group_name,
                                                                         vm_name,
                                                                         extension['name'], ext)
+    LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
                                                                      extension['name'],
@@ -584,10 +586,10 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
             raise CLIError(msg)
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
-    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     disk_vault_resource_info = parse_resource_id(disk_vault_id)
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 

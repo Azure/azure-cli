@@ -2,6 +2,87 @@
 
 Release History
 ===============
+
+2.1.10
+++++++
+* Minor fixes.
+* Condense the table layout for task list.
+* Add support for Azure DevOps URLs.
+
+2.1.9
++++++
+* Add context token to task step.
+* Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
+
+2.1.8
++++++
+* Support commit and pull request git events for Task source trigger.
+* Use default Dockerfile if it's not specified in build command.
+
+2.1.7
++++++
+* Fix an ACR Build encoding issue in Python2.
+* Upgrade pinned dependency azure-storage-blob from 1.1.0 to 1.3.1
+
+2.1.6
++++++
+* Support similar table format as helm client.
+
+2.1.5
++++++
+* Add ACR Task commands.
+* Add quick run command.
+* Deprecate build-task command group.
+* Add helm command group to support managing helm charts with ACR.
+* Allow idempotent create for managed registry.
+* Add a no-format flag for displaying build logs
+
+2.1.4
++++++
+* Provide a workaround for runtime operations without ARM requests.
+* Exclude version control files (eg, .git, .gitignore) from uploaded tar by default in build command.
+* Minor fixes
+
+2.1.3
++++++
+* Add content-trust policy commands.
+* Fix a few issues to handle .dockerignore file properly in build command.
+* Minor fixes
+
+2.1.2
++++++
+* Minor fixes
+
+2.1.1
++++++
+* Add --with-secure-properties flag in 'acr build-task show' command.
+* Add 'acr build-task update-build' command.
+
+2.1.0
++++++
+* BREAKING CHANGE: Update '--no-push' to a pure flag in 'acr build' command.
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* Add 'show' and 'update' commands under 'acr repository' group.
+* Add '--detail' flag for 'show-manifests' and 'show-tags' to show more detailed information.
+* Add '--image' parameter to support get build details or logs by an image.
+
+2.0.28
+++++++
+* Add polling build status.
+* Allow case-insensitive enum values.
+* Add --top and --orderby parameters for show-manifests.
+
+2.0.27
+++++++
+* Add 'azure-storage-blob' as dependency.
+* Use 2 cores as the default CPU configuration in 'acr build-task create' command.
+
+2.0.26
+++++++
+* Allow VSTS as a remote source location
+* Add 'acr import' command.
+
 2.0.25
 ++++++
 * Improve manifest delete confirmation on tags

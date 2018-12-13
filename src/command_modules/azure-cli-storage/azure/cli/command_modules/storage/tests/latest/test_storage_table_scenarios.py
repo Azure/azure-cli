@@ -6,7 +6,7 @@
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
-from .storage_test_util import StorageScenarioMixin
+from ..storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -71,8 +71,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage entity delete -t {} --row-key 001 --partition-key 001',
                          account_info, table_name)
-        self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
-                         account_info, table_name).assert_with_checks(NoneCheck())
+        self.storage_cmd_negative('storage entity show -t {} --row-key 001 --partition-key 001',
+                                  account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
                          account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=002 partitionkey=002 name=test2 value=something2',

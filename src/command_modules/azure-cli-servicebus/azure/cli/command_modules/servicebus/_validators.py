@@ -75,6 +75,19 @@ def validate_partner_namespace(cmd, namespace):
                 name=namespace.partner_namespace)
 
 
+def validate_target_namespace(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.target_namespace:
+        if not is_valid_resource_id(namespace.target_namespace):
+            namespace.target_namespace = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.ServiceBus',
+                type='namespaces',
+                name=namespace.target_namespace)
+
+
 def validate_premiumsku_capacity(namespace):
     if namespace.sku and namespace.sku != 'Premium' and namespace.capacity:
         raise CLIError('--capacity - This property is only applicable to namespaces of Premium SKU')

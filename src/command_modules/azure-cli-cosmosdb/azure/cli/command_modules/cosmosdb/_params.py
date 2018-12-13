@@ -17,7 +17,7 @@ from azure.cli.command_modules.cosmosdb._validators import (
 
 def load_arguments(self, _):
 
-    from azure.mgmt.cosmosdb.models.cosmos_db_enums import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind
+    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind
 
     with self.argument_context('cosmosdb') as c:
         c.argument('account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part='name')
@@ -38,6 +38,7 @@ def load_arguments(self, _):
             c.argument('capabilities', nargs='+', validator=validate_capabilities, help='set custom capabilities on the Cosmos DB database account.')
             c.argument('enable_virtual_network', arg_type=get_three_state_flag(), help='Enables virtual network on the Cosmos DB database account')
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
+            c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
 
     with self.argument_context('cosmosdb regenerate-key') as c:
         c.argument('key_kind', arg_type=get_enum_type(KeyKind))

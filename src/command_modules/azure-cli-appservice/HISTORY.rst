@@ -2,6 +2,74 @@
 
 Release History
 ===============
+0.2.9
++++++
+* webapp: az webapp config container now honors --slot parameter
+
+0.2.8
++++++
+* webapp: adding support for az webapp up command (Preview) that helps in creating & deploying contents to app
+* webapp: fix a bug on container based windows app due to backend change
+
+
+0.2.7
++++++
+* webapp, functionapp: Zip deployment default timeout to poll for the status increased to 5 mins, also adding a timeout property to customize this value
+* webapp, functionapp: Default Node_version updated. Resetting slot swap action, during a two phase swap preserves all the appsettings & connection strings
+* remove client side sku check for linux app service plan create
+* minor fix to avoid key errors when trying to get zipdeploy status
+
+0.2.6
++++++
+* update ACR SDK
+* webapp: fix a bug in `az webapp config backup update` that prevents setting a backup schedule if one is not already set
+
+0.2.5
++++++
+* az functionapp create supports creating a linux consumption plan type with a specific runtime
+* (PREVIEW) support webapps hosting on Windows containers
+
+0.2.4
++++++
+* support for webjobs(continuous and triggered) operations management
+* appservice plan, webapp & function app updated to use latest python websites SDK version
+* az webapp config set supports --fts-state property. Also added support fot az functionapp config set & show
+* webapp: add support for bring your own storage
+* webapp: add support for listing and restoring deleted apps
+
+0.2.3
++++++
+* support CORS on functionapp & webapp
+* arm tag support on create commands
+* `webapp/functionapp identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+
+0.2.2
++++++
+* fix a bug that prevent from creating a function-app using storage accounts in external resource groups
+* fix a crash on zip deployment
+
+0.2.1
++++++
+* Minor fixes.
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+* appservice: allow PremiumV2 skus
+
+0.1.36
+++++++
+* webapp/functionapp: Adding support for disabling identity az webapp identity remove. Preview tag removed for Identity feature.
+
+0.1.35
+++++++
+* dependencies: remove the cap on the urllib as newer requests was released
+* functionapp create: support to use appservice plan from external resource groups
+
+0.1.34
+++++++
+* dependencies: cap the urllib to 1.22 to avoid conflit with requests 2.18.4
+
 0.1.33
 ++++++
 * webapp/functionapp: improve generic update commands

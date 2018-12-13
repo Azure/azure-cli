@@ -104,6 +104,24 @@ def transform_vnet_create_output(result):
     return {'newVNet': result.result()}
 
 
+def transform_vnet_table_output(result):
+
+    def _transform(result):
+        item = OrderedDict()
+        item['Name'] = result['name']
+        item['ResourceGroup'] = result['resourceGroup']
+        item['Location'] = result['location']
+        item['NumSubnets'] = len(result.get('subnets', []))
+        item['Prefixes'] = ', '.join(result['addressSpace']['addressPrefixes']) or ' '
+        item['DnsServers'] = ', '.join((result.get('dhcpOptions') or {}).get('dnsServers', [])) or ' '
+        item['DDOSProtection'] = result['enableDdosProtection']
+        item['VMProtection'] = result['enableVmProtection']
+        return item
+    if isinstance(result, list):
+        return [_transform(r) for r in result]
+    return _transform(result)
+
+
 def transform_public_ip_create_output(result):
     return {'publicIp': result.result()}
 
@@ -113,7 +131,9 @@ def transform_traffic_manager_create_output(result):
 
 
 def transform_nic_create_output(result):
-    return {'NewNIC': result.result()}
+    if result:
+        return {'NewNIC': result.result()}
+    return None
 
 
 def transform_nsg_create_output(result):
@@ -211,4 +231,46 @@ def transform_network_usage_table(result):
             ('CurrentValue', item['currentValue']),
             ('Limit', item['limit'])
         ]))
+    return transformed
+
+
+def transform_effective_route_table(result):
+    transformed = []
+    for item in result['value']:
+        transformed.append(OrderedDict([
+            ('Source', item['source']),
+            ('State', item['state']),
+            ('Address Prefix', ' '.join(item['addressPrefix'] or [])),
+            ('Next Hop Type', item['nextHopType']),
+            ('Next Hop IP', ' '.join(item['nextHopIpAddress'] or []))
+        ]))
+    return transformed
+
+
+def transform_effective_nsg(result):
+    from msrestazure.tools import parse_resource_id
+    transformed = []
+    for item in result['value']:
+        association = item['association']
+        try:
+            nic = parse_resource_id(association['networkInterface']['id'])['name']
+        except TypeError:
+            nic = '-'
+        try:
+            subnet = parse_resource_id(association['subnet']['id'])['name']
+        except TypeError:
+            subnet = '-'
+        nsg = parse_resource_id(item['networkSecurityGroup']['id'])['name']
+        print_names = True
+        for rule in item['effectiveSecurityRules']:
+            transformed.append(OrderedDict([
+                ('NIC', nic if print_names else ' '),
+                ('Subnet', subnet if print_names else ' '),
+                ('NSG', nsg if print_names else ' '),
+                ('Rule Name', rule['name']),
+                ('Protocol', rule['protocol']),
+                ('Direction', rule['direction']),
+                ('Access', rule['access'])
+            ]))
+            print_names = False
     return transformed

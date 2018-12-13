@@ -20,7 +20,11 @@ from azure.mgmt.sql.models import (
     CreateMode,
     DatabaseEdition,
     EncryptionProtector,
+    FailoverGroup,
+    FailoverGroupReadOnlyEndpoint,
+    FailoverGroupReadWriteEndpoint,
     IdentityType,
+    PartnerInfo,
     PerformanceLevelUnit,
     ReplicationRole,
     ResourceIdentity,
@@ -34,7 +38,8 @@ from azure.mgmt.sql.models import (
 
 from ._util import (
     get_sql_capabilities_operations,
-    get_sql_servers_operations
+    get_sql_servers_operations,
+    get_sql_managed_instances_operations
 )
 
 
@@ -58,6 +63,19 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
         resource_group_name=resource_group_name).location
 
 
+# Determines managed instance location
+def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
+    '''
+    Returns the location (i.e. Azure region) that the specified managed instance is in.
+    '''
+
+    managed_instance_client = get_sql_managed_instances_operations(cli_ctx, None)
+    # pylint: disable=no-member
+    return managed_instance_client.get(
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name).location
+
+
 def _any_sku_values_specified(sku):
     '''
     Returns True if the sku object has any properties that are specified
@@ -65,6 +83,29 @@ def _any_sku_values_specified(sku):
     '''
 
     return any(val for key, val in sku.__dict__.items())
+
+
+def _get_default_server_version(location_capabilities):
+    '''
+    Gets the default server version capability from the full location
+    capabilities response.
+
+    If none have 'default' status, gets the first capability that has
+    'available' status.
+
+    If there is no default or available server version, falls back to
+    server version 12.0 in order to maintain compatibility with older
+    Azure CLI releases.
+    '''
+    server_versions = location_capabilities.supported_server_versions
+
+    try:
+        # Try behavior from azure-cli-sql 2.0.26: get default
+        return _get_default_capability(server_versions)
+    except StopIteration:
+        # No default or available version found.
+        # Fall back to behaviour from azure-cli-sql 2.0.25 and earlier: get version 12.0
+        return next(sv for sv in server_versions if sv.name == "12.0")
 
 
 def _get_default_capability(capabilities):
@@ -82,7 +123,7 @@ def is_available(status):
     Returns True if the capability status is available (including default).
     '''
 
-    return status != CapabilityStatus.visible and status != CapabilityStatus.visible.value
+    return status not in (CapabilityStatus.visible, CapabilityStatus.visible.value)
 
 
 def _filter_available(capabilities):
@@ -115,6 +156,28 @@ def _find_edition_capability(sku, supported_editions):
     else:
         # Find default edition capability
         return _get_default_capability(supported_editions)
+
+
+def _find_family_capability(sku, supported_families):
+    '''
+    Finds the family capability in the collection of supported families
+    that matches the requested sku.
+
+    If the edition has no family specified, returns the default family.
+    '''
+
+    if sku.family:
+        # Find requested edition capability
+        try:
+            return next(e for e in supported_families if e.name == sku.family)
+        except StopIteration:
+            candidate_families = [e.name for e in supported_families]
+            raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
+                sku.family, candidate_families
+            ))
+    else:
+        # Find default family capability
+        return _get_default_capability(supported_families)
 
 
 def _find_performance_level_capability(sku, supported_service_level_objectives, allow_reset_family):
@@ -261,6 +324,22 @@ def _get_server_dns_suffx(cli_ctx):
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
 
 
+def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_name, database_name):
+    '''
+    Gets the Managed db resource id in this Azure environment.
+    '''
+
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}/databases/{}'.format(
+        quote(get_subscription_id(cli_ctx)),
+        quote(resource_group_name),
+        quote(managed_instance_name),
+        quote(database_name))
+
+
 def db_show_conn_str(
         cmd,
         client_provider,
@@ -361,7 +440,7 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
+class DatabaseIdentity():  # pylint: disable=too-few-public-methods
     '''
     Helper class to bundle up database identity properties and generate
     database resource id.
@@ -412,7 +491,7 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     # Get default server version capability
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
     capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_editions)
-    server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+    server_version_capability = _get_default_server_version(capabilities)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(
@@ -429,6 +508,38 @@ def _find_db_sku_from_capabilities(cli_ctx, location, sku, allow_reset_family=Fa
     result = Sku(name=performance_level_capability.name)
     logger.debug('_find_db_sku_from_capabilities return: %s', result)
     return result
+
+
+def _validate_elastic_pool_id(
+        cli_ctx,
+        elastic_pool_id,
+        server_name,
+        resource_group_name):
+    '''
+    Validates elastic_pool_id is either None or a valid resource id.
+
+    If elastic_pool_id has a value but it is not a valid resource id,
+    then assume that user specified elastic pool name which we need to
+    convert to elastic pool id using the provided server & resource group
+    name.
+
+    Returns the elastic_pool_id, which may have been updated and may be None.
+    '''
+
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
+        return resource_id(
+            subscription=get_subscription_id(cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Sql',
+            type='servers',
+            name=server_name,
+            child_type_1='elasticPools',
+            child_name_1=elastic_pool_id)
+
+    return elastic_pool_id
 
 
 def _db_dw_create(
@@ -457,6 +568,13 @@ def _db_dw_create(
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_db_sku_from_capabilities(cli_ctx, kwargs['location'], sku)
+
+    # Validate elastic pool id
+    kwargs['elastic_pool_id'] = _validate_elastic_pool_id(
+        cli_ctx,
+        kwargs['elastic_pool_id'],
+        dest_db.server_name,
+        dest_db.resource_group_name)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -726,7 +844,7 @@ def db_list_capabilities(
     capabilities = client.list_by_location(location, CapabilityGroup.supported_editions)
 
     # Get subtree related to databases
-    editions = _get_default_capability(capabilities.supported_server_versions).supported_editions
+    editions = _get_default_server_version(capabilities).supported_editions
 
     # Filter by edition
     if edition:
@@ -1331,7 +1449,7 @@ def _find_elastic_pool_sku_from_capabilities(cli_ctx, location, sku, allow_reset
     # Get default server version capability
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
     capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
-    server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+    server_version_capability = _get_default_server_version(capabilities)
 
     # Find edition capability, based on requested sku properties
     edition_capability = _find_edition_capability(sku, server_version_capability.supported_elastic_pool_editions)
@@ -1457,7 +1575,7 @@ def elastic_pool_list_capabilities(
     capabilities = client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
 
     # Get subtree related to elastic pools
-    editions = _get_default_capability(capabilities.supported_server_versions).supported_elastic_pool_editions
+    editions = _get_default_server_version(capabilities).supported_elastic_pool_editions
 
     # Filter by edition
     if edition:
@@ -1815,3 +1933,348 @@ def encryption_protector_update(
             server_key_name=key_name
         )
     )
+
+###############################################
+#                sql managed instance         #
+###############################################
+
+
+def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Given a requested sku which may have some properties filled in
+    (e.g. tier and capacity), finds the canonical matching sku
+    from the given location's capabilities.
+    '''
+
+    logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
+
+    if sku.name:
+        # User specified sku.name, so nothing else needs to be resolved.
+        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
+        return sku
+
+    if not _any_sku_values_specified(sku):
+        # User did not request any properties of sku, so just wipe it out.
+        # Server side will pick a default.
+        logger.debug('_find_managed_instance_sku_from_capabilities return None')
+        return None
+
+    # Some properties of sku are specified, but not name. Use the requested properties
+    # to find a matching capability and copy the sku from there.
+
+    # Get default server version capability
+    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+    capabilities = capabilities_client.list_by_location(location, CapabilityGroup.supported_managed_instance_versions)
+    managed_instance_version_capability = _get_default_capability(capabilities.supported_managed_instance_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(sku, managed_instance_version_capability.supported_editions)
+
+    # Find family level capability, based on requested sku properties
+    family_capability = _find_family_capability(sku, edition_capability.supported_families)
+
+    result = Sku(name=family_capability.sku)
+    logger.debug('_find_managed_instance_sku_from_capabilities return: %s', result)
+    return result
+
+
+def managed_instance_create(
+        cmd,
+        client,
+        managed_instance_name,
+        resource_group_name,
+        location,
+        virtual_network_subnet_id,
+        assign_identity=False,
+        sku=None,
+        **kwargs):
+    '''
+    Creates a managed instance.
+    '''
+
+    if assign_identity:
+        kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    kwargs['location'] = location
+    kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+    kwargs['subnet_id'] = virtual_network_subnet_id
+
+    # Create
+    return client.create_or_update(
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_instance_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists managed instances in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all managed instances in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all managed instances in the subscription
+    return client.list()
+
+
+def managed_instance_update(
+        instance,
+        administrator_login_password=None,
+        license_type=None,
+        vcores=None,
+        storage_size_in_gb=None,
+        assign_identity=False):
+    '''
+    Updates a managed instance. Custom update function to apply parameters to instance.
+    '''
+
+    # Once assigned, the identity cannot be removed
+    if instance.identity is None and assign_identity:
+        instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    # Apply params to instance
+    instance.administrator_login_password = (
+        administrator_login_password or instance.administrator_login_password)
+    instance.license_type = (
+        license_type or instance.license_type)
+    instance.v_cores = (
+        vcores or instance.v_cores)
+    instance.storage_size_in_gb = (
+        storage_size_in_gb or instance.storage_size_in_gb)
+
+    return instance
+
+###############################################
+#                sql managed db               #
+###############################################
+
+
+def managed_db_create(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    # Create
+    return client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_restore(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        target_managed_database_name,
+        target_managed_instance_name=None,
+        target_resource_group_name=None,
+        **kwargs):
+    '''
+    Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
+
+    Custom function makes create mode more convenient.
+    '''
+
+    if not target_managed_instance_name:
+        target_managed_instance_name = managed_instance_name
+
+    if not target_resource_group_name:
+        target_resource_group_name = resource_group_name
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.point_in_time_restore.value
+    kwargs['source_database_id'] = _get_managed_db_resource_id(
+        cmd.cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name)
+
+    return client.create_or_update(
+        database_name=target_managed_database_name,
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+###############################################
+#              sql failover-group             #
+###############################################
+
+
+# pylint: disable=too-few-public-methods
+class FailoverPolicyType(Enum):
+    automatic = 'Automatic'
+    manual = 'Manual'
+
+
+def failover_group_create(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        failover_group_name,
+        partner_server,
+        partner_resource_group=None,
+        failover_policy=FailoverPolicyType.automatic.value,
+        grace_period=1,
+        add_db=None):
+    '''
+    Creates a failover group.
+    '''
+
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    # Build the partner server id
+    partner_server_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+        quote(get_subscription_id(cmd.cli_ctx)),
+        quote(partner_resource_group or resource_group_name),
+        quote(partner_server))
+
+    partner_server = PartnerInfo(id=partner_server_id)
+
+    # Convert grace period from hours to minutes
+    grace_period = int(grace_period) * 60
+
+    if failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+
+    if add_db is None:
+        add_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        cmd,
+        resource_group_name,
+        server_name,
+        [],
+        add_db,
+        [])
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name,
+        parameters=FailoverGroup(
+            partner_servers=[partner_server],
+            databases=databases,
+            read_write_endpoint=FailoverGroupReadWriteEndpoint(
+                failover_policy=failover_policy,
+                failover_with_data_loss_grace_period_minutes=grace_period),
+            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+                failover_policy="Disabled")))
+
+
+def failover_group_update(
+        cmd,
+        instance,
+        resource_group_name,
+        server_name,
+        failover_policy=None,
+        grace_period=None,
+        add_db=None,
+        remove_db=None):
+    '''
+    Updates the failover group.
+    '''
+
+    if failover_policy is not None:
+        instance.read_write_endpoint.failover_policy = failover_policy
+
+    if instance.read_write_endpoint.failover_policy == FailoverPolicyType.manual.value:
+        grace_period = None
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+    if grace_period is not None:
+        grace_period = int(grace_period) * 60
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+    if add_db is None:
+        add_db = []
+
+    if remove_db is None:
+        remove_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        cmd,
+        resource_group_name,
+        server_name,
+        instance.databases,
+        add_db,
+        remove_db)
+
+    instance.databases = databases
+
+    return instance
+
+
+def failover_group_failover(
+        client,
+        resource_group_name,
+        server_name,
+        failover_group_name,
+        allow_data_loss=False):
+    '''
+    Failover a failover group.
+    '''
+
+    failover_group = client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
+
+    if failover_group.replication_role == "Primary":
+        return
+
+    # Choose which failover method to use
+    if allow_data_loss:
+        failover_func = client.force_failover_allow_data_loss
+    else:
+        failover_func = client.failover
+
+    return failover_func(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
+
+
+def _get_list_of_databases_for_fg(
+        cmd,
+        resource_group_name,
+        server_name,
+        databases_in_fg,
+        add_db,
+        remove_db):
+    '''
+    Gets a list of databases that are supposed to be part of the failover group
+    after the operation finishes
+    It consolidates the list of dbs to add and remove with the list of databases
+    that are already part of the failover group.
+    '''
+
+    add_db_ids = [DatabaseIdentity(cmd.cli_ctx, d, server_name, resource_group_name).id() for d in add_db]
+
+    remove_db_ids = [DatabaseIdentity(cmd.cli_ctx, d, server_name, resource_group_name).id() for d in remove_db]
+
+    databases = list(({x.lower() for x in databases_in_fg} |
+                      {x.lower() for x in add_db_ids}) - {x.lower() for x in remove_db_ids})
+
+    return databases

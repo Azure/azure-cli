@@ -16,11 +16,10 @@ NUM_RUNS = 3
 DEFAULT_THRESHOLD = 10
 # explicit thresholds that deviate from the default
 THRESHOLDS = {
-    'network': 25,
-    'vm': 25,
-    'batch': 25,
+    'network': 30,
+    'vm': 30,
+    'batch': 30,
     'storage': 50,
-    'servicefabric': 30,
     TOTAL: 300
 }
 
@@ -94,6 +93,7 @@ def run_verifications(args):
         failed_mods = {}
 
         mods = sorted(results.keys())
+        bubble_found = False
         for mod in mods:
             val = results[mod]
             mean_val = mean(val)
@@ -106,7 +106,13 @@ def run_verifications(args):
                 'values': val
             }
             if mean_val > threshold:
-                failed_mods[mod] = statistics
+                if not bubble_found and mean_val < 30:
+                    # This temporary measure allows one floating performance
+                    # failure up to 30 ms. See issue #6224 and #6218.
+                    bubble_found = True
+                    passed_mods[mod] = statistics
+                else:
+                    failed_mods[mod] = statistics
             else:
                 passed_mods[mod] = statistics
 

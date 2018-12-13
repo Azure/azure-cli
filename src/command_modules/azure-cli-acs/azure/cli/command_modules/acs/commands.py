@@ -5,7 +5,6 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
-from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_managed_clusters
@@ -30,7 +29,11 @@ def load_command_table(self, _):
     )
 
     # ACS base commands
-    with self.command_group('acs', container_services_sdk, client_factory=cf_container_services) as g:
+    # TODO: When the first azure-cli release after January 31, 2020 is planned, add
+    # `expiration=<CLI core version>` to the `self.deprecate()` args below.
+    deprecate_info = self.deprecate(redirect='aks')
+    with self.command_group('acs', container_services_sdk, deprecate_info=deprecate_info,
+                            client_factory=cf_container_services) as g:
         g.custom_command('browse', 'acs_browse')
         g.custom_command('create', 'acs_create', supports_no_wait=True,
                          table_transformer=deployment_validate_table_format)
@@ -38,8 +41,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_container_services')
         g.custom_command('list-locations', 'list_acs_locations')
         g.custom_command('scale', 'update_acs')
-        g.command('show', 'get', exception_handler=empty_on_404)
-        g.generic_wait_command('wait')
+        g.show_command('show', 'get')
+        g.wait_command('wait')
 
     # ACS Mesos DC/OS commands
     with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
@@ -57,21 +60,23 @@ def load_command_table(self, _):
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
+        g.custom_command('enable-addons', 'aks_enable_addons', supports_no_wait=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
         g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_upgrades_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
         g.custom_command('install-connector', 'k8s_install_connector')
         g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
         g.custom_command('remove-connector', 'k8s_uninstall_connector')
+        g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
-        g.custom_command('show', 'aks_show', table_transformer=aks_show_table_format)
+        g.custom_show_command('show', 'aks_show', table_transformer=aks_show_table_format)
         g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True,
                          confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
                          'Are you sure you want to perform this operation?')
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
-        g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
-        g.generic_wait_command('wait')
+        g.wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)

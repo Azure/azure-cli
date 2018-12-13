@@ -13,7 +13,7 @@ import mock
 import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-
+from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 
@@ -86,11 +86,11 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                      checks=self.is_empty())
 
 
-class RbacSPKeyVaultScenarioTest(ScenarioTest):
+class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
-        from azure.keyvault.models import KeyVaultErrorException
+        KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
 
         self.kwargs.update({
@@ -119,6 +119,8 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
         finally:
             self.cmd('ad app delete --id {sp}')
 
+
+class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
@@ -174,8 +176,7 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                         "Microsoft.Authorization/*/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/read",
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"],
+                        "Microsoft.Insights/alertRules/*"],
             "DataActions": [
                 "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
             ],
@@ -193,17 +194,26 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
+        # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role definition create --role-definition {template}', checks=[
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
             time.sleep(180)
-            self.cmd('role definition list -n {role}',
-                     checks=self.check('[0].roleName', '{role}'))
+            role = self.cmd('role definition list -n {role}',
+                            checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+            # verify we can update
+            role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
+            with open(temp_file, 'w') as f:
+                json.dump(role[0], f)
+            self.cmd('role definition update --role-definition {template}',
+                     checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
+            time.sleep(30)
+
             self.cmd('role definition delete -n {role}',
                      checks=self.is_empty())
-            time.sleep(60)
+            time.sleep(120)
             self.cmd('role definition list -n {role}',
                      checks=self.is_empty())
 
@@ -235,8 +245,10 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.check("length([])", 1))
-                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}',
-                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
+                    self.check("length([])", 1),
+                    self.check("[0].principalName", self.kwargs["upn"])
+                ])
 
                 # test couple of more general filters
                 result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()

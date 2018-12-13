@@ -61,7 +61,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  active_directory_resource_id=None,
                  active_directory_graph_resource_id=None,
                  active_directory_data_lake_resource_id=None,
-                 vm_image_alias_doc=None):
+                 vm_image_alias_doc=None,
+                 media_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -73,6 +74,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.active_directory_graph_resource_id = active_directory_graph_resource_id
         self.active_directory_data_lake_resource_id = active_directory_data_lake_resource_id
         self.vm_image_alias_doc = vm_image_alias_doc
+        self.media_resource_id = media_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -101,13 +103,15 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                  keyvault_dns=None,
                  sql_server_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
-                 azure_datalake_analytics_catalog_and_job_endpoint=None):
+                 azure_datalake_analytics_catalog_and_job_endpoint=None,
+                 acr_login_server_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
+        self.acr_login_server_endpoint = acr_login_server_endpoint
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -157,13 +161,15 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.windows.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.azure.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
         sql_server_hostname='.database.windows.net',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
-        azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net'))
+        azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
+        acr_login_server_endpoint='.azurecr.io'))
 
 AZURE_CHINA_CLOUD = Cloud(
     'AzureChinaCloud',
@@ -176,11 +182,13 @@ AZURE_CHINA_CLOUD = Cloud(
         active_directory='https://login.chinacloudapi.cn',
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
         active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.chinacloudapi.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
-        sql_server_hostname='.database.chinacloudapi.cn'))
+        sql_server_hostname='.database.chinacloudapi.cn',
+        acr_login_server_endpoint='.azurecr.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
     'AzureUSGovernment',
@@ -193,11 +201,13 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.usgovcloudapi.net'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
-        sql_server_hostname='.database.usgovcloudapi.net'))
+        sql_server_hostname='.database.usgovcloudapi.net',
+        acr_login_server_endpoint='.azurecr.us'))
 
 AZURE_GERMAN_CLOUD = Cloud(
     'AzureGermanCloud',
@@ -210,7 +220,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         active_directory='https://login.microsoftonline.de',
         active_directory_resource_id='https://management.core.cloudapi.de/',
         active_directory_graph_resource_id='https://graph.cloudapi.de/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        media_resource_id='https://rest.media.cloudapi.de'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',

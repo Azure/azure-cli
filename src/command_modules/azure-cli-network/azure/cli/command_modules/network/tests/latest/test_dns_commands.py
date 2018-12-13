@@ -150,11 +150,9 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.is_empty())
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}')
 
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
@@ -231,14 +229,32 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.is_empty())
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}')
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_alias')
+    def test_dns_alias(self, resource_group):
+
+        self.kwargs.update({
+            'zone': 'mytestzone1.com',
+            'tm_dns': 'mytesttrafficmanager12',
+            'tm': 'tm1'
+        })
+
+        self.cmd('network dns zone create -g {rg} -n {zone}')
+        tm = self.cmd('network traffic-manager profile create -g {rg} -n {tm} --unique-dns-name {tm_dns} --routing-method geographic').get_output_in_json()
+
+        self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
+
+        self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
+                 checks=self.check("targetResource.id.contains(@, '{tm}')", True))
+        self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --target-resource ""',
+                 checks=self.check('targetResource.id', None))
 
 
 class DnsParseZoneFiles(unittest.TestCase):
@@ -404,7 +420,7 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_mx(zone, 'aa.' + zn, [(300, 1, 'foo.com.' + zn)])
         self._check_txt(zone, 'longtxt2.' + zn, [(100, 500, None)])
         self._check_txt(zone, 'longtxt.' + zn, [(999, 944, None)])
-        self._check_txt(zone, 'spf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
+        self._check_txt(zone, 'myspf.' + zn, [(100, None, 'this is an SPF record! Convert to TXT on import')])  # pylint: disable=line-too-long
         self._check_txt(zone, zn, [
             (200, None, 'this is another SPF, this time as TXT'),
             (200, None, 'v=spf1 mx ip4:14.14.22.0/23 a:mail.trum.ch mx:mese.ch include:spf.mapp.com ?all')  # pylint: disable=line-too-long

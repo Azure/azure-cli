@@ -13,7 +13,7 @@ import re
 import six
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
-from azure.cli.core._environment import get_config_dir
+from azure.cli.core.api import get_config_dir
 
 INDEX_DIR_PREFIX = 'search_index'
 INDEX_VERSION = 'v1'
@@ -76,7 +76,7 @@ def _print_hit(hit):
 
     print('`az {0}`'.format(hit['cmd_name']))
     print_para('short_summary')
-    if hit['long_summary']:
+    if hit.get('long_summary', None):
         print_para('long_summary')
     print('')
 

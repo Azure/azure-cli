@@ -3,9 +3,20 @@
 Release History
 ===============
 
+1.2.1
++++++
+* `backup vault backup-properties show`: exception handling to exit with code 3 upon a missing resource for consistency.
+
+1.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+1.1.2
+++++++
+* Minor fixes.
+
 1.1.1
 +++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 1.1.0

@@ -17,6 +17,7 @@ from knack.util import CLIError
 
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.extension import get_extension
+from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
 
 logger = get_logger(__name__)
@@ -54,17 +55,23 @@ class AzCliCommandParser(CLICommandParser):
         self.command_source = kwargs.pop('_command_source', None)
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
-    def load_command_table(self, cmd_tbl):
+    def load_command_table(self, command_loader):
         """Load a command table into our parser."""
         # If we haven't already added a subparser, we
         # better do it.
+        cmd_tbl = command_loader.command_table
+        grp_tbl = command_loader.command_group_table
         if not self.subparsers:
             sp = self.add_subparsers(dest='_command_package')
             sp.required = True
             self.subparsers = {(): sp}
 
         for command_name, metadata in cmd_tbl.items():
-            subparser = self._get_subparser(command_name.split())
+            subparser = self._get_subparser(command_name.split(), grp_tbl)
+            deprecate_info = metadata.deprecate_info
+            if not subparser or (deprecate_info and deprecate_info.expired()):
+                continue
+
             command_verb = command_name.split()[-1]
             # To work around http://bugs.python.org/issue9253, we artificially add any new
             # parsers we add to the "choices" section of the subparser.
@@ -86,6 +93,11 @@ class AzCliCommandParser(CLICommandParser):
             argument_validators = []
             argument_groups = {}
             for _, arg in metadata.arguments.items():
+                # don't add deprecated arguments to the parser
+                deprecate_info = arg.type.settings.get('deprecate_info', None)
+                if deprecate_info and deprecate_info.expired():
+                    continue
+
                 if arg.validator:
                     argument_validators.append(arg.validator)
                 try:
@@ -104,6 +116,7 @@ class AzCliCommandParser(CLICommandParser):
                     raise CLIError("command authoring error for '{}': '{}' {}".format(
                         command_name, ex.args[0].dest, ex.message))  # pylint: disable=no-member
                 param.completer = arg.completer
+                param.deprecate_info = arg.deprecate_info
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -125,15 +138,17 @@ class AzCliCommandParser(CLICommandParser):
 
     def format_help(self):
         extension_version = None
+        extension_name = None
         try:
-            if self.command_source:
+            if isinstance(self.command_source, ExtensionCommandSource):
+                extension_name = self.command_source.extension_name
                 extension_version = get_extension(self.command_source.extension_name).version
         except Exception:  # pylint: disable=broad-except
             pass
 
         telemetry.set_command_details(
             command=self.prog[3:],
-            extension_name=self.command_source.extension_name if self.command_source else None,
+            extension_name=extension_name,
             extension_version=extension_version)
         telemetry.set_success(summary='show help')
         super(AzCliCommandParser, self).format_help()
@@ -147,35 +162,26 @@ class AzCliCommandParser(CLICommandParser):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:
-            error_msg = "{prog}: '{value}' is not an {prog} command. See '{prog} --help'.".format(prog=self.prog,
-                                                                                                  value=value)
+            if not self.command_source:
+                # parser has no `command_source`, value is part of command itself
+                error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'.".format(
+                    prog=self.prog, value=value)
+            else:
+                # `command_source` indicates command values have been parsed, value is an argument
+                parameter = action.option_strings[0] if action.option_strings else action.dest
+                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
+                    prog=self.prog, value=value, param=parameter)
             telemetry.set_user_fault(error_msg)
             logger.error(error_msg)
-            candidates = difflib.get_close_matches(value, action.choices, cutoff=0.8)
+            candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
             if candidates:
                 print_args = {
                     's': 's' if len(candidates) > 1 else '',
                     'verb': 'are' if len(candidates) > 1 else 'is',
                     'value': value
                 }
-                suggestion_msg = "\nThe most similar command{s} to '{value}' {verb}:\n".format(**print_args)
+                suggestion_msg = "\nThe most similar choice{s} to '{value}' {verb}:\n".format(**print_args)
                 suggestion_msg += '\n'.join(['\t' + candidate for candidate in candidates])
                 print(suggestion_msg, file=sys.stderr)
 
             self.exit(2)
-
-    @staticmethod
-    def _add_argument(obj, arg):
-        """ Only pass valid argparse kwargs to argparse.ArgumentParser.add_argument """
-        from knack.parser import ARGPARSE_SUPPORTED_KWARGS
-
-        options_list = arg.options_list
-        argparse_options = {name: value for name, value in arg.options.items() if name in ARGPARSE_SUPPORTED_KWARGS}
-        if options_list:
-            return obj.add_argument(*options_list, **argparse_options)
-        else:
-            if 'required' in argparse_options:
-                del argparse_options['required']
-            if 'metavar' not in argparse_options:
-                argparse_options['metavar'] = '<{}>'.format(argparse_options['dest'].upper())
-            return obj.add_argument(**argparse_options)

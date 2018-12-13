@@ -3,6 +3,30 @@
 Release History
 ===============
 
+0.2.3
++++++
+* Minor fixes.
+
+0.2.2
++++++
+* Attempting to add an extension that is already installed will not raise an exception.
+
+0.2.1
++++++
+* Fix index url failing requests.
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.0
++++++
+* `extension list-available` will only show extensions compatible with CLI version.
+
+0.0.15
+++++++
+* Minor fixes
+
 0.0.14
 ++++++
 * Be more resilient to system error when removing an extension.

@@ -32,8 +32,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        from azure.cli.core.mock import DummyCli
+        self.cli_ctx = DummyCli()
         self.engine_type = engine_type
         self.engine_parameter_name = engine_parameter_name
         self.location = location
@@ -69,6 +69,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
+    def test_mariadb_server_mgmt(self, resource_group_1, resource_group_2):
+        self._test_server_mgmt('mariadb', resource_group_1, resource_group_2)
+
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mysql_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mysql', resource_group_1, resource_group_2)
 
@@ -89,7 +94,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
         old_cu = 2
         new_cu = 4
         family = 'Gen5'
-        skuname = '{}_{}_{}'.format("GP", family, old_cu)
+        skuname = 'GP_{}_{}'.format(family, old_cu)
+        newskuname = 'GP_{}_{}'.format(family, new_cu)
         loc = 'koreasouth'
 
         geoGeoRedundantBackup = 'Disabled'
@@ -141,8 +147,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, resource_group_1, servers[0], new_cu),
+        self.cmd('{} server update -g {} --name {} --sku-name {}'
+                 .format(database_engine, resource_group_1, servers[0], newskuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -163,8 +169,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test update server per property
-        self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, resource_group_1, servers[0], old_cu),
+        self.cmd('{} server update -g {} --name {} --sku-name {}'
+                 .format(database_engine, resource_group_1, servers[0], skuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -244,9 +250,19 @@ class ServerMgmtScenarioTest(ScenarioTest):
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer()
+    @ServerPreparer(engine_type='mariadb')
+    def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
+        self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
+        self._test_db_mgmt(resource_group, server, database_engine)
+        self._test_configuration_mgmt(resource_group, server, database_engine)
+        self._test_log_file_mgmt(resource_group, server, database_engine)
+
+    @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
     def test_mysql_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
@@ -255,6 +271,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='postgres')
     def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
@@ -342,12 +359,93 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server firewall-rule list -g {} --server {}'
                  .format(database_engine, resource_group, server), checks=[NoneCheck()])
 
+    def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
+        vnet_firewall_rule_1 = 'vnet_rule1'
+        vnet_firewall_rule_2 = 'vnet_rule2'
+        location = 'koreasouth'
+        vnet_name = 'clitestvnet'
+        ignore_missing_endpoint = 'true'
+        address_prefix = '10.0.0.0/16'
+
+        subnet_name_1 = 'clitestsubnet1'
+        subnet_prefix_1 = '10.0.0.0/24'
+
+        subnet_name_2 = 'clitestsubnet2'
+        subnet_prefix_2 = '10.0.1.0/24'
+
+        subnet_name_3 = 'clitestsubnet3'
+        subnet_prefix_3 = '10.0.3.0/24'
+
+        # pre create the dependent resources here
+        # create vnet and subnet
+        self.cmd('network vnet create -n {} -g {} -l {} '
+                 '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location, address_prefix, subnet_name_1, subnet_prefix_1))
+        # add one more subnet
+        self.cmd('network vnet subnet create --vnet-name {} -g {} '
+                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
+
+        # test vnet-rule create
+        self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
+                 '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
+                 .format(database_engine, vnet_firewall_rule_1, resource_group, server,
+                         vnet_name, subnet_name_1, ignore_missing_endpoint),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # test vnet-rule show
+        self.cmd('{} server vnet-rule show -n {} -g {} -s {}'
+                 .format(database_engine, vnet_firewall_rule_1, resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # test create one more vnet rule .
+        self.cmd('{} server vnet-rule create -n {} -g {} -s {} '
+                 '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
+                 .format(database_engine, vnet_firewall_rule_2, resource_group, server,
+                         vnet_name, subnet_name_2, ignore_missing_endpoint),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # add one more subnet
+        self.cmd('network vnet subnet create --vnet-name {} -g {} '
+                 '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_3, subnet_name_3))
+
+        self.cmd('{} server vnet-rule update -n {} -g {} -s {} '
+                 '--vnet-name {} --subnet {} --ignore-missing-endpoint {}'
+                 .format(database_engine, vnet_firewall_rule_2, resource_group, server,
+                         vnet_name, subnet_name_3, ignore_missing_endpoint),
+                 checks=[
+                     JMESPathCheck('name', vnet_firewall_rule_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', 'Ready')])
+
+        # test vnet-rule list
+        self.cmd('{} server vnet-rule list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        self.cmd('{} server vnet-rule delete --name {} -g {} --server {}'
+                 .format(database_engine, vnet_firewall_rule_1, resource_group, server), checks=NoneCheck())
+        self.cmd('{} server vnet-rule list -g {} --server {}'
+                 .format(database_engine, resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('{} server vnet-rule delete -n {} -g {} -s {}'
+                 .format(database_engine, vnet_firewall_rule_2, resource_group, server), checks=NoneCheck())
+        self.cmd('{} server vnet-rule list -g {} --server {}'
+                 .format(database_engine, resource_group, server), checks=[NoneCheck()])
+        self.cmd('network vnet delete -n {} -g {}'.format(vnet_name, resource_group))
+
     def _test_db_mgmt(self, resource_group, server, database_engine):
         self.cmd('{} db list -g {} -s {}'.format(database_engine, resource_group, server),
                  checks=JMESPathCheck('type(@)', 'array'))
 
     def _test_configuration_mgmt(self, resource_group, server, database_engine):
-        if database_engine == 'mysql':
+        if database_engine == 'mysql' or database_engine == 'mariadb':
             config_name = 'log_slow_admin_statements'
             default_value = 'OFF'
             new_value = 'ON'
@@ -384,7 +482,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('type(@)', 'array')])
 
     def _test_log_file_mgmt(self, resource_group, server, database_engine):
-        if database_engine == 'mysql':
+        if database_engine == 'mysql' or database_engine == 'mariadb':
             config_name = 'slow_query_log'
             new_value = 'ON'
 
@@ -404,3 +502,104 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                               JMESPathCheck('type(@)', 'array')]).get_output_in_json()
 
         self.assertIsNotNone(result[0]['name'])
+
+
+class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
+
+    @ResourceGroupPreparer(parameter_name='resource_group')
+    def test_mysql_replica_mgmt(self, resource_group):
+        self._test_replica_mgmt(resource_group, 'mysql')
+
+    def _test_replica_mgmt(self, resource_group, database_engine):
+        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
+                    self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
+
+        # create a server
+        result = self.cmd('{} server create -g {} --name {} -l brazilsouth '
+                          '--admin-user cloudsa --admin-password SecretPassword123 '
+                          '--sku-name GP_Gen4_2'
+                          .format(database_engine, resource_group, server),
+                          checks=[
+                              JMESPathCheck('name', server),
+                              JMESPathCheck('resourceGroup', resource_group),
+                              JMESPathCheck('sslEnforcement', 'Enabled'),
+                              JMESPathCheck('sku.name', 'GP_Gen4_2'),
+                              JMESPathCheck('replicationRole', 'None'),
+                              JMESPathCheck('masterServerId', '')]).get_output_in_json()
+
+        from time import sleep
+        sleep(300)
+        # test replica create
+        self.cmd('{} server replica create -g {} -n {} '
+                 '--source-server {}'
+                 .format(database_engine, resource_group, replicas[0], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'Replica'),
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
+
+        # test show server with replication info
+        self.cmd('{} server show -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'Master'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # test replica list
+        self.cmd('{} server replica list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # test replica stop
+        self.cmd('{} server replica stop -g {} -n {} --yes'
+                 .format(database_engine, resource_group, replicas[0]),
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # test show server with replication info, master becomes normal server
+        self.cmd('{} server show -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # test delete master server
+        self.cmd('{} server replica create -g {} -n {} '
+                 '--source-server {}'
+                 .format(database_engine, resource_group, replicas[1], result['id']),
+                 checks=[
+                     JMESPathCheck('name', replicas[1]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', 'Replica'),
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
+
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, server), checks=NoneCheck())
+
+        sleep(300)
+        # test show server with replication info, replica was auto stopped after master server deleted
+        self.cmd('{} server show -g {} --name {}'
+                 .format(database_engine, resource_group, replicas[1]),
+                 checks=[
+                     JMESPathCheck('replicationRole', 'None'),
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+
+        # clean up servers
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())

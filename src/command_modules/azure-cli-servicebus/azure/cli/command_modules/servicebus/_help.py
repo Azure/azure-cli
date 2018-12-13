@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -82,6 +83,11 @@ helps['servicebus georecovery-alias authorization-rule keys'] = """
     short-summary: Manage Azure Authorization Rule keys for Service Bus Namespace
 """
 
+helps['servicebus migration'] = """
+    type: group
+    short-summary: Manage Azure Service Bus Migration of Standard to Premium
+"""
+
 helps['servicebus namespace exists'] = """
     type: command
     short-summary: check for the availability of the given name for the Namespace
@@ -161,7 +167,7 @@ helps['servicebus namespace authorization-rule list'] = """
     short-summary: Shows the list of Authorization Rule by Service Bus Namespace
     examples:
         - name: Shows the list of Authorization Rule by Service Bus Namespace
-          text: az servicebus namespace authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
+          text: az servicebus namespace authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['servicebus namespace authorization-rule keys list'] = """
@@ -169,7 +175,7 @@ helps['servicebus namespace authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for Service Bus Namespace
     examples:
         - name: List the keys and connection strings of Authorization Rule for Service Bus Namespace
-          text: az servicebus namespace authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+          text: az servicebus namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['servicebus namespace authorization-rule keys renew'] = """
@@ -177,7 +183,7 @@ helps['servicebus namespace authorization-rule keys renew'] = """
     short-summary: Regenerate keys of Authorization Rule for the Service Bus Namespace.
     examples:
         - name: Regenerate keys of Authorization Rule for the Service Bus Namespace.
-          text: az servicebus namespace authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
+          text: az servicebus namespace authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
 """
 
 helps['servicebus namespace authorization-rule delete'] = """
@@ -257,7 +263,7 @@ helps['servicebus queue authorization-rule list'] = """
     short-summary: List of Authorization Rule by Service Bus Queue.
     examples:
         - name: List of Authorization Rule by Queue
-          text: az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue
+          text: az servicebus queue authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue
 """
 
 helps['servicebus queue authorization-rule keys list'] = """
@@ -265,7 +271,7 @@ helps['servicebus queue authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
     examples:
         - name: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
-          text: az servicebus queue authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
+          text: az servicebus queue authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
 """
 
 helps['servicebus queue authorization-rule keys renew'] = """
@@ -273,7 +279,7 @@ helps['servicebus queue authorization-rule keys renew'] = """
     short-summary: Regenerate keys of Authorization Rule for Service Bus Queue
     examples:
         - name: Regenerate keys of Authorization Rule for Service Bus Queue
-          text: az servicebus queue authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --key PrimaryKey
+          text: az servicebus queue authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --key PrimaryKey
 """
 
 helps['servicebus queue authorization-rule delete'] = """
@@ -297,7 +303,7 @@ helps['servicebus topic update'] = """
     short-summary: Updates the Service Bus Topic
     examples:
         - name: Updates existing Service Bus Topic.
-          text: az servicebus topic update --resource-group myresourcegroup --namespace-name mynamespace --name mytopic --support-ordering True
+          text: az servicebus topic update --resource-group myresourcegroup --namespace-name mynamespace --name mytopic --enable-ordering True
 """
 
 helps['servicebus topic show'] = """
@@ -345,7 +351,7 @@ helps['servicebus topic authorization-rule show'] = """
     short-summary: Shows the details of Authorization Rule for given Service Bus Topic
     examples:
         - name: Shows the details of Authorization Rule for given Service Bus Topic
-          text: az servicebus topic authorization-rule get --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
+          text: az servicebus topic authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
 """
 
 helps['servicebus topic authorization-rule list'] = """
@@ -353,7 +359,7 @@ helps['servicebus topic authorization-rule list'] = """
     short-summary: shows list of Authorization Rule by Service Bus Topic
     examples:
         - name: shows list of Authorization Rule by Service Bus Topic
-          text: az servicebus topic authorization-rule get --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
+          text: az servicebus topic authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
 """
 
 helps['servicebus topic authorization-rule keys list'] = """
@@ -361,7 +367,7 @@ helps['servicebus topic authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for Service Bus Topic.
     examples:
         - name: List the keys and connection strings of Authorization Rule for Service Bus Topic.
-          text: az servicebus topic authorization-rule listkeys --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
+          text: az servicebus topic authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
 """
 
 helps['servicebus topic authorization-rule keys renew'] = """
@@ -369,7 +375,7 @@ helps['servicebus topic authorization-rule keys renew'] = """
     short-summary: Regenerate keys of Authorization Rule for Service Bus Topic.
     examples:
         - name: Regenerate key of Service Bus Topic.
-          text: az servicebus topic authorization-rule regenerate_keys --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --key PrimaryKey
+          text: az servicebus topic authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --key PrimaryKey
 """
 
 helps['servicebus topic authorization-rule delete'] = """
@@ -402,7 +408,7 @@ helps['servicebus topic subscription show'] = """
     short-summary: Shows Service Bus Subscription Details
     examples:
         - name: Shows the Subscription details.
-          text: az servicebus topic subscription get --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name mysubscription
+          text: az servicebus topic subscription show --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name mysubscription
 """
 
 helps['servicebus topic subscription list'] = """
@@ -493,7 +499,7 @@ helps['servicebus georecovery-alias authorization-rule list'] = """
     short-summary: Shows the list of Authorization Rule by Service Bus Namespace
     examples:
         - name: Shows the list of Authorization Rule by Service Bus Namespace
-          text: az servicebus georecovery-alias authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
+          text: az servicebus georecovery-alias authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --alias myaliasname
 """
 
 helps['servicebus georecovery-alias authorization-rule keys list'] = """
@@ -526,4 +532,39 @@ helps['servicebus georecovery-alias delete'] = """
     examples:
         - name:  Delete Service Bus Geo-Disaster Recovery Configuration Alias request accepted
           text: az servicebus georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+"""
+
+helps['servicebus migration start'] = """
+    type: command
+    short-summary: Create and Start Service Bus Migration of Standard to Premium namespace.
+    long-summary: Service Bus Migration requires an empty Premium namespace to replicate entities from Standard namespace.
+    examples:
+        - name: Create and Start Service Bus Migration of Standard to Premium namespace
+          text: az servicebus migration start --resource-group myresourcegroup --name standardnamespace --target-namespace ARMIDpremiumnamespace --post-migration-name mypostmigrationname
+"""
+
+helps['servicebus migration show'] = """
+    type: command
+    short-summary: shows properties of properties of Service Bus Migration
+    examples:
+        - name: shows properties of properties of Service Bus Migration
+          text: az servicebus migration show --resource-group myresourcegroup --name standardnamespace
+"""
+
+helps['servicebus migration complete'] = """
+    type: command
+    short-summary: Completes the Service Bus Migration of Standard to Premium namespace
+    long-summary: After completing migration, the existing connection strings to standard namespace will connect to premium namespace automatically. Post migration name is the name that can be used to connect to standard namespace after migration is complete.
+    examples:
+        - name:  Completes the Service Bus Migration of Standard to Premium namespace
+          text: az servicebus migration complete --resource-group myresourcegroup --name standardnamespace
+"""
+
+helps['servicebus migration abort'] = """
+    type: command
+    short-summary: Disable the Service Bus Migration of Standard to Premium namespace
+    long-summary: abort command stops the replication of entities from standard to premium namespaces. The entities replicated to premium namespace before abort command will be available under premium namespace. The aborted migration can not be resumed, its has to restarted.
+    examples:
+        - name:  Disable Service Bus Migration of Standard to Premium namespace
+          text: az servicebus migration abort --resource-group myresourcegroup --name standardnamespace
 """

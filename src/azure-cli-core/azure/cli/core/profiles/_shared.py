@@ -32,15 +32,19 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
+    MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
+    MGMT_NETWORK_DNS = ('azure.mgmt.dns', 'DnsManagementClient')
+    MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
 
@@ -75,33 +79,69 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2017-10-01',
-        ResourceType.MGMT_NETWORK: '2018-02-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
+        ResourceType.MGMT_STORAGE: '2018-07-01',
+        ResourceType.MGMT_NETWORK: '2018-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2018-10-01', {
             'resource_skus': '2017-09-01',
-            'disks': '2018-04-01',
-            'snapshots': '2018-04-01',
-            'virtual_machine_run_commands': '2017-03-30'
+            'disks': '2018-06-01',
+            'snapshots': '2018-06-01',
+            'galleries': '2018-06-01',
+            'gallery_images': '2018-06-01',
+            'gallery_image_versions': '2018-06-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
-        ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
+        ResourceType.MGMT_RESOURCE_POLICY: '2018-03-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-07-29',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
+            'classic_administrators': '2015-06-01'
+        }),
+        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
+        ResourceType.MGMT_KEYVAULT: '2018-02-14',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
+            'classic_administrators': '2015-06-01'
+        }),
+        ResourceType.DATA_KEYVAULT: '7.0',
+        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+    },
+    '2018-03-01-hybrid': {
+        ResourceType.MGMT_STORAGE: '2016-01-01',
+        ResourceType.MGMT_NETWORK: '2017-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2017-03-30'),
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-02-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
+            'classic_administrators': '2015-06-01'
+        }),
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_COMPUTE: SDKProfile('2016-03-30'),
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
+            'classic_administrators': '2015-06-01'
+        }),
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05'
     }
 }
@@ -167,6 +207,30 @@ def get_api_version(api_profile, resource_type, as_sdk_profile=False):
         raise APIVersionException(resource_type, api_profile)
 
 
+@total_ordering
+class _SemVerAPIFormat(object):
+    """Basic semver x.y.z API format.
+    Supports x, or x.y, or x.y.z
+    """
+
+    def __init__(self, api_version_str):
+        try:
+            parts = api_version_str.split('.')
+            parts += [0, 0]  # At worst never read, at best minor/patch
+            self.major = int(parts[0])
+            self.minor = int(parts[1])
+            self.patch = int(parts[2])
+        except (ValueError, TypeError):
+            raise ValueError('The API version {} is not in a '
+                             'semver format'.format(api_version_str))
+
+    def __eq__(self, other):
+        return (self.major, self.minor, self.patch) == (other.major, other.minor, other.patch)
+
+    def __lt__(self, other):
+        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
+
+
 @total_ordering  # pylint: disable=too-few-public-methods
 class _DateAPIFormat(object):
     """ Class to support comparisons for API versions in
@@ -216,11 +280,36 @@ class _DateAPIFormat(object):
         return False
 
 
+def _parse_api_version(api_version):
+    """Will try to parse it as a date, and if not working
+    as semver, and if still not working raise.
+    """
+    try:
+        return _DateAPIFormat(api_version)
+    except ValueError:
+        return _SemVerAPIFormat(api_version)
+
+
+def _cross_api_format_less_than(api_version, other):
+    """LT strategy that supports if types are different.
+
+    For now, let's assume that any Semver is higher than any DateAPI
+    This fits KeyVault, if later we have a counter-example we'll update
+    """
+    api_version = _parse_api_version(api_version)
+    other = _parse_api_version(other)
+
+    if type(api_version) is type(other):
+        return api_version < other
+    return isinstance(api_version, _DateAPIFormat) and isinstance(other, _SemVerAPIFormat)
+
+
 def _validate_api_version(api_version_str, min_api=None, max_api=None):
-    api_version = _DateAPIFormat(api_version_str)
-    if min_api and api_version < _DateAPIFormat(min_api):
+    """Validate if api_version is inside the interval min_api/max_api.
+    """
+    if min_api and _cross_api_format_less_than(api_version_str, min_api):
         return False
-    if max_api and api_version > _DateAPIFormat(max_api):
+    if max_api and _cross_api_format_less_than(max_api, api_version_str):
         return False
     return True
 
@@ -270,13 +359,14 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
+                      azure.keyvault.v7_0.models.KeyVault
     """
     api_version = get_api_version(api_profile, resource_type)
     if isinstance(api_version, _ApiVersions):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
-    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
+    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
 
 
 def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):

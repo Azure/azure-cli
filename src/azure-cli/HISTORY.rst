@@ -2,6 +2,81 @@
 
 Release History
 ===============
+2.0.52
+++++++
+* Minor fixes
+
+2.0.51
+++++++
+* Minor fixes
+
+2.0.50
+++++++
+* Minor fixes
+
+2.0.49
+++++++
+* Minor fixes
+
+2.0.48
+++++++
+* Fix Homebrew
+
+2.0.47
+++++++
+* Minor fixes
+
+2.0.46
+++++++
+* Minor fixes
+
+2.0.45
+++++++
+* Minor fixes
+
+2.0.44
+++++++
+* Minor fixes
+
+2.0.43
+++++++
+* Minor fixes
+
+2.0.42
+++++++
+* Minor fixes
+
+2.0.41
+++++++
+* Minor fixes
+
+2.0.40
+++++++
+* Minor fixes
+
+2.0.39
+++++++
+* MSI packaging change
+
+2.0.38
+++++++
+* Minor fixes
+
+2.0.37
+++++++
+* Minor fixes
+
+2.0.36
+++++++
+* Minor fixes
+
+2.0.35
+++++++
+* Minor fixes
+
+2.0.34
+++++++
+* Minor fixes
 
 2.0.33
 ++++++

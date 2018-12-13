@@ -3,6 +3,94 @@
 Release History
 ===============
 
+2.0.52
+++++++
+* core: support cross tenant resource provisioning for multi-tenant service principal
+* Fix bug where ids piped from a command with tsv output is improperly parsed.
+
+2.0.51
+++++++
+* msi login: do not reuse subscription name for identity info
+
+2.0.50
+++++++
+* auth: support service principal sn+issuer auth
+
+2.0.49
+++++++
+* Fix issue with `--ids` where `--subscription` would take precedence over the subscription in `--ids`.
+  Adding explicit warnings when name parameters would be ignored by use of `--ids`.
+
+2.0.48
+++++++
+* Fix Homebrew.
+
+2.0.47
+++++++
+* Introduces generic behavior to handle "Bad Request" errors.
+
+2.0.46
+++++++
+* Fixed issue where `az vm create --generate-ssh-keys` overwrites private key
+  file if public key file is missing. (#4725, #6780)
+
+2.0.45
+++++++
+* Fix issue of loading empty configuration file.
+* Azure Stack: support new profile 2018-03-01-hybrid
+
+2.0.44
+++++++
+* use knack/0.4.2 with fix towards numeric value display in table output
+* Introduce YAML output format
+* Overhaul telemetry upload mechanism
+
+2.0.43
+++++++
+* Consuming mult api azure.mgmt.authorization package for stack support
+* Minor fixes
+
+2.0.42
+++++++
+* login: support browser based login in WSL bash window
+* Adds `--force-string` flag to all generic update commands.
+
+2.0.41
+++++++
+* Minor fixes
+* Update PyYAML dependency to 4.2b4
+
+2.0.40
+++++++
+* authentication: support authorization code flow for interactive login
+
+2.0.39
+++++++
+* MSI packaging change
+
+2.0.38
+++++++
+* Add global support for `--subscription` to most commands.
+
+2.0.37
+++++++
+* Minor fixes
+
+2.0.36	
+++++++	
+* Minor fixes
+
+2.0.35
+++++++
+* Added method of registering `show` commands to fail with exit code of 3.
+
+2.0.34
+++++++
+* core: support cross tenant resource referencing
+* Improve telemetry upload reliability
+  1. Remove retry. Once failed stop uploading.
+  2. Update the process start configuration to prevent upload process from blocking the CLI process.
+
 2.0.33
 ++++++
 * core: ignore FileNotFoundError error on expanding `@`

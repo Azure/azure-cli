@@ -21,17 +21,11 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
                                 " Run 'az login' only if you need to use a different account")
 
 
-def _load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
-    profile = Profile(cli_ctx=cli_ctx)
-    if refresh:
-        subscriptions = profile.refresh_accounts()
-    subscriptions = profile.load_cached_subscriptions(all_clouds)
-    return subscriptions
-
-
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = _load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
+    from azure.cli.core.api import load_subscriptions
+
+    subscriptions = load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
@@ -92,14 +86,20 @@ def account_clear(cmd):
 
 # pylint: disable=inconsistent-return-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
 
     # quick argument usage check
-    if (any([password, service_principal, tenant, allow_no_subscriptions]) and identity):
+    if any([password, service_principal, tenant, allow_no_subscriptions]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
+    if any([password, service_principal, username, identity]) and use_device_code:
+        raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
+    if use_cert_sn_issuer and not service_principal:
+        raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
+    if service_principal and not username:
+        raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
 
     interactive = False
 
@@ -128,7 +128,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
             password,
             service_principal,
             tenant,
-            allow_no_subscriptions=allow_no_subscriptions)
+            use_device_code=use_device_code,
+            allow_no_subscriptions=allow_no_subscriptions,
+            use_cert_sn_issuer=use_cert_sn_issuer)
     except AdalError as err:
         # try polish unfriendly server errors
         if username:
@@ -161,3 +163,33 @@ def logout(cmd, username=None):
 def list_locations(cmd):
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations(cmd.cli_ctx)
+
+
+def check_cli(cmd):
+    from azure.cli.core.file_util import (
+        create_invoker_and_load_cmds_and_args, get_all_help)
+
+    exceptions = {}
+
+    print('Running CLI self-test.\n')
+
+    print('Loading all commands and arguments...')
+    try:
+        create_invoker_and_load_cmds_and_args(cmd.cli_ctx)
+        print('Commands loaded OK.\n')
+    except Exception as ex:  # pylint: disable=broad-except
+        exceptions['load_commands'] = ex
+        logger.error('Error occurred loading commands!\n')
+
+    print('Retrieving all help...')
+    try:
+        get_all_help(cmd.cli_ctx)
+        print('Help loaded OK.\n')
+    except Exception as ex:  # pylint: disable=broad-except
+        exceptions['load_help'] = ex
+        logger.error('Error occurred loading help!\n')
+
+    if not exceptions:
+        print('CLI self-test completed: OK')
+    else:
+        raise CLIError(exceptions)

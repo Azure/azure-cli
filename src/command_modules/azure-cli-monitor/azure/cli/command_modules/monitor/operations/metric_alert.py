@@ -3,8 +3,96 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
 
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
+
+logger = get_logger(__name__)
+
+
+def create_metric_alert(client, resource_group_name, rule_name, scopes, description, condition, disabled=False,
+                        tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
+                        auto_mitigate=None):
+    from azure.mgmt.monitor.models import MetricAlertResource, MetricAlertSingleResourceMultipleMetricCriteria
+    # generate names for the conditions
+    for i, cond in enumerate(condition):
+        cond.name = 'cond{}'.format(i)
+    kwargs = {
+        'description': description,
+        'severity': severity,
+        'enabled': not disabled,
+        'scopes': scopes,
+        'evaluation_frequency': evaluation_frequency,
+        'window_size': window_size,
+        'criteria': MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition),
+        'actions': actions,
+        'tags': tags,
+        'location': 'global',
+        'auto_mitigate': auto_mitigate
+    }
+    return client.create_or_update(resource_group_name, rule_name, MetricAlertResource(**kwargs))
+
+
+def update_metric_alert(instance, scopes=None, description=None, enabled=None, tags=None,
+                        severity=None, window_size=None, evaluation_frequency=None, auto_mitigate=None,
+                        add_actions=None, remove_actions=None, add_conditions=None, remove_conditions=None):
+    if scopes is not None:
+        instance.scopes = scopes
+    if description is not None:
+        instance.description = description
+    if enabled is not None:
+        instance.enabled = enabled
+    if tags is not None:
+        instance.tags = tags
+    if severity is not None:
+        instance.severity = severity
+    if window_size is not None:
+        instance.window_size = window_size
+    if evaluation_frequency is not None:
+        instance.evaluation_frequency = evaluation_frequency
+    if auto_mitigate is not None:
+        instance.auto_mitigate = auto_mitigate
+
+    # process action removals
+    if remove_actions is not None:
+        instance.actions = [x for x in instance.actions if x.action_group_id not in remove_actions]
+
+    # process action additions
+    if add_actions is not None:
+        for action in add_actions:
+            match = next((x for x in instance.actions if action.action_group_id == x.action_group_id), None)
+            if match:
+                match.webhook_properties = action.webhook_properties
+            else:
+                instance.actions.append(action)
+
+    # process condition removals
+    if remove_conditions is not None:
+        instance.criteria.all_of = [x for x in instance.criteria.all_of if x.name not in remove_conditions]
+
+    def _get_next_name():
+        i = 0
+        while True:
+            possible_name = 'cond{}'.format(i)
+            match = next((x for x in instance.criteria.all_of if x.name == possible_name), None)
+            if match:
+                i = i + 1
+                continue
+            return possible_name
+
+    # process condition additions
+    if add_conditions is not None:
+        for condition in add_conditions:
+            condition.name = _get_next_name()
+            instance.criteria.all_of.append(condition)
+
+    return instance
+
+
+def list_metric_alerts(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_subscription()
 
 
 def create_metric_rule(client, resource_group_name, rule_name, target, condition, description=None, disabled=False,

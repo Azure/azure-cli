@@ -7,8 +7,7 @@ import unittest
 
 
 def api_version_constraint(resource_type, **kwargs):
-    from azure.cli.core.profiles import supported_api_version
-    from azure.cli.testsdk import TestCli
-    cli_ctx = TestCli()
-    return unittest.skipUnless(supported_api_version(cli_ctx, resource_type, **kwargs),
+    from .reverse_dependency import get_dummy_cli, get_support_api_version_func
+
+    return unittest.skipUnless(get_support_api_version_func()(get_dummy_cli(), resource_type, **kwargs),
                                "Test not supported by current profile.")

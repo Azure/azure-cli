@@ -17,13 +17,13 @@ def get_mediaservices_client(cli_ctx, *_):
 def _auth_client_factory(cli_ctx, scope=None):
     import re
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.authorization import AuthorizationManagementClient
+    from azure.cli.core.profiles import ResourceType
     subscription_id = None
     if scope:
         matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
         if matched:
             subscription_id = matched.groupdict()['subscription']
-    return get_mgmt_service_client(cli_ctx, AuthorizationManagementClient, subscription_id=subscription_id)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
 def _graph_client_factory(cli_ctx, **_):
@@ -61,3 +61,27 @@ def get_streaming_policies_client(cli_ctx, *_):
 
 def get_streaming_endpoints_client(cli_ctx, *_):
     return cf_media(cli_ctx).streaming_endpoints
+
+
+def get_locations_client(cli_ctx, *_):
+    return cf_media(cli_ctx).locations
+
+
+def get_live_events_client(cli_ctx, *_):
+    return cf_media(cli_ctx).live_events
+
+
+def get_live_outputs_client(cli_ctx, *_):
+    return cf_media(cli_ctx).live_outputs
+
+
+def get_content_key_policies_client(cli_ctx, *_):
+    return cf_media(cli_ctx).content_key_policies
+
+
+def get_account_filters_client(cli_ctx, *_):
+    return cf_media(cli_ctx).account_filters
+
+
+def get_asset_filters_client(cli_ctx, *_):
+    return cf_media(cli_ctx).asset_filters
