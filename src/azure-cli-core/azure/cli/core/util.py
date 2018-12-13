@@ -6,6 +6,7 @@
 from __future__ import print_function
 import sys
 import json
+import getpass
 import base64
 import binascii
 import six
@@ -344,3 +345,10 @@ def reload_module(module):
     except ImportError:
         pass  # for python 2
     reload(sys.modules[module])
+
+
+def get_default_admin_username():
+    try:
+        return getpass.getuser()
+    except KeyError:
+        return None
