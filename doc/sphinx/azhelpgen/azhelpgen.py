@@ -5,6 +5,7 @@
 
 import argparse
 import json
+from mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
@@ -32,7 +33,8 @@ class AzHelpGenDirective(Directive):
                invocation_cls=AzCliCommandInvoker,
                parser_cls=AzCliCommandParser,
                help_cls=AzCliHelp)
-        create_invoker_and_load_cmds_and_args(az_cli)
+        with patch('getpass.getuser', return_value='your_system_user_login_name'):
+            create_invoker_and_load_cmds_and_args(az_cli)
         help_files = get_all_help(az_cli)
 
         doc_source_map = _load_doc_source_map()
