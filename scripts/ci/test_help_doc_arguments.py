@@ -14,13 +14,11 @@ import os
 
 logger = logging.getLogger('az-publish')
 
-
-DEFAULT_TEST_CMDS = []
-
-pattern = r".*?\s+((--\S+)( --\S+)*( -\S)*).*?:"   # meaning: escape ansi color codes then
-                                        #       match one or more long options ('--') followed by an (optional) short option ('-')
-                                        #       and then the first semicolon after 0 or more chars (':')
-                                        #       Also handles cases where there are multiple long options see --edition in az sql mi
+pattern = r".*?\s+(( --\S+)+( -\S)*).*?:"
+# meaning:  escape ansi color codes then
+#           match one or more long options ('--') followed by an (optional) short option ('-')
+#           and then the first semicolon after 0 or more chars (':')
+#           Also handles cases where there are multiple long options see --edition in az sql mi
 COMPILED_RE = re.compile(pattern)
 GLOBAL_ARGS = ["debug", "help", "output", "query", "subscription", "verbose"]
 
@@ -43,7 +41,7 @@ def main(xml_file, commands=[]):
             assert help_args == doc_args
         except AssertionError as e:
             logger.error("Test failed. Help args are different.\n")
-            logger.error("CLI help args: %s\n\nDoc help args: %s\n.", ", ".join(help_args), ", ".join(doc_args))
+            logger.error("CLI help args:%s\n\nDoc help args: %s.\n", ", ".join(help_args), ", ".join(doc_args))
             logger.error(e)
             exit(1)
 
@@ -66,7 +64,7 @@ def get_args_from_help_text(cmd_name):
     for line in lines:
         match = COMPILED_RE.search(line)
         if match:
-            options = match.group(1)
+            options = match.group(1).strip()
             if _get_long_option(options) not in GLOBAL_ARGS:
                 arguments.add(options)
     return arguments
@@ -110,7 +108,9 @@ if __name__ == "__main__":
         logger.warning(usage_msg)
         exit(1)
 
-    test_commands = [sys.argv[2]] if len(sys.argv) > 2 else ["vm", "network vnet", "storage",
-                                                           "keyvault secret set", "vm create", "sql mi create",
-                                                           "aks create", "webapp deployment slot list"]
+    default_commands = [
+        "vm", "network vnet", "storage", # these groups should not fail as command groups do not have parameters.
+       "keyvault secret set", "vm create", "sql mi create", "aks create", "webapp deployment slot list"]
+
+    test_commands = [sys.argv[2]] if len(sys.argv) > 2 else default_commands
     main(sys.argv[1], test_commands)
