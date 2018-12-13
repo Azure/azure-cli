@@ -7,6 +7,7 @@ Release History
 ++++++
 * Minor fixes.
 * Condense the table layout for task list.
+* Add support for Azure DevOps URLs.
 
 2.1.9
 +++++
