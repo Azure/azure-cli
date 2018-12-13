@@ -161,7 +161,7 @@ class TestExtensionCommands(unittest.TestCase):
             with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
                 add_extension(extension_name=MY_EXT_NAME)
                 call_args = mock_logger.warning.call_args
-                self.assertEqual("The extension '%s' already exists.", call_args[0][0])
+                self.assertEqual("Extension '%s' is already installed.", call_args[0][0])
                 self.assertEqual(MY_EXT_NAME, call_args[0][1])
                 self.assertEqual(mock_logger.warning.call_count, 1)
 
