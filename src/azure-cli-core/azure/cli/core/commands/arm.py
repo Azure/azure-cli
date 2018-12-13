@@ -220,7 +220,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                     if isinstance(existing_values, str):
                         if not getattr(arg.type, 'configured_default_applied', None):
                             logger.warning(
-                                "Property '%s=%s' being overriden by value '%s' from IDs parameter.",
+                                "Property '%s=%s' being overridden by value '%s' from IDs parameter.",
                                 arg.name, existing_values, parts[arg.type.settings['id_part']]
                             )
                         existing_values = IterateValue()

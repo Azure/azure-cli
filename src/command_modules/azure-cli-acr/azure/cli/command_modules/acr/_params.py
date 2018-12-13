@@ -119,7 +119,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', choices=[OsType.linux.value, OsType.windows.value])
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the build.')
         c.argument('timeout', type=int, help='Build timeout in seconds.')
-        c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code respository.")
+        c.argument('repository_url', options_list=['--context', '-c'], help="The full URL to the source code repository.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('git_access_token', help="The access token used to access the source control provider.")
         # build step parameters
