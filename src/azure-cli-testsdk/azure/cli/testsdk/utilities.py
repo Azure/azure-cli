@@ -64,8 +64,8 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         except AttributeError:
             pass
         for candidate in self._candidates:
-            if request['body']:
-                request['body'] = str(request['body']).replace(candidate, self._replacement)
+            if request.body:
+                request.body = str(request.body).replace(candidate, self._replacement)
         return request
 
     def process_response(self, response):
@@ -80,5 +80,6 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             except (KeyError, ValueError, TypeError):
                 pass
         for candidate in self._candidates:
-            response['body']['string'] = str(response['body']['string']).replace(candidate, self._replacement)
+            if response['body']['string']:
+                response['body']['string'] = str(response['body']['string']).replace(candidate, self._replacement)
         return response
