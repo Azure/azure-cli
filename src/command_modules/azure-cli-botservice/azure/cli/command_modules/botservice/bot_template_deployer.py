@@ -65,6 +65,7 @@ class BotTemplateDeployer:
         """Create WebApp Bot.
 
         :param cmd:
+        :param logger:
         :param client:
         :param resource_group_name:
         :param resource_name:
@@ -137,7 +138,7 @@ class BotTemplateDeployer:
 
         # Application insights prep
         appInsightsLocation = azure_region_mapper.AzureRegionMapper\
-            .get_app_insights_location(location.lower().replace(' ', ''))
+            .get_app_insights_location(appInsightsLocation.lower().replace(' ', ''))
 
         logger.debug('Application insights location resolved to %s.', appInsightsLocation)
 
@@ -194,7 +195,8 @@ class BotTemplateDeployer:
         logger.debug('ARM template deployment complete. Result %s ', deploy_result)
         logger.info('Bot creation completed successfully.')
 
-        return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name, app_password=password)
+        return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name, logger,
+                                                app_password=password)
 
     @staticmethod
     def get_bot_file_encryption_key():

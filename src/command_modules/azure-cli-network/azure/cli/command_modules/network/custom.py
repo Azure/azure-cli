@@ -2735,7 +2735,7 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
 
 
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
-                         resource_group_name=None, enabled=None, retention=0):
+                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None):
     from azure.cli.core.commands import LongRunningOperation
     config = LongRunningOperation(cmd.cli_ctx)(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
     if enabled is not None:
@@ -2745,6 +2745,11 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     if retention is not None:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
         config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
+    if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
+        config.format = {
+            'type': log_format,
+            'version': log_version
+        }
     setattr(config, 'flow_analytics_configuration', None)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
