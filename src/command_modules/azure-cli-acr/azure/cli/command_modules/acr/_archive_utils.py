@@ -209,11 +209,7 @@ def check_remote_source_code(source_location):
     # http
     if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") \
        or lower_source_location.startswith("github.com/"):
-        isVSTS = False
-        for vstsURL in TASK_VALID_VSTS_URLS:
-            if vstsURL in lower_source_location:
-                isVSTS = True
-                break
+        isVSTS = any(url in lower_source_location for url in TASK_VALID_VSTS_URLS)
         if isVSTS or re.search(r"\.git(?:#.+)?$", lower_source_location):
             # git url must contain ".git" or be from VSTS/Azure DevOps.
             # This is because Azure DevOps doesn't follow the standard git server convention of putting
