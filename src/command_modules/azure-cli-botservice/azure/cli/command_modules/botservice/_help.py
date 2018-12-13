@@ -16,6 +16,12 @@ helps['bot create'] = """
 helps['bot show'] = """
     type: command
     short-summary: Get an existing bot.
+    long-summary: Get information about an existing bot. To get the information needed to connect to the bot, use the
+                  --msbot flag with the command.
+    examples:
+    - name: Get the information needed to connect to an existing bot on Azure
+      text: |-
+        az bot show -n botName -g MyResourceGroup --msbot
 """
 helps['bot prepare-publish'] = """
     type: command
