@@ -773,10 +773,10 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='westcentralus')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer()
-    @StorageAccountPreparer()
+    @SqlServerPreparer(location='westcentralus')
+    @StorageAccountPreparer(location='westcentralus')
     @StorageAccountPreparer(parameter_name='storage_account_2',
                             resource_group_parameter_name='resource_group_2')
     def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
