@@ -1236,16 +1236,20 @@ helps['vm identity assign'] = """
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable system assigned identity on a VM with the 'Reader' role.
+        - name: Enable the system assigned identity on a VM with the 'Reader' role.
           text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
+        - name: Enable the system assigned identity and a user assigned identity on a VM.
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --identities [system] myAssignedId
 """
 
 helps['vm identity remove'] = """
     type: command
-    short-summary: (PREVIEW) Remove managed service identities from a VM.
+    short-summary: Remove managed service identities from a VM.
     examples:
-        - name: Remove system assigned identity
+        - name: Remove the system assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm
+        - name: Remove the system assigned identity (alternative)
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system]
         - name: Remove a user assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId
         - name: Remove 2 identities which are in the same resource group with the VM

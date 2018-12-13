@@ -383,13 +383,13 @@ def load_arguments(self, _):
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
-            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to remove. Use '{}' to refer system assigned identity.".format(MSI_LOCAL_ID))
+            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
     for scope in ['vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
-            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '{}' to refer system assigned identity.".format(MSI_LOCAL_ID))
+            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
