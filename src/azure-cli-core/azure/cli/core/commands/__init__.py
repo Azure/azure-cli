@@ -316,7 +316,7 @@ class AzCliCommandInvoker(CommandInvoker):
             self._validation(expanded_arg)
             jobs.append((expanded_arg, cmd_copy))
 
-        ids = getattr(parsed_args, '_ids', [None] * len(jobs))
+        ids = getattr(parsed_args, '_ids') or [None] * len(jobs)
         if self.cli_ctx.config.getboolean('core', 'disable_concurrent_ids', False) or len(ids) < 2:
             results, exceptions = self._run_jobs_serially(jobs, ids)
         else:
