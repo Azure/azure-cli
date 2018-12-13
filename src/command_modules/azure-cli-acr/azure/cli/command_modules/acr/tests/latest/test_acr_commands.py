@@ -447,16 +447,23 @@ class AcrCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
-        '''There are six test cases in the function.
-        Case 1: Import image from a regsitry in a different subscription from the current one
-        Case 2: Import image from one regsitry to another where both registries belong to the same subscription
-        Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
+        '''There are nine test cases in the function.
+        Case 1: Import image from a registry in a different subscription from the current one
+        Case 2: Import image from one registry to another where both registries belong to the same subscription
+        Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
         Case 4: Import image to enable multiple tags in the target registry
         Case 5: Import image within the same registry
         Case 6: Import image by manifest digest
+        Case 7: Import image from a registry in Docker Hub
+        Case 8: Import image from an Azure Container Registry with Service Principal's credentials
+        Case 9: Import image from an Azure Container Registry with personal access token
         '''
 
-        registry_name = self.create_random_name("targetregsitry", 20)
+        source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
+        registry_name = self.create_random_name("targetregistry", 20)
+        token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
+        service_principal_username = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPusername/0f20a7a4ade54fd7bc6305de3da7e99f').get_output_in_json()['value']
+        service_principal_password = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPpassword/a961338d18e34e8fa41b570f7fd67cba').get_output_in_json()['value']
 
         '''
         To be able to run the tests, we are assuming the following resources before the test:
@@ -465,21 +472,44 @@ class AcrCommandsTests(ScenarioTest):
         Two source images each of which stays in a different source registries mentioned above.
         '''
         self.kwargs.update({
+            'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
+            'resource_imageV1': 'sourceregistrydiffsub.azurecr.io/microsoft:azure-cli-1',
+            'resource_imageV2': 'sourceregistrydiffsub.azurecr.io/microsoft:azure-cli-2',
+            'source_registry_rg': 'resourcegroupsamesub',
+            'source_loc': 'westus',
+            'source_registry_name': source_registry_name,
             'registry_name': registry_name,
-            'rg_loc': 'eastus',
             'sku': 'Standard',
-            'resource_id': '/subscriptions/a7ee80a4-3d5e-45c2-9378-36e8d98f4d13/resourceGroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
-            'source_image_diff_sub': 'builder:latest',
-            'source_image_same_sub': 'sourceregistrysamesub.azurecr.io/builder:latest',
-            'source_image_same_registry': '{}.azurecr.io/builder:latest'.format(registry_name),
-            'source_image_by_digest': 'sourceregistrysamesub.azurecr.io/builder@sha256:bc3842ba36fcc182317c07a8643daa4a8e4e7aed45958b1f7e2a2b30c2f5a64f',
-            'tag_diff_sub': 'repository_diff_sub:tag_diff_sub',
+            'rg_loc': 'eastus',
+            'source_image_diff_sub': 'microsoft:azure-cli',
+            'source_image_same_sub': '{}.azurecr.io/microsoft:azure-cli'.format(source_registry_name),
+            'source_image_same_registry': '{}.azurecr.io/microsoft:azure-cli'.format(registry_name),
+            'source_image_by_digest': '{}.azurecr.io/azure-cli@sha256:2d00e582eb3bff20a7febc04222aafda5bdc58df64bc1ddf74efbaf0e51dbba5'.format(source_registry_name),
             'tag_same_sub': 'repository_same_sub:tag_same_sub',
             'tag_multitag1': 'repository_multi1:tag_multi1',
             'tag_multitag2': 'repository_multi2:tag_multi2',
             'tag_same_registry': 'repository_same_registry:tag_same_registry',
-            'tag_by_digest': 'repository_by_digest:tag_by_digest'
+            'tag_by_digest': 'repository_by_digest:tag_by_digest',
+            'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
+            'application_ID': service_principal_username,
+            'service_principal_password': service_principal_password,
+            'token': token
         })
+
+        # create a resource group for the source registry
+        self.cmd('group create -n {source_registry_rg} -l {source_loc}')
+
+        # create a source registry which stays in the same subscription as the target registry does
+        self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
+                 checks=[self.check('name', '{source_registry_name}'),
+                         self.check('location', '{source_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Case 1: Import image from a registry in a different subscription from the current one
+        self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image_diff_sub}')
 
         # create a target registry to hold the imported images
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -490,13 +520,10 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('sku.tier', 'Standard'),
                          self.check('provisioningState', 'Succeeded')])
 
-        # Case 1: Import image from a regsitry in a different subscription from the current one
-        self.cmd('acr import -n {registry_name} -r {resource_id} --source {source_image_diff_sub} -t {tag_diff_sub}')
-
-        # Case 2: Import image from one regsitry to another where both registries belong to the same subscription
+        # Case 2: Import image from one registry to another where both registries belong to the same subscription
         self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_same_sub}')
 
-        # Case 3: Import image to the target regsitry and keep the repository:tag the same as that in the source
+        # Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
         self.cmd('acr import -n {registry_name} --source {source_image_same_sub}')
 
         # Case 4: Import image to enable multiple tags in the target registry
@@ -507,3 +534,12 @@ class AcrCommandsTests(ScenarioTest):
 
         # Case 6: Import image by manifest digest
         self.cmd('acr import -n {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')
+
+        # Case 7: Import image from a public registry in dockerhub
+        self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
+
+        # Case 8: Import image from an Azure Container Registry with Service Principal's credentials
+        self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
+
+        # Case 9: Import image from an Azure Container Registry with personal access token
+        self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
