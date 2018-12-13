@@ -18,7 +18,7 @@ class AzureRegionMapper:  # pylint:disable=too-few-public-methods
             'australiacentral2': 'southeastasia',
             'australiasoutheast': 'southeastasia',
             'eastasia': 'southeastasia',
-            'southeastasia': 'westus',
+            'southeastasia': 'southeastasia',
             'eastus': 'eastus',
             'eastus2': 'eastus',
             'southcentralus': 'southcentralus',
