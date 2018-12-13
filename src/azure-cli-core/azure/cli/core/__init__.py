@@ -428,8 +428,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
+            cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
-            client = client_factory(self.cli_ctx, command_args) if client_factory else None
+            client = client_factory(cmd.cli_ctx, command_args) if client_factory else None
             supports_no_wait = kwargs.get('supports_no_wait', None)
             if supports_no_wait:
                 no_wait_enabled = command_args.pop('no_wait', False)
@@ -438,8 +439,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
-            result = op(**command_args)
-            return result
+            return op(**command_args)
 
         def default_arguments_loader():
             op = handler or self.get_op_handler(operation)
