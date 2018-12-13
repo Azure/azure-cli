@@ -225,6 +225,10 @@ helps['vm extension set'] = """
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 \\
                 --vm-name MyVm --resource-group MyResourceGroup \\
                 --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+    parameters:
+    - name: --name -n
+      populator-commands:
+      - az vm extension image list
 """
 
 helps['vm extension wait'] = """
@@ -958,6 +962,10 @@ helps['vmss extension set'] = """
     type: command
     short-summary: Add an extension to a VMSS or update an existing extension.
     long-summary: Get extension details from `az vmss extension image list`.
+    parameters:
+    - name: --name -n
+      populator-commands:
+      - az vm extension image list
 """
 
 helps['vmss extension show'] = """
