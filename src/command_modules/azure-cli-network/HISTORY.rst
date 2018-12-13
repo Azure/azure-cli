@@ -5,6 +5,7 @@ Release History
 
 2.2.10
 ++++++
+* `watcher flow-log configure`: Add support for `--format` and `--log-version`.
 * `dns zone update`: Finished issue where using "" to clear resolution and registration VNets didn't work.
 * `application-gateway waf-config set`: Added `--exclusion` argument to support WAF exclusions.
 
