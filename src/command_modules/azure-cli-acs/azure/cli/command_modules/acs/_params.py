@@ -183,6 +183,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks enable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
+        c.argument('subnet_name', options_list=['--subnet-name', '-s'])
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)

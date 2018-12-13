@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.14
+++++++
+* Add Virtual Nodes Preview
+
 2.3.13
 ++++++
 * Remove "(PREVIEW)" from AAD arguments to "az aks create"
