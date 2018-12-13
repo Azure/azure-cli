@@ -168,7 +168,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
-
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_multi_id')
     def test_network_multi_id_show(self, resource_group):
 
