@@ -295,7 +295,7 @@ def _update_user_account_settings(params, admin_user_name, ssh_key, password):
         parent.user_account_settings = models.UserAccountSettings(admin_user_name=None)
     # Get effective user name, password and key trying them in the following order: provided via command line,
     # provided in the config file, current user name and his default public ssh key.
-    effective_user_name = admin_user_name or parent.user_account_settings.admin_user_name or get_default_admin_username()
+    effective_user_name = admin_user_name or parent.user_account_settings.admin_user_name or get_default_admin_username() # pylint: disable=line-too-long
     effective_password = password or parent.user_account_settings.admin_user_password
     # Use default ssh public key only if no password is configured.
     effective_key = (ssh_key or parent.user_account_settings.admin_user_ssh_public_key or
