@@ -337,7 +337,7 @@ helps['policy definition create'] = """
                             "effect": "deny"
                         }
                     }'
-                - name: Create a policy parameter definition with the following example
+                - name: Create a policy parameter definition.
                   text: |
                     az policy definition create --name allowedLocations --rules '{
                         "if": {
