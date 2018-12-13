@@ -1248,8 +1248,6 @@ helps['vm identity remove'] = """
     examples:
         - name: Remove the system assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm
-        - name: Remove the system assigned identity (alternative)
-          text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system]
         - name: Remove a user assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId
         - name: Remove 2 identities which are in the same resource group with the VM

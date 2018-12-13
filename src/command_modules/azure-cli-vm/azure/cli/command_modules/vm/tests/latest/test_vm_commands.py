@@ -2456,8 +2456,8 @@ class MSIScenarioTest(ScenarioTest):
         ])
 
         # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
-        self.cmd('vmss identity remove -g {rg} -n {vm}', checks=self.is_empty())
-        self.cmd('vmss identity remove -g {rg} -n {vm}', checks=self.is_empty())
+        self.cmd('vm identity remove -g {rg} -n {vm}', checks=self.is_empty())
+        self.cmd('vm identity remove -g {rg} -n {vm}', checks=self.is_empty())
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
     def test_vmss_explicit_msi(self, resource_group):
