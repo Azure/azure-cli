@@ -2361,6 +2361,9 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss identity remove -g {rg} -n {vmss3}')
             self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=self.is_empty())
 
+            # test that vmss identity remove does not fail when the vmss has no assigned identities.
+            self.cmd('vmss identity remove -g {rg} -n {vmss3}', checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_vm_msi_no_scope(self, resource_group):
 
@@ -2451,6 +2454,10 @@ class MSIScenarioTest(ScenarioTest):
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', None),
         ])
+
+        # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
+        self.cmd('vmss identity remove -g {rg} -n {vm}', checks=self.is_empty())
+        self.cmd('vmss identity remove -g {rg} -n {vm}', checks=self.is_empty())
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
     def test_vmss_explicit_msi(self, resource_group):

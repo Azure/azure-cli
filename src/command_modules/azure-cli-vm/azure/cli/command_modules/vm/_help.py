@@ -77,7 +77,7 @@ helps['vm create'] = """
             az vm create -n MyVm -g MyResourceGroup --image UbuntuLTS
         - name: Create a default Windows Server VM with a private IP address.
           text: >
-            az vm create -n MyVm -g MyResourceGroup --public-ip-address "" --image Win2012R2Datacenter
+            az vm create -n MyVm -g MyResourceGroup --public-ip-address "" --image MicrosoftWindowsServer:WindowsServer:2012-Datacenter:latest
         - name: Create a VM from a custom managed image.
           text: >
             az vm create -g MyResourceGroup -n MyVm --image MyImage
@@ -89,7 +89,7 @@ helps['vm create'] = """
             az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
           text: |
-            az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
+            az vm create -n MyVm -g MyResourceGroup --image credativ:Debian:8:latest --vnet-name MyVnet --subnet subnet1 \\
                 --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
                 --ssh-key-value @key-file
         - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
@@ -1246,9 +1246,11 @@ helps['vm identity remove'] = """
     examples:
         - name: Remove system assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm
+        - name: Remove a user assigned identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
-        - name: Remove system assigned identity and a user identity
+        - name: Remove the system assigned identity and a user identity
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system] readerId
 """
 

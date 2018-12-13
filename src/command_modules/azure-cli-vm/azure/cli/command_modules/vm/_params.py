@@ -20,6 +20,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
+from ._vm_utils import MSI_LOCAL_ID
 
 
 # pylint: disable=too-many-statements, too-many-branches
@@ -382,13 +383,13 @@ def load_arguments(self, _):
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
-            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
+            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to remove. Use '{}' to refer system assigned identity.".format(MSI_LOCAL_ID))
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
     for scope in ['vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
-            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '[system]' to refer system assigned identity.")
+            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '{}' to refer system assigned identity.".format(MSI_LOCAL_ID))
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
