@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.50"
+__version__ = "2.0.52"
 
 import os
 import sys
@@ -12,13 +12,13 @@ import timeit
 
 import six
 
-from knack.arguments import ArgumentsContext
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
 
 
 logger = get_logger(__name__)
@@ -171,7 +171,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
                     ext_name = ext.name
-                    ext_dir = get_extension_path(ext_name)
+                    ext_dir = ext.path or get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
@@ -242,13 +242,14 @@ class MainCommandsLoader(CLICommandsLoader):
         command_loaders = self.cmd_to_loader_map.get(command, None)
 
         if command_loaders:
-            with ArgumentsContext(self, '') as c:
-                c.argument('resource_group_name', resource_group_name_type)
-                c.argument('location', get_location_type(self.cli_ctx))
-                c.argument('deployment_name', deployment_name_type)
-                c.argument('cmd', ignore_type)
-
             for loader in command_loaders:
+                # register global args
+                with loader.argument_context('') as c:
+                    c.argument('resource_group_name', resource_group_name_type)
+                    c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('deployment_name', deployment_name_type)
+                    c.argument('cmd', ignore_type)
+
                 loader.command_name = command
                 self.command_table[command].load_arguments()  # this loads the arguments via reflection
                 loader.load_arguments(command)  # this adds entries to the argument registries
@@ -427,8 +428,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
+            cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
-            client = client_factory(self.cli_ctx, command_args) if client_factory else None
+            client = client_factory(cmd.cli_ctx, command_args) if client_factory else None
             supports_no_wait = kwargs.get('supports_no_wait', None)
             if supports_no_wait:
                 no_wait_enabled = command_args.pop('no_wait', False)
@@ -437,8 +439,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                 client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
-            result = op(**command_args)
-            return result
+            return op(**command_args)
 
         def default_arguments_loader():
             op = handler or self.get_op_handler(operation)

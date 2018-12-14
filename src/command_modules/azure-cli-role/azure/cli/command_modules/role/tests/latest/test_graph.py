@@ -300,8 +300,12 @@ class GraphAppCredsScenarioTest(ScenarioTest):
 
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append')
-            self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append --credential-description newCred1')
+            self.cmd('ad sp credential list --id {app}', checks=[
+                self.check('length([*])', 2),
+                self.check('[0].customKeyIdentifier', 'newCred1'),
+                self.check('[1].customKeyIdentifier', 'rbac')  # auto configured by create-for-rbac
+            ])
             self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
             result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             self.assertTrue(result[0]['keyId'] != key_id)
@@ -309,11 +313,18 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             # try the same through app commands
             result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad app credential reset --id {app} --password verySecert123 --append')
-            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad app credential reset --id {app} --password verySecert123 --append --credential-description newCred2')
+            result = self.cmd('ad app credential list --id {app}', checks=[
+                self.check('length([*])', 2),
+                self.check('[0].customKeyIdentifier', 'newCred2'),
+                self.check('[1].customKeyIdentifier', 'newCred1')
+            ])
             self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
+            # ensure we can update other properties #7728
+            self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
+            self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)

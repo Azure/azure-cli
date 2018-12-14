@@ -129,10 +129,11 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size=''):
+def normalize_disk_info(image_data_disks_num=0,
+                        data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False):
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
-    # we should return a dictionary with info like below and will emoit when see conflictions
+    # we should return a dictionary with info like below and will omit when we see conflictions
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
     #   0: { caching: 'None', write_accelerator: True},
@@ -144,22 +145,43 @@ def normalize_disk_info(image_data_disks_num=0, data_disk_sizes_gb=None, attach_
     data_disk_sizes_gb = data_disk_sizes_gb or []
     info['os'] = {}
 
-    for i in range(image_data_disks_num + len(data_disk_sizes_gb) + len(attach_data_disks)):
+    # update os diff disk settings
+    if ephemeral_os_disk:
+        info['os']['diffDiskSettings'] = {'option': 'Local'}
+        # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
+        if not os_disk_caching:
+            os_disk_caching = 'ReadOnly'
+
+    # add unmanaged data disk luns.
+    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
         info[i] = {
-            'lun': i
+            'lun': i,
+            'managedDisk': {'storageAccountType': None}
         }
 
-    # fill in storage sku for managed data disks
-    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
-        info[i]['managedDisk'] = {'storageAccountType': storage_sku}
+    # update storage skus for managed data disks
+    if storage_sku is not None:
+        update_disk_sku_info(info, storage_sku)
 
-    # fill in createOption
+    # check that os storage account type is not UltraSSD_LRS
+    if info['os'].get('storageAccountType', "").lower() == 'ultrassd_lrs':
+        logger.warning("Managed os disk storage account sku cannot be UltraSSD_LRS. Using service default.")
+        info['os']['storageAccountType'] = None
+
+    # fill in createOption for image and new data disks
     for i in range(image_data_disks_num):
         info[i]['createOption'] = 'fromImage'
     base = image_data_disks_num
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
-        info[i]['diskSizeGB'] = data_disk_sizes_gb[i]
+        info[i]['diskSizeGB'] = data_disk_sizes_gb[i - base]
+
+    # add managed data disk luns.
+    base = image_data_disks_num + len(data_disk_sizes_gb)
+    for i in range(base, base + len(attach_data_disks)):
+        info[i] = {'lun': i}
+
+    # fill in createOption for attached data disks
     base = image_data_disks_num + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i]['createOption'] = 'attach'
@@ -274,3 +296,33 @@ def get_storage_blob_uri(cli_ctx, storage):
             raise CLIError('{} does\'t exist.'.format(storage))
         storage_uri = storage_account.primary_endpoints.blob
     return storage_uri
+
+
+def update_disk_sku_info(info_dict, skus):
+    usage_msg = 'Usage:\n\t[--storage-sku SKU | --storage-sku ID=SKU ID=SKU ID=SKU...]\n' \
+                'where each ID is "os" or a 0-indexed lun.'
+
+    def _update(info, lun, value):
+        luns = info.keys()
+        if lun not in luns:
+            raise CLIError("Data disk with lun of {} doesn't exist".format(lun))
+        if lun == 'os':
+            info[lun]['storageAccountType'] = value
+        else:
+            info[lun]['managedDisk']['storageAccountType'] = value
+
+    if len(skus) == 1 and '=' not in skus[0]:
+        for lun in info_dict.keys():
+            _update(info_dict, lun, skus[0])
+    else:
+        for sku in skus:
+            if '=' not in sku:
+                raise CLIError("A sku's format is incorrect.\n{}".format(usage_msg))
+
+            lun, value = sku.split('=', 1)
+            lun = lun.lower()
+            try:
+                lun = int(lun) if lun != "os" else lun
+            except ValueError:
+                raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
+            _update(info_dict, lun, value)

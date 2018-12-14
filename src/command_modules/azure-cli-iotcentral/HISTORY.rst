@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.1.4
++++++
+* Add subdomain availability check when creating an IoT Central application. 
 
 0.1.3
 +++++

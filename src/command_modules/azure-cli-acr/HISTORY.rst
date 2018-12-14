@@ -3,6 +3,22 @@
 Release History
 ===============
 
+2.1.11
+++++++
+* Add support for image import from external Container Registries.
+
+2.1.10
+++++++
+* Minor fixes.
+* Condense the table layout for task list.
+* Add support for Azure DevOps URLs.
+
+2.1.9
++++++
+* Add context token to task step.
+* Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
+
 2.1.8
 +++++
 * Support commit and pull request git events for Task source trigger.

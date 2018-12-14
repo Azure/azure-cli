@@ -106,6 +106,7 @@ The repo has a `launch.json` file that will launch the version of Python that is
                   [--profile PROFILE]
                   [tests [tests ...]]
   ```
+  Note that to run all tests, use `azdev test --ci`.
 
   To check the CLI and command modules for style errors:
   ```

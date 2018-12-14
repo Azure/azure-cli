@@ -29,7 +29,11 @@ def load_command_table(self, _):
     )
 
     # ACS base commands
-    with self.command_group('acs', container_services_sdk, client_factory=cf_container_services) as g:
+    # TODO: When the first azure-cli release after January 31, 2020 is planned, add
+    # `expiration=<CLI core version>` to the `self.deprecate()` args below.
+    deprecate_info = self.deprecate(redirect='aks')
+    with self.command_group('acs', container_services_sdk, deprecate_info=deprecate_info,
+                            client_factory=cf_container_services) as g:
         g.custom_command('browse', 'acs_browse')
         g.custom_command('create', 'acs_create', supports_no_wait=True,
                          table_transformer=deployment_validate_table_format)

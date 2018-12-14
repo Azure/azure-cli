@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.7
++++++
+* Minor fixes
+
 0.2.6
 +++++
 * `monitor metrics alert create/update`: `--condition` now supports metric names which include characters forward-slash (/) and period (.).

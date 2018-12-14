@@ -75,6 +75,9 @@ helps['vm create'] = """
         - name: Create a default Ubuntu VM with automatic SSH authentication.
           text: >
             az vm create -n MyVm -g MyResourceGroup --image UbuntuLTS
+        - name: Create a default RedHat VM with automatic SSH authentication using an image URN.
+          text: >
+            az vm create -n MyVm -g MyResourceGroup --image RedHat:RHEL:7-RAW:7.4.2018010506
         - name: Create a default Windows Server VM with a private IP address.
           text: >
             az vm create -n MyVm -g MyResourceGroup --public-ip-address "" --image Win2012R2Datacenter
@@ -225,6 +228,10 @@ helps['vm extension set'] = """
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 \\
                 --vm-name MyVm --resource-group MyResourceGroup \\
                 --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+    parameters:
+    - name: --name -n
+      populator-commands:
+      - az vm extension image list
 """
 
 helps['vm extension wait'] = """
@@ -958,6 +965,10 @@ helps['vmss extension set'] = """
     type: command
     short-summary: Add an extension to a VMSS or update an existing extension.
     long-summary: Get extension details from `az vmss extension image list`.
+    parameters:
+    - name: --name -n
+      populator-commands:
+      - az vm extension image list
 """
 
 helps['vmss extension show'] = """
@@ -1236,19 +1247,23 @@ helps['vm identity assign'] = """
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable system assigned identity on a VM with the 'Reader' role.
+        - name: Enable the system assigned identity on a VM with the 'Reader' role.
           text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
+        - name: Enable the system assigned identity and a user assigned identity on a VM.
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --identities [system] myAssignedId
 """
 
 helps['vm identity remove'] = """
     type: command
-    short-summary: (PREVIEW) Remove managed service identities from a VM.
+    short-summary: Remove managed service identities from a VM.
     examples:
-        - name: Remove system assigned identity
+        - name: Remove the system assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm
+        - name: Remove a user assigned identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
-        - name: Remove system assigned identity and a user identity
+        - name: Remove the system assigned identity and a user identity
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system] readerId
 """
 
@@ -1309,11 +1324,6 @@ helps['disk'] = """
     short-summary: Manage Azure Managed Disks.
 """
 
-helps['snapshot'] = """
-    type: group
-    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
-"""
-
 helps['image'] = """
     type: group
     short-summary: Manage custom virtual machine images.
@@ -1368,6 +1378,11 @@ helps['disk revoke-access'] = """
     short-summary: Revoke a resource's read access to a managed disk.
 """
 
+helps['snapshot'] = """
+    type: group
+    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
+"""
+
 helps['snapshot create'] = """
     type: command
     short-summary: Create a snapshot.
@@ -1399,6 +1414,11 @@ helps['snapshot grant-access'] = """
 helps['snapshot revoke-access'] = """
     type: command
     short-summary: Revoke read access to a snapshot.
+"""
+
+helps['snapshot wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a snapshot is met.
 """
 
 helps['image create'] = """

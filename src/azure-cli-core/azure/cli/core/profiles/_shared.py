@@ -65,7 +65,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
     def __init__(self, default_api_version, profile=None):
         """Constructor.
 
-        :param str default_api_version: Default API version if not overriden by a profile. Nullable.
+        :param str default_api_version: Default API version if not overridden by a profile. Nullable.
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
@@ -79,8 +79,8 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2018-03-01-preview',
-        ResourceType.MGMT_NETWORK: '2018-08-01',
+        ResourceType.MGMT_STORAGE: '2018-07-01',
+        ResourceType.MGMT_NETWORK: '2018-10-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2018-10-01', {
             'resource_skus': '2017-09-01',
             'disks': '2018-06-01',

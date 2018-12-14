@@ -92,6 +92,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr import') as c:
         c.argument('source', help="The source identifier in the format '[registry.azurecr.io/]repository[:tag]' or '[registry.azurecr.io/]repository@digest'.")
         c.argument('source_registry', options_list=['--registry', '-r'], help='The source container registry can be name, login server or resource ID of the source registry.')
+        c.argument('source_registry_username', options_list=['--username', '-u'], help='The username of source container registry')
+        c.argument('source_registry_password', options_list=['--password', '-p'], help='The password of source container registry')
         c.argument('target_tags', arg_type=image_by_tag_type, action='append')
         c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
@@ -150,6 +152,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context.")
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
+        c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])

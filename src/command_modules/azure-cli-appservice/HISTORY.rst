@@ -2,6 +2,23 @@
 
 Release History
 ===============
+0.2.9
++++++
+* webapp: az webapp config container now honors --slot parameter
+
+0.2.8
++++++
+* webapp: adding support for az webapp up command (Preview) that helps in creating & deploying contents to app
+* webapp: fix a bug on container based windows app due to backend change
+
+
+0.2.7
++++++
+* webapp, functionapp: Zip deployment default timeout to poll for the status increased to 5 mins, also adding a timeout property to customize this value
+* webapp, functionapp: Default Node_version updated. Resetting slot swap action, during a two phase swap preserves all the appsettings & connection strings
+* remove client side sku check for linux app service plan create
+* minor fix to avoid key errors when trying to get zipdeploy status
+
 0.2.6
 +++++
 * update ACR SDK

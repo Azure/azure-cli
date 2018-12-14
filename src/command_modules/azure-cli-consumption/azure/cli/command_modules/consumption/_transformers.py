@@ -78,6 +78,10 @@ def budget_output(result):
     result.amount = str(result.amount)
     if result.current_spend:
         result.current_spend.amount = str(result.current_spend.amount)
+    if result.notifications:
+        for key in result.notifications:
+            value = result.notifications[key]
+            value.threshold = str(value.threshold)
     return result
 
 

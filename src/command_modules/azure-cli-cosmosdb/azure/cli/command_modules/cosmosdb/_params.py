@@ -38,6 +38,7 @@ def load_arguments(self, _):
             c.argument('capabilities', nargs='+', validator=validate_capabilities, help='set custom capabilities on the Cosmos DB database account.')
             c.argument('enable_virtual_network', arg_type=get_three_state_flag(), help='Enables virtual network on the Cosmos DB database account')
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
+            c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
 
     with self.argument_context('cosmosdb regenerate-key') as c:
         c.argument('key_kind', arg_type=get_enum_type(KeyKind))
@@ -51,6 +52,3 @@ def load_arguments(self, _):
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
         c.argument('default_ttl', type=int, help='Default TTL')
-
-    with self.argument_context('cosmosdb create') as c:
-        c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")

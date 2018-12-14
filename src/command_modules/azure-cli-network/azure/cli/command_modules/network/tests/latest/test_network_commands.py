@@ -13,7 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 
 from knack.util import CLIError
 
@@ -168,7 +168,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
-
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_multi_id')
     def test_network_multi_id_show(self, resource_group):
 
@@ -215,6 +215,23 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway start --resource-group {rg} -n ag1')
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
+
+
+class NetworkAppGatewayZoneScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_zone', location='westus2')
+    def test_network_ag_zone(self, resource_group):
+        self.kwargs.update({
+            'gateway': 'ag1',
+            'ip': 'pubip1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --zones 1 3 --public-ip-address {ip} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
+        self.cmd('network application-gateway show -g {rg} -n {gateway}', checks=[
+            self.check('zones[0]', 1),
+            self.check('zones[1]', 3)
+        ])
 
 
 class NetworkAppGatewayAuthCertScenario(ScenarioTest):
@@ -601,17 +618,41 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_config')
     def test_network_app_gateway_waf_config(self, resource_group):
 
-        self.kwargs['ip'] = 'pip1'
-        self.cmd('network application-gateway create -g {rg} -n ag1 --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_Medium', checks=[
-            self.check("applicationGateway.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{ip}')", True),
-            self.check('applicationGateway.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic')
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1'
+        })
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_Medium --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("frontendIpConfigurations[0].publicIpAddress.contains(id, '{ip}')", True),
+            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
-        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name {ag} --enabled true --firewall-mode prevention --rule-set-version 2.2.9 --disabled-rule-groups crs_30_http_policy --disabled-rules 981175 981176 --no-wait')
+        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name {ag}', checks=[
             self.check('enabled', True),
             self.check('firewallMode', 'Prevention'),
             self.check('length(disabledRuleGroups)', 2),
             self.check('length(disabledRuleGroups[1].rules)', 2)
+        ])
+
+
+class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_v2_config')
+    def test_network_app_gateway_waf_v2_config(self, resource_group):
+
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def --no-wait')
+        self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
+            self.check('enabled', True),
+            self.check('length(exclusions)', 2)
         ])
 
 
@@ -1624,6 +1665,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
         import json
@@ -1637,8 +1679,8 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.kwargs['id2'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
         self.cmd('network vnet show --ids {id1} {id2} --query "[].name"', checks=[
             self.check('length(@)', 2),
-            self.check('@[0]', '{vnet1}'),
-            self.check('@[1]', '{vnet2}')
+            self.check("contains(@, '{vnet1}')", True),
+            self.check("contains(@, '{vnet2}')", True),
         ])
 
         # This test ensures you can pipe a list of IDs to --ids
@@ -1899,7 +1941,9 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'gw2_ip2': 'gw2ip2',
             'key': 'abc123',
             'conn12': 'vnet1to2',
-            'conn21': 'vnet2to1'
+            'conn21': 'vnet2to1',
+            'bgp_peer1': '10.52.255.253',
+            'bgp_peer2': '10.53.255.253'
         })
 
         # Create one VNet with two public IPs
@@ -1912,16 +1956,19 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         self.cmd('network public-ip create -g {rg} -n {gw2_ip1}')
         self.cmd('network public-ip create -g {rg} -n {gw2_ip2}')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --bgp-peering-address {bgp_peer1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --bgp-peering-address {bgp_peer2} --no-wait')
 
         # wait for gateway completion to finish
         self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
         self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
 
+        # TODO: Re-enabled once issue https://github.com/Azure/azure-cli/issues/7977 is resolved
         # create and connect the VNet gateways
-        self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
-        self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
+        with self.assertRaisesRegexp(CLIError, '255.255.255.255'):
+            self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
+        with self.assertRaisesRegexp(CLIError, '255.255.255.255'):
+            self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
 
 
 class NetworkVpnGatewayScenarioTest(ScenarioTest):

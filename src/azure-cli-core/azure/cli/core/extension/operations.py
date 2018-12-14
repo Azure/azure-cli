@@ -22,7 +22,7 @@ from knack.log import get_logger
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
-                                      WheelExtension, ExtensionNotInstalledException)
+                                      WheelExtension, DevExtension, ExtensionNotInstalledException)
 from azure.cli.core.telemetry import set_extension_management_detail
 
 from ._homebrew_patch import HomebrewPipPatch
@@ -106,7 +106,7 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     extension_name = parsed_filename.groupdict().get('name').replace('_', '-') if parsed_filename else None
     if not extension_name:
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
-    if extension_exists(extension_name):
+    if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
     ext_file = None
     if is_url:
@@ -194,9 +194,17 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
                   pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
     if extension_name:
-        if extension_exists(extension_name):
-            logger.warning("The extension '%s' already exists.", extension_name)
-            return
+        ext = None
+        try:
+            ext = get_extension(extension_name)
+        except ExtensionNotInstalledException:
+            pass
+        if ext:
+            if isinstance(ext, WheelExtension):
+                logger.warning("Extension '%s' is already installed.", extension_name)
+                return
+            else:
+                logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
             source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
         except NoExtensionCandidatesError as err:
@@ -218,7 +226,11 @@ def remove_extension(extension_name):
 
     try:
         # Get the extension and it will raise an error if it doesn't exist
-        get_extension(extension_name)
+        ext = get_extension(extension_name)
+        if ext and isinstance(ext, DevExtension):
+            raise CLIError(
+                "Extension '{name}' was installed in development mode. Remove using "
+                "`azdev extension remove {name}`".format(name=extension_name))
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name)
         shutil.rmtree(get_extension_path(extension_name), onerror=log_err)
@@ -244,7 +256,7 @@ def show_extension(extension_name):
 
 def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
-        ext = get_extension(extension_name)
+        ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
             download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
@@ -280,7 +292,7 @@ def list_available_extensions(index_url=None, show_details=False):
     index_data = get_index_extensions(index_url=index_url)
     if show_details:
         return index_data
-    installed_extensions = get_extensions()
+    installed_extensions = get_extensions(ext_type=WheelExtension)
     installed_extension_names = [e.name for e in installed_extensions]
     results = []
     for name, items in OrderedDict(sorted(index_data.items())).items():
