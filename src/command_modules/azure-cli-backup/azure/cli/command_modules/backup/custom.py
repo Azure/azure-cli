@@ -19,7 +19,7 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
-    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig
+    JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import (
@@ -86,8 +86,9 @@ def list_vaults(client, resource_group_name=None):
 
 
 def set_backup_properties(client, vault_name, resource_group_name, backup_storage_redundancy):
-    backup_storage_config = BackupResourceConfig(storage_type=backup_storage_redundancy)
-    client.update(resource_group_name, vault_name, backup_storage_config)
+    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
+    backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
+    client.update(vault_name, resource_group_name, backup_storage_config_resource)
 
 
 def get_default_policy_for_vm(client, resource_group_name, vault_name):
