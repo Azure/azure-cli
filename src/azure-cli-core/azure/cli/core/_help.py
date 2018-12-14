@@ -4,14 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-
+import argparse
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
                         HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
                         _print_indent, CLIHelp)
 
 from knack.log import get_logger
-
 from azure.cli.core.commands import ExtensionCommandSource
 
 logger = get_logger(__name__)
@@ -45,7 +44,59 @@ Here are the base commands:
 """
 
 
-class AzCliHelp(CLIHelp):
+# PrintMixin class to decouple printing functionality from AZCLIHelp class.
+# Most of these methods override print methods in CLIHelp
+class CLIPrintMixin(CLIHelp):
+    def _print_header(self, cli_name, help_file):
+        super(CLIPrintMixin, self)._print_header(cli_name, help_file)
+
+        links = help_file.links
+        if links:
+            link_text = "{} and {}".format(", ".join(links[0:-1]), links[-1]) if len(links) > 1 else links[0]
+            link_text = "For more information, see: {}\n".format(link_text)
+            _print_indent(link_text, 2, width=self.textwrap_width)
+
+    def _print_detailed_help(self, cli_name, help_file):
+        CLIPrintMixin._print_extensions_msg(help_file)
+        super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
+
+
+    @staticmethod
+    def _process_value_sources(p):
+        commands, strings, urls = [], [], []
+
+        for item in p.value_sources:
+            if "string" in item:
+                strings.append(item["string"])
+            elif "link" in item and "command" in item["link"]:
+                commands.append(item["link"]["command"])
+            elif "link" in item and "url" in item["link"]:
+                urls.append(item["link"]["command"])
+
+        command_str = u'  Values from: {}.'.format(", ".join(commands)) if commands else ''
+        string_str = u'  {}'.format(", ".join(strings)) if strings else ''
+        urls_str = u'  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
+        return u'{}{}{}'.format(command_str, string_str, urls_str)
+
+    @staticmethod
+    def _get_choices_defaults_sources_str(p):
+        choice_str = u'  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
+            if p.choices else ''
+        default_str = u'  Default: {}.'.format(p.default) if p.default and p.default != argparse.SUPPRESS else ''
+        value_sources_str = CLIPrintMixin._process_value_sources(p) if p.value_sources else ''
+        return u'{}{}{}'.format(choice_str, default_str, value_sources_str)
+
+    @staticmethod
+    def _print_extensions_msg(help_file):
+        if help_file.type != 'command':
+            return
+        if isinstance(help_file.command_source, ExtensionCommandSource):
+            logger.warning(help_file.command_source.get_command_warn_msg())
+            if help_file.command_source.preview:
+                logger.warning(help_file.command_source.get_preview_warn_msg())
+
+
+class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     def __init__(self, cli_ctx):
         super(AzCliHelp, self).__init__(cli_ctx,
@@ -73,30 +124,6 @@ class AzCliHelp(CLIHelp):
 
         self._register_help_loaders()
 
-    # print methods
-    @staticmethod
-    def _print_extensions_msg(help_file):
-        if help_file.type != 'command':
-            return
-        if isinstance(help_file.command_source, ExtensionCommandSource):
-            logger.warning(help_file.command_source.get_command_warn_msg())
-            if help_file.command_source.preview:
-                logger.warning(help_file.command_source.get_preview_warn_msg())
-
-    def _print_detailed_help(self, cli_name, help_file):
-        AzCliHelp._print_extensions_msg(help_file)
-        super(AzCliHelp, self)._print_detailed_help(cli_name, help_file)
-
-    def _print_header(self, cli_name, help_file):
-        super(AzCliHelp, self)._print_header(cli_name, help_file)
-
-        links = help_file.links
-        if links:
-            link_text = "{} and {}".format(", ".join(links[0:-1]), links[-1]) if len(links) > 1 else links[0]
-            link_text = "For more information, see: {}\n".format(link_text)
-            _print_indent(link_text, 2, width=self.textwrap_width)
-
-
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
         import inspect
@@ -116,7 +143,6 @@ class CliHelpFile(KnackHelpFile):
 
     def __init__(self, help_ctx, delimiters):
         # Each help file (for a command or group) has a version denoting the source of its data.
-        self.yaml_help_version = 0
         super(CliHelpFile, self).__init__(help_ctx, delimiters)
         self.links = []
 
@@ -199,6 +225,10 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
         help_param = next(p for p in self.parameters if p.name == '--help -h')
         help_param.group_name = 'Global Arguments'
 
+        # update parameter type so we can use overriden update_from_data method to update value sources.
+        for param in self.parameters:
+            param.__class__ = HelpParameter
+
     def _load_from_data(self, data):
         super(CliCommandHelpFile, self)._load_from_data(data)
 
@@ -258,5 +288,10 @@ class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-at
 
     def __init__(self, **kwargs):
         super(HelpParameter, self).__init__(**kwargs)
-        # new field
-        self.raw_value_sources = []
+
+    def update_from_data(self, data):
+        super(HelpParameter, self).update_from_data(data)
+        # original help.py value_sources are strings, update command strings to value-source dict
+        if self.value_sources:
+            self.value_sources = [str_or_dict if isinstance(str_or_dict, dict) else {"link": {"command" : str_or_dict}}
+                                  for str_or_dict in self.value_sources]

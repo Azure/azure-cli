@@ -68,7 +68,7 @@ def _get_new_yaml_dict(help_dict):
                 if "populator-commands" in param:
                     new_param["value-sources"] = []
                     for item in param["populator-commands"]:
-                        new_param["value-sources"].append(dict(string=item))
+                        new_param["value-sources"].append({"link": {"command" : item}})
                 parameters.append(new_param)
             elem_content["arguments"] = parameters
 
