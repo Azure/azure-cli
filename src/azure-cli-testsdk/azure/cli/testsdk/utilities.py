@@ -69,7 +69,8 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             pass
         for candidate in self._candidates:
             if request.body:
-                request.body = str(request.body).replace(candidate, self._replacement)
+                body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                request.body = body_string.replace(candidate, self._replacement)
         return request
 
     def process_response(self, response):
