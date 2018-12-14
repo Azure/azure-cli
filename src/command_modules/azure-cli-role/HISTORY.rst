@@ -2,7 +2,7 @@
 
 Release History
 ===============
-2.1.12
+2.2.0
 ++++++
 * BREAKING CHANGE: `az ad app/sp list` will by default output the first 100 objects instead of getting all of them.    
 
