@@ -13,9 +13,14 @@ from knack.help import HelpAuthoringException
 class BaseHelpLoader(object):
     def __init__(self, help_ctx=None):
         self.help_ctx = help_ctx
+        self._data = None
     
     def versioned_load(self, help_obj, parser):
-        raise NotImplementedError
+        self._load_raw_data(help_obj, parser)
+        if self._data_is_applicable():
+            self._load_help_body(help_obj)
+            self._load_help_parameters(help_obj)
+            self._load_help_examples(help_obj)
 
     @classmethod
     def get_version(cls):
@@ -24,6 +29,45 @@ class BaseHelpLoader(object):
         except AttributeError:
             raise NotImplementedError
 
+    def _data_is_applicable(self):
+        return self._data and self.get_version() == self._data.get('version')
+
+    def _load_raw_data(self, help_obj, parser):
+        raise NotImplementedError
+
+    def _load_help_body(self, help_obj):
+        raise NotImplementedError
+
+    def _load_help_parameters(self, help_obj):
+        raise NotImplementedError
+
+    def _load_help_examples(self, help_obj):
+        raise NotImplementedError
+
+    # Loader static helper methods
+
+    # Update a help file object from a data dict using the attribute to key mapping
+    @staticmethod
+    def _update_help_obj(help_obj, data, attr_key_tups):
+        for attr, key in attr_key_tups:
+            try:
+                setattr(help_obj, attr, data[key])
+            except (AttributeError, KeyError):
+                pass
+
+    # update relevant help file object parameters from data.
+    @staticmethod
+    def _update_help_obj_params(help_obj, data_params, params_equal):
+        loaded_params = []
+        loaded_param = {}
+        for param in help_obj.parameters:
+            loaded_param = next((n for n in data_params if params_equal(param, n)), None)
+            if loaded_param:
+                param.update_from_data(loaded_param)
+            loaded_params.append(param)
+        help_obj.parameters = loaded_params
+
+    # get the yaml help
     @staticmethod
     def _get_yaml_help_for_nouns(nouns, cmd_loader_map_ref):
         import inspect
@@ -68,7 +112,6 @@ class BaseHelpLoader(object):
                         return _parse_yaml_from_string(text, help_file_path)
         return None
 
-
 class HelpLoaderV0(BaseHelpLoader):
     VERSION = 0
 
@@ -79,41 +122,33 @@ class HelpLoaderV0(BaseHelpLoader):
 class HelpLoaderV1(BaseHelpLoader):
     VERSION = 1
 
-    # load help_obj with data if applicable
-    def versioned_load(self, help_obj, parser):
+    def _load_raw_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
+        self._data = BaseHelpLoader._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
+        self._command_data = self._get_command_data(help_obj.command, self._data)
 
-        data = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
+    def _load_help_body(self, help_obj):
+        attr_key_tups = [("short_summary", "summary"), ("long_summary", "description"), ("links", "links")]
+        if self._command_data:
+            self._update_help_obj(help_obj, self._command_data, attr_key_tups)
 
-        # proceed only if data applies to this help loader
-        if not (data and data.get("version", None) == self.VERSION):
-            return
+    def _load_help_parameters(self, help_obj):
+        def params_equal(param, param_dict):
+            return param == param_dict['name']
+        if self._command_data:
+            self._update_help_obj_params(help_obj, self._command_data.get("arguments", []), params_equal)
 
-        content = data.get("content")
-        info_type = None
-        info = None
-        for elem in content:
-            for key, value in elem.items():
-                # find the command / group's help text
-                if value.get("name") == help_obj.command:
-                    info_type = key
-                    info = value
-                    break
 
-            # found the right entry in content, update help_obj
-            if info:
-                help_obj.type = info_type
-                if "summary" in info:
-                    help_obj.short_summary = info["summary"]
-                if "description" in info:
-                    help_obj.long_summary = info["description"]
-                if "links" in info:
-                    help_obj.links = info["links"]
-                if help_obj.type == "command":
-                    self._load_command_data(help_obj, info)
-                return
+    @staticmethod
+    def _get_command_data(cmd_name, data):
+        if data and data.get("content"):
+            try:
+                return next(value for elem in data.get("content") for key, value in elem.items() if value.get("name") == cmd_name)
+            except StopIteration:
+                pass
+        return None
 
     @classmethod
     def _load_command_data(cls, help_obj, info):
@@ -122,58 +157,6 @@ class HelpLoaderV1(BaseHelpLoader):
             for ex in info["examples"]:
                 if help_obj._should_include_example(ex):
                     help_obj.examples.append(cls._get_example_from_data(ex))
-
-        if "arguments" in info and hasattr(help_obj, "parameters"):
-            def _name_is_equal(data, param):
-                if data.get('name', None) == param.name:
-                    return True
-                for name in param.name_source:
-                    if data.get("name") == name.lstrip("-"):
-                        return True
-                return False
-
-            loaded_params = []
-            for param in help_obj.parameters:
-                loaded_param = next((n for n in info['arguments'] if _name_is_equal(n, param)), None)
-                if loaded_param and isinstance(param, KnackHelpParameter):
-                    loaded_param["name"] = param.name
-                    param.__class__ = HelpParameter  # cast param to CliHelpParameter
-                    cls._update_param_from_data(param, loaded_param)
-                loaded_params.append(param)
-
-            help_obj.parameters = loaded_params
-
-    @staticmethod
-    def _update_param_from_data(ex, data):
-
-        def _raw_value_source_to_string(value_source):
-            if "string" in value_source:
-                return value_source["string"]
-            elif "link" in value_source:
-                link_text = ""
-                if "url" in value_source["link"]:
-                    link_text = "{}".format(value_source["link"]["url"])
-                if "command" in value_source["link"]:
-                    link_text = "{}".format(value_source["link"]["command"])
-                return link_text
-            return ""
-
-        if ex.name != data.get('name'):
-            raise HelpAuthoringException(u"mismatched name {} vs. {}".format(ex.name, data.get('name')))
-
-        if data.get('summary'):
-            ex.short_summary = data.get('summary')
-
-        if data.get('description'):
-            ex.long_summary = data.get('description')
-
-        if data.get('value-sources'):
-            ex.value_sources = []
-            ex.raw_value_sources = data.get('value-sources')
-            for value_source in ex.raw_value_sources:
-                val_str = _raw_value_source_to_string(value_source)
-                if val_str:
-                    ex.value_sources.append(val_str)
 
     @staticmethod
     def _get_example_from_data(_data):
