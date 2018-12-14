@@ -95,7 +95,7 @@ def update_adls_account(client, account_name, resource_group_name, tags=None, de
     # this will fail if the encryption is not user managed, as service managed key rotation is not supported.
     if key_version:
         update_params.encryption_config = UpdateEncryptionConfig(
-            UpdateKeyVaultMetaInfo(key_version))
+            key_vault_meta_info=UpdateKeyVaultMetaInfo(encryption_key_version=key_version))
 
     return client.update(resource_group_name, account_name, update_params).result()
 # endregion
