@@ -50,7 +50,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_header(self, cli_name, help_file):
         super(CLIPrintMixin, self)._print_header(cli_name, help_file)
 
-        links = help_file.links
+        links = help_file.links # TODO: this needs to be updated to handle links obj not just link text
         if links:
             link_text = "{} and {}".format(", ".join(links[0:-1]), links[-1]) if len(links) > 1 else links[0]
             link_text = "For more information, see: {}\n".format(link_text)
@@ -60,6 +60,27 @@ class CLIPrintMixin(CLIHelp):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
 
+
+    @staticmethod
+    def _get_choices_defaults_sources_str(p):
+        choice_str = u'  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
+            if p.choices else ''
+        default_str = u'  Default: {}.'.format(p.default) if p.default and p.default != argparse.SUPPRESS else ''
+        value_sources_str = CLIPrintMixin._process_value_sources(p) if p.value_sources else ''
+        return u'{}{}{}'.format(choice_str, default_str, value_sources_str)
+
+    @staticmethod
+    def _print_examples(help_file):
+        indent = 0
+        _print_indent('Examples', indent)
+        for e in help_file.examples:
+            indent = 1
+            _print_indent(u'{0}'.format(e.short_summary), indent)
+            indent = 2
+            if e.long_summary:
+                _print_indent(u'{0}'.format(e.description), indent)
+            _print_indent(u'{0}'.format(e.command), indent)
+            print('')
 
     @staticmethod
     def _process_value_sources(p):
@@ -77,14 +98,6 @@ class CLIPrintMixin(CLIHelp):
         string_str = u'  {}'.format(", ".join(strings)) if strings else ''
         urls_str = u'  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
         return u'{}{}{}'.format(command_str, string_str, urls_str)
-
-    @staticmethod
-    def _get_choices_defaults_sources_str(p):
-        choice_str = u'  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
-            if p.choices else ''
-        default_str = u'  Default: {}.'.format(p.default) if p.default and p.default != argparse.SUPPRESS else ''
-        value_sources_str = CLIPrintMixin._process_value_sources(p) if p.value_sources else ''
-        return u'{}{}{}'.format(choice_str, default_str, value_sources_str)
 
     @staticmethod
     def _print_extensions_msg(help_file):
@@ -276,12 +289,11 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         _data['text'] = _data.get('text', '')
         super(HelpExample, self).__init__(_data)
 
+        self.short_summary = _data.get('summary', '') if _data.get('summary', '') else self.name
+        self.command = _data.get('command', '') if _data.get('command', '') else self.text
+        self.long_summary = _data.get('description', '')
         self.min_profile = _data.get('min_profile', '')
         self.max_profile = _data.get('max_profile', '')
-
-        self.summary = _data.get('summary', '')
-        self.command = _data.get('command', '')
-        self.description = _data.get('description', '')
 
 
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes

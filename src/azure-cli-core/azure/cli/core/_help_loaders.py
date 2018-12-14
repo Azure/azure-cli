@@ -48,23 +48,22 @@ class BaseHelpLoader(object):
 
     # Update a help file object from a data dict using the attribute to key mapping
     @staticmethod
-    def _update_help_obj(help_obj, data, attr_key_tups):
+    def _update_obj_from_data_dict(obj, data, attr_key_tups):
         for attr, key in attr_key_tups:
             try:
-                setattr(help_obj, attr, data[key])
+                setattr(obj, attr, data[key] or attr)
             except (AttributeError, KeyError):
                 pass
 
     # update relevant help file object parameters from data.
     @staticmethod
-    def _update_help_obj_params(help_obj, data_params, params_equal):
+    def _update_help_obj_params(help_obj, data_params, params_equal, attr_key_tups):
         loaded_params = []
-        loaded_param = {}
-        for param in help_obj.parameters:
-            loaded_param = next((n for n in data_params if params_equal(param, n)), None)
+        for param_obj in help_obj.parameters:
+            loaded_param = next((n for n in data_params if params_equal(param_obj, n)), None)
             if loaded_param:
-                param.update_from_data(loaded_param)
-            loaded_params.append(param)
+                BaseHelpLoader._update_obj_from_data_dict(param_obj, loaded_param, attr_key_tups)
+            loaded_params.append(param_obj)
         help_obj.parameters = loaded_params
 
     # get the yaml help
@@ -121,25 +120,35 @@ class HelpLoaderV0(BaseHelpLoader):
 
 class HelpLoaderV1(BaseHelpLoader):
     VERSION = 1
+    core_attrs_to_keys = [("short_summary", "summary"), ("long_summary", "description")]
+    body_attrs_to_keys = core_attrs_to_keys + [("links", "links")]
+    param_attrs_to_keys = core_attrs_to_keys + [("value_sources", None)]
 
     def _load_raw_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
-        self._data = BaseHelpLoader._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
-        self._command_data = self._get_command_data(help_obj.command, self._data)
+        all_data = BaseHelpLoader._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
+        self._data = self._get_command_data(help_obj.command, all_data)
 
     def _load_help_body(self, help_obj):
-        attr_key_tups = [("short_summary", "summary"), ("long_summary", "description"), ("links", "links")]
-        if self._command_data:
-            self._update_help_obj(help_obj, self._command_data, attr_key_tups)
+        self._update_obj_from_data_dict(help_obj, self._data, self.body_attrs_to_keys)
 
     def _load_help_parameters(self, help_obj):
         def params_equal(param, param_dict):
             return param == param_dict['name']
-        if self._command_data:
-            self._update_help_obj_params(help_obj, self._command_data.get("arguments", []), params_equal)
+        if help_obj.type == "command" and self._data.get("arguments"):
+            loaded_params = []
+            for param_obj in help_obj.parameters:
+                loaded_param = next((n for n in self._data["arguments"] if params_equal(param_obj, n)), None)
+                if loaded_param:
+                    BaseHelpLoader._update_obj_from_data_dict(param_obj, loaded_param, self.param_attrs_to_keys)
+                loaded_params.append(param_obj)
+            help_obj.parameters = loaded_params
 
+    def _load_help_examples(self, help_obj):
+        if help_obj.type == "command" and self._data.get("examples"):
+            help_obj.examples = [HelpExample(**ex) for ex in self._data["examples"] if help_obj._should_include_example(ex)]
 
     @staticmethod
     def _get_command_data(cmd_name, data):
@@ -149,14 +158,6 @@ class HelpLoaderV1(BaseHelpLoader):
             except StopIteration:
                 pass
         return None
-
-    @classmethod
-    def _load_command_data(cls, help_obj, info):
-        if "examples" in info:
-            help_obj.examples = []
-            for ex in info["examples"]:
-                if help_obj._should_include_example(ex):
-                    help_obj.examples.append(cls._get_example_from_data(ex))
 
     @staticmethod
     def _get_example_from_data(_data):
