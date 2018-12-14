@@ -488,7 +488,8 @@ def _resolve_role_id(role, scope, definitions_client):
     return role_id
 
 
-def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_filter=None, include_all=None, show_mine=None):
+def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_filter=None, include_all=None,
+              show_mine=None):
     client = _graph_client_factory(cmd.cli_ctx)
     if show_mine:
         return list_owned_objects(client.signed_in_user, 'application')
