@@ -2167,7 +2167,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         zip_file_path = zip_contents_from_dir(src_dir, language)
 
         logger.warning("Preparing to deploy %s contents to app."
-                      "This operation can take a while to complete ...",
+                       "This operation can take a while to complete ...",
                        '' if is_skip_build else 'and build')
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file afer deployment, handling exception if user removed the file manually
