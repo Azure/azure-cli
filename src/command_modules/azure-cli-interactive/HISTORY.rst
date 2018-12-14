@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.1
++++++
+* Minor fixes
+
 0.4.0
 +++++
 * Interactive now installs the 'interactive' extension, which will allow for faster updates and support.
