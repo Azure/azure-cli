@@ -31,7 +31,8 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-cli-core'
+    'azure-cli-core',
+    'prompt_toolkit~=1.0.15'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
