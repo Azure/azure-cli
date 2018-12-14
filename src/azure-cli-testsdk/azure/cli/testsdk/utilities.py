@@ -55,6 +55,10 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         self._activated = False
         self._candidates = []
 
+    def refresh(self):
+        self._activated = False
+        self._candidates = []
+
     def process_request(self, request):  # pylint: disable=no-self-use
         import re
         try:
