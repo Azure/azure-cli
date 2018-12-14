@@ -55,7 +55,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         self._activated = False
         self._candidates = []
 
-    def refresh(self):
+    def reset(self):
         self._activated = False
         self._candidates = []
 
