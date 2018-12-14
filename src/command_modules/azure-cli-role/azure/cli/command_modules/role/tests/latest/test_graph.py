@@ -28,7 +28,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             self.check('length([*])', 1)
         ])
         self.assertTrue(len(self.cmd('ad app list').get_output_in_json()) <= 100)
-        self.cmd('ad app list --mine')
+        self.cmd('ad app list --show-mine')
         # show/list sp
         self.cmd('ad sp show --id {app_id_uri}',
                  checks=self.check('servicePrincipalNames[0]', '{app_id_uri}'))
@@ -45,7 +45,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         self.cmd('ad app list --identifier-uri {app_id_uri}',
                  checks=self.is_empty())
         self.assertTrue(len(self.cmd('ad sp list').get_output_in_json()) <= 100)
-        self.cmd('ad sp list --mine')
+        self.cmd('ad sp list --show-mine')
 
     def test_native_app_create_scenario(self):
         self.kwargs = {

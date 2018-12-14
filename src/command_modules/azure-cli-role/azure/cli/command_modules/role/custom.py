@@ -488,9 +488,9 @@ def _resolve_role_id(role, scope, definitions_client):
     return role_id
 
 
-def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_filter=None, include_all=None, mine=None):
+def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_filter=None, include_all=None, show_mine=None):
     client = _graph_client_factory(cmd.cli_ctx)
-    if mine:
+    if show_mine:
         return list_owned_objects(client.signed_in_user, 'application')
     sub_filters = []
     if query_filter:
@@ -529,9 +529,9 @@ def remove_application_owner(cmd, owner_object_id, identifier):
     return client.remove_owner(_resolve_application(client, identifier), owner_object_id)
 
 
-def list_sps(cmd, spn=None, display_name=None, query_filter=None, mine=None, include_all=None):
+def list_sps(cmd, spn=None, display_name=None, query_filter=None, show_mine=None, include_all=None):
     client = _graph_client_factory(cmd.cli_ctx)
-    if mine:
+    if show_mine:
         return list_owned_objects(client.signed_in_user, 'servicePrincipal')
 
     sub_filters = []
