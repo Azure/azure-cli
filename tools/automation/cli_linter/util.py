@@ -9,6 +9,10 @@ import os
 import copy
 import inspect
 
+option_pattern = r"(\-\-\S+|\-s)"
+OPTION_RE = re.compile(option_pattern)
+
+
 
 _LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
 
@@ -83,3 +87,21 @@ class LinterError(Exception):
     Exception thrown by linter for non rule violation reasons
     """
     pass
+
+def get_commands_from_example(example_text):
+    CMD_PREFIX = "az "
+    commands = []  # some examples have multistep commands. This is a simple way to extract them
+    while(CMD_PREFIX in example_text):
+        # find next az command start and end
+        start = example_text.find(CMD_PREFIX)
+        end = example_text.find(CMD_PREFIX, start + 1)
+        end = end if end > -1 else len(example_text)
+        # extract it
+        commands.append(example_text[start:end].rstrip("|"))  # remove unwanted pip symbols
+        # update example text
+        example_text = example_text[end:]
+
+    for command in commands:
+        idx = command.find("-")  # Todo: positionals?
+        command_body = command[:idx]
+

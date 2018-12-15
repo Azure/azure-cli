@@ -5,7 +5,6 @@
 
 import os
 import inspect
-import argparse
 from importlib import import_module
 from pkgutil import iter_modules
 import yaml
@@ -65,6 +64,10 @@ class Linter(object):
 
     def is_valid_parameter_help_name(self, entry_name, param_name):
         return param_name in [param.name for param in getattr(self._loaded_help.get(entry_name), 'parameters', [])]
+
+    def is_parameter_help_option(self, entry_name, option):
+        param_names = [param.name for param in getattr(self._loaded_help.get(entry_name), 'parameters', [])]
+        return next((True for param_name in param_names if option in param_name.split()), default=False)
 
     def get_command_help(self, command_name):
         return self._get_loaded_help_description(command_name)

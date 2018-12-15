@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
 from ..rule_decorators import help_file_entry_rule
 from ..linter import RuleError
 
@@ -44,3 +45,8 @@ def faulty_help_example_rule(linter, help_entry):
     if violations:
         raise RuleError('The following example entry indices do not include the command: {}'.format(
             ' | '.join(violations)))
+
+@help_file_entry_rule
+def faulty_help_example_parameters_rule(linter, help_entry):
+    for index, example in enumerate(linter.get_help_entry_examples(help_entry)):
+        commands = example.get()
