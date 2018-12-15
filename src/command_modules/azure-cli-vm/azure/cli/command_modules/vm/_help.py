@@ -1309,11 +1309,6 @@ helps['disk'] = """
     short-summary: Manage Azure Managed Disks.
 """
 
-helps['snapshot'] = """
-    type: group
-    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
-"""
-
 helps['image'] = """
     type: group
     short-summary: Manage custom virtual machine images.
@@ -1368,6 +1363,11 @@ helps['disk revoke-access'] = """
     short-summary: Revoke a resource's read access to a managed disk.
 """
 
+helps['snapshot'] = """
+    type: group
+    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
+"""
+
 helps['snapshot create'] = """
     type: command
     short-summary: Create a snapshot.
@@ -1399,6 +1399,11 @@ helps['snapshot grant-access'] = """
 helps['snapshot revoke-access'] = """
     type: command
     short-summary: Revoke read access to a snapshot.
+"""
+
+helps['snapshot wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a snapshot is met.
 """
 
 helps['image create'] = """

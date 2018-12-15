@@ -5,7 +5,9 @@ Release History
 
 2.1.9
 +++++
+* Add context token to task step.
 * Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
 * Fix 'acr helm push' not allowing helm packages with build metadata
 
 2.1.8

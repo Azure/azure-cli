@@ -41,6 +41,8 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
+    extension_instance_name_type = CLIArgumentType(help='Instance name of the extension. Default: name of the extension.')
+
     if StorageAccountTypes:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
     else:
@@ -147,7 +149,7 @@ def load_arguments(self, _):
         c.argument('overwrite', action='store_true')
 
     with self.argument_context('vm update') as c:
-        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
+        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
@@ -311,9 +313,9 @@ def load_arguments(self, _):
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
-                   help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+                   help="(PREVIEW) Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
-                   help="(PREVIEW) the eviction policy for virtual machines in a low priority scale set.")
+                   help="(PREVIEW) The eviction policy for virtual machines in a low priority scale set.")
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -434,7 +436,9 @@ def load_arguments(self, _):
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
             c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='(PREVIEW)Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+                       help='(PREVIEW) Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+            c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
+                       help='(Preview) Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -487,9 +491,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm extension set') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
+        c.argument('extension_instance_name', extension_instance_name_type, arg_group='Resource Id')
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
+        c.argument('extension_instance_name', extension_instance_name_type)
 
     for scope in ['vm extension image', 'vmss extension image']:
         with self.argument_context(scope) as c:

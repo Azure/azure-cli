@@ -371,7 +371,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
-                    tags=None):
+                    tags=None, no_wait=False):
     Snapshot, CreationData, DiskCreateOption = cmd.get_models('Snapshot', 'CreationData', 'DiskCreateOption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -393,7 +393,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
                         sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
+    return sdk_no_wait(no_wait, client.snapshots.create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
 def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds):
@@ -507,7 +507,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None):
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1219,12 +1219,21 @@ def list_extensions(cmd, resource_group_name, vm_name):
 
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
-                  protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False):
+                  protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
+                  extension_instance_name=None):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory(cmd.cli_ctx)
 
+    if not extension_instance_name:
+        extension_instance_name = vm_extension_name
+
     VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
-    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
+    instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
+                                                 suggested_name=extension_instance_name)
+    if instance_name != extension_instance_name:
+        msg = "A %s extension with name %s already exists. Updating it with your settings..."
+        logger.warning(msg, vm_extension_name, instance_name)
+
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,
                                   publisher=publisher,
@@ -1819,7 +1828,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None, ultra_ssd_enabled=None):
+                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2398,7 +2407,10 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
-                       no_wait=False):
+                       no_wait=False, extension_instance_name=None):
+    if not extension_instance_name:
+        extension_instance_name = extension_name
+
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
@@ -2413,7 +2425,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
             extension_profile.extensions = [x for x in extensions if
                                             x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
-    ext = VirtualMachineScaleSetExtension(name=extension_name,
+    ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
                                           type=extension_name,
                                           protected_settings=protected_settings,

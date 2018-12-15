@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.9
++++++
+* Minor fixes
+
 0.3.8
 +++++
 * Show identity when exporting a container group to yaml

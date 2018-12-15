@@ -4,13 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import unittest
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
 
 
-@unittest.skip("will reenable back once the test server gets fixed to recycle disk spaces")
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadLiveTests(LiveScenarioTest):
     @ResourceGroupPreparer()
