@@ -39,7 +39,7 @@ from azure.cli.core.util import in_cloud_console
 from azure.cli.core.util import open_page_in_browser
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
+from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
@@ -1806,7 +1806,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
                     deployment_source_url=None, deployment_source_branch='master',
                     deployment_local_git=None, deployment_container_image_name=None, tags=None):
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -1844,13 +1844,21 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
+    if runtime:
+        if is_linux and runtime not in LINUX_RUNTIMES:
+            raise CLIError("usage error: Currently supported runtimes (--runtime) in linux function apps are: {}."
+                           .format(', '.join(LINUX_RUNTIMES)))
+        elif not is_linux and runtime not in WINDOWS_RUNTIMES:
+            raise CLIError("usage error: Currently supported runtimes (--runtime) in windows function apps are: {}."
+                           .format(', '.join(WINDOWS_RUNTIMES)))
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
+
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
     if is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
         if consumption_plan_location:
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
         else:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
