@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 
 # Based on the semver regex here:
 # https://github.com/Masterminds/semver/blob/e71d0f94bb19d376417da48392b212ac41be4991/version.go
-VALID_NAME = '^[a-zA-Z0-9]+-'\
+VALID_NAME = '^[-a-zA-Z]+'\
     'v?([0-9]+)(\\.[0-9]+)?(\\.[0-9]+)?'\
     '(-([-0-9A-Za-z]+(\\.[-0-9A-Za-z]+)*))?'\
     '(\\+([-0-9A-Za-z]+(\\.[-0-9A-Za-z]+)*))?'\
