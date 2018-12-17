@@ -17,7 +17,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.1.1"
+VERSION = "0.1.3"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -37,7 +37,9 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-web==0.40.0',
-    'azure-mgmt-botservice'
+    'azure-mgmt-botservice',
+    'cryptography',
+    'requests'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

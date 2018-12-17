@@ -480,6 +480,43 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
+class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_linux_webapp_multicontainer_slot(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux-multi', length=24)
+        plan = self.create_random_name(prefix='plan-linux-multi', length=24)
+        config_file = os.path.join(TEST_DIR, 'sample-compose.yml')
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
+        slot_config_file = os.path.join(TEST_DIR, 'sample-compose-slot.yml')
+
+        self.cmd('appservice plan create -g {} -n {} --is-linux --sku S1'.format(resource_group, plan))
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello World! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot))
+        self.cmd("webapp config container set -g {} -n {} --slot {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, slot, slot_config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(slot_webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello from a slot! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
+
 class WebappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_acr_integration(self, resource_group):
@@ -775,6 +812,44 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('reserved', True),
                      JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppOnWindowsWithRuntime(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows --runtime node'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_windows_without_runtime(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowswithoutruntime', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))

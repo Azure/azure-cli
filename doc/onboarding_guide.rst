@@ -19,7 +19,7 @@ Suggested timeline:
 
 - **1 week prior to desired release date:** Hopefully, PR is merged! Download the edge build and try it out. Submit follow-up PRs to address any small issues. Anything caught before release is not a breaking change!
 
-Inital Pull Request Guidance
+Initial Pull Request Guidance
 ============================
 
 Reviewing a new command module is very difficult, so the PR shouldn't be the first time we see your module! The two most important things for your initial PR are:
@@ -28,9 +28,9 @@ Reviewing a new command module is very difficult, so the PR shouldn't be the fir
 2. The help output of:
 
    - all groups and subgroups (i.e. `az vm -h`)
-   
+
    - all non-trivial commands (commands except `list`, `show`, `delete`)
-   
+
 If you and your CLI contact have been doing regular command reviews, the PR should merely be a formality. If you haven't been conducting regular reviews, the help output allows us to quickly identify holes and anti-patterns to get you on the right track. Most teams post the help output in the PR comments. You can also put them in a TXT document if you choose.
 
 Lessons Learned

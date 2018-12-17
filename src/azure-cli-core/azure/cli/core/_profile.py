@@ -496,7 +496,8 @@ class Profile(object):
         for ext_sub in ext_subs:
             sub = self.get_subscription(ext_sub)
             if sub[_TENANT_ID] != account[_TENANT_ID]:
-                external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
+                # external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
+                external_tenants_info.append(sub)
 
         if identity_type is None:
             def _retrieve_token():
@@ -507,12 +508,18 @@ class Profile(object):
                                                                      account[_TENANT_ID], resource)
                 use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
                 return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
+                                                                              account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
             def _retrieve_tokens_from_external_tenants():
                 external_tokens = []
-                for u, t in external_tenants_info:
-                    external_tokens.append(self._creds_cache.retrieve_token_for_user(u, t, resource))
+                for s in external_tenants_info:
+                    if user_type == _USER:
+                        external_tokens.append(self._creds_cache.retrieve_token_for_user(
+                            username_or_sp_id, s[_TENANT_ID], resource))
+                    else:
+                        external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
+                            username_or_sp_id, resource, s[_TENANT_ID], resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -562,7 +569,8 @@ class Profile(object):
                                                               account[_TENANT_ID], resource)
         else:
             creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                           resource)
+                                                                           resource,
+                                                                           account[_TENANT_ID])
         return (creds,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
@@ -596,7 +604,7 @@ class Profile(object):
                                                                                self._ad_resource_uri)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
-                               "modified. You can run 'az login' later to explictly refresh them", user_name, ex)
+                               "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)
                 result += deepcopy([r for r in to_refresh if r[_USER_ENTITY][_USER_NAME] == user_name])
                 continue
 
@@ -878,9 +886,10 @@ class CredsCache(object):
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
-    def retrieve_token_for_service_principal(self, sp_id, resource, use_cert_sn_issuer=False):
+    def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
-        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID] and
+                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
         if not matched:
             raise CLIError("Please run 'az account set' to select active account.")
         cred = matched[0]

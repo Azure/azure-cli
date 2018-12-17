@@ -16,8 +16,13 @@ class JMESPathCheck(object):  # pylint: disable=too-few-public-methods
 
     def __call__(self, execution_result):
         json_value = execution_result.get_output_in_json()
-        actual_result = jmespath.search(self._query, json_value,
-                                        jmespath.Options(collections.OrderedDict))
+        actual_result = None
+        try:
+            actual_result = jmespath.search(self._query, json_value,
+                                            jmespath.Options(collections.OrderedDict))
+        except jmespath.exceptions.JMESPathTypeError:
+            raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
+                                              execution_result.output)
         if actual_result != self._expected_result and str(actual_result) != str(self._expected_result):
             if actual_result:
                 raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,

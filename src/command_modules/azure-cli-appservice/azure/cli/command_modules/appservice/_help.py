@@ -635,6 +635,27 @@ helps['webapp create'] = """
             az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
 """
 
+helps['webapp up'] = """
+    type: command
+    short-summary: (Preview) Create and deploy existing local code to the webapp, by running the command from the folder where the code is present.
+                   Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET,
+                   staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps.
+                   If command is run from an empty folder, an empty windows webapp is created.
+    examples:
+        - name: View the details of the app that will be created, without actually running the operation
+          text: >
+            az webapp up -n MyUniqueAppName --dryrun
+        - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+          text: >
+            az webapp up -n MyUniqueAppName
+        - name: Create a web app in a sepcific region, by running the command from the folder where the code to deployed exists.
+          text: >
+            az webapp up -n MyUniqueAppName -l locationName
+        - name: Deploy new code to an app that was originally created using the same command
+          text: >
+            az webapp up -n MyUniqueAppName -l locationName
+"""
+
 helps['webapp update'] = """
     type: command
     short-summary: Update a web app.

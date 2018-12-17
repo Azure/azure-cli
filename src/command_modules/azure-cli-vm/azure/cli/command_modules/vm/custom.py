@@ -316,7 +316,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None, storage_sku=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, data_disks=None, tags=None, zone_resilient=None):
+                 os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
@@ -328,6 +328,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     else:
         os_disk = ImageOSDisk(os_type=os_type,
                               os_state=OperatingSystemStateTypes.generalized,
+                              caching=os_disk_caching,
                               snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
                               managed_disk=SubResource(id=os_disk) if os_disk else None,
                               blob_uri=os_blob_uri,
@@ -1266,12 +1267,15 @@ def list_vm_extension_images(
 
 # region VirtualMachines Identity
 def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
+    from ._vm_utils import MSI_LOCAL_ID
     ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
     remove_system_assigned_identity = False
-    if '[system]' in identities:
+    if MSI_LOCAL_ID in identities:
         remove_system_assigned_identity = True
-        identities.remove('[system]')
+        identities.remove(MSI_LOCAL_ID)
     resource = getter(cmd, resource_group_name, name)
+    if resource.identity is None:
+        return None
     emsis_to_remove = []
     if identities:
         existing_emsis = set([x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())])

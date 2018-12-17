@@ -170,6 +170,7 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'], validator=validate_max_pods)
         c.argument('network_plugin')
+        c.argument('network_policy')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
@@ -182,6 +183,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks enable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
+        c.argument('subnet_name', options_list=['--subnet-name', '-s'])
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -215,7 +217,7 @@ def load_arguments(self, _):
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
     with self.argument_context('aks scale') as c:
-        c.argument('nodepool_name', type=str, default='nodepool1',
+        c.argument('nodepool_name', type=str,
                    help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
 
     with self.argument_context('aks upgrade-connector') as c:

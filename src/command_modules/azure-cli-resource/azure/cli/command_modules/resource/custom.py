@@ -398,6 +398,14 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
     return policy_id
 
 
+def _parse_management_group_reference(name):
+    if name.lower().startswith('/providers/microsoft.management/managementgroups'):
+        parts = name.split('/')
+        if len(parts) >= 9:
+            return parts[4], parts[8]
+    return None, name
+
+
 def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
     from msrest.exceptions import HttpOperationError
     from msrestazure.azure_exceptions import CloudError
@@ -410,8 +418,11 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             client.config.subscription_id = subscription_id
     try:
-        if cmd.supported_api_version(min_api='2018-03-01') and management_group:
-            return policy_operations.get_at_management_group(name, management_group)
+        if cmd.supported_api_version(min_api='2018-03-01'):
+            if not management_group:
+                management_group, name = _parse_management_group_reference(name)
+            if management_group:
+                return policy_operations.get_at_management_group(name, management_group)
         return policy_operations.get(name)
     except (CloudError, HttpOperationError, ErrorResponseException) as ex:
         status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code

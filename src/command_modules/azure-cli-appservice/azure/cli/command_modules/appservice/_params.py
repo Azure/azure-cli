@@ -28,6 +28,8 @@ AUTH_TYPES = {
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
+LINUX_RUNTIMES = ['dotnet', 'node', 'python']
+WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
 
 # pylint: disable=too-many-statements
 
@@ -326,6 +328,11 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
+    with self.argument_context('webapp up') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('sku', arg_type=sku_arg_type)
+        c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
+
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
@@ -340,7 +347,7 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
-        c.argument('runtime', help='The function runtime stack. Currently supported for Linux apps only', arg_type=get_enum_type(['dotnet', 'node', 'python']))
+        c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
 
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions

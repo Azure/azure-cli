@@ -15,6 +15,7 @@ BUILD_TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/buildTasks'
 BUILD_STEP_RESOURCE_TYPE = BUILD_TASK_RESOURCE_TYPE + '/steps'
 
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
+TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 
 CLASSIC_REGISTRY_SKU = [SkuName.classic.value]
 MANAGED_REGISTRY_SKU = [SkuName.basic.value, SkuName.standard.value, SkuName.premium.value]

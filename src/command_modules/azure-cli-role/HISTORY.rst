@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.2.0
+++++++
+* BREAKING CHANGE: `az ad app/sp list` will by default output the first 100 objects instead of getting all of them.    
+
+2.1.11
+++++++
+* support custom identifier for password credential 
+
 2.1.10
 ++++++
 * `ad app update`: address a failure caused by updating immutable credentials

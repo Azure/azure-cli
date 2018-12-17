@@ -5,12 +5,11 @@
 from __future__ import print_function
 
 from collections import Counter, OrderedDict
-import mock
-
-from knack.log import get_logger
 
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+
+from knack.log import get_logger
 
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 
@@ -783,7 +782,8 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
                                  rule_set_type='OWASP', rule_set_version=None,
                                  disabled_rule_groups=None,
                                  disabled_rules=None, no_wait=False,
-                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None):
+                                 request_body_check=None, max_request_body_size=None, file_upload_limit=None,
+                                 exclusions=None):
     ApplicationGatewayWebApplicationFirewallConfiguration = cmd.get_models(
         'ApplicationGatewayWebApplicationFirewallConfiguration')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
@@ -824,6 +824,7 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
         ag.web_application_firewall_configuration.request_body_check = request_body_check
         ag.web_application_firewall_configuration.max_request_body_size_in_kb = max_request_body_size
         ag.web_application_firewall_configuration.file_upload_limit_in_mb = file_upload_limit
+        ag.web_application_firewall_configuration.exclusions = exclusions
 
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
@@ -966,7 +967,6 @@ def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, 
         instance.registration_virtual_networks = None
     elif registration_vnets:
         instance.registration_virtual_networks = registration_vnets
-
     return instance
 
 
@@ -1983,7 +1983,7 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
     _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool)
                if backend_address_pool else None)
     _set_param(instance, 'frontend_ip_configurations',
-               [SubResource(x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
+               [SubResource(id=x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
 
     return parent
 
@@ -2735,7 +2735,7 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
 
 
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
-                         resource_group_name=None, enabled=None, retention=0):
+                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None):
     from azure.cli.core.commands import LongRunningOperation
     config = LongRunningOperation(cmd.cli_ctx)(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
     if enabled is not None:
@@ -2745,6 +2745,11 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     if retention is not None:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
         config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
+    if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
+        config.format = {
+            'type': log_format,
+            'version': log_version
+        }
     setattr(config, 'flow_analytics_configuration', None)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
@@ -3495,45 +3500,17 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
     return instance
 
 
-# region VPN CLIENT WORKAROUND
-# This is needed due to NRP doing exactly the opposite of what the specification says they should do.
+# TODO: Remove workaround when Swagger is fixed
+# region LegacyVpnClient Workaround
 # pylint: disable=line-too-long, protected-access, mixed-line-endings
-def _poll(self, update_cmd):
-    from msrestazure.azure_operation import finished, failed, BadResponse, OperationFailed
-    initial_url = self._response.request.url
-
-    while not finished(self.status()):
-        self._delay()
-        headers = self._polling_cookie()
-
-        if self._operation.location_url:
-            self._response = update_cmd(
-                self._operation.location_url, headers)
-            self._operation.set_async_url_if_present(self._response)
-            self._operation.get_status_from_location(
-                self._response)
-        elif self._operation.method == "PUT":
-            self._response = update_cmd(initial_url, headers)
-            self._operation.set_async_url_if_present(self._response)
-            self._operation.get_status_from_resource(
-                self._response)
-        else:
-            raise BadResponse(
-                'Location header is missing from long-running operation.')
-
-    if failed(self._operation.status):
-        raise OperationFailed("Operation failed or cancelled")
-    elif self._operation.should_do_final_get():
-        self._response = update_cmd(initial_url)
-        self._operation.get_status_from_resource(
-            self._response)
-
-
-# This is needed due to a bug in autorest code generation. It adds 202 as a valid status code.
-def _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
+def _legacy_generate_vpn_client_initial(
+        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None,
+        raw=False, **operation_config):
     import uuid
     from msrest.pipeline import ClientRawResponse
-    from msrestazure.azure_operation import AzureOperationPoller
+
+    # Construct URL
+    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnclientpackage'
     path_format_arguments = {
         'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
         'virtualNetworkGatewayName': self._serialize.url("virtual_network_gateway_name", virtual_network_gateway_name, 'str'),
@@ -3547,6 +3524,7 @@ def _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_nam
 
     # Construct headers
     header_parameters = {}
+    header_parameters['Accept'] = 'application/json'
     header_parameters['Content-Type'] = 'application/json; charset=utf-8'
     if self.config.generate_client_request_id:
         header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
@@ -3559,71 +3537,69 @@ def _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_nam
     body_content = self._serialize.body(parameters, 'VpnClientParameters')
 
     # Construct and send request
-    def long_running_send():
+    request = self._client.post(url, query_parameters, header_parameters, body_content)
+    response = self._client.send(request, stream=False, **operation_config)
 
-        request = self._client.post(url, query_parameters)
-        return self._client.send(
-            request, header_parameters, body_content, **operation_config)
+    if response.status_code not in [200, 202]:
+        exp = CloudError(response)
+        exp.request_id = response.headers.get('x-ms-request-id')
+        raise exp
 
-    def get_long_running_status(status_link, headers=None):
+    deserialized = None
 
-        request = self._client.get(status_link)
-        if headers:
-            request.headers.update(headers)
-        return self._client.send(
-            request, header_parameters, **operation_config)
+    if response.status_code == 200:
+        deserialized = self._deserialize('str', response)
+
+    if raw:
+        client_raw_response = ClientRawResponse(deserialized, response)
+        return client_raw_response
+
+    return deserialized
+
+
+# pylint: disable=line-too-long, protected-access, mixed-line-endings
+def _legacy_generate_vpn_client(
+        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False,
+        polling=True, **operation_config):
+    from msrest.pipeline import ClientRawResponse
+    from msrest.polling import LROPoller, NoPolling
+    from msrestazure.polling.arm_polling import ARMPolling
+
+    raw_result = _legacy_generate_vpn_client_initial(
+        self,
+        resource_group_name=resource_group_name,
+        virtual_network_gateway_name=virtual_network_gateway_name,
+        parameters=parameters,
+        custom_headers=custom_headers,
+        raw=True,
+        **operation_config
+    )
 
     def get_long_running_output(response):
-
-        if response.status_code not in [200, 202]:
-            exp = CloudError(response)
-            exp.request_id = response.headers.get('x-ms-request-id')
-            raise exp
-
-        deserialized = None
-
-        if response.status_code in [200, 202]:
-            deserialized = self._deserialize('str', response)
+        deserialized = self._deserialize('str', response)
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)
             return client_raw_response
 
         return deserialized
-
-    if raw:
-        response = long_running_send()
-        return get_long_running_output(response)
-
-    long_running_operation_timeout = operation_config.get(
+    lro_delay = operation_config.get(
         'long_running_operation_timeout',
         self.config.long_running_operation_timeout)
-    return AzureOperationPoller(
-        long_running_send, get_long_running_output,
-        get_long_running_status, long_running_operation_timeout)
-
-
-@mock.patch('msrestazure.azure_operation.AzureOperationPoller._poll', _poll)
-def _generate_vpn_profile(
-        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
-    # Construct URL
-    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnprofile'
-    return _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers, raw, **operation_config)
-
-
-@mock.patch('msrestazure.azure_operation.AzureOperationPoller._poll', _poll)
-def _generatevpnclientpackage(
-        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
-    # Construct URL
-    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnclientpackage'
-    return _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers, raw, **operation_config)
-
-# endregion VPN CLIENT WORKAROUND`
+    if polling is True:
+        polling_method = ARMPolling(lro_delay, **operation_config)
+    elif polling is False:
+        polling_method = NoPolling()
+    else:
+        polling_method = polling
+    return LROPoller(self._client, raw_result, get_long_running_output, polling_method)
+# endregion LegacyVpnClient Workaround
 
 
 def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
+    from msrestazure.polling.arm_polling import ARMPolling
     params = cmd.get_models('VpnClientParameters')(
         processor_architecture=processor_architecture
     )
@@ -3632,11 +3608,9 @@ def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gatewa
         params.authentication_method = authentication_method
         params.radius_server_auth_certificate = radius_server_auth_certificate
         params.client_root_certificates = client_root_certificates
-        return _generate_vpn_profile(client, resource_group_name, virtual_network_gateway_name, params)
-
+        return client.generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params, polling=ARMPolling(lro_options={'final-state-via': 'location'}))
     # legacy implementation
-    return _generatevpnclientpackage(client, resource_group_name, virtual_network_gateway_name, params)
-
+    return _legacy_generate_vpn_client(client, resource_group_name, virtual_network_gateway_name, params, polling=ARMPolling(lro_options={'final-state-via': 'location'}))
 # endregion
 
 

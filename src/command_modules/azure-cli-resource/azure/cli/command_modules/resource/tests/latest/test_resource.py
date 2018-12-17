@@ -6,10 +6,12 @@
 import json
 import os
 import time
+import mock
 import unittest
 
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 
 
@@ -549,7 +551,7 @@ class FeatureScenarioTest(ScenarioTest):
         self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
 
 
-class PolicyScenarioTest(LiveScenarioTest):
+class PolicyScenarioTest(ScenarioTest):
 
     def cmdstring(self, basic, management_group=None, subscription=None):
         cmd = basic
@@ -616,6 +618,26 @@ class PolicyScenarioTest(LiveScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
+    def applyPolicyAtScope(self, scope, policy):
+        # create a policy assignment at the given scope
+        self.kwargs.update({
+            'pol': policy,
+            'pan': self.create_random_name('cli-test-polassg', 24),   # limit is 24 characters at MG scope
+            'padn': self.create_random_name('test_assignment', 20),
+            'scope': scope
+        })
+
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope}', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free')
+        ])
+
+        # delete the assignment and validate it's gone
+        self.cmd('policy assignment delete -n {pan} --scope {scope}')
+        self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
+
     def resource_policy_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -667,7 +689,14 @@ class PolicyScenarioTest(LiveScenarioTest):
         ])
 
         # apply assignments
-        if not management_group and not subscription:
+        if management_group:
+            scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+            policy = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(pn=self.kwargs['pn'], scope=scope)
+            self.applyPolicyAtScope(scope, policy)
+        elif subscription:
+            policy = '/subscriptions/{sub}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(sub=subscription, pn=self.kwargs['pn'])
+            self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy)
+        else:
             self.applyPolicy()
 
         # delete the policy
@@ -769,19 +798,33 @@ class PolicyScenarioTest(LiveScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_resource_policy_default(self, resource_group):
         self.resource_policy_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse()
     def test_resource_policy_management_group(self, resource_group):
-        self.resource_policy_operations(resource_group, 'AzGovTest8')
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policy_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
 
+    @record_only()
+    @unittest.skip('mock doesnt work when the subscription comes from --scope')
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse()
     def test_resource_policy_subscription_id(self, resource_group):
-        self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        else:
+            self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
     @AllowLargeResponse()
@@ -791,14 +834,27 @@ class PolicyScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
     @AllowLargeResponse()
     def test_resource_policyset_management_group(self, resource_group):
-        self.resource_policyset_operations(resource_group, 'AzGovTest8')
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policyset_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
 
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
     @AllowLargeResponse()
     def test_resource_policyset_subscription_id(self, resource_group):
-        self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        else:
+            self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()

@@ -3,11 +3,16 @@
 Release History
 ===============
 
+2.2.10
+++++++
+* `vm identity remove`: does not crash if the specified vm has no assigned managed service identities.
+
 2.2.9
 ++++++
 * `vm extension show / wait`: deprecated --expand parameter.
 * `vm restart`: Added `--force` which redeploys unresponsive VMs.
 * `vm/vmss create`: `--authentication-type` now accepts/infers "all" to create a VM with both password and ssh authentication.
+* `image create`: Added `--os-disk-caching` parameter to set os disk caching for an image.
 
 2.2.8
 ++++++

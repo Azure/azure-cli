@@ -12,6 +12,7 @@ from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplac
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     def test_sp_create_scenario(self):
         app_id_uri = 'http://' + self.create_random_name('clisp-test-', 20)
         self.kwargs['app_id_uri'] = app_id_uri
@@ -26,7 +27,8 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             self.check('[0].identifierUris[0]', '{app_id_uri}'),
             self.check('length([*])', 1)
         ])
-
+        self.assertTrue(len(self.cmd('ad app list').get_output_in_json()) <= 100)
+        self.cmd('ad app list --show-mine')
         # show/list sp
         self.cmd('ad sp show --id {app_id_uri}',
                  checks=self.check('servicePrincipalNames[0]', '{app_id_uri}'))
@@ -42,6 +44,8 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
                  checks=self.is_empty())
         self.cmd('ad app list --identifier-uri {app_id_uri}',
                  checks=self.is_empty())
+        self.assertTrue(len(self.cmd('ad sp list').get_output_in_json()) <= 100)
+        self.cmd('ad sp list --show-mine')
 
     def test_native_app_create_scenario(self):
         self.kwargs = {
@@ -300,8 +304,12 @@ class GraphAppCredsScenarioTest(ScenarioTest):
 
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append')
-            self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append --credential-description newCred1')
+            self.cmd('ad sp credential list --id {app}', checks=[
+                self.check('length([*])', 2),
+                self.check('[0].customKeyIdentifier', 'newCred1'),
+                self.check('[1].customKeyIdentifier', 'rbac')  # auto configured by create-for-rbac
+            ])
             self.cmd('ad sp credential delete --id {app} --key-id ' + key_id)
             result = self.cmd('ad sp credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             self.assertTrue(result[0]['keyId'] != key_id)
@@ -309,8 +317,12 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             # try the same through app commands
             result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad app credential reset --id {app} --password verySecert123 --append')
-            self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 2)).get_output_in_json()
+            self.cmd('ad app credential reset --id {app} --password verySecert123 --append --credential-description newCred2')
+            result = self.cmd('ad app credential list --id {app}', checks=[
+                self.check('length([*])', 2),
+                self.check('[0].customKeyIdentifier', 'newCred2'),
+                self.check('[1].customKeyIdentifier', 'newCred1')
+            ])
             self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 

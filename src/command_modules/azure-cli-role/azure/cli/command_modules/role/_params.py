@@ -21,7 +21,9 @@ def load_arguments(self, _):
     with self.argument_context('ad') as c:
         c.argument('_subscription')  # hide global subscription param
         c.argument('owner_object_id', help="owner's object id")
-        c.argument('not_mine', action='store_true', help='do not set the current user as the owner', arg_group='Ownerships')
+        c.argument('show_mine', action='store_true', help='list entities owned by the current user')
+        c.argument('include_all', options_list='--all', action='store_true',
+                   help='list all entities, expect long delay if under a big organization')
 
     with self.argument_context('ad app') as c:
         c.argument('app_id', help='application id')
@@ -43,6 +45,7 @@ def load_arguments(self, _):
         c.argument('required_resource_accesses', type=validate_file_or_dict,
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
+        c.argument('credential_description', help="the description of the password")
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
@@ -80,6 +83,7 @@ def load_arguments(self, _):
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+            c.argument('credential_description', help="the description of the password", arg_group='Credential')
 
     with self.argument_context('ad app credential reset') as c:
         c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')

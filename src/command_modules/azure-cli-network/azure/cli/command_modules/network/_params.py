@@ -27,7 +27,8 @@ from azure.cli.command_modules.network._validators import (
     get_network_watcher_from_vm, get_network_watcher_from_location,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages)
+    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
+    WafConfigExclusionAction)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -41,14 +42,14 @@ def load_arguments(self, _):
     (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
      Direction,
-     ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, HTTPMethod, IPAllocationMethod,
+     ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
-         'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'HTTPMethod', 'IPAllocationMethod',
+         'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
@@ -276,6 +277,7 @@ def load_arguments(self, _):
         c.argument('file_upload_limit', help='File upload size limit in MB.', type=int)
         c.argument('max_request_body_size', help='Max request body size in KB.', type=int)
         c.argument('request_body_check', arg_type=get_three_state_flag(), help='Allow WAF to check the request body.')
+        c.argument('exclusions', nargs='+', options_list='--exclusion', action=WafConfigExclusionAction)
 
     for item in ['ssl-policy', 'waf-config']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -777,6 +779,10 @@ def load_arguments(self, _):
     with self.argument_context('network watcher flow-log') as c:
         c.argument('nsg', help='Name or ID of the network security group.')
         c.argument('enabled', arg_type=get_three_state_flag())
+
+    with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
+        c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))
+        c.argument('log_version', help='Version (revision) of the flow log.', type=int)
 
     for item in ['list', 'stop', 'delete', 'show', 'show-status']:
         with self.argument_context('network watcher packet-capture {}'.format(item)) as c:
