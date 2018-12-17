@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._format import (
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output)
+    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -129,7 +129,7 @@ def load_command_table(self, _):
         client_factory=cf_express_route_circuit_peerings
     )
 
-    network_interface_endpoint_sdk = CliCommandType(
+    network_private_endpoint_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.interface_endpoints_operations#InterfaceEndpointsOperations.{}',
         client_factory=cf_interface_endpoints,
         min_api='2018-08-01'
@@ -291,6 +291,8 @@ def load_command_table(self, _):
         {'prop': 'probes', 'name': 'probe'},
         {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace}
     ]
+    if self.supported_api_version(min_api='2018-08-01'):
+        subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
 
     def _make_singular(value):
         try:
@@ -446,14 +448,15 @@ def load_command_table(self, _):
         g.show_command('show')
     # endregion
 
-    # region InterfaceEndpoint
-    with self.command_group('network interface-endpoint', network_interface_endpoint_sdk) as g:
-        # TODO: Re-enable when service team asks. See issue #7271
-        # g.custom_command('create', 'create_interface_endpoint')
-        # g.command('delete', 'delete')
-        g.custom_command('list', 'list_interface_endpoints')
+    # region PrivateEndpoint
+    with self.command_group('network interface-endpoint', network_private_endpoint_sdk, deprecate_info=self.deprecate(redirect='network private-endpoint', hide=True)) as g:
+        g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
-        # g.generic_update_command('update', custom_func_name='update_interface_endpoint')
+
+    with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
+        # TODO: Re-enable when service team asks. See issue #7271
+        g.custom_command('list', 'list_private_endpoints')
+        g.show_command('show')
     # endregion
 
     # region LoadBalancers
@@ -534,8 +537,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'get_effective_route_table', min_api='2016-09-01')
-        g.command('list-effective-nsg', 'list_effective_network_security_groups', min_api='2016-09-01')
+        g.command('show-effective-route-table', 'get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
+        g.command('list-effective-nsg', 'list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
         g.generic_update_command('update', custom_func_name='update_nic', supports_no_wait=True)
         g.wait_command('wait')
 

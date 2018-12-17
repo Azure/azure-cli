@@ -65,7 +65,7 @@ helps['vm create'] = """
           type: string
           short-summary: >
             The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
-            This parameter is required unless using `--attach-os-disk.`
+            This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
           populator-commands:
           - az vm image list
           - az vm image show
@@ -75,6 +75,9 @@ helps['vm create'] = """
         - name: Create a default Ubuntu VM with automatic SSH authentication.
           text: >
             az vm create -n MyVm -g MyResourceGroup --image UbuntuLTS
+        - name: Create a default RedHat VM with automatic SSH authentication using an image URN.
+          text: >
+            az vm create -n MyVm -g MyResourceGroup --image RedHat:RHEL:7-RAW:7.4.2018010506
         - name: Create a default Windows Server VM with a private IP address.
           text: >
             az vm create -n MyVm -g MyResourceGroup --public-ip-address "" --image Win2012R2Datacenter
@@ -131,14 +134,19 @@ helps['vmss create'] = """
     parameters:
         - name: --image
           type: string
-          short-summary: The name of the operating system image as a URN alias, URN, or URI.
+          short-summary: >
+            The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+            Valid URN format: "Publisher:Offer:Sku:Version".
+          populator-commands:
+          - az vm image list
+          - az vm image show
     examples:
         - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
           text: >
             az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
         - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
           text: |
-            az vmss create -n MyVmss -g MyResourceGroup --dns-name-for-public-ip MyGloballyUniqueDnsName \\
+            az vmss create -n MyVmss -g MyResourceGroup --public-ip-address-dns-name my-globally-dns-name \\
                 --load-balancer MyLoadBalancer --vnet-name MyVnet --subnet MySubnet --image UbuntuLTS \\
                 --generate-ssh-keys
         - name: Create a Linux VM scale set from a custom image using the default existing public SSH key.
@@ -220,6 +228,10 @@ helps['vm extension set'] = """
             az vm extension set -n VMAccessForLinux --publisher Microsoft.OSTCExtensions --version 1.4 \\
                 --vm-name MyVm --resource-group MyResourceGroup \\
                 --protected-settings '{"username":"user1", "ssh_key":"ssh_rsa ..."}'
+    parameters:
+    - name: --name -n
+      populator-commands:
+      - az vm extension image list
 """
 
 helps['vm extension wait'] = """
@@ -806,9 +818,13 @@ helps['vm image list'] = """
 helps['vm image list-offers'] = """
     type: command
     short-summary: List the VM image offers available in the Azure Marketplace.
+    parameters:
+        - name: --publisher -p
+          populator-commands:
+          - az vm list-publishers
     examples:
         - name: List all offers from Microsoft in the West US region.
-          text: az vm image list-offers -l westus -p Microsoft
+          text: az vm image list-offers -l westus -p MicrosoftWindowsServer
         - name: List all offers from OpenLocic in the West US region.
           text: az vm image list-offers -l westus -p OpenLogic
 """
@@ -826,6 +842,10 @@ helps['vm image list-publishers'] = """
 helps['vm image list-skus'] = """
     type: command
     short-summary: List the VM image SKUs available in the Azure Marketplace.
+    parameters:
+        - name: --publisher -p
+          populator-commands:
+          - az vm list-publishers
     examples:
         - name: List all skus available for CentOS published by OpenLogic in the West US region.
           text: az vm image list-skus -l westus -f CentOS -p OpenLogic
@@ -839,7 +859,7 @@ helps['vm image show'] = """
           text: >
             latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
                 "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
+            az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version {latest}
 """
 
 helps['vm image accept-terms'] = """
@@ -945,6 +965,10 @@ helps['vmss extension set'] = """
     type: command
     short-summary: Add an extension to a VMSS or update an existing extension.
     long-summary: Get extension details from `az vmss extension image list`.
+    parameters:
+    - name: --name -n
+      populator-commands:
+      - az vm extension image list
 """
 
 helps['vmss extension show'] = """
@@ -1223,19 +1247,23 @@ helps['vm identity assign'] = """
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
-        - name: Enable system assigned identity on a VM with the 'Reader' role.
+        - name: Enable the system assigned identity on a VM with the 'Reader' role.
           text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --scope /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/MyResourceGroup
+        - name: Enable the system assigned identity and a user assigned identity on a VM.
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader --identities [system] myAssignedId
 """
 
 helps['vm identity remove'] = """
     type: command
-    short-summary: (PREVIEW) Remove managed service identities from a VM.
+    short-summary: Remove managed service identities from a VM.
     examples:
-        - name: Remove system assigned identity
+        - name: Remove the system assigned identity
           text: az vm identity remove -g MyResourceGroup -n MyVm
+        - name: Remove a user assigned identity
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
-        - name: Remove system assigned identity and a user identity
+        - name: Remove the system assigned identity and a user identity
           text: az vm identity remove -g MyResourceGroup -n MyVm --identities [system] readerId
 """
 
@@ -1296,11 +1324,6 @@ helps['disk'] = """
     short-summary: Manage Azure Managed Disks.
 """
 
-helps['snapshot'] = """
-    type: group
-    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
-"""
-
 helps['image'] = """
     type: group
     short-summary: Manage custom virtual machine images.
@@ -1355,6 +1378,11 @@ helps['disk revoke-access'] = """
     short-summary: Revoke a resource's read access to a managed disk.
 """
 
+helps['snapshot'] = """
+    type: group
+    short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
+"""
+
 helps['snapshot create'] = """
     type: command
     short-summary: Create a snapshot.
@@ -1388,6 +1416,11 @@ helps['snapshot revoke-access'] = """
     short-summary: Revoke read access to a snapshot.
 """
 
+helps['snapshot wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a snapshot is met.
+"""
+
 helps['image create'] = """
     type: command
     short-summary: Create a custom Virtual Machine Image from managed disks or snapshots.
@@ -1395,8 +1428,7 @@ helps['image create'] = """
         - name: Create an image from an existing disk.
           text: |
             az image create -g MyResourceGroup -n image1 --os-type Linux \\
-                --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1 \\
-                --data-snapshot /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg/providers/Microsoft.Compute/snapshots/s2
+                --source /subscriptions/db5eb68e-73e2-4fa8-b18a-0123456789999/resourceGroups/rg1/providers/Microsoft.Compute/snapshots/s1
         - name: Create an image by capturing an existing generalized virtual machine in the same resource group.
           text: az image create -g MyResourceGroup -n image1 --source MyVm1
 """
@@ -1482,9 +1514,13 @@ helps['sig image-version update'] = """
     type: command
     short-summary: update a share image version
     examples:
-        - name: replicate to a new region
+        - name: replicate to a new set of regions
+          text: |
+            az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --target-regions westcentralus=2 eastus2
+        - name: replicate to one more region
           text: |
             az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
+
 """
 
 helps['sig image-version wait'] = """

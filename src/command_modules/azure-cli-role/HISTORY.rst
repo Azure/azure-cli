@@ -2,6 +2,28 @@
 
 Release History
 ===============
+2.2.0
+++++++
+* BREAKING CHANGE: `az ad app/sp list` will by default output the first 100 objects instead of getting all of them.    
+
+2.1.11
+++++++
+* support custom identifier for password credential 
+
+2.1.10
+++++++
+* `ad app update`: address a failure caused by updating immutable credentials
+* graph: output warnings to communicate breaking changes in the near future for "ad app/sp list"
+
+2.1.9
+++++++
+* support API permission management, signed-in-user, and application password & certificate credential management
+* `ad sp create-for-rbac`: clarify the confusion between displayName and service principal name
+* support grant permissions to AAD apps
+
+2.1.8
+++++++
+* support add/remove/list owner on AAD Applciation and Group objects
 
 2.1.7
 ++++++

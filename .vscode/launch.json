@@ -1,160 +1,57 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Azure CLI Debug (Integrated Console)",
-      "type": "python",
-      "request": "launch",
-      "stopOnEntry": false,
-      "pythonPath": "${workspaceRoot}/venv/bin/python",
-      "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": [
-        "openshift",
-        "create",
-        "-n",
-        "juosacli1011",
-        "-g",
-        "juosacli1011",
-        "-c",
-        "1",
-        "-l",
-        "canadaeast",
-        "--fqdn",
-        "juosaclijuosacli1010700.canadaeast.cloudapp.azure.com",
-        "--debug"
-      ],
-      "console": "integratedTerminal",
-      "debugOptions": [
-        "WaitOnAbnormalExit",
-        "WaitOnNormalExit",
-        "RedirectOutput"
-      ]
-    },
-    {
-      "name": "Azure CLI Debug vnet",
-      "type": "python",
-      "request": "launch",
-      "stopOnEntry": false,
-      "pythonPath": "${workspaceRoot}/env/bin/python",
-      "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": [
-        "openshift",
-        "show",
-        "-n",
-        "juosacli300",
-        "-g",
-        "juosacli300",
-        "--debug"
-      ],
-      "console": "integratedTerminal",
-      "debugOptions": [
-        "WaitOnAbnormalExit",
-        "WaitOnNormalExit",
-        "RedirectOutput"
-      ]
-    },
-    {
-      "name": "Azure CLI Debug Scale",
-      "type": "python",
-      "request": "launch",
-      "stopOnEntry": false,
-      "pythonPath": "${workspaceRoot}/env/bin/python",
-      "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": [
-        "openshift",
-        "scale",
-        "-n",
-        "juosacli800",
-        "-g",
-        "juosacli800",
-        "--compute-count",
-        "3",
-        "--debug"
-      ],
-      "console": "integratedTerminal",
-      "debugOptions": [
-        "WaitOnAbnormalExit",
-        "WaitOnNormalExit",
-        "RedirectOutput"
-      ]
-    },
-    {
-      "name": "Azure CLI Debug 2 (Integrated Console)",
-      "type": "python",
-      "request": "launch",
-      "stopOnEntry": false,
-      "pythonPath": "${workspaceRoot}/env/bin/python",
-      "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": [
-        "aks",
-        "create",
-        "-n",
-        "juaksosa",
-        "-g",
-        "juaksosa",
-        "-c",
-        "1",
-        "-l",
-        "eastus",
-        "--service-principal",
-        "f63d3b6c-614d-4901-bc15-fe86772832cf",
-        "--client-secret",
-        "ee3fbf27-d11c-4adc-9079-f261015b7a51",
-        "--debug"
-      ],
-      "console": "integratedTerminal",
-      "debugOptions": [
-        "WaitOnAbnormalExit",
-        "WaitOnNormalExit",
-        "RedirectOutput"
-      ]
-    },
-    {
-      "name": "Azure tests",
-      "type": "python",
-      "request": "launch",
-      "stopOnEntry": false,
-      "pythonPath": "${workspaceRoot}/env/bin/python",
-      "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": ["azdev", "test", "test_osa_commands"],
-      "console": "integratedTerminal",
-      "debugOptions": [
-        "WaitOnAbnormalExit",
-        "WaitOnNormalExit",
-        "RedirectOutput"
-      ]
-    },
-    {
-      "name": "Azure CLI Debug (External Console)",
-      "type": "python",
-      "request": "launch",
-      "stopOnEntry": true,
-      "pythonPath": "${config:python.pythonPath}",
-      "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": ["--help"],
-      "console": "externalTerminal",
-      "debugOptions": ["WaitOnAbnormalExit", "WaitOnNormalExit"]
-    },
-    {
-      "name": "Azdev Scripts",
-      "type": "python",
-      "request": "launch",
-      "pythonPath": "${config:python.pythonPath}",
-      "program": "${workspaceRoot}/tools/automation/__main__.py",
-      "cwd": "${workspaceRoot}",
-      "args": ["--help"],
-      "console": "integratedTerminal",
-      "debugOptions": [
-        "WaitOnAbnormalExit",
-        "WaitOnNormalExit",
-        "RedirectOutput"
-      ]
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Azure CLI Debug (Integrated Console)",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "--help"
+            ],
+            "console": "integratedTerminal",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ],
+            "debugStdLib": true
+        },
+        {
+            "name": "Azure CLI Debug (External Console)",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": true,
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "--help"
+            ],
+            "console": "externalTerminal",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit"
+            ]
+        },
+        {
+            "name": "Azdev Scripts",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/tools/automation/__main__.py",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "--help"
+            ],
+            "console": "integratedTerminal",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        }
+    ]
 }

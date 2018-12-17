@@ -173,6 +173,7 @@ def load_command_table(self, _):
         g.custom_command('invoke-action', 'invoke_resource_action')
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
+        g.wait_command('wait', getter_name='show_resource')
 
     with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
@@ -241,15 +242,15 @@ def load_command_table(self, _):
 
     with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
-        g.command('delete', 'delete')
-        g.command('list', 'list')
+        g.custom_command('delete', 'delete_policy_definition')
+        g.custom_command('list', 'list_policy_definition')
         g.custom_show_command('show', 'get_policy_definition')
-        g.generic_update_command('update', custom_func_name='update_policy_definition', custom_func_type=resource_custom)
+        g.custom_command('update', 'update_policy_definition')
 
     with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')
-        g.command('delete', 'delete')
-        g.command('list', 'list')
+        g.custom_command('delete', 'delete_policy_setdefinition')
+        g.custom_command('list', 'list_policy_setdefinition')
         g.custom_show_command('show', 'get_policy_setdefinition')
         g.custom_command('update', 'update_policy_setdefinition')
 

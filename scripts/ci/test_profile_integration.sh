@@ -14,6 +14,8 @@ set -e
 
 output=$(az cloud list-profiles -otsv)
 
+azdev verify package $share_folder/build/
+
 for profile in $output; do
     echo
     echo "Verifying profile:" $profile

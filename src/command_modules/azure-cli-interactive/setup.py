@@ -14,7 +14,7 @@ except ImportError:
     cmdclass = {}
 
 # Version is also defined in azclishell.__init__.py.
-VERSION = "0.3.30"
+VERSION = "0.4.0"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -55,11 +55,10 @@ setup(
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
     packages=[
-         'azure',
-         'azure.cli',
-         'azure.cli.command_modules',
-         'azure.cli.command_modules.interactive',
-         'azure.cli.command_modules.interactive.azclishell',
+        'azure',
+        'azure.cli',
+        'azure.cli.command_modules',
+        'azure.cli.command_modules.interactive',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

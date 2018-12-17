@@ -7,13 +7,14 @@ import tarfile
 import os
 import re
 import codecs
-from builtins import open as bltn_open
+from io import open
 import requests
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
 from azure.storage.blob import BlockBlobService
 from ._azure_utils import get_blob_info
+from ._constants import TASK_VALID_VSTS_URLS
 
 logger = get_logger(__name__)
 
@@ -113,7 +114,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
         if docker_file_path:
             docker_file_tarinfo = tar.gettarinfo(
                 docker_file_path, docker_file_in_tar)
-            with bltn_open(docker_file_path, "rb") as f:
+            with open(docker_file_path, "rb") as f:
                 tar.addfile(docker_file_tarinfo, f)
 
 
@@ -185,7 +186,7 @@ def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matchin
     if not ignored:
         # append the tar header and data to the archive
         if tarinfo.isreg():
-            with bltn_open(name, "rb") as f:
+            with open(name, "rb") as f:
                 tar.addfile(tarinfo, f)
         else:
             tar.addfile(tarinfo)
@@ -208,8 +209,11 @@ def check_remote_source_code(source_location):
     # http
     if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") \
        or lower_source_location.startswith("github.com/"):
-        if re.search(r"\.git(?:#.+)?$", lower_source_location) or "visualstudio.com" in lower_source_location:
-            # git url must contain ".git" or be from VSTS
+        isVSTS = any(url in lower_source_location for url in TASK_VALID_VSTS_URLS)
+        if isVSTS or re.search(r"\.git(?:#.+)?$", lower_source_location):
+            # git url must contain ".git" or be from VSTS/Azure DevOps.
+            # This is because Azure DevOps doesn't follow the standard git server convention of putting
+            # .git at the end of their URLs, so we have to special case them.
             return source_location
         elif not lower_source_location.startswith("github.com/"):
             # Others are tarball

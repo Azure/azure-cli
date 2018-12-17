@@ -20,9 +20,6 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1
         - name: Create a container in a container group that runs Windows, with 2 cores and 3.5Gb of memory.
           text: az container create -g MyResourceGroup --name mywinapp --image winappimage:latest --os-type Windows --cpu 2 --memory 3.5
-        - name: Create a container in a container group with public IP address and ports.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address public --ports 80 443
-        - name: Create a container in a container group with public IP address and UDP port.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ip-address public --ports 8081 --protocol UDP
         - name: Create a container in a container group with public IP address, ports and DNS name label.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --ports 80 443 --dns-name-label contoso
@@ -31,11 +28,9 @@ helps['container create'] = """
         - name: Create a container in a container group that runs a command and stop the container afterwards.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "echo hello" --restart-policy Never
         - name: Create a container in a container group with environment variables.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest -e key1=value1 key2=value2
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables key1=value1 key2=value2
         - name: Create a container in a container group using container image from Azure Container Registry.
           text: az container create -g MyResourceGroup --name myapp --image myAcrRegistry.azurecr.io/myimage:latest --registry-password password
-        - name: Create a container in a container group using container image from another private container image registry.
-          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1.5 --registry-login-server myregistry.com --registry-username username --registry-password password
         - name: Create a container in a container group that mounts an Azure File share as volume.
           text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "cat /mnt/azfile/myfile" --azure-file-volume-share-name myshare --azure-file-volume-account-name mystorageaccount --azure-file-volume-account-key mystoragekey --azure-file-volume-mount-path /mnt/azfile
         - name: Create a container in a container group that mounts a git repo as volume.
@@ -44,8 +39,15 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup -f containerGroup.yaml
         - name: Create a container group using Log Analytics from a workspace name.
           text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace myworkspace
-        - name: Create a container group using Log Analytics from a workspace id and key.
-          text: az container create -g MyResourceGroup --name myapp --log-analytics-workspace workspaceid --log-analytics-workspace-key workspacekey
+        - name: Create a container group with a system assigned identity.
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity
+        - name: Create a container group with a system assigned identity. The group will have a 'Contributor' role with access to a storage account.
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        - name: Create a container group with a user assigned identity.
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity  /subscriptions/mySubscrpitionId/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        - name: Create a container group with both system and user assigned identity.
+          text: az container create -g MyResourceGroup --name myapp --image myimage:latest --assign-identity [system] /subscriptions/mySubscrpitionId/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+          min_profile: latest
 """
 
 helps['container delete'] = """

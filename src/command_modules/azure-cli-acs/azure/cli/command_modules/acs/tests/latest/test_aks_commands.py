@@ -266,6 +266,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.cmd(create_cmd)
         self.assertIn('--max-pods', str(err.exception))
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_without_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -308,6 +309,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -334,6 +336,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_aks_create_default_service_without_SP_and_with_role_assignment(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)

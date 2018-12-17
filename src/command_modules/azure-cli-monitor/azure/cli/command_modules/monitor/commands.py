@@ -10,12 +10,16 @@ from azure.cli.core.commands import CliCommandType
 def load_command_table(self, _):
 
     from ._client_factory import (
-        cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
+        cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
         cf_metric_alerts)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
+
+    monitor_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
+        exception_handler=monitor_exception_handler)
 
     action_group_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations.action_groups_operations#ActionGroupsOperations.{}',
@@ -27,9 +31,9 @@ def load_command_table(self, _):
         client_factory=cf_action_groups,
         exception_handler=monitor_exception_handler)
 
-    activity_log_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.operations.activity_log#{}',
-        client_factory=cf_activity_log,
+    activity_log_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations.event_categories_operations#EventCategoriesOperations.{}',
+        client_factory=cf_event_categories,
         exception_handler=monitor_exception_handler)
 
     activity_log_alerts_sdk = CliCommandType(
@@ -87,11 +91,6 @@ def load_command_table(self, _):
         client_factory=cf_log_profiles,
         exception_handler=monitor_exception_handler)
 
-    metric_operations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.metrics_operations#MetricsOperations.{}',
-        client_factory=cf_metrics,
-        exception_handler=monitor_exception_handler)
-
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
         client_factory=cf_alert_rules,
@@ -116,9 +115,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_action_groups', setter_arg_name='action_group',
                                  table_transformer=action_group_list_table)
 
-    with self.command_group('monitor activity-log', activity_log_custom) as g:
-        g.command('list', 'list_activity_log')
-        g.command('list-categories', 'list', operations_tmpl='azure.mgmt.monitor.operations.event_categories_operations#EventCategoriesOperations.{}', client_factory=cf_event_categories)
+    with self.command_group('monitor activity-log', activity_log_sdk) as g:
+        g.custom_command('list', 'list_activity_log', client_factory=cf_activity_log)
+        g.command('list-categories', 'list')
 
     with self.command_group('monitor activity-log alert', activity_log_alerts_sdk, custom_command_type=activity_log_alerts_custom) as g:
         g.custom_command('list', 'list_activity_logs_alert')
@@ -191,7 +190,7 @@ def load_command_table(self, _):
 
     with self.command_group('monitor metrics') as g:
         from .transformers import metrics_table, metrics_definitions_table
-        g.command('list', 'list', command_type=metric_operations_sdk, table_transformer=metrics_table)
+        g.command('list', 'list_metrics', command_type=monitor_custom, table_transformer=metrics_table)
         g.command('list-definitions', 'list', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
 
     with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom, client_factory=cf_metric_alerts) as g:

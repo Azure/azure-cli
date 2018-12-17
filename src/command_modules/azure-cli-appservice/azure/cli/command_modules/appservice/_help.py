@@ -121,17 +121,17 @@ examples:
 
 helps['webapp config storage-account'] = """
 type: group
-short-summary: Manage a web app's Azure storage account configurations.
+short-summary: Manage a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config storage-account list'] = """
 type: command
-short-summary: Get a web app's Azure storage account configurations.
+short-summary: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config storage-account add'] = """
 type: command
-short-summary: Add an Azure storage account configuration to a web app.
+short-summary: Add an Azure storage account configuration to a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
     - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
       text: >
@@ -146,7 +146,7 @@ examples:
 
 helps['webapp config storage-account update'] = """
 type: command
-short-summary: Update an existing Azure storage account configuration on a web app.
+short-summary: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
     - name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
       text: >
@@ -157,7 +157,7 @@ examples:
 
 helps['webapp config storage-account delete'] = """
 type: command
-short-summary: Delete a web app's Azure storage account configuration.
+short-summary: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config connection-string'] = """
@@ -633,6 +633,27 @@ helps['webapp create'] = """
         - name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
           text: >
             az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+"""
+
+helps['webapp up'] = """
+    type: command
+    short-summary: (Preview) Create and deploy existing local code to the webapp, by running the command from the folder where the code is present.
+                   Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET,
+                   staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps.
+                   If command is run from an empty folder, an empty windows webapp is created.
+    examples:
+        - name: View the details of the app that will be created, without actually running the operation
+          text: >
+            az webapp up -n MyUniqueAppName --dryrun
+        - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+          text: >
+            az webapp up -n MyUniqueAppName
+        - name: Create a web app in a sepcific region, by running the command from the folder where the code to deployed exists.
+          text: >
+            az webapp up -n MyUniqueAppName -l locationName
+        - name: Deploy new code to an app that was originally created using the same command
+          text: >
+            az webapp up -n MyUniqueAppName -l locationName
 """
 
 helps['webapp update'] = """

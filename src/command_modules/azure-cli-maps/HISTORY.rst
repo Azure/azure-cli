@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.3
++++++
+* Add support for the S1 SKU: `maps account create | update`: now supports `S1` as a valid value for the `--sku | -s` parameter.
+
 0.3.2
 +++++
 * Minor fixes

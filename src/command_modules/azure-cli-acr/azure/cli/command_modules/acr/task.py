@@ -66,6 +66,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     values=None,
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
+                    pull_request_trigger_enabled=True,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -77,15 +78,16 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None):
-    if commit_trigger_enabled and not git_access_token:
-        raise CLIError("Commit trigger needs to be disabled [--commit-trigger-enabled False] "
-                       "if no --git-access-token is provided.")
+    if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
+        raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
+                       "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
     if file.endswith(ALLOWED_TASK_FILE_TYPES):
         step = FileTaskStep(
             task_file_path=file,
             values_file_path=values,
             context_path=context_path,
+            context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
     else:
@@ -95,7 +97,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             no_cache=no_cache,
             docker_file_path=file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-            context_path=context_path
+            context_path=context_path,
+            context_access_token=git_access_token
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -106,7 +109,13 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         source_control_type = SourceControlType.github.value
 
     source_triggers = None
+    source_trigger_events = []
     if commit_trigger_enabled:
+        source_trigger_events.append(SourceTriggerEvent.commit.value)
+    if pull_request_trigger_enabled:
+        source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
+    # if source_trigger_events contains any event types we assume they are enabled
+    if source_trigger_events:
         source_triggers = [
             SourceTrigger(
                 source_repository=SourceProperties(
@@ -119,8 +128,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                         scope='repo'
                     )
                 ),
-                source_trigger_events=[SourceTriggerEvent.commit.value],
-                status=TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value,
+                source_trigger_events=source_trigger_events,
+                status=TriggerStatus.enabled.value,
                 name=source_trigger_name
             )
         ]
@@ -205,6 +214,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     timeout=None,
                     context_path=None,
                     commit_trigger_enabled=None,
+                    pull_request_trigger_enabled=None,
                     git_access_token=None,
                     branch=None,
                     image_names=None,
@@ -239,6 +249,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             task_file_path=file,
             values_file_path=values,
             context_path=context_path,
+            context_access_token=git_access_token,
             values=set_values
         )
     elif file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
@@ -248,7 +259,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             no_cache=no_cache,
             docker_file_path=file,
             arguments=arguments,
-            context_path=context_path
+            context_path=context_path,
+            context_access_token=git_access_token
         )
     elif step:
         if isinstance(step, DockerBuildStep):
@@ -258,7 +270,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 no_cache=no_cache,
                 docker_file_path=file,
                 arguments=arguments,
-                context_path=context_path
+                context_path=context_path,
+                context_access_token=git_access_token
             )
 
         elif isinstance(step, FileTaskStep):
@@ -266,6 +279,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 task_file_path=file,
                 values_file_path=values,
                 context_path=context_path,
+                context_access_token=git_access_token,
                 values=set_values
             )
 
@@ -282,10 +296,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     if task.trigger:
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
-        if commit_trigger_enabled or source_triggers is not None:
-            status = None
-            if commit_trigger_enabled is not None:
-                status = TriggerStatus.enabled.value if commit_trigger_enabled else TriggerStatus.disabled.value
+        if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
+            source_trigger_events = _get_trigger_event_list(source_triggers,
+                                                            commit_trigger_enabled,
+                                                            pull_request_trigger_enabled)
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -297,11 +311,12 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                             token_type=DEFAULT_TOKEN_TYPE
                         )
                     ),
-                    source_trigger_events=[SourceTriggerEvent.commit],
-                    status=status,
-                    name=source_triggers[0].name if source_triggers else "defaultBaseimageTriggerName"
+                    source_trigger_events=source_trigger_events,
+                    status=TriggerStatus.enabled.value if source_trigger_events else TriggerStatus.disabled.value,
+                    name=source_triggers[0].name if source_triggers else "defaultSourceTriggerName"
                 )
             ]
+
         if base_image_trigger_enabled or base_image_trigger is not None:
             status = None
             if base_image_trigger_enabled is not None:
@@ -488,3 +503,27 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     if image:
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
+
+
+def _get_trigger_event_list(source_triggers,
+                            commit_trigger_enabled=None,
+                            pull_request_trigger_enabled=None):
+    source_trigger_events = set()
+    # perform merge with server-side event list
+    if source_triggers:
+        source_trigger_events = set(source_triggers[0].source_trigger_events)
+        if source_triggers[0].status == TriggerStatus.disabled.value:
+            source_trigger_events.clear()
+    if commit_trigger_enabled is not None:
+        if commit_trigger_enabled:
+            source_trigger_events.add(SourceTriggerEvent.commit.value)
+        else:
+            if SourceTriggerEvent.commit.value in source_trigger_events:
+                source_trigger_events.remove(SourceTriggerEvent.commit.value)
+    if pull_request_trigger_enabled is not None:
+        if pull_request_trigger_enabled:
+            source_trigger_events.add(SourceTriggerEvent.pullrequest.value)
+        else:
+            if SourceTriggerEvent.pullrequest.value in source_trigger_events:
+                source_trigger_events.remove(SourceTriggerEvent.pullrequest.value)
+    return source_trigger_events

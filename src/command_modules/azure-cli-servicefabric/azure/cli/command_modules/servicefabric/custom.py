@@ -1692,7 +1692,7 @@ def _create_keyvault(cmd,
 # pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
     try:
-        current_user = graph_client.objects.get_current_user()
+        current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
     except CloudError:

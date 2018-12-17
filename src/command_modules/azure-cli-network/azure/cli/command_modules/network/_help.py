@@ -655,7 +655,7 @@ helps['network application-gateway ssl-policy set'] = """
           text: |
             az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway \\
                 --policy-type Custom --min-protocol-version TLSv1_2 \\
-                --cipher-suits TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
+                --cipher-suites TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
 """
 
 helps['network application-gateway ssl-policy show'] = """
@@ -686,8 +686,46 @@ helps['network application-gateway ssl-policy predefined show'] = """
         - name: Gets SSL predefined policy with the specified policy name.
           text: az network application-gateway ssl-policy predefined show -n AppGwSslPolicy20170401
 """
+# endregion
 
+# region Application Gateway Trusted Root Certs
+helps['network application-gateway root-cert'] = """
+    type: group
+    short-summary: Manage trusted root certificates of an application gateway.
+"""
+helps['network application-gateway root-cert create'] = """
+    type: command
+    short-summary: Upload a trusted root certificate.
+"""
 
+helps['network application-gateway root-cert delete'] = """
+    type: command
+    short-summary: Delete a trusted root certificate.
+    examples:
+        - name: Delete a trusted root certificate.
+          text: az network application-gateway root-cert delete -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
+"""
+
+helps['network application-gateway root-cert list'] = """
+    type: command
+    short-summary: List trusted root certificates.
+    examples:
+        - name: List trusted root certificates.
+          text: az network application-gateway root-cert list -g MyResourceGroup --gateway-name MyAppGateway
+"""
+
+helps['network application-gateway root-cert show'] = """
+    type: command
+    short-summary: Get the details of a trusted root certificate.
+    examples:
+        - name: Get the details of a trusted root certificate.
+          text: az network application-gateway root-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
+"""
+
+helps['network application-gateway root-cert update'] = """
+    type: command
+    short-summary: Update a trusted root certificate.
+"""
 # endregion
 
 # region Application Gateway URL path map
@@ -827,6 +865,12 @@ helps['network application-gateway waf-config set'] = """
           short-summary: Space-separated list of rule IDs to disable.
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
+        - name: --exclusion
+          short-summary: Add an exclusion expression to the WAF check.
+          long-summary: |
+            Usage:   --exclusion VARIABLE OPERATOR VALUE
+
+            Multiple exclusions can be specified by using more than one `--exclusion` argument.
     examples:
         - name: Configure WAF on an application gateway in detection mode with default values
           text: |
@@ -836,7 +880,14 @@ helps['network application-gateway waf-config set'] = """
           text: |
             az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
                 --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
-                --disabled-rules 920130 920140 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI
+                --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
+                --disabled-rules 920130 920140
+        - name: Configure WAF on an application gateway with exclusions.
+          text: |
+            az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
+                --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
+                --exclusion "RequestHeaderNames StartsWith x-header" \\
+                --exclusion "RequestArgNames Equals IgnoreThis"
 """
 
 helps['network application-gateway waf-config show'] = """
@@ -1977,16 +2028,6 @@ helps['network interface-endpoint'] = """
     short-summary: Manage interface endpoints.
 """
 
-# helps['network interface-endpoint create'] = """
-#    type: command
-#    short-summary: Create an interface endpoint.
-# """
-
-# helps['network interface-endpoint delete'] = """
-#    type: command
-#    short-summary: Delete an interface endpoint.
-# """
-
 helps['network interface-endpoint list'] = """
     type: command
     short-summary: List interface endpoints.
@@ -1996,12 +2037,26 @@ helps['network interface-endpoint show'] = """
     type: command
     short-summary: Get the details of an interface endpoint.
 """
-
-# helps['network interface-endpoint update'] = """
-#    type: command
-#    short-summary: Update an interface endpoint.
-# """
 # endregion
+
+# region Private Endpoint
+helps['network private-endpoint'] = """
+    type: group
+    short-summary: Manage private endpoints.
+"""
+
+
+helps['network private-endpoint list'] = """
+    type: command
+    short-summary: List private endpoints.
+"""
+
+helps['network private-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an private endpoint.
+"""
+# endregion
+
 
 # region Load Balancer
 helps['network lb'] = """
@@ -3238,7 +3293,7 @@ helps['network traffic-manager profile create'] = """
         - name: Create a traffic manager profile with performance routing.
           text: |
             az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance \\
-                --unique-dns-name mywebapp --ttl 30 --monitor-protocol HTTP --monitor-port 80 --monitor-path "/"
+                --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/"
 """
 
 helps['network traffic-manager profile delete'] = """

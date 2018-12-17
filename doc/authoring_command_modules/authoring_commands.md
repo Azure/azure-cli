@@ -71,7 +71,7 @@ Write your command as a simple function, specifying your arguments as the parame
 
 ***Parameter Naming Guidance***
 
-When choosing names, it is recommended that you look at similiar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
+When choosing names, it is recommended that you look at similar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
 
 Avoid using a parameter name called `name` as this is a very common alias in the CLI and will often create aliasing conflicts.
 
@@ -258,7 +258,7 @@ argument_context(self, scope, **kwargs):
 - `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`.
 
 ```Python
-with self.argument_context('my_param', ...) as c:  # applies to BOTH command1 and command2
+with self.argument_context('mypackage', ...) as c:  # applies to BOTH command1 and command2
 ```
 But
 ```Python
@@ -266,7 +266,7 @@ with self.argument_context('mypackage command1', ...) as c:  # applies to comman
 ```
 Like CSS rules, modifications are applied in order from generic to specific.
 ```Python
-with self.argument_context('my_param', ...) as c:  # applies to both command1 and command2
+with self.argument_context('mypackage', ...) as c:  # applies to both command1 and command2
   c.argument('my_param', ...)
 with self.argument_context('mypackage command1', ...) as c:  # applies to command1 but not command2
   c.argument('my_param', ...)
@@ -320,7 +320,7 @@ When writing commands for the Azure CLI, it is important to understand how keywo
 
 From the diagram you can see that any kwargs supplied when creating the `AzCommandsLoader` object are passed to and used as the baseline for any command groups or argument contexts that are later created. Any kwargs specified in the `command_group` calls serve as the baseline for any `command` or `custom_command` calls, and any kwargs passed to `argument_context` serve as the baseline for any calls to `argument`.
 
-While kwargs are inherited from higher levels on the diagram, they can be overriden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
+While kwargs are inherited from higher levels on the diagram, they can be overridden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
 
 Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
 
@@ -483,7 +483,7 @@ with self.argument_context('parent child') as c:
 Often times, the service needs references to supporting resources like storage accounts, key vault, etc. Typically, services require the ARM ID of these resources. The CLI pattern is to accept the ARM ID for this resource OR the name of the resource, assuming the resource is in the same subscription and resource group as the main resource.
 
 DO NOT:
-- Expose an ID parameter like `--storage-account-id`. 
+- Expose an ID parameter like `--storage-account-id`.
 - Add parameters like `--storage-account-resource-group` to indicate the resource group for the secondary resource. The user should supply the ARM ID in this instance.
 
 DO:
@@ -581,7 +581,7 @@ return setter(instance)  # update the instance and return the result
 
 `generic_update_command` was designed to simulate PATCH-like behavior for services that are backed only by a PUT API endpoint. For services that have actual PATCH-based update endpoints, the CLI's `update` command should still leverage `generic_update_command` in order to provide consistency among commands. The following guidelines should be helpful:
 
-- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default). 
+- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default).
 - You will HAVE TO supply `custom_func_name` and `custom_func_type`. Consider the following example:
 ```Python
 def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, complex_prop2=None):
@@ -592,7 +592,7 @@ def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, c
    parameters = FooUpdateParameters(
      prop1=prop1,
      prop2=prop2)
-     
+
    # (2) complex objects must also have PATCH-like behavior, and often services do not
    # correctly support this. You may need to fill these objects with the existing
    # values if they are not being updated

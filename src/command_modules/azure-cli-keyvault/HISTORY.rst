@@ -2,6 +2,21 @@
 
 Release History
 ===============
+2.2.8
++++++
+* Minor fixes
+
+2.2.7
++++++
+* bug fix: do not drop legit exceptions 
+
+2.2.6
++++++
+* Minor changes
+
+2.2.5
++++++
+* Minor changes
 
 2.2.4
 +++++

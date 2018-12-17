@@ -31,7 +31,6 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 import requests
 
@@ -1179,9 +1178,9 @@ def create_application(client, display_name, homepage, identifier_uris,
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                   display_name=display_name,
+                                                   identifier_uris=identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
@@ -1266,7 +1265,7 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     else:
         app_id = identifier
 
-    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id, True))
+    return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
 def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None):
@@ -1366,13 +1365,9 @@ def subnet_role_assignment_exists(cli_ctx, scope):
     return False
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001',
-               enable_cloud_console_aks_browse=False):
+def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, listen_port='8001'):
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
-
-    if in_cloud_console() and not enable_cloud_console_aks_browse:
-        raise CLIError('Browse is disabled in cloud shell by default.')
 
     proxy_url = 'http://127.0.0.1:{0}/'.format(listen_port)
     _, browse_path = tempfile.mkstemp()
@@ -1392,17 +1387,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False, li
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console() and enable_cloud_console_aks_browse:
-        logger.warning('***WARNING***')
-        logger.warning('Browsing the kubernetes dashboard in Cloud Shell is an alpha feature.')
-        logger.warning('The browse URL is currently obfuscated but not authenticated.')
-        logger.warning('Do not share this URL.')
-        if not prompt_y_n('Proceed?'):
-            raise CLIError("Browse aborted.")
+    if in_cloud_console():
         # TODO: better error handling here.
-        response = requests.post('http://localhost:8888/openport/8001')
+        response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
         result = json.loads(response.text)
-        logger.warning('To view the console, please open % in a new tab', result['url'])
+        term_id = os.environ.get('ACC_TERM_ID')
+        if term_id:
+            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+                                     json={"url": result['url']})
+        logger.warning('To view the console, please open %s in a new tab', result['url'])
     else:
         logger.warning('Proxy running on %s', proxy_url)
 
@@ -1451,6 +1444,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                skip_subnet_role_assignment=False,
                network_plugin=None,
+               network_policy=None,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1513,13 +1507,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                            'Are you an Owner on this subscription?')
 
     network_profile = None
-    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
         network_profile = ContainerServiceNetworkProfile(
             network_plugin=network_plugin,
             pod_cidr=pod_cidr,
             service_cidr=service_cidr,
             dns_service_ip=dns_service_ip,
-            docker_bridge_cidr=docker_bridge_address
+            docker_bridge_cidr=docker_bridge_address,
+            network_policy=network_policy
         )
 
     addon_profiles = _handle_addons_args(
@@ -1596,12 +1591,13 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
+def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
+                      subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
-                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+                              workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
@@ -1635,7 +1631,8 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
 ADDONS = {
     'http_application_routing': 'httpApplicationRouting',
-    'monitoring': 'omsagent'
+    'monitoring': 'omsagent',
+    'virtual-node': 'aciConnector'
 }
 
 
@@ -1652,18 +1649,17 @@ def aks_show(cmd, client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="nodepool1", no_wait=False):
+def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     for agent_profile in instance.agent_pool_profiles:
-        if agent_profile.name == nodepool_name:
+        if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
             agent_profile.count = int(node_count)  # pylint: disable=no-member
-
-    # null out the SP and AAD profile because otherwise validation complains
-    instance.service_principal_profile = None
-    instance.aad_profile = None
-
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+            # null out the SP and AAD profile because otherwise validation complains
+            instance.service_principal_profile = None
+            instance.aad_profile = None
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
@@ -1730,15 +1726,20 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
 
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
-                   no_wait=False):
+                   subnet_name=None, no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
     addon_profiles = instance.addon_profiles or {}
 
+    os_type = 'Linux'
+
     # for each addons argument
     for addon_arg in addon_args:
         addon = ADDONS[addon_arg]
+        if addon == 'aciConnector':
+            # only linux is supported for now, in the future this will be a user flag
+            addon += os_type
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -1759,6 +1760,15 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+            elif addon == 'aciConnector' + os_type:
+                if addon_profile.enabled:
+                    raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
+                                   'To change virtual-node configuration, run '
+                                   '"az aks disable-addons -a virtual-node -g {resource_group_name}" '
+                                   'before enabling it again.')
+                if not subnet_name:
+                    raise CLIError('The aci-connector addon requires setting a subnet name.')
+                addon_profile.config = {'SubnetName': subnet_name}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
@@ -1778,9 +1788,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
 def _get_azext_module(extension_name, module_name):
     try:
         # Adding the installed extension in the path
-        from azure.cli.core.extension import get_extension_path
-        ext_dir = get_extension_path(extension_name)
-        sys.path.append(ext_dir)
+        from azure.cli.core.extension.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
         # Import the extension module
         from importlib import import_module
         azext_custom = import_module(module_name)
@@ -1824,8 +1833,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
 
 def _install_dev_spaces_extension(extension_name):
     try:
-        from azure.cli.command_modules.extension import custom
-        custom.add_extension(extension_name=extension_name)
+        from azure.cli.core.extension import operations
+        operations.add_extension(extension_name=extension_name)
     except Exception:  # nopa pylint: disable=broad-except
         return False
     return True
@@ -1834,15 +1843,9 @@ def _install_dev_spaces_extension(extension_name):
 def _update_dev_spaces_extension(extension_name, extension_module):
     from azure.cli.core.extension import ExtensionNotInstalledException
     try:
-        from azure.cli.command_modules.extension import custom
-        custom.update_extension(extension_name=extension_name)
-
-        # reloading the imported module to update
-        try:
-            from importlib import reload
-        except ImportError:
-            pass  # for python 2
-        reload(sys.modules[extension_module])
+        from azure.cli.core.extension import operations
+        operations.update_extension(extension_name=extension_name)
+        operations.reload_extension(extension_name=extension_name)
     except CLIError as err:
         logger.info(err)
     except ExtensionNotInstalledException as err:

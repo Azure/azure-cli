@@ -15,7 +15,7 @@ class EventGridTestConfiguration:
         self.event_subscription_base_endpoint = "https://eventgridclilivetest.azurewebsites.net/api/HttpTriggerCSharp1"
         try:
             self.event_subscription_endpoint = os.environ['A01_EVENTGRID_ENDPOINT']
-        except Exception as e:
+        except Exception:
             self.event_subscription_endpoint = self.event_subscription_sanitized_endpoint
 
 

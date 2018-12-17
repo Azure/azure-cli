@@ -72,7 +72,7 @@ def get_installed_cli_distributions():
 
 def get_az_version_string():
     import platform
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
     installed_dists = get_installed_cli_distributions()
@@ -83,31 +83,40 @@ def get_az_version_string():
             cli_info = {'name': dist.key, 'version': dist.version}
             break
 
+    def _print(val=''):
+        print(val, file=output)
+
     if cli_info:
-        print('{} ({})'.format(cli_info['name'], cli_info['version']), file=output)
+        _print('{} ({})'.format(cli_info['name'], cli_info['version']))
 
     component_version_info = sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''),
                                       'version': dist.version}
                                      for dist in installed_dists
                                      if dist.key.startswith(COMPONENT_PREFIX)],
                                     key=lambda x: x['name'])
-    print(file=output)
-    print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]),
-          file=output)
-    print(file=output)
+    _print()
+    _print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]))
+    _print()
     extensions = get_extensions()
     if extensions:
-        print('Extensions:', file=output)
-        print('\n'.join(['{} ({})'.format(c.name, c.version) for c in extensions]),
-              file=output)
-        print(file=output)
-    print("Python location '{}'".format(sys.executable), file=output)
-    print("Extensions directory '{}'".format(EXTENSIONS_DIR), file=output)
-    print(file=output)
-    print('Python ({}) {}'.format(platform.system(), sys.version), file=output)
-    print(file=output)
-    print('Legal docs and information: aka.ms/AzureCliLegal', file=output)
-    print(file=output)
+        _print('Extensions:')
+        for ext in extensions:
+            if ext.ext_type == 'dev':
+                _print('{} ({}) [{}]'.format(ext.name, ext.version, ext.path))
+            else:
+                _print('{} ({})'.format(ext.name, ext.version))
+        _print()
+    _print("Python location '{}'".format(sys.executable))
+    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    if DEV_EXTENSION_SOURCES:
+        _print("Development extension sources:")
+        for source in DEV_EXTENSION_SOURCES:
+            _print('    {}'.format(source))
+    _print()
+    _print('Python ({}) {}'.format(platform.system(), sys.version))
+    _print()
+    _print('Legal docs and information: aka.ms/AzureCliLegal')
+    _print()
     version_string = output.getvalue()
     return version_string
 
@@ -288,7 +297,10 @@ def open_page_in_browser(url):
         #    understand the "open location" message"
         # b. Python 2.x can't sniff out the default browser
         return subprocess.Popen(['open', url])
-    return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    try:
+        return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    except TypeError:  # See https://bugs.python.org/msg322439
+        return webbrowser.open(url, new=2)
 
 
 def _get_platform_info():
@@ -332,3 +344,12 @@ def can_launch_browser():
 
 def get_command_type_kwarg(custom_command=False):
     return 'custom_command_type' if custom_command else 'command_type'
+
+
+def reload_module(module):
+    # reloading the imported module to update
+    try:
+        from importlib import reload
+    except ImportError:
+        pass  # for python 2
+    reload(sys.modules[module])

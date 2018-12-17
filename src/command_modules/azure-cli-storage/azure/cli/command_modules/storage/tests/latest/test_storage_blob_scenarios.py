@@ -12,7 +12,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
 from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.storage._client_factory import NO_CREDENTIALS_ERROR_MESSAGE
+from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
 
 
@@ -94,6 +94,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(
             [JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
              JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+
+        # check that blob properties can be set back to null
+        self.storage_cmd('storage blob update -n {} -c {} --content-type ""',
+                         account_info, blob_name, container)
+
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType', None))
 
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))

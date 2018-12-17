@@ -161,9 +161,17 @@ def cf_postgres_db(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).databases
 
 
+def cf_mariadb_virtual_network_rules_operations(cli_ctx, _):
+    return get_mariadb_management_client(cli_ctx).virtual_network_rules
+
+
 def cf_mysql_virtual_network_rules_operations(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).virtual_network_rules
 
 
 def cf_postgres_virtual_network_rules_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).virtual_network_rules
+
+
+def cf_mysql_replica(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).replicas

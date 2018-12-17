@@ -605,15 +605,9 @@ def _generate_ssh_keys():
     """Generates ssh keys pair"""
     private_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')
     public_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-    if os.path.exists(private_key_path) and os.path.exists(public_key_path):
-        logger.warning('Reusing existing ssh public key from ~/.ssh')
-        return
-    if os.path.exists(private_key_path):
-        logger.warning('SSH private key id_rsa exists but public key is missing. Please export the public key.')
-        return
     keys.generate_ssh_keys(private_key_path, public_key_path)
-    logger.warning('SSH key files id_rsa and id_rsa.pub have been generated under ~/.ssh to allow SSH access to the '
-                   'nodes. If using machines without permanent storage, back up your keys to a safe location.')
+    logger.warning('Attempted to find or generate SSH key files id_rsa and id_rsa.pub under ~/.ssh to allow SSH access '
+                   'to the nodes. If using machines without permanent storage, back up your keys to a safe location.')
 
 
 def list_workspaces(client, resource_group=None):
