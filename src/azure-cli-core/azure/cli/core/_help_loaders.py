@@ -136,7 +136,7 @@ class HelpLoaderV1(BaseHelpLoader):
 
     def _load_help_parameters(self, help_obj):
         def params_equal(param, param_dict):
-            return param == param_dict['name']
+            return param.name == param_dict['name']
         if help_obj.type == "command" and self._data.get("arguments"):
             loaded_params = []
             for param_obj in help_obj.parameters:
@@ -158,10 +158,3 @@ class HelpLoaderV1(BaseHelpLoader):
             except StopIteration:
                 pass
         return None
-
-    @staticmethod
-    def _get_example_from_data(_data):
-        summary, command, description = _data.get('summary', ''), _data.get('command', ''), _data.get('description', '')
-        _data['name'] = summary
-        _data['text'] = "{}\n{}".format(description, command) if description else command
-        return HelpExample(**_data)
