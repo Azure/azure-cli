@@ -303,6 +303,20 @@ def load_arguments(self, _):
         c.argument('overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
+    with self.argument_context('webapp config snapshot') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+
+    with self.argument_context('webapp config snapshot list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config snapshot restore') as c:
+        c.argument('time', help='Timestamp of the snapshot to restore.')
+        c.argument('restore_content_only', help='Restore the web app files without restoring the settings.')
+        c.argument('source_resource_group', help='Name of the resource group to retrieve snapshot from.')
+        c.argument('source_name', help='Name of the webapp to retrieve snapshot from.')
+        c.argument('source_slot', help='Name of the webapp slot to retrieve snapshot from.')
+
     with self.argument_context('webapp auth update') as c:
         c.argument('enabled', arg_type=get_three_state_flag(return_label=True))
         c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True), help='use App Service Token Store')
