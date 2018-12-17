@@ -5,6 +5,7 @@
 
 from msrestazure.tools import is_valid_resource_id, resource_id
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.core.util import (
     sdk_no_wait, CLIError,
@@ -57,9 +58,9 @@ def sqlvm_group_list(
 
 
 # pylint: disable= line-too-long, too-many-arguments
-def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_group_name, location, sql_image_offer,
+def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_group_name, sql_image_offer,
                        sql_image_sku, domain_fqdn, cluster_operator_account, sql_service_account,
-                       storage_account_url, storage_account_key, cluster_bootstrap_account=None,
+                       storage_account_url, storage_account_key, location=None, cluster_bootstrap_account=None,
                        file_share_witness_path=None, ou_path=None, tags=None):
 
     '''
@@ -168,7 +169,7 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
 
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
-def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group_name,
+def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, location=None,
                  sql_server_license_type='PAYG', sql_virtual_machine_group_resource_id=None, cluster_bootstrap_account_password=None,
                  cluster_operator_account_password=None, sql_service_account_password=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
@@ -191,6 +192,8 @@ def sqlvm_create(client, cmd, location, sql_virtual_machine_name, resource_group
 
     if sql_virtual_machine_group_resource_id and not is_valid_resource_id(sql_virtual_machine_group_resource_id):
         raise CLIError("Invalid SQL virtual machine group resource id.")
+
+    location = location or get
 
     tags = tags or {}
 
@@ -342,8 +345,8 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
     return instance
 
 
-def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, cluster_bootstrap_account_password,
-                       cluster_operator_account_password, sql_service_account_password):
+def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, sql_service_account_password,
+                       cluster_operator_account_password, cluster_bootstrap_account_password=None):
     '''
     Add a SQL virtual machine to a SQL virtual machine group.
     '''

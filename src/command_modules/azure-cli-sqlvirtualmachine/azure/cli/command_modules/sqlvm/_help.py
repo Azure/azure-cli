@@ -19,10 +19,6 @@ helps['sqlvm aglistener'] = """
     type: group
     short-summary: Manage SQL availability group listeners.
     """
-helps['sqlvm op'] = """
-    type: group
-    short-summary: List all SQL available Rest API operations.
-    """
 helps['sqlvm group create'] = """
     type: command
     short-summary: Creates a SQL virtual machine group.

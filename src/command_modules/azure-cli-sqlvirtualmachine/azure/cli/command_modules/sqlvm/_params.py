@@ -5,6 +5,8 @@
 
 # pylint:disable=too-many-lines
 
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
+
 from azure.mgmt.sqlvirtualmachine.models import (
     SqlServerLicenseType,
     BackupScheduleType,
@@ -19,7 +21,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
 from azure.cli.core.commands.parameters import (
     get_enum_type,
     tags_type,
-    get_three_state_flag
+    get_three_state_flag,
+    get_location_type
 )
 
 
@@ -45,6 +48,11 @@ def load_arguments(self, _):
                    options_list=['--image-sku', '-s'],
                    help='SQL image sku.',
                    arg_type=get_enum_type(SqlVmGroupImageSku))
+        c.argument('location',
+                   help='Location. If not provided, group will be created in the same reosurce group location.'
+                   'You can configure the default location using `az configure --defaults location=<location>`.',
+                   arg_type=get_location_type(self.cli_ctx),
+                   validator=get_default_location_from_resource_group)
 
     with self.argument_context('sqlvm group', arg_group='WSFC Domain Profile') as c:
         c.argument('domain_fqdn',
@@ -129,6 +137,11 @@ def load_arguments(self, _):
                    help='SQL Server license type.',
                    options_list=['--license-type'],
                    arg_type=get_enum_type(SqlServerLicenseType))
+        c.argument('location',
+                   help='Location. If not provided, virtual machine should be in the same region of resource group.'
+                   'You can configure the default location using `az configure --defaults location=<location>`.',
+                   arg_type=get_location_type(self.cli_ctx),
+                   validator=get_default_location_from_resource_group)
 
     with self.argument_context('sqlvm', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
