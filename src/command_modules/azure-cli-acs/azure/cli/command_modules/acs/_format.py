@@ -10,9 +10,11 @@ def aks_list_table_format(results):
     """"Format a list of managed clusters as summary results for display with "-o table"."""
     return [_aks_table_format(r) for r in results]
 
+
 def osa_list_table_format(results):
     """"Format a list of OpenShift managed clusters as summary results for display with "-o table"."""
     return [_osa_table_format(r) for r in results]
+
 
 def aks_show_table_format(result):
     """Format a managed cluster as summary results for display with "-o table"."""
@@ -33,6 +35,7 @@ def _aks_table_format(result):
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
 
+
 def _osa_table_format(result):
     from jmespath import compile as compile_jmes, Options
 
@@ -46,6 +49,7 @@ def _osa_table_format(result):
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
+
 
 def aks_upgrades_table_format(result):
     """Format get-upgrades results as a summary for display with "-o table"."""
