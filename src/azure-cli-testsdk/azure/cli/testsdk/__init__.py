@@ -16,10 +16,10 @@ from .utilities import create_random_name
 from .patches import MOCKED_USER_NAME
 
 __all__ = ['ScenarioTest', 'LiveScenarioTest', 'ResourceGroupPreparer', 'StorageAccountPreparer',
-           'RoleBasedServicePrincipalPreparer', 'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck', 'JMESPathCheckExists',
-           'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck', 'get_sha1_hash', 'KeyVaultPreparer',
-           'JMESPathCheckGreaterThan', 'api_version_constraint', 'create_random_name', 'MOCKED_USER_NAME',
-           'AADGraphUserReplacer']
+           'RoleBasedServicePrincipalPreparer', 'ManagedApplicationPreparer', 'CliTestError', 'JMESPathCheck',
+           'JMESPathCheckExists', 'NoneCheck', 'live_only', 'record_only', 'StringCheck', 'StringContainCheck',
+           'get_sha1_hash', 'KeyVaultPreparer', 'JMESPathCheckGreaterThan', 'api_version_constraint',
+           'create_random_name', 'MOCKED_USER_NAME', 'AADGraphUserReplacer']
 
 
 __version__ = '0.1.0'

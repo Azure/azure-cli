@@ -19,13 +19,13 @@ from ._format import aks_versions_table_format
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2017_07_01.operations.'
                         'container_services_operations#ContainerServicesOperations.{}',
         client_factory=cf_container_services
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2018_03_31.operations.'
                         'managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )
@@ -90,7 +90,8 @@ def load_command_table(self, _):
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)
 
     # OSA commands
-    with self.command_group('openshift', openshift_managed_clusters_sdk, client_factory=cf_openshift_managed_clusters) as g:
+    with self.command_group('openshift', openshift_managed_clusters_sdk,
+                            client_factory=cf_openshift_managed_clusters) as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)

@@ -42,7 +42,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.graphrbac.models import (ApplicationCreateParameters,
-                                    ApplicationUpdateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
@@ -60,13 +59,10 @@ from azure.mgmt.containerservice.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.models import OSType
 from azure.mgmt.containerservice.models import OpenShiftAgentPoolProfileRole
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProvider
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterAADIdentityProvider
 from azure.mgmt.containerservice.models import OpenShiftManagedCluster
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterMasterPoolProfile
-from azure.mgmt.containerservice.models import OpenShiftContainerServiceVMSize
 from azure.mgmt.containerservice.models import OpenShiftRouterProfile
 from azure.mgmt.containerservice.models import OpenShiftManagedClusterAuthProfile
 from azure.mgmt.containerservice.models import NetworkProfile
@@ -2131,7 +2127,8 @@ def _ensure_osa_aad(cli_ctx,
         required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access],
                                                          additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
-        list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')".format(reply_url)))
+        list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
+                                                               .format(reply_url)))
         if update:
             if list_aad_filtered:
                 update_application(client=rbac_client.applications,

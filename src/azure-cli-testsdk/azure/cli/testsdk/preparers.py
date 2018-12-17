@@ -201,7 +201,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
             # The slice is the easiest way for know to return the Teanant from the same command
             return {self.parameter_name: self.result['appId'], self.parameter_secret: name}
         self.test_class_instance.kwargs[self.key] = name
-        return {self.parameter_name: self.dev_setting_sp_name,
+        return {self.parameter_name: self.dev_setting_app_name,
                 self.parameter_secret: self.dev_setting_app_secret}
 
     def remove_resource(self, name, **kwargs):
