@@ -4,7 +4,7 @@ Release History
 ===============
 
 2.3.15
-+++++
+++++++
 * Add Managed OpenShift commands
 
 2.3.14
