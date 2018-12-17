@@ -34,6 +34,7 @@ DEPENDENCIES = [
     'azure-mgmt-web==0.40.0',
     'azure-mgmt-storage==3.1.1',
     'azure-mgmt-containerregistry==2.6.0',
+    'azure-mgmt-applicationinsights==0.1.1',
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
     'urllib3[secure]>=1.18',
     'xmltodict',

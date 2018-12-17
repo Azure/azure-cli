@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* functionapp: add support for app insights on functionapp create
+
 0.2.11
 ++++++
 * webapp: az webapp config ssl upload, handling the scenario of uploading certificates on apps that are hosted on an ASE, where the ASE RG & App RG are different
