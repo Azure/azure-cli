@@ -8,7 +8,9 @@ import mock
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.web.models import (SourceControl, HostNameBinding, Site, SiteConfig,
                                    HostNameSslState, SslState, Certificate,
-                                   AddressResponse, HostingEnvironmentProfile)
+                                   AddressResponse, HostingEnvironmentProfile,
+                                   DeletedAppRestoreRequest, SnapshotRecoverySource,
+                                   SnapshotRestoreRequest)
 from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.adal_authentication import AdalAuthentication
 from knack.util import CLIError
@@ -25,7 +27,10 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          show_webapp,
                                                          get_streaming_log,
                                                          download_historical_logs,
-                                                         validate_container_app_create_options)
+                                                         validate_container_app_create_options,
+                                                         restore_deleted_webapp,
+                                                         list_snapshots,
+                                                         restore_snapshot)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -285,6 +290,57 @@ class TestWebappMocked(unittest.TestCase):
         except ErrorToExitInfiniteLoop:
             # assert
             site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_restore_deleted_webapp(self, site_op_mock):
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+        request = DeletedAppRestoreRequest(deleted_site_id='12345', recover_configuration=False)
+
+        # action
+        restore_deleted_webapp(cmd_mock, '12345', 'rg', 'web1', None, True)
+
+        # assert
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'restore_from_deleted_app', None, request)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_list_webapp_snapshots(self, site_op_mock):
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        # action
+        list_snapshots(cmd_mock, 'rg', 'web1', None)
+
+        # assert
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_snapshots', None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_restore_snapshot(self, client_factory_mock):
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        client = mock.MagicMock()
+        client.web_apps.restore_snapshot_slot = mock.MagicMock()
+        client.web_apps.restore_snapshot = mock.MagicMock()
+        client_factory_mock.return_value = client
+
+        source = SnapshotRecoverySource(id='/subscriptions/sub1/resourceGroups/src_rg/providers/Microsoft.Web/sites/src_web/slots/src_slot')
+        request = SnapshotRestoreRequest(overwrite=False, snapshot_time='2018-12-07T02:01:31.4708832Z',
+                                         recovery_source=source, recover_configuration=False)
+        overwrite_request = SnapshotRestoreRequest(overwrite=True, snapshot_time='2018-12-07T02:01:31.4708832Z', recover_configuration=True)
+
+        # action
+        restore_snapshot(cmd_mock, 'rg', 'web1', '2018-12-07T02:01:31.4708832Z', slot='slot1', restore_content_only=True,
+                         source_resource_group='src_rg', source_name='src_web', source_slot='src_slot')
+        restore_snapshot(cmd_mock, 'rg', 'web1', '2018-12-07T02:01:31.4708832Z', restore_content_only=False)
+
+        # assert
+        client.web_apps.restore_snapshot_slot.assert_called_with('rg', 'web1', request, 'slot1')
+        client.web_apps.restore_snapshot.assert_called_with('rg', 'web1', overwrite_request)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)

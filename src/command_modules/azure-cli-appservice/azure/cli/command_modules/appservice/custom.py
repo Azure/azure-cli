@@ -31,7 +31,8 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
-                                   DeletedAppRestoreRequest, DefaultErrorResponseException)
+                                   DeletedAppRestoreRequest, DefaultErrorResponseException,
+                                   SnapshotRestoreRequest, SnapshotRecoverySource)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -1217,6 +1218,39 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
         return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
 
     return client.web_apps.restore(resource_group_name, webapp_name, 0, restore_request)
+
+
+def list_snapshots(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_snapshots',
+                                   slot)
+
+
+def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,
+                     source_resource_group=None, source_name=None, source_slot=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    recover_config = not restore_content_only
+    if all([source_resource_group, source_name]):
+        # Restore from source app to target app
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        source_id = "/subscriptions/" + sub_id + "/resourceGroups/" + source_resource_group + \
+            "/providers/Microsoft.Web/sites/" + source_name
+        if source_slot:
+            source_id = source_id + "/slots/" + source_slot
+        source = SnapshotRecoverySource(id=source_id)
+        request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
+                                         recover_configuration=recover_config)
+        if slot:
+            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.restore_snapshot(resource_group_name, name, request)
+    elif any([source_resource_group, source_name]):
+        raise CLIError('usage error: --source-resource-group and --source-name must both be specified if one is used')
+    else:
+        # Overwrite app with its own snapshot
+        request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
+        if slot:
+            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.restore_snapshot(resource_group_name, name, request)
 
 
 # pylint: disable=inconsistent-return-statements
