@@ -597,6 +597,11 @@ helps['openshift delete'] = """
     short-summary: (PREVIEW) Delete a managed OpenShift cluster.
 """
 
+helps['openshift list'] = """
+    type: command
+    short-summary: (PREVIEW) List managed OpenShift clusters.
+"""
+
 helps['openshift wait'] = """
     type: command
     short-summary: (PREVIEW) Wait for a managed OpenShift cluster to reach a desired state.
