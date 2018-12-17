@@ -2379,7 +2379,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     update_aad_secret = False
     try:
         client.get(resource_group_name, name)
-    except CloudError as ex:
+    except CloudError:
         update_aad_secret = True
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,

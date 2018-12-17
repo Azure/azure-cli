@@ -208,6 +208,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_app_name:
             execute(self.cli_ctx, 'az ad app delete --id {}'.format(self.result['appId']))
 
+
 class AADGraphUserReplacer:
     def __init__(self, test_user, mock_user):
         self.test_user = test_user
