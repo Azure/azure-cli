@@ -136,7 +136,7 @@ helps['relay namespace authorization-rule list'] = """
     short-summary: Shows the list of Authorization Rule by Relay Service Namespace
     examples:
         - name: Shows the list of Authorization Rule by Relay Service Namespace
-          text: az relay namespace authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
+          text: az relay namespace authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['relay namespace authorization-rule keys list'] = """
@@ -144,7 +144,7 @@ helps['relay namespace authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for Relay Service Namespace
     examples:
         - name: List the keys and connection strings of Authorization Rule for Relay Service Namespace
-          text: az relay namespace authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+          text: az relay namespace authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['relay namespace authorization-rule keys renew'] = """
@@ -152,7 +152,7 @@ helps['relay namespace authorization-rule keys renew'] = """
     short-summary: Regenerate keys of Authorization Rule for the Relay Service Namespace.
     examples:
         - name: Regenerate keys of Authorization Rule for the Relay Service Namespace.
-          text: az relay namespace authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
+          text: az relay namespace authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
 """
 
 helps['relay namespace authorization-rule delete'] = """
@@ -232,7 +232,7 @@ helps['relay wcfrelay authorization-rule list'] = """
     short-summary: List of Authorization Rule by Relay Service WCF Relay.
     examples:
         - name: List of Authorization Rule by WCF Relay
-          text: az relay wcfrelay authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay
+          text: az relay wcfrelay authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay
 """
 
 helps['relay wcfrelay authorization-rule keys list'] = """
@@ -240,7 +240,7 @@ helps['relay wcfrelay authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for the given Relay Service WCF Relay
     examples:
         - name: List the keys and connection strings of Authorization Rule for the given Relay Service WCF Relay
-          text: az relay wcfrelay authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay --name myauthorule
+          text: az relay wcfrelay authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay --name myauthorule
 """
 
 helps['relay wcfrelay authorization-rule keys renew'] = """
@@ -248,7 +248,7 @@ helps['relay wcfrelay authorization-rule keys renew'] = """
     short-summary: Regenerate keys of Authorization Rule for Relay Service WCF Relay
     examples:
         - name: Regenerate keys of Authorization Rule for Relay Service WCF Relay
-          text: az relay wcfrelay authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay --name myauthorule --key PrimaryKey
+          text: az relay wcfrelay authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --relay-name myrelay --name myauthorule --key PrimaryKey
 """
 
 helps['relay wcfrelay authorization-rule delete'] = """
@@ -320,7 +320,7 @@ helps['relay hyco authorization-rule show'] = """
     short-summary: Shows the details of Authorization Rule for given Relay Service Hybrid Connection
     examples:
         - name: Shows the details of Authorization Rule for given Relay Service Hybrid Connection
-          text: az relay hyco authorization-rule get --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule
+          text: az relay hyco authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule
 """
 
 helps['relay hyco authorization-rule list'] = """
@@ -328,7 +328,7 @@ helps['relay hyco authorization-rule list'] = """
     short-summary: shows list of Authorization Rule by Relay Service Hybrid Connection
     examples:
         - name: shows list of Authorization Rule by Relay Service Hybrid Connection
-          text: az relay hyco authorization-rule get --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco
+          text: az relay hyco authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco
 """
 
 helps['relay hyco authorization-rule keys list'] = """
@@ -336,7 +336,7 @@ helps['relay hyco authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for Relay Service Hybrid Connection.
     examples:
         - name: List the keys and connection strings of Authorization Rule for Relay Service Hybrid Connection.
-          text: az relay hyco authorization-rule listkeys --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule
+          text: az relay hyco authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule
 """
 
 helps['relay hyco authorization-rule keys renew'] = """
@@ -344,7 +344,7 @@ helps['relay hyco authorization-rule keys renew'] = """
     short-summary: Regenerate keys of Authorization Rule for Relay Service Hybrid Connection.
     examples:
         - name: Regenerate key of Relay Service Hybrid Connection.
-          text: az relay hyco authorization-rule regenerate_keys --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule --key PrimaryKey
+          text: az relay hyco authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --hybrid-connection-name myhyco --name myauthorule --key PrimaryKey
 """
 
 helps['relay hyco authorization-rule delete'] = """

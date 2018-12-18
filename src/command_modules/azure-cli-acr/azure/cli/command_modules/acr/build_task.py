@@ -17,10 +17,11 @@ from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     BuildTaskBuildRequest,
     BuildTaskUpdateParameters,
     SourceRepositoryUpdateParameters,
-    DockerBuildStepUpdateParameters
+    DockerBuildStepUpdateParameters,
+    OsType
 )
 from ._utils import validate_managed_registry
-from .build import acr_build_show_logs
+from ._stream_utils import stream_logs
 from ._build_polling import get_build_with_polling
 
 
@@ -40,7 +41,7 @@ def acr_build_task_create(cmd,  # pylint: disable=too-many-locals
                           git_access_token,
                           alias=None,
                           status='Enabled',
-                          os_type='Linux',
+                          os_type=OsType.linux.value,
                           cpu=2,
                           timeout=3600,
                           commit_trigger_enabled=True,
@@ -303,13 +304,14 @@ def acr_build_task_run(cmd,
                        client,  # cf_acr_builds
                        build_task_name,
                        registry_name,
+                       no_format=False,
                        no_logs=False,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
-    from ._client_factory import cf_acr_registries
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries_builds
+    client_registries = cf_acr_registries_builds(cmd.cli_ctx)
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(
         client_registries.queue_build(resource_group_name,
@@ -317,13 +319,13 @@ def acr_build_task_run(cmd,
                                       BuildTaskBuildRequest(build_task_name=build_task_name)))
 
     build_id = queued_build.build_id
-    logger.warning("Queued a build with build ID: %s", build_id)
-    logger.warning("Waiting for build agent...")
+    logger.warning("Queued a build with ID: %s", build_id)
+    logger.warning("Waiting for agent...")
 
     if no_logs:
         return get_build_with_polling(client, build_id, registry_name, resource_group_name)
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name, True)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format, True)
 
 
 def acr_build_task_show_build(cmd,
@@ -383,6 +385,7 @@ def acr_build_task_logs(cmd,
                         build_id=None,
                         build_task_name=None,
                         image=None,
+                        no_format=False,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -406,7 +409,7 @@ def acr_build_task_logs(cmd,
                                                     build_task_name=build_task_name,
                                                     image=image))
 
-    return acr_build_show_logs(client, build_id, registry_name, resource_group_name)
+    return stream_logs(client, build_id, registry_name, resource_group_name, no_format)
 
 
 def _get_list_builds_message(base_message, build_task_name=None, image=None):

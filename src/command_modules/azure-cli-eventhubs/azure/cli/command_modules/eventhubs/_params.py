@@ -12,7 +12,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 # pylint: disable=line-too-long
 def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.eventhub.models.event_hub_management_client_enums import KeyType, AccessRights, SkuName
+    from azure.mgmt.eventhub.models import KeyType, AccessRights, SkuName
     from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
 
@@ -31,6 +31,8 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
+        c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
 
     with self.argument_context('eventhubs namespace create') as c:
         c.argument('tags', arg_type=tags_type)

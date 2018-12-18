@@ -21,7 +21,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir
+from .utilities import find_recording_dir, StorageAccountKeyReplacer
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -78,6 +78,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
+        self._processors_to_reset = [StorageAccountKeyReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -86,7 +87,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
             self.name_replacer
-        ]
+        ] + self._processors_to_reset
 
         default_replay_processors = [
             LargeResponseBodyReplacer(),
@@ -123,6 +124,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
             recording_name=recording_name
         )
+
+    def tearDown(self):
+        for processor in self._processors_to_reset:
+            processor.reset()
+        super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1

@@ -54,8 +54,30 @@ def build_task_detail_output_format(result):
     return _output_format(result, _build_task_detail_format_group)
 
 
+def task_output_format(result):
+    return _output_format(result, _task_format_group)
+
+
 def build_output_format(result):
     return _output_format(result, _build_format_group)
+
+
+def run_output_format(result):
+    return _output_format(result, _run_format_group)
+
+
+def helm_list_output_format(result):
+    if isinstance(result, dict):
+        obj_list = []
+        for _, item in result.items():
+            obj_list += item
+        return _output_format(obj_list, _helm_format_group)
+    logger.debug("Unexpected output %s", result)
+    return _output_format(result, _helm_format_group)
+
+
+def helm_show_output_format(result):
+    return _output_format(result, _helm_format_group)
 
 
 def _output_format(result, format_group):
@@ -150,7 +172,7 @@ def _replication_format_group(item):
 
 def _build_task_format_group(item):
     return OrderedDict([
-        ('Name', _get_value(item, 'name')),
+        ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value(item, 'sourceRepository', 'isCommitTriggerEnabled')),
@@ -160,7 +182,7 @@ def _build_task_format_group(item):
 
 def _build_task_detail_format_group(item):
     return OrderedDict([
-        ('Name', _get_value(item, 'name')),
+        ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
         ('COMMIT TRIGGER', _get_value(item, 'sourceRepository', 'isCommitTriggerEnabled')),
@@ -172,20 +194,58 @@ def _build_task_detail_format_group(item):
     ])
 
 
+def _task_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('PLATFORM', _get_value(item, 'platform', 'os')),
+        ('STATUS', _get_value(item, 'status')),
+        ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
+        ('SOURCE TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
+        ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType'))
+    ])
+
+
 def _build_format_group(item):
     return OrderedDict([
         ('BUILD ID', _get_value(item, 'buildId')),
         ('TASK', _get_value(item, 'buildTask')),
         ('PLATFORM', _get_value(item, 'platform', 'osType')),
         ('STATUS', _get_value(item, 'status')),
-        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'), _get_value(item, 'gitCommitTrigger'))),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
+                                       _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
 
 
+def _run_format_group(item):
+    return OrderedDict([
+        ('RUN ID', _get_value(item, 'runId')),
+        ('TASK', _get_value(item, 'task')),
+        ('PLATFORM', _get_value(item, 'platform', 'os')),
+        ('STATUS', _get_value(item, 'status')),
+        ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
+                                       _get_value(item, 'sourceTrigger', 'eventType'))),
+        ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+    ])
+
+
+def _helm_format_group(item):
+    description = _get_value(item, 'description')
+    if len(description) > 57:  # Similar to helm client
+        description = description[:57] + '...'
+
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('CHART VERSION', _get_value(item, 'version')),
+        ('APP VERSION', _get_value(item, 'appVersion')),
+        ('DESCRIPTION', description)
+    ])
+
+
 def _get_value(item, *args):
-    """Recursively get a nested value from a dict.
+    """Get a nested value from a dict.
     :param dict item: The dict object
     """
     try:
@@ -196,9 +256,9 @@ def _get_value(item, *args):
         return ' '
 
 
-def _get_build_trigger(image_update_trigger, git_commit_trigger):
-    if git_commit_trigger.strip():
-        return 'Git Commit'
+def _get_build_trigger(image_update_trigger, git_source_trigger):
+    if git_source_trigger.strip():
+        return git_source_trigger
     if image_update_trigger.strip():
         return 'Image Update'
     return 'Manual'

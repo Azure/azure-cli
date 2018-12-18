@@ -17,6 +17,10 @@ AKS_SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'aksServicePrincip
 helps['acs'] = """
      type: group
      short-summary: Manage Azure Container Services.
+     long-summary: |
+         ACS will be retired as a standalone service on January 31, 2020.
+
+         If you use the Kubernetes orchestrator, please migrate to AKS by January 31, 2020.
 """
 
 helps['acs browse'] = """
@@ -188,18 +192,18 @@ helps['aks create'] = """
           short-summary: User account to create on node VMs for SSH access.
         - name: --aad-client-app-id
           type: string
-          short-summary: (PREVIEW) The ID of an Azure Active Directory client application of type "Native". This
+          short-summary: The ID of an Azure Active Directory client application of type "Native". This
                          application is for user login via kubectl.
         - name: --aad-server-app-id
           type: string
-          short-summary: (PREVIEW) The ID of an Azure Active Directory server application of type "Web app/API". This
+          short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This
                          application represents the managed cluster's apiserver (Server application).
         - name: --aad-server-app-secret
           type: string
-          short-summary: (PREVIEW) The secret of an Azure Active Directory server application.
+          short-summary: The secret of an Azure Active Directory server application.
         - name: --aad-tenant-id
           type: string
-          short-summary: (PREVIEW) The ID of an Azure Active Directory tenant.
+          short-summary: The ID of an Azure Active Directory tenant.
         - name: --dns-service-ip
           type: string
           short-summary: An IP address assigned to the Kubernetes DNS service.
@@ -207,7 +211,7 @@ helps['aks create'] = """
                         For example, 10.0.0.10.
         - name: --docker-bridge-address
           type: string
-          short-summary: An IP address and netmask assigned to the Docker bridge.
+          short-summary: A specific IP address and netmask for the Docker bridge, using standard CIDR notation.
           long-summary: This address must not be in any Subnet IP ranges, or the Kubernetes service address range.
                         For example, 172.17.0.1/16.
         - name: --enable-addons -a
@@ -231,6 +235,13 @@ helps['aks create'] = """
           type: string
           short-summary: The Kubernetes network plugin to use.
           long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
+        - name: --network-policy
+          type: string
+          short-summary: (PREVIEW) The Kubernetes network policy to use.
+          long-summary: |
+              Using together with "azure" network plugin.
+              Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
+              Defaults to "" (network policy disabled).
         - name: --no-ssh-key -x
           type: string
           short-summary: Do not use or create a local SSH key.

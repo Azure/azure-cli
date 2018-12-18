@@ -553,7 +553,7 @@ helps['network application-gateway rule show'] = """
     short-summary: Get the details of a rule.
     examples:
         - name: Get the details of a rule.
-          text: az network application-gateway rule list -g MyResourceGroup --gateway-name MyAppGateway -n MyRule
+          text: az network application-gateway rule show -g MyResourceGroup --gateway-name MyAppGateway -n MyRule
 """
 
 helps['network application-gateway rule update'] = """
@@ -655,7 +655,7 @@ helps['network application-gateway ssl-policy set'] = """
           text: |
             az network application-gateway ssl-policy set -g MyResourceGroup --gateway-name MyAppGateway \\
                 --policy-type Custom --min-protocol-version TLSv1_2 \\
-                --cipher-suits TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
+                --cipher-suites TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_RSA_WITH_AES_128_GCM_SHA256
 """
 
 helps['network application-gateway ssl-policy show'] = """
@@ -684,10 +684,48 @@ helps['network application-gateway ssl-policy predefined show'] = """
     short-summary: Gets SSL predefined policy with the specified policy name.
     examples:
         - name: Gets SSL predefined policy with the specified policy name.
-          text: az network application-gateway ssl-policy show -n AppGwSslPolicy20170401
+          text: az network application-gateway ssl-policy predefined show -n AppGwSslPolicy20170401
+"""
+# endregion
+
+# region Application Gateway Trusted Root Certs
+helps['network application-gateway root-cert'] = """
+    type: group
+    short-summary: Manage trusted root certificates of an application gateway.
+"""
+helps['network application-gateway root-cert create'] = """
+    type: command
+    short-summary: Upload a trusted root certificate.
 """
 
+helps['network application-gateway root-cert delete'] = """
+    type: command
+    short-summary: Delete a trusted root certificate.
+    examples:
+        - name: Delete a trusted root certificate.
+          text: az network application-gateway root-cert delete -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
+"""
 
+helps['network application-gateway root-cert list'] = """
+    type: command
+    short-summary: List trusted root certificates.
+    examples:
+        - name: List trusted root certificates.
+          text: az network application-gateway root-cert list -g MyResourceGroup --gateway-name MyAppGateway
+"""
+
+helps['network application-gateway root-cert show'] = """
+    type: command
+    short-summary: Get the details of a trusted root certificate.
+    examples:
+        - name: Get the details of a trusted root certificate.
+          text: az network application-gateway root-cert show -g MyResourceGroup --gateway-name MyAppGateway -n MyRootCert
+"""
+
+helps['network application-gateway root-cert update'] = """
+    type: command
+    short-summary: Update a trusted root certificate.
+"""
 # endregion
 
 # region Application Gateway URL path map
@@ -827,6 +865,12 @@ helps['network application-gateway waf-config set'] = """
           short-summary: Space-separated list of rule IDs to disable.
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
+        - name: --exclusion
+          short-summary: Add an exclusion expression to the WAF check.
+          long-summary: |
+            Usage:   --exclusion VARIABLE OPERATOR VALUE
+
+            Multiple exclusions can be specified by using more than one `--exclusion` argument.
     examples:
         - name: Configure WAF on an application gateway in detection mode with default values
           text: |
@@ -836,7 +880,14 @@ helps['network application-gateway waf-config set'] = """
           text: |
             az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
                 --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
-                --disabled-rules 920130 920140 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI
+                --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
+                --disabled-rules 920130 920140
+        - name: Configure WAF on an application gateway with exclusions.
+          text: |
+            az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
+                --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
+                --exclusion "RequestHeaderNames StartsWith x-header" \\
+                --exclusion "RequestArgNames Equals IgnoreThis"
 """
 
 helps['network application-gateway waf-config show'] = """
@@ -1902,11 +1953,6 @@ helps['network express-route peering create'] = """
                 --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 \\
                 --primary-peer-subnet 101.0.0.0/30 --secondary-peer-subnet 102.0.0.0/30 \\
                 --advertised-public-prefixes 101.0.0.0/30
-        - name: Add IPv6 settings to existing IPv4 config for Microsoft peering.
-          text: |
-            az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit \\
-                --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 \\
-                --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
 """
 
 helps['network express-route peering delete'] = """
@@ -1948,7 +1994,69 @@ helps['network express-route peering update'] = """
                 --advertised-public-prefixes 2002:db00::/126
           min_profile: latest
 """
+
+helps['network express-route peering connection'] = """
+    type: group
+    short-summary: Manage ExpressRoute circuit connections.
+"""
+
+helps['network express-route peering connection create'] = """
+    type: command
+    short-summary: Create connections between two ExpressRoute circuits.
+    examples:
+        - name: Create connection between two ExpressRoute circuits with AzurePrivatePeering settings.
+          text: |
+            az network express-route peering connection create -g MyResourceGroup --circuit-name \\
+                MyCircuit --peering-name AzurePrivatePeering -n myConnection --peer-circuit \\
+                MyOtherCircuit --address-prefix 104.0.0.0/29
+"""
+
+helps['network express-route peering connection delete'] = """
+    type: command
+    short-summary: Delete an ExpressRoute circuit connection.
+"""
+
+helps['network express-route peering connection show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute circuit connection.
+"""
 # endregion
+
+# region Interface Endpoint
+helps['network interface-endpoint'] = """
+    type: group
+    short-summary: Manage interface endpoints.
+"""
+
+helps['network interface-endpoint list'] = """
+    type: command
+    short-summary: List interface endpoints.
+"""
+
+helps['network interface-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an interface endpoint.
+"""
+# endregion
+
+# region Private Endpoint
+helps['network private-endpoint'] = """
+    type: group
+    short-summary: Manage private endpoints.
+"""
+
+
+helps['network private-endpoint list'] = """
+    type: command
+    short-summary: List private endpoints.
+"""
+
+helps['network private-endpoint show'] = """
+    type: command
+    short-summary: Get the details of an private endpoint.
+"""
+# endregion
+
 
 # region Load Balancer
 helps['network lb'] = """
@@ -2208,6 +2316,38 @@ helps['network lb inbound-nat-rule update'] = """
           text: |
             az network lb inbound-nat-rule update -g MyResourceGroup --lb-name MyLb -n MyNatRule \\
                 --floating-ip false --idle-timeout 5
+"""
+# endregion
+
+# region Load Balancer outbound rule
+helps['network lb outbound-rule'] = """
+    type: group
+    short-summary: Manage outbound rules of a load balancer.
+"""
+
+helps['network lb outbound-rule create'] = """
+    type: command
+    short-summary: Create an outbound-rule.
+"""
+
+helps['network lb outbound-rule delete'] = """
+    type: command
+    short-summary: Delete an outbound-rule.
+"""
+
+helps['network lb outbound-rule list'] = """
+    type: command
+    short-summary: List outbound rules.
+"""
+
+helps['network lb outbound-rule show'] = """
+    type: command
+    short-summary: Get the details of an outbound rule.
+"""
+
+helps['network lb outbound-rule update'] = """
+    type: command
+    short-summary: Update an outbound-rule.
 """
 # endregion
 
@@ -2725,6 +2865,31 @@ helps['network nsg rule update'] = """
 """
 # endregion
 
+# region NetworkProfile
+helps['network profile'] = """
+    type: group
+    short-summary: Manage network profiles.
+    long-summary: >
+        To create a network profile, see the create command for the relevant resource. Currently,
+        only Azure Container Instances are supported.
+"""
+
+helps['network profile delete'] = """
+    type: command
+    short-summary: Delete a network profile.
+"""
+
+helps['network profile list'] = """
+    type: command
+    short-summary: List network profiles.
+"""
+
+helps['network profile show'] = """
+    type: command
+    short-summary: Get the details of a network profile.
+"""
+# endregion
+
 # region Public IP
 helps['network public-ip'] = """
     type: group
@@ -2782,6 +2947,36 @@ helps['network public-ip update'] = """
     examples:
         - name: Update a public IP resource with a DNS name label and static allocation.
           text: az network public-ip update -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
+"""
+
+helps['network public-ip prefix'] = """
+    type: group
+    short-summary: Manage public IP prefix resources.
+"""
+
+helps['network public-ip prefix create'] = """
+    type: command
+    short-summary: Create a public IP prefix resource.
+"""
+
+helps['network public-ip prefix delete'] = """
+    type: command
+    short-summary: Delete a public IP prefix resource.
+"""
+
+helps['network public-ip prefix list'] = """
+    type: command
+    short-summary: List public IP prefix resources.
+"""
+
+helps['network public-ip prefix show'] = """
+    type: command
+    short-summary: Get the details of a public IP prefix resource.
+"""
+
+helps['network public-ip prefix update'] = """
+    type: command
+    short-summary: Update a public IP prefix resource.
 """
 # endregion
 
@@ -2909,7 +3104,7 @@ helps['network route-filter list'] = """
     short-summary: List route filters.
     examples:
         - name: List route filters in a resource group.
-          text: az network route-filter delete -g MyResourceGroup
+          text: az network route-filter list -g MyResourceGroup
 """
 
 helps['network route-filter show'] = """
@@ -2957,7 +3152,7 @@ helps['network route-filter rule delete'] = """
     short-summary: Delete a rule from a route filter.
     examples:
         - name: Delete a rule from a route filter.
-          text: az network route-filter rule create -g MyResourceGroup --filter-name MyRouteFilter -n MyRouteFilterRule
+          text: az network route-filter rule delete -g MyResourceGroup --filter-name MyRouteFilter -n MyRouteFilterRule
 """
 
 helps['network route-filter rule list'] = """
@@ -2999,6 +3194,78 @@ helps['network route-filter rule update'] = """
 """
 # endregion
 
+# region Service Endpoint
+helps['network service-endpoint'] = """
+    type: group
+    short-summary: Manage policies related to service endpoints.
+"""
+
+helps['network service-endpoint policy'] = """
+    type: group
+    short-summary: Manage service endpoint policies.
+"""
+
+helps['network service-endpoint policy create'] = """
+    type: command
+    short-summary: Create a service endpoint policy.
+"""
+
+helps['network service-endpoint policy delete'] = """
+    type: command
+    short-summary: Delete a service endpoint policy.
+"""
+
+helps['network service-endpoint policy list'] = """
+    type: command
+    short-summary: List service endpoint policies.
+"""
+
+helps['network service-endpoint policy show'] = """
+    type: command
+    short-summary: Get the details of a service endpoint policy.
+"""
+
+helps['network service-endpoint policy update'] = """
+    type: command
+    short-summary: Update a service endpoint policy.
+"""
+
+helps['network service-endpoint policy-definition'] = """
+    type: group
+    short-summary: Manage service endpoint policy definitions.
+"""
+
+helps['network service-endpoint policy-definition create'] = """
+    type: command
+    short-summary: Create a service endpoint policy definition.
+    parameters:
+        - name: --service
+          populator-commands:
+          - az network service-endpoint list
+"""
+
+helps['network service-endpoint policy-definition delete'] = """
+    type: command
+    short-summary: Delete a service endpoint policy definition.
+"""
+
+helps['network service-endpoint policy-definition list'] = """
+    type: command
+    short-summary: List service endpoint policy definitions.
+"""
+
+helps['network service-endpoint policy-definition show'] = """
+    type: command
+    short-summary: Get the details of a service endpoint policy definition.
+"""
+
+helps['network service-endpoint policy-definition update'] = """
+    type: command
+    short-summary: Update a service endpoint policy definition.
+"""
+
+# endregion
+
 # region Traffic Manager
 helps['network traffic-manager'] = """
     type: group
@@ -3026,7 +3293,7 @@ helps['network traffic-manager profile create'] = """
         - name: Create a traffic manager profile with performance routing.
           text: |
             az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance \\
-                --unique-dns-name mywebapp --ttl 30 --monitor-protocol HTTP --monitor-port 80 --monitor-path "/"
+                --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/"
 """
 
 helps['network traffic-manager profile delete'] = """
@@ -3236,7 +3503,15 @@ helps['network vnet subnet list'] = """
     short-summary: List the subnets in a virtual network.
     examples:
         - name: List the subnets in a virtual network.
-          text: az network vnet subnet list -g MyResourceGroup -n MyVNet
+          text: az network vnet subnet list -g MyResourceGroup --vnet-name MyVNet
+"""
+
+helps['network vnet subnet list-available-delegations'] = """
+    type: command
+    short-summary: List the services available for subnet delegation.
+    examples:
+        - name: Retrieve the service names for available delegations in the West US region.
+          text: az network vnet subnet list-available-delegations -l westus --query [].serviceName
 """
 
 helps['network vnet subnet show'] = """
@@ -3273,7 +3548,7 @@ helps['network vnet peering create'] = """
     short-summary: Create a virtual network peering connection.
     long-summary: >
         To successfully peer two virtual networks this command must be called twice with
-        the values for --vnet-name and --remote-vnet-id reversed.
+        the values for --vnet-name and --remote-vnet reversed.
     examples:
         - name: Create a peering connection between two virtual networks.
           text: |
@@ -3351,7 +3626,7 @@ helps['network vpn-connection delete'] = """
     short-summary: Delete a VPN connection.
     examples:
         - name: Delete a VPN connection.
-          text: az network vpn-connection create -g MyResourceGroup -n MyConnection
+          text: az network vpn-connection delete -g MyResourceGroup -n MyConnection
 """
 
 helps['network vpn-connection list'] = """
@@ -3750,6 +4025,34 @@ helps['network watcher test-ip-flow'] = """
             az network watcher test-ip-flow -g MyResourceGroup --direction Outbound \\
                 --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm MyVm
 """
+
+helps['network watcher run-configuration-diagnostic'] = """
+    type: command
+    short-summary: Run a configuration diagnostic on a target resource.
+    long-summary: >
+        Requires that Network Watcher is enabled for the region in which the target is located.
+    examples:
+        - name: Run configuration diagnostic on a VM with a single query.
+          text: |
+            az network watcher run-configuration-diagnostic --resource {VM_ID}
+               --direction Inbound --protocol TCP --source 12.11.12.14 --destination 10.1.1.4 --port 12100
+        - name: Run configuration diagnostic on a VM with multiple queries.
+          text: |
+            az network watcher run-configuration-diagnostic --resource {VM_ID}
+                --queries '[
+                {
+                    "direction": "Inbound", "protocol": "TCP", "source": "12.11.12.14",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                },
+                {
+                    "direction": "Inbound", "protocol": "TCP", "source": "12.11.12.0/32",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                },
+                {
+                    "direction": "Outbound", "protocol": "TCP", "source": "12.11.12.14",
+                    "destination": "10.1.1.4", "destinationPort": "12100"
+                }]'
+"""
 # endregion
 
 # region Network Watcher Connection Monitor
@@ -3861,7 +4164,7 @@ helps['network watcher packet-capture create'] = """
         - name: --vm
           short-summary: Name or ID of the VM to target.
         - name: --filters
-          short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
+          short-summary: JSON encoded list of packet filters. Use `@{path}` to load from file.
     examples:
         - name: Create a packet capture session on a VM.
           text: az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm --storage-account MyStorageAccount

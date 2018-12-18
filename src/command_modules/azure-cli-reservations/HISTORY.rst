@@ -2,6 +2,18 @@
 
 Release History
 ===============
+0.4.1
++++++
+* Add RedHat in the reserved resource enum type
+
+0.4.0
++++++
+* Add CosmosDb in the reserved resource enum type
+* Add name property in Patch model
+
+0.3.2
++++++
+* Minor fixes
 
 0.3.1
 +++++

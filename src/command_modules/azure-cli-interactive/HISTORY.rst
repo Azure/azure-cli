@@ -3,6 +3,22 @@
 Release History
 ===============
 
+0.4.0
++++++
+* Interactive now installs the 'interactive' extension, which will allow for faster updates and support.
+
+0.3.31
+++++++
+* Ensure global subscription parameter appears in parameters.
+
+0.3.30
+++++++
+* Fix error found on windows where commands fail to run properly.
+
+0.3.29
+++++++
+* Fix command loading problem in interactive that was caused by deprecated objects.
+
 0.3.28
 ++++++
 * Minor fixes

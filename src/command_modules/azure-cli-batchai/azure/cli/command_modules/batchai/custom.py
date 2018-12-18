@@ -532,7 +532,7 @@ def _configure_auto_storage(cli_ctx, location):
         logger.warning('BatchAI will use existing %s resource group for auto-storage account',
                        resource_group)
     else:
-        logger.warning('Creating %s resource for auto-storage account', resource_group)
+        logger.warning('Creating %s resource group for auto-storage account', resource_group)
         resource_client.resource_groups.create_or_update(
             resource_group, ResourceGroup(location=location))
     storage_client = _get_storage_management_client(cli_ctx)
@@ -575,7 +575,7 @@ def _create_auto_storage_account(storage_client, resource_group, location):
         name = _generate_auto_storage_account_name()
         check = storage_client.storage_accounts.check_name_availability(name).name_available
     storage_client.storage_accounts.create(resource_group, name, {
-        'sku': Sku(SkuName.standard_lrs),
+        'sku': Sku(name=SkuName.standard_lrs),
         'kind': Kind.storage,
         'location': location}).result()
     return name
@@ -605,15 +605,9 @@ def _generate_ssh_keys():
     """Generates ssh keys pair"""
     private_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')
     public_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-    if os.path.exists(private_key_path) and os.path.exists(public_key_path):
-        logger.warning('Reusing existing ssh public key from ~/.ssh')
-        return
-    if os.path.exists(private_key_path):
-        logger.warning('SSH private key id_rsa exists but public key is missing. Please export the public key.')
-        return
     keys.generate_ssh_keys(private_key_path, public_key_path)
-    logger.warning('SSH key files id_rsa and id_rsa.pub have been generated under ~/.ssh to allow SSH access to the '
-                   'nodes. If using machines without permanent storage, back up your keys to a safe location.')
+    logger.warning('Attempted to find or generate SSH key files id_rsa and id_rsa.pub under ~/.ssh to allow SSH access '
+                   'to the nodes. If using machines without permanent storage, back up your keys to a safe location.')
 
 
 def list_workspaces(client, resource_group=None):

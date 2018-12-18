@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.cdn.models import (Endpoint, QueryStringCachingBehavior, SkuName,
+from azure.mgmt.cdn.models import (Endpoint, SkuName,
                                    EndpointUpdateParameters, ProfileUpdateParameters)
 
 
@@ -75,13 +75,12 @@ def update_endpoint(cmd, instance,
 def create_endpoint(cmd, client, resource_group_name, profile_name, name, origins, location=None,
                     origin_host_header=None, origin_path=None, content_types_to_compress=None,
                     is_compression_enabled=None, is_http_allowed=None, is_https_allowed=None,
-                    query_string_caching_behavior=QueryStringCachingBehavior.ignore_query_string.
-                    value, tags=None):
+                    query_string_caching_behavior=None, tags=None):
     is_compression_enabled = False if is_compression_enabled is None else is_compression_enabled
     is_http_allowed = True if is_http_allowed is None else is_http_allowed
     is_https_allowed = True if is_https_allowed is None else is_https_allowed
-    endpoint = Endpoint(location,
-                        origins,
+    endpoint = Endpoint(location=location,
+                        origins=origins,
                         origin_host_header=origin_host_header,
                         origin_path=origin_path,
                         content_types_to_compress=content_types_to_compress,
@@ -118,7 +117,7 @@ def create_profile(cmd, client, resource_group_name, name,
                    sku=SkuName.standard_akamai.value,
                    location=None, tags=None):
     from azure.mgmt.cdn.models import (Profile, Sku)
-    profile = Profile(location, Sku(name=sku), tags=tags)
+    profile = Profile(location=location, sku=Sku(name=sku), tags=tags)
     return client.profiles.create(resource_group_name, name, profile)
 
 # endregion

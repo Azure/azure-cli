@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.2.3
++++++
+* Minor fixes
+
+0.2.2
++++++
+* Minor fixes
+
+0.2.1
++++++
+* Minor fixes
+
 0.2.0
 +++++
 * Removes dependency on azure-cli

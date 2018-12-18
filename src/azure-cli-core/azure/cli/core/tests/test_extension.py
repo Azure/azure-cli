@@ -58,50 +58,50 @@ class TestExtensions(TestExtensionsBase):
     def test_no_extensions_dir(self):
         """ Extensions directory doesn't exist """
         shutil.rmtree(self.ext_dir)
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
 
     def test_no_extensions_in_dir(self):
         """ Directory exists but there are no extensions """
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
 
     def test_other_files_in_extensions_dir(self):
         tempfile.mkstemp(dir=self.ext_dir)
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
 
     def test_extension_list(self):
         _install_test_extension1()
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 1)
 
     def test_extension_exists(self):
         _install_test_extension1()
-        actual = extension_exists(EXT_NAME)
+        actual = extension_exists(EXT_NAME, ext_type=WheelExtension)
         self.assertTrue(actual)
 
     def test_extension_not_exists(self):
-        actual = extension_exists(EXT_NAME)
+        actual = extension_exists(EXT_NAME, ext_type=WheelExtension)
         self.assertFalse(actual)
 
     def test_extension_not_exists_2(self):
         _install_test_extension1()
-        actual = extension_exists('notanextension')
+        actual = extension_exists('notanextension', ext_type=WheelExtension)
         self.assertFalse(actual)
 
     def test_get_extension(self):
         _install_test_extension1()
-        actual = get_extension(EXT_NAME)
+        actual = get_extension(EXT_NAME, ext_type=WheelExtension)
         self.assertEqual(actual.name, EXT_NAME)
 
     def test_get_extension_not_installed(self):
         with self.assertRaises(ExtensionNotInstalledException):
-            get_extension(EXT_NAME)
+            get_extension(EXT_NAME, ext_type=WheelExtension)
 
     def test_get_extension_names(self):
         _install_test_extension1()
-        actual = get_extension_names()
+        actual = get_extension_names(ext_type=WheelExtension)
         self.assertEqual(len(actual), 1)
         self.assertEqual(actual[0], EXT_NAME)
 

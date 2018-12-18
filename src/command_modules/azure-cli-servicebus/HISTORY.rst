@@ -3,6 +3,26 @@
 Release History
 ===============
 
+0.3.2
++++++
+* Minor fixes
+
+0.3.1
++++++
+* Added Read-Only migration_state to MigrationConfigProperties to show current Service Bus Standard to Premium namespace migration state.
+
+0.3.0
++++++
+* BREAKING CHANGE: 'list' commands errors for resource(s) NotFound(404) are now handled in the typical way instead of showing empty list
+
+0.2.3
++++++
+* Minor fixes
+
+0.2.2
++++++
+* Minor fixes
+
 0.2.1
 +++++
 * Added migration command group to migrate a namespace from Service Bus Standard to Premium

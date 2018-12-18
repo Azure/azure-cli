@@ -100,8 +100,12 @@ def configure_common_settings(cli_ctx, client):
         client._client.add_header(header, value)  # pylint: disable=protected-access
 
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
-    client._client.add_header('CommandName',  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    client._client.add_header('CommandName',
                               "{}{}".format(cli_ctx.data['command'], command_name_suffix))
+    if cli_ctx.data.get('safe_params'):
+        client._client.add_header('ParameterSetName',
+                                  ' '.join(cli_ctx.data['safe_params']))
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
@@ -143,7 +147,7 @@ def _get_mgmt_service_client(cli_ctx,
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
-                            sas_token=None, socket_timeout=None, endpoint_suffix=None):
+                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
@@ -152,6 +156,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
                          'sas_token': sas_token}
         if socket_timeout:
             client_kwargs['socket_timeout'] = socket_timeout
+        if token_credential:
+            client_kwargs['token_credential'] = token_credential
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
@@ -169,11 +175,9 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
 
 def get_subscription_id(cli_ctx):
     from azure.cli.core._profile import Profile
-    if 'subscription_id' in cli_ctx.data:
-        subscription_id = cli_ctx.data['subscription_id']
-    else:
-        subscription_id = Profile(cli_ctx=cli_ctx).get_subscription_id()
-    return subscription_id
+    if not cli_ctx.data.get('subscription_id'):
+        cli_ctx.data['subscription_id'] = Profile(cli_ctx=cli_ctx).get_subscription_id()
+    return cli_ctx.data['subscription_id']
 
 
 def _get_add_headers_callback(cli_ctx):

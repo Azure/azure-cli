@@ -26,3 +26,28 @@ def _log_analytics_client_factory(cli_ctx, *_):
 
 def cf_log_analytics(cli_ctx, *_):
     return _log_analytics_client_factory(cli_ctx).workspaces
+
+
+def cf_resource(cli_ctx):
+    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+
+
+def get_auth_management_client(cli_ctx, scope=None, **_):
+    import re
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    subscription_id = None
+    if scope:
+        matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
+        if matched:
+            subscription_id = matched.groupdict()['subscription']
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
+
+
+def cf_network(cli_ctx):
+    from azure.mgmt.network import NetworkManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, NetworkManagementClient, api_version="2018-08-01")

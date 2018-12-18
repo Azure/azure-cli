@@ -8,7 +8,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
+from azure.mgmt.containerregistry.v2018_09_01.models import (
     Registry,
     RegistryUpdateParameters,
     StorageAccountProperties,
@@ -51,12 +51,16 @@ def acr_create(cmd,
                admin_enabled=False,
                deployment_name=None):
     if sku in MANAGED_REGISTRY_SKU and storage_account_name:
-        raise CLIError("Please specify '--sku Basic' without providing an existing storage account "
+        raise CLIError("Please specify '--sku {}' without providing an existing storage account "
                        "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
                        "to create a Classic registry using storage account `{}`."
-                       .format(storage_account_name, storage_account_name))
+                       .format(sku, storage_account_name, storage_account_name))
 
     if sku in CLASSIC_REGISTRY_SKU:
+        result = client.check_name_availability(registry_name)
+        if not result.name_available:
+            raise CLIError(result.message)
+
         logger.warning(
             "Due to the planned deprecation of the Classic registry SKU, we recommend using "
             "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
@@ -158,7 +162,6 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    from subprocess import PIPE, Popen
     docker_command = _get_docker_command()
 
     login_server, username, password = get_login_credentials(
@@ -168,6 +171,7 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         username=username,
         password=password)
 
+    from subprocess import PIPE, Popen
     p = Popen([docker_command, "login",
                "--username", username,
                "--password", password,
@@ -183,9 +187,11 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
                        "--password", password,
                        login_server])
             p.wait()
-        elif b'--password-stdin' in stderr:
-            pass
         else:
+            if b'--password-stdin' in stderr:
+                errors = [err for err in stderr.decode().split('\n') if '--password-stdin' not in err]
+                stderr = '\n'.join(errors).encode()
+
             import sys
             output = getattr(sys.stderr, 'buffer', sys.stderr)
             output.write(stderr)
@@ -209,7 +215,7 @@ def _get_docker_command():
         p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
         _, stderr = p.communicate()
     except OSError:
-        # docker is not discoverable in WSL so retry docker.exe once
+        # The executable may not be discoverable in WSL so retry *.exe once
         try:
             docker_command = 'docker.exe'
             p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)

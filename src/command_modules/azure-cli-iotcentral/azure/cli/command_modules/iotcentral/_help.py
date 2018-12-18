@@ -9,26 +9,29 @@ from knack.help_files import helps
 
 helps['iotcentral'] = """
     type: group
-    short-summary: (PREVIEW) Manage IoT Central assets.
+    short-summary: Manage IoT Central assets.
 """
 
 helps['iotcentral app'] = """
     type: group
-    short-summary: (PREVIEW) Manage IoT Central applications.
+    short-summary: Manage IoT Central applications.
 """
 
 helps['iotcentral app create'] = """
     type: command
     short-summary: Create an IoT Central application.
-    long-summary: For an introduction to IoT Central, see https://docs.microsoft.com/en-us/azure/iot-central/
+    long-summary: |
+        For an introduction to IoT Central, see https://docs.microsoft.com/en-us/azure/iot-central/.
+        The F1 Sku is no longer supported. Please use the S1 Sku (default) for app creation.
+        For more pricing information, please visit https://azure.microsoft.com/en-us/pricing/details/iot-central/.
     examples:
-        - name: Create an IoT Central application with the free pricing tier F1, in the region of the resource group.
+        - name: Create an IoT Central application in the standard pricing tier S1, in the region of the resource group.
           text: >
-            az iotcentral app create --resource-group MyResourceGroup --name MyApp --subdomain myapp
-        - name: Create an IoT Central application with the standard pricing tier S1 in the 'westus' region.
+            az iotcentral app create --resource-group MyResourceGroup --name my-app-resource --subdomain my-app-subdomain
+        - name: Create an IoT Central application with the standard pricing tier S1 in the 'westus' region, with a custom display name, based on the iotc-default template.
           text: >
-            az iotcentral create --resource-group MyResourceGroup --name MyApp --sku S1 --location westus
-            --subdomain myapp
+            az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus
+            --subdomain my-app-subdomain --template iotc-default@1.0.0 --display-name 'My Custom Display Name'
 """
 
 helps['iotcentral app show'] = """
@@ -37,7 +40,7 @@ helps['iotcentral app show'] = """
     examples:
         - name: Show an IoT Central application.
           text: >
-            az iotcentral show --name MyApp
+            az iotcentral app show --name MyApp
 """
 
 helps['iotcentral app update'] = """

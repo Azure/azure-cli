@@ -86,6 +86,15 @@ def validate_k8s_version(namespace):
                            'such as "1.7.12" or "1.8.7"')
 
 
+def validate_nodepool_name(namespace):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    if namespace.nodepool_name != "":
+        if len(namespace.nodepool_name) > 12:
+            raise CLIError('--nodepool-name can contain atmost 12 characters')
+        if not namespace.nodepool_name.isalnum():
+            raise CLIError('--nodepool-name should only contain alphanumeric characters')
+
+
 def validate_k8s_client_version(namespace):
     """Validates a string as a possible Kubernetes version."""
     k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*|latest)$')

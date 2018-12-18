@@ -3,8 +3,71 @@
 Release History
 ===============
 
+2.3.14
+++++++
+* Add Virtual Nodes Preview
+
+2.3.13
+++++++
+* Remove "(PREVIEW)" from AAD arguments to "az aks create"
+* Mark "az acs" commands as deprecated (the ACS service will retire on January 31, 2020)
+* Add support of Network Policy when creating new AKS clusters
+* Don't require --nodepool-name in "az aks scale" if there's only one nodepool
+
+2.3.12
+++++++
+* Minor fixes
+
+2.3.11
+++++++
+* BREAKING CHANGE: Remove enable_cloud_console_aks_browse to enable 'az aks browse' by default
+
+2.3.10
+++++++
+* Minor fixes
+
+2.3.9
++++++
+* Minor fixes
+
+2.3.8
++++++
+* Minor fixes.
+
+2.3.7
++++++
+* Minor fixes.
+
+2.3.6
++++++
+* `az aks create/scale --nodepool-name` configures nodepool name, truncated to 12 characters, default - nodepool1
+
+2.3.5
++++++
+* bugfix: Fall back to 'scp' when Parimiko fails.
+* `az aks create` no longer requires --aad-tenant-id
+* bugfix: improve merging of kubernetes credentials when duplicate entries are present.
+* In Azure Cloud Shell, open a tunnel and report the URL
+
+2.3.4
++++++
+* install-connector: Updates the install-connector command to set the AKS Master FQDN
+
+2.3.3
++++++
+* bugfix: creating role assignment for vnet-subnet-id when not specifying service principal and skip-role-assignemnt
+
+2.3.2
++++++
+* `az aks create` now defaults to Standard_DS2_v2 VMs.
+
+2.3.1
++++++
+* `az aks get-credentials` will now call new apis to get cluster credential.
+
 2.3.0
 +++++
+* `az acs/aks install-cli` will install to under %USERPROFILE%\.azure-kubectl on Windows
 * `az aks install-connector` will now detect if the cluster has RBAC and configure ACI Connector appropriately
 * Create role assignment to the subnet when it's provided.
 * Add new option "skip role assignment" for subnet when it's provided

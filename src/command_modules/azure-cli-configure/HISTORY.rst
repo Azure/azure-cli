@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.19
+++++++
+* Add YAML to output format options.
+
 2.0.18
 ++++++
 * Minor fixes

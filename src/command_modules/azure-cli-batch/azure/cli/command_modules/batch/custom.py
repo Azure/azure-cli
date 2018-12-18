@@ -18,8 +18,8 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
-                                TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
-                                StartTask, AffinityInformation)
+                                TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
+                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -41,11 +41,27 @@ def transfer_doc(source_func, *additional_source_funcs):
 
 
 # Mgmt custom commands
-
 def list_accounts(client, resource_group_name=None):
     acct_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(acct_list)
+
+
+def get_account(cmd, client, resource_group_name=None, account_name=None):
+    if resource_group_name and account_name:
+        return client.get(resource_group_name, account_name)
+    else:
+        account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint')
+        if not account_endpoint:
+            raise ValueError(
+                "Missing required arguments. Either specify --resource-group-name and "
+                "--account-name or must be logged into a batch account")
+        account_list = list_accounts(client)
+        for account in account_list:
+            if account.account_endpoint in account_endpoint:
+                return account
+    raise ValueError("Missing required arguments. Either specify --resource-group-name and "
+                     "--account-name or must be logged into a batch account")
 
 
 @transfer_doc(AutoStorageBaseProperties)
@@ -106,6 +122,8 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             profile = Profile(cli_ctx=cmd.cli_ctx)
             creds, subscription, tenant = profile.get_raw_token(resource=resource)
             return {
+                'account': account.name,
+                'endpoint': 'https://{}/'.format(account.account_endpoint),
                 'tokenType': creds[0],
                 'accessToken': creds[1],
                 'expiresOn': creds[2]['expiresOn'],
@@ -185,9 +203,12 @@ def create_certificate(client, certificate_file, thumbprint, password=None):
     with open(certificate_file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')
-    cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
-                                   certificate_format=certificate_format,
-                                   password=password)
+    cert = CertificateAddParameter(
+        thumbprint=thumbprint,
+        thumbprint_algorithm=thumbprint_algorithm,
+        data=data,
+        certificate_format=certificate_format,
+        password=password)
     client.add(cert)
     return client.get(thumbprint_algorithm, thumbprint)
 
@@ -251,12 +272,13 @@ def update_pool(client,
             metadata = []
         if application_package_references is None:
             application_package_references = []
-        param = PoolUpdatePropertiesParameter(certificate_references,
-                                              application_package_references,
-                                              metadata)
+        param = PoolUpdatePropertiesParameter(
+            certificate_references=certificate_references,
+            application_package_references=application_package_references,
+            metadata=metadata)
 
         if start_task_command_line:
-            param.start_task = StartTask(start_task_command_line,
+            param.start_task = StartTask(command_line=start_task_command_line,
                                          environment_settings=start_task_environment_settings,
                                          wait_for_success=start_task_wait_for_success,
                                          max_task_retry_count=start_task_max_task_retry_count)
@@ -272,7 +294,6 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
                                                 expand=expand)
         return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
                                                   job_list_from_job_schedule_options=option1))
-
     option2 = JobListOptions(filter=filter,
                              select=select,
                              expand=expand)
@@ -291,22 +312,27 @@ def create_task(client,
         json_obj = get_file_json(json_file)
         try:
             task = TaskAddParameter.from_dict(json_obj)
-        except DeserializationError:
-            tasks = []
+        except (DeserializationError, TypeError):
             try:
-                for json_task in json_obj:
-                    tasks.append(TaskAddParameter.from_dict(json_task))
+                task_collection = TaskAddCollectionParameter.from_dict(json_obj)
+                tasks = task_collection.value
             except (DeserializationError, TypeError):
-                raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
+                try:
+                    for json_task in json_obj:
+                        tasks.append(TaskAddParameter.from_dict(json_task))
+                except (DeserializationError, TypeError):
+                    raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "
                              "or both --task-id and --command-line must be specified.")
-        task = TaskAddParameter(task_id, command_line,
-                                resource_files=resource_files,
-                                environment_settings=environment_settings,
-                                affinity_info=AffinityInformation(affinity_id) if affinity_id else None,
-                                application_package_references=application_package_references)
+        task = TaskAddParameter(
+            id=task_id,
+            command_line=command_line,
+            resource_files=resource_files,
+            environment_settings=environment_settings,
+            affinity_info=AffinityInformation(affinity_id=affinity_id) if affinity_id else None,
+            application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:
             task.constraints = TaskConstraints(max_wall_clock_time=max_wall_clock_time,

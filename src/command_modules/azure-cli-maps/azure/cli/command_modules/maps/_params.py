@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     tags_type)
 
-from azure.mgmt.maps.models.maps_management_client_enums import KeyType
+from azure.mgmt.maps.models import KeyType
 
 
 def load_arguments(self, _):
@@ -34,7 +34,7 @@ def load_arguments(self, _):
         c.argument('sku_name',
                    options_list=['--sku', '-s'],
                    help='The name of the SKU.',
-                   arg_type=get_enum_type(['S0']))
+                   arg_type=get_enum_type(['S0', 'S1']))
         c.argument('tags',
                    arg_type=tags_type)
 

@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 
-def set_logging(client, log, retention, timeout=None):
+def set_logging(client, log, retention, timeout=None, version=None):
     for s in client:
-        s.set_logging('r' in log, 'w' in log, 'd' in log, retention, timeout)
+        s.set_logging('r' in log, 'w' in log, 'd' in log, retention, timeout=timeout, version=version)
 
 
 def get_logging(client, timeout=None):

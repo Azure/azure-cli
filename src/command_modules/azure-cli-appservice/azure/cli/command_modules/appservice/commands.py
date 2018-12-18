@@ -35,16 +35,19 @@ def ex_handler_factory(creating_plan=False):
         import json
         from knack.util import CLIError
         try:
-            detail = json.loads(ex.response.text)['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/en-us/"
-                              "azure/app-service-web/app-service-linux-intro")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text)['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with linux worker is not supported in current region. For " +
+                                  "supported regions, please refer to https://docs.microsoft.com/en-us/"
+                                  "azure/app-service-web/app-service-linux-intro")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
             ex = CLIError(detail)
         except Exception:  # pylint: disable=broad-except
             pass
@@ -70,6 +73,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('up', 'create_deploy_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
@@ -79,7 +83,7 @@ def load_command_table(self, _):
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
-        g.custom_command('identity show', 'show_identity')
+        g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
@@ -87,6 +91,11 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_traffic_routing')
         g.custom_show_command('show', 'show_traffic_routing')
         g.custom_command('clear', 'clear_traffic_routing')
+
+    with self.command_group('webapp cors') as g:
+        g.custom_command('add', 'add_cors')
+        g.custom_command('remove', 'remove_cors')
+        g.custom_command('show', 'show_cors')
 
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -101,6 +110,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'get_connection_strings', exception_handler=empty_on_404)
         g.custom_command('set', 'update_connection_strings')
         g.custom_command('delete', 'delete_connection_strings')
+
+    with self.command_group('webapp config storage-account') as g:
+        g.custom_command('list', 'get_azure_storage_accounts', exception_handler=empty_on_404)
+        g.custom_command('add', 'add_azure_storage_account')
+        g.custom_command('update', 'update_azure_storage_account')
+        g.custom_command('delete', 'delete_azure_storage_accounts')
 
     with self.command_group('webapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -126,6 +141,22 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
         g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
         g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp config snapshot') as g:
+        g.custom_command('list', 'list_snapshots')
+        g.custom_command('restore', 'restore_snapshot')
+
+    with self.command_group('webapp webjob continuous') as g:
+        g.custom_command('list', 'list_continuous_webjobs', exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_continuous_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('start', 'start_continuous_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('stop', 'stop_continuous_webjob', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp webjob triggered') as g:
+        g.custom_command('list', 'list_triggered_webjobs', exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_triggered_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('run', 'run_triggered_webjob', exception_handler=ex_handler_factory())
+        g.custom_command('log', 'get_history_triggered_webjob', exception_handler=ex_handler_factory())
 
     with self.command_group('webapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
@@ -164,6 +195,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
 
+    with self.command_group('webapp deleted') as g:
+        g.custom_command('list', 'list_deleted_webapp')
+        g.custom_command('restore', 'restore_deleted_webapp')
+
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
         g.command('delete', 'delete', confirmation=True)
@@ -174,7 +209,7 @@ def load_command_table(self, _):
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
 
     with self.command_group('functionapp') as g:
-        g.custom_command('create', 'create_function')
+        g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
@@ -183,9 +218,13 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
         g.custom_command('identity assign', 'assign_identity')
-        g.custom_command('identity show', 'show_identity')
+        g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.generic_update_command('update', setter_name='set_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
+
+    with self.command_group('functionapp config') as g:
+        g.custom_command('set', 'update_site_configs')
+        g.custom_show_command('show', 'get_site_configs')
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
@@ -220,3 +259,8 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+
+    with self.command_group('functionapp cors') as g:
+        g.custom_command('add', 'add_cors')
+        g.custom_command('remove', 'remove_cors')
+        g.custom_command('show', 'show_cors')

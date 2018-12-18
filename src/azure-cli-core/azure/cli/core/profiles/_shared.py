@@ -65,7 +65,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
     def __init__(self, default_api_version, profile=None):
         """Constructor.
 
-        :param str default_api_version: Default API version if not overriden by a profile. Nullable.
+        :param str default_api_version: Default API version if not overridden by a profile. Nullable.
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
@@ -79,17 +79,20 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2018-03-01-preview',
-        ResourceType.MGMT_NETWORK: '2018-02-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2018-06-01', {
+        ResourceType.MGMT_STORAGE: '2018-07-01',
+        ResourceType.MGMT_NETWORK: '2018-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2018-10-01', {
             'resource_skus': '2017-09-01',
-            'disks': '2018-04-01',
-            'snapshots': '2018-04-01'
+            'disks': '2018-06-01',
+            'snapshots': '2018-06-01',
+            'galleries': '2018-06-01',
+            'gallery_images': '2018-06-01',
+            'gallery_image_versions': '2018-06-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
+        ResourceType.MGMT_RESOURCE_POLICY: '2018-03-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
@@ -97,23 +100,48 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.DATA_STORAGE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_NETWORK_DNS: '2018-03-01-preview'
+        ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
+        ResourceType.MGMT_KEYVAULT: '2018-02-14',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
+            'classic_administrators': '2015-06-01'
+        }),
+        ResourceType.DATA_KEYVAULT: '7.0',
+        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+    },
+    '2018-03-01-hybrid': {
+        ResourceType.MGMT_STORAGE: '2016-01-01',
+        ResourceType.MGMT_NETWORK: '2017-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2017-03-30'),
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-02-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
+            'classic_administrators': '2015-06-01'
+        }),
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2015-06-15',
         ResourceType.MGMT_COMPUTE: SDKProfile('2016-03-30'),
-        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2015-10-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2016-02-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05'
     }
 }

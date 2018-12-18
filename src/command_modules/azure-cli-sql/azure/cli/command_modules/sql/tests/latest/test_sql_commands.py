@@ -2795,7 +2795,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest1070"
+        failover_group_name = "fgclitest1650"
 
         database_name = "db1"
 
@@ -2875,6 +2875,15 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 2)
                  ])
 
+        # Update Failover Group failover policy to Manual
+        self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
+                 .format(s1.group, s1.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
         # Failover Failover Group
         self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s2.group, s2.name, failover_group_name))
@@ -2942,8 +2951,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
                  .format(s1.group, s1.name, failover_group_name, database_name),
                  checks=[
-                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
                      JMESPathCheck('length(databases)', 0)
                  ])

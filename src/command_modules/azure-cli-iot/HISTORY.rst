@@ -2,6 +2,24 @@
 
 Release History
 ===============
+0.3.4
++++++
+* Minor fixes
+
+0.3.3
++++++
+* Added extension installation command to first-run banner
+
+0.3.2
++++++
+* Adds support for routing IoT Hubs.
+
+0.3.1
++++++
+* Increment DPS mgmt SDK requirement
+* Fix internal breaking changes for SDK usage patterns
+* Apply work around (back rev API) for assocating a linked-hub due to swagger/sdk mismatch with API.
+* Update tests and DPS recording
 
 0.3.0
 +++++
