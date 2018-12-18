@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
 from ..rule_decorators import help_file_entry_rule
 from ..linter import RuleError
+from ..util import get_cmd_param_list_from_example
 
 
 @help_file_entry_rule
@@ -48,5 +48,31 @@ def faulty_help_example_rule(linter, help_entry):
 
 @help_file_entry_rule
 def faulty_help_example_parameters_rule(linter, help_entry):
+    violations = []
+    valid_commands = linter._loaded_help.keys()
     for index, example in enumerate(linter.get_help_entry_examples(help_entry)):
-        commands = example.get()
+        example_text = example.get('text','')
+        cmd_params_list = get_cmd_param_list_from_example(example_text)
+
+        for cmd_body, params in cmd_params_list:
+            cmd_list = cmd_body.split()[1:] # break down command into list of words and get rid of `az`.
+
+            while(cmd_list and " ".join(cmd_list) not in valid_commands): # trim possible positional arguments.
+                cmd_list = cmd_list[:-1]
+
+            # if no help entry match was found, this is not a valid command.
+            if not cmd_list:
+                violations.append("\t\t\t'{}' is not a valid command.".format(cmd_body))
+                continue
+
+            cmd = " ".join(cmd_list)
+
+            for param in params:
+                if not linter.is_valid_parameter_help_option(cmd, param):
+                    violations.append("\t\t\tOption '{}' is not a valid parameter for command '{}'.".format(param, cmd))
+
+    if violations:
+        num_err = len(violations)
+        violation_str = "\n".join(violations[:25])
+        violation_msg = "There is a violation:\n{}.".format(violation_str) if num_err == 1 else "There are {} violations:\n{}".format(num_err, violation_str)
+        raise RuleError(violation_msg)

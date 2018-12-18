@@ -88,7 +88,15 @@ class LinterError(Exception):
     """
     pass
 
-def get_commands_from_example(example_text):
+# return list of (cmd, params) tuples from example text. e.g. (az foo bar, [--opt, -n, -g, --help])
+def get_cmd_param_list_from_example(example_text):
+
+    def process_short_option(option): # handle options like -otable
+        if len(option) > 2 and option[0] == "-" and option[0] != option[1]:
+            return option[0:2]
+        else:
+            return option
+
     CMD_PREFIX = "az "
     commands = []  # some examples have multistep commands. This is a simple way to extract them
     while(CMD_PREFIX in example_text):
@@ -96,12 +104,24 @@ def get_commands_from_example(example_text):
         start = example_text.find(CMD_PREFIX)
         end = example_text.find(CMD_PREFIX, start + 1)
         end = end if end > -1 else len(example_text)
-        # extract it
-        commands.append(example_text[start:end].rstrip("|"))  # remove unwanted pip symbols
+        # extract command
+        cmd_text = example_text[start:end]
         # update example text
         example_text = example_text[end:]
+        # remove piping from cmd_text
+        end = cmd_text.find("|")
+        end = end if end > -1 else len(cmd_text)
+        cmd_text = cmd_text[:end]
+        # add to commands list
+        commands.append(cmd_text)
 
+
+    cmd_param_list = []
     for command in commands:
-        idx = command.find("-")  # Todo: positionals?
-        command_body = command[:idx]
+        idx = command.find(" -")  # Todo: positionals?
+        command_body = command[:idx].strip()
+        parameters = [maybe_opt for maybe_opt in command[idx:].split() if maybe_opt.startswith("-")]
+        parameters = list(map(process_short_option, parameters)) # process short options like -otable
+        cmd_param_list.append((command_body, parameters))
 
+    return cmd_param_list
