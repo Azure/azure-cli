@@ -104,12 +104,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         storage_model_types = [e.value for e in StorageType]
         vault_properties = self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            JMESPathCheckExists("contains({}, storageType)".format(storage_model_types)),
-            self.check('storageTypeState', 'Unlocked'),
+            JMESPathCheckExists("contains({}, properties.storageModelType)".format(storage_model_types)),
+            self.check('properties.storageTypeState', 'Unlocked'),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
-        if vault_properties['storageType'] == StorageType.geo_redundant.value:
+        if vault_properties['properties']['storageModelType'] == StorageType.geo_redundant.value:
             new_storage_model = StorageType.locally_redundant.value
         else:
             new_storage_model = StorageType.geo_redundant.value
@@ -118,7 +118,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
 
         self.cmd('backup vault backup-properties show -n {vault1} -g {rg}', checks=[
-            self.check('storageType', new_storage_model)
+            self.check('properties.storageModelType', new_storage_model)
         ])
 
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
