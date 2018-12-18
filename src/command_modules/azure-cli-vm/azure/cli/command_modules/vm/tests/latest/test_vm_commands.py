@@ -418,8 +418,8 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
             'vm': 'vm2',
             'os_disk': 'os1'
         })
-        self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri}',
-                 checks=self.check('name', '{os_disk}'))
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux',
+                 checks=[self.check('name', '{os_disk}'), self.check('osType', 'Linux')])
         # create a vm by attaching to it
         self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {os_disk} --os-type linux',
                  checks=self.check('powerState', 'VM running'))
@@ -631,6 +631,16 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.storageAccountType', 'Standard_LRS'),
                      self.check('storageProfile.osDisk.caching', 'ReadWrite')
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_managed_disk')
+    def test_vm_managed_disk_os_type(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'd1',
+            'disk2': 'd2',
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --os-type Linux', checks=self.check('osType', 'Linux'))
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --os-type Windows', checks=self.check('osType', 'Windows'))
 
 
 class VMWriteAcceleratorScenarioTest(ScenarioTest):
