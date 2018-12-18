@@ -23,7 +23,7 @@ from azure.cli.command_modules.vm._validators import (
 from ._vm_utils import MSI_LOCAL_ID
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
     OperatingSystemTypes = self.get_models('OperatingSystemTypes')
