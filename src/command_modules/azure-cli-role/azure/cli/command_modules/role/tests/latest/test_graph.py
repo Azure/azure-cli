@@ -12,6 +12,7 @@ from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplac
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     def test_sp_create_scenario(self):
         app_id_uri = 'http://' + self.create_random_name('clisp-test-', 20)
         self.kwargs['app_id_uri'] = app_id_uri
@@ -26,7 +27,8 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             self.check('[0].identifierUris[0]', '{app_id_uri}'),
             self.check('length([*])', 1)
         ])
-
+        self.assertTrue(len(self.cmd('ad app list').get_output_in_json()) <= 100)
+        self.cmd('ad app list --show-mine')
         # show/list sp
         self.cmd('ad sp show --id {app_id_uri}',
                  checks=self.check('servicePrincipalNames[0]', '{app_id_uri}'))
@@ -42,6 +44,8 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
                  checks=self.is_empty())
         self.cmd('ad app list --identifier-uri {app_id_uri}',
                  checks=self.is_empty())
+        self.assertTrue(len(self.cmd('ad sp list').get_output_in_json()) <= 100)
+        self.cmd('ad sp list --show-mine')
 
     def test_native_app_create_scenario(self):
         self.kwargs = {

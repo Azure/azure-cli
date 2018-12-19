@@ -20,11 +20,13 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
+from ._vm_utils import MSI_LOCAL_ID
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
+    OperatingSystemTypes = self.get_models('OperatingSystemTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -41,7 +43,7 @@ def load_arguments(self, _):
                                      help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                      id_part='name')
 
-    extension_instance_name_type = CLIArgumentType(help='Instance name of the extension. Default: name of the extension.')
+    extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
 
     if StorageAccountTypes:
         disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
@@ -77,6 +79,7 @@ def load_arguments(self, _):
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
+        c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The Operating System type of the Disk.')
         c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
     # endregion
@@ -205,7 +208,7 @@ def load_arguments(self, _):
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
 
     with self.argument_context('vm extension') as c:
-        c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='extension name', id_part='child_name_1')
+        c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
         c.argument('expand', deprecate_info=c.deprecate(expiration='2.1.0', hide=True))
 
@@ -382,13 +385,13 @@ def load_arguments(self, _):
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
-            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
+            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
     for scope in ['vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
-            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '[system]' to refer system assigned identity.")
+            c.argument('identities', nargs='+', help="Space-separated identities to remove. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 

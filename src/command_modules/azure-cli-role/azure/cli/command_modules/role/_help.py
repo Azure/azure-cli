@@ -110,6 +110,7 @@ helps['ad sp create'] = """
 helps['ad sp list'] = """
     type: command
     short-summary: List service principals.
+    long-summary: For low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad sp owner'] = """
     type: group
@@ -134,6 +135,7 @@ helps['ad app delete'] = """
 helps['ad app list'] = """
     type: command
     short-summary: List applications.
+    long-summary: for low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad app show'] = """
     type: command
@@ -186,7 +188,7 @@ helps['ad app permission grant'] = """
     short-summary: Grant the app an API permission
     examples:
         - name: Grant a native application with permissions to access an existing API with TTL of 2 years
-          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
 """
 helps['ad app permission list'] = """
     type: command

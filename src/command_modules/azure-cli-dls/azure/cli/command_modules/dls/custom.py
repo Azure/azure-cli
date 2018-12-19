@@ -63,7 +63,10 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
             if not key_name or not key_vault_id or not key_version:
                 # pylint: disable=line-too-long
                 raise CLIError('For user managed encryption, --key_vault_id, --key_name and --key_version are required parameters and must be supplied.')
-            config.key_vault_meta_info = KeyVaultMetaInfo(key_vault_id, key_name, key_version)
+            config.key_vault_meta_info = KeyVaultMetaInfo(
+                key_vault_resource_id=key_vault_id,
+                encryption_key_name=key_name,
+                encryption_key_version=key_version)
         else:
             if key_name or key_vault_id or key_version:
                 # pylint: disable=line-too-long
@@ -92,7 +95,7 @@ def update_adls_account(client, account_name, resource_group_name, tags=None, de
     # this will fail if the encryption is not user managed, as service managed key rotation is not supported.
     if key_version:
         update_params.encryption_config = UpdateEncryptionConfig(
-            UpdateKeyVaultMetaInfo(key_version))
+            key_vault_meta_info=UpdateKeyVaultMetaInfo(encryption_key_version=key_version))
 
     return client.update(resource_group_name, account_name, update_params).result()
 # endregion

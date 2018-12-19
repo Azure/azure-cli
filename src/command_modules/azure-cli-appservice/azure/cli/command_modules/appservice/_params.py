@@ -28,6 +28,8 @@ AUTH_TYPES = {
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
+LINUX_RUNTIMES = ['dotnet', 'node', 'python']
+WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
 
 # pylint: disable=too-many-statements
 
@@ -301,6 +303,20 @@ def load_arguments(self, _):
         c.argument('overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
+    with self.argument_context('webapp config snapshot') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+
+    with self.argument_context('webapp config snapshot list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config snapshot restore') as c:
+        c.argument('time', help='Timestamp of the snapshot to restore.')
+        c.argument('restore_content_only', help='Restore the web app files without restoring the settings.')
+        c.argument('source_resource_group', help='Name of the resource group to retrieve snapshot from.')
+        c.argument('source_name', help='Name of the webapp to retrieve snapshot from.')
+        c.argument('source_slot', help='Name of the webapp slot to retrieve snapshot from.')
+
     with self.argument_context('webapp auth update') as c:
         c.argument('enabled', arg_type=get_three_state_flag(return_label=True))
         c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True), help='use App Service Token Store')
@@ -345,7 +361,7 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
-        c.argument('runtime', help='The function runtime stack. Currently supported for Linux apps only', arg_type=get_enum_type(['dotnet', 'node', 'python']))
+        c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
 
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions

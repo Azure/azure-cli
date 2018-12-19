@@ -65,7 +65,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
     def __init__(self, default_api_version, profile=None):
         """Constructor.
 
-        :param str default_api_version: Default API version if not overriden by a profile. Nullable.
+        :param str default_api_version: Default API version if not overridden by a profile. Nullable.
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """

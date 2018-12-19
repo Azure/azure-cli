@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.2.11
+++++++
+* `disk create`: expose --os-type parameter.
+
+2.2.10
+++++++
+* `vm identity remove`: does not crash if the specified vm has no assigned managed service identities.
+
 2.2.9
 ++++++
 * `vm extension show / wait`: deprecated --expand parameter.
