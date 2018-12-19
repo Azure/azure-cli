@@ -632,16 +632,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
                      self.check('storageProfile.osDisk.caching', 'ReadWrite')
                  ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_managed_disk')
-    def test_vm_managed_disk_os_type(self, resource_group):
-        self.kwargs.update({
-            'disk1': 'd1',
-            'disk2': 'd2',
-        })
-
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --os-type Linux', checks=self.check('osType', 'Linux'))
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1 --os-type Windows', checks=self.check('osType', 'Windows'))
-
 
 class VMWriteAcceleratorScenarioTest(ScenarioTest):
 
