@@ -11,6 +11,7 @@ import logging as logs
 import os
 import sys
 import time
+import copy
 from importlib import import_module
 import six
 
@@ -19,7 +20,8 @@ from knack.commands import CLICommand, CommandGroup
 from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, CommandResultItem, todict
+from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
@@ -195,9 +197,8 @@ class AzCliCommandInvoker(CommandInvoker):
     def execute(self, args):
         from knack.events import (EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE,
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
-                                  EVENT_INVOKER_POST_PARSE_ARGS, EVENT_INVOKER_TRANSFORM_RESULT,
+                                  EVENT_INVOKER_POST_PARSE_ARGS,
                                   EVENT_INVOKER_FILTER_RESULT)
-        from knack.util import CommandResultItem, todict
         from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
         # TODO: Can't simply be invoked as an event because args are transformed
@@ -278,11 +279,10 @@ class AzCliCommandInvoker(CommandInvoker):
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
 
-        expanded_args = list(_explode_list_args(parsed_args))
         cmd = parsed_args.func
         self.cli_ctx.data['command'] = parsed_args.command
-        self.cli_ctx.data['safe_params'] = [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
-                                            (p.startswith('-') and len(p) > 1)]
+
+        self.cli_ctx.data['safe_params'] = AzCliCommandInvoker._extract_parameter_names(args)
 
         command_source = self.commands_loader.command_table[command].command_source
 
@@ -294,7 +294,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 extension_version = get_extension(command_source.extension_name).version
         except Exception:  # pylint: disable=broad-except
             pass
-
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
                                       extension_name=extension_name, extension_version=extension_version)
@@ -304,46 +303,36 @@ class AzCliCommandInvoker(CommandInvoker):
         self.resolve_warnings(cmd, parsed_args)
         self.resolve_confirmation(cmd, parsed_args)
 
-        results = []
-        for expanded_arg in expanded_args:
-            if hasattr(expanded_arg, 'cmd'):
-                expanded_arg.cmd = cmd
+        jobs = []
+        for expanded_arg in _explode_list_args(parsed_args):
+            cmd_copy = copy.copy(cmd)
+            cmd_copy.cli_ctx = copy.copy(cmd.cli_ctx)
+            cmd_copy.cli_ctx.data = copy.deepcopy(cmd.cli_ctx.data)
+            expanded_arg.cmd = cmd_copy
 
             if hasattr(expanded_arg, '_subscription'):
-                self.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
+                cmd_copy.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
 
             self._validation(expanded_arg)
+            jobs.append((expanded_arg, cmd_copy))
 
-            params = self._filter_params(expanded_arg)
+        ids = getattr(parsed_args, '_ids', None) or [None] * len(jobs)
+        if self.cli_ctx.config.getboolean('core', 'disable_concurrent_ids', False) or len(ids) < 2:
+            results, exceptions = self._run_jobs_serially(jobs, ids)
+        else:
+            results, exceptions = self._run_jobs_concurrently(jobs, ids)
 
-            try:
-                result = cmd(params)
-                if cmd.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
-                    result = None
-                elif cmd.no_wait_param and getattr(expanded_arg, cmd.no_wait_param, False):
-                    result = None
-
-                transform_op = cmd.command_kwargs.get('transform', None)
-                if transform_op:
-                    result = transform_op(result)
-
-                if _is_poller(result):
-                    result = LongRunningOperation(self.cli_ctx, 'Starting {}'.format(cmd.name))(result)
-                elif _is_paged(result):
-                    result = list(result)
-
-                result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
-                event_data = {'result': result}
-                self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
-                result = event_data['result']
-                results.append(result)
-
-            except Exception as ex:  # pylint: disable=broad-except
-                if cmd.exception_handler:
-                    cmd.exception_handler(ex)
-                    return CommandResultItem(None, exit_code=1, error=ex)
-                else:
-                    six.reraise(*sys.exc_info())
+        # handle exceptions
+        if len(exceptions) == 1 and not results:
+            ex, id_arg = exceptions[0]
+            raise ex
+        elif exceptions:
+            for exception, id_arg in exceptions:
+                logger.warning('%s: "%s"', id_arg, str(exception))
+            if not results:
+                return CommandResultItem(None, exit_code=1, error=CLIError('Encountered more than one exception.'))
+            else:
+                logger.warning('Encountered more than one exception.')
 
         if results and len(results) == 1:
             results = results[0]
@@ -355,6 +344,64 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    @staticmethod
+    def _extract_parameter_names(args):
+        # note: name start with more than 2 '-' will be treated as value e.g. certs in PEM format
+        return [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
+                (p.startswith('-') and not p.startswith('---') and len(p) > 1)]
+
+    def _run_job(self, expanded_arg, cmd_copy):
+        params = self._filter_params(expanded_arg)
+        try:
+            result = cmd_copy(params)
+            if cmd_copy.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
+                result = None
+            elif cmd_copy.no_wait_param and getattr(expanded_arg, cmd_copy.no_wait_param, False):
+                result = None
+
+            transform_op = cmd_copy.command_kwargs.get('transform', None)
+            if transform_op:
+                result = transform_op(result)
+
+            if _is_poller(result):
+                result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name))(result)
+            elif _is_paged(result):
+                result = list(result)
+
+            result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+            event_data = {'result': result}
+            cmd_copy.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
+            return event_data['result']
+        except Exception as ex:  # pylint: disable=broad-except
+            if cmd_copy.exception_handler:
+                cmd_copy.exception_handler(ex)
+                return CommandResultItem(None, exit_code=1, error=ex)
+            else:
+                six.reraise(*sys.exc_info())
+
+    def _run_jobs_serially(self, jobs, ids):
+        results, exceptions = [], []
+        for job, id_arg in zip(jobs, ids):
+            expanded_arg, cmd_copy = job
+            try:
+                results.append(self._run_job(expanded_arg, cmd_copy))
+            except(Exception, SystemExit) as ex:  # pylint: disable=broad-except
+                exceptions.append((ex, id_arg))
+        return results, exceptions
+
+    def _run_jobs_concurrently(self, jobs, ids):
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        tasks, results, exceptions = [], [], []
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            for expanded_arg, cmd_copy in jobs:
+                tasks.append(executor.submit(self._run_job, expanded_arg, cmd_copy))
+            for index, task in enumerate(as_completed(tasks)):
+                try:
+                    results.append(task.result())
+                except (Exception, SystemExit) as ex:  # pylint: disable=broad-except
+                    exceptions.append((ex, ids[index]))
+        return results, exceptions
 
     def resolve_warnings(self, cmd, parsed_args):
         self._resolve_deprecation_warnings(cmd, parsed_args)

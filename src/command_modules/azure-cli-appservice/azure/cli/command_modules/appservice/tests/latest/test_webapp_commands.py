@@ -480,6 +480,43 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
+class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_linux_webapp_multicontainer_slot(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-linux-multi', length=24)
+        plan = self.create_random_name(prefix='plan-linux-multi', length=24)
+        config_file = os.path.join(TEST_DIR, 'sample-compose.yml')
+        slot = "stage"
+        slot_webapp_name = "{}-{}".format(webapp_name, slot)
+        slot_config_file = os.path.join(TEST_DIR, 'sample-compose-slot.yml')
+
+        self.cmd('appservice plan create -g {} -n {} --is-linux --sku S1'.format(resource_group, plan))
+        self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello World! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
+        self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot))
+        self.cmd("webapp config container set -g {} -n {} --slot {} --multicontainer-config-file \"{}\" "
+                 "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, slot, slot_config_file))
+
+        last_number_seen = 99999999
+        for x in range(0, 10):
+            r = requests.get('http://{}.azurewebsites.net'.format(slot_webapp_name), timeout=240)
+            # verify the web page
+            self.assertTrue('Hello from a slot! I have been seen' in str(r.content))
+            current_number = [int(s) for s in r.content.split() if s.isdigit()][0]
+            self.assertNotEqual(current_number, last_number_seen)
+            last_number_seen = current_number
+
+
 class WebappACRScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_acr_integration(self, resource_group):

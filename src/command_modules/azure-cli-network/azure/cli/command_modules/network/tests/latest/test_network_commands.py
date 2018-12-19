@@ -13,7 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 
 from knack.util import CLIError
 
@@ -168,7 +168,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
 
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
-
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_multi_id')
     def test_network_multi_id_show(self, resource_group):
 
@@ -1665,6 +1665,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
         import json
@@ -1678,8 +1679,8 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.kwargs['id2'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
         self.cmd('network vnet show --ids {id1} {id2} --query "[].name"', checks=[
             self.check('length(@)', 2),
-            self.check('@[0]', '{vnet1}'),
-            self.check('@[1]', '{vnet2}')
+            self.check("contains(@, '{vnet1}')", True),
+            self.check("contains(@, '{vnet2}')", True),
         ])
 
         # This test ensures you can pipe a list of IDs to --ids
@@ -1940,7 +1941,9 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'gw2_ip2': 'gw2ip2',
             'key': 'abc123',
             'conn12': 'vnet1to2',
-            'conn21': 'vnet2to1'
+            'conn21': 'vnet2to1',
+            'bgp_peer1': '10.52.255.253',
+            'bgp_peer2': '10.53.255.253'
         })
 
         # Create one VNet with two public IPs
@@ -1953,16 +1956,19 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         self.cmd('network public-ip create -g {rg} -n {gw2_ip1}')
         self.cmd('network public-ip create -g {rg} -n {gw2_ip2}')
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --no-wait')
-        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1} --sku HighPerformance --asn {vnet1_asn} --public-ip-addresses {gw1_ip1} {gw1_ip2} --bgp-peering-address {bgp_peer1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2} --sku HighPerformance --asn {vnet2_asn} --public-ip-addresses {gw2_ip1} {gw2_ip2} --bgp-peering-address {bgp_peer2} --no-wait')
 
         # wait for gateway completion to finish
         self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
         self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
 
+        # TODO: Re-enabled once issue https://github.com/Azure/azure-cli/issues/7977 is resolved
         # create and connect the VNet gateways
-        self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
-        self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
+        with self.assertRaisesRegexp(CLIError, '255.255.255.255'):
+            self.cmd('network vpn-connection create -g {rg} -n {conn12} --vnet-gateway1 {gw1} --vnet-gateway2 {gw2} --shared-key {key} --enable-bgp')
+        with self.assertRaisesRegexp(CLIError, '255.255.255.255'):
+            self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
 
 
 class NetworkVpnGatewayScenarioTest(ScenarioTest):

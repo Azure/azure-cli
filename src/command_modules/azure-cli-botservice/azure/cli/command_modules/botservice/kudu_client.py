@@ -10,17 +10,25 @@ import zipfile
 import requests
 import urllib3
 
+try:
+    # Try importing Python 3 urllib.parse
+    from urllib.parse import quote
+except ImportError:
+    # If urllib.parse was not imported, use Python 2 module urlparse
+    from urllib import quote  # pylint: disable=import-error
+
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 
 
 class KuduClient:  # pylint:disable=too-many-instance-attributes
-    def __init__(self, cmd, resource_group_name, name, bot):
+    def __init__(self, cmd, resource_group_name, name, bot, logger):
         self.__cmd = cmd
         self.__resource_group_name = resource_group_name
         self.__name = name
         self.__bot = bot
+        self.__logger = logger
 
         # Properties set after self.__initialize() is called.
         self.__initialized = False
@@ -30,9 +38,9 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         self.bot_site_name = None
 
     def download_bot_zip(self, file_save_path, folder_path):
-        """Download bot's source code from KUDU.
+        """Download bot's source code from Kudu.
 
-        This method looks for the zipped source code in the site/clirepo/ folder on KUDU. If the code is not there, the
+        This method looks for the zipped source code in the site/clirepo/ folder on Kudu. If the code is not there, the
         contents of site/wwwroot are zipped and then downloaded.
 
         :param file_save_path: string
@@ -43,7 +51,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             self.__initialize()
 
         headers = self.__get_application_octet_stream_headers()
-        # Download source code in zip format from KUDU
+        # Download source code in zip format from Kudu
         response = requests.get(self.__scm_url + '/api/zip/site/clirepo/', headers=headers)
         # If the status_code is not 200, the source code was not successfully retrieved.
         # Run the prepareSrc.cmd to zip up the code and prepare it for download.
@@ -71,12 +79,32 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         zip_ref.close()
         os.remove(download_path)
 
+    def get_bot_file(self, bot_file):
+        """Retrieve the .bot file from Kudu.
+
+        :param bot_file:
+        :return:
+        """
+        if not self.__initialized:
+            self.__initialize()
+
+        if bot_file.startswith('./') or bot_file.startswith('.\\'):
+            bot_file = bot_file[2:]
+        # Format backslashes to forward slashes and URL escape
+        bot_file = quote(bot_file.replace('\\', '/'))
+        request_url = self.__scm_url + '/api/vfs/site/wwwroot/' + bot_file
+        self.__logger.info('Attempting to retrieve .bot file content from %s' % request_url)
+        response = requests.get(request_url, headers=self.__get_application_octet_stream_headers())
+        HttpResponseValidator.check_response_status(response)
+        self.__logger.info('Bot file successfully retrieved from Kudu.')
+        return json.loads(response.text)
+
     def install_node_dependencies(self):
         """Installs Node.js dependencies at `site/wwwroot/` for Node.js bots.
 
         This method is only called when the detected bot is a Node.js bot.
 
-        :return: Dictionary with results of the HTTP KUDU request
+        :return: Dictionary with results of the HTTP Kudu request
         """
         if not self.__initialized:
             self.__initialize()
@@ -85,18 +113,19 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             'command': 'npm install',
             'dir': r'site\wwwroot'
         }
-        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=self.__auth_headers)
+        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload),
+                                 headers=self.__get_application_json_headers())
         HttpResponseValidator.check_response_status(response)
         return response.json()
 
     def publish(self, zip_file_path):
-        """Publishes zipped bot source code to KUDU.
+        """Publishes zipped bot source code to Kudu.
 
         Performs the following steps:
-        1. Empties the `site/clirepo/` folder on KUDU
+        1. Empties the `site/clirepo/` folder on Kudu
         2. Pushes the code to `site/clirepo/`
         3. Deploys the code via the zipdeploy API. (https://github.com/projectkudu/kudu/wiki/REST-API#zip-deployment)
-        4. Gets the results of the latest KUDU deployment
+        4. Gets the results of the latest Kudu deployment
 
         :param zip_file_path:
         :return: Dictionary with results of the latest deployment
@@ -116,28 +145,41 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         return self.__enable_zip_deploy(zip_file_path)
 
     def __empty_source_folder(self):
-        """Remove the `clirepo/` folder from KUDU.
+        """Remove the `clirepo/` folder from Kudu.
 
         This method is called from KuduClient.publish() in preparation for uploading the user's local source code.
-        After removing the folder from KUDU, the method performs another request to recreate the `clirepo/` folder.
+        After removing the folder from Kudu, the method performs another request to recreate the `clirepo/` folder.
         :return:
         """
         # The `clirepo/` folder contains the zipped up source code
         payload = {
-            'command': 'rm -rf clirepo',
+            'command': 'rm -rf clirepo && mkdir clirepo',
             'dir': r'site'
         }
         headers = self.__get_application_json_headers()
-        requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=headers)
+        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=headers)
+        HttpResponseValidator.check_response_status(response)
 
-        # Recreate the clirepo/ folder, otherwise KUDU calls that reference the site/clirepo/ folder will fail.
-        response = requests.put(self.__scm_url + '/api/vfs/site/clirepo/', headers=headers)
-        HttpResponseValidator.check_response_status(response, 201)
+    def __empty_wwwroot_folder(self):
+        """Empty the site/wwwroot/ folder from Kudu.
+
+        Empties the site/wwwroot/ folder by removing the entire directory, and then recreating it. Called when
+        publishing a bot to Kudu.
+        """
+        self.__logger.info('Emptying the "site/wwwroot/" folder on Kudu in preparation for publishing.')
+        payload = {
+            'command': 'rm -rf wwwroot && mkdir wwwroot',
+            'dir': r'site'
+        }
+        headers = self.__get_application_json_headers()
+        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=headers)
+        HttpResponseValidator.check_response_status(response)
+        self.__logger.info('"site/wwwroot/" successfully emptied.')
 
     def __enable_zip_deploy(self, zip_file_path):
-        """Pushes local bot's source code in zip format to KUDU for deployment.
+        """Pushes local bot's source code in zip format to Kudu for deployment.
 
-        This method deploys the zipped bot source code via KUDU's zipdeploy API. This API does not run any build
+        This method deploys the zipped bot source code via Kudu's zipdeploy API. This API does not run any build
         processes such as `npm install`, `dotnet restore`, `dotnet publish`, etc.
 
         :param zip_file_path: string
@@ -148,14 +190,17 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
 
         zip_url = self.__scm_url + '/api/zipdeploy'
         headers = self.__get_application_octet_stream_headers()
-
+        self.__empty_wwwroot_folder()
         with open(os.path.realpath(os.path.expanduser(zip_file_path)), 'rb') as fs:
             zip_content = fs.read()
+            self.__logger.info('Source code read, uploading to Kudu.')
             r = requests.post(zip_url, data=zip_content, headers=headers)
             if r.status_code != 200:
                 raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
                     zip_url, r.status_code, r.text))
+            self.__logger.info('Source code successfully uploaded.')
 
+        self.__logger.info('Retrieving the latest deployment info.')
         # On successful deployment navigate to the app, display the latest deployment JSON response.
         response = requests.get(self.__scm_url + '/api/deployments/latest', headers=self.__auth_headers)
         HttpResponseValidator.check_response_status(response)
@@ -172,7 +217,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         return headers
 
     def __initialize(self):
-        """Generates necessary data for performing calls to KUDU based off of data passed in on initialization.
+        """Generates necessary data for performing calls to Kudu based off of data passed in on initialization.
 
         :return: None
         """

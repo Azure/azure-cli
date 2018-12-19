@@ -88,6 +88,7 @@ def cli_cosmosdb_create(cmd, client,
     return docdb_account
 
 
+# pylint: disable=too-many-branches
 def cli_cosmosdb_update(client,
                         resource_group_name,
                         account_name,
@@ -100,7 +101,8 @@ def cli_cosmosdb_update(client,
                         enable_automatic_failover=None,
                         capabilities=None,
                         enable_virtual_network=None,
-                        virtual_network_rules=None):
+                        virtual_network_rules=None,
+                        enable_multiple_write_locations=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -114,7 +116,8 @@ def cli_cosmosdb_update(client,
                 ip_range_filter is not None or \
                 enable_automatic_failover is not None or \
                 enable_virtual_network is not None or \
-                virtual_network_rules is not None:
+                virtual_network_rules is not None or \
+                enable_multiple_write_locations is not None:
             raise CLIError("Cannot set capabilities and update properties at the same time. {0}".format(locations))
 
         else:
@@ -133,7 +136,8 @@ def cli_cosmosdb_update(client,
                 ip_range_filter is None and \
                 enable_automatic_failover is None and \
                 enable_virtual_network is None and \
-                virtual_network_rules is None:
+                virtual_network_rules is None and \
+                enable_multiple_write_locations is None:
             async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
             docdb_account = async_docdb_create.result()
             docdb_account = client.get(resource_group_name, account_name)
@@ -182,6 +186,14 @@ def cli_cosmosdb_update(client,
     if tags is None:
         tags = existing.tags
 
+    if enable_multiple_write_locations is None:
+        enable_multiple_write_locations = existing.enable_multiple_write_locations
+    elif enable_multiple_write_locations != existing.enable_multiple_write_locations and \
+            enable_multiple_write_locations:
+        raise CLIError("Cannot convert account from single master to multi master")
+    elif enable_multiple_write_locations != existing.enable_multiple_write_locations:
+        logger.warning("Updating the account from multi master to single master will take 24 hours to complete.")
+
     params = DatabaseAccountCreateUpdateParameters(
         location=existing.location,
         locations=locations,
@@ -192,7 +204,8 @@ def cli_cosmosdb_update(client,
         enable_automatic_failover=enable_automatic_failover,
         capabilities=existing.capabilities,
         is_virtual_network_filter_enabled=enable_virtual_network,
-        virtual_network_rules=virtual_network_rules)
+        virtual_network_rules=virtual_network_rules,
+        enable_multiple_write_locations=enable_multiple_write_locations)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()

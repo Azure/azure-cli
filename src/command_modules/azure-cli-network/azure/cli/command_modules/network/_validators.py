@@ -60,8 +60,8 @@ def get_vnet_validator(dest):
         names_or_ids = getattr(namespace, dest)
         ids = []
 
-        if names_or_ids == [""] or not names_or_ids:
-            names_or_ids = []
+        if names_or_ids == [''] or not names_or_ids:
+            return
 
         for val in names_or_ids:
             if not is_valid_resource_id(val):
