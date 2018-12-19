@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
@@ -414,7 +415,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
-            c.argument('admin_username', help='Username for the VM.', default=_get_default_admin_username())
+            c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
@@ -581,11 +582,3 @@ def load_arguments(self, _):
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
                        help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
     # endregion
-
-
-def _get_default_admin_username():
-    import getpass
-    try:
-        return getpass.getuser()
-    except KeyError:
-        return None
