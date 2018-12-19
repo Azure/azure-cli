@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from .url_quote_util import encode_url_path
+from knack.log import get_logger
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+logger = get_logger(__name__)
 
 
 def transform_acl_list_output(result):
@@ -100,6 +102,9 @@ def create_boolean_result_output_transformer(property_name):
 
 
 def transform_storage_list_output(result):
+    if getattr(result, 'next_marker', None):
+        logger.warning('Next Marker:')
+        logger.warning(result.next_marker)
     return list(result)
 
 

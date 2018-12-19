@@ -324,10 +324,11 @@ def validate_blob_type(namespace):
 
 
 def validate_storage_data_plane_list(namespace):
-    if namespace.num_results is None:
-        logger.warning('In a future release, if --num-results is not provided, the CLI will output only the first '
-                       '5000 results to minimize wait times. Users will be able to use a --all flag for the old '
-                       'behavior.')
+    if namespace.num_results == '*':
+        namespace.num_results = None
+        return
+    else:
+        namespace.num_results = int(namespace.num_results)
 
 
 def get_content_setting_validator(settings_class, update, guess_from_file=None):

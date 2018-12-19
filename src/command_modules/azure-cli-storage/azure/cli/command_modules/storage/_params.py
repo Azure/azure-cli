@@ -205,11 +205,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
-        c.argument('num_results', type=int,
-                   help='Specifies the maximum number of blobs to return. '
-                        'If this parameter is not provided, all blobs will be returned.',
+        c.argument('num_results', default=5000,
+                   help='Specifies the maximum number of blobs to return. Provide "*" to return all.',
                    validator=validate_storage_data_plane_list)
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
 
     with self.argument_context('storage blob generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -389,7 +387,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('blob_name', 'snapshot')
 
     with self.argument_context('storage container list') as c:
-        c.argument('num_results', type=int, help='Specifies the maximum number of containers to return.',
+        c.argument('num_results', default=5000,
+                   help='Specifies the maximum number of containers to return. Provide "*" to return all.',
                    validator=validate_storage_data_plane_list)
 
     with self.argument_context('storage container set-permission') as c:
@@ -408,11 +407,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container legal-hold') as c:
         c.argument('container_name', container_name_type)
-        c.argument('tags', nargs='+', help='Each tag should be 3 to 23 alphanumeric characters and is '
-                                           'normalized to lower case')
-
-    with self.argument_context('storage container list') as c:
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+        c.argument('tags', nargs='+',
+                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -458,7 +454,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
 
     with self.argument_context('storage share list') as c:
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+        c.argument('num_results', default=5000,
+                   help='Specifies the maximum number of shares to return. Provide "*" to return all.',
+                   validator=validate_storage_data_plane_list)
 
     with self.argument_context('storage share exists') as c:
         c.ignore('directory_name', 'file_name')
