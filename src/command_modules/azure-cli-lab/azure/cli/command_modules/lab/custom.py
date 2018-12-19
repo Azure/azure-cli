@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import getpass
-
+from azure.cli.core.util import get_default_admin_username
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements
+
 
 def create_custom_image(client, resource_group_name, lab_name, name, source_vm_id, os_type, os_state,
                         author=None, description=None):
@@ -29,7 +29,7 @@ def create_custom_image(client, resource_group_name, lab_name, name, source_vm_i
 
 
 def create_lab_vm(client, resource_group_name, lab_name, name, notes=None, image=None, image_type=None,
-                  size=None, admin_username=getpass.getuser(), admin_password=None,
+                  size=None, admin_username=get_default_admin_username(), admin_password=None,
                   ssh_key=None, authentication_type='password',
                   vnet_name=None, subnet=None, disallow_public_ip_address=None, artifacts=None,
                   location=None, tags=None, custom_image_id=None, lab_virtual_network_id=None,
