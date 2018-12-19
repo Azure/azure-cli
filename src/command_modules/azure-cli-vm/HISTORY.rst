@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.11
+++++++
+* `image create --source`: fixed bug where source os disk is mistaken for a VM with the same name, even if the full resource ID is provided.
+
 2.2.10
 ++++++
 * `vm identity remove`: does not crash if the specified vm has no assigned managed service identities.
