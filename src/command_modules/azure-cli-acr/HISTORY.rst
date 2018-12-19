@@ -5,7 +5,7 @@ Release History
 
 2.1.12
 ++++++
-* Minor fixes.
+* Allow force push a helm chart that doesn't exist.
 
 2.1.11
 ++++++
