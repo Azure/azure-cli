@@ -358,9 +358,7 @@ def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
 def list_hdi_script_actions(cmd, resource_group_name, cluster_name, persisted=False):
     if persisted:
         client = cf_hdinsight_script_actions(cmd.cli_ctx)
-        script_actions = client.list_persisted_scripts(resource_group_name, cluster_name)
     else:
         client = cf_hdinsight_script_execution_history(cmd.cli_ctx)
-        script_actions = client.list(resource_group_name, cluster_name)
 
-    return script_actions
+    return client.list_by_cluster(resource_group_name, cluster_name)

@@ -39,8 +39,8 @@ def cf_hdinsight_applications(cli_ctx, *_, **__):
     return cf_hdinsight(cli_ctx).applications
 
 
-def cf_hdinsight_extension(cli_ctx, *_, **__):
-    return cf_hdinsight(cli_ctx).extension
+def cf_hdinsight_extensions(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).extensions
 
 
 def cf_hdinsight_locations(cli_ctx, *_, **__):

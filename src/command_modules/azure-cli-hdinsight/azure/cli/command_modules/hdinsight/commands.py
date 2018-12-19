@@ -8,7 +8,7 @@ def load_command_table(self, _):
     from azure.cli.core.commands import CliCommandType
     from ._client_factory import cf_hdinsight_applications
     from ._client_factory import cf_hdinsight_clusters
-    from ._client_factory import cf_hdinsight_extension
+    from ._client_factory import cf_hdinsight_extensions
     from ._client_factory import cf_hdinsight_locations
     from ._client_factory import cf_hdinsight_script_execution_history
     from ._client_factory import cf_hdinsight_script_actions
@@ -28,9 +28,9 @@ def load_command_table(self, _):
         client_factory=cf_hdinsight_applications
     )
 
-    hdinsight_extension_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.extension_operations#ExtensionOperations.{}',
-        client_factory=cf_hdinsight_extension
+    hdinsight_extensions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.hdinsight.operations.extensions_operations#ExtensionsOperations.{}',
+        client_factory=cf_hdinsight_extensions
     )
 
     hdinsight_locations_sdk = CliCommandType(
@@ -78,12 +78,12 @@ def load_command_table(self, _):
                             hdinsight_applications_sdk, client_factory=cf_hdinsight_applications) as g:
         g.custom_command('create', 'create_hdi_application')
         g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.command('list', 'list_by_cluster')
         g.wait_command('wait')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
 
     # OMS operations
-    with self.command_group('hdinsight oms', hdinsight_extension_sdk, client_factory=cf_hdinsight_extension) as g:
+    with self.command_group('hdinsight oms', hdinsight_extensions_sdk, client_factory=cf_hdinsight_extensions) as g:
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'disable_monitoring')

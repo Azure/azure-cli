@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-hdinsight==0.1.0',
+    'azure-mgmt-hdinsight==0.2.0',
     'azure-cli-core',
 ]
 
