@@ -553,6 +553,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from .completers import dir_path_completer
         c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
                    completer=dir_path_completer)
+        c.argument('num_results', default=5000,
+                   help='Specifies the maximum number of files and directories to return. Provide "*" to return all.',
+                   validator=validate_storage_data_plane_list)
 
     with self.argument_context('storage file metadata show') as c:
         c.register_path_argument()
