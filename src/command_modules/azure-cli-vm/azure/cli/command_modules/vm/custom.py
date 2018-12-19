@@ -250,7 +250,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 
 # region Disks (Managed)
 def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
-                        size_gb=None, sku='Premium_LRS',
+                        size_gb=None, sku='Premium_LRS', os_type=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
@@ -274,7 +274,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
     if zone:
         disk.zones = zone
     if disk_iops_read_write is not None:
