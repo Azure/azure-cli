@@ -16,6 +16,7 @@ class IoTCentralTest(ScenarioTest):
         rg = resource_group
         location = resource_group_location
         template = 'iotc-devkit-sample@1.0.0'
+        updatedName = app_name + 'update'
 
         # Test 'az iotcentral app create'
         self.cmd('iotcentral app create -n {0} -g {1} --sku S1 --subdomain {2}'.format(app_name, rg, app_name), checks=[
@@ -35,6 +36,14 @@ class IoTCentralTest(ScenarioTest):
                      self.check('sku.name', 'S1'),
                      self.check('template', template)])
 
+        # Test 'az iotcentral app update'
+        self.cmd('iotcentral app update -n {0} -g {1} --set displayName={2} subdomain={3}'
+                 .format(template_app_name, rg, updatedName, updatedName), checks=[
+                     self.check('resourceGroup', rg),
+                     self.check('location', location),
+                     self.check('subdomain', updatedName),
+                     self.check('displayName', updatedName)])
+
         # Test 'az iotcentral app show'
         self.cmd('iotcentral app show -n {0} -g {1}'.format(app_name, rg), checks=[
             self.check('resourceGroup', rg),
@@ -47,8 +56,8 @@ class IoTCentralTest(ScenarioTest):
         self.cmd('iotcentral app show -n {0} -g {1}'.format(template_app_name, rg), checks=[
             self.check('resourceGroup', rg),
             self.check('location', location),
-            self.check('subdomain', template_app_name),
-            self.check('displayName', template_app_display_name),
+            self.check('subdomain', updatedName),
+            self.check('displayName', updatedName),
             self.check('sku.name', 'S1'),
             self.check('template', template)])
 
