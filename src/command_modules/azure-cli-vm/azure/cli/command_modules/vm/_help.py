@@ -349,7 +349,7 @@ helps['vmss start'] = """
 helps['vmss stop'] = """
     type: command
     short-summary: Power off (stop) VMs within a VMSS.
-    long-summary: The VMs will continue to be billed. To deallocate VMs within a VMSS, see "az vmss deallocate"
+    long-summary: The VMs will continue to be billed. To avoid this, you can deallocate VM instances within a VMSS through "az vmss deallocate"
 """
 
 helps['vmss update'] = """
@@ -1223,7 +1223,7 @@ helps['vm start'] = """
 helps['vm stop'] = """
     type: command
     short-summary: Power off (stop) a running VM.
-    long-summary: The VM will continue to be billed. To deallocate a VM, see "az vm deallocate"
+    long-summary: The VM will continue to be billed. To avoid this, you can deallocate the VM through "az vm deallocate"
     examples:
         - name: Power off (stop) a running VM.
           text: az vm stop -g MyResourceGroup -n MyVm
