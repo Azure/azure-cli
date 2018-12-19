@@ -418,8 +418,8 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
             'vm': 'vm2',
             'os_disk': 'os1'
         })
-        self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri}',
-                 checks=self.check('name', '{os_disk}'))
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux',
+                 checks=[self.check('name', '{os_disk}'), self.check('osType', 'Linux')])
         # create a vm by attaching to it
         self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {os_disk} --os-type linux',
                  checks=self.check('powerState', 'VM running'))
