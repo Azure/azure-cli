@@ -1366,7 +1366,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
 # endregion
 
 
-def process_vm_vmss_stop(cmd, _):
+def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
     if "vmss" in cmd.name:
         logger.warning("About to power off the VMSS instances...\nThey will continue to be billed. "
                        "To deallocate VMSS instances, run: az vmss deallocate.")
