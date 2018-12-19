@@ -8,6 +8,7 @@ Release History
 
 0.2.9
 +++++
+* webapp: az webapp up reliability fixes, where using the command to redeploy code to a newly created app using the same command was failing
 * webapp: az webapp config container now honors --slot parameter
 * functionapp: add support for --runtime flag in windows function apps
 
