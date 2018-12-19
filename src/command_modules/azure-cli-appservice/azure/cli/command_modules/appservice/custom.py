@@ -44,7 +44,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           should_create_new_rg, set_location, check_if_asp_exists, check_app_exists,
+                           should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
                            get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
@@ -2125,7 +2125,8 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
             version_used_create != "-" else version_used_create
 
     full_sku = get_sku_name(sku)
-    loc_name = set_location(cmd, sku, location)
+    location = set_location(cmd, sku, location)
+    loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
     asp = "appsvc_asp_{}_{}".format(os_val, loc_name)
     rg_name = "appsvc_rg_{}_{}".format(os_val, loc_name)
@@ -2163,7 +2164,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _create_new_asp = check_if_asp_exists(cmd, rg_name, asp, location)
+        _create_new_asp = should_create_new_asp(cmd, rg_name, asp, location)
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
@@ -2175,8 +2176,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _create_new_app = True
     else:
         logger.warning("App service plan '%s' already exists.", asp)
-        _create_new_asp = False
-        _create_new_app = check_app_exists(cmd, rg_name, name)
+        _create_new_app = should_create_new_app(cmd, rg_name, name)
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ....", name)
@@ -2185,7 +2185,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _set_build_appSetting = True
     else:
         logger.warning("App '%s' already exists", name)
-        if do_deployment:
+        if do_deployment and not is_skip_build:
             # setting the appsettings causes a app restart so we avoid if not needed
             _app_settings = get_app_settings(cmd, rg_name, name)
             if all(not d for d in _app_settings):
@@ -2198,21 +2198,18 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
     # update create_json to include the app_url
     url = _get_url(cmd, rg_name, name)
 
-    if do_deployment and not is_skip_build and _set_build_appSetting:
+    if _set_build_appSetting:
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
         update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
-        # work around until the timeout limits issue for linux is investigated & fixed
-        # wakeup kudu, by making an SCM call
-        import time
-        time.sleep(5)
-        _ping_scm_site(cmd, rg_name, name)
 
+    if do_deployment:
         logger.warning("Creating zip with contents of dir %s ...", src_dir)
         # zip contents & deploy
         zip_file_path = zip_contents_from_dir(src_dir, language)
 
-        logger.warning("Preparing to deploy %s contents to app.",
+        logger.warning("Preparing to deploy %s contents to app."
+                       "This operation can take a while to complete ...",
                        '' if is_skip_build else 'and build')
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file afer deployment, handling exception if user removed the file manually
