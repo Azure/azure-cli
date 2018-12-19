@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.1.11
+++++++
+* Add support for image import from external Container Registries.
+* Condense the table layout for task list.
+* Add support for Azure DevOps URLs.
+
 2.1.10
 ++++++
 * Minor fixes.

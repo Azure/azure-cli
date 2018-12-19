@@ -1267,12 +1267,15 @@ def list_vm_extension_images(
 
 # region VirtualMachines Identity
 def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
+    from ._vm_utils import MSI_LOCAL_ID
     ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
     remove_system_assigned_identity = False
-    if '[system]' in identities:
+    if MSI_LOCAL_ID in identities:
         remove_system_assigned_identity = True
-        identities.remove('[system]')
+        identities.remove(MSI_LOCAL_ID)
     resource = getter(cmd, resource_group_name, name)
+    if resource.identity is None:
+        return None
     emsis_to_remove = []
     if identities:
         existing_emsis = set([x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())])

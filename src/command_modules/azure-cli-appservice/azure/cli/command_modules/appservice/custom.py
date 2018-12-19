@@ -797,11 +797,12 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
         linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
-        update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version)
+        update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version, slot=slot)
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
-    return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings))
+    return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
+                                                                          slot=slot))
 
 
 def _get_acr_cred(cli_ctx, registry_name):

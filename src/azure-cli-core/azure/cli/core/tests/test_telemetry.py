@@ -27,3 +27,15 @@ class TestCoreTelemetry(unittest.TestCase):
             self.assertEqual(_error_fn(), 'positive result')
         else:
             self.assertEqual(_error_fn(), fallback_return)
+
+    def test_extract_parameters_correctly(self):
+        from azure.cli.core.commands import AzCliCommandInvoker
+        args = ['vm', 'user', 'update', '-g', 'rg', '-n', 'vm1', '-u', 'user',
+                '--ssh-key-value', '-----BEGIN PRIVATE KEY-----']
+        self.assertEqual(['-g', '-n', '-u', '--ssh-key-value'], AzCliCommandInvoker._extract_parameter_names(args))
+
+        args = ['vm', 'create', '--resource-group-name', 'rg', '--name', 'vm1', '--image', 'centos']
+        self.assertEqual(['--resource-group-name', '--name', '--image'], AzCliCommandInvoker._extract_parameter_names(args))
+
+        args = ['vm', 'show', '-g', 'rg', '--name', 'vm1', '-d', '--debug']
+        self.assertEqual(['-g', '--name', '-d', '--debug'], AzCliCommandInvoker._extract_parameter_names(args))

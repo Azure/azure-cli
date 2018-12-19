@@ -21,7 +21,9 @@ class MapsScenarioTests(ScenarioTest):
             'name': self.create_random_name(prefix='cli-', length=20),
             'name1': self.create_random_name(prefix='cli-', length=20),
             'name2': self.create_random_name(prefix='cli-', length=20),
-            'sku': 'S0',
+            'name3': self.create_random_name(prefix='clis1-', length=20),
+            'sku': 's0',
+            'skus1': 's1',
             'tags': tag_key + '=' + tag_value,
             'key_type_primary': KeyType.primary.value,
             'key_type_secondary': KeyType.secondary.value
@@ -42,14 +44,23 @@ class MapsScenarioTests(ScenarioTest):
             'az maps account create -n {name} -g {rg} --sku {sku} --accept-tos').get_output_in_json()
         self.assertEqual(account, account_duplicated)
 
+        self.cmd('az maps account create -n {name3} -g {rg1} --sku {skus1} --accept-tos',
+                 checks=[
+                     self.check('name', '{name3}'),
+                     self.check('resourceGroup', '{rg1}'),
+                     self.check('sku.name', '{skus1}'),
+                     self.check('tags', None)
+                 ]).get_output_in_json()
+
         # Test 'az maps account update'
         # Test to add a new tag to an existing account.
-        self.cmd('az maps account update -n {name} -g {rg} --sku {sku} --tags {tags}',
+        # Test to upgrade tier to `S1`
+        self.cmd('az maps account update -n {name} -g {rg} --sku {skus1} --tags {tags}',
                  checks=[
                      self.check('id', account['id']),
                      self.check('name', '{name}'),
                      self.check('resourceGroup', '{rg}'),
-                     self.check('sku.name', '{sku}'),
+                     self.check('sku.name', '{skus1}'),
                      self.check('tags', {tag_key: tag_value})
                  ])
 
@@ -59,14 +70,14 @@ class MapsScenarioTests(ScenarioTest):
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{sku}')
+            self.check('sku.name', '{skus1}')
         ])
         # Search by id
         self.cmd('az maps account show --ids ' + account['id'], checks=[
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{sku}'),
+            self.check('sku.name', '{skus1}'),
             self.check('tags', {tag_key: tag_value})
         ])
 
@@ -78,13 +89,15 @@ class MapsScenarioTests(ScenarioTest):
             self.check('[0].id', account['id']),
             self.check('[0].name', '{name}'),
             self.check('[0].resourceGroup', '{rg}'),
-            self.check('[0].sku.name', '{sku}'),
+            self.check('[0].sku.name', '{skus1}'),
             self.check('[0].tags', {tag_key: tag_value})
         ])
 
         # Create two new accounts (One in separate resource group).
-        self.cmd('az maps account create -n {name1} -g {rg1} --sku {sku} --accept-tos')
-        self.cmd('az maps account create -n {name2} -g {rg} --sku {sku} --accept-tos')
+        self.cmd(
+            'az maps account create -n {name1} -g {rg1} --sku {sku} --accept-tos')
+        self.cmd(
+            'az maps account create -n {name2} -g {rg} --sku {sku} --accept-tos')
         # Check that list command now shows two accounts in one resource group, and one in another.
         self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 2),
@@ -96,13 +109,14 @@ class MapsScenarioTests(ScenarioTest):
             self.check("length([?resourceGroup == '{rg1}'])", 0)
         ])
         self.cmd('az maps account list -g {rg1}', checks=[
-            self.check('length(@)', 1),
+            self.check('length(@)', 2),
             self.check('type(@)', 'array'),
             self.check("length([?name == '{name}'])", 0),
             self.check("length([?name == '{name1}'])", 1),
             self.check("length([?name == '{name2}'])", 0),
+            self.check("length([?name == '{name3}'])", 1),
             self.check("length([?resourceGroup == '{rg}'])", 0),
-            self.check("length([?resourceGroup == '{rg1}'])", 1)
+            self.check("length([?resourceGroup == '{rg1}'])", 2)
         ])
 
         # Test 'az maps account key list'.
@@ -140,15 +154,19 @@ class MapsScenarioTests(ScenarioTest):
 
         # Test 'az maps account delete'.
         # Test to remove a Maps account.
-        self.cmd('az maps account delete -n {name} -g {rg}', checks=self.is_empty())
+        self.cmd(
+            'az maps account delete -n {name} -g {rg}', checks=self.is_empty())
         self.cmd('az maps account list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check("length([?name == '{name}'])", 0)
         ])
 
         # Remove the rest of Maps accounts.
-        exit_code = self.cmd('az maps account delete -n {name1} -g {rg1}').exit_code
+        exit_code = self.cmd(
+            'az maps account delete -n {name1} -g {rg1}').exit_code
         self.assertEqual(exit_code, 0)
         self.cmd('az maps account delete -n {name2} -g {rg}')
+        self.cmd('az maps account delete -n {name3} -g {rg1}')
+
         self.cmd('az maps account list -g {rg}', checks=self.is_empty())
         self.cmd('az maps account list -g {rg1}', checks=self.is_empty())
