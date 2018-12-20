@@ -12,7 +12,7 @@ from ._client_factory import cf_hdinsight_script_actions, cf_hdinsight_script_ex
 logger = get_logger(__name__)
 
 
-# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements, unused-argument
 def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type, location=None, tags=None,
                    no_wait=False, cluster_version='default', cluster_tier=None,
                    cluster_configurations=None, component_version=None,
@@ -23,13 +23,32 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                    storage_account=None, storage_account_key=None,
                    storage_default_container=None, storage_default_filesystem=None,
-                   virtual_network=None, subnet_name=None):
+                   vnet_name=None, subnet=None,
+                   domain=None, ldaps_urls=None,
+                   cluster_admin_account=None, cluster_admin_password=None,
+                   cluster_users_group_dns=None,
+                   assign_identity=None,
+                   encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
+                   encryption_algorithm='RSA-OAEP', esp=False):
+    from .util import MSI_LOCAL_ID, build_identities_info, build_virtual_network_profile, parse_domain_name, \
+        get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
-        StorageProfile, StorageAccount, VirtualNetworkProfile, DataDisksGroups
+        StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
+        DirectoryType, DiskEncryptionProperties, Tier
+
+    validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
+                                       subnet, domain, cluster_admin_account, assign_identity,
+                                       ldaps_urls, cluster_admin_password, cluster_users_group_dns)
+
+    if esp:
+        if cluster_tier == Tier.standard:
+            raise CLIError('Cluster tier cannot be {} when --esp is specified. '
+                           'Please use default value or specify {} explicitly.'.format(Tier.standard, Tier.premium))
+        if not cluster_tier:
+            cluster_tier = Tier.premium
 
     # Update optional parameters with defaults
-    additional_storage_accounts = []  # TODO: Add support for additional storage accounts
     location = location or _get_rg_location(cmd.cli_ctx, resource_group_name)
 
     # Format dictionary/free-form arguments
@@ -79,18 +98,25 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     if storage_default_container and storage_default_filesystem:
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
+    # Retrieve primary blob service endpoint
+    storage_account_endpoint = None
+    if storage_account:
+        dfs = True if storage_default_filesystem else False
+        storage_account_endpoint = get_storage_account_endpoint(cmd, storage_account, dfs)
+
     # Attempt to infer the storage account key from the endpoint
     if not storage_account_key and storage_account:
         from .util import get_key_for_storage_account
         logger.info('Storage account key not specified. Attempting to retrieve key...')
-        key = get_key_for_storage_account(cmd, storage_account, resource_group_name)
+        key = get_key_for_storage_account(cmd, storage_account)
         if not key:
-            logger.warning('Storage account key could not be inferred from storage account.')
+            raise CLIError('Storage account key could not be inferred from storage account.')
         else:
             storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
-    if not storage_default_container and storage_account and _is_wasb_endpoint(storage_account):
+    if not storage_default_container and storage_account_endpoint \
+       and _is_wasb_endpoint(storage_account_endpoint):
         storage_default_container = cluster_name
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
 
@@ -100,14 +126,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         raise CLIError('If storage details are specified, the storage account, storage account key, '
                        'and either the default container or default filesystem must be specified.')
 
-    # Validate network profile parameters
-    if not _all_or_none(virtual_network, subnet_name):
-        raise CLIError('Either both the virtual network and subnet should be specified, or neither should be.')
+    # Validate disk encryption parameters
+    if not _all_or_none(encryption_vault_uri, encryption_key_name, encryption_key_version):
+        raise CLIError('Either the encryption vault URI, key name and key version should be specified, '
+                       'or none of them should be.')
+
     # Specify virtual network profile only when network arguments are provided
-    virtual_network_profile = virtual_network and VirtualNetworkProfile(
-        id=virtual_network,
-        subnet=subnet_name
-    )
+    virtual_network_profile = subnet and build_virtual_network_profile(subnet)
 
     # Validate data disk parameters
     if not workernode_data_disks_per_node and workernode_data_disk_storage_account_type:
@@ -173,22 +198,51 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         # Specify storage account details only when storage arguments are provided
         storage_accounts.append(
             StorageAccount(
-                name=storage_account,
+                name=storage_account_endpoint,
                 key=storage_account_key,
                 container=storage_default_container,
                 file_system=storage_default_filesystem,
                 is_default=True
-            ))
+            )
+        )
+
+    additional_storage_accounts = []  # TODO: Add support for additional storage accounts
     if additional_storage_accounts:
         storage_accounts += [
             StorageAccount(
-                name=s.storage_account,
+                name=s.storage_account_endpoint,
                 key=s.storage_account_key,
                 container=s.container,
                 is_default=False
             )
             for s in additional_storage_accounts
         ]
+
+    cluster_identity = build_identities_info(assign_identity)
+    msi_resource_id = assign_identity and next((x for x in assign_identity if x != MSI_LOCAL_ID), None)
+
+    domain_name = domain and parse_domain_name(domain)
+    if not ldaps_urls and domain_name:
+        ldaps_urls = ['ldaps://{}:636'.format(domain_name)]
+
+    security_profile = domain and SecurityProfile(
+        directory_type=DirectoryType.active_directory,
+        domain=domain_name,
+        ldaps_urls=ldaps_urls,
+        domain_username=cluster_admin_account,
+        domain_user_password=cluster_admin_password,
+        cluster_users_group_dns=cluster_users_group_dns,
+        aadds_resource_id=domain,
+        msi_resource_id=msi_resource_id
+    )
+
+    disk_encryption_properties = encryption_vault_uri and DiskEncryptionProperties(
+        vault_uri=encryption_vault_uri,
+        key_name=encryption_key_name,
+        key_version=encryption_key_version,
+        encryption_algorithm=encryption_algorithm,
+        msi_resource_id=msi_resource_id
+    )
 
     create_params = ClusterCreateParametersExtended(
         location=location,
@@ -207,8 +261,11 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             ),
             storage_profile=StorageProfile(
                 storageaccounts=storage_accounts
-            )
-        )
+            ),
+            security_profile=security_profile,
+            disk_encryption_properties=disk_encryption_properties
+        ),
+        identity=cluster_identity
     )
 
     if no_wait:
@@ -222,6 +279,22 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
         if resource_group_name else client.list()
 
     return list(clusters_list)
+
+
+# pylint: disable=unused-argument
+def rotate_hdi_cluster_key(cmd, client, resource_group_name, cluster_name,
+                           encryption_vault_uri, encryption_key_name, encryption_key_version, no_wait=False):
+    from azure.mgmt.hdinsight.models import ClusterDiskEncryptionParameters
+    rotate_params = ClusterDiskEncryptionParameters(
+        vault_uri=encryption_vault_uri,
+        key_name=encryption_key_name,
+        key_version=encryption_key_version
+    )
+
+    if no_wait:
+        return sdk_no_wait(no_wait, client.rotate_disk_encryption_key, resource_group_name, cluster_name, rotate_params)
+
+    return client.rotate_disk_encryption_key(resource_group_name, cluster_name, rotate_params)
 
 
 def _all_or_none(*params):
@@ -248,19 +321,14 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
                            https_endpoint_access_mode=None, https_endpoint_location=None,
                            https_endpoint_destination_port=8080, https_endpoint_public_port=443,
                            ssh_endpoint_location=None, ssh_endpoint_destination_port=22, ssh_endpoint_public_port=22,
-                           virtual_network=None, subnet_name=None):
+                           vnet_name=None, subnet=None):
+    from .util import build_virtual_network_profile
     from azure.mgmt.hdinsight.models import Application, ApplicationProperties, ComputeProfile, RuntimeScriptAction, \
-        Role, VirtualNetworkProfile, LinuxOperatingSystemProfile, HardwareProfile, \
+        Role, LinuxOperatingSystemProfile, HardwareProfile, \
         ApplicationGetHttpsEndpoint, ApplicationGetEndpoint, OsProfile
 
-    # Validate network profile parameters
-    if not _all_or_none(virtual_network, subnet_name):
-        raise CLIError('Either both the virtual network and subnet should be specified, or neither should be.')
     # Specify virtual network profile only when network arguments are provided
-    virtual_network_profile = virtual_network and VirtualNetworkProfile(
-        id=virtual_network,
-        subnet=subnet_name
-    )
+    virtual_network_profile = subnet and build_virtual_network_profile(subnet)
 
     os_profile = (ssh_password or ssh_public_key) and OsProfile(
         linux_operating_system_profile=LinuxOperatingSystemProfile(
@@ -315,7 +383,7 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
                 name=script_action_name,
                 uri=script_uri,
                 parameters=script_parameters,
-                roles=list(map(lambda role: role.name, roles))
+                roles=[role.name for role in roles]
             )
         ],
         https_endpoints=https_endpoints,
