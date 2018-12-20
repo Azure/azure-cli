@@ -817,7 +817,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
-            'availset': 'availset-test'
+            'availset': 'availset-test-conv'
         })
 
         self.cmd('vm availability-set create -g {rg} -n {availset} --unmanaged --platform-fault-domain-count 3 -l westus2', checks=[
