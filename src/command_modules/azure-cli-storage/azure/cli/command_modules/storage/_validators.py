@@ -326,7 +326,6 @@ def validate_blob_type(namespace):
 def validate_storage_data_plane_list(namespace):
     if namespace.num_results == '*':
         namespace.num_results = None
-        return
     else:
         namespace.num_results = int(namespace.num_results)
 

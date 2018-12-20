@@ -5,7 +5,7 @@ Release History
 
 2.3.0
 +++++
-* `storage blob/file/container/share list`- Limit default number of results returned to be 5,000.
+* BREAKING CHANGE: `storage blob/file/container/share list`- Limit default number of results returned to be 5,000.
   Use `--num-results *` for original behavior of returning all results.
 * `storage blob/file/container/share list`- log marker for next page to STDERR and expose `--marker` parameter.
 
