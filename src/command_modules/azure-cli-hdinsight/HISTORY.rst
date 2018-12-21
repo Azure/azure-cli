@@ -9,7 +9,8 @@ Release History
 * Add commands for managing applications
 * Add commands for managing script actions
 * Add commands for managing Operations Management Suite (OMS)
-* `hdinsight usage`: support to list regional usages
+* `hdinsight list-usage`: support to list regional usages
+* `hdinsight create`: remove default cluster type
 
 0.1.0
 +++++

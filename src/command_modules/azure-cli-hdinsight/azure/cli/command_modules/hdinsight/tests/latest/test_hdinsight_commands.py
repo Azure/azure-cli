@@ -140,7 +140,7 @@ class HDInsightClusterTests(ScenarioTest):
             'loc': self.location
         })
 
-        self.cmd('az hdinsight usage -l {loc}', checks=[
+        self.cmd('az hdinsight list-usage -l {loc}', checks=[
             self.check('type(value)', 'array'),
             self.check('length(value)', 1)
         ])

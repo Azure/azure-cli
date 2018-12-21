@@ -55,7 +55,7 @@ def load_command_table(self, _):
 
     # usage operations
     with self.command_group('hdinsight', hdinsight_locations_sdk, client_factory=cf_hdinsight_locations) as g:
-        g.command('usage', 'list_usages')
+        g.command('list-usage', 'list_usages')
 
     # script action operations
     with self.command_group('hdinsight script-action',

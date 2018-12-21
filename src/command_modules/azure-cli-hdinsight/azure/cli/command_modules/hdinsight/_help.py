@@ -9,7 +9,7 @@ from knack.help_files import helps
 
 helps['hdinsight'] = """
     type: group
-    short-summary: Manage HDInsight clusters, applications, extensions, OMS, script actions and usages.
+    short-summary: Manage HDInsight resources.
 """
 
 helps['hdinsight create'] = """
