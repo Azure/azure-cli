@@ -562,11 +562,11 @@ helps['vm diagnostics set'] = """
                 --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
-            protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
-                'storageAccountSasToken': '{storage_sastoken}'}"
+            protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
+                'storageAccountSasToken': '$storage_sastoken'}"
 
-            az vm diagnostics set --settings "{default_config}" \\
-                --protected-settings "{protected_settings}" \\
+            az vm diagnostics set --settings "$default_config" \\
+                --protected-settings "$protected_settings" \\
                 --resource-group $my_resource_group --vm-name $my_linux_vm
 """
 
