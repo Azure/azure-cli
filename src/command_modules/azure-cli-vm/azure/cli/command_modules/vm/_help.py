@@ -631,10 +631,10 @@ helps['vm unmanaged-disk list'] = """
     examples:
         - name: List the unmanaged disks attached to a VM.
           text: az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm
-        - name: List unmanaged disks with IDs containing the string "data_disk".
+        - name: List unmanaged disks with names containing the string "data_disk".
           text: >
-            az vm unmanaged-disk list --ids \\
-                $(az resource list --query "[?contains(name, 'data_disk')].id" -o tsv)
+            az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm \\
+                --query "[?contains(name, 'data_disk')]" --output table
 """
 
 helps['vm disk detach'] = """
