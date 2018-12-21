@@ -417,6 +417,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
+        namespace.aux_subscriptions = [res['subscription']]
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
