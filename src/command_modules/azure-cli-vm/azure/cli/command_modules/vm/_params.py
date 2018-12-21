@@ -38,6 +38,7 @@ def load_arguments(self, _):
                                        completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
     existing_disk_name = CLIArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
     existing_snapshot_name = CLIArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
+    get_updated_disk_options = lambda c: ['--disk', c.deprecate(target='--name', redirect='--disk', hide=True), c.deprecate(target='-n', redirect='--disk', hide=True)] # deprecate --name -n in favor of --disk
     vmss_name_type = CLIArgumentType(name_arg_type,
                                      configured_default='vmss',
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
@@ -193,17 +194,17 @@ def load_arguments(self, _):
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
-        c.argument('disk', validator=validate_vm_disk, help='disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('disk', validator=validate_vm_disk, help='The disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('new', action='store_true', help='create a new disk')
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.', type=int)
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
 
     with self.argument_context('vm disk detach') as c:
-        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
+        c.argument('disk_name', options_list=get_updated_disk_options(c), validator=validate_vm_disk, help='The disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
@@ -257,16 +258,16 @@ def load_arguments(self, _):
         c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
     with self.argument_context('vm unmanaged-disk') as c:
-        c.argument('disk_size', help='Size of disk (GiB)', default=1023, type=int)
         c.argument('new', action='store_true', help='Create a new disk.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
         c.argument('vhd_uri', help="Virtual hard disk URI. For example: https://mystorage.blob.core.windows.net/vhds/d1.vhd")
 
     with self.argument_context('vm unmanaged-disk attach') as c:
-        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name(optional when create a new disk)')
+        c.argument('disk_name', options_list=get_updated_disk_options(c), help='The data disk name.')
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.', type=int)
 
     with self.argument_context('vm unmanaged-disk detach') as c:
-        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
+        c.argument('disk_name', options_list=get_updated_disk_options(c), help='The data disk name.')
 
     for scope in ['vm unmanaged-disk attach', 'vm unmanaged-disk detach']:
         with self.argument_context(scope) as c:

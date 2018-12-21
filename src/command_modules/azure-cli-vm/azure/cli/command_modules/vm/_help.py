@@ -609,7 +609,7 @@ helps['vm unmanaged-disk attach'] = """
     long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GB) unmanaged data disk to a VM.
-          text: az vm unmanaged-disk attach -g MyResourceGroup --vm-name MyVm
+          text: az vm unmanaged-disk attach -g MyResourceGroup --vm-name MyVm --new
         - name: Attach an existing data disk to a VM as unmanaged.
           text: >
             az vm unmanaged-disk attach -g MyResourceGroup --vm-name MyVm \\
@@ -643,7 +643,7 @@ helps['vm disk detach'] = """
     examples:
         - name: Detach a data disk from a VM.
           text: >
-            az vm disk detach -g MyResourceGroup --vm-name MyVm -n disk_name
+            az vm disk detach -g MyResourceGroup --vm-name MyVm --disk disk_name
 """
 
 helps['vm disk attach'] = """
