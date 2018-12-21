@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.53"
+__version__ = "2.0.54"
 
 import os
 import sys

@@ -95,23 +95,23 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
     return True
 
 
-def check_if_asp_exists(cmd, rg_name, asp_name, location):
+def should_create_new_asp(cmd, rg_name, asp_name, location):
     # get all appservice plans from RG
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
         if (item.name.lower() == asp_name.lower() and
                 item.location.replace(" ", "").lower() == location or
                 item.location == location):
-            return True
-    return False
+            return False
+    return True
 
 
-def check_app_exists(cmd, rg_name, app_name):
+def should_create_new_app(cmd, rg_name, app_name):
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.web_apps.list_by_resource_group(rg_name)):
         if item.name.lower() == app_name.lower():
-            return True
-    return False
+            return False
+    return True
 
 
 # pylint:disable=unexpected-keyword-arg
@@ -252,10 +252,8 @@ def set_location(cmd, sku, location):
         available_locs = []
         for loc in locs:
             available_locs.append(loc.name)
-        location = available_locs[0]
-    else:
-        location = location
-    return location.replace(" ", "").lower()
+        return available_locs[0]
+    return location
 
 
 def should_create_new_rg(cmd, default_rg, rg_name, is_linux):
