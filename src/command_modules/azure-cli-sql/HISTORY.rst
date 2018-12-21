@@ -5,7 +5,7 @@ Release History
 
 2.1.6
 +++++
-* Minor fixes.
+* Support for custom collation on managed instance.
 
 2.1.5
 +++++
