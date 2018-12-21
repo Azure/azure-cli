@@ -3,10 +3,13 @@
 Release History
 ===============
 
+2.2.12
+++++++
+* 'vm disk/unmanaged-disk': parameter options are more consistent.
+
 2.2.11
 ++++++
 * `disk create`: expose --os-type parameter.
-* 'vm disk/unmanaged-disk': parameter options are more consistent.
 
 2.2.10
 ++++++
