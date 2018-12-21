@@ -326,3 +326,9 @@ def update_disk_sku_info(info_dict, skus):
             except ValueError:
                 raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
             _update(info_dict, lun, value)
+
+
+# deprecate --name -n in favor of --disk
+def get_updated_disk_options(argument_context):
+    return ['--disk', argument_context.deprecate(target='--name', redirect='--disk', hide=True),
+            argument_context.deprecate(target='-n', redirect='--disk', hide=True)]

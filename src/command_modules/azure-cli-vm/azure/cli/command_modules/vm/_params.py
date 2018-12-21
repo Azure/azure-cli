@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
-from ._vm_utils import MSI_LOCAL_ID
+from ._vm_utils import MSI_LOCAL_ID, get_updated_disk_options
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
@@ -38,7 +38,6 @@ def load_arguments(self, _):
                                        completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
     existing_disk_name = CLIArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
     existing_snapshot_name = CLIArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
-    get_updated_disk_options = lambda c: ['--disk', c.deprecate(target='--name', redirect='--disk', hide=True), c.deprecate(target='-n', redirect='--disk', hide=True)] # deprecate --name -n in favor of --disk
     vmss_name_type = CLIArgumentType(name_arg_type,
                                      configured_default='vmss',
                                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
