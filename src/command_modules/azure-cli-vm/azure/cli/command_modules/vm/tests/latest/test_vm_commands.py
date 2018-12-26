@@ -2189,7 +2189,6 @@ class VMSSNicScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'iid': 0
         })
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
@@ -2198,10 +2197,15 @@ class VMSSNicScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
+
+        result = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs['iid'] = result[0]['instanceId']
+
         nic_list = self.cmd('vmss nic list-vm-nics -g {rg} --vmss-name {vmss} --instance-id {iid}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ]).get_output_in_json()
+
         self.kwargs['nic'] = nic_list[0].get('name')
         self.cmd('vmss nic show --resource-group {rg} --vmss-name {vmss} --instance-id {iid} -n {nic}', checks=[
             self.check('type(@)', 'object'),
@@ -2357,6 +2361,9 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss identity remove -g {rg} -n {vmss3}')
             self.cmd('vmss identity show -g {rg} -n {vmss3}', checks=self.is_empty())
 
+            # test that vmss identity remove does not fail when the vmss has no assigned identities.
+            self.cmd('vmss identity remove -g {rg} -n {vmss3}', checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_vm_msi_no_scope(self, resource_group):
 
@@ -2447,6 +2454,10 @@ class MSIScenarioTest(ScenarioTest):
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', None),
         ])
+
+        # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
+        self.cmd('vm identity remove -g {rg} -n {vm}', checks=self.is_empty())
+        self.cmd('vm identity remove -g {rg} -n {vm}', checks=self.is_empty())
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
     def test_vmss_explicit_msi(self, resource_group):

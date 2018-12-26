@@ -1408,6 +1408,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_rbac=None,
                skip_subnet_role_assignment=False,
                network_plugin=None,
+               network_policy=None,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1470,13 +1471,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                            'Are you an Owner on this subscription?')
 
     network_profile = None
-    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address]):
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
         network_profile = ContainerServiceNetworkProfile(
             network_plugin=network_plugin,
             pod_cidr=pod_cidr,
             service_cidr=service_cidr,
             dns_service_ip=dns_service_ip,
-            docker_bridge_cidr=docker_bridge_address
+            docker_bridge_cidr=docker_bridge_address,
+            network_policy=network_policy
         )
 
     addon_profiles = _handle_addons_args(
@@ -1553,12 +1555,13 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None, no_wait=False):
+def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
+                      subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
-                              workspace_resource_id=workspace_resource_id, no_wait=no_wait)
+                              workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
@@ -1592,7 +1595,8 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
 ADDONS = {
     'http_application_routing': 'httpApplicationRouting',
-    'monitoring': 'omsagent'
+    'monitoring': 'omsagent',
+    'virtual-node': 'aciConnector'
 }
 
 
@@ -1609,18 +1613,17 @@ def aks_show(cmd, client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="nodepool1", no_wait=False):
+def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     for agent_profile in instance.agent_pool_profiles:
-        if agent_profile.name == nodepool_name:
+        if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
             agent_profile.count = int(node_count)  # pylint: disable=no-member
-
-    # null out the SP and AAD profile because otherwise validation complains
-    instance.service_principal_profile = None
-    instance.aad_profile = None
-
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+            # null out the SP and AAD profile because otherwise validation complains
+            instance.service_principal_profile = None
+            instance.aad_profile = None
+            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
@@ -1687,15 +1690,20 @@ def aks_remove_dev_spaces(cmd, client, name, resource_group_name, prompt=False):
 
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
-                   no_wait=False):
+                   subnet_name=None, no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
     addon_profiles = instance.addon_profiles or {}
 
+    os_type = 'Linux'
+
     # for each addons argument
     for addon_arg in addon_args:
         addon = ADDONS[addon_arg]
+        if addon == 'aciConnector':
+            # only linux is supported for now, in the future this will be a user flag
+            addon += os_type
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -1716,6 +1724,15 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
+            elif addon == 'aciConnector' + os_type:
+                if addon_profile.enabled:
+                    raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
+                                   'To change virtual-node configuration, run '
+                                   '"az aks disable-addons -a virtual-node -g {resource_group_name}" '
+                                   'before enabling it again.')
+                if not subnet_name:
+                    raise CLIError('The aci-connector addon requires setting a subnet name.')
+                addon_profile.config = {'SubnetName': subnet_name}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:

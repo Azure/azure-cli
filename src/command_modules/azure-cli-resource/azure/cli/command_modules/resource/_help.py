@@ -337,7 +337,7 @@ helps['policy definition create'] = """
                             "effect": "deny"
                         }
                     }'
-                - name: Create a policy parameter definition with the following example
+                - name: Create a policy parameter definition.
                   text: |
                     az policy definition create --name allowedLocations --rules '{
                         "if": {
@@ -600,6 +600,11 @@ helps['resource create'] = """
 helps['resource update'] = """
     type: command
     short-summary: Update a resource.
+"""
+
+helps['resource wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a resources is met.
 """
 
 helps['resource invoke-action'] = """

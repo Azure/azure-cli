@@ -14,6 +14,7 @@ from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
 from azure.storage.blob import BlockBlobService
 from ._azure_utils import get_blob_info
+from ._constants import TASK_VALID_VSTS_URLS
 
 logger = get_logger(__name__)
 
@@ -208,8 +209,11 @@ def check_remote_source_code(source_location):
     # http
     if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") \
        or lower_source_location.startswith("github.com/"):
-        if re.search(r"\.git(?:#.+)?$", lower_source_location) or "visualstudio.com" in lower_source_location:
-            # git url must contain ".git" or be from VSTS
+        isVSTS = any(url in lower_source_location for url in TASK_VALID_VSTS_URLS)
+        if isVSTS or re.search(r"\.git(?:#.+)?$", lower_source_location):
+            # git url must contain ".git" or be from VSTS/Azure DevOps.
+            # This is because Azure DevOps doesn't follow the standard git server convention of putting
+            # .git at the end of their URLs, so we have to special case them.
             return source_location
         elif not lower_source_location.startswith("github.com/"):
             # Others are tarball
