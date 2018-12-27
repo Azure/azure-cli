@@ -85,6 +85,8 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             except (KeyError, ValueError, TypeError):
                 pass
         for candidate in self._candidates:
-            if response['body']['string'] and candidate in str(response['body']['string']):
-                response['body']['string'] = str(response['body']['string']).replace(candidate, self._replacement)
+            if response['body']['string']:
+                body = response['body']['string']
+                response['body']['string'] = str(body, 'utf-8') if isinstance(body, bytes) else body
+                response['body']['string'] = response['body']['string'].replace(candidate, self._replacement)
         return response
