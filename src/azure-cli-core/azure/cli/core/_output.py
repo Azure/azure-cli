@@ -7,6 +7,7 @@ import knack.output
 from knack.events import EVENT_INVOKER_POST_PARSE_ARGS
 from azure.cli.core.azlogging import AzCliLogging
 
+
 class AzOutputProducer(knack.output.OutputProducer):
     def __init__(self, cli_ctx=None):
         super(AzOutputProducer, self).__init__(cli_ctx)

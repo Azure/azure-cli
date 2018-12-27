@@ -34,6 +34,7 @@ CLI_LOGGER_NAME = 'az'
 class AzCliLogging(CLILogging):
     MUTE_FLAG = '--mute'    # note: easier to expose flag than to look for --output none do we prefer mute or silent?
     MUTE_ARG_DEST = '_output_verbosity_mute'
+
     @staticmethod
     def on_global_arguments(_, **kwargs):
         arg_group = kwargs.get('arg_group')
@@ -46,12 +47,11 @@ class AzCliLogging(CLILogging):
         self.console_log_configs = AzCliLogging._get_console_log_configs()
         self.cli_ctx.register_event(EVENT_PARSER_GLOBAL_CREATE, AzCliLogging.on_global_arguments)
 
-
     def _determine_verbose_level(self, args):
         for arg in args:
             if arg == AzCliLogging.MUTE_FLAG:
                 return 0
-        verbose_level= super(AzCliLogging, self)._determine_verbose_level(args)
+        verbose_level = super(AzCliLogging, self)._determine_verbose_level(args)
         # account for introducing lower verbosity in console log configs
         return min(verbose_level + 1, len(self.console_log_configs) - 1)
 
