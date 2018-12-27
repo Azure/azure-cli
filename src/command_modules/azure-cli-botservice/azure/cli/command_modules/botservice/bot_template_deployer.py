@@ -11,6 +11,7 @@ import string
 import requests
 
 from knack.util import CLIError
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
@@ -57,7 +58,10 @@ class BotTemplateDeployer:
                                           parameters=parameters, mode=mode)
 
         smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=False)
+        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(smc.deployments.create_or_update(
+            resource_group_name,
+            deployment_name,
+            properties, raw=False))
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
@@ -189,8 +193,6 @@ class BotTemplateDeployer:
             deployment_name=resource_name,
             mode='Incremental'
         )
-
-        deploy_result.wait()
 
         logger.debug('ARM template deployment complete. Result %s ', deploy_result)
         logger.info('Bot creation completed successfully.')
