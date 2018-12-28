@@ -695,13 +695,12 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
             route=route
         )
         return client.iot_hub_resource.test_route(test_route_input, hub_name, resource_group_name)
-    else:
-        test_all_routes_input = TestAllRoutesInput(
-            routing_source=source_type,
-            message=route_message,
-            twin=route_twin
-        )
-        return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
+    test_all_routes_input = TestAllRoutesInput(
+        routing_source=source_type,
+        message=route_message,
+        twin=route_twin
+    )
+    return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):
