@@ -5,6 +5,7 @@ Release History
 0.3.5
 +++++
 * Increment IotHub mgmt SDK requirement.
+* Minor fixes
 * Update test recordings.
 
 0.3.4
