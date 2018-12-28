@@ -5,9 +5,7 @@
 
 
 import re
-import os
 import copy
-import inspect
 
 option_pattern = r"(\-\-\S+|\-s)"
 OPTION_RE = re.compile(option_pattern)
@@ -89,39 +87,34 @@ class LinterError(Exception):
     pass
 
 # return list of (cmd, params) tuples from example text. e.g. (az foo bar, [--opt, -n, -g, --help])
-def get_cmd_param_list_from_example(example_text):
+def extract_commands_from_example(example_text):
 
-    def process_short_option(option): # handle options like -otable
-        if len(option) > 2 and option[0] == "-" and option[0] != option[1]:
-            return option[0:2]
-        else:
-            return option
+    # fold commands spanning multiple lines into one line. Split commands that use pipes
+    example_text = example_text.replace("\\\n", " ")
+    example_text = example_text.replace("|", "\n")
 
-    CMD_PREFIX = "az "
-    commands = []  # some examples have multistep commands. This is a simple way to extract them
-    while(CMD_PREFIX in example_text):
-        # find next az command start and end
-        start = example_text.find(CMD_PREFIX)
-        end = example_text.find(CMD_PREFIX, start + 1)
-        end = end if end > -1 else len(example_text)
-        # extract command
-        cmd_text = example_text[start:end]
-        # update example text
-        example_text = example_text[end:]
-        # remove piping from cmd_text
-        end = cmd_text.find("|")
-        end = end if end > -1 else len(cmd_text)
-        cmd_text = cmd_text[:end]
-        # add to commands list
-        commands.append(cmd_text)
+    commands = example_text.splitlines()
+    processed_commands = []
+    for command in commands:  # filter out commands
+        if command.startswith("az"):
+            processed_commands.append(command)
+        elif "az " in command:  # some commands start with "$(az ..." and even "`az in one case"
+            idx = command.find("az ")
+            command = command[idx:]
+            processed_commands.append(command)
 
+    return processed_commands
 
-    cmd_param_list = []
-    for command in commands:
-        idx = command.find(" -")  # Todo: positionals?
-        command_body = command[:idx].strip()
-        parameters = [maybe_opt for maybe_opt in command[idx:].split() if maybe_opt.startswith("-")]
-        parameters = list(map(process_short_option, parameters)) # process short options like -otable
-        cmd_param_list.append((command_body, parameters))
+def process_command_args(command_args):
+    result_args = []
+    new_commands = []
+    unwanted_chars = "$()`"
 
-    return cmd_param_list
+    for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
+        arg = arg.strip(unwanted_chars)
+        if arg.startswith("az "):  # store any new commands
+            new_commands.append(arg)
+            arg = '{}' # some commands expect json value
+        result_args.append(arg)
+
+    return result_args, new_commands
