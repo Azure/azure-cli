@@ -120,6 +120,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='App properties of the route message.')
         c.argument('system_properties', options_list=['--system-properties', '--sp'],
                    help='System properties of the route message.')
+        c.argument('tags', options_list=['--tags'],
+                   help='Device twin tags.')
+        c.argument('desired', options_list=['--desired'],
+                   help='Device twin desired properties.')
+        c.argument('reported', options_list=['--reported'],
+                   help='Device twin reported properties.')
 
     with self.argument_context('iot hub routing-endpoint') as c:
         c.argument('endpoint_name', options_list=['--endpoint-name', '--name', '-n'],

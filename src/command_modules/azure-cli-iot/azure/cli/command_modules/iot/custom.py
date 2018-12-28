@@ -21,7 +21,11 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       RoutingServiceBusTopicEndpointProperties,
                                       RoutingStorageContainerProperties,
                                       RouteProperties,
-                                      RoutingMessage)
+                                      RoutingMessage,
+                                      RoutingTwin,
+                                      RoutingTwinProperties,
+                                      TestRouteInput,
+                                      TestAllRoutesInput)
 
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
@@ -668,17 +672,36 @@ def iot_hub_route_update(client, hub_name, route_name, source_type=None, endpoin
 
 
 def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
-                       system_properties=None, resource_group_name=None):
+                       system_properties=None, tags=None, desired=None, reported=None, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     route_message = RoutingMessage(
         body=body,
         app_properties=app_properties,
         system_properties=system_properties
     )
+    routing_twin_properties = RoutingTwinProperties(
+        desired=desired,
+        reported=reported
+    )
+    route_twin = RoutingTwin(
+        tags=tags,
+        properties=routing_twin_properties
+    )
     if route_name:
         route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
-        return client.iot_hub_resource.test_route(hub_name, resource_group_name, route, route_message)
-    return client.iot_hub_resource.test_all_routes(hub_name, resource_group_name, source_type, route_message)
+        test_route_input = TestRouteInput(
+            message=route_message,
+            twin=route_twin,
+            route=route
+        )
+        return client.iot_hub_resource.test_route(test_route_input, hub_name, resource_group_name)
+    else:
+        test_all_routes_input = TestAllRoutesInput(
+            routing_source=source_type,
+            message=route_message,
+            twin=route_twin
+        )
+        return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):

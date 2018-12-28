@@ -11,7 +11,7 @@ class IoTHubTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_iot_hub(self, resource_group, resource_group_location):
-        hub = 'iot-hub-for-test'
+        hub = 'iot-hub-for-test-1'
         rg = resource_group
         location = resource_group_location
         ehConnectionString = self._get_eventhub_connectionstring(rg)
@@ -268,7 +268,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest'
+        ehNamespace = 'ehNamespaceiothubfortest-1'
         eventHub = 'eventHubiothubfortest'
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
