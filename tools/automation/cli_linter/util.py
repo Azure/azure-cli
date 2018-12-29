@@ -85,36 +85,3 @@ class LinterError(Exception):
     Exception thrown by linter for non rule violation reasons
     """
     pass
-
-# return list of (cmd, params) tuples from example text. e.g. (az foo bar, [--opt, -n, -g, --help])
-def extract_commands_from_example(example_text):
-
-    # fold commands spanning multiple lines into one line. Split commands that use pipes
-    example_text = example_text.replace("\\\n", " ")
-    example_text = example_text.replace("|", "\n")
-
-    commands = example_text.splitlines()
-    processed_commands = []
-    for command in commands:  # filter out commands
-        if command.startswith("az"):
-            processed_commands.append(command)
-        elif "az " in command:  # some commands start with "$(az ..." and even "`az in one case"
-            idx = command.find("az ")
-            command = command[idx:]
-            processed_commands.append(command)
-
-    return processed_commands
-
-def process_command_args(command_args):
-    result_args = []
-    new_commands = []
-    unwanted_chars = "$()`"
-
-    for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
-        arg = arg.strip(unwanted_chars)
-        if arg.startswith("az "):  # store any new commands
-            new_commands.append(arg)
-            arg = '{}' # some commands expect json value
-        result_args.append(arg)
-
-    return result_args, new_commands
