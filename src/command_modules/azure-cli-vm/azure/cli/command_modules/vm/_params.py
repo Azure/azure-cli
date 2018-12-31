@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
@@ -23,9 +24,10 @@ from azure.cli.command_modules.vm._validators import (
 from ._vm_utils import MSI_LOCAL_ID
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
+    OperatingSystemTypes = self.get_models('OperatingSystemTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -78,6 +80,7 @@ def load_arguments(self, _):
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('name', arg_type=name_arg_type)
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
+        c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The Operating System type of the Disk.')
         c.argument('disk_iops_read_write', type=int, min_api='2018-06-01', help='The number of IOPS allowed for this disk. Only settable for UltraSSD disks. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
     # endregion
@@ -409,10 +412,11 @@ def load_arguments(self, _):
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+            c.ignore('aux_subscriptions')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
-            c.argument('admin_username', help='Username for the VM.', default=_get_default_admin_username())
+            c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
@@ -579,11 +583,3 @@ def load_arguments(self, _):
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
                        help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
     # endregion
-
-
-def _get_default_admin_username():
-    import getpass
-    try:
-        return getpass.getuser()
-    except KeyError:
-        return None

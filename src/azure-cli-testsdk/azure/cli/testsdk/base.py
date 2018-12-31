@@ -78,6 +78,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
+        self._processors_to_reset = [StorageAccountKeyReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -85,9 +86,8 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
-            self.name_replacer,
-            StorageAccountKeyReplacer()
-        ]
+            self.name_replacer
+        ] + self._processors_to_reset
 
         default_replay_processors = [
             LargeResponseBodyReplacer(),
@@ -124,6 +124,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
             recording_name=recording_name
         )
+
+    def tearDown(self):
+        for processor in self._processors_to_reset:
+            processor.reset()
+        super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1

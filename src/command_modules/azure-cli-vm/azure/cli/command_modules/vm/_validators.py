@@ -417,6 +417,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
+        namespace.aux_subscriptions = [res['subscription']]
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
@@ -1364,3 +1365,12 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
         namespace.target_regions = regions_info
 # endregion
+
+
+def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
+    if "vmss" in cmd.name:
+        logger.warning("About to power off the VMSS instances...\nThey will continue to be billed. "
+                       "To deallocate VMSS instances, run: az vmss deallocate.")
+    else:
+        logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
+                       "To deallocate a VM, run: az vm deallocate.")

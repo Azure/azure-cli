@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.5
++++++
+* Fix update command API call.
+
 0.1.4
 +++++
 * Add subdomain availability check when creating an IoT Central application. 

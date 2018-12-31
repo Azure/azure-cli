@@ -6,14 +6,15 @@
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
+from ._client_factory import cf_hdinsight_script_actions, cf_hdinsight_script_execution_history
 
 
 logger = get_logger(__name__)
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
-def create_cluster(cmd, client, cluster_name, resource_group_name, location=None, tags=None, no_wait=False,
-                   cluster_version='default', cluster_type='spark', cluster_tier=None,
+def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type, location=None, tags=None,
+                   no_wait=False, cluster_version='default', cluster_tier=None,
                    cluster_configurations=None, component_version=None,
                    headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
@@ -237,3 +238,127 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
 
 def _is_wasb_endpoint(storage_endpoint):
     return '.blob.' in storage_endpoint
+
+
+# pylint: disable=unused-argument
+def create_hdi_application(cmd, client, resource_group_name, cluster_name, application_name,
+                           script_uri, script_action_name, script_parameters=None, edgenode_size='Standard_D3_V2',
+                           ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
+                           marketplace_identifier=None, application_type='CustomApplication', tags=None,
+                           https_endpoint_access_mode=None, https_endpoint_location=None,
+                           https_endpoint_destination_port=8080, https_endpoint_public_port=443,
+                           ssh_endpoint_location=None, ssh_endpoint_destination_port=22, ssh_endpoint_public_port=22,
+                           virtual_network=None, subnet_name=None):
+    from azure.mgmt.hdinsight.models import Application, ApplicationProperties, ComputeProfile, RuntimeScriptAction, \
+        Role, VirtualNetworkProfile, LinuxOperatingSystemProfile, HardwareProfile, \
+        ApplicationGetHttpsEndpoint, ApplicationGetEndpoint, OsProfile
+
+    # Validate network profile parameters
+    if not _all_or_none(virtual_network, subnet_name):
+        raise CLIError('Either both the virtual network and subnet should be specified, or neither should be.')
+    # Specify virtual network profile only when network arguments are provided
+    virtual_network_profile = virtual_network and VirtualNetworkProfile(
+        id=virtual_network,
+        subnet=subnet_name
+    )
+
+    os_profile = (ssh_password or ssh_public_key) and OsProfile(
+        linux_operating_system_profile=LinuxOperatingSystemProfile(
+            username=ssh_username,
+            password=ssh_password,
+            ssh_public_key=ssh_public_key
+        )
+    )
+
+    roles = [
+        Role(
+            name="edgenode",
+            target_instance_count=1,
+            hardware_profile=HardwareProfile(vm_size=edgenode_size),
+            os_profile=os_profile,
+            virtual_network_profile=virtual_network_profile
+        )
+    ]
+
+    # Validate network profile parameters
+    if not _all_or_none(https_endpoint_access_mode, https_endpoint_location):
+        raise CLIError('Either both the https endpoint location and access mode should be specified, '
+                       'or neither should be.')
+
+    https_endpoints = []
+    if https_endpoint_location:
+        https_endpoints.append(
+            ApplicationGetHttpsEndpoint(
+                access_modes=[https_endpoint_access_mode],
+                location=https_endpoint_location,
+                destination_port=https_endpoint_destination_port,
+                public_port=https_endpoint_public_port,
+            )
+        )
+
+    ssh_endpoints = []
+    if ssh_endpoint_location:
+        ssh_endpoints.append(
+            ApplicationGetEndpoint(
+                location=ssh_endpoint_location,
+                destination_port=ssh_endpoint_destination_port,
+                public_port=ssh_endpoint_public_port
+            )
+        )
+
+    application_properties = ApplicationProperties(
+        compute_profile=ComputeProfile(
+            roles=roles
+        ),
+        install_script_actions=[
+            RuntimeScriptAction(
+                name=script_action_name,
+                uri=script_uri,
+                parameters=script_parameters,
+                roles=list(map(lambda role: role.name, roles))
+            )
+        ],
+        https_endpoints=https_endpoints,
+        ssh_endpoints=ssh_endpoints,
+        application_type=application_type,
+        marketplace_identifier=marketplace_identifier,
+    )
+
+    create_params = Application(
+        tags=tags,
+        properties=application_properties
+    )
+
+    return client.create(resource_group_name, cluster_name, application_name, create_params)
+
+
+# pylint: disable=unused-argument
+def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace_id, primary_key=None):
+    return client.enable_monitoring(resource_group_name, cluster_name, workspace_id, primary_key)
+
+
+# pylint: disable=unused-argument
+def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
+                              script_uri, script_action_name, roles, script_parameters=None,
+                              persist_on_success=False):
+    from azure.mgmt.hdinsight.models import RuntimeScriptAction
+
+    script_actions_params = [
+        RuntimeScriptAction(
+            name=script_action_name,
+            uri=script_uri,
+            parameters=script_parameters,
+            roles=roles.split(',')
+        )
+    ]
+
+    return client.execute_script_actions(resource_group_name, cluster_name, persist_on_success, script_actions_params)
+
+
+def list_hdi_script_actions(cmd, resource_group_name, cluster_name, persisted=False):
+    if persisted:
+        client = cf_hdinsight_script_actions(cmd.cli_ctx)
+    else:
+        client = cf_hdinsight_script_execution_history(cmd.cli_ctx)
+
+    return client.list_by_cluster(resource_group_name, cluster_name)

@@ -1073,6 +1073,9 @@ def load_arguments(self, _):
                    options_list=['--capacity', '-c'],
                    help='The capacity of the managed instance in vcores.')
 
+        c.argument('collation',
+                   help='The collation of the managed instance.')
+
     with self.argument_context('sql mi create') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1082,7 +1085,8 @@ def load_arguments(self, _):
                 'license_type',
                 'virtual_network_subnet_id',
                 'vcores',
-                'storage_size_in_gb'
+                'storage_size_in_gb',
+                'collation'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object

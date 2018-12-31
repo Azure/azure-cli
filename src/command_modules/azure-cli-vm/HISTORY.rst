@@ -2,6 +2,13 @@
 
 Release History
 ===============
+2.2.12
+++++++
+* `vm/vmss create`: support cross tenant image referencing
+
+2.2.11
+++++++
+* `disk create`: expose --os-type parameter.
 
 2.2.10
 ++++++

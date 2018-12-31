@@ -53,6 +53,11 @@ class StorageAccountKeyReplacer(RecordingProcessor):
     def __init__(self, replacement='veryFakedStorageAccountKey=='):
         self._replacement = replacement
         self._activated = False
+        self._candidates = []
+
+    def reset(self):
+        self._activated = False
+        self._candidates = []
 
     def process_request(self, request):  # pylint: disable=no-self-use
         import re
@@ -62,6 +67,10 @@ class StorageAccountKeyReplacer(RecordingProcessor):
                 self._activated = True
         except AttributeError:
             pass
+        for candidate in self._candidates:
+            if request.body:
+                body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                request.body = body_string.replace(candidate, self._replacement)
         return request
 
     def process_response(self, response):
@@ -71,9 +80,13 @@ class StorageAccountKeyReplacer(RecordingProcessor):
                 body = json.loads(response['body']['string'])
                 keys = body['keys']
                 for key_entry in keys:
-                    key_entry['value'] = self._replacement
+                    self._candidates.append(key_entry['value'])
                 self._activated = False
             except (KeyError, ValueError, TypeError):
-                return response
-            response['body']['string'] = json.dumps(body)
+                pass
+        for candidate in self._candidates:
+            if response['body']['string']:
+                body = response['body']['string']
+                response['body']['string'] = str(body, 'utf-8') if isinstance(body, bytes) else body
+                response['body']['string'] = response['body']['string'].replace(candidate, self._replacement)
         return response
