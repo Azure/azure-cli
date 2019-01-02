@@ -24,6 +24,47 @@ phases:
     inputs:
       ArtifactName: metadata
 
+- phase: Phase_21
+  displayName: Compress Source
+
+  dependsOn: Phase_13
+  condition: succeeded()
+  queue:
+    name: Hosted
+
+  steps:
+  - task: ArchiveFiles@2
+    displayName: 'Create zip of source'
+    inputs:
+      rootFolderOrFile: '$(Build.SourcesDirectory)'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).zip'
+  - task: AzureFileCopy@1
+    displayName: 'Copy source zip to Azure Blob'
+    inputs:
+      sourcePath: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).zip'
+      azureConnectionType: 'ConnectedServiceNameARM'
+      azureSubscription: 'SDKInfrastructureSP'
+      destination: AzureBlob
+      storage: azureclistage
+      containerName: archive-devops
+      blobPrefix: '$(Build.BuildNumber)'
+  - task: ArchiveFiles@2
+    displayName: 'Create tarball of source'
+    inputs:
+      rootFolderOrFile: '$(Build.SourcesDirectory)'
+      archiveType: tar
+      tarCompression: gz
+      archiveFile: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).tar.gz'
+  - task: AzureFileCopy@1
+    displayName: 'AzureBlob File Copy'
+    inputs:
+      sourcePath: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).tar.gz'
+      azureConnectionType: 'ConnectedServiceNameARM'
+      azureSubscription: 'SDKInfrastructureSP'
+      destination: AzureBlob
+      storage: azureclistage
+      containerName: archive-devops
+      blobPrefix: '$(Build.BuildNumber)'
 
 
 - phase: Phase_11
