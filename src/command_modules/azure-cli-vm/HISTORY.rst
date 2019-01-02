@@ -9,6 +9,7 @@ Release History
 2.2.11
 ++++++
 * `disk create`: expose --os-type parameter.
+* `image create --source`: fixed bug where source os disk is mistaken for a VM with the same name, even if the full resource ID is provided.
 
 2.2.10
 ++++++

@@ -357,6 +357,50 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_conflict')
+    def test_vm_custom_image_name_conflict(self, resource_group):
+        self.kwargs.update({
+            'vm': 'test-vm',
+            'image1': 'img-from-vm',
+            'image2': 'img-from-vm-id',
+            'image3': 'img-from-disk-id',
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password')
+        vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.cmd('vm stop -g {rg} -n {vm}')
+
+        # set variables up to test against name conflict between disk and vm.
+        self.kwargs.update({
+            'os_disk_vhd_uri': vm1_info['storageProfile']['osDisk']['vhd']['uri'],
+            'vm_id': vm1_info['id'],
+            'os_disk': vm1_info['name']
+        })
+
+        # create disk with same name as vm
+        disk_info = self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux').get_output_in_json()
+        self.kwargs.update({'os_disk_id': disk_info['id']})
+
+        # Deallocate and generalize vm. Do not need to deprovision vm as this test will not recreate a vm from the image.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        # Create image from vm
+        self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from vm id
+        self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from disk id
+        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux', checks=[
+            self.check("sourceVirtualMachine", None),
+            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
+        ])
+
 
 class VMImageWithPlanTest(ScenarioTest):
 

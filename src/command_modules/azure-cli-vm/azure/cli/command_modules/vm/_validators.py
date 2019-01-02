@@ -1257,20 +1257,27 @@ def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
+    source_from_vm = False
     try:
         # try capturing from VM, a most common scenario
         res_id = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
-        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+        if res['type'] == 'virtualMachines':
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
+            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            source_from_vm = True
+    except CloudError:
+        pass
+
+    if source_from_vm:
         # pylint: disable=no-member
         namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
-    except CloudError:
+    else:
         namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
