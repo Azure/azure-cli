@@ -198,7 +198,6 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
                        'http://{}'
             self.result = execute(self.cli_ctx, template.format(name, name, name)).get_output_in_json()
             self.test_class_instance.kwargs[self.key] = name
-            # The slice is the easiest way for know to return the Teanant from the same command
             return {self.parameter_name: self.result['appId'], self.parameter_secret: name}
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: self.dev_setting_app_name,

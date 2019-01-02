@@ -2415,7 +2415,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
 def openshift_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
-    return _remove_osa_nulls([mc])
+    return _remove_osa_nulls([mc])[0]
 
 
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):

@@ -31,7 +31,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'aad_client_app_id': aad_client_app_id,
             'aad_client_app_secret': aad_client_app_secret,
-            'resource_type': 'Microsoft.ContainerService/OpenShiftManagedClusters'
+            'resource_type': "Microsoft.ContainerService/OpenShiftManagedClusters"
         })
 
         # create
@@ -108,7 +108,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # show again and expect failure
         self.cmd('openshift show -g {resource_group} -n {name}', expect_failure=True)
-
+    
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestosa', location='eastus')
     def test_openshift_create_default_service_no_aad(self, resource_group, resource_group_location):
         # kwargs for string formatting
