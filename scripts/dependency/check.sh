@@ -1,10 +1,14 @@
 #!/bin/bash
 
-set -e
+set -ev
 
-cd `cd $(dirname $0); cd ../..; pwd`
+if [[ $TRAVIS_REPO_SLUG == "Azure/azure-cli" ]]; then
+    cd `cd $(dirname $0); cd ../..; pwd`
+fi
 
-git status >/dev/null 2>&1 || (echo "This command is expected to run in a git environment." >&2; exit 1)
+git status || (echo "This command is expected to run in a git environment." >&2; exit 1)
+
+
 
 VENV_DIR=`mktemp -d /tmp/azurecli.dep.check.XXXXXX`
 echo "Created temporary folder $VENV_DIR" >&2

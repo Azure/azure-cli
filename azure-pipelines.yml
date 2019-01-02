@@ -2,6 +2,37 @@ resources:
 - repo: self
 
 phases:
+- phase: Precheck
+  displayName: Precheck
+
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.6'
+
+  - task: Bash@3
+    displayName: 'Dependency Check'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/dependency/check.sh
+
+  - task: Bash@3
+    displayName: 'PEP8'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/precheck_pep8.sh
+
+  - task: Bash@3
+    displayName: 'Headers'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/precheck_header.sh
+
+
 - phase: ExtractMetadata
   displayName: Extract Metadata
 
