@@ -5,7 +5,7 @@ variables:
 - group: staging-storage-account
 
 phases:
-- phase: Phase_13
+- phase: ExtractMetadata
   displayName: Extract Metadata
 
   condition: succeeded()
@@ -24,10 +24,10 @@ phases:
     inputs:
       ArtifactName: metadata
 
-- phase: Phase_21
+- phase: CompressSource
   displayName: Compress Source
 
-  dependsOn: Phase_13
+  dependsOn: ExtractMetadata
   condition: succeeded()
   queue:
     name: Hosted
@@ -67,10 +67,10 @@ phases:
       blobPrefix: '$(Build.BuildNumber)'
 
 
-- phase: Phase_11
+- phase: BuildWindowsMSI
   displayName: Build Windows MSI
 
-  dependsOn: Phase_13
+  dependsOn: ExtractMetadata
   condition: succeeded()
   queue:
     name: Hosted VS2017
@@ -97,10 +97,10 @@ phases:
 
 
 
-- phase: Phase_4
+- phase: BuildDockerImage
   displayName: Build Docker Image
 
-  dependsOn: Phase_13
+  dependsOn: ExtractMetadata
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -119,10 +119,10 @@ phases:
 
 
 
-- phase: Phase_19
+- phase: TestDockerImage
   displayName: Test Docker Image
 
-  dependsOn: Phase_4
+  dependsOn: BuildDockerImage
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -153,10 +153,10 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: Phase_1
+- phase: BuildPythonWheel
   displayName: Build Python Wheels
 
-  dependsOn: Phase_13
+  dependsOn: ExtractMetadata
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -181,14 +181,13 @@ phases:
 
 
 
-- phase: Phase_15
+- phase: TestPythonWheel
   displayName: Test Python Wheels
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
-#Your build pipeline references an undefined variable named ‘cd $SYSTEM_ARTIFACTSDIRECTORY/pypi; pwd’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -209,8 +208,8 @@ phases:
 
        set -ex
 
-       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-       PYPI_FILES=$(cd $SYSTEM_ARTIFACTSDIRECTORY/pypi; pwd)
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+       PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
 
 
        echo "== Testing pip install on Python 3.6 =="
@@ -231,18 +230,13 @@ phases:
     displayName: 'Test pip Install'
 
 
-- phase: Phase_14
+- phase: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
-#Your build pipeline references an undefined variable named ‘az storage blob url -c $CONTAINER_NAME -n $TAR_NAME -otsv’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘cd $(dirname $0’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘cd $SYSTEM_ARTIFACTSDIRECTORY/pypi; pwd’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -262,10 +256,10 @@ phases:
 
        set -evx
 
-       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
 
        docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-       pypi_files=$(cd $SYSTEM_ARTIFACTSDIRECTORY/pypi; pwd)
+       pypi_files=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
 
        echo "Generating formula in docker container ... "
        docker run -v $docker_files:/mnt/scripts \
@@ -277,10 +271,10 @@ phases:
                   /mnt/scripts/run.sh
 
        # clean up
-       rm -rf $BUILD_STAGINGDIRECTORY/metadata
-       rm -rf $BUILD_STAGINGDIRECTORY/pypi
+       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
+       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi
 
-       docker cp azurecli:azure-cli.rb $BUILD_STAGINGDIRECTORY/azure-cli.rb
+       docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
     env:
@@ -293,10 +287,10 @@ phases:
 
 
 
-- phase: Phase_16
+- phase: TestHomebrewFormula
   displayName: Test Homebrew Formula
 
-  dependsOn: Phase_14
+  dependsOn: BuildHomebrewFormula
   condition: succeeded()
   queue:
     name: Hosted macOS
@@ -332,10 +326,10 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: Phase_3
+- phase: BuildYumPackage
   displayName: Build Yum Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -354,10 +348,10 @@ phases:
 
 
 
-- phase: Phase_17
+- phase: TestYumPackage
   displayName: Test Yum Package
 
-  dependsOn: Phase_3
+  dependsOn: BuildYumPackage
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -389,10 +383,10 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: Phase_2
+- phase: BuildUbuntuXenial
   displayName: Build Ubuntu Xenial Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -419,10 +413,10 @@ phases:
 
 
 
-- phase: Phase_5
+- phase: BuildUbuntuArtful
   displayName: Build Ubuntu Artful Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -449,10 +443,10 @@ phases:
 
 
 
-- phase: Phase_6
+- phase: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -480,10 +474,10 @@ phases:
 
 
 
-- phase: Phase_7
+- phase: BuildUbuntuBionic
   displayName: Build Ubuntu Bionic Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -511,10 +505,10 @@ phases:
 
 
 
-- phase: Phase_8
+- phase: BuildDebianWheezy
   displayName: Build Debian Wheezy Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -542,10 +536,10 @@ phases:
 
 
 
-- phase: Phase_9
+- phase: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -572,10 +566,10 @@ phases:
 
 
 
-- phase: Phase_10
+- phase: BuildDebianStretch
   displayName: Build Debian Stretch Package
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
@@ -602,18 +596,18 @@ phases:
 
 
 
-- phase: Phase_18
+- phase: TestLinuxPackages
   displayName: Test Linux Packages
 
   dependsOn:
-   - Phase_2
-   - Phase_5
-   - Phase_6
-   - Phase_7
-   - Phase_8
-   - Phase_9
-   - Phase_10
-   - Phase_20
+   - BuildUbuntuXenial
+   - BuildUbuntuArtful
+   - BuildUbuntuTrusty
+   - BuildUbuntuBionic
+   - BuildDebianWheezy
+   - BuildDebianJessie
+   - BuildDebianStretch
+   - BuildUbuntuCosmic
   condition: succeededOrFailed()
   queue:
     name: Hosted Ubuntu 1604
@@ -665,16 +659,16 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: Phase_12
+- phase: PublishArtifacts
   displayName: Publish Artifacts to Azure Storage
 
   dependsOn:
-   - Phase_16
-   - Phase_15
-   - Phase_17
-   - Phase_18
-   - Phase_19
-   - Phase_11
+   - TestHomebrewFormula
+   - TestPythonWheel
+   - TestYumPackage
+   - TestLinuxPackages
+   - TestDockerImage
+   - BuildWindowsMSI
   condition: succeeded()
   queue:
     name: Hosted
@@ -730,10 +724,10 @@ phases:
 
 
 
-- phase: Phase_20
+- phase: BuildUbuntuCosmic
   displayName: Build Ubuntu Cosmic
 
-  dependsOn: Phase_1
+  dependsOn: BuildPythonWheel
   condition: succeeded()
   queue:
     name: Hosted Ubuntu 1604
