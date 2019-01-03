@@ -33,4 +33,3 @@ class AmsMruTests(LiveScenarioTest):
         ])
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
-
