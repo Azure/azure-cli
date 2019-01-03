@@ -3,7 +3,7 @@
 # Build APT package in an Azure Container Instances
 # This script assumes the Azure CLI is installed and logged in.
 
-set -ex
+set -exv
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__init__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
