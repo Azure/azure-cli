@@ -61,8 +61,7 @@ def _get_new_yaml_dict(help_dict):
                 new_param = dict()
                 if "name" in param:
                     options = param["name"].split()
-                    option = max(options, key=lambda x: len(x))
-                    new_param["name"] = option.lstrip('-')
+                    new_param["name"] = max(options, key=lambda x: len(x))
                 _convert_summaries(old_dict=param, new_dict=new_param)
 
                 if "populator-commands" in param:
@@ -179,17 +178,17 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     test = False
 
+    msg = 'Usage: python help_convert.py (MOD | MOD "TEST")\n'
+
     if "--help" in args or "-h" in args:
-        print('Usage: python help_convert.py (MOD | MOD "TEST")\n')
+        print(msg)
         exit(0)
 
-    if len(args) > 2:
-        msg = 'Usage: python help_convert.py (MOD | MOD "TEST")\n'
+    if len(args) > 2 or len(args) == 0:
         exit(msg)
 
     if len(args) == 2:
         if args[1].lower() != "test":
-            msg = 'Usage: python help_convert.py (MOD | MOD "TEST")\n'
             exit(msg)
         else:
             test = True

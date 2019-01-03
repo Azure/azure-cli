@@ -122,7 +122,7 @@ class HelpLoaderV1(BaseHelpLoader):
     VERSION = 1
     core_attrs_to_keys = [("short_summary", "summary"), ("long_summary", "description")]
     body_attrs_to_keys = core_attrs_to_keys + [("links", "links")]
-    param_attrs_to_keys = core_attrs_to_keys + [("value_sources", None)]
+    param_attrs_to_keys = core_attrs_to_keys + [("value_sources", "value-sources")]
 
     def _load_raw_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
@@ -136,7 +136,10 @@ class HelpLoaderV1(BaseHelpLoader):
 
     def _load_help_parameters(self, help_obj):
         def params_equal(param, param_dict):
-            return param.name == param_dict['name']
+            if param_dict['name'].startswith("--"):  # for optionals, help file name must be one of the  long options
+                return param_dict['name'] in param.name.split()
+            else:  # for positionals, help file must name must match param name shown when -h is run
+                return param_dict['name'] == param.name
         if help_obj.type == "command" and self._data.get("arguments"):
             loaded_params = []
             for param_obj in help_obj.parameters:

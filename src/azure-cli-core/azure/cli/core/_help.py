@@ -52,7 +52,7 @@ class CLIPrintMixin(CLIHelp):
 
         links = help_file.links # TODO: this needs to be updated to handle links obj not just link text
         if links:
-            link_text = "{} and {}".format(", ".join(links[0:-1]), links[-1]) if len(links) > 1 else links[0]
+            link_text = "{} and {}".format(", ".join([link["url"] for link in links[0:-1]]), links[-1]["url"]) if len(links) > 1 else links[0]["url"]
             link_text = "For more information, see: {}\n".format(link_text)
             _print_indent(link_text, 2, width=self.textwrap_width)
 
@@ -92,10 +92,11 @@ class CLIPrintMixin(CLIHelp):
             elif "link" in item and "command" in item["link"]:
                 commands.append(item["link"]["command"])
             elif "link" in item and "url" in item["link"]:
-                urls.append(item["link"]["command"])
+                urls.append(item["link"]["url"])
 
         command_str = u'  Values from: {}.'.format(", ".join(commands)) if commands else ''
         string_str = u'  {}'.format(", ".join(strings)) if strings else ''
+        string_str = string_str + "." if string_str and not string_str.endswith(".") else string_str
         urls_str = u'  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
         return u'{}{}{}'.format(command_str, string_str, urls_str)
 
