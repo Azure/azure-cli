@@ -106,7 +106,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if custom_domain is not None:
         domain = CustomDomain(name=custom_domain)
         if use_subdomain is not None:
-            domain.use_sub_domain = use_subdomain == 'true'
+            domain.use_sub_domain_name = use_subdomain == 'true'
 
     encryption = instance.encryption
     if encryption_services:
