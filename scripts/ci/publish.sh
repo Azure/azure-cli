@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
 unset AZURE_CLI_DIAGNOSTICS_TELEMETRY
 pip install azure-storage-blob==1.1.0

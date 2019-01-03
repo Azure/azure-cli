@@ -7,7 +7,7 @@
 # This script is expected to be run in a container environment, therefore sudo doesn't present
 # here.
 
-set -ex
+set -exv
 
 : "${CLI_VERSION:?CLI_VERSION environment variable not set.}"
 : "${CLI_VERSION_REVISION:?CLI_VERSION_REVISION environment variable not set.}"
