@@ -391,7 +391,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False))
 
         self.storage_cmd('storage blob service-properties update --static-website --index-document index.html '
-                        '--404-document error.html', account_info)
+                         '--404-document error.html', account_info)
 
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
