@@ -243,6 +243,11 @@ helps['storage blob service-properties'] = """
     short-summary: Manage storage blob service properties.
 """
 
+helps['storage blob service-properties update'] = """
+    type: command
+    short-summary: Update storage blob service properties.
+"""
+
 helps['storage blob service-properties delete-policy'] = """
     type: group
     short-summary: Manage storage blob delete-policy service properties.
