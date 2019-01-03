@@ -32,6 +32,99 @@ phases:
       targetType: 'filePath'
       filePath: ./scripts/ci/precheck_header.sh
 
+- phase: UnitTestPy2
+  displayName: 'Unit Test with Python2'
+
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+
+  - script: |
+      pip install tox
+    displayName: 'Install Tox'
+
+  - task: Bash@3
+    displayName: 'Execute Unit Tests'
+    env:
+      TOXENV=py27
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/unittest.sh
+
+- phase: UnitTestPy3
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+
+  - script: |
+      pip install tox
+    displayName: 'Install Tox'
+
+  - task: Bash@3
+    displayName: 'Execute Unit Tests'
+    env:
+        TOXENV=py36
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/unittest.sh
+
+- phase: VerifyPy2
+  displayName: 'Verify Python2'
+
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+  - task: Bash@3
+    displayName: 'Automation'
+    env:
+     REDUCE_SDK: 'True'
+    inputs:
+     targetType: 'filePath'
+     filePath: ./scripts/ci/test_automation.sh
+
+- phase: VerifyPy3
+  displayName: 'Verify Python3'
+
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: Bash@3
+    displayName: 'Lint Command Table and Help'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/verify_linter.sh
+  - task: Bash@3
+    displayName: 'Automation'
+    env:
+      REDUCE_SDK: 'True'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+
 
 - phase: ExtractMetadata
   displayName: Extract Metadata
