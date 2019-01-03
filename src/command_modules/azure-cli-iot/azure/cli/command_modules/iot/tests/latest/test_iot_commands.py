@@ -189,6 +189,8 @@ class IoTHubTest(ScenarioTest):
         new_source_type = 'TwinChangeEvents'
         condition = 'true'
         enabled = True
+        tags = '{tags}'
+        desired = '{desired}'
         self.cmd('iot hub route create --hub-name {0} -g {1} -n {2} -s {3} --en {4} -c {5} -e {6}'
                  .format(hub, rg, route_name, source_type, endpoint_name, condition, enabled),
                  checks=[self.check('length([*])', 1),
@@ -232,8 +234,24 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub route test --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
                  checks=[self.check('result', 'true')])
 
+        # Test 'az iot hub route test' with optional arguments
+        self.kwargs.update({'tags':'"{"\\"\"test"\\"\":123}"'})
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2} --tags {3}'.format(hub, rg, route_name, tags),
+                 checks=[self.check('result', 'true')])
+
         # Test 'az iot hub route test'
         self.cmd('iot hub route test --hub-name {0} -g {1} -s {2}'.format(hub, rg, source_type),
+                 checks=[self.check('length(routes[*])', 1),
+                         self.check('routes[0].properties.name', route_name),
+                         self.check('routes[0].properties.source', source_type),
+                         self.check('routes[0].properties.isEnabled', enabled),
+                         self.check('routes[0].properties.condition', condition),
+                         self.check('length(routes[0].properties.endpointNames[*])', 1),
+                         self.check('routes[0].properties.endpointNames[0]', endpoint_name)])
+
+        # Test 'az iot hub route test' with optional arguments
+        self.kwargs.update({'desired':'"{"\\"\"test"\\"\":123}"'})
+        self.cmd('iot hub route test --hub-name {0} -g {1} -s {2} --desired {3}'.format(hub, rg, source_type, desired),
                  checks=[self.check('length(routes[*])', 1),
                          self.check('routes[0].properties.name', route_name),
                          self.check('routes[0].properties.source', source_type),

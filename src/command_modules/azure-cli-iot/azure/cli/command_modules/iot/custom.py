@@ -41,6 +41,7 @@ from azure.cli.command_modules.iot.shared import EndpointType
 
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate
+import json
 
 
 # CUSTOM TYPE
@@ -680,11 +681,11 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
         system_properties=system_properties
     )
     routing_twin_properties = RoutingTwinProperties(
-        desired=desired,
-        reported=reported
+        desired=json.loads(desired) if desired else desired,
+        reported=json.loads(reported) if reported else reported
     )
     route_twin = RoutingTwin(
-        tags=tags,
+        tags=json.loads(tags) if tags else tags,
         properties=routing_twin_properties
     )
     if route_name:
