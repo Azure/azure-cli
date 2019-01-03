@@ -100,3 +100,5 @@ class AmsJobTests(ScenarioTest):
                     time.sleep(5)
                 else:
                     raise
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')

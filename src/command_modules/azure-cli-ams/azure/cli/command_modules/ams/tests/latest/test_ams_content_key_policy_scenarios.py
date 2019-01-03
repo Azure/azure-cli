@@ -34,6 +34,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-template "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}')
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_with_playready_success(self, storage_account_for_create):
@@ -111,6 +113,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.licenses[0].playRight.explicitAnalogTelevisionOutputRestriction.configurationData', '{configurationData}')
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
     def test_content_key_policy_update(self, storage_account_for_update):
@@ -165,6 +169,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_with_fairplay(self, storage_account_for_create):
@@ -197,6 +203,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
             self.check('options[0].configuration.rentalDuration', '{rentalDuration}')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -237,6 +245,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_with_widevine(self, storage_account_for_create):
@@ -261,6 +271,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('name', '{contentKeyPolicyName}'),
             self.check('options[0].configuration.odatatype', '{configurationODataType}')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -291,6 +303,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.odatatype', '{configurationODataType}'),
             self.check('options[0].restriction.odatatype', '{restrictionODataType}')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_show')
@@ -323,6 +337,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.odatatype', '{configurationODataType}'),
             self.check('options[0].restriction.odatatype', '{restrictionODataType}')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_show')
@@ -359,6 +375,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.assertNotEquals(output.get('options')[0].get('restriction').get('primaryVerificationKey').get('rawBody'), None)
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_delete')
     def test_content_key_policy_delete_list(self, storage_account_for_delete):
@@ -390,3 +408,5 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.cmd('az ams content-key-policy list -a {amsname} -g {rg}', checks=[
             self.check('length(@)', 0)
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')

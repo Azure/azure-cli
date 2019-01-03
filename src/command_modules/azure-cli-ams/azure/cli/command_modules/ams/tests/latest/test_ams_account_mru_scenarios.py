@@ -31,3 +31,6 @@ class AmsMruTests(LiveScenarioTest):
             self.check('count', '{count}'),
             self.check('type', '{type}')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+

@@ -108,6 +108,8 @@ class AmsAssetTests(ScenarioTest):
             self.check('length(@)', 2)
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_asset_get_encryption_key(self, storage_account_for_create):
@@ -141,6 +143,8 @@ class AmsAssetTests(ScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('az ams asset get-encryption-key -a {amsname} -n {assetName} -g {rg}')
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_asset_get_streaming_locators(self, storage_account_for_create):
@@ -164,3 +168,5 @@ class AmsAssetTests(ScenarioTest):
         self.cmd('az ams asset get-streaming-locators -a {amsname} -n {assetName} -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')

@@ -51,6 +51,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_create_with_akamai(self, storage_account_for_create):
@@ -102,6 +104,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -180,6 +184,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_create(self, storage_account_for_create):
@@ -218,6 +224,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_show')
@@ -296,6 +304,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_scale')
     def test_ams_streaming_endpoint_scale(self, storage_account_for_scale):
@@ -333,6 +343,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_start(self, storage_account_for_create):
@@ -354,6 +366,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint start -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
             self.check('resourceState', 'Running')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -381,6 +395,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.assertIn(str_endpoint['resourceState'], resource_states)
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_stop_async(self, storage_account_for_create):
@@ -407,6 +423,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.assertIn(str_endpoint['resourceState'], resource_states)
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_stop(self, storage_account_for_create):
@@ -431,6 +449,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             self.check('resourceState', 'Stopped')
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_list(self, storage_account_for_create):
@@ -452,3 +472,5 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint list -g {rg} -a {amsname}', checks=[
             self.check('length(@)', 2)
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')

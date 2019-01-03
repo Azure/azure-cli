@@ -55,6 +55,8 @@ class AmsLiveOutputTests(ScenarioTest):
 
         self.assertIn(live_output['resourceState'], resource_states)
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_output_list(self, storage_account_for_create):
@@ -90,6 +92,8 @@ class AmsLiveOutputTests(ScenarioTest):
         self.cmd('az ams live-output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
             self.check('length(@)', 1)
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -130,6 +134,8 @@ class AmsLiveOutputTests(ScenarioTest):
             self.check('name', '{liveOutputName}'),
             self.check('resourceGroup', '{rg}')
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -177,3 +183,5 @@ class AmsLiveOutputTests(ScenarioTest):
         self.cmd('az ams live-output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
             self.check('length(@)', 1)
         ])
+
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
