@@ -59,17 +59,17 @@ def set_service_properties(client, parameters, delete_retention=None, days_retai
                            index_document=None, error_document_404_path=None):
     # update
     kwargs = {}
-    if any([delete_retention, days_retained]):
+    if hasattr(parameters, 'delete_retention_policy'):
         kwargs['delete_retention_policy'] = parameters.delete_retention_policy
     if delete_retention is not None:
         parameters.delete_retention_policy.enabled = delete_retention
     if days_retained is not None:
         parameters.delete_retention_policy.days = days_retained
 
-    if any([static_website, index_document, error_document_404_path]):
-        if getattr(parameters, 'static_website', None) is None:
-            raise CLIError('Static websites are only supported for StorageV2 (general-purpose v2) accounts.')
+    if hasattr(parameters, 'static_website'):
         kwargs['static_website'] = parameters.static_website
+    elif any(param is not None for param in [static_website, index_document, error_document_404_path]):
+        raise CLIError('Static websites are only supported for StorageV2 (general-purpose v2) accounts.')
     if static_website is not None:
         parameters.static_website.enabled = static_website
     if index_document is not None:
@@ -78,8 +78,8 @@ def set_service_properties(client, parameters, delete_retention=None, days_retai
         parameters.static_website.error_document_404_path = error_document_404_path
 
     # checks
-    policy = parameters.delete_retention_policy
-    if policy.enabled and not policy.days:
+    policy = kwargs.get('delete_retention_policy', None)
+    if policy and policy.enabled and not policy.days:
         raise CLIError("must specify days-retained")
 
     client.set_blob_service_properties(**kwargs)
