@@ -24,49 +24,6 @@ phases:
     inputs:
       ArtifactName: metadata
 
-- phase: CompressSource
-  displayName: Compress Source
-
-  dependsOn: ExtractMetadata
-  condition: succeeded()
-  queue:
-    name: Hosted
-
-  steps:
-  - task: ArchiveFiles@2
-    displayName: 'Create zip of source'
-    inputs:
-      rootFolderOrFile: '$(Build.SourcesDirectory)'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).zip'
-  - task: AzureFileCopy@1
-    displayName: 'Copy source zip to Azure Blob'
-    inputs:
-      sourcePath: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).zip'
-      azureConnectionType: 'ConnectedServiceNameARM'
-      azureSubscription: 'SDKInfrastructureSP'
-      destination: AzureBlob
-      storage: azureclistage
-      containerName: archive-devops
-      blobPrefix: '$(Build.BuildNumber)'
-  - task: ArchiveFiles@2
-    displayName: 'Create tarball of source'
-    inputs:
-      rootFolderOrFile: '$(Build.SourcesDirectory)'
-      archiveType: tar
-      tarCompression: gz
-      archiveFile: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).tar.gz'
-  - task: AzureFileCopy@1
-    displayName: 'AzureBlob File Copy'
-    inputs:
-      sourcePath: '$(Build.ArtifactStagingDirectory)/azure-cli_$(Build.BuildId).tar.gz'
-      azureConnectionType: 'ConnectedServiceNameARM'
-      azureSubscription: 'SDKInfrastructureSP'
-      destination: AzureBlob
-      storage: azureclistage
-      containerName: archive-devops
-      blobPrefix: '$(Build.BuildNumber)'
-
-
 - phase: BuildWindowsMSI
   displayName: Build Windows MSI
 
@@ -257,6 +214,7 @@ phases:
        set -evx
 
        CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+       HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
 
        docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
        pypi_files=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
@@ -277,8 +235,6 @@ phases:
        docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
-    env:
-      HOMEBREW_UPSTREAM_URL: 'https://azureclistage.blob.core.windows.net/archive-devops/$(Build.BuildNumber)/azure-cli_$(Build.BuildID).tar.gz'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: homebrew'
