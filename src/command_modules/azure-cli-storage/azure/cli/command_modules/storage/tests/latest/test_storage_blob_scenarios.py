@@ -393,10 +393,15 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob service-properties update --static-website --index-document index.html '
                          '--404-document error.html', account_info)
 
+        self.storage_cmd('storage blob service-properties update --delete-retention --delete-retention-period 1',
+                         account_info)
+
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
                                 JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
-                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'))
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1))
 
 
 if __name__ == '__main__':
