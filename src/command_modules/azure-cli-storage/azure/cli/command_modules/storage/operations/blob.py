@@ -170,7 +170,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         # remove starting path seperator and normalize
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
         if normalized_blob_name in blobs_to_download:
-            from knack.util import CLIError
             raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
                            'to select for a subset of blobs to download OR utilize the `storage blob download` '
                            'command instead to download individual blobs.'.format(normalized_blob_name))
@@ -397,7 +396,6 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
         blob_service.copy_blob(destination_container, destination_blob_name, source_blob_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException:
-        from knack.util import CLIError
         error_template = 'Failed to copy blob {} to container {}.'
         raise CLIError(error_template.format(source_blob_name, destination_container))
 
@@ -416,6 +414,5 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
         blob_service.copy_blob(destination_container, destination_blob_name, file_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException as ex:
-        from knack.util import CLIError
         error_template = 'Failed to copy file {} to container {}. {}'
         raise CLIError(error_template.format(source_file_name, destination_container, ex))
