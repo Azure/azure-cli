@@ -256,9 +256,9 @@ def cli_cosmosdb_database_list(client):
     return list(client.ReadDatabases())
 
 
-def cli_cosmosdb_database_create(client, database_id):
+def cli_cosmosdb_database_create(client, database_id, throughput=None):
     """Creates an Azure Cosmos DB database """
-    return client.CreateDatabase({'id': database_id})
+    return client.CreateDatabase({'id': database_id}, {'offerThroughput': throughput})
 
 
 def cli_cosmosdb_database_delete(client, database_id):

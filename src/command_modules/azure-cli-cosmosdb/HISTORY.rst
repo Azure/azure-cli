@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.7
++++++
+* Added support for creating database with shared throughput
+
 0.2.6 
 +++++ 
 * Added support for updating account from multi-master to single-master
