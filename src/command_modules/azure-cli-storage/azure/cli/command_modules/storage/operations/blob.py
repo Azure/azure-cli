@@ -55,16 +55,16 @@ def set_delete_policy(client, enable=None, days_retained=None):
     return client.get_blob_service_properties().delete_retention_policy
 
 
-def set_service_properties(client, parameters, delete_retention=None, days_retained=None, static_website=None,
-                           index_document=None, error_document_404_path=None):
+def set_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
+                           static_website=None, index_document=None, error_document_404_path=None):
     # update
     kwargs = {}
     if hasattr(parameters, 'delete_retention_policy'):
         kwargs['delete_retention_policy'] = parameters.delete_retention_policy
     if delete_retention is not None:
         parameters.delete_retention_policy.enabled = delete_retention
-    if days_retained is not None:
-        parameters.delete_retention_policy.days = days_retained
+    if delete_retention_period is not None:
+        parameters.delete_retention_policy.days = delete_retention_period
 
     if hasattr(parameters, 'static_website'):
         kwargs['static_website'] = parameters.static_website
