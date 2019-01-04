@@ -79,7 +79,7 @@ def load_arguments(self, _):
             c.argument('name', name_arg_type)
             c.argument('cert', arg_group='Credential', validator=validate_cert)
             c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                       deprecate_info=c.deprecate(expiration='2.1.0', hide=True))
+                       deprecate_info=c.deprecate(expiration='2.1.0', hide=False), help="If missing, CLI will generate a strong password")
             c.argument('years', type=int, default=None, arg_group='Credential')
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
