@@ -488,6 +488,12 @@ helps['policy assignment create'] = """
                         ]
                     }
                 }'
+        - name: Create a resource policy assignment with a system assigned identity.
+          text: >
+            az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity
+        - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
+          text: >
+            az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --identity-role Contributor
 """
 helps['policy assignment delete'] = """
     type: command
@@ -500,6 +506,29 @@ helps['policy assignment show'] = """
 helps['policy assignment list'] = """
     type: command
     short-summary: List resource policy assignments.
+"""
+helps['policy assignment identity'] = """
+    type: group
+    short-summary: Manage a policy assignment's managed identity.
+"""
+helps['policy assignment identity assign'] = """
+    type: command
+    short-summary: Add a system assigned identity to a policy assignment.
+    examples:
+        - name: Add a system assigned managed identity to a policy assignment.
+          text: >
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment
+        - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
+          text: >
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --identity-role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+"""
+helps['policy assignment identity show'] = """
+    type: command
+    short-summary: Show a policy assignment's managed identity.
+"""
+helps['policy assignment identity remove'] = """
+    type: command
+    short-summary: Remove a managed identity from a policy assignment.
 """
 helps['resource'] = """
     type: group

@@ -40,6 +40,8 @@ from azure.cli.command_modules.resource._client_factory import (
     _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
+from ._validators import MSI_LOCAL_ID
+
 logger = get_logger(__name__)
 
 
@@ -1010,7 +1012,8 @@ def register_feature(client, resource_provider_namespace, feature_name):
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
-                             not_scopes=None):
+                             not_scopes=None, location=None, assign_identity=None,
+                             identity_scope=None, identity_role='Contributor'):
     """Creates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -1049,9 +1052,32 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             policySku = policySku if sku.lower() == 'free' else PolicySku(name='A1', tier='Standard')
         assignment.sku = policySku
 
-    return policy_client.policy_assignments.create(scope,
-                                                   name or uuid.uuid4(),
-                                                   assignment)
+    if cmd.supported_api_version(min_api='2018-05-01'):
+        if location:
+            assignment.location = location
+        identity = None
+        if assign_identity is not None:
+            identity = _build_identities_info(cmd, assign_identity)
+        assignment.identity = identity
+
+    createdAssignment = policy_client.policy_assignments.create(scope, name or uuid.uuid4(), assignment)
+
+    # Create the identity's role assignment if requested
+    if assign_identity is not None and identity_scope:
+        from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
+        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
+
+    return createdAssignment
+
+
+def _build_identities_info(cmd, identities):
+    identities = identities or []
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    identity_type = ResourceIdentityType.none
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_type = ResourceIdentityType.system_assigned
+    ResourceIdentity = cmd.get_models('Identity')
+    return ResourceIdentity(type=identity_type)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
@@ -1103,6 +1129,40 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
         result = [i for i in result if _scope.lower() == i.scope.lower()]
 
     return result
+
+
+def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+
+    def getter():
+        return policy_client.policy_assignments.get(scope, name)
+
+    def setter(policyAssignment):
+        policyAssignment.identity = _build_identities_info(cmd, [MSI_LOCAL_ID])
+        return policy_client.policy_assignments.create(scope, name, policyAssignment)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
+    updatedAssignment = _assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role, identity_scope)
+    return updatedAssignment.identity
+
+
+def show_identity(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+    return policy_client.policy_assignments.get(scope, name).identity
+
+
+def remove_identity(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+    policyAssignment = policy_client.policy_assignments.get(scope, name)
+
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    ResourceIdentity = cmd.get_models('Identity')
+    policyAssignment.identity = ResourceIdentity(type=ResourceIdentityType.none)
+    policyAssignment = policy_client.policy_assignments.create(scope, name, policyAssignment)
+    return policyAssignment.identity
 
 
 def enforce_mutually_exclusive(subscription, management_group):
