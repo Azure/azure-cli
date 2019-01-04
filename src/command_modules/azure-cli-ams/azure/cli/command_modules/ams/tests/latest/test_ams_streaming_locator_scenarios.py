@@ -68,8 +68,6 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
         self.cmd('az ams streaming-locator delete -n {streamingLocatorName} -a {amsname} -g {rg}')
 
-        self.cmd('az ams asset delete -a {amsname} -n {assetName} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_locator_with_content_keys(self, resource_group, storage_account_for_create):
@@ -146,8 +144,6 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
         self.cmd('az ams streaming-locator delete -n {streamingLocatorName} -a {amsname} -g {rg}')
 
-        self.cmd('az ams asset delete -a {amsname} -n {assetName} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_locator_get_content_keys(self, resource_group, storage_account_for_create):
@@ -186,6 +182,3 @@ class AmsStreamingLocatorTests(ScenarioTest):
             self.check('length(@)', 1),
             self.check('@[0].policyName', '{contentKeyPolicyName}')
         ])
-
-        self.cmd('az ams asset delete -a {amsname} -n {assetName} -g {rg}')
-

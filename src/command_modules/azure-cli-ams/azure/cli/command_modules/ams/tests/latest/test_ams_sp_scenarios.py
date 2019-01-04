@@ -47,5 +47,4 @@ class AmsSpTests(ScenarioTest):
                     self.check('AccountName', '{amsname}')
                 ])
             finally:
-                self.cmd('az ams account delete -n {amsname} -g {rg}')
                 self.cmd('ad app delete --id {spName}')

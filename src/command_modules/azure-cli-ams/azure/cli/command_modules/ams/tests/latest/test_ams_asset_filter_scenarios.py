@@ -71,8 +71,6 @@ class AmsAssetFilterTests(ScenarioTest):
             self.check('tracks[1].trackSelections[1].value', 'MP4A')
         ])
 
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_show')
     def test_ams_asset_filter_show(self, storage_account_for_show):
@@ -135,8 +133,6 @@ class AmsAssetFilterTests(ScenarioTest):
             self.check('tracks[1].trackSelections[1].value', 'MP4A')
         ])
 
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_list_and_delete')
     def test_ams_asset_filter_list_and_delete(self, storage_account_for_list_and_delete):
@@ -196,8 +192,6 @@ class AmsAssetFilterTests(ScenarioTest):
         self.cmd('az ams asset-filter list -a {amsname} --asset-name {asset_name} -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_update')
@@ -266,6 +260,3 @@ class AmsAssetFilterTests(ScenarioTest):
             self.check('tracks[1].trackSelections[1].property', 'FourCC'),
             self.check('tracks[1].trackSelections[1].value', 'MP4A')
         ])
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-

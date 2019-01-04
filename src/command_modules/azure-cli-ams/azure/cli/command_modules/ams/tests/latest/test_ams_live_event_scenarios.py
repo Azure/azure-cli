@@ -67,8 +67,6 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams live-event delete -a {amsname} -n {liveEventName} -g {rg}')
 
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_start(self, storage_account_for_create):
@@ -105,8 +103,6 @@ class AmsLiveEventTests(ScenarioTest):
         self.assertNotEquals('Stopping', live_event['resourceState'])
         self.assertNotEquals('Stopped', live_event['resourceState'])
 
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_stop(self, storage_account_for_create):
@@ -135,8 +131,6 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertNotEquals('Starting', live_event['resourceState'])
         self.assertNotEquals('Running', live_event['resourceState'])
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -195,8 +189,6 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_list(self, storage_account_for_create):
@@ -230,8 +222,6 @@ class AmsLiveEventTests(ScenarioTest):
         self.cmd('az ams live-event list -a {amsname} -g {rg}', checks=[
             self.check('length(@)', 2)
         ])
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -273,8 +263,6 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_reset(self, storage_account_for_create):
@@ -309,8 +297,6 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertNotEquals('Stopping', live_event['resourceState'])
         self.assertNotEquals('Stopped', live_event['resourceState'])
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -347,8 +333,6 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['crossDomainPolicy'])
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['clientAccessPolicy'])
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -395,5 +379,3 @@ class AmsLiveEventTests(ScenarioTest):
         ])
 
         self.cmd('az ams live-event delete -a {amsname} -n {liveEventName} -g {rg}')
-
-        self.cmd('az ams account delete -n {amsname} -g {rg}')
