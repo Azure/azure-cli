@@ -268,3 +268,4 @@ class AmsAssetFilterTests(ScenarioTest):
         ])
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')
+

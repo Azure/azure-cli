@@ -188,3 +188,4 @@ class AmsStreamingLocatorTests(ScenarioTest):
         ])
 
         self.cmd('az ams asset delete -a {amsname} -n {assetName} -g {rg}')
+
