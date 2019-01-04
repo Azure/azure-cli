@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 from enum import Enum
+import json
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
@@ -41,7 +42,6 @@ from azure.cli.command_modules.iot.shared import EndpointType
 
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate
-import json
 
 
 # CUSTOM TYPE
