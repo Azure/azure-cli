@@ -2422,7 +2422,7 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
-                       no_wait=False, extension_instance_name=None):
+                       no_wait=False, extension_instance_name=None, provision_after_extensions=None):
     if not extension_instance_name:
         extension_instance_name = extension_name
 
@@ -2446,7 +2446,8 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
                                           settings=settings,
-                                          auto_upgrade_minor_version=(not no_auto_upgrade))
+                                          auto_upgrade_minor_version=(not no_auto_upgrade),
+                                          provision_after_extensions=provision_after_extensions)
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 
