@@ -42,19 +42,16 @@ def upload_source_code(client,
     logger.warning("Uploading archived source code from '%s'...", tar_file_path)
     upload_url = None
     relative_path = None
-    error_message = "Could not get SAS URL to upload."
     try:
         source_upload_location = client.get_build_source_upload_url(
             resource_group_name, registry_name)
         upload_url = source_upload_location.upload_url
         relative_path = source_upload_location.relative_path
     except (AttributeError, CloudError) as e:
-        logger.debug("%s Exception: %s", error_message, e)
-        raise CLIError(error_message)
+        raise CLIError("Failed to get a SAS URL to upload context. Error: {}".format(e.message))
 
     if not upload_url:
-        logger.debug("%s Empty source upload URL.", error_message)
-        raise CLIError(error_message)
+        raise CLIError("Failed to get a SAS URL to upload context.")
 
     account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(upload_url)
     BlockBlobService(account_name=account_name,
