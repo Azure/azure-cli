@@ -93,9 +93,8 @@ def _get_aad_token(cli_ctx,
                              verify=(not should_disable_connection_verify()))
 
     if response.status_code not in [200]:
-        raise CLIError(
-            "Access to registry '{}' was denied. Response code: {}.".format(
-                login_server, response.status_code))
+        raise CLIError("Access to registry '{}' was denied. Response code: {}.".format(
+            login_server, response.status_code))
 
     refresh_token = loads(response.content.decode("utf-8"))["refresh_token"]
     if only_refresh_token:
@@ -119,9 +118,12 @@ def _get_aad_token(cli_ctx,
     }
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
-    access_token = loads(response.content.decode("utf-8"))["access_token"]
 
-    return access_token
+    if response.status_code not in [200]:
+        raise CLIError("Access to registry '{}' was denied. Response code: {}.".format(
+            login_server, response.status_code))
+
+    return loads(response.content.decode("utf-8"))["access_token"]
 
 
 def _get_credentials(cli_ctx,
@@ -251,7 +253,7 @@ def log_registry_response(response):
     :param Response response: The response object
     """
     log_request(None, response.request)
-    log_response(None, response.request, response, result=response)
+    log_response(None, response.request, RegistryResponse(response.request, response))
 
 
 def get_login_server_suffix(cli_ctx):
@@ -350,11 +352,17 @@ def request_data_from_registry(http_method,
             elif response.status_code == 204:
                 return None, None
             elif response.status_code == 401:
-                raise CLIError(parse_error_message('Authentication required.', response))
+                raise RegistryException(
+                    parse_error_message('Authentication required.', response),
+                    response.status_code)
             elif response.status_code == 404:
-                raise CLIError(parse_error_message('The requested data does not exist.', response))
+                raise RegistryException(
+                    parse_error_message('The requested data does not exist.', response),
+                    response.status_code)
             elif response.status_code == 409:
-                raise CLIError(parse_error_message('Failed to request data due to a conflict.', response))
+                raise RegistryException(
+                    parse_error_message('Failed to request data due to a conflict.', response),
+                    response.status_code)
             else:
                 raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
         except CLIError:
@@ -383,3 +391,23 @@ def parse_error_message(error_message, response):
         return '{} Correlation ID: {}.'.format(error_message, correlation_id)
     except (KeyError, TypeError, AttributeError):
         return error_message
+
+
+class RegistryException(CLIError):
+    def __init__(self, message, status_code):
+        super(RegistryException, self).__init__(message)
+        self.status_code = status_code
+
+
+class RegistryResponse(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, request, internal_response):
+        self.request = request
+        self.internal_response = internal_response
+        self.status_code = internal_response.status_code
+        self.headers = internal_response.headers
+        self.encoding = internal_response.encoding
+        self.reason = internal_response.reason
+        self.content = internal_response.content
+
+    def text(self):
+        return self.content.decode(self.encoding or "utf-8")
