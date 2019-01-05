@@ -20,7 +20,7 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
-    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
+    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace, _validate_secrets)
 from ._vm_utils import MSI_LOCAL_ID
 
 
@@ -32,6 +32,7 @@ def load_arguments(self, _):
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     multi_ids_type = CLIArgumentType(nargs='+')
+    multi_ids_type = CLIArgumentType
     existing_vm_name = CLIArgumentType(overrides=name_arg_type,
                                        configured_default='vm',
                                        help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
@@ -169,6 +170,7 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
+        # c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`',  validator=_validate_secrets)
         c.argument('boot_diagnostics_storage',
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
         c.argument('accelerated_networking', resource_type=ResourceType.MGMT_NETWORK, min_api='2016-09-01', arg_type=get_three_state_flag(), arg_group='Network',
@@ -218,6 +220,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+        # c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`',  validator=_validate_secrets)
         c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)
         c.argument('certificate', help='key vault certificate name or its full secret URL')
         c.argument('certificate_store', help='Windows certificate store names. Default: My')
@@ -411,6 +414,7 @@ def load_arguments(self, _):
             c.argument('image', completer=get_urn_aliases_completion_list)
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
+            # c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`',  validator=_validate_secrets)
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
             c.ignore('aux_subscriptions')
 
