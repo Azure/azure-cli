@@ -32,7 +32,6 @@ def load_arguments(self, _):
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     multi_ids_type = CLIArgumentType(nargs='+')
-    multi_ids_type = CLIArgumentType
     existing_vm_name = CLIArgumentType(overrides=name_arg_type,
                                        configured_default='vm',
                                        help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
