@@ -971,7 +971,9 @@ helps['vmss extension set'] = """
       populator-commands:
       - az vm extension image list
     examples:
-        - name: Set an extension which depends on two previously set extensions. It will always be provisioned after the first two extensions.
+        - name: >
+                Set an extension which depends on two previously set extensions. If a vm is added to the vmss or is redeployed,
+                the extension will always be provisioned after the two extensions it depends on.
           text: >
                 az vmss extension set --vmss-name my-vmss --name customScript --resource-group my-group \\
                     --extension-instance-name script-ext --publisher Microsoft.Azure.Extensions \\
