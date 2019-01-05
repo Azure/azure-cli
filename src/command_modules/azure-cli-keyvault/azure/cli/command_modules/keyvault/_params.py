@@ -97,7 +97,7 @@ def load_arguments(self, _):
     for item in ['key', 'secret', 'certificate']:
         with self.argument_context('keyvault ' + item, arg_group='Id') as c:
             c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            # c.argument('vault_base_url', get_vault_base_url_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
         for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
@@ -106,15 +106,15 @@ def load_arguments(self, _):
                     c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
                 except ValueError:
                     pass
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
-                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}. Required if --id is not specified.'.format(item),required=False, id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+                # c.argument('vault_base_url', get_vault_base_url_type, type=get_vault_base_url_type(self.cli_ctx), help='URL of the key vault. Required if --id is not specified.', required=False)
                 c.argument(item + '_version', required=False)
 
         for cmd in ['purge', 'recover', 'show-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 c.extra('identifier', options_list=['--id'], help='The recovery id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id('deleted' + item))
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
-                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}. Required if --id is not specified.'.format(item),required=False, id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+                # c.argument('vault_base_url', get_vault_base_url_type, type=get_vault_base_url_type(self.cli_ctx), help='URL of the key vault. Required if --id is not specified.', required=False)
                 c.argument(item + '_version', required=False)
     # endregion
 
@@ -171,7 +171,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault storage', arg_group='Id') as c:
         c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
-        c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.argument('vault_base_url', get_vault_base_url_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
     for scope in ['keyvault storage add', 'keyvault storage update']:
         with self.argument_context(scope) as c:
@@ -183,7 +183,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault storage ' + scope, arg_group='Id') as c:
             c.extra('identifier', options_list=['--id'], help='Id of the storage account.  If specified all other \'Id\' arguments should be omitted.', validator=validate_storage_account_id)
             c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
-            c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+            # c.argument('vault_base_url', get_vault_base_url_type, type=get_vault_base_url_type(self.cli_ctx), help='URL of the key vault. Required if --id is not specified.', required=False)
 
     with self.argument_context('keyvault storage backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store storage account backup.')
@@ -209,7 +209,8 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'], help='Id of the SAS definition.  If specified all other \'Id\' arguments should be omitted.', validator=validate_sas_definition_id)
             c.argument('storage_account_name', required=False, help='Name to identify the storage account in the vault. Required if --id is not specified.')
             c.argument('sas_definition_name', required=False, help='Name to identify the SAS definition in the vault. Required if --id is not specified.')
-            c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+            # c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}. Required if --id is not specified.'.format(item),required=False, id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+            # c.argument('vault_base_url', get_vault_base_url_type, type=get_vault_base_url_type(self.cli_ctx), help='Name of the key vault. Required if --id is not specified.', required=False)
     # endregion
 
     # KeyVault Certificate
