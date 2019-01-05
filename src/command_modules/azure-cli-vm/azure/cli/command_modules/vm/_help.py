@@ -977,7 +977,6 @@ helps['vmss extension set'] = """
                     --extension-instance-name script-ext --publisher Microsoft.Azure.Extensions \\
                     --provision-after-extensions named-foo-ext VMAccessForLinux --version 2.0 \\
                     --settings '{\"commandToExecute\": \"echo testing\"}'
-                                         
 """
 
 helps['vmss extension show'] = """

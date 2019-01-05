@@ -1232,11 +1232,11 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('provisionAfterExtensions[0]', '{net-ext}'),
             self.check('provisionAfterExtensions[1]', '{script-ext}'),
         ])
-        # delete all the extensions
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
 
+        # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
     def test_vmss_extension_instance_name(self):

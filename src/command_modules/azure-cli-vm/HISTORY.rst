@@ -4,7 +4,8 @@ Release History
 ===============
 2.2.12
 ++++++
-* `vm/vmss create`: support cross tenant image referencing
+* `vm/vmss create`: support cross tenant image referencing.
+* `vmss extension set`: expose `--provision-after-extensions`. It defines what extensions must be provisioned before the extension being set.
 
 2.2.11
 ++++++
