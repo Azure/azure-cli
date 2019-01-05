@@ -20,7 +20,7 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
-    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace, _validate_secrets)
+    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)  #_validate_secrets)
 from ._vm_utils import MSI_LOCAL_ID
 
 
