@@ -230,11 +230,11 @@ helps['aks create'] = """
           short-summary: "Enable Kubernetes Role-Based Access Control. Default: enabled."
         - name: --max-pods -m
           type: int
-          short-summary: The maximum number of pods deployable to a node.
+          short-summary: The maximum number of pods deployable to a node. If not specified, defaults to 110, or 30 for advanced networking configurations.
           long-summary: If not specified, defaults to 110, or 30 for advanced networking configurations.
         - name: --network-plugin
           type: string
-          short-summary: The Kubernetes network plugin to use.
+          short-summary: The Kubernetes network plugin to use. Specify "azure" for advanced networking configurations. Defaults to "kubenet".
           long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
         - name: --network-policy
           type: string
