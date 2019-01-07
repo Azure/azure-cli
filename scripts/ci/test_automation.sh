@@ -4,7 +4,7 @@ set -ev
 if [[ $TRAVIS_REPO_SLUG == "Azure/azure-cli" ]]; then
     . $(cd $(dirname $0); pwd)/artifacts.sh
 else
-    sh ./scripts/ci/artifacts.sh
+    sh ./artifacts.sh
 fi
 
 ls -la $share_folder/build
