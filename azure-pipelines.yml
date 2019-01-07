@@ -64,8 +64,8 @@ phases:
       pip install tox
     displayName: 'Install Tox'
 
-  - script: |
-      sh ./scripts/ci/unittest.sh
+  - bash: |
+      ./scripts/ci/unittest.sh
     displayName: 'Execute Unit Tests'
     env:
         TOXENV: py36
@@ -82,8 +82,8 @@ phases:
     displayName: 'Use Python 2.7'
     inputs:
       versionSpec: 2.7
-  - script: |
-      sh ./scripts/ci/test_automation.sh
+  - bash: |
+      ./scripts/ci/test_automation.sh
     displayName: 'Automation'
     env:
      REDUCE_SDK: 'True'
@@ -100,11 +100,11 @@ phases:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
-  - script: |
-      sh ./scripts/ci/verify_linter.sh
+  - bash: |
+      ./scripts/ci/verify_linter.sh
     displayName: 'Lint Command Table and Help'
-  - script: |
-      sh ./scripts/ci/test_automation.sh
+  - bash: |
+      ./scripts/ci/test_automation.sh
     displayName: 'Automation'
     env:
       REDUCE_SDK: 'True'
