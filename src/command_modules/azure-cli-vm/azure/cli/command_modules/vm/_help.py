@@ -546,28 +546,61 @@ helps['vm diagnostics set'] = """
     short-summary: Configure the Azure VM diagnostics extension.
     examples:
         - name: Set up default diagnostics on a Linux VM for Azure Portal VM metrics graphs and syslog collection.
-          text: >
-            # Set the following 3 parameters first.\n
-            my_resource_group=<Resource group name containing your Linux VM and the storage account>\n
-            my_linux_vm=<Your Azure Linux VM name>\n
-            my_diagnostic_storage_account=<Your Azure storage account for storing VM diagnostic data>\n
+          text: |
+                # Set the following 3 parameters first.
+                my_resource_group=<Resource group name containing your Linux VM and the storage account>
+                my_linux_vm=<Your Azure Linux VM name>
+                my_diagnostic_storage_account=<Your Azure storage account for storing VM diagnostic data>
 
-            my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_linux_vm --query "id" -o tsv)\n
+                my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_linux_vm --query "id" -o tsv)
 
-            default_config=$(az vm diagnostics get-default-config \\
-                | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
-                | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
+                default_config=$(az vm diagnostics get-default-config \\
+                    | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
+                    | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
 
-            storage_sastoken=$(az storage account generate-sas \\
-                --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
-                --permissions wlacu --resource-types co --services bt -o tsv)
+                storage_sastoken=$(az storage account generate-sas \\
+                    --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
+                    --permissions wlacu --resource-types co --services bt -o tsv)
 
-            protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
-                'storageAccountSasToken': '{storage_sastoken}'}"
+                protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
+                    'storageAccountSasToken': '$storage_sastoken'}"
 
-            az vm diagnostics set --settings "{default_config}" \\
-                --protected-settings "{protected_settings}" \\
-                --resource-group $my_resource_group --vm-name $my_linux_vm
+                az vm diagnostics set --settings "$default_config" \\
+                    --protected-settings "$protected_settings" \\
+                    --resource-group $my_resource_group --vm-name $my_linux_vm
+
+        - name: Set up default diagnostics on a Windows VM.
+          text: |
+                # Set the following 3 parameters first.
+                my_resource_group=<Resource group name containing your Windows VM and the storage account>
+                my_windows_vm=<Your Azure Windows VM name>
+                my_diagnostic_storage_account=<Your Azure storage account for storing VM diagnostic data>
+
+                my_vm_resource_id=$(az vm show -g $my_resource_group -n $my_windows_vm --query "id" -o tsv)
+
+                default_config=$(az vm diagnostics get-default-config  --is-windows-os \\
+                    | sed "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$my_diagnostic_storage_account#g" \\
+                    | sed "s#__VM_OR_VMSS_RESOURCE_ID__#$my_vm_resource_id#g")
+
+                # Please use the same options, the WAD diagnostic extension has strict
+                # expectations of the sas token's format. Set the expiry as desired.
+                storage_sastoken=$(az storage account generate-sas \\
+                    --account-name $my_diagnostic_storage_account --expiry 2037-12-31T23:59:00Z \\
+                    --permissions acuw --resource-types co --services bt --https-only --output tsv)
+
+                protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
+                    'storageAccountSasToken': '$storage_sastoken'}"
+
+                # # Alternatively, if the WAD extension has issues parsing the sas token,
+                # # one can use a storage account key.
+                # storage_account_key=$(az storage account keys list --account-name tosinstorage1win \\
+                #   --query [0].value -o tsv)
+                # protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
+                #   'storageAccountKey': '$storage_account_key'}"
+
+                az vm diagnostics set --settings "$default_config" \\
+                    --protected-settings "$protected_settings" \\
+                    --resource-group $my_resource_group --vm-name $my_windows_vm
 """
 
 disk_long_summary = """
