@@ -6,6 +6,8 @@ pwd
 
 ls -la
 
+ls -la $(cd $(dirname $0); pwd)
+
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
 ls -la $share_folder/build

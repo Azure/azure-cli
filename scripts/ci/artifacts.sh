@@ -4,9 +4,7 @@ pwd
 
 ls -la
 
-ls -la scripts/ci
+ls -la $(cd $(dirname $0); pwd)
 
-echo $(dirname $0)
-
-. $(dirname $0)/build.sh
-share_folder="$(dirname $0)/../../artifacts"
+. $(cd $(dirname $0); pwd)/build.sh
+share_folder=$(cd $(dirname $0); cd ../../artifacts; pwd)
