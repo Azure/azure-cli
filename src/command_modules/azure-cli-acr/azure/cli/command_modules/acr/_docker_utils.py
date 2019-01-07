@@ -25,7 +25,7 @@ from azure.cli.core.cloud import CloudSuffixNotSetException
 
 from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
-from ._utils import get_registry_by_name
+from ._utils import get_registry_by_name, ResourceNotFound
 
 
 logger = get_logger(__name__)
@@ -128,7 +128,6 @@ def _get_aad_token(cli_ctx,
 
 def _get_credentials(cli_ctx,
                      registry_name,
-                     resource_group_name,
                      username,
                      password,
                      only_refresh_token,
@@ -137,7 +136,6 @@ def _get_credentials(cli_ctx,
                      permission=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -145,18 +143,19 @@ def _get_credentials(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
+    try:
+        registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
+        login_server = registry.login_server
+    except ResourceNotFound:
+        # Try to use the pre-defined login server suffix to construct login server from registry name.
+        login_server_suffix = get_login_server_suffix(cli_ctx)
+        if not login_server_suffix:
+            raise
+        registry = None
+        login_server = '{}{}'.format(registry_name, login_server_suffix)
+
     # 1. if username was specified, verify that password was also specified
     if username:
-        # Try to use the pre-defined login server suffix to construct login server from registry name.
-        # This is to avoid a management server request if username/password are already provided.
-        # In all other cases, including the suffix not defined, login server will be obtained from server.
-        login_server_suffix = get_login_server_suffix(cli_ctx)
-        if login_server_suffix:
-            login_server = '{}{}'.format(registry_name, login_server_suffix)
-        else:
-            registry, _ = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
-            login_server = registry.login_server
-
         if not password:
             try:
                 password = prompt_pass(msg='Password: ')
@@ -165,11 +164,8 @@ def _get_credentials(cli_ctx,
 
         return login_server, username, password
 
-    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
-    login_server = registry.login_server
-
     # 2. if we don't yet have credentials, attempt to get a refresh token
-    if not password and registry.sku.name in MANAGED_REGISTRY_SKU:
+    if not password and (not registry or registry.sku.name in MANAGED_REGISTRY_SKU):
         try:
             password = _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
@@ -178,7 +174,7 @@ def _get_credentials(cli_ctx,
             logger.warning("Unable to get AAD authorization tokens with message: %s", str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    if not password and registry.admin_user_enabled:
+    if not password and registry and registry.admin_user_enabled:
         try:
             cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
             username = cred.username
@@ -203,18 +199,15 @@ def _get_credentials(cli_ctx,
 
 def get_login_credentials(cli_ctx,
                           registry_name,
-                          resource_group_name=None,
                           username=None,
                           password=None):
     """Try to get AAD authorization tokens or admin user credentials to log into a registry.
     :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
     return _get_credentials(cli_ctx,
                             registry_name,
-                            resource_group_name,
                             username,
                             password,
                             only_refresh_token=True)
@@ -222,7 +215,6 @@ def get_login_credentials(cli_ctx,
 
 def get_access_credentials(cli_ctx,
                            registry_name,
-                           resource_group_name=None,
                            username=None,
                            password=None,
                            repository=None,
@@ -230,7 +222,6 @@ def get_access_credentials(cli_ctx,
                            permission=None):
     """Try to get AAD authorization tokens or admin user credentials to access a registry.
     :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     :param str repository: Repository for which the access token is requested
@@ -239,7 +230,6 @@ def get_access_credentials(cli_ctx,
     """
     return _get_credentials(cli_ctx,
                             registry_name,
-                            resource_group_name,
                             username,
                             password,
                             only_refresh_token=False,
