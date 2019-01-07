@@ -972,12 +972,14 @@ helps['vmss extension set'] = """
       - az vm extension image list
     examples:
         - name: >
-                Set an extension which depends on two previously set extensions. If a vm is added to the vmss or is redeployed,
-                the extension will always be provisioned after the two extensions it depends on.
+                Set an extension which depends on two previously set extensions. That is, When a VMSS instance is
+                created or reimaged, the customScript extension will be provisioned only after all extensions that
+                it depends on have been provisioned. The extension need not depend on the other extensions for
+                pre-requisite configurations.
           text: >
                 az vmss extension set --vmss-name my-vmss --name customScript --resource-group my-group \\
-                    --extension-instance-name script-ext --publisher Microsoft.Azure.Extensions \\
-                    --provision-after-extensions named-foo-ext VMAccessForLinux --version 2.0 \\
+                    --version 2.0 --publisher Microsoft.Azure.Extensions \\
+                    --provision-after-extensions NetworkWatcherAgentLinux VMAccessForLinux  \\
                     --settings '{\"commandToExecute\": \"echo testing\"}'
 """
 
