@@ -6,6 +6,7 @@ Release History
 ++++++
 * `vm/vmss create`: support cross tenant image referencing.
 * `vm diagnostics get-default-config --windows-os`: fix bug in windows os default config.
+* `sig image-version update`: expose --replica-count for setting the default replication count.
 
 2.2.11
 ++++++
