@@ -83,6 +83,9 @@ phases:
     inputs:
       versionSpec: 2.7
   - bash: |
+      pip install wheel
+    displayName: 'Install Wheel'
+  - bash: |
       ./scripts/ci/test_automation.sh
     displayName: 'Automation'
     env:
@@ -100,6 +103,9 @@ phases:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
+  - bash: |
+      pip install wheel
+    displayName: 'Install Wheel'
   - bash: |
       ./scripts/ci/verify_linter.sh
     displayName: 'Lint Command Table and Help'
