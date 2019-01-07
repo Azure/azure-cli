@@ -57,6 +57,8 @@ cmd /c az batch pool autoscale --help
 cmd /c az batch pool autoscale enable --help
 cmd /c az batch pool autoscale disable --help
 cmd /c az batch pool autoscale evaluate --help
+cmd /c az batch pool node-counts --help
+cmd /c az batch pool node-counts list --help
 
 cmd /c az batch node --help
 cmd /c az batch node delete --help
@@ -75,6 +77,8 @@ cmd /c az batch node remote-login-settings --help
 cmd /c az batch node remote-login-settings show --help
 cmd /c az batch node remote-desktop --help
 cmd /c az batch node remote-desktop download --help
+cmd /c az batch node service-logs --help
+cmd /c az batch node service-logs upload --help
 cmd /c az batch node file --help
 cmd /c az batch node file delete --help
 cmd /c az batch node file download --help

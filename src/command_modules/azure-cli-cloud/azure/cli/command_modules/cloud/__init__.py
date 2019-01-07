@@ -24,7 +24,7 @@ class CloudCommandsLoader(AzCommandsLoader):
 
         with self.command_group('cloud', cloud_custom) as g:
             g.command('list', 'list_clouds')
-            g.command('show', 'show_cloud')
+            g.show_command('show', 'show_cloud')
             g.command('register', 'register_cloud')
             g.command('unregister', 'unregister_cloud')
             g.command('set', 'set_cloud')
@@ -56,6 +56,8 @@ class CloudCommandsLoader(AzCommandsLoader):
             c.argument('suffix_keyvault_dns', help='The Key Vault service dns suffix')
             c.argument('suffix_azure_datalake_store_file_system_endpoint', help='The Data Lake store filesystem service dns suffix')
             c.argument('suffix_azure_datalake_analytics_catalog_and_job_endpoint', help='The Data Lake analytics job and catalog service dns suffix')
+            c.argument('suffix_acr_login_server_endpoint', help='The Azure Container Registry login server suffix')
+            c.ignore('_subscription')  # hide global subscription param
 
         with self.argument_context('cloud show') as c:
             c.argument('cloud_name', help='Name of a registered cloud.', default=active_cloud_name)

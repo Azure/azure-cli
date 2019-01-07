@@ -6,7 +6,7 @@
 import os
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import create_random_name as create_random_name_base
+from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor
 
 
 def create_random_name(prefix='clitest', length=24):
@@ -18,17 +18,14 @@ def find_recording_dir(test_file):
     return os.path.join(os.path.dirname(test_file), 'recordings')
 
 
-def get_active_api_profile(cli_ctx):
-    from azure.cli.core.cloud import get_active_cloud
-    return get_active_cloud(cli_ctx).profile
-
-
 @contextmanager
 def force_progress_logging():
     from six import StringIO
     import logging
     from knack.log import get_logger
-    from azure.cli.core.commands import logger as cmd_logger
+    from .reverse_dependency import get_commands_loggers
+
+    cmd_logger = get_commands_loggers()
 
     # register a progress logger handler to get the content to verify
     test_io = StringIO()
@@ -48,3 +45,48 @@ def force_progress_logging():
     cmd_logger.removeHandler(test_handler)
     cmd_logger.setLevel(old_cmd_level)
     az_logger.handlers[0].level = old_az_level
+
+
+class StorageAccountKeyReplacer(RecordingProcessor):
+    """Replace the access token for service principal authentication in a response body."""
+
+    def __init__(self, replacement='veryFakedStorageAccountKey=='):
+        self._replacement = replacement
+        self._activated = False
+        self._candidates = []
+
+    def reset(self):
+        self._activated = False
+        self._candidates = []
+
+    def process_request(self, request):  # pylint: disable=no-self-use
+        import re
+        try:
+            pattern = r"/providers/Microsoft\.Storage/storageAccounts/[^/]+/listKeys$"
+            if re.search(pattern, request.path, re.I):
+                self._activated = True
+        except AttributeError:
+            pass
+        for candidate in self._candidates:
+            if request.body:
+                body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                request.body = body_string.replace(candidate, self._replacement)
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            import json
+            try:
+                body = json.loads(response['body']['string'])
+                keys = body['keys']
+                for key_entry in keys:
+                    self._candidates.append(key_entry['value'])
+                self._activated = False
+            except (KeyError, ValueError, TypeError):
+                pass
+        for candidate in self._candidates:
+            if response['body']['string']:
+                body = response['body']['string']
+                response['body']['string'] = str(body, 'utf-8') if isinstance(body, bytes) else body
+                response['body']['string'] = response['body']['string'].replace(candidate, self._replacement)
+        return response

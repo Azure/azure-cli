@@ -2,6 +2,54 @@
 
 Release History
 ===============
+2.1.2
+++++++
+* az login: expose --use-cert-sn-issuer flag for service principal login with cert auto-rolls
+
+2.1.1
+++++++
+* Moving _load_subscriptions into the core
+
+2.1.0
+++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+2.0.27
+++++++
+* login: use browser for interactive login
+
+2.0.26
+++++++
+* Minor fixes
+
+2.0.25
+++++++
+* Minor fixes
+
+2.0.24
+++++++
+* `disk create`: fix a bug that source detection is not accurate
+* BREAKING CHANGE: remove --msi-port/--identity-port as they are no longer used
+
+2.0.23
+++++++
+* Fix typo in `az account get-access-token` short summary.
+
+2.0.22
+++++++
+* account list: handle accounts which come from CLI 1.0/ASM mode
+* (Breaking change): remove `--msi` & `--msi-port` which were tagged `deprecating` 2 releases ago
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.21
+++++++
+* az login: warn on using --identity-port/--msi-port as they become useless with imds support
+
+2.0.20
+++++++
+* az login: use `--identity` and deprecate `--msi`
+* enable login/logout commands in cloud shell
+
 2.0.19
 ++++++
 * Enable `az login` in from interactive mode.

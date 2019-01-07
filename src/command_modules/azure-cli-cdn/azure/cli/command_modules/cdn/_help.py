@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -42,7 +43,7 @@ helps['cdn profile delete'] = """
     examples:
         - name: Delete a CDN profile.
           text: >
-            az cdn profile create -g group -n profile
+            az cdn profile delete -g group -n profile
 """
 
 helps['cdn profile list'] = """
@@ -129,7 +130,7 @@ helps['cdn endpoint load'] = """
 """
 
 helps['cdn endpoint purge'] = """
-    type: comman
+    type: command
     short-summary: Purge pre-loaded content for a CDN endpoint.
     examples:
         - name: Purge pre-loaded Javascript and CSS content.

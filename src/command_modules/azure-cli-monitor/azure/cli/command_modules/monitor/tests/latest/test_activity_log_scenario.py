@@ -4,20 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 from time import sleep
-from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
+
+from knack.util import CLIError
 
 
 # This is a live test because the start and end time can't be determined dynamically
-class TestActivityLogScenarios(LiveScenarioTest):
+class TestActivityLogScenarios(ScenarioTest):
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_activity_log_list_scenario(self, resource_group):
-
-        for count in range(3):
-            logs = self.cmd('monitor activity-log list --resource-group {}'.format(resource_group)).get_output_in_json()
-            if len(logs) > 0:
-                break
-
-            sleep(2 ** count)  # Wait 1, 2, and 4 seconds incrementally to let the activity log catch up.
-        else:
-            self.assertTrue(False, 'After three try the command fails to retrieve any activity log.')
+        with self.assertRaisesRegexp(CLIError, 'start time cannot be more than 90 days in the past'):
+            self.cmd('monitor activity-log list --start-time 2018-01-01T00:00:00Z --end-time 2999-01-01T00:00:00Z')

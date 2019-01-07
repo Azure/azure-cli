@@ -6,12 +6,13 @@
 from __future__ import print_function
 import sys
 import json
+import getpass
 import base64
 import binascii
+import six
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-import six
 
 logger = get_logger(__name__)
 
@@ -22,10 +23,28 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
+    from msrest.exceptions import HttpOperationError
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
     elif isinstance(ex, KeyboardInterrupt):
+        return 1
+    elif isinstance(ex, HttpOperationError):
+        try:
+            response_dict = json.loads(ex.response.text)
+            error = response_dict['error']
+
+            # ARM should use ODATA v4. So should try this first.
+            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+            if isinstance(error, dict):
+                code = "{} - ".format(error.get('code', 'Unknown Code'))
+                message = error.get('message', ex)
+                logger.error("%s%s", code, message)
+            else:
+                logger.error(error)
+
+        except (ValueError, KeyError):
+            logger.error(ex)
         return 1
 
     logger.exception(ex)
@@ -54,7 +73,7 @@ def get_installed_cli_distributions():
 
 def get_az_version_string():
     import platform
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
     installed_dists = get_installed_cli_distributions()
@@ -65,31 +84,40 @@ def get_az_version_string():
             cli_info = {'name': dist.key, 'version': dist.version}
             break
 
+    def _print(val=''):
+        print(val, file=output)
+
     if cli_info:
-        print('{} ({})'.format(cli_info['name'], cli_info['version']), file=output)
+        _print('{} ({})'.format(cli_info['name'], cli_info['version']))
 
     component_version_info = sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''),
                                       'version': dist.version}
                                      for dist in installed_dists
                                      if dist.key.startswith(COMPONENT_PREFIX)],
                                     key=lambda x: x['name'])
-    print(file=output)
-    print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]),
-          file=output)
-    print(file=output)
+    _print()
+    _print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]))
+    _print()
     extensions = get_extensions()
     if extensions:
-        print('Extensions:', file=output)
-        print('\n'.join(['{} ({})'.format(c.name, c.version) for c in extensions]),
-              file=output)
-        print(file=output)
-    print("Python location '{}'".format(sys.executable), file=output)
-    print("Extensions directory '{}'".format(EXTENSIONS_DIR), file=output)
-    print(file=output)
-    print('Python ({}) {}'.format(platform.system(), sys.version), file=output)
-    print(file=output)
-    print('Legal docs and information: aka.ms/AzureCliLegal', file=output)
-    print(file=output)
+        _print('Extensions:')
+        for ext in extensions:
+            if ext.ext_type == 'dev':
+                _print('{} ({}) [{}]'.format(ext.name, ext.version, ext.path))
+            else:
+                _print('{} ({})'.format(ext.name, ext.version))
+        _print()
+    _print("Python location '{}'".format(sys.executable))
+    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    if DEV_EXTENSION_SOURCES:
+        _print("Development extension sources:")
+        for source in DEV_EXTENSION_SOURCES:
+            _print('    {}'.format(source))
+    _print()
+    _print('Python ({}) {}'.format(platform.system(), sys.version))
+    _print()
+    _print('Legal docs and information: aka.ms/AzureCliLegal')
+    _print()
     version_string = output.getvalue()
     return version_string
 
@@ -227,3 +255,109 @@ DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 def should_disable_connection_verify():
     import os
     return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
+
+
+def poller_classes():
+    from msrestazure.azure_operation import AzureOperationPoller
+    from msrest.polling.poller import LROPoller
+    return (AzureOperationPoller, LROPoller)
+
+
+def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
+    """ Populates handler_args with the appropriate args for no wait """
+    h_args = get_arg_list(handler)
+    if 'no_wait' in h_args:
+        handler_args['no_wait'] = no_wait_enabled
+    if 'raw' in h_args and no_wait_enabled:
+        # support autorest 2
+        handler_args['raw'] = True
+    if 'polling' in h_args and no_wait_enabled:
+        # support autorest 3
+        handler_args['polling'] = False
+
+
+def sdk_no_wait(no_wait, func, *args, **kwargs):
+    if no_wait:
+        kwargs.update({'raw': True, 'polling': False})
+    return func(*args, **kwargs)
+
+
+def open_page_in_browser(url):
+    import subprocess
+    import webbrowser
+    platform_name, release = _get_platform_info()
+
+    if _is_wsl(platform_name, release):   # windows 10 linux subsystem
+        try:
+            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+        except FileNotFoundError:  # WSL might be too old
+            pass
+    elif platform_name == 'darwin':
+        # handle 2 things:
+        # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
+        #    understand the "open location" message"
+        # b. Python 2.x can't sniff out the default browser
+        return subprocess.Popen(['open', url])
+    try:
+        return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    except TypeError:  # See https://bugs.python.org/msg322439
+        return webbrowser.open(url, new=2)
+
+
+def _get_platform_info():
+    import platform
+    uname = platform.uname()
+    # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
+    platform_name = getattr(uname, 'system', None) or uname[0]
+    release = getattr(uname, 'release', None) or uname[2]
+    return platform_name.lower(), release.lower()
+
+
+def _is_wsl(platform_name, release):
+    platform_name, release = _get_platform_info()
+    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+
+
+def can_launch_browser():
+    import os
+    import webbrowser
+    platform_name, release = _get_platform_info()
+    if _is_wsl(platform_name, release) or platform_name != 'linux':
+        return True
+    # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
+    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
+    # we can check a few env vars
+    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
+    result = True
+    if platform_name == 'linux':
+        if any(os.getenv(v) for v in gui_env_vars):
+            try:
+                default_browser = webbrowser.get()
+                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
+                    result = False
+            except webbrowser.Error:
+                result = False
+        else:
+            result = False
+
+    return result
+
+
+def get_command_type_kwarg(custom_command=False):
+    return 'custom_command_type' if custom_command else 'command_type'
+
+
+def reload_module(module):
+    # reloading the imported module to update
+    try:
+        from importlib import reload
+    except ImportError:
+        pass  # for python 2
+    reload(sys.modules[module])
+
+
+def get_default_admin_username():
+    try:
+        return getpass.getuser()
+    except KeyError:
+        return None

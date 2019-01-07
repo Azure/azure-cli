@@ -5,6 +5,8 @@
 
 import argparse
 import json
+from mock import patch
+from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
@@ -12,40 +14,14 @@ from sphinx.util.nodes import nested_parse_with_titles
 
 from knack.help_files import helps
 
-from knack.help import GroupHelpFile
 from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
 from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupRegistry
 
+USER_HOME = expanduser('~')
 
-def get_help_files(cli_ctx):
-    invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls, parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
-    cli_ctx.invocation = invoker
-    cmd_table = invoker.commands_loader.load_command_table(None)
-    for command in cmd_table:
-        invoker.commands_loader.load_arguments(command)
-    invoker.parser.load_command_table(invoker.commands_loader.command_table)
-
-    parser_keys = []
-    parser_values = []
-    sub_parser_keys = []
-    sub_parser_values = []
-    _store_parsers(invoker.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
-    for cmd, parser in zip(parser_keys, parser_values):
-        if cmd not in sub_parser_keys:
-            sub_parser_keys.append(cmd)
-            sub_parser_values.append(parser)
-    help_files = []
-    for cmd, parser in zip(sub_parser_keys, sub_parser_values):
-        try:
-            help_file = GroupHelpFile(cmd, parser) if _is_group(parser) else CliCommandHelpFile(cmd, parser)
-            help_file.load(parser)
-            help_files.append(help_file)
-        except Exception as ex:
-            print("Skipped '{}' due to '{}'".format(cmd, ex))
-    help_files = sorted(help_files, key=lambda x: x.command)
-    return help_files
 
 class AzHelpGenDirective(Directive):
     def make_rst(self):
@@ -57,7 +33,9 @@ class AzHelpGenDirective(Directive):
                invocation_cls=AzCliCommandInvoker,
                parser_cls=AzCliCommandParser,
                help_cls=AzCliHelp)
-        help_files = get_help_files(az_cli)
+        with patch('getpass.getuser', return_value='your_system_user_login_name'):
+            create_invoker_and_load_cmds_and_args(az_cli)
+        help_files = get_all_help(az_cli)
 
         doc_source_map = _load_doc_source_map()
 
@@ -67,6 +45,8 @@ class AzHelpGenDirective(Directive):
             yield ''
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
             yield '{}:description: {}'.format(INDENT, help_file.long_summary)
+            if help_file.deprecate_info:
+                yield '{}:deprecated: {}'.format(INDENT, help_file.deprecate_info._get_message(help_file.deprecate_info))
             if not is_command:
                 top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
@@ -83,29 +63,40 @@ class AzHelpGenDirective(Directive):
                for arg in sorted(help_file.parameters,
                                 key=lambda p: group_registry.get_group_priority(p.group_name)
                                 + str(not p.required) + p.name):
-                  yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
-                  yield ''
-                  yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
-                  short_summary = arg.short_summary or ''
-                  possible_values_index = short_summary.find(' Possible values include')
-                  short_summary = short_summary[0:possible_values_index
-                                                if possible_values_index >= 0 else len(short_summary)]
-                  short_summary = short_summary.strip()
-                  yield '{}:summary: {}'.format(DOUBLEINDENT, short_summary)
-                  yield '{}:description: {}'.format(DOUBLEINDENT, arg.long_summary)
-                  if arg.choices:
-                     yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(sorted([str(x) for x in arg.choices])))
-                  if arg.default and arg.default != argparse.SUPPRESS:
-                     yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
-                  if arg.value_sources:
-                     yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
-                  yield ''
+                    yield '{}.. cliarg:: {}'.format(INDENT, arg.name)
+                    yield ''
+                    yield '{}:required: {}'.format(DOUBLEINDENT, arg.required)
+                    if arg.deprecate_info:
+                        yield '{}:deprecated: {}'.format(DOUBLEINDENT, arg.deprecate_info._get_message(arg.deprecate_info))
+                    short_summary = arg.short_summary or ''
+                    possible_values_index = short_summary.find(' Possible values include')
+                    short_summary = short_summary[0:possible_values_index
+                                                    if possible_values_index >= 0 else len(short_summary)]
+                    short_summary = short_summary.strip()
+                    yield '{}:summary: {}'.format(DOUBLEINDENT, short_summary)
+                    yield '{}:description: {}'.format(DOUBLEINDENT, arg.long_summary)
+                    if arg.choices:
+                        yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(sorted([str(x) for x in arg.choices])))
+                    if arg.default and arg.default != argparse.SUPPRESS:
+                        try:
+                            if arg.default.startswith(USER_HOME):
+                                arg.default = arg.default.replace(USER_HOME, '~').replace('\\', '/')
+                        except Exception:
+                            pass
+                        try:
+                            arg.default = arg.default.replace("\\", "\\\\")
+                        except Exception:
+                            pass
+                        yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
+                    if arg.value_sources:
+                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
+                    yield ''
             yield ''
             if len(help_file.examples) > 0:
                for e in help_file.examples:
                   yield '{}.. cliexample:: {}'.format(INDENT, e.name)
                   yield ''
-                  yield DOUBLEINDENT + e.text
+                  yield DOUBLEINDENT + e.text.replace("\\", "\\\\")
                   yield ''
 
     def run(self):

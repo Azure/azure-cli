@@ -9,7 +9,6 @@ from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageA
 from azure.cli.core.profiles import ResourceType
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadLiveTests(LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

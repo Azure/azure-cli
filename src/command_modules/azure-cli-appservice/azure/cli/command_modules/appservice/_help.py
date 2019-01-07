@@ -1,8 +1,9 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=too-many-lines
 from knack.help_files import helps
 
 
@@ -44,19 +45,40 @@ helps['webapp auth update'] = """
           --facebook-oauth-scopes public_profile email
 """
 
-helps['webapp assign-identity'] = """
+helps['webapp identity assign'] = """
     type: command
-    short-summary: (PREVIEW) assign managed service identity to the webapp
+    short-summary: assign or disable managed service identity to the webapp
     examples:
         - name: assign local identity and assign a reader role to the current resource group.
           text: >
-            az webapp assign-identity -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
-        - name: disable the identity when there is need.
+            az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
+        - name: enable identity for the webapp.
           text: >
-            az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_DISABLE_MSI=true
+            az webapp identity assign -g MyResourceGroup -n MyUniqueApp
 """
 
-helps['functionapp assign-identity'] = helps['webapp assign-identity'].replace('webapp', 'functionapp')
+helps['webapp identity'] = """
+    type: group
+    short-summary: manage webapp's managed service identity
+"""
+
+helps['webapp identity show'] = """
+    type: command
+    short-summary: display webapp's managed service identity
+"""
+
+helps['webapp identity remove'] = """
+    type: command
+    short-summary: Disable webapp's managed service identity
+"""
+
+helps['functionapp identity'] = helps['webapp identity'].replace('webapp', 'functionapp')
+
+helps['functionapp identity assign'] = helps['webapp identity assign'].replace('webapp', 'functionapp')
+
+helps['functionapp identity show'] = helps['webapp identity show'].replace('webapp', 'functionapp')
+
+helps['functionapp identity remove'] = helps['webapp identity remove'].replace('webapp', 'functionapp')
 
 helps['webapp config'] = """
 type: group
@@ -95,6 +117,47 @@ examples:
     - name: Set the default NodeJS version to 6.9.1 for a web app.
       text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
+"""
+
+helps['webapp config storage-account'] = """
+type: group
+short-summary: Manage a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
+"""
+
+helps['webapp config storage-account list'] = """
+type: command
+short-summary: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
+"""
+
+helps['webapp config storage-account add'] = """
+type: command
+short-summary: Add an Azure storage account configuration to a web app. (Linux Web Apps and Windows Containers Web Apps Only)
+examples:
+    - name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
+      text: >
+        az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --type AzureFiles \\
+          --account-name MyStorageAccount \\
+          --share-name MyShare \\
+          --access-key MyAccessKey \\
+          --mount-path /path/to/mount
+"""
+
+helps['webapp config storage-account update'] = """
+type: command
+short-summary: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only)
+examples:
+    - name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
+      text: >
+        az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --mount-path /path/to/new/mount
+"""
+
+helps['webapp config storage-account delete'] = """
+type: command
+short-summary: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps['webapp config connection-string'] = """
@@ -170,6 +233,28 @@ short-summary: Delete an SSL certificate from a web app.
 helps['webapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a web app.
+"""
+
+helps['webapp config snapshot'] = """
+type: group
+short-summary: Manage web app snapshots.
+"""
+
+helps['webapp config snapshot list'] = """
+type: command
+short-summary: List the restorable snapshots for a web app.
+"""
+
+helps['webapp config snapshot restore'] = """
+type: command
+short-summary: Restore a web app snapshot.
+examples:
+    - name: Restore web app files from a snapshot. Overwrites the web app's current files and settings.
+      text: >
+        az webapp config snapshot restore -g MyResourceGroup -n MySite --time 2018-12-11T23:34:16.8388367
+    - name: Restore a snapshot of web app SourceApp to web app TargetApp. Use --restore-content-only to not restore app settings. Overwrites TargetApp's files.
+      text: >
+        az webapp config snapshot restore -g TargetResourceGroup -n TargetApp --source-name SourceApp --source-resource-group OriginalResourceGroup --time 2018-12-11T23:34:16.8388367 --restore-content-only
 """
 
 helps['webapp deployment'] = """
@@ -306,7 +391,7 @@ helps['webapp deployment source config-local-git'] = """
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
-            az webapp source-control config-local-git \\
+            az webapp deployment source config-local-git \\
                 -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
@@ -318,7 +403,7 @@ helps['webapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a webapp.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including a .deployment file on your
+        npm install or dotnet publish. This can be overridden by including a .deployment file in your
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process.
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
@@ -366,9 +451,45 @@ helps['webapp traffic-routing clear'] = """
     short-summary: Clear the routing rules and send all traffic to production.
 """
 
+helps['webapp cors'] = """
+    type: group
+    short-summary: Manage Cross-Origin Resource Sharing (CORS)
+"""
+
+helps['webapp cors add'] = """
+    type: command
+    short-summary: Add allowed origins
+    examples:
+         - name: add a new allowed origin
+           text: >
+             az webapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+"""
+
+helps['webapp cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins
+    examples:
+         - name: remove an allowed origin
+           text: >
+             az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+         - name: remove all allowed origins
+           text: >
+             az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
+"""
+
+helps['webapp cors show'] = """
+    type: command
+    short-summary: show allowed origins
+"""
+
 helps['appservice plan'] = """
     type: group
     short-summary: Manage app service plans.
+"""
+
+helps['appservice list-locations'] = """
+    type: command
+    short-summary: List regions where a plan sku is available.
 """
 
 helps['appservice plan update'] = """
@@ -463,6 +584,61 @@ helps['webapp config backup restore'] = """
     short-summary: Restore a web app from a backup.
 """
 
+helps['webapp webjob'] = """
+    type: group
+    short-summary: Allows management operations for webjobs on a webapp.
+"""
+
+helps['webapp webjob continuous'] = """
+    type: group
+    short-summary: Allows management operations of continuous webjobs on a webapp.
+"""
+
+helps['webapp webjob continuous list'] = """
+    type: command
+    short-summary: List all continuous webjobs on a selected webapp.
+"""
+
+helps['webapp webjob continuous start'] = """
+    type: command
+    short-summary: Start a specific continuous webjob on a selected webapp.
+"""
+
+helps['webapp webjob continuous stop'] = """
+    type: command
+    short-summary: Stop a specific continuous webjob.
+"""
+
+helps['webapp webjob continuous remove'] = """
+    type: command
+    short-summary: Delete a specific continuous webjob.
+"""
+
+helps['webapp webjob triggered'] = """
+    type: group
+    short-summary: Allows management operations of triggered webjobs on a webapp.
+"""
+
+helps['webapp webjob triggered list'] = """
+    type: command
+    short-summary: List all triggered webjobs hosted on a webapp.
+"""
+
+helps['webapp webjob triggered run'] = """
+    type: command
+    short-summary: Run a specific triggered webjob hosted on a webapp.
+"""
+
+helps['webapp webjob triggered remove'] = """
+    type: command
+    short-summary: Delete a specific triggered webjob hosted on a webapp.
+"""
+
+helps['webapp webjob triggered log'] = """
+    type: command
+    short-summary: Get history of a specific triggered webjob hosted on a webapp.
+"""
+
 helps['webapp browse'] = """
     type: command
     short-summary: Open a web app in a browser.
@@ -481,6 +657,36 @@ helps['webapp create'] = """
             az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
 """
 
+helps['webapp ssh'] = """
+    type: command
+    short-summary: (Preview) SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.
+    examples:
+        - name: ssh into a webapp
+          text: >
+            az webapp ssh -n MyUniqueAppName -g MyResourceGroup
+"""
+
+helps['webapp up'] = """
+    type: command
+    short-summary: (Preview) Create and deploy existing local code to the webapp, by running the command from the folder where the code is present.
+                   Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET,
+                   staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps.
+                   If command is run from an empty folder, an empty windows webapp is created.
+    examples:
+        - name: View the details of the app that will be created, without actually running the operation
+          text: >
+            az webapp up -n MyUniqueAppName --dryrun
+        - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+          text: >
+            az webapp up -n MyUniqueAppName
+        - name: Create a web app in a sepcific region, by running the command from the folder where the code to deployed exists.
+          text: >
+            az webapp up -n MyUniqueAppName -l locationName
+        - name: Deploy new code to an app that was originally created using the same command
+          text: >
+            az webapp up -n MyUniqueAppName -l locationName
+"""
+
 helps['webapp update'] = """
     type: command
     short-summary: Update a web app.
@@ -494,6 +700,30 @@ helps['webapp list-runtimes'] = """
     type: command
     short-summary: List available built-in stacks which can be used for web apps.
 """
+
+helps['webapp deleted'] = """
+    type: group
+    short-summary: Manage deleted web apps.
+"""
+
+helps['webapp deleted list'] = """
+    type: command
+    short-summary: List web apps that have been deleted.
+"""
+
+helps['webapp deleted restore'] = """
+    type: command
+    short-summary: Restore a deleted web app.
+    long-summary: Restores the files and settings of a deleted web app to the specified web app.
+    examples:
+        - name: Restore a deleted app to the Staging slot of MySite.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234
+        - name: Restore a deleted app to the app MySite. Do not restore the deleted app's settings.
+          text: >
+            az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234 --restore-content-only
+"""
+
 
 helps['webapp delete'] = """
     type: command
@@ -545,6 +775,11 @@ helps['functionapp create'] = """
         - name: Create a basic function app.
           text: >
             az functionapp create -g MyResourceGroup  -p MyPlan -n MyUniqueAppName -s MyStorageAccount
+"""
+
+helps['functionapp update'] = """
+    type: command
+    short-summary: Update a function app.
 """
 
 helps['functionapp delete'] = """
@@ -668,9 +903,24 @@ helps['functionapp config ssl upload'] = """
     short-summary: Upload an SSL certificate to a function app.
 """
 
+helps['functionapp config show'] = """
+    type: command
+    short-summary: Get the details of a web app's configuration.
+"""
+
+helps['functionapp config set'] = """
+    type: command
+    short-summary: Set the web app's configuration.
+"""
+
 helps['functionapp deployment'] = """
     type: group
     short-summary: Manage function app deployments.
+"""
+
+helps['functionapp deployment list-publishing-profiles'] = """
+    type: command
+    short-summary: Get the details for available function app deployment profiles.
 """
 
 helps['functionapp deployment source'] = """
@@ -689,7 +939,7 @@ helps['functionapp deployment source config-local-git'] = """
     examples:
         - name: Get an endpoint and add it as a git remote.
           text: >
-            az functionapp source-control config-local-git \\
+            az functionapp deployment source config-local-git \\
                 -g MyResourceGroup -n MyUniqueApp
 
             git remote add azure \\
@@ -733,7 +983,7 @@ helps['functionapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a function app.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including an .deployment file on your
+        npm install or dotnet publish. This can be overridden by including an .deployment file in your
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process.
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
@@ -744,4 +994,35 @@ helps['functionapp deployment source config-zip'] = """
              az functionapp deployment source config-zip \\
                  -g <myRG> -n <myAppName> \\
                  --src <zip file path location>
+"""
+
+helps['functionapp cors'] = """
+    type: group
+    short-summary: Manage Cross-Origin Resource Sharing (CORS)
+"""
+
+helps['functionapp cors add'] = """
+    type: command
+    short-summary: Add allowed origins
+    examples:
+         - name: add a new allowed origin
+           text: >
+             az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+"""
+
+helps['functionapp cors remove'] = """
+    type: command
+    short-summary: Remove allowed origins
+    examples:
+         - name: remove an allowed origin
+           text: >
+             az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+         - name: remove all allowed origins
+           text: >
+             az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
+"""
+
+helps['functionapp cors show'] = """
+    type: command
+    short-summary: show allowed origins
 """

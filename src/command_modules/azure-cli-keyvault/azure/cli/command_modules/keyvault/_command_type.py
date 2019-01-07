@@ -16,7 +16,7 @@ def _encode_hex(item):
     encoded strings. """
     if isinstance(item, list):
         return [_encode_hex(x) for x in item]
-    elif hasattr(item, '__dict__'):
+    if hasattr(item, '__dict__'):
         for key, val in item.__dict__.items():
             if not key.startswith('_'):
                 try:
@@ -24,14 +24,15 @@ def _encode_hex(item):
                 except TypeError:
                     item.__dict__[key] = _encode_hex(val)
         return item
-    elif isinstance(item, (bytes, bytearray)):
+    if isinstance(item, (bytes, bytearray)):
         return base64.b64encode(item).decode('utf-8')
     return item
 
 
-def keyvault_exception_handler(ex):
+def keyvault_exception_handler(cmd, ex):
     from msrest.exceptions import ValidationError, ClientRequestError
-    from azure.keyvault.models import KeyVaultErrorException
+    from azure.cli.core.profiles import ResourceType
+    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
     if isinstance(ex, (ValidationError, KeyVaultErrorException)):
         try:
             raise CLIError(ex.inner_exception.error.message)
@@ -43,12 +44,14 @@ def keyvault_exception_handler(ex):
                            'The vault may not exist or you may need to flush your DNS cache '
                            'and try again later.')
         raise CLIError(ex)
+    else:
+        raise CLIError(ex)
 
 
 class KeyVaultCommandGroup(AzCommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+        from ._client_factory import keyvault_data_plane_factory
         # all regular and custom commands should use the keyvault data plane client
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
@@ -78,8 +81,9 @@ class KeyVaultCommandGroup(AzCommandGroup):
 
         def keyvault_command_handler(command_args):
             from azure.cli.core.util import get_arg_list
+            from azure.cli.core.commands.client_factory import resolve_client_arg_name
             from msrest.paging import Paged
-            from msrestazure.azure_operation import AzureOperationPoller
+            from azure.cli.core.util import poller_classes
 
             op = get_op_handler()
             op_args = get_arg_list(op)
@@ -87,10 +91,12 @@ class KeyVaultCommandGroup(AzCommandGroup):
             client_factory = command_type.settings.get('client_factory', None) if command_type \
                 else merged_kwargs.get('client_factory', None)
 
-            client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
+            client_arg_name = resolve_client_arg_name(operations_tmpl.format(method_name), kwargs)
             if client_arg_name in op_args:
                 client = client_factory(self.command_loader.cli_ctx, command_args)
                 command_args[client_arg_name] = client
+            if 'cmd' not in op_args:
+                command_args.pop('cmd')
             try:
                 result = op(**command_args)
                 # apply results transform if specified
@@ -99,20 +105,26 @@ class KeyVaultCommandGroup(AzCommandGroup):
                     return _encode_hex(transform_result(result))
 
                 # otherwise handle based on return type of results
-                if isinstance(result, AzureOperationPoller):
+                if isinstance(result, poller_classes()):
                     return _encode_hex(
                         LongRunningOperation(self.command_loader.cli_ctx, 'Starting {}'.format(name))(result))
-                elif isinstance(result, Paged):
+                if isinstance(result, Paged):
                     try:
                         return _encode_hex(list(result))
                     except TypeError:
                         # TODO: Workaround for an issue in either KeyVault server-side or msrest
                         # See https://github.com/Azure/autorest/issues/1309
                         return []
-                else:
-                    return _encode_hex(result)
+                return _encode_hex(result)
             except Exception as ex:  # pylint: disable=broad-except
-                return keyvault_exception_handler(ex)
+                if name == 'show':
+                    # show_exception_handler needs to be called before the keyvault_exception_handler
+                    from azure.cli.core.commands.arm import show_exception_handler
+                    try:
+                        show_exception_handler(ex)
+                    except Exception:  # pylint: disable=broad-except
+                        pass
+                return keyvault_exception_handler(self.command_loader, ex)
 
         self.command_loader._cli_command(command_name, handler=keyvault_command_handler,  # pylint: disable=protected-access
                                          argument_loader=keyvault_arguments_loader,
@@ -137,7 +149,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 class KeyVaultArgumentContext(AzArgumentContext):
 
     def attributes_argument(self, name, attr_class, create=False, ignore=None):
-        from azure.cli.command_modules.keyvault._validators import get_attribute_validator, datetime_type
+        from ._validators import get_attribute_validator, datetime_type
         from azure.cli.core.commands.parameters import get_three_state_flag
 
         from knack.arguments import ignore_type

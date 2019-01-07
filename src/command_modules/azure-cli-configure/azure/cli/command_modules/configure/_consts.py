@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 OUTPUT_LIST = [
-    {'name': 'json', 'desc': 'JSON formatted output that most closely matches API responses'},
+    {'name': 'json', 'desc': 'JSON formatted output that most closely matches API responses.'},
     {'name': 'jsonc',
-     'desc': 'Colored JSON formatted output that most closely matches API responses'},
-    {'name': 'table', 'desc': 'Human-readable output format'},
-    {'name': 'tsv', 'desc': 'Tab- and Newline-delimited, great for GREP, AWK, etc.'}
+     'desc': 'Colored JSON formatted output that most closely matches API responses.'},
+    {'name': 'table', 'desc': 'Human-readable output format.'},
+    {'name': 'tsv', 'desc': 'Tab- and Newline-delimited. Great for GREP, AWK, etc.'},
+    {'name': 'yaml', 'desc': 'YAML formatted output. An alternative to JSON. Great for configuration files.'}
 ]
 
 LOGIN_METHOD_LIST = [

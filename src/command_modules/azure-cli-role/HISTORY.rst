@@ -2,6 +2,96 @@
 
 Release History
 ===============
+2.2.0
+++++++
+* BREAKING CHANGE: `az ad app/sp list` will by default output the first 100 objects instead of getting all of them.    
+
+2.1.11
+++++++
+* support custom identifier for password credential 
+
+2.1.10
+++++++
+* `ad app update`: address a failure caused by updating immutable credentials
+* graph: output warnings to communicate breaking changes in the near future for "ad app/sp list"
+
+2.1.9
+++++++
+* support API permission management, signed-in-user, and application password & certificate credential management
+* `ad sp create-for-rbac`: clarify the confusion between displayName and service principal name
+* support grant permissions to AAD apps
+
+2.1.8
+++++++
+* support add/remove/list owner on AAD Applciation and Group objects
+
+2.1.7
+++++++
+* ad app owner: Adds support for listing Azure AD app owners.
+* ad sp owner: Adds support for listing Azure AD service principal owners.
+
+2.1.6
+++++++
+* role: ensure role definition create & update commands accept multiple permission configurations
+* create-for-rbac: ensure home page uri is always "https"
+
+2.1.5
+++++++
+* support list user's group memberships
+
+2.1.4
+++++++
+* Minor fixes.
+
+2.1.3
+++++++
+* role assignment: fix a recent regression that principalName is missing
+
+2.1.2
+++++++
+* support for stack profile 2017-03-09-profile
+
+2.1.1
++++++
+* `ad app update`: Fixes issue where generic update parameters would not work correctly.
+
+2.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+2.0.27
+++++++
+* Minor fixes.
+
+2.0.26
+++++++
+* Minor fixes.
+
+2.0.25
+++++++
+* ad: remove stack traces from graph exceptions before surface to users
+* ad sp create: do not throw if CLI can't resolve app id
+
+2.0.24
+++++++
+* ad app update: add generic update support
+
+2.0.23
+++++++
+* BREAKING CHANGE: remove deprecated `az ad sp reset-credentials`
+* Minor fixes.
+
+2.0.22
+++++++
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.21
+++++++
+* graph: support required access configuration and native client 
+* rbac: ensure collection has less than 1000 ids on resolving graph objects
+* ad sp: new commands to manage credentials "az ad sp credential reset/list/delete"
+* role assignments: (breaking change)list/show output has "properties" removed to align with SDK
+* role definition: support `dataActions` and `notDataActions`
 
 2.0.20
 ++++++

@@ -3,10 +3,59 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
 
 
 class MonitorTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
+    @StorageAccountPreparer()
+    def test_metric_alert_v2_scenario(self, resource_group, storage_account):
+
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa': storage_account,
+            'ag1': 'ag1',
+            'ag2': 'ag2',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor action-group create -g {rg} -n {ag2}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"', checks=[
+            self.check('description', 'Test'),
+            self.check('severity', 2),
+            self.check('autoMitigate', None),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf[0].dimensions)', 2),
+            self.check('length(criteria.allOf[1].dimensions)', 1)
+        ])
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "alt desc" --add-action ag2 test=best --remove-action ag1 --remove-condition cond0 --add-condition "total transactions < 100" --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate', checks=[
+            self.check('description', 'alt desc'),
+            self.check('severity', 3),
+            self.check('autoMitigate', True),
+            self.check('windowSize', '0:15:00'),
+            self.check('evaluationFrequency', '0:05:00'),
+            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf[0].dimensions)', 1),
+            self.check('length(criteria.allOf[1].dimensions)', 0)
+        ])
+        self.cmd('monitor metrics alert list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('monitor metrics alert show -g {rg} -n {alert}')
+        self.cmd('monitor metrics alert delete -g {rg} -n {alert}')
+        self.cmd('monitor metrics alert list -g {rg}',
+                 checks=self.check('length(@)', 0))
+
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'

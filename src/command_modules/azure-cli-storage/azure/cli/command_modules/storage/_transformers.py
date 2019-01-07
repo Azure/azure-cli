@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
 from .url_quote_util import encode_url_path
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+logger = get_logger(__name__)
 
 
 def transform_acl_list_output(result):
@@ -31,11 +33,9 @@ def transform_cors_list_output(result):
     from collections import OrderedDict
     new_result = []
     for service in sorted(result.keys()):
-        service_name = service
         for i, rule in enumerate(result[service]):
             new_entry = OrderedDict()
-            new_entry['Service'] = service_name
-            service_name = ''
+            new_entry['Service'] = service
             new_entry['Rule'] = i + 1
 
             new_entry['AllowedMethods'] = ', '.join((x for x in rule.allowed_methods))
@@ -102,6 +102,9 @@ def create_boolean_result_output_transformer(property_name):
 
 
 def transform_storage_list_output(result):
+    if getattr(result, 'next_marker', None):
+        logger.warning('Next Marker:')
+        logger.warning(result.next_marker)
     return list(result)
 
 

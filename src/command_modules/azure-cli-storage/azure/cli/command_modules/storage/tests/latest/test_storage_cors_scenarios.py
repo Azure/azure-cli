@@ -21,17 +21,23 @@ class StorageCorsTests(ScenarioTest):
 
         self.cmd('storage cors add --method POST --origins http://example.com --services bfq '
                  '--max-age 60 --connection-string "{}"'.format(connection_string))
+        self.cmd('storage cors add --method GET --origins http://example.com --services bf '
+                 '--connection-string "{}"'.format(connection_string))
 
-        self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
-                 checks=JMESPathCheck('length(@)', 3))
+        rules = self.cmd('storage cors list --connection-string "{}"'.format(connection_string)).get_output_in_json()
+        self.assertEqual(len(rules), 5)
+        for rule in rules:
+            self.assertNotEqual(rule['Service'], "")
 
         self.cmd('storage cors clear --services bf --connection-string "{}"'
                  .format(connection_string))
 
-        self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
-                 checks=JMESPathCheck('length(@)', 1))
+        self.cmd('storage cors list --connection-string "{}"'.format(connection_string), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].Service', 'queue'),
+            JMESPathCheck('[0].AllowedMethods', 'POST')])
 
-        self.cmd('storage cors clear --services bfq --connection-string "{}"'
+        self.cmd('storage cors clear --services q --connection-string "{}"'
                  .format(connection_string))
 
         self.cmd('storage cors list --connection-string "{}"'.format(connection_string),

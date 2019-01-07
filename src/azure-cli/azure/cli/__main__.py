@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
+import uuid
 
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
@@ -11,6 +12,15 @@ from knack.log import get_logger
 from azure.cli.core import get_default_cli
 
 import azure.cli.core.telemetry as telemetry
+
+
+# A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
+# If uuid1 raises ValueError, use uuid4 instead.
+try:
+    uuid.uuid1()
+except ValueError:
+    uuid.uuid1 = uuid.uuid4
+
 
 logger = get_logger(__name__)
 

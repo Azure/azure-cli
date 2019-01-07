@@ -8,6 +8,8 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_T
 
 from .exceptions import CliExecutionError
 
+MOCKED_USER_NAME = 'example@example.com'
+
 
 def patch_progress_controller(unit_test):
     def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
@@ -41,7 +43,7 @@ def patch_load_cached_subscriptions(unit_test):
         return [{
             "id": MOCKED_SUBSCRIPTION_ID,
             "user": {
-                "name": "example@example.com",
+                "name": MOCKED_USER_NAME,
                 "type": "user"
             },
             "state": "Enabled",
@@ -56,7 +58,16 @@ def patch_load_cached_subscriptions(unit_test):
 
 def patch_retrieve_token_for_user(unit_test):
     def _retrieve_token_for_user(*args, **kwargs):  # pylint: disable=unused-argument
-        return 'Bearer', 'top-secret-token-for-you', None
+        import datetime
+        fake_token = 'top-secret-token-for-you'
+        return 'Bearer', fake_token, {
+            "tokenType": "Bearer",
+            "expiresIn": 3600,
+            "expiresOn": (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S.%f"),
+            "resource": args[3],
+            "accessToken": fake_token,
+            "refreshToken": fake_token
+        }
 
     mock_in_unit_test(unit_test,
                       'azure.cli.core._profile.CredsCache.retrieve_token_for_user',
@@ -69,6 +80,9 @@ def patch_long_run_operation_delay(unit_test):
 
     mock_in_unit_test(unit_test,
                       'msrestazure.azure_operation.AzureOperationPoller._delay',
+                      _shortcut_long_run_operation)
+    mock_in_unit_test(unit_test,
+                      'msrestazure.polling.arm_polling.ARMPolling._delay',
                       _shortcut_long_run_operation)
     mock_in_unit_test(unit_test,
                       'azure.cli.core.commands.LongRunningOperation._delay',

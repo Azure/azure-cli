@@ -3,6 +3,43 @@
 Release History
 ===============
 
+0.2.4
++++++
+* Minor fixes
+
+0.2.3
++++++
+* Add completer for  `--sku`, `--kind`, `--location` arguments
+
+0.2.2
++++++
+* Add new command `az cognitiveservices account list-usage`
+* Add new command `az cognitiveservices account list-kinds`
+* Add new command `az cognitiveservices account list`
+* Deprecate `az cognitiveservices list`
+* --name is now optional for `az cognitiveservices account list-skus`
+
+0.2.1
++++++
+* Add new parameter --api-properties, which is required for creating some of the services.
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.14
+++++++
+* Minor fixes.
+
+0.1.13
+++++++
+* Fix typo with example for `az cognitiveservices account create` [#5603](https://github.com/Azure/azure-cli/issues/5603)
+
+0.1.12
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
 0.1.11
 ++++++
 * Update the 'notice' of creating a new Cognitive Service account.

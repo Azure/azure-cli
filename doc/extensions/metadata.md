@@ -50,4 +50,9 @@ Type: `string`
 
 Example: `"azext.maxCliCoreVersion": "2.0.15"`
 
+### azext.isPreview
+Description: Indicate that the extension is in preview.
 
+Type: `boolean`
+
+Example: `"azext.isPreview": true`

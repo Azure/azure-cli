@@ -7,7 +7,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.reservations._client_factory import (
-    reservation_mgmt_client_factory, reservation_order_mgmt_client_factory)
+    reservation_mgmt_client_factory, reservation_order_mgmt_client_factory, base_mgmt_client_factory)
 from ._exception_handler import reservations_exception_handler
 
 
@@ -27,16 +27,16 @@ def load_command_table(self, _):
 
     reservations_client_sdk = reservations_type(
         operations_tmpl='azure.mgmt.reservations.azure_reservation_api#AzureReservationAPI.{}',
-        client_factory=reservation_order_mgmt_client_factory
+        client_factory=base_mgmt_client_factory
     )
 
     with self.command_group('reservations reservation-order', reservations_order_sdk) as g:
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
 
     with self.command_group('reservations reservation', reservations_sdk) as g:
         g.command('list', 'list')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('list-history', 'list_revisions')
         g.custom_command('update', 'cli_reservation_update_reservation')
         g.custom_command('split', 'cli_reservation_split_reservation')
@@ -46,4 +46,4 @@ def load_command_table(self, _):
         g.command('list', 'get_applied_reservation_list')
 
     with self.command_group('reservations catalog', reservations_client_sdk) as g:
-        g.command('show', 'get_catalog')
+        g.show_command('show', 'get_catalog')

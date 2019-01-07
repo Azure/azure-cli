@@ -1,10 +1,10 @@
-# Microsoft Azure CLI 2.0
+# Microsoft Azure CLI
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
-[![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=master)](https://travis-ci.org/Azure/azure-cli)
-[![Slack](https://azureclislackin.azurewebsites.net/badge.svg)](https://azurecli.slack.com)
+[![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
+[![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
-A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our next generation multi-platform command line experience for Azure.
+A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
 
 Take a test run now from Azure Cloud Shell!
 
@@ -14,7 +14,7 @@ Take a test run now from Azure Cloud Shell!
 
 Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for detailed install instructions.
 
-A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md).
+A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md).
 
 ### Developer Installation (see below)
 
@@ -41,9 +41,9 @@ $ az vm create -h
 
 ### Highlights
 
-Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0
+Here are a few features and concepts that can help you get the most out of the Azure CLI.
 
-![Azure CLI 2.0 Highlight Reel](doc/assets/AzBlogAnimation4.gif)
+![Azure CLI Highlight Reel](doc/assets/AzBlogAnimation4.gif)
 
 The following examples are showing using the `--output table` format, you can change your default using the `az configure` command.
 
@@ -101,6 +101,16 @@ Usage of /:  39.6% of 1.94GB   Swap usage:   0%   Users logged in: 0
 jasonsha@MyVM:~$
 ```
 
+#### Exit Codes
+For scripting purposes, we output certain exit codes for differing scenarios.
+
+|Exit Code   |Scenario   |
+|---|---|
+|0  |Command ran successfully.   |
+|1   |Generic error; server returned bad status code, CLI validation failed, etc.   |
+|2   |Parser error; check input to command line.   |
+|3   |Missing ARM resource; used for existence check from `show` commands.   |
+
 #### More Samples and Snippets
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
 
@@ -114,14 +124,14 @@ To provide feedback from the command line, try the `az feedback` command.
 
 ### Docker
 
-We maintain a Docker image preconfigured with the Azure CLI.  
+We maintain a Docker image preconfigured with the Azure CLI.
 See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
 
 ```bash
 $ docker run -v ${HOME}:/root -it microsoft/azure-cli:<version>
 ```
 
-For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).  
+For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
 For example:
 ```bash
 docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
@@ -129,7 +139,7 @@ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
 
 ### Edge Builds
 
-If you want to get the latest build from the master branch, you can use our "edge" builds feed. Here's an example of 
+If you want to get the latest build from the `dev` branch, you can use our "edge" builds feed. Here's an example of
 installing edge dev builds with pip in a virtual environment.
 
 ```bash
@@ -145,12 +155,12 @@ the feed is frequently updated.
 $ pip install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir
 ```
 
-The edge build is generated for each push to the `master` branch as a part of the Travis CI build. The version of the edge build follows 
+The edge build is generated for each push to the `dev` branch as a part of the Travis CI build. The version of the edge build follows
 
 
 ## Developer Setup
-If you would like to setup a development environment and contribute to the CLI, see 
-[Configuring Your Machine](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md).
+If you would like to setup a development environment and contribute to the CLI, see
+[Configuring Your Machine](https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md).
 
 ## Contribute Code
 
@@ -168,7 +178,7 @@ Azure CLI
 
 Copyright (c) Microsoft Corporation
 
-All rights reserved. 
+All rights reserved.
 
 MIT License
 
@@ -181,4 +191,4 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## Automation
 
-- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/master/doc/scenario_base_tests.md)
+- [How to write scenario based VCR test](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md)

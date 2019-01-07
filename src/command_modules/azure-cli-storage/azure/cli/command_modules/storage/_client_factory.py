@@ -8,31 +8,39 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 
-NO_CREDENTIALS_ERROR_MESSAGE = """
-No credentials specified to access storage service. Please provide any of the following:
+MISSING_CREDENTIALS_ERROR_MESSAGE = """
+Missing credentials to access storage service. The following variations are accepted:
     (1) account name and key (--account-name and --account-key options or
         set AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_KEY environment variables)
-    (2) connection string (--connection-string option or
-        set AZURE_STORAGE_CONNECTION_STRING environment variable)
-    (3) account name and SAS token (--sas-token option used with either the --account-name
+    (2) account name and SAS token (--sas-token option used with either the --account-name
         option or AZURE_STORAGE_ACCOUNT environment variable)
+    (3) account name (--account-name option or AZURE_STORAGE_ACCOUNT environment variable;
+        this will make calls to query for a storage account key using login credentials)
+    (4) connection string (--connection-string option or
+        set AZURE_STORAGE_CONNECTION_STRING environment variable); some shells will require
+        quoting to preserve literal character interpretation.
 """
 
 
-def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None):
+def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
+                                    socket_timeout=None, token_credential=None):
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
+                                   socket_timeout=socket_timeout,
+                                   token_credential=token_credential,
                                    endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint)
 
 
-def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None):
+def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
+                                 socket_timeout=None, token_credential=None):
     try:
-        return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token)
+        return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
+                                               socket_timeout, token_credential)
     except ValueError as val_exception:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
         message = str(val_exception)
         if message == _ERROR_STORAGE_MISSING_INFO:
-            message = NO_CREDENTIALS_ERROR_MESSAGE
+            message = MISSING_CREDENTIALS_ERROR_MESSAGE
         from knack.util import CLIError
         raise CLIError(message)
 
@@ -65,7 +73,9 @@ def blob_data_service_factory(cli_ctx, kwargs):
     return generic_data_service_factory(cli_ctx, blob_service, kwargs.pop('account_name', None),
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
+                                        sas_token=kwargs.pop('sas_token', None),
+                                        socket_timeout=kwargs.pop('socket_timeout', None),
+                                        token_credential=kwargs.pop('token_credential', None))
 
 
 def table_data_service_factory(cli_ctx, kwargs):
@@ -84,7 +94,8 @@ def queue_data_service_factory(cli_ctx, kwargs):
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
+        sas_token=kwargs.pop('sas_token', None),
+        token_credential=kwargs.pop('token_credential', None))
 
 
 def cloud_storage_account_service_factory(cli_ctx, kwargs):
@@ -124,3 +135,11 @@ def multi_service_properties_factory(cli_ctx, kwargs):
 
 def cf_sa(cli_ctx, _):
     return storage_client_factory(cli_ctx).storage_accounts
+
+
+def cf_blob_container_mgmt(cli_ctx, _):
+    return storage_client_factory(cli_ctx).blob_containers
+
+
+def cf_blob_data_gen_update(cli_ctx, kwargs):
+    return blob_data_service_factory(cli_ctx, kwargs.copy())

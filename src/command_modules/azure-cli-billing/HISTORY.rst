@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.9
+++++++
+* Minor fixes.
+
+0.1.8
+++++++
+* Add enrollment account commands
+* `sdist` is now compatible with wheel 0.31.0
+
 0.1.7
 ++++++
 * Update for CLI core changes.

@@ -2,6 +2,26 @@
 
 Release History
 ===============
+0.2.0
++++++
+* BREAKING CHANGE: `cdn endpoint create`'s default query string caching behaviour no longer defaults to "IgnoreQueryString". It is now set by the service.
+
+0.1.1
++++++
+* Update azure-mgmt-cdn dependency to 3.0.0
+
+0.1.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.0.15
+++++++
+* Minor fixes.
+
+0.0.14
+++++++
+* Minor fixes.
+* `sdist` is now compatible with wheel 0.31.0
 
 0.0.13
 ++++++

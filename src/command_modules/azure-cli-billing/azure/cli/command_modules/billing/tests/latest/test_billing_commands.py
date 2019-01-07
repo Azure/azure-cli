@@ -55,3 +55,15 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
             'period_name': period_name
         })
         self.cmd('billing period show -n {period_name}', checks=self.check('name', period_name))
+
+    @record_only()
+    def test_list_enrollment_accounts(self):
+        # list
+        enrollment_accounts_list = self.cmd('billing enrollment-account list').get_output_in_json()
+        self.assertTrue(enrollment_accounts_list)
+        # get
+        enrollment_account_name = enrollment_accounts_list[0]['name']
+        self.kwargs.update({
+            'enrollment_account_name': enrollment_account_name
+        })
+        self.cmd('billing enrollment-account show -n {enrollment_account_name}', checks=self.check('name', enrollment_account_name))

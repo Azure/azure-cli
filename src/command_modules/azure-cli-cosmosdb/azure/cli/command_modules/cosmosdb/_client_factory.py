@@ -14,7 +14,7 @@ from azure.cli.core import __version__ as core_version
 logger = get_logger(__name__)
 
 
-NO_CREDENTIALS_ERROR_MESSAGE = """
+MISSING_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specified to access Cosmos DB service. Please provide any of the following:
     (1) resource group name and account name
     (2) account name and key
@@ -34,15 +34,6 @@ def _add_headers(client):
     client.default_headers['User-Agent'] = ' '.join(agents)
 
 
-def _get_url_connection(url_collection, account_name):
-    if url_collection:
-        return url_collection
-    elif account_name:
-        return 'https://{}.documents.azure.com:443'.format(account_name)
-
-    return None
-
-
 def cf_cosmosdb_document(cli_ctx, kwargs):
     from pydocumentdb import document_client
     service_type = document_client.DocumentClient
@@ -59,10 +50,15 @@ def cf_cosmosdb_document(cli_ctx, kwargs):
             keys = cf_cosmosdb(cli_ctx).database_accounts.list_keys(resource_group, name)
             key = keys.primary_master_key
 
-        url_connection = _get_url_connection(url_connection, name)
+        if name and resource_group and not url_connection:
+            database_account = cf_cosmosdb(cli_ctx).database_accounts.get(resource_group, name)
+            url_connection = database_account.document_endpoint
+
+        if name and not url_connection:
+            url_connection = 'https://{}.documents.azure.com:443'.format(name)
 
         if not key and not url_connection:
-            raise CLIError(NO_CREDENTIALS_ERROR_MESSAGE)
+            raise CLIError(MISSING_CREDENTIALS_ERROR_MESSAGE)
         auth = {'masterKey': key}
         client = document_client.DocumentClient(url_connection=url_connection, auth=auth)
     except Exception as ex:

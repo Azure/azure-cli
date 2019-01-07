@@ -4,103 +4,94 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
-
-from msrestazure.azure_exceptions import CloudError
-
-from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
+from azure.cli.core.util import sdk_no_wait
 
 
-def cli_advisor_generate_recommendations(client):
-    response = client.generate(raw=True)
-    location = response.headers['Location']
-    operation_id = parse_operation_id(location)
-
-    try:
-        client.get_generate_status(operation_id=operation_id)
-    except CloudError as ex:
-        # Advisor API returns 204 which is not aligned with ARM guidelines
-        # so the SDK will throw an exception that we will have to ignore
-        if ex.status_code != 204:
-            raise ex
-
-
-def cli_advisor_list_recommendations(client, ids=None, resource_group_name=None, category=None):
-    scope = build_filter_string(ids, resource_group_name, category)
+def list_recommendations(client, ids=None, resource_group_name=None,
+                         category=None, refresh=None):
+    if refresh:
+        _generate_recommendations(client)
+    scope = _build_filter_string(ids, resource_group_name, category)
     return client.list(scope)
 
 
-def cli_advisor_disable_recommendations(client, ids, days=None):
-    suppressions = []
-    suppressionName = str(uuid.uuid4())
-    for id_arg in ids:
-        result = parse_recommendation_uri(id_arg)
-        resourceUri = result['resourceUri']
-        recommendationId = result['recommendationId']
+def disable_recommendations(client, ids=None, recommendation_name=None,
+                            resource_group_name=None, days=None):
+    recs = _get_recommendations(
+        client=client.recommendations,
+        ids=ids,
+        resource_group_name=resource_group_name,
+        recommendation_name=recommendation_name)
+
+    for rec in recs:
+        suppression_name = str(uuid.uuid4())
         ttl = '{}:00:00:00'.format(days) if days else ''
-        client.create(
-            resource_uri=resourceUri,
-            recommendation_id=recommendationId,
-            name=suppressionName,
+
+        result = _parse_recommendation_uri(rec.id)
+        resource_uri = result['resource_uri']
+        recommendation_id = result['recommendation_id']
+
+        sup = client.suppressions.create(
+            resource_uri=resource_uri,
+            recommendation_id=recommendation_id,
+            name=suppression_name,
             ttl=ttl
         )
-        suppressions.append(client.get(
-            resource_uri=resourceUri,
-            recommendation_id=recommendationId,
-            name=suppressionName
-        ))
-    return suppressions
+
+        if rec.suppression_ids:
+            rec.suppression_ids.append(sup.suppression_id)
+        else:
+            rec.suppression_ids = [sup.suppression_id]
+
+    return recs
 
 
-def cli_advisor_enable_recommendations(client, ids):
-    enabledRecs = []
-    allSups = list(client.suppressions.list())
-    for id_arg in ids:
-        result = parse_recommendation_uri(id_arg)
-        resourceUri = result['resourceUri']
-        recommendationId = result['recommendationId']
-        recs = cli_advisor_list_recommendations(
-            client=client.recommendations,
-            ids=[resourceUri]
-        )
-        rec = next(x for x in recs if x.name == recommendationId)
-        matches = [x for x in allSups if x.suppression_id in rec.suppression_ids]
-        for match in matches:
-            client.suppressions.delete(
-                resource_uri=resourceUri,
-                recommendation_id=recommendationId,
-                name=match.name
-            )
+def enable_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
+    recs = _get_recommendations(
+        client=client.recommendations,
+        ids=ids,
+        resource_group_name=resource_group_name,
+        recommendation_name=recommendation_name)
+    all_sups = list(client.suppressions.list())
+
+    for rec in recs:
+        for sup in all_sups:
+            if sup.suppression_id in rec.suppression_ids:
+                result = _parse_recommendation_uri(rec.id)
+                client.suppressions.delete(
+                    resource_uri=result['resource_uri'],
+                    recommendation_id=result['recommendation_id'],
+                    name=sup.name)
         rec.suppression_ids = None
-        enabledRecs.append(rec)
-    return enabledRecs
+
+    return recs
 
 
-def cli_advisor_get_configurations(client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
+def list_configuration(client):
     return client.list_by_subscription()
 
 
-def cli_advisor_set_configurations(client, resource_group_name=None,
-                                   low_cpu_threshold=None, exclude=None, include=None):
-
-    cfg = ConfigData()
-    cfg.properties = ConfigDataProperties()
-
-    cfg.properties.low_cpu_threshold = low_cpu_threshold
-    cfg.properties.exclude = exclude
-    if include:
-        cfg.properties.exclude = False
-
+def show_configuration(client, resource_group_name=None):
+    output = None
     if resource_group_name:
-        return client.create_in_resource_group(
-            config_contract=cfg,
-            resource_group=resource_group_name)
+        output = client.list_by_resource_group(resource_group_name)
+    else:
+        output = client.list_by_subscription()
+    # the list is guaranteed to have one element
+    return list(output)[0]
 
-    return client.create_in_subscription(cfg)
+
+def update_configuration(instance, low_cpu_threshold=None,
+                         exclude=None, include=None):
+    instance.properties.low_cpu_threshold = low_cpu_threshold
+    instance.properties.exclude = exclude
+    if include:
+        instance.properties.exclude = False
+
+    return instance
 
 
-def build_filter_string(ids=None, resource_group_name=None, category=None):
+def _build_filter_string(ids=None, resource_group_name=None, category=None):
 
     idFilter = None
     if ids:
@@ -120,7 +111,7 @@ def build_filter_string(ids=None, resource_group_name=None, category=None):
     return None
 
 
-def parse_operation_id(location):
+def _parse_operation_id(location):
     # extract the operation ID from the Location header
     # it is a GUID (i.e. a string of length 36) immediately preceding the api-version query parameter
     end = location.find('?api-version')
@@ -129,7 +120,53 @@ def parse_operation_id(location):
     return operation_id
 
 
-def parse_recommendation_uri(recommendationUri):
-    resourceUri = recommendationUri[:recommendationUri.find("/providers/Microsoft.Advisor/recommendations")]
-    recommendationId = recommendationUri[recommendationUri.find("/recommendations/") + len('/recommendations/'):]
-    return {'resourceUri': resourceUri, 'recommendationId': recommendationId}
+def _parse_recommendation_uri(recommendation_uri):
+    resource_uri = recommendation_uri[:recommendation_uri.find("/providers/Microsoft.Advisor/recommendations")]
+    rStart = recommendation_uri.find("/recommendations/") + len('/recommendations/')
+    # recommendation ID is a GUID (i.e. a string of length 36)
+    rEnd = rStart + 36
+    recommendation_id = recommendation_uri[rStart:rEnd]
+    return {'resource_uri': resource_uri, 'recommendation_id': recommendation_id}
+
+
+def _generate_recommendations(client):
+    from msrestazure.azure_exceptions import CloudError
+
+    response = sdk_no_wait(True, client.generate)
+    location = response.headers['Location']
+    operation_id = _parse_operation_id(location)
+
+    try:
+        client.get_generate_status(operation_id=operation_id)
+    except CloudError as ex:
+        # Advisor API returns 204 which is not aligned with ARM guidelines
+        # so the SDK will throw an exception that we will have to ignore
+        if ex.status_code != 204:
+            raise ex
+
+
+def _set_configuration(client, resource_group_name=None, parameters=None):
+    if resource_group_name:
+        return client.create_in_resource_group(
+            config_contract=parameters,
+            resource_group=resource_group_name)
+
+    return client.create_in_subscription(parameters)
+
+
+def _get_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
+    if ids:
+        resource_ids = [_parse_recommendation_uri(id_arg)['resource_uri'] for id_arg in ids]
+        recs = list_recommendations(
+            client=client,
+            ids=resource_ids
+        )
+        return [r for r in recs if r.id in ids]
+
+    if recommendation_name:
+        recs = list_recommendations(
+            client=client,
+            resource_group_name=resource_group_name)
+        return [r for r in recs if r.name == recommendation_name]
+
+    return None

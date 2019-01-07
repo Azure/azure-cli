@@ -14,3 +14,6 @@ def load_arguments(self, _):
 
     with self.argument_context('billing period show') as c:
         c.argument('billing_period_name', options_list=['--name', '-n'], help='name of the billing period')
+
+    with self.argument_context('billing enrollment-account show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='name of the enrollment account')

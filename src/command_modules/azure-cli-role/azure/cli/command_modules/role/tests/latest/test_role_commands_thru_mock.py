@@ -9,16 +9,22 @@ import unittest
 import uuid
 import mock
 
-from azure.cli.testsdk import TestCli
+from azure.cli.core.mock import DummyCli
 
-from azure.mgmt.authorization.models import RoleDefinition, RoleDefinitionProperties
-from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException, ApplicationUpdateParameters
+from azure.mgmt.authorization.models import RoleDefinition, RoleAssignmentCreateParameters
+from azure.graphrbac.models import (Application, ServicePrincipal, GraphErrorException,
+                                    ApplicationUpdateParameters, GetObjectsParameters)
 from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_role_definition,
                                                    create_service_principal_for_rbac,
                                                    reset_service_principal_credential,
+                                                   update_application, _try_x509_pem,
+                                                   delete_service_principal_credential,
+                                                   list_service_principal_credentials,
                                                    update_application,
-                                                   _try_x509_pem)
+                                                   _get_object_stubs,
+                                                   list_service_principal_owners,
+                                                   list_application_owners)
 
 from knack.util import CLIError
 
@@ -53,7 +59,7 @@ class TestRoleMocked(unittest.TestCase):
             self.create_def_invoked = True
             uuid.UUID(str(role_definition_id))  # as long as no exception, it means a generated uuid
             self.assertEqual(self.default_scope, scope)
-            self.assertEqual(role_definition.properties.role_name, self.role_logical_name)
+            self.assertEqual(role_definition.role_name, self.role_logical_name)
 
         faked_role_client = mock.MagicMock()
         client_mock.return_value = faked_role_client
@@ -66,7 +72,7 @@ class TestRoleMocked(unittest.TestCase):
 
         # action
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         create_role_definition(cmd, role_definition_file)
 
         # assert
@@ -80,14 +86,16 @@ class TestRoleMocked(unittest.TestCase):
             self.update_def_invoked = True
             self.assertEqual(role_definition_id, test_role_id)
             self.assertEqual(self.default_scope, scope)
-            self.assertEqual(role_definition.properties.role_name, self.role_logical_name)
+            self.assertEqual(role_definition.role_name, self.role_logical_name)
 
         faked_role_client = mock.MagicMock()
         client_mock.return_value = faked_role_client
         faked_role_client.role_definitions.create_or_update = _update_def
         faked_role_client.config.subscription_id = self.subscription_id
-        faked_role_client.role_definitions.list.return_value = [RoleDefinition(name=test_role_id,
-                                                                               properties=RoleDefinitionProperties(role_name=self.role_logical_name))]
+
+        test_def = RoleDefinition(role_name=self.role_logical_name)
+        test_def.name = test_role_id
+        faked_role_client.role_definitions.list.return_value = [test_def]
 
         _, role_definition_file = tempfile.mkstemp()
         with open(role_definition_file, 'w') as f:
@@ -96,7 +104,7 @@ class TestRoleMocked(unittest.TestCase):
 
         # action
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         update_role_definition(cmd, role_definition_file)
 
         # assert
@@ -117,17 +125,18 @@ class TestRoleMocked(unittest.TestCase):
         test_app_id = 'app_id_123'
         app = Application(app_id=test_app_id)
         faked_graph_client.applications.create.return_value = app
-        sp = ServicePrincipal(object_id='does not matter')
+        sp = ServicePrincipal()
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         result = create_service_principal_for_rbac(cmd, name, test_pwd, 12, skip_assignment=True)
 
         # assert
         self.assertEqual(result['password'], test_pwd)
         self.assertEqual(result['name'], 'http://' + name)
+        self.assertEqual(result['displayName'], name)
         self.assertEqual(result['appId'], test_app_id)
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
@@ -158,12 +167,12 @@ class TestRoleMocked(unittest.TestCase):
 
         name = 'mysp'
         faked_graph_client.applications.create.side_effect = mock_app_create
-        sp = ServicePrincipal(object_id='does not matter')
+        sp = ServicePrincipal()
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         result = create_service_principal_for_rbac(cmd, name, cert=cert, years=2, skip_assignment=True)
 
         # assert
@@ -190,7 +199,7 @@ class TestRoleMocked(unittest.TestCase):
         sp_object.app_id = 'app_id'
         app_object = mock.MagicMock()
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         app_object.object_id = test_object_id
 
         graph_client_mock.return_value = faked_graph_client
@@ -247,7 +256,7 @@ class TestRoleMocked(unittest.TestCase):
         key_cred = mock.MagicMock()
         key_cred.key_id = key_id_of_existing_cert
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
 
         graph_client_mock.return_value = faked_graph_client
         faked_graph_client.service_principals.list.return_value = [sp_object]
@@ -266,7 +275,7 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_create_for_rbac_failed_with_polished_error_if_due_to_permission(self, graph_client_mock, auth_client_mock):
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
                                                                'Insufficient privileges to complete the operation',
                                                                self.subscription_id)
@@ -282,7 +291,7 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_create_for_rbac_failed_with_regular_error(self, graph_client_mock, auth_client_mock):
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = DummyCli()
         TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
                                                                'something bad for you',
                                                                self.subscription_id)
@@ -305,15 +314,90 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
 
     def test_update_application_to_be_single_tenant(self):
-        graph_app_client = mock.MagicMock()
-        app_mock = mock.MagicMock()
-        test_object_id = '11111111-2222-3333-4444-555555555555'
-        app_mock.object_id = test_object_id
-        graph_app_client.list.return_value = [app_mock]
+        test_app_id = 'app_id_123'
+        app = Application(app_id=test_app_id)
+        setattr(app, 'additional_properties', {})
+        instance = update_application(app, 'http://any-client',
+                                      available_to_other_tenants=True)
+        self.assertTrue(isinstance(instance, ApplicationUpdateParameters))
+        self.assertEqual(instance.available_to_other_tenants, True)
 
-        update_application(graph_app_client, 'http://any-client', available_to_other_tenants=True)
-        graph_app_client.patch.assert_called_with(test_object_id,
-                                                  ApplicationUpdateParameters(available_to_other_tenants=True))
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    def test_list_sp_owner(self, graph_client_mock):
+
+        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
+        test_sp_app_id = '11111111-2222-3333-4444-555555555555'
+        test_user_object_id = '11111111-2222-3333-4444-555555555555'
+
+        graph_client = mock.MagicMock()
+        graph_client_mock.return_value = graph_client
+
+        sp = mock.MagicMock()
+        sp.object_id, sp.app_id = test_sp_object_id, test_sp_app_id
+
+        user = mock.MagicMock()
+        user.object_id = test_user_object_id
+
+        graph_client.service_principals.list.return_value = [sp]
+        graph_client.service_principals.list_owners.return_value = [user]
+
+        # action
+        res = list_service_principal_owners(mock.MagicMock(), test_sp_app_id)
+
+        # assert
+        graph_client.service_principals.list.assert_called_once()
+        graph_client.service_principals.list_owners.assert_called_once()
+
+        self.assertTrue(1 == len(res))
+        self.assertTrue(test_user_object_id == res[0].object_id)
+
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
+    def test_role_list_app_owner(self, graph_client_mock):
+
+        test_app_object_id = '11111111-2222-3333-4444-555555555555'
+        test_app_app_id = '11111111-2222-3333-4444-555555555555'
+        test_user_object_id = '11111111-2222-3333-4444-555555555555'
+
+        graph_client = mock.MagicMock()
+        graph_client_mock.return_value = graph_client
+
+        app = mock.MagicMock()
+        app.object_id, app.app_id = test_app_object_id, test_app_app_id
+
+        user = mock.MagicMock()
+        user.object_id = test_user_object_id
+
+        graph_client.applications.list.return_value = [app]
+        graph_client.applications.list_owners.return_value = [user]
+
+        # action
+        res = list_application_owners(mock.MagicMock(), test_app_app_id)
+
+        # assert
+        graph_client.applications.list.assert_called_once()
+        graph_client.applications.list_owners.assert_called_once()
+
+        self.assertTrue(1 == len(res))
+        self.assertTrue(test_user_object_id == res[0].object_id)
+
+    def test_get_object_stubs(self):
+        graph_client = mock.MagicMock()
+        assignees = [i for i in range(2001)]
+        graph_client.objects.get_objects_by_object_ids.return_value = []
+
+        # action
+        _get_object_stubs(graph_client, assignees)
+
+        # assert
+        # we get called with right args
+        self.assertEqual(graph_client.objects.get_objects_by_object_ids.call_count, 3)
+        object_groups = []
+        for i in range(0, 2001, 1000):
+            object_groups.append([i for i in range(i, min(i + 1000, 2001))])
+
+        for call, group in zip(graph_client.objects.get_objects_by_object_ids.call_args_list, object_groups):
+            args, _ = call
+            self.assertEqual(args[0].object_ids, group)
 
 
 class FakedError(object):  # pylint: disable=too-few-public-methods

@@ -12,20 +12,24 @@ try:
 except ImportError:
     import mock
 
+from knack.util import CLIError
+
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
                                                       _validate_vmss_create_subnet,
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth,
-                                                      _validate_vm_create_storage_profile)
+                                                      _validate_vm_create_storage_profile,
+                                                      _validate_vmss_single_placement_group,
+                                                      _validate_vmss_create_load_balancer_or_app_gateway)
 
 
 def _get_test_cmd():
-    from azure.cli.testsdk import TestCli
+    from azure.cli.core.mock import DummyCli
     from azure.cli.core import AzCommandsLoader
     from azure.cli.core.commands import AzCliCommand
-    cli_ctx = TestCli()
+    cli_ctx = DummyCli()
     loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_COMPUTE)
     cmd = AzCliCommand(loader, 'test', None)
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE}
@@ -33,7 +37,7 @@ def _get_test_cmd():
     return cmd
 
 
-def _mock_resource_client(cli_ctx, client_type):
+def _mock_resource_client(cli_ctx, client_type, **kwargs):
     client = mock.MagicMock()
     if client_type is ResourceType.MGMT_NETWORK:
         def _mock_list(rg):
@@ -88,7 +92,7 @@ def _mock_resource_client(cli_ctx, client_type):
     return client
 
 
-def _mock_network_client_with_existing_subnet(*_):
+def _mock_network_client_with_existing_subnet(*_, **kwargs):
     client = mock.MagicMock()
 
     def _mock_list(rg):
@@ -153,6 +157,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.subnet = None
         ns.vnet_name = None
         ns.vnet_type = None
+        ns.disable_overprovision = None
         return ns
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_network_client_with_existing_subnet)
@@ -178,19 +183,34 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
         self.assertEqual(ns.vnet_type, 'new')
 
-    def test_new_subnet_size_for_big_vmss(self):
-        ns = argparse.Namespace()
+    def test_new_subnet_size_for_big_vmss_with_over_provision(self):
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
         ns.app_gateway_type = 'new'
         ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
         ns.instance_count = 1000
+        # with over-provision, we has subnet size bigger than the capacity
+        _validate_vmss_create_subnet(ns)
+        self.assertEqual('10.0.0.0/21', ns.subnet_address_prefix)
+
+    def test_new_subnet_size_for_big_vmss_without_over_provision(self):
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
+        ns.vnet_type = 'new'
+        ns.vnet_address_prefix = '10.0.0.0/16'
+        ns.subnet_address_prefix = None
+        ns.app_gateway_type = 'new'
+        ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
+        ns.instance_count = 1000
+        ns.disable_overprovision = True
+
+        # w/o over-provision, we set subnet size just based on the capacity
         _validate_vmss_create_subnet(ns)
         self.assertEqual('10.0.0.0/22', ns.subnet_address_prefix)
 
     def test_new_subnet_size_for_small_vmss(self):
-        ns = argparse.Namespace()
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
@@ -210,7 +230,7 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         ns = argparse.Namespace()
         ns.resource_group_name = rg
         ns.location = location
-        ns.storage_sku = tier
+        ns.storage_sku = [tier]
         ns.storage_account = None
         ns.storage_account_type = None
         self.ns = ns
@@ -238,12 +258,28 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
 class TestVMDefaultAuthType(unittest.TestCase):
 
     @staticmethod
+    def _get_test_ssh_key():
+        return 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n'
+
+    @staticmethod
     def _set_ns():
         ns = argparse.Namespace()
         ns.storage_profile = None
         ns.ssh_key_value = None
         ns.ssh_dest_key_path = None
         ns.admin_password = None
+        return ns
+
+    @staticmethod
+    def _new_linux_ns(authentication_type=None):
+        ns = TestVMDefaultAuthType._set_ns()
+        ns.os_type = "LINux"
+        if authentication_type in ("password", "all"):
+            ns.admin_username = 'user12345'
+            ns.admin_password = 'verySecret!!!'
+        if authentication_type in ("ssh", "all"):
+            ns.ssh_key_value = TestVMDefaultAuthType._get_test_ssh_key()
+        ns.authentication_type = authentication_type
         return ns
 
     def test_default_windows(self):
@@ -255,6 +291,25 @@ class TestVMDefaultAuthType(unittest.TestCase):
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'password')
 
+    def test_windows_password_and_ssh_fails(self):
+        ns = TestVMDefaultAuthType._set_ns()
+        ns.os_type = "WindowS"
+        ns.authentication_type = None
+        ns.admin_username = 'user12345'
+        ns.admin_password = 'verySecret123'
+        ns.ssh_key_value = self._get_test_ssh_key()
+
+        # test fails if authentication_type implicit
+        with self.assertRaises(CLIError) as context:
+            _validate_vm_vmss_create_auth(ns)
+            self.assertTrue("SSH not supported for Windows VMs. Use password authentication." in str(context.exception))
+
+        # test fails if authentication type explicit
+        ns.authentication_type = 'all'
+        with self.assertRaises(CLIError) as context:
+            _validate_vm_vmss_create_auth(ns)
+            self.assertTrue("SSH not supported for Windows VMs. Use password authentication." in str(context.exception))
+
     def test_default_linux(self):
         ns = TestVMDefaultAuthType._set_ns()
         ns.os_type = "LINux"
@@ -262,7 +317,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         test_user = 'user12345'
         ns.admin_username = test_user
         ns.admin_password = None
-        ns.ssh_key_value = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n'
+        ns.ssh_key_value = self._get_test_ssh_key()
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'ssh')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(test_user))
@@ -279,9 +334,22 @@ class TestVMDefaultAuthType(unittest.TestCase):
 
         # throw when conflict with ssh key value
         ns.ssh_key_value = 'junk but does not matter'
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(CLIError) as context:
             _validate_vm_vmss_create_auth(ns)
-        self.assertTrue("incorrect usage for authentication-type 'password':" in str(context.exception))
+            self.assertTrue("SSH key cannot be used with password authentication type." in str(context.exception))
+
+    def test_linux_with_password_and_ssh_explicit(self):
+        ns = TestVMDefaultAuthType._new_linux_ns(authentication_type="all")
+        _validate_vm_vmss_create_auth(ns)
+        self.assertEqual(ns.authentication_type, 'all')
+        self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(ns.admin_username))
+
+    def test_linux_with_password_and_ssh_implicit(self):
+        ns = TestVMDefaultAuthType._new_linux_ns(authentication_type="all")
+        ns.authentication_type = None
+        _validate_vm_vmss_create_auth(ns)
+        self.assertEqual(ns.authentication_type, 'all')
+        self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(ns.admin_username))
 
 
 class TestVMImageDefaults(unittest.TestCase):
@@ -290,22 +358,129 @@ class TestVMImageDefaults(unittest.TestCase):
         ns = argparse.Namespace()
         cmd = mock.MagicMock()
 
+        data_disk = mock.MagicMock()
+        data_disk.storage_account_type = 'Standard_LRS'
         image_info = mock.MagicMock()
         client_mock = mock.MagicMock()
         image_info.storage_profile.os_disk.os_type.value = 'someOS'
-        image_info.storage_profile.data_disks = ['does not matter']
+        image_info.storage_profile.data_disks = [data_disk]
         client_mock.images.get.return_value = image_info
         factory_mock.return_value = client_mock
 
         ns.image = '/subscriptions/0b1f6471-1bf0-4dda-aec3-xxxxxxxxxxxx/resourceGroups/foo/providers/Microsoft.Compute/images/bar'
         ns.admin_username = 'admin123'
         ns.admin_password = 'verySecret!'
-        ns.storage_sku = 'Premium_LRS'
-        ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, None, None, False
+        ns.storage_sku = ['Premium_LRS']
+        ns.ultra_ssd_enabled = None
+        ns.os_caching, ns.data_caching = None, None
+        ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk, ns.data_disk_sizes_gb = None, None, None, None, False, None
+        ns.size = 'Standard_DS1_v2'
         _validate_vm_create_storage_profile(cmd, ns, False)
 
         self.assertEqual(ns.os_type, 'someOS')
-        self.assertEqual(ns.image_data_disks, ['does not matter'])
+        self.assertTrue(0 in ns.disk_info)
+
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_vm_validator_enables_ultrassd_lrs(self, factory_mock):
+        ns = argparse.Namespace()
+        cmd = mock.MagicMock()
+
+        image_info = mock.MagicMock()
+        client_mock = mock.MagicMock()
+        image_info.storage_profile.os_disk.os_type.value = 'someOS'
+        image_info.storage_profile.data_disks = []
+        client_mock.images.get.return_value = image_info
+        factory_mock.return_value = client_mock
+
+        ns.image = '/subscriptions/0b1f6471-1bf0-4dda-aec3-xxxxxxxxxxxx/resourceGroups/foo/providers/Microsoft.Compute/images/bar'
+        ns.admin_username = 'admin123'
+        ns.admin_password = 'verySecret!'
+        ns.storage_sku = ['os=Premium_LRS', '0=UltraSSD_LRS']
+        ns.ultra_ssd_enabled = None
+        ns.data_disk_sizes_gb = [5]
+        ns.os_type, ns.attach_os_disk, ns.os_caching, ns.data_caching = None, None, None, None
+        ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, False
+        ns.size = 'Standard_DS1_v2'
+        _validate_vm_create_storage_profile(cmd, ns, False)
+
+        self.assertEqual(ns.ultra_ssd_enabled, True)
+
+
+class TestBigVMSSDefaults(unittest.TestCase):
+    @classmethod
+    def _set_up_ns(cls, ns):
+        ns.single_placement_group, ns.zones, ns.platform_fault_domain_count, ns.instance_count = None, None, None, 2
+
+    def test_vmss_disable_single_placement_group(self):
+        # default is enable single-placement-group
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, None)
+
+        # disable on any zonal scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.zones = ['1']
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, False)
+
+        # disable on any big scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.instance_count = 101
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, False)
+
+        # disable on zonal + fd count
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.platform_fault_domain_count = 1
+        ns.zones = ['1']
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, False)
+
+        # error on conflicts
+        # can't enable it with zonal scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.zones = ['1']
+        ns.single_placement_group = True
+        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
+
+        # can't enable it with big scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.instance_count = 101
+        ns.single_placement_group = True
+        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
+
+    def test_vmss_default_std_lb(self):
+        cmd = mock.MagicMock()
+        lb_sku_mock = mock.MagicMock()
+        lb_sku_mock.standard.value = 'Standard'
+        lb_sku_mock.basic.value = 'Basic'
+        cmd.get_models.return_value = lb_sku_mock
+
+        # default to standard when single-placement-group is off
+        ns = argparse.Namespace()
+        ns.load_balancer, ns.application_gateway = None, None
+        ns.app_gateway_subnet_address_prefix, ns.application_gateway = None, None
+        ns.app_gateway_sku, ns.app_gateway_capacity = None, None
+        ns.load_balancer_sku = None
+        ns.single_placement_group = False
+        _validate_vmss_create_load_balancer_or_app_gateway(cmd, ns)
+        self.assertEqual(ns.load_balancer_sku, 'Standard')
+
+        # error on conflicts
+        ns = argparse.Namespace()
+        ns.load_balancer, ns.application_gateway = None, None
+        ns.app_gateway_subnet_address_prefix, ns.application_gateway = None, None
+        ns.app_gateway_sku, ns.app_gateway_capacity = None, None
+        ns.load_balancer_sku = 'Basic'
+        ns.single_placement_group = False
+        ns.zones = '1'
+        self.assertRaises(CLIError, _validate_vmss_create_load_balancer_or_app_gateway, cmd, ns)
 
 
 if __name__ == '__main__':

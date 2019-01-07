@@ -21,9 +21,14 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir
+from .utilities import find_recording_dir, StorageAccountKeyReplacer
+from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
+
+
+ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
+COVERAGE_FILE = 'az_command_coverage.txt'
 
 
 class CheckerMixin(object):
@@ -69,11 +74,11 @@ class CheckerMixin(object):
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
                  recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
-
+        self.test_guid_count = 0
+        self._processors_to_reset = [StorageAccountKeyReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -82,7 +87,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
             self.name_replacer
-        ]
+        ] + self._processors_to_reset
 
         default_replay_processors = [
             LargeResponseBodyReplacer(),
@@ -120,6 +125,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_name=recording_name
         )
 
+    def tearDown(self):
+        for processor in self._processors_to_reset:
+            processor.reset()
+        super(ScenarioTest, self).tearDown()
+
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
         moniker = '{}{:06}'.format(prefix, self.test_resources_count)
@@ -130,6 +140,21 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             return name
 
         return moniker
+
+    # Use this helper to make playback work when guids are created and used in request urls, e.g. role assignment or AAD
+    # service principals. For usages, in test code, patch the "guid-gen" routine to this one, e.g.
+    # with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid)
+    def create_guid(self):
+        import uuid
+        self.test_guid_count += 1
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+
+        if self.in_recording:
+            name = uuid.uuid4()
+            self.name_replacer.register_name_pair(str(name), moniker)
+            return name
+
+        return uuid.UUID(moniker)
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
@@ -148,8 +173,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
     def __init__(self, method_name):
         super(LiveScenarioTest, self).__init__(method_name)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
 
     def cmd(self, command, checks=None, expect_failure=False):
@@ -165,6 +189,12 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+
+        if os.environ.get(ENV_COMMAND_COVERAGE, None):
+            with open(COVERAGE_FILE, 'a') as coverage_file:
+                if command.startswith('az '):
+                    command = command[3:]
+                coverage_file.write(command + '\n')
 
         self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
 
@@ -236,6 +266,14 @@ class ExecutionResult(object):
             self.exit_code = 1
             self.output = stdout_buf.getvalue()
             self.process_error = ex
+        except SystemExit as ex:
+            # SystemExit not caught by broad exception, check for sys.exit(3)
+            if ex.code == 3 and expect_failure:
+                self.exit_code = 1
+                self.output = stdout_buf.getvalue()
+                self.applog = logging_buf.getvalue()
+            else:
+                raise
         finally:
             stdout_buf.close()
             logging_buf.close()

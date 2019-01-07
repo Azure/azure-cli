@@ -5,6 +5,8 @@
 
 import sys
 from knack.util import CLIError
+from azure.cli.core.util import sdk_no_wait
+
 from ._client_factory import network_client_factory
 
 
@@ -64,9 +66,9 @@ def delete_network_resource_property_entry(resource, prop):
             [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
         _set_param(item, prop, keep_items)
         if no_wait:
-            client.create_or_update(resource_group_name, resource_name, item, raw=no_wait)
+            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, resource_name, item)
         else:
-            result = client.create_or_update(resource_group_name, resource_name, item, raw=no_wait).result()
+            result = sdk_no_wait(no_wait, client.create_or_update, resource_group_name, resource_name, item).result()
             if next((x for x in getattr(result, prop) if x.name.lower() == item_name.lower()), None):
                 raise CLIError("Failed to delete '{}' on '{}'".format(item_name, resource_name))
 

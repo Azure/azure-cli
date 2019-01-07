@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from datetime import datetime
 
 from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
 
 from .base import execute
 from .exceptions import CliTestError
+from .reverse_dependency import get_dummy_cli
 
 
 # Resource Group Preparer and its shorthand decorator
@@ -21,8 +23,7 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
                  random_name_length=75, key='rg'):
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
@@ -36,7 +37,12 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
 
-        template = 'az group create --location {} --name {} --tag use=az-test'
+        tags = {'product': 'azurecli', 'cause': 'automation', 'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+        if 'ENV_JOB_NAME' in os.environ:
+            tags['job'] = os.environ['ENV_JOB_NAME']
+        tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
+
+        template = 'az group create --location {} --name {} --tag ' + tags
         execute(self.cli_ctx, template.format(self.location, name))
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
@@ -54,8 +60,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -100,8 +105,7 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -143,8 +147,7 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD', key='sp'):
         super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
-        from azure.cli.testsdk import TestCli
-        self.cli_ctx = TestCli()
+        self.cli_ctx = get_dummy_cli()
         self.skip_assignment = skip_assignment
         self.result = {}
         self.parameter_name = parameter_name
@@ -171,7 +174,31 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
             execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
 
+class AADGraphUserReplacer:
+    def __init__(self, test_user, mock_user):
+        self.test_user = test_user
+        self.mock_user = mock_user
+
+    def process_request(self, request):
+        test_user_encoded = self.test_user.replace('@', '%40')
+        if test_user_encoded in request.uri:
+            request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
+
+        if request.body:
+            body = str(request.body)
+            if self.test_user in body:
+                request.body = body.replace(self.test_user, self.mock_user)
+
+        return request
+
+    def process_response(self, response):
+        if response['body']['string']:
+            response['body']['string'] = response['body']['string'].replace(self.test_user,
+                                                                            self.mock_user)
+
+        return response
 # Utility
+
 
 def is_preparer_func(fn):
     return getattr(fn, '__is_preparer', False)

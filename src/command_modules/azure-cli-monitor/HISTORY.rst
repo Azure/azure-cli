@@ -3,9 +3,80 @@
 Release History
 ===============
 
-0.1.2
+0.2.7
++++++
+* Minor fixes
+
+0.2.6
++++++
+* `monitor metrics alert create/update`: `--condition` now supports metric names which include characters forward-slash (/) and period (.).
+
+0.2.5
++++++
+* `monitor activity-log list`:
+    Allow listing all events at the subscription level.
+    Added `--offset` parameter to more easily create time queries.
+    Improved validation for --start-time and --end-time to use wider range of ISO8601 formats and more user-friendly datetime formats.
+    Added `--namespace` as alias for deprecated option `--resource-provider`.
+    Deprecated `--filters` because no values other than those with strongly-typed options are supported by the service.
+* `monitor metrics list`:
+    Added `--offset` parameter to more easily create time queries.
+    Improved validation for --start-time and --end-time to use wider range of ISO8601 formats and more user-friendly datetime formats.
+* `monitor diagnostic-settings create`: Improve validation for arguments `--event-hub` and `--event-hub-rule`.
+
+0.2.4
++++++
+* Minor fixes
+
+0.2.3
++++++
+* Added `monitor metrics alert` commands for near-realtime metric alerts.
+* Deprecated `monitor alert` commands.
+
+0.2.2
++++++
+* Minor fixes
+
+0.2.1
++++++
+* Minor fixes
+
+0.2.0
++++++
+* BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.
+
+0.1.8
+++++++
+* Minor fixes.
+
+0.1.7
 +++++
 * Minor fixes.
+
+0.1.6
++++++
+* Minor fixes.
+
+0.1.5
++++++
+* Minor fixes.
+* `sdist` is now compatible with wheel 0.31.0
+
+0.1.4
++++++
+* `metrics list`: Added support for `--top`, `--orderby` and `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)
+* `metrics list`: Accepts a space-separated list of metrics to retrieve. [Fixes #4529](https://github.com/Azure/azure-cli/issues/5785)
+* `metrics list-definitions`: Added support for `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)
+
+0.1.3
++++++
+* Deprecates the `monitor autoscale-settings` commands.
+* Adds the `monitor autoscale` command group.
+* Adds the `monitor autoscale profile` command group.
+* Adds the `monitor autoscale rule` command group.
+
+0.1.2
++++++
 * Fix az monitor log-profiles create command
 
 0.1.1

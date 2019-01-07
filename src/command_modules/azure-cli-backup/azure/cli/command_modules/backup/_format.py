@@ -33,12 +33,19 @@ def transform_item(result):
 
 
 def transform_job(result):
-    return OrderedDict([('Name', result['name']),
-                        ('Operation', result['properties']['operation']),
-                        ('Status', result['properties']['status']),
-                        ('Item Name', result['properties']['entityFriendlyName']),
-                        ('Start Time UTC', result['properties']['startTime']),
-                        ('Duration', result['properties']['duration'])])
+    columns = []
+    columns.append(('Name', result['name']))
+    columns.append(('Operation', result['properties']['operation']))
+    columns.append(('Status', result['properties']['status']))
+    columns.append(('Item Name', result['properties']['entityFriendlyName']))
+    columns.append(('Start Time UTC', result['properties']['startTime']))
+
+    if result['properties']['backupManagementType'] == 'AzureIaasVM':
+        columns.append(('Duration', result['properties']['duration']))
+    elif result['properties']['backupManagementType'] == 'AzureStorage':
+        columns.append(('Duration', result['properties']['additionalProperties']['duration']))
+
+    return OrderedDict(columns)
 
 
 def transform_policy(result):

@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.profiles import get_sdk, ResourceType
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def build_table_output(result, projection):
@@ -134,6 +137,10 @@ def transform_file_directory_result(cli_ctx):
     list.
     """
     def transformer(result):
+        if getattr(result, 'next_marker', None):
+            logger.warning('Next Marker:')
+            logger.warning(result.next_marker)
+
         t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
         return_list = []
         for each in result:
@@ -142,8 +149,15 @@ def transform_file_directory_result(cli_ctx):
                 setattr(each, 'type', 'file')
             elif isinstance(each, t_dir):
                 setattr(each, 'type', 'dir')
-
             return_list.append(each)
 
         return return_list
     return transformer
+
+
+def transform_immutability_policy(result):
+    # service returns policy with period value of "0" after it has been deleted
+    # this only shows the policy if the property value is greater than 0
+    if result.immutability_period_since_creation_in_days:
+        return result
+    return None

@@ -5,14 +5,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=import-error, protected-access
+# Justification:
+#   * The azure.cli packages are not visible while the script is scaned but they are guaranteed
+#     existence on the droid image
+#   * The test method names and other properties are protected for unit test framework.
+
 import os.path
 from pkgutil import iter_modules
 from unittest import TestLoader
 from importlib import import_module
 from json import dumps as json_dumps
 
-import azure.cli  # pylint: disable=import-error
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest  # pylint: disable=import-error
+import azure.cli
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
 
 RECORDS = []
 
@@ -23,6 +29,13 @@ def get_test_type(test_case):
     elif isinstance(test_case, LiveScenarioTest):
         return 'Live'
     return 'Unit'
+
+
+def find_recording_file(test_path):
+    module_path, _, test_method = test_path.rsplit('.', 2)
+    test_folder = os.path.dirname(import_module(module_path).__file__)
+    recording_file = os.path.join(test_folder, 'recordings', test_method + '.yaml')
+    return recording_file if os.path.exists(recording_file) else None
 
 
 def search(path, prefix=''):
@@ -37,13 +50,20 @@ def search(path, prefix=''):
         if not is_pkg and name.startswith('test'):
             test_module = import_module(full_name)
             for suite in loader.loadTestsFromModule(test_module):
-                for test in suite._tests:  # pylint: disable=protected-access
-                    RECORDS.append({
-                        'module': full_name,
-                        'class': test.__class__.__name__,
-                        'method': test._testMethodName,  # pylint: disable=protected-access
-                        'type': get_test_type(test),
-                        'path': '{}.{}.{}'.format(full_name, test.__class__.__name__, test._testMethodName)})  # pylint: disable=protected-access
+                for test in suite._tests:
+                    path = '{}.{}.{}'.format(full_name, test.__class__.__name__, test._testMethodName)
+                    rec = {
+                        'ver': '1.0',
+                        'execution': {
+                            'command': 'python -m unittest {}'.format(path),
+                            'recording': find_recording_file(path)
+                        },
+                        'classifier': {
+                            'identifier': path,
+                            'type': get_test_type(test),
+                        }
+                    }
+                    RECORDS.append(rec)
 
 
 search(azure.cli.__path__, 'azure.cli')

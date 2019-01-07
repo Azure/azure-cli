@@ -3,6 +3,88 @@
 Release History
 ===============
 
+0.4.1
++++++
+* Minor fixes
+
+0.4.0
++++++
+* Interactive now installs the 'interactive' extension, which will allow for faster updates and support.
+
+0.3.31
+++++++
+* Ensure global subscription parameter appears in parameters.
+
+0.3.30
+++++++
+* Fix error found on windows where commands fail to run properly.
+
+0.3.29
+++++++
+* Fix command loading problem in interactive that was caused by deprecated objects.
+
+0.3.28
+++++++
+* Minor fixes
+
+0.3.27
+++++++
+* Minor fixes
+
+0.3.26
+++++++
+* Minor fixes
+
+0.3.25
+++++++
+* Update PyYAML dependency to 4.2b4
+
+0.3.24
+++++++
+* Minor fixes
+
+0.3.23
+++++++
+* Minor fixes
+
+0.3.22
+++++++
+* Fix dependency versions.
+
+0.3.21
+++++++
+* Mute logging from parser for completions.
+* Made interactive more resistant to stale/corrupted help caches.
+
+0.3.20
+++++++
+* Allow interactive completers to function with positional arguments.
+* More user-friendly output when users type '\'.
+* Fix completions for parameters with no help.
+* Fix descriptions for command-groups.
+
+0.3.19
+++++++
+* Stops completions upon unrecognized commands.
+* Add event hooks before and after command subtree is created.
+* Allow completions for --ids parameters.
+* `sdist` is now compatible with wheel 0.31.0
+
+0.3.18
+++++++
+* Completions kick in as soon as command table loading is done.
+* Fix bug with using `--style` parameter.
+* Interactive lexer instantiated after command table dump if missing.
+* Improvements to completer support.
+
+0.3.17
+++++++
+* Persist history across different sessions
+* Fixed history while in scope
+* Updates to interactive telemetry
+* Fixed progress meter for long running operations
+* Completions more robust to command table exceptions
+
 0.3.16
 ++++++
 * Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
@@ -46,11 +128,6 @@ Release History
 ++++++++++++++++++
 
 * Improves the start up time by using cached commands
-
-
-0.3.7 (2017-07-27)
-++++++++++++++++++
-
 * Increase test coverage
 
 0.3.5 (2017-06-21)

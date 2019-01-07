@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
 class AcrCommandsTests(ScenarioTest):
@@ -141,11 +141,10 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs.update({
             'registry_name': registry_name,
             'rg_loc': resource_group_location,
-            'sku': 'Standard',
-            'deployment_name': 'Microsoft.ContainerRegistry'
+            'sku': 'Standard'
         })
 
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
@@ -168,11 +167,10 @@ class AcrCommandsTests(ScenarioTest):
             'webhook_scope': 'hello-world',
             'uri': 'http://www.microsoft.com',
             'actions': 'push',
-            'sku': 'Standard',
-            'deployment_name': 'Microsoft.ContainerRegistry'
+            'sku': 'Standard'
         })
 
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
@@ -236,11 +234,10 @@ class AcrCommandsTests(ScenarioTest):
             'replication_name': replication_name,
             'replication_loc': replication_location,
             'sku': 'Premium',
-            'tags': 'key=value',
-            'deployment_name': 'Microsoft.ContainerRegistry'
+            'tags': 'key=value'
         })
 
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
@@ -270,3 +267,279 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
         # test acr delete
         self.cmd('acr delete -n {registry_name} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @record_only()
+    def test_acr_create_build_task(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('clireg', 20),
+            'build_task_name1': 'cliregbuildtask1',
+            'build_task_name2': 'cliregbuildtask2',
+            'rg_loc': 'eastus',
+            'sku': 'Standard',
+            # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
+            'git_access_token': 'b67dce55c2d8a654a4c823751a58aac1e59d9641',
+            'context': 'https://github.com/xiadu94/BuildTest',
+            'image1': 'repo1:tag1',
+            'image2': 'repo2:tag2',
+            'build_arg': 'key1=value1',
+            'secret_build_arg': 'key2=value2',
+            'non_default_os_type': 'Windows',
+            'non_default_status': 'Disabled',
+            'non_default_timeout': '10000',
+            'non_default_commit_trigger_enabled': 'false',
+            'non_default_base_image_trigger': 'None',
+            'non_default_branch': 'dev',
+            'non_default_docker_file_path': 'Dockerfile_dev',
+            'non_default_no_push': 'true',
+            'non_default_no_cache': 'true'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Create a build task using the minimum required parameters
+        self.cmd('acr build-task create -n {build_task_name1} -r {registry_name} --git-access-token {git_access_token} --context {context} --image {image1}',
+                 checks=[self.check('name', '{build_task_name1}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('alias', '{build_task_name1}'),
+                         self.check('platform.osType', 'Linux'),
+                         self.check('platform.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('status', 'Enabled'),
+                         self.check('timeout', 3600),
+                         self.check('sourceRepository.repositoryUrl', '{context}'),
+                         self.check('sourceRepository.sourceControlType', 'GitHub'),
+                         self.check('sourceRepository.isCommitTriggerEnabled', True),
+                         self.check('properties.baseImageTrigger', 'Runtime'),
+                         self.check('properties.branch', 'master'),
+                         self.check('properties.dockerFilePath', 'Dockerfile'),
+                         self.check('properties.imageNames', ['repo1:tag1']),
+                         self.check('properties.buildArguments', []),
+                         self.check('properties.isPushEnabled', True),
+                         self.check('properties.noCache', False),
+                         self.check('properties.provisioningState', 'Succeeded')])
+
+        # Create a build task using all parameters
+        self.cmd('acr build-task create -n {build_task_name2} -r {registry_name} --git-access-token {git_access_token} --context {context} --image {image1}'
+                 ' --os {non_default_os_type} --status {non_default_status} --timeout {non_default_timeout} --commit-trigger-enabled {non_default_commit_trigger_enabled}'
+                 ' --base-image-trigger {non_default_base_image_trigger} --branch {non_default_branch} --file {non_default_docker_file_path} --image {image2}'
+                 ' --build-arg {build_arg} --secret-build-arg {secret_build_arg} --no-push {non_default_no_push} --no-cache {non_default_no_cache}',
+                 checks=[self.check('name', '{build_task_name2}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('alias', '{build_task_name2}'),
+                         self.check('platform.osType', '{non_default_os_type}'),
+                         self.check('platform.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('status', '{non_default_status}'),
+                         self.check('timeout', '{non_default_timeout}'),
+                         self.check('sourceRepository.repositoryUrl', '{context}'),
+                         self.check('sourceRepository.sourceControlType', 'GitHub'),
+                         self.check('sourceRepository.isCommitTriggerEnabled', False),
+                         self.check('properties.baseImageTrigger', '{non_default_base_image_trigger}'),
+                         self.check('properties.branch', '{non_default_branch}'),
+                         self.check('properties.dockerFilePath', '{non_default_docker_file_path}'),
+                         self.check('properties.imageNames', ['repo1:tag1', 'repo2:tag2']),
+                         self.check('properties.buildArguments[0].name', 'key1'),
+                         self.check('properties.buildArguments[0].value', 'value1'),
+                         self.check('properties.isPushEnabled', False),
+                         self.check('properties.noCache', True),
+                         self.check('properties.provisioningState', 'Succeeded')])
+
+        self.cmd('acr build-task list -r {registry_name}',
+                 checks=[self.check('[0].name', '{build_task_name1}'),
+                         self.check('[1].name', '{build_task_name2}')])
+
+        # trigger a build from the build task
+        response = self.cmd('acr build-task run -n {build_task_name1} -r {registry_name} --no-logs',
+                            checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
+                                    self.check('status', 'Succeeded')]).get_output_in_json()
+
+        self.kwargs.update({
+            'build_id': response['buildId']
+        })
+
+        # list all builds from the build task
+        self.cmd('acr build-task list-builds -n {build_task_name1} -r {registry_name}',
+                 checks=[self.check('[0].type', 'Microsoft.ContainerRegistry/registries/builds'),
+                         self.check('[0].buildId', '{build_id}'),
+                         self.check('[0].isArchiveEnabled', False)])
+
+        self.cmd('acr build-task show -n {build_task_name1} -r {registry_name}',
+                 checks=[self.check('name', '{build_task_name1}')])
+        self.cmd('acr build-task show -n {build_task_name2} -r {registry_name}',
+                 checks=[self.check('name', '{build_task_name2}')])
+
+        self.cmd('acr build-task show -n {build_task_name2} -r {registry_name} --with-secure-properties',
+                 checks=[self.check('name', '{build_task_name2}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('alias', '{build_task_name2}'),
+                         self.check('platform.osType', '{non_default_os_type}'),
+                         self.check('platform.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('status', '{non_default_status}'),
+                         self.check('timeout', '{non_default_timeout}'),
+                         self.check('sourceRepository.repositoryUrl', '{context}'),
+                         self.check('sourceRepository.sourceControlType', 'GitHub'),
+                         self.check('sourceRepository.isCommitTriggerEnabled', False),
+                         self.check('sourceRepository.sourceControlAuthProperties.token', '{git_access_token}'),
+                         self.check('sourceRepository.sourceControlAuthProperties.tokenType', 'PAT'),
+                         self.check('sourceRepository.sourceControlAuthProperties.scope', 'repo'),
+                         self.check('properties.baseImageTrigger', '{non_default_base_image_trigger}'),
+                         self.check('properties.branch', '{non_default_branch}'),
+                         self.check('properties.dockerFilePath', '{non_default_docker_file_path}'),
+                         self.check('properties.imageNames', ['repo1:tag1', 'repo2:tag2']),
+                         self.check('properties.buildArguments[0].name', 'key1'),
+                         self.check('properties.buildArguments[0].value', 'value1'),
+                         self.check('properties.buildArguments[0].isSecret', False),
+                         self.check('properties.buildArguments[1].name', 'key2'),
+                         self.check('properties.buildArguments[1].value', 'value2'),
+                         self.check('properties.buildArguments[1].isSecret', True),
+                         self.check('properties.isPushEnabled', False),
+                         self.check('properties.noCache', True),
+                         self.check('properties.provisioningState', 'Succeeded')])
+
+        # update the first build task using non-default parameter values
+        self.cmd('acr build-task update -n {build_task_name1} -r {registry_name} --git-access-token {git_access_token} --context {context} --image {image1}'
+                 ' --os {non_default_os_type} --status {non_default_status} --timeout {non_default_timeout} --commit-trigger-enabled {non_default_commit_trigger_enabled}'
+                 ' --base-image-trigger {non_default_base_image_trigger} --branch {non_default_branch} --file {non_default_docker_file_path} --image {image2}'
+                 ' --build-arg {build_arg} --secret-build-arg {secret_build_arg} --no-push {non_default_no_push} --no-cache {non_default_no_cache}',
+                 checks=[self.check('name', '{build_task_name1}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('alias', '{build_task_name1}'),
+                         self.check('platform.osType', '{non_default_os_type}'),
+                         self.check('platform.cpu', 2),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('status', '{non_default_status}'),
+                         self.check('timeout', '{non_default_timeout}'),
+                         self.check('sourceRepository.repositoryUrl', '{context}'),
+                         self.check('sourceRepository.sourceControlType', 'GitHub'),
+                         self.check('sourceRepository.isCommitTriggerEnabled', False),
+                         self.check('properties.baseImageTrigger', '{non_default_base_image_trigger}'),
+                         self.check('properties.branch', '{non_default_branch}'),
+                         self.check('properties.dockerFilePath', '{non_default_docker_file_path}'),
+                         self.check('properties.imageNames', ['repo1:tag1', 'repo2:tag2']),
+                         self.check('properties.buildArguments[0].name', 'key1'),
+                         self.check('properties.buildArguments[0].value', 'value1'),
+                         self.check('properties.isPushEnabled', False),
+                         self.check('properties.noCache', True),
+                         self.check('properties.provisioningState', 'Succeeded')])
+
+        # update a build of the first task
+        self.cmd('acr build-task update-build -r {registry_name} --build-id {build_id} --no-archive false',
+                 checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/builds'),
+                         self.check('buildId', '{build_id}'),
+                         self.check('isArchiveEnabled', True),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # test build task delete
+        self.cmd('acr build-task delete -n {build_task_name1} -r {registry_name}')
+        self.cmd('acr build-task delete -n {build_task_name2} -r {registry_name}')
+
+        # test acr delete
+        self.cmd('acr delete -n {registry_name} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @record_only()
+    def test_acr_image_import(self, resource_group):
+        '''There are nine test cases in the function.
+        Case 1: Import image from a registry in a different subscription from the current one
+        Case 2: Import image from one registry to another where both registries belong to the same subscription
+        Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
+        Case 4: Import image to enable multiple tags in the target registry
+        Case 5: Import image within the same registry
+        Case 6: Import image by manifest digest
+        Case 7: Import image from a registry in Docker Hub
+        Case 8: Import image from an Azure Container Registry with Service Principal's credentials
+        Case 9: Import image from an Azure Container Registry with personal access token
+        '''
+
+        source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
+        registry_name = self.create_random_name("targetregistry", 20)
+        token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
+        service_principal_username = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPusername/0f20a7a4ade54fd7bc6305de3da7e99f').get_output_in_json()['value']
+        service_principal_password = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPpassword/a961338d18e34e8fa41b570f7fd67cba').get_output_in_json()['value']
+
+        '''
+        To be able to run the tests, we are assuming the following resources before the test:
+        Current active cloud account and subscription.
+        Two source registries, one in the subscription other than the current one and another in the subscription the same as the current one.
+        Two source images each of which stays in a different source registries mentioned above.
+        '''
+        self.kwargs.update({
+            'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
+            'resource_imageV1': 'sourceregistrydiffsub.azurecr.io/microsoft:azure-cli-1',
+            'resource_imageV2': 'sourceregistrydiffsub.azurecr.io/microsoft:azure-cli-2',
+            'source_registry_rg': 'resourcegroupsamesub',
+            'source_loc': 'westus',
+            'source_registry_name': source_registry_name,
+            'registry_name': registry_name,
+            'sku': 'Standard',
+            'rg_loc': 'eastus',
+            'source_image_diff_sub': 'microsoft:azure-cli',
+            'source_image_same_sub': '{}.azurecr.io/microsoft:azure-cli'.format(source_registry_name),
+            'source_image_same_registry': '{}.azurecr.io/microsoft:azure-cli'.format(registry_name),
+            'source_image_by_digest': '{}.azurecr.io/azure-cli@sha256:2d00e582eb3bff20a7febc04222aafda5bdc58df64bc1ddf74efbaf0e51dbba5'.format(source_registry_name),
+            'tag_same_sub': 'repository_same_sub:tag_same_sub',
+            'tag_multitag1': 'repository_multi1:tag_multi1',
+            'tag_multitag2': 'repository_multi2:tag_multi2',
+            'tag_same_registry': 'repository_same_registry:tag_same_registry',
+            'tag_by_digest': 'repository_by_digest:tag_by_digest',
+            'source_image_public_registry_dockerhub': 'registry.hub.docker.com/library/hello-world',
+            'application_ID': service_principal_username,
+            'service_principal_password': service_principal_password,
+            'token': token
+        })
+
+        # create a resource group for the source registry
+        self.cmd('group create -n {source_registry_rg} -l {source_loc}')
+
+        # create a source registry which stays in the same subscription as the target registry does
+        self.cmd('acr create -n {source_registry_name} -g {source_registry_rg} -l {source_loc} --sku {sku}',
+                 checks=[self.check('name', '{source_registry_name}'),
+                         self.check('location', '{source_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Case 1: Import image from a registry in a different subscription from the current one
+        self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image_diff_sub}')
+
+        # create a target registry to hold the imported images
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Case 2: Import image from one registry to another where both registries belong to the same subscription
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_same_sub}')
+
+        # Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub}')
+
+        # Case 4: Import image to enable multiple tags in the target registry
+        self.cmd('acr import -n {registry_name} --source {source_image_same_sub} -t {tag_multitag1} -t {tag_multitag2}')
+
+        # Case 5: Import image within the same registry
+        self.cmd('acr import -n {registry_name} --source {source_image_same_registry} -t {tag_same_registry}')
+
+        # Case 6: Import image by manifest digest
+        self.cmd('acr import -n {registry_name} --source {source_image_by_digest} -t {tag_by_digest}')
+
+        # Case 7: Import image from a public registry in dockerhub
+        self.cmd('acr import -n {registry_name} --source {source_image_public_registry_dockerhub}')
+
+        # Case 8: Import image from an Azure Container Registry with Service Principal's credentials
+        self.cmd('acr import -n {registry_name} --source {resource_imageV1} -u {application_ID} -p {service_principal_password}')
+
+        # Case 9: Import image from an Azure Container Registry with personal access token
+        self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')

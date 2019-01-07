@@ -3,9 +3,117 @@
 Release History
 ===============
 
-2.0.28
+2.0.55
 ++++++
 * Minor fixes
+
+2.0.54
+++++++
+* Minor fixes
+
+2.0.53
+++++++
+* Minor fixes
+
+2.0.52
+++++++
+* Minor fixes
+
+2.0.51
+++++++
+* Minor fixes
+
+2.0.50
+++++++
+* Minor fixes
+
+2.0.49
+++++++
+* Minor fixes
+
+2.0.48
+++++++
+* Fix Homebrew
+
+2.0.47
+++++++
+* Minor fixes
+
+2.0.46
+++++++
+* Minor fixes
+
+2.0.45
+++++++
+* Minor fixes
+
+2.0.44
+++++++
+* Minor fixes
+
+2.0.43
+++++++
+* Minor fixes
+
+2.0.42
+++++++
+* Minor fixes
+
+2.0.41
+++++++
+* Minor fixes
+
+2.0.40
+++++++
+* Minor fixes
+
+2.0.39
+++++++
+* MSI packaging change
+
+2.0.38
+++++++
+* Minor fixes
+
+2.0.37
+++++++
+* Minor fixes
+
+2.0.36
+++++++
+* Minor fixes
+
+2.0.35
+++++++
+* Minor fixes
+
+2.0.34
+++++++
+* Minor fixes
+
+2.0.33
+++++++
+* Minor fixes
+
+2.0.32
+++++++
+* Minor fixes
+
+2.0.31
+++++++
+* Minor fixes
+
+2.0.30
+++++++
+* Minor fixes
+
+2.0.29
+++++++
+* Minor fixes
+
+2.0.28
+++++++
+* Bug fix for 'ValueError: field 6 out of range (need a 48-bit value)' - https://github.com/Azure/azure-cli/issues/5184
 
 2.0.27
 ++++++

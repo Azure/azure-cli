@@ -13,17 +13,20 @@ def get_default_diag_config(is_windows):
         return {
             "WadCfg": {
                 "DiagnosticMonitorConfiguration": {
-                    "overallQuotaInMB": "4096",
+                    "overallQuotaInMB": 4096,
                     "DiagnosticInfrastructureLogs": {
-                        "scheduledTransferLogLevelFilter": "Error"
+                        "scheduledTransferLogLevelFilter": "Error",
+                        "scheduledTransferPeriod": "PT1M"
                     },
                     "WindowsEventLog": {
                         "scheduledTransferPeriod": "PT1M",
                         "DataSource": [
-                            {"name": "Application!*[System[(Level = 1) or (Level = 2)]]"},
-                            {"name": "Security!*[System[(Level = 1 or Level = 2)]]"},
-                            {"name": "System!*[System[(Level = 1 or Level = 2)]]"}
+                            {"name": "Application!*[System[(Level=1 or Level=2)]]"},
+                            {"name": "System!*[System[(Level=1 or Level=2)]]"}
                         ]
+                    },
+                    "Directories": {
+                        "scheduledTransferPeriod": "PT1M"
                     },
                     "PerformanceCounters": {
                         "scheduledTransferPeriod": "PT1M",
@@ -262,7 +265,7 @@ def get_default_diag_config(is_windows):
                         ]
                     },
                     "Metrics": {
-                        "resourceId": "[variables('wadmetricsresourceid')]",
+                        "resourceId": "__VM_OR_VMSS_RESOURCE_ID__",
                         "MetricAggregation": [
                             {
                                 "scheduledTransferPeriod": "PT1H"
@@ -274,7 +277,7 @@ def get_default_diag_config(is_windows):
                     }
                 }
             },
-            "storageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__"
+            "StorageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__"
         }
     else:
         return {

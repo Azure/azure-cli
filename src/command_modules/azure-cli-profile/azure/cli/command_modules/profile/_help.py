@@ -1,3 +1,4 @@
+# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -24,10 +25,10 @@ helps['login'] = """
             az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
         - name: Log in using a VM's system assigned identity
           text: >
-            az login --msi
+            az login --identity
         - name: Log in using a VM's user assigned identity. Client or object ids of the service identity also work
           text: >
-            az login --msi -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+            az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
     """
 
 helps['account'] = """
@@ -70,8 +71,13 @@ helps['account show'] = """
 
 helps['account get-access-token'] = """
     type: command
-    short-summary: Get a token for utlilities to access Azure.
+    short-summary: Get a token for utilities to access Azure.
     long-summary: >
         The token will be valid for at least 5 minutes with the maximum at 60 minutes.
         If the subscription argument isn't specified, the current account is used.
+"""
+
+helps['self-test'] = """
+    type: command
+    short-summary: Runs a self-test of the CLI.
 """

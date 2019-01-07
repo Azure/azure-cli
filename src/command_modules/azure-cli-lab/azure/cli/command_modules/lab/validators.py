@@ -377,11 +377,20 @@ def _update_artifacts(artifacts, lab_resource_id):
 
     result_artifacts = []
     for artifact in artifacts:
-        artifact_id = artifact.get('artifact_id', None)
+        if artifact.__class__.__name__ == "ArtifactInstallProperties":
+            if artifact.parameters:
+                raise CLIError("Formulas with parameterized artifacts are not supported. Use --artifacts to supply"
+                               "artifacts to the virtual machine.")
+            artifact_id = _update_artifact_id(artifact.artifact_id, lab_resource_id)
+            parameters = []
+        else:
+            artifact_id = artifact.get('artifact_id', None)
+            parameters = artifact.get('parameters', [])
+
         if artifact_id:
             result_artifact = dict()
             result_artifact['artifact_id'] = _update_artifact_id(artifact_id, lab_resource_id)
-            result_artifact['parameters'] = artifact.get('parameters', [])
+            result_artifact['parameters'] = parameters
             result_artifacts.append(result_artifact)
         else:
             raise CLIError("Missing 'artifactId' for artifact: '{}'".format(artifact))

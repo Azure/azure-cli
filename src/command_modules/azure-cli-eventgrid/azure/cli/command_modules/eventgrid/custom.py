@@ -116,7 +116,7 @@ def cli_eventgrid_event_subscription_delete(
         resource_group_name=None,
         topic_name=None):
     scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
-    client.delete(scope, event_subscription_name)
+    return client.delete(scope, event_subscription_name)
 
 
 def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
