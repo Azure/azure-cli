@@ -25,11 +25,13 @@ from azure.cli.core.commands.parameters import (
     get_location_type
 )
 
+from ._validators import validate_sqlvm_group, validate_sqlvm_list
+
 
 # pylint: disable=too-many-statements, line-too-long
 def load_arguments(self, _):
 
-    for scope in ['sqlvm', 'sqlvm group']:
+    for scope in ['sql vm', 'sql vm group']:
         with self.argument_context(scope) as c:
             c.argument('tags', tags_type)
 
@@ -37,7 +39,7 @@ def load_arguments(self, _):
     #    sql virtual machine groups params        #
     ###############################################
 
-    with self.argument_context('sqlvm group') as c:
+    with self.argument_context('sql vm group') as c:
         c.argument('sql_virtual_machine_group_name',
                    options_list=['--name', '-n'],
                    help='Name of the SQL virtual machine group.')
@@ -54,7 +56,7 @@ def load_arguments(self, _):
                    arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
 
-    with self.argument_context('sqlvm group', arg_group='WSFC Domain Profile') as c:
+    with self.argument_context('sql vm group', arg_group='WSFC Domain Profile') as c:
         c.argument('domain_fqdn',
                    options_list=['--domain-fqdn', '-f'],
                    help='Fully qualified name of the domain.')
@@ -65,8 +67,8 @@ def load_arguments(self, _):
                    options_list=['--service-acc', '-e'],
                    help='Account name under which SQL service will run on all participating SQL virtual machines in the cluster.')
         c.argument('storage_account_url',
-                   options_list=['--sa-url', '-u'],
-                   help='Fully qualified ARM resource id of the witness storage account.')
+                   options_list=['--storage-acc', '-u'],
+                   help='Storage account url of the witness storage account.')
         c.argument('storage_account_key',
                    options_list=['--sa-key', '-k'],
                    help='Primary key of the witness storage account.')
@@ -77,13 +79,13 @@ def load_arguments(self, _):
                    options_list=['--fsw-path'],
                    help='Optional path for fileshare witness.')
         c.argument('ou_path',
-                   help='Organizational Unit path in which the nodes and cluster will be present.')
+                   help='Organizational Unit path in which the nodes and cluster will be present. Example: OU=WSCluster,DC=testdomain,DC=com')
 
     ###############################################
     #    availability group listener params       #
     ###############################################
 
-    with self.argument_context('sqlvm aglistener') as c:
+    with self.argument_context('sql vm group aglistener') as c:
         c.argument('availability_group_listener_name',
                    options_list=['--name', '-n'],
                    help='Name of the availability group listener.')
@@ -97,53 +99,69 @@ def load_arguments(self, _):
         c.argument('availability_group_name',
                    options_list=['--ag-name', '-a'],
                    help='Name of the availability group.')
-        c.argument('sqlvm_resource_id',
-                   options_list=['--sqlvm-rid', '-s'],
-                   help='Resource id of the SQL virtual machine.')
 
-    with self.argument_context('sqlvm aglistener', arg_group='Load Balancer Configuration') as c:
+    with self.argument_context('sql vm group aglistener update') as c:
+        c.argument('remove_sql_virtual_machine_instances',
+                   nargs='+',
+                   options_list=['--remove-sqlvm'],
+                   validator=validate_sqlvm_list,
+                   help="Space-separated name or resource IDs of the SQL virtual machines to be removed.")
+        c.argument('add_sql_virtual_machine_instances',
+                   nargs='+',
+                   options_list=['--add-sqlvm'],
+                   validator=validate_sqlvm_list,
+                   help="Space-separated name or resource IDs of the SQL virtual machines to be added.")
+
+    with self.argument_context('sql vm group aglistener', arg_group='Load Balancer Configuration') as c:
         c.argument('ip_address',
                    options_list=['--ip-address', '-i'],
                    help='Private IP address bound to the availability group listener.')
         c.argument('subnet_resource_id',
-                   options_list=['--subnet-rid', '-u'],
-                   help='Subnet used to include private IP.')
+                   options_list=['--subnet', '-u'],
+                   help='Subnet resource ID used to include private IP.')
         c.argument('public_ip_address_resource_id',
-                   options_list=['--public-ip-rid', '-c'],
+                   options_list=['--public-ip', '-c'],
                    help='Resource id of the public IP.')
         c.argument('load_balancer_resource_id',
-                   options_list=['--lb-rid', '-b'],
+                   options_list=['--load-balancer', '-b'],
                    help='Resource id of the load balancer.')
         c.argument('probe_port',
                    options_list=['--probe-port', '-e'],
                    help='Probe port.',
                    type=int)
         c.argument('sql_virtual_machine_instances',
-                   options_list=['--sqlvm-rids', '-l'],
+                   options_list=['--sqlvms', '-q'],
                    nargs='+',
-                   help='Space-separated list of SQL virtual machine instance resource id\'s that are enrolled into the availability group listener.')
+                   validator=validate_sqlvm_list,
+                   help='Space-separated list of SQL virtual machine instance name or resource IDs that are enrolled into the availability group.')
 
     ###############################################
     #      sql virtual machine params             #
     ###############################################
 
-    with self.argument_context('sqlvm') as c:
+    with self.argument_context('sql vm') as c:
         c.argument('sql_virtual_machine_name',
                    options_list=['--name', '-n'])
         c.argument('sql_virtual_machine_group_resource_id',
-                   options_list=['--sqlvm-group-rid'],
-                   help='ARM resource id of the SQL virtual machine group this SQL virtual machine is or will be part of.')
-        c.argument('sql_server_license_type',
-                   help='SQL Server license type.',
-                   options_list=['--license-type'],
-                   arg_type=get_enum_type(SqlServerLicenseType))
+                   options_list=['--sqlvm-group'],
+                   validator=validate_sqlvm_group,
+                   help='Name or resource ID of the SQL virtual machine group this SQL virtual machine is or will be part of.')
         c.argument('location',
                    help='Location. If not provided, virtual machine should be in the same region of resource group.'
                    'You can configure the default location using `az configure --defaults location=<location>`.',
                    arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
+        c.argument('expand',
+                   help='Get the SQLIaaSExtension configuration settings.',
+                   arg_type=get_enum_type(['*']))
 
-    with self.argument_context('sqlvm', arg_group='WSFC Domain Credentials') as c:
+    with self.argument_context('sql vm', arg_group='SQL Server License') as c:
+        c.argument('sql_server_license_type',
+                   help='SQL Server license type.',
+                   options_list=['--license-type'],
+                   arg_type=get_enum_type(SqlServerLicenseType))
+
+    with self.argument_context('sql vm', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
                    options_list=['--boostrap-acc-pwd'],
                    help='Cluster bootstrap account password.')
@@ -154,12 +172,18 @@ def load_arguments(self, _):
                    options_list=['--service-acc-pwd'],
                    help='SQL service account password.')
 
-    with self.argument_context('sqlvm add-to-group') as c:
+    with self.argument_context('sql vm add-to-group') as c:
         c.argument('sql_virtual_machine_group_resource_id',
-                   options_list=['--sqlvm-group-rid', '-r'],
-                   help='ARM resource id of the SQL virtual machine group this SQL virtual machine is or will be part of.')
+                   options_list=['--sqlvm-group', '-r'],
+                   validator=validate_sqlvm_group,
+                   help='Name or resource ID of the SQL virtual machine group. If only name provided, SQL virtual machine group should be in the same '
+                   'resource group of the SQL virtual machine.')
+        c.argument('sql_virtual_machine_name', id_part='name')
 
-    with self.argument_context('sqlvm add-to-group', arg_group='WSFC Domain Credentials') as c:
+    with self.argument_context('sql vm remove-from-group') as c:
+        c.argument('sql_virtual_machine_name', id_part='name')
+
+    with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
                    options_list=['--boostrap-acc-pwd', '-b'],
                    help='Cluster bootstrap account password.')
@@ -170,7 +194,7 @@ def load_arguments(self, _):
                    options_list=['--service-acc-pwd', '-s'],
                    help='SQL service account password.')
 
-    with self.argument_context('sqlvm', arg_group='Auto Patching Settings') as c:
+    with self.argument_context('sql vm', arg_group='Auto Patching Settings') as c:
         c.argument('enable_auto_patching',
                    help='Enable or disable autopatching on SQL virtual machine. If any autopatching settings provided, parameter automatically sets to true.',
                    arg_type=get_three_state_flag())
@@ -184,23 +208,27 @@ def load_arguments(self, _):
                    type=int,
                    help='Duration of patching. 30-180 minutes.')
 
-    with self.argument_context('sqlvm', arg_group='Auto Backup Settings') as c:
+    with self.argument_context('sql vm', arg_group='Auto Backup Settings') as c:
         c.argument('enable_auto_backup',
                    help='Enable or disable autobackup on SQL virtual machine. If any backup settings provided, parameter automatically sets to true.',
                    arg_type=get_three_state_flag())
         c.argument('enable_encryption',
-                   help=' Enable encryption for backup on SQL virtual machine.')
+                   help=' Enable encryption for backup on SQL virtual machine.',
+                   arg_type=get_three_state_flag())
         c.argument('retention_period',
                    type=int,
-                   help='Retention period of backup.')
+                   help='Retention period of backup. 1-30 days.')
         c.argument('storage_account_url',
+                   options_list=['--storage-acc'],
                    help='Storage account url where backup will be taken to.')
         c.argument('storage_access_key',
                    help='Storage account key where backup will be taken to.')
         c.argument('backup_password',
+                   options_list=['--backup-pwd'],
                    help='Password for encryption on backup.')
         c.argument('backup_system_dbs',
-                   help='Include system databases on backup.')
+                   help='Include system databases on backup.',
+                   arg_type=get_three_state_flag())
         c.argument('backup_schedule_type',
                    help='Backup schedule type.',
                    arg_type=get_enum_type(BackupScheduleType))
@@ -217,20 +245,23 @@ def load_arguments(self, _):
                    type=int,
                    help='Frequency of log backups. 5-60 minutes.')
 
-    with self.argument_context('sqlvm', arg_group='Key Vault Credential Settings') as c:
+    with self.argument_context('sql vm', arg_group='Key Vault Credential Settings') as c:
         c.argument('enable_key_vault_credential',
                    help='Enable or disable key vault credential setting. If any key vault settings provided, parameter automatically sets to true.',
                    arg_type=get_three_state_flag())
         c.argument('credential_name',
                    help='Credential name')
         c.argument('azure_key_vault_url',
+                   options_list=['--key-vault'],
                    help='Azure Key Vault url.')
         c.argument('service_principal_name',
+                   options_list=['--sp-name'],
                    help='Service principal name to access key vault.')
         c.argument('service_principal_secret',
+                   options_list=['--sp-secret'],
                    help='Service principal name secret to access key vault.')
 
-    with self.argument_context('sqlvm', arg_group='SQL Connectivity Update Settings') as c:
+    with self.argument_context('sql vm', arg_group='SQL Connectivity Update Settings') as c:
         c.argument('connectivity_type',
                    help='SQL Server connectivity option.',
                    arg_type=get_enum_type(ConnectivityType))
@@ -240,14 +271,15 @@ def load_arguments(self, _):
         c.argument('sql_auth_update_username',
                    help='SQL Server sysadmin login to create.')
         c.argument('sql_auth_update_password',
+                   options_list=['--sql-auth-update-pwd'],
                    help='SQL Server sysadmin login password.')
 
-    with self.argument_context('sqlvm', arg_group='SQL Workload Type Update Settings') as c:
+    with self.argument_context('sql vm', arg_group='SQL Workload Type Update Settings') as c:
         c.argument('sql_workload_type',
                    help='SQL Server workload type.',
                    arg_type=get_enum_type(SqlWorkloadType))
 
-    with self.argument_context('sqlvm', arg_group='SQL Storage Update Settings') as c:
+    with self.argument_context('sql vm', arg_group='SQL Storage Update Settings') as c:
         c.argument('disk_count',
                    help='Virtual machine disk count.',
                    type=int)
@@ -255,7 +287,7 @@ def load_arguments(self, _):
                    help='Disk configuration to apply to SQL Server.',
                    arg_type=get_enum_type(DiskConfigurationType))
 
-    with self.argument_context('sqlvm', arg_group='Additional Features') as c:
+    with self.argument_context('sql vm', arg_group='Additional Features') as c:
         c.argument('enable_r_services',
                    help='Enable or disable R services (SQL 2016 onwards).',
                    arg_type=get_three_state_flag())

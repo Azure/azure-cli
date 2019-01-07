@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from msrestazure.tools import is_valid_resource_id, resource_id
+from knack.prompting import prompt_pass
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 from azure.cli.core.util import (
     sdk_no_wait, CLIError,
@@ -60,13 +60,16 @@ def sqlvm_group_list(
 # pylint: disable= line-too-long, too-many-arguments
 def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_group_name, sql_image_offer,
                        sql_image_sku, domain_fqdn, cluster_operator_account, sql_service_account,
-                       storage_account_url, storage_account_key, location=None, cluster_bootstrap_account=None,
+                       storage_account_url, storage_account_key=None, location=None, cluster_bootstrap_account=None,
                        file_share_witness_path=None, ou_path=None, tags=None):
 
     '''
     Creates a SQL virtual machine group.
     '''
     tags = tags or {}
+
+    if not storage_account_key:
+        storage_account_key = prompt_pass('Storage Key: ', confirm=True)
 
     # Create the windows server failover cluster domain profile object.
     wsfc_domain_profile_object = WsfcDomainProfile(domain_fqdn=domain_fqdn,
@@ -92,17 +95,12 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
 
 
 # pylint: disable=line-too-long, too-many-arguments
-def sqlvm_group_update(instance, domain_fqdn=None, sql_image_sku=None, sql_image_offer=None,
-                       cluster_operator_account=None, sql_service_account=None,
+def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None, sql_service_account=None,
                        storage_account_url=None, storage_account_key=None, cluster_bootstrap_account=None,
                        file_share_witness_path=None, ou_path=None, tags=None):
     '''
     Updates a SQL virtual machine group.
     '''
-    if sql_image_sku is not None:
-        instance.sql_image_sku = sql_image_sku
-    if sql_image_offer is not None:
-        instance.sql_image_offer = sql_image_offer
     if domain_fqdn is not None:
         instance.wsfc_domain_profile.domain_fqdn = domain_fqdn
     if cluster_operator_account is not None:
@@ -115,6 +113,8 @@ def sqlvm_group_update(instance, domain_fqdn=None, sql_image_sku=None, sql_image
         instance.wsfc_domain_profile.storage_account_url = storage_account_url
     if storage_account_key is not None:
         instance.wsfc_domain_profile.storage_access_key = storage_account_key
+    if storage_account_url and not storage_account_key:
+        instance.wsfc_domain_profile.storage_access_key = prompt_pass('Storage Key: ', confirm=True)
     if file_share_witness_path is not None:
         instance.wsfc_domain_profile.file_share_witness_path = file_share_witness_path
     if ou_path is not None:
@@ -133,16 +133,12 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     '''
     Creates an availability group listener
     '''
-
     if not is_valid_resource_id(subnet_resource_id):
         raise CLIError("Invalid subnet resource id.")
     if not is_valid_resource_id(load_balancer_resource_id):
         raise CLIError("Invalid load balancer resource id.")
     if public_ip_address_resource_id and not is_valid_resource_id(public_ip_address_resource_id):
         raise CLIError("Invalid public IP address resource id.")
-    for sqlvm in sql_virtual_machine_instances:
-        if not is_valid_resource_id(sqlvm):
-            raise CLIError("Invalid SQL virtual machine resource id.")
 
     # Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
@@ -158,7 +154,7 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
 
     # Create the availability group listener object
     ag_listener_object = AvailabilityGroupListener(availability_group_name=availability_group_name,
-                                                   load_balancer_configurations=load_balancer_object,
+                                                   load_balancer_configurations=[load_balancer_object],
                                                    port=port)
 
     LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update, resource_group_name,
@@ -168,9 +164,30 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     return client.get(resource_group_name, sql_virtual_machine_group_name, availability_group_listener_name)
 
 
+def aglistener_update(instance, remove_sql_virtual_machine_instances=None, add_sql_virtual_machine_instances=None):
+    '''
+    Updates an availability group listener
+    '''
+
+    # Get the list of all current machines in the ag listener
+    vm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
+
+    if add_sql_virtual_machine_instances:
+        for sqlvm_resource_id in add_sql_virtual_machine_instances:
+            if sqlvm_resource_id not in vm_list:
+                instance.load_balancer_configurations[0].sql_virtual_machine_instances.append(sqlvm_resource_id)
+
+    if remove_sql_virtual_machine_instances:
+        for sqlvm_resource_id in remove_sql_virtual_machine_instances:
+            if sqlvm_resource_id in vm_list:
+                instance.load_balancer_configurations[0].sql_virtual_machine_instances.remove(sqlvm_resource_id)
+
+    return instance
+
+
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, location=None,
-                 sql_server_license_type='PAYG', sql_virtual_machine_group_resource_id=None, cluster_bootstrap_account_password=None,
+                 sql_server_license_type=None, sql_virtual_machine_group_resource_id=None, cluster_bootstrap_account_password=None,
                  cluster_operator_account_password=None, sql_service_account_password=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
@@ -189,11 +206,6 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
     virtual_machine_resource_id = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Compute', type='virtualMachines', name=sql_virtual_machine_name)
-
-    if sql_virtual_machine_group_resource_id and not is_valid_resource_id(sql_virtual_machine_group_resource_id):
-        raise CLIError("Invalid SQL virtual machine group resource id.")
-
-    location = location or get
 
     tags = tags or {}
 
@@ -215,6 +227,10 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
             backup_system_dbs or backup_schedule_type or full_backup_frequency or full_backup_start_time or
             full_backup_window_hours or log_backup_frequency):
         enable_auto_backup = True
+        if not storage_access_key:
+            storage_access_key = prompt_pass('Storage Key: ', confirm=True)
+        if not backup_password:
+            backup_password = prompt_pass('Backup Password: ', confirm=True)
 
     auto_backup_object = AutoBackupSettings(enable=enable_auto_backup,
                                             enable_encryption=enable_encryption if enable_auto_backup else None,
@@ -232,6 +248,8 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
     # If customer has provided any key_vault_credential settings, enabling plugin should be True
     if (credential_name or azure_key_vault_url or service_principal_name or service_principal_secret):
         enable_key_vault_credential = True
+        if not service_principal_secret:
+            service_principal_secret = prompt_pass('Service Principal Secret: ', confirm=True)
 
     keyvault_object = KeyVaultCredentialSettings(enable=enable_key_vault_credential,
                                                  credential_name=credential_name,
@@ -300,6 +318,11 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
             log_backup_frequency is not None):
 
         enable_auto_backup = enable_auto_backup if enable_auto_backup is False else True
+        if not storage_access_key:
+            storage_access_key = prompt_pass('Storage Key: ', confirm=True)
+        if not backup_password:
+            backup_password = prompt_pass('Backup Password: ', confirm=True)
+
         instance.auto_backup_settings = AutoBackupSettings(enable=enable_auto_backup,
                                                            enable_encryption=enable_encryption if enable_auto_backup else None,
                                                            retention_period=retention_period,
@@ -317,6 +340,9 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
             service_principal_name is not None or service_principal_secret is not None):
 
         enable_key_vault_credential = enable_key_vault_credential if enable_key_vault_credential is False else True
+        if not service_principal_secret:
+            service_principal_secret = prompt_pass('Service Principal Secret: ', confirm=True)
+
         instance.key_vault_credential_settings = KeyVaultCredentialSettings(enable=enable_key_vault_credential,
                                                                             credential_name=credential_name,
                                                                             service_principal_name=service_principal_name,
@@ -345,16 +371,19 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
     return instance
 
 
-def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, sql_service_account_password,
-                       cluster_operator_account_password, cluster_bootstrap_account_password=None):
+def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, sql_service_account_password=None,
+                       cluster_operator_account_password=None, cluster_bootstrap_account_password=None):
     '''
     Add a SQL virtual machine to a SQL virtual machine group.
     '''
 
-    if not is_valid_resource_id(sql_virtual_machine_group_resource_id):
-        raise CLIError("Invalid SQL virtual machine group resource id.")
-
     instance.sql_virtual_machine_group_resource_id = sql_virtual_machine_group_resource_id
+    if not sql_service_account_password:
+        sql_service_account_password = prompt_pass('SQL Service account password: ', confirm=True)
+    if not cluster_operator_account_password:
+        cluster_operator_account_password = prompt_pass('Cluster operator account password: ', confirm=True,
+                                                        help_string='Password to authenticate with the domain controller.')
+
     instance.wsfc_domain_credentials = WsfcDomainCredentials(cluster_bootstrap_account_password=cluster_bootstrap_account_password,
                                                              cluster_operator_account_password=cluster_operator_account_password,
                                                              sql_service_account_password=sql_service_account_password)
@@ -366,35 +395,5 @@ def remove_sqlvm_from_group(instance):
     Removes SQL virtual machine from SQL virtual machine group.
     '''
     instance.sql_virtual_machine_group_resource_id = None
-
-    return instance
-
-
-def add_sqlvm_to_aglistener(instance, sqlvm_resource_id):
-    '''
-    Add a SQL virtual machine to an availability group listener.
-    '''
-    if not is_valid_resource_id(sqlvm_resource_id):
-        raise CLIError("Invalid SQL virtual machine resource id.")
-
-    vm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
-
-    if sqlvm_resource_id not in vm_list:
-        instance.load_balancer_configurations[0].sql_virtual_machine_instances.append(sqlvm_resource_id)
-
-    return instance
-
-
-def remove_sqlvm_from_aglistener(instance, sqlvm_resource_id):
-    '''
-    Remove a SQL virtual machine from an availability group listener.
-    '''
-    if not is_valid_resource_id(sqlvm_resource_id):
-        raise CLIError("Invalid SQL virtual machine resource id.")
-
-    vm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
-
-    if sqlvm_resource_id in vm_list:
-        instance.load_balancer_configurations[0].sql_virtual_machine_instances.remove(sqlvm_resource_id)
 
     return instance

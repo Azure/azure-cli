@@ -62,6 +62,12 @@ def transform_sqlvm_output(result):
         # Note, wsfcDomainCredentials will not display
         if result.sql_virtual_machine_group_resource_id is not None:
             output['sqlVirtualMachineGroupResourceId'] = result.sql_virtual_machine_group_resource_id
+        if result.auto_patching_settings is not None:
+            output['autoPatchingSettings'] = format_auto_patching_settings(result.auto_patching_settings)
+        if result.auto_backup_settings is not None:
+            output['autoBackupSettings'] = format_auto_backup_settings(result.auto_backup_settings)
+        if result.server_configurations_management_settings is not None:
+            output['serverConfigurationManagementSettings'] = format_server_configuration_management_settings(result.server_configurations_management_settings)
 
         return output
     except AttributeError:
@@ -144,8 +150,6 @@ def format_additional_features_server_configurations(result):
     order_dict = OrderedDict()
     if result.is_rservices_enabled is not None:
         order_dict['isRServicesEnabled'] = result.is_rservices_enabled
-    if result.backup_permissions_for_azure_backup_svc is not None:
-        order_dict['backupPermissionsForAzureBackupSvc'] = result.backup_permissions_for_azure_backup_svc
 
     return order_dict
 
@@ -265,12 +269,23 @@ def format_server_configuration_management_settings(result):
     Formats the ServerConfigurationsManagementSettings object removing arguments that are empty
     '''
     from collections import OrderedDict
-    order_dict = OrderedDict([('sqlConnectivityUpdateSettings',
-                               format_sql_connectivity_update_settings(result.sql_connectivity_update_settings)),
-                              ('sqlWorkloadTypeUpdateSettings', format_sql_workload_type_update_settings(result.sql_workload_type_update_settings)),
-                              ('sqlStorageUpdateSettings', format_sql_storage_update_settings(result.sql_storage_update_settings)),
-                              ('additionalFeaturesServerConfigurations',
-                               format_additional_features_server_configurations(result.additional_features_server_configurations))])
+    order_dict = OrderedDict()
+
+    settings = format_sql_connectivity_update_settings(result.sql_connectivity_update_settings)
+    if settings:
+        order_dict['sqlConnectivityUpdateSettings'] = settings
+
+    settings = format_sql_workload_type_update_settings(result.sql_workload_type_update_settings)
+    if settings:
+        order_dict['sqlWorkloadTypeUpdateSettings'] = settings
+
+    settings = format_sql_storage_update_settings(result.sql_storage_update_settings)
+    if settings:
+        order_dict['sqlStorageUpdateSettings'] = settings
+
+    settings = format_additional_features_server_configurations(result.additional_features_server_configurations)
+    if settings:
+        order_dict['additionalFeaturesServerConfigurations'] = settings
 
     return order_dict
 
@@ -279,6 +294,7 @@ def format_sql_connectivity_update_settings(result):
     '''
     Formats the SqlConnectivityUpdateSettings object removing arguments that are empty
     '''
+
     from collections import OrderedDict
     # Only display parameters that have content
     order_dict = OrderedDict()
@@ -296,6 +312,7 @@ def format_sql_storage_update_settings(result):
     '''
     Formats the SqlStorageUpdateSettings object removing arguments that are empty
     '''
+
     from collections import OrderedDict
     # Only display parameters that have content
     order_dict = OrderedDict()
@@ -311,6 +328,7 @@ def format_sql_workload_type_update_settings(result):
     '''
     Formats the SqlWorkloadTypeUpdateSettings object removing arguments that are empty
     '''
+
     from collections import OrderedDict
     # Only display parameters that have content
     order_dict = OrderedDict()

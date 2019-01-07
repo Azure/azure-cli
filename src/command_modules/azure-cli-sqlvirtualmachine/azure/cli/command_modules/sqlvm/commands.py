@@ -34,7 +34,7 @@ def load_command_table(self, _):
         client_factory=get_sqlvirtualmachine_sql_virtual_machines_operations
     )
 
-    with self.command_group('sqlvm',
+    with self.command_group('sql vm',
                             sqlvm_vm_operations,
                             client_factory=get_sqlvirtualmachine_sql_virtual_machines_operations) as g:
         g.generic_update_command('update', custom_func_name='sqlvm_update', transform=transform_sqlvm_output)
@@ -54,7 +54,7 @@ def load_command_table(self, _):
         client_factory=get_sqlvirtualmachine_sql_virtual_machine_groups_operations
     )
 
-    with self.command_group('sqlvm group',
+    with self.command_group('sql vm group',
                             sqlvm_group_operations,
                             client_factory=get_sqlvirtualmachine_sql_virtual_machine_groups_operations) as g:
         g.generic_update_command('update', custom_func_name='sqlvm_group_update', transform=transform_sqlvm_group_output)
@@ -72,11 +72,10 @@ def load_command_table(self, _):
         client_factory=get_sqlvirtualmachine_availability_group_listeners_operations
     )
 
-    with self.command_group('sqlvm aglistener',
+    with self.command_group('sql vm group aglistener',
                             sqlvm_agl_operations,
                             client_factory=get_sqlvirtualmachine_availability_group_listeners_operations) as g:
-        g.generic_update_command('add-sqlvm', custom_func_name='add_sqlvm_to_aglistener', transform=transform_aglistener_output)
-        g.generic_update_command('remove-sqlvm', custom_func_name='remove_sqlvm_from_aglistener', transform=transform_aglistener_output)
+        g.generic_update_command('update', custom_func_name='aglistener_update', transform=transform_aglistener_output)
         g.command('show', 'get', transform=transform_aglistener_output)
         g.command('list', 'list_by_group', transform=transform_aglistener_list)
         g.command('delete', 'delete', confirmation=True)
