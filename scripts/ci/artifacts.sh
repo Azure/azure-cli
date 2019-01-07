@@ -4,5 +4,7 @@ pwd
 
 ls -la
 
+ls -la scripts/ci
+
 . $(dirname $0)/build.sh
 share_folder="$(dirname $0)/../../artifacts"
