@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.14
+++++++
+* Minor fixes
+
 2.3.13
 ++++++
 * Add Virtual Nodes Preview
