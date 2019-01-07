@@ -4,7 +4,8 @@ Release History
 ===============
 2.2.12
 ++++++
-* `vm/vmss create`: support cross tenant image referencing
+* `vm/vmss create`: support cross tenant image referencing.
+* `vm diagnostics get-default-config --windows-os`: fix bug in windows os default config.
 
 2.2.11
 ++++++
