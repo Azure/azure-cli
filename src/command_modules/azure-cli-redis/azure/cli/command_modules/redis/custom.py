@@ -98,15 +98,13 @@ def cli_redis_create(cmd, client,
 
 
 # pylint: disable=unused-argument
-def cli_redis_create_server_link(cmd, client, resource_group_name, name, primary_cache):
+def cli_redis_create_server_link(cmd, client, primary_cache, secondary_cache ):
     primary_cache_resource = get_cache_from_resource_id(primary_cache)
     primary_cache_resource_group = get_resource_group_name_by_resource_id(primary_cache)
-
-    redis_client = cf_redis(cmd.cli_ctx)
-    secondary_cache = redis_client.get(resource_group_name, name)
+    secondary_cache_resource = get_cache_from_resource_id(secondary_cache)
 
     from azure.mgmt.redis.models import RedisLinkedServerCreateParameters
-    params = RedisLinkedServerCreateParameters(secondary_cache.id, secondary_cache.location, 'Secondary')
+    params = RedisLinkedServerCreateParameters(secondary_cache_resource.id, secondary_cache_resource.location, 'Secondary')
     return client.create(primary_cache_resource_group, primary_cache_resource.name, name, params)
 
 def list_cache(client, resource_group_name=None):
@@ -128,6 +126,6 @@ def get_cache_from_resource_id(cli_ctx, cache_resource_id):
     redis_client = cf_redis(cmd.cli_ctx)
 
     id_comps = parse_resource_id(cache_resource_id)
-    return client.get(id_comps['resource_group'], id_comps['name'])
+    return redis_client.get(id_comps['resource_group'], id_comps['name'])
 
 # endregion

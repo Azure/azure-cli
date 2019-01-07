@@ -34,12 +34,8 @@ def load_arguments(self, _):
         c.argument('schedule_entries', help="List of Patch schedule entries. Example Value:[{\"dayOfWeek\":\"Monday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]", type=ScheduleEntryList)
         c.argument('tenant_settings', type=JsonString)
         c.argument('linked_server_name', help='Name of the linked redis cache')
-        c.argument('secondary_cache_name', help='Name of the redis cache to be linked as Secondary')
-        c.argument('secondary_cache_resource_group', help='Resource group name of the redis cache to be linked as Secondary')
-
-    with self.argument_context('redis linked-server') as c:
-        c.argument('name', help='Name of the primary redis cache')
-        c.argument('resource_group_name', help='Resource group name of the primary redis cache')
+        c.argument('secondary_cache', help='Resource Id of the redis cache to be linked as Secondary')
+        c.argument('primary_cache', help='Resource Id of the Primary redis cache')
 
     with self.argument_context('redis firewall-rules') as c:
         c.argument('rule-name', options_list=['--name','-n'], help='Name of the firewall rule')
