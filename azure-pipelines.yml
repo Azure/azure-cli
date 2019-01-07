@@ -14,16 +14,16 @@ phases:
     inputs:
       versionSpec: '3.6'
 
-  - script: |
-      sh ./scripts/dependency/check.sh
+  - bash: |
+      ./scripts/dependency/check.sh
     displayName: 'Dependency Check'
 
-  - script: |
-      sh ./scripts/ci/precheck_pep8.sh
+  - bash: |
+      ./scripts/ci/precheck_pep8.sh
     displayName: 'PEP8'
 
-  - script: |
-      sh ./scripts/ci/precheck_header.sh
+  - bash: |
+      ./scripts/ci/precheck_header.sh
     displayName: 'Headers'
 
 - phase: UnitTestPy2
