@@ -2,6 +2,10 @@
 
 set -ev
 
+pwd
+
+ls -la
+
 . $(cd $(dirname $0); pwd)/artifacts.sh
 
 ls -la $share_folder/build
