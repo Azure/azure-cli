@@ -2,7 +2,7 @@
 
 set -ev
 
-sh $(dirname $0)/artifacts.sh
+. $(cd $(dirname $0); pwd)/artifacts.sh
 
 ls -la $share_folder/build
 

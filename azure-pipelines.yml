@@ -14,23 +14,17 @@ phases:
     inputs:
       versionSpec: '3.6'
 
-  - task: Bash@3
+  - script: |
+      sh ./scripts/dependency/check.sh
     displayName: 'Dependency Check'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/dependency/check.sh
 
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/precheck_pep8.sh
     displayName: 'PEP8'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/precheck_pep8.sh
 
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/precheck_header.sh
     displayName: 'Headers'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/precheck_header.sh
 
 - phase: UnitTestPy2
   displayName: 'Unit Test with Python2'
@@ -49,13 +43,11 @@ phases:
       pip install tox
     displayName: 'Install Tox'
 
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/unittest.sh
     displayName: 'Execute Unit Tests'
     env:
       TOXENV: py27
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/unittest.sh
 
 - phase: UnitTestPy3
   condition: succeeded()
@@ -72,13 +64,11 @@ phases:
       pip install tox
     displayName: 'Install Tox'
 
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/unittest.sh
     displayName: 'Execute Unit Tests'
     env:
         TOXENV: py36
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/unittest.sh
 
 - phase: VerifyPy2
   displayName: 'Verify Python2'
@@ -92,13 +82,11 @@ phases:
     displayName: 'Use Python 2.7'
     inputs:
       versionSpec: 2.7
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/test_automation.sh
     displayName: 'Automation'
     env:
      REDUCE_SDK: 'True'
-    inputs:
-     targetType: 'filePath'
-     filePath: ./scripts/ci/test_automation.sh
 
 - phase: VerifyPy3
   displayName: 'Verify Python3'
@@ -112,18 +100,14 @@ phases:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/verify_linter.sh
     displayName: 'Lint Command Table and Help'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/verify_linter.sh
-  - task: Bash@3
+  - script: |
+      sh ./scripts/ci/test_automation.sh
     displayName: 'Automation'
     env:
       REDUCE_SDK: 'True'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
 
 
 - phase: ExtractMetadata
@@ -133,11 +117,9 @@ phases:
   queue:
     name: Hosted Ubuntu 1604
   steps:
-  - task: Bash@3
+  - script: |
+      sh ./scripts/release/get_version.sh
     displayName: 'Extract Version'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/get_version.sh
 
 
   - task: PublishBuildArtifacts@1
