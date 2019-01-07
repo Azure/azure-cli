@@ -76,7 +76,7 @@ helps['ams account sp create'] = """
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
-            az ams account sp create -a myAmsAccount -g myRG -n mySpName -password mySecret --role Owner --xml
+            az ams account sp create -a myAmsAccount -g myRG -n mySpName --password mySecret --role Owner --xml
     """
 
 helps['ams account sp reset-credentials'] = """
@@ -144,7 +144,7 @@ helps['ams transform output add'] = """
             az ams transform output add -a myAmsAccount -n transformName -g myResourceGroup --preset \"C:\\MyPresets\\CustomPreset.json\"
         - name: Add an output with a VideoAnalyzer preset with es-ES as audio language and only with audio insights.
           text: >
-            az ams transform output add -a myAmsAccount -n transformName -g myResourceGroup --preset VideoAnalyzer --audio-language es-ES --audio-insights-only
+            az ams transform output add -a myAmsAccount -n transformName -g myResourceGroup --preset VideoAnalyzer --audio-language es-ES --insights-to-extract AudioInsightsOnly
     """
 
 helps['ams transform output remove'] = """
