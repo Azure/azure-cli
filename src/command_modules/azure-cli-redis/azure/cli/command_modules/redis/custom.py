@@ -6,6 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.command_modules.redis._client_factory import cf_redis
+from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
 
@@ -97,14 +98,36 @@ def cli_redis_create(cmd, client,
 
 
 # pylint: disable=unused-argument
-def cli_redis_create_server_link(cmd, client, resource_group_name, name, secondary_cache_name,
-                                 secondary_cache_resource_group):
+def cli_redis_create_server_link(cmd, client, resource_group_name, name, primary_cache):
+    primary_cache_resource = get_cache_from_resource_id(primary_cache)
+    primary_cache_resource_group = get_resource_group_name_by_resource_id(primary_cache)
 
     redis_client = cf_redis(cmd.cli_ctx)
-    secondary_cache = redis_client.get(secondary_cache_resource_group, secondary_cache_name)
+    secondary_cache = redis_client.get(resource_group_name, name)
 
     from azure.mgmt.redis.models import RedisLinkedServerCreateParameters
     params = RedisLinkedServerCreateParameters(secondary_cache.id, secondary_cache.location, 'Secondary')
-    return client.create(resource_group_name, name, secondary_cache_name, params)
+    return client.create(primary_cache_resource_group, primary_cache_resource.name, name, params)
+
+def list_cache(client, resource_group_name=None):
+    cache_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else client.list()
+    return list(cache_list)
+
+def get_resource_group_name_by_resource_id(resource_id):
+    """Returns the resource group name from parsing the resource id.
+    :param str resource_id: The resource id
+    """
+    resource_id = resource_id.lower()
+    resource_group_keyword = '/resourcegroups/'
+    return resource_id[resource_id.index(resource_group_keyword) + len(
+        resource_group_keyword): resource_id.index('/providers/')]
+
+def get_cache_from_resource_id(cli_ctx, cache_resource_id):
+    from msrestazure.tools import parse_resource_id
+    redis_client = cf_redis(cmd.cli_ctx)
+
+    id_comps = parse_resource_id(cache_resource_id)
+    return client.get(id_comps['resource_group'], id_comps['name'])
 
 # endregion

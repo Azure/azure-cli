@@ -33,9 +33,29 @@ helps['redis patch-schedule'] = """
     short-summary: Manage Redis patch schedules.
 """
 
+helps['redis patch-schedule create'] = """
+    type: command
+    short-summary: Create patching schedule for Redis cache.
+"""
+
+helps['redis patch-schedule update'] = """
+    type: command
+    short-summary: Replace the patching schedule for Redis cache.
+"""
+
 helps['redis firewall-rules'] = """
     type: group
     short-summary: Manage Redis firewall rules.
+"""
+
+helps['redis firewall-rules create'] = """
+    type: command
+    short-summary: Create a redis cache firewall rule.
+"""
+
+helps['redis firewall-rules update'] = """
+    type: command
+    short-summary: Update a redis cache firewall rule.
 """
 
 helps['redis linked-server'] = """
