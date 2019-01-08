@@ -2,15 +2,20 @@
 
 Release History
 ===============
+0.2.11
+++++++
+* webapp: az webapp config ssl upload, handling the scenario of uploading certificates on apps that are hosted on an ASE, where the ASE RG & App RG are different
+* webapp: add az webapp ssh
+
 0.2.10
 ++++++
+* webapp: az webapp up reliability fixes, where using the command to redeploy code to a newly created app using the same command was failing
 * webapp: add support for listing and restoring webapp snapshots
+* functionapp: add support for --runtime flag in windows function apps
 
 0.2.9
 +++++
 * webapp: az webapp config container now honors --slot parameter
-* functionapp: add support for --runtime flag in windows function apps
-
 
 0.2.8
 +++++

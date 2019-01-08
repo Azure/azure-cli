@@ -1,0 +1,642 @@
+resources:
+- repo: self
+
+phases:
+- phase: ExtractMetadata
+  displayName: Extract Metadata
+
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: Bash@3
+    displayName: 'Extract Version'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/get_version.sh
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: metadata'
+    inputs:
+      ArtifactName: metadata
+
+- phase: BuildWindowsMSI
+  displayName: Build Windows MSI
+
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  queue:
+    name: Hosted VS2017
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: metadata
+
+
+  - script: |
+       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+       set
+
+       build_scripts/windows/scripts/build.cmd
+    displayName: 'Build Windows MSI'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: MSI'
+    inputs:
+      PathtoPublish: 'build_scripts/windows/out/'
+
+      ArtifactName: msi
+
+
+
+- phase: BuildDockerImage
+  displayName: Build Docker Image
+
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: Bash@3
+    displayName: 'Bash Script'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/docker/pipeline.sh
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: docker image'
+    inputs:
+      ArtifactName: docker
+
+
+
+- phase: TestDockerImage
+  displayName: Test Docker Image
+
+  dependsOn: BuildDockerImage
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Metadata'
+    inputs:
+      artifactName: metadata
+
+
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Docker Image'
+    inputs:
+      artifactName: docker
+
+
+  - bash: |
+       set -exv
+
+       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+       IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+       TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+
+       echo "== Test docker image =="
+
+       docker load < $TAR_FILE
+       docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
+    displayName: 'Bash Script'
+
+
+- phase: BuildPythonWheel
+  displayName: Build Python Wheels
+
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+
+
+  - task: Bash@3
+    displayName: 'Run Wheel Build Script'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/pypi/build.sh
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: pypi'
+    inputs:
+      ArtifactName: pypi
+
+
+
+- phase: TestPythonWheel
+  displayName: Test Python Wheels
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Metadata'
+    inputs:
+      artifactName: metadata
+
+
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download PyPI Packages'
+    inputs:
+      artifactName: pypi
+
+
+  - bash: |
+       #!/usr/bin/env bash
+
+       # Verify the pip wheels
+
+       set -ex
+
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+       PYPI_FILES=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
+
+
+       echo "== Testing pip install on Python 3.6 =="
+       docker run \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.6 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+
+       echo "== Testing pip install on Python 3.7 =="
+       docker run \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+
+       echo "== Testing pip install on Python 2.7 =="
+       docker run \
+         --rm -v $PYPI_FILES:/mnt/pypi python:2.7 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+
+    displayName: 'Test pip Install'
+
+
+- phase: BuildHomebrewFormula
+  displayName: Build Homebrew Formula
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Metadata'
+    inputs:
+      artifactName: metadata
+
+
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download PyPI Packages'
+    inputs:
+      artifactName: pypi
+
+  - bash: |
+       #!/bin/bash
+
+       root=$(cd $(dirname $0); pwd)
+
+       set -evx
+
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+       HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
+
+       docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
+       pypi_files=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
+
+       echo "Generating formula in docker container ... "
+       docker run -v $docker_files:/mnt/scripts \
+                  -v $pypi_files:/mnt/pypi \
+                  -e CLI_VERSION=$CLI_VERSION \
+                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
+                  --name azurecli \
+                  python:3.6 \
+                  /mnt/scripts/run.sh
+
+       # clean up
+       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
+       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi
+
+       docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
+       docker rm --force azurecli
+    displayName: 'Build homebrew formula'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: homebrew'
+    inputs:
+      ArtifactName: homebrew
+
+
+
+- phase: TestHomebrewFormula
+  displayName: Test Homebrew Formula
+
+  dependsOn: BuildHomebrewFormula
+  condition: succeeded()
+  queue:
+    name: Hosted macOS
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Metadata'
+    inputs:
+      artifactName: metadata
+
+
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Homebrew'
+    inputs:
+      artifactName: homebrew
+
+
+  - bash: |
+       echo == Remove pre-installed azure-cli ==
+       brew uninstall azure-cli
+
+       echo == Install azure-cli.rb formula ==
+       brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+
+       echo == Az Version ==
+       az --version
+
+       echo == Run Self-Test ==
+       az self-test
+
+       echo == Audit azure-cli.rb formula ==
+       brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+
+    displayName: 'Bash Script'
+
+
+- phase: BuildYumPackage
+  displayName: Build Yum Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: Bash@3
+    displayName: 'Build Rpm Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline.sh
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: yum'
+    inputs:
+      ArtifactName: yum
+
+
+
+- phase: TestYumPackage
+  displayName: Test Yum Package
+
+  dependsOn: BuildYumPackage
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Metadata'
+    inputs:
+      artifactName: metadata
+
+
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: yum
+
+
+  - bash: |
+       set -ex
+
+       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+       YUM_NAME=azure-cli-$CLI_VERSION-1.el7.x86_64.rpm
+       YUM_FILE=$SYSTEM_ARTIFACTSDIRECTORY/yum/$YUM_NAME
+
+       echo "== Test yum package on CentOS =="
+
+       docker pull centos
+       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
+
+    displayName: 'Bash Script'
+
+
+- phase: BuildUbuntuXenial
+  displayName: Build Ubuntu Xenial Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Ubuntu Xenial Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: xenial
+      DISTRO_BASE_IMAGE: ubuntu:xenial
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: BuildUbuntuArtful
+  displayName: Build Ubuntu Artful Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Ubuntu Artful Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: artful
+      DISTRO_BASE_IMAGE: ubuntu:artful
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: BuildUbuntuTrusty
+  displayName: Build Ubuntu Trusty Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Ubuntu Trusty Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: trusty
+      DISTRO_BASE_IMAGE: ubuntu:trusty
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: BuildUbuntuBionic
+  displayName: Build Ubuntu Bionic Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Ubuntu Bionic Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: bionic
+      DISTRO_BASE_IMAGE: ubuntu:bionic
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: BuildDebianWheezy
+  displayName: Build Debian Wheezy Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Debian Wheezy'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: wheezy
+      DISTRO_BASE_IMAGE: debian:wheezy
+
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: BuildDebianJessie
+  displayName: Build Debian Jessie Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Debian Jessie Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: jessie
+      DISTRO_BASE_IMAGE: debian:jessie
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: BuildDebianStretch
+  displayName: Build Debian Stretch Package
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Build Debian Stretch Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: stretch
+      DISTRO_BASE_IMAGE: debian:stretch
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
+
+- phase: TestLinuxPackages
+  displayName: Test Linux Packages
+
+  dependsOn:
+   - BuildUbuntuXenial
+   - BuildUbuntuArtful
+   - BuildUbuntuTrusty
+   - BuildUbuntuBionic
+   - BuildDebianWheezy
+   - BuildDebianJessie
+   - BuildDebianStretch
+   - BuildUbuntuCosmic
+  condition: succeededOrFailed()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Metadata'
+    inputs:
+      artifactName: metadata
+
+
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Debian Builds'
+    inputs:
+      artifactName: debian
+
+
+  - bash: |
+       set -exv
+
+       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+
+       DISTROS=(wheezy jessie stretch artful xenial trusty)
+       BASE_IMAGES=(debian:wheezy debian:jessie debian:stretch ubuntu:artful ubuntu:xenial ubuntu:trusty)
+
+       # Distros that don't require libssl1.1
+       for i in ${!DISTROS[@]}; do
+           echo "== Test debian package on ${DISTROS[$i]} =="
+
+           DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
+
+           docker pull ${BASE_IMAGES[$i]}
+
+           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
+       done
+
+       # Distros that do require libssl1.1
+       DISTROS=(bionic cosmic)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic)
+
+       for i in ${!DISTROS[@]}; do
+           echo "== Test debian package on ${DISTROS[$i]} =="
+
+           DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
+
+           docker pull ${BASE_IMAGES[$i]}
+
+           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y libssl1.1 apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
+       done
+    displayName: 'Bash Script'
+
+- phase: BuildUbuntuCosmic
+  displayName: Build Ubuntu Cosmic
+
+  dependsOn: BuildPythonWheel
+  condition: succeeded()
+  queue:
+    name: Hosted Ubuntu 1604
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: pypi
+
+
+  - task: Bash@3
+    displayName: 'Bash Script'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: cosmic
+      DISTRO_BASE_IMAGE: ubuntu:cosmic
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      ArtifactName: debian
+
+
