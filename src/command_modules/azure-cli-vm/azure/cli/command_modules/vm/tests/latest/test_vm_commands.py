@@ -1837,7 +1837,7 @@ class VMSSCreateOptions(ScenarioTest):
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id'] = instances[0]['instanceId']
 
-        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --instance-id {instance_id} --name {disk} --caching {caching}')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --instance-id {instance_id} --disk {disk} --caching {caching}')
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 1),
             self.check('[0].storageProfile.dataDisks[0].caching', self.kwargs['caching'])
