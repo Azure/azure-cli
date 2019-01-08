@@ -238,14 +238,8 @@ def _show_missing_access_warning(resource_group, name, command):
 
 # Hide extension information from output as the info is not correct and unhelpful; also
 # commands using it mean to hide the extension concept from users.
-
-
 class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
-    def __call__(self, poller):
-        super(ExtensionUpdateLongRunningOperation, self).__call__(poller)
-        # That said, we suppress the output. Operation failures will still
-        # be caught through the base class
-        return None
+    pass
 
 
 # region Disks (Managed)
@@ -672,9 +666,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if no_wait:
         return sdk_no_wait(no_wait, client.create_or_update,
                            resource_group_name, deployment_name, properties)
-    else:
-        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
-                                                      resource_group_name, deployment_name, properties))
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                  resource_group_name, deployment_name, properties))
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
@@ -982,8 +975,7 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
 
         return _set_availset(cmd, resource_group_name=resource_group_name, name=availability_set_name,
                              parameters=av_set)
-    else:
-        logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
+    logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
 
 
 def create_av_set(cmd, availability_set_name, resource_group_name,
@@ -1068,7 +1060,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
-class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
+class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods, useless-object-inheritance
 
     def __init__(self, out):
         self.out = out
@@ -1280,8 +1272,8 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
         return None
     emsis_to_remove = []
     if identities:
-        existing_emsis = set([x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())])
-        emsis_to_remove = set([x.lower() for x in identities])
+        existing_emsis = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
+        emsis_to_remove = {x.lower() for x in identities}
         non_existing = emsis_to_remove.difference(existing_emsis)
         if non_existing:
             raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
@@ -1396,8 +1388,7 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
         network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
         nic_name = parse_resource_id(found.id)['name']
         return network_client.network_interfaces.get(resource_group_name, nic_name)
-    else:
-        raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
+    raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
 
 
 def list_vm_nics(cmd, resource_group_name, vm_name):
@@ -1736,10 +1727,9 @@ def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     if _is_linux_os(vm):
         return _set_linux_user(cmd, vm, resource_group_name, username, password, ssh_key_value, no_wait)
-    else:
-        if ssh_key_value:
-            raise CLIError('SSH key is not appliable on a Windows VM')
-        return _reset_windows_admin(cmd, vm, resource_group_name, username, password, no_wait)
+    if ssh_key_value:
+        raise CLIError('SSH key is not appliable on a Windows VM')
+    return _reset_windows_admin(cmd, vm, resource_group_name, username, password, no_wait)
 
 
 def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
@@ -2200,8 +2190,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
                                                                            rule.frontend_port)
 
         return instance_addresses
-    else:
-        raise CLIError('The VM scale-set uses an internal load balancer, hence no connection information')
+    raise CLIError('The VM scale-set uses an internal load balancer, hence no connection information')
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
@@ -2236,8 +2225,8 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
     # pylint: disable=no-member
     if vmss.sku.capacity == new_capacity:
         return
-    else:
-        vmss.sku.capacity = new_capacity
+
+    vmss.sku.capacity = new_capacity
     vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, vm_scale_set_name, vmss_new)

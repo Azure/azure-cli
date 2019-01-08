@@ -19,7 +19,7 @@ from azure.cli.core.commands.validators import (
 from azure.cli.core.util import hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys
+import azure.cli.core.keys as keys  # pylint:disable=useless-import-alias
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -288,15 +288,15 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
-    elif profile == StorageProfile.SAPirImage:
+    if profile == StorageProfile.SAPirImage:
         return 'create unmanaged OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.SASpecializedOSDisk:
+    if profile == StorageProfile.SASpecializedOSDisk:
         return 'attach to existing unmanaged OS disk'
-    elif profile == StorageProfile.ManagedCustomImage:
+    if profile == StorageProfile.ManagedCustomImage:
         return 'create managed OS disk from custom image'
-    elif profile == StorageProfile.ManagedPirImage:
+    if profile == StorageProfile.ManagedPirImage:
         return 'create managed OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.ManagedSpecializedOSDisk:
+    if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
 
 
