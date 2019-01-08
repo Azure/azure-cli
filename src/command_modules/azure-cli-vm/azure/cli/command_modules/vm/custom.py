@@ -2568,8 +2568,10 @@ def fix_gallery_image_date_info(date_info):
     return date_info
 
 
-def update_image_version(instance, target_regions=None):
+def update_image_version(instance, target_regions=None, replica_count=None):
     if target_regions:
         instance.publishing_profile.target_regions = target_regions
+    if replica_count:
+        instance.publishing_profile.replica_count = replica_count
     return instance
 # endregion
