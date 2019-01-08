@@ -1196,22 +1196,47 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'pub': 'Microsoft.Azure.NetworkWatcher',
-            'ext': 'NetworkWatcherAgentLinux',
+            'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
             'username': username,
             'config_file': config_file
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
-        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
-            self.check('name', '{ext}'),
-            self.check('publisher', '{pub}'),
+            self.check('name', '{net-ext}'),
+            self.check('publisher', '{net-pub}'),
+            self.check('provisionAfterExtensions', None)
         ]).get_output_in_json()
-        uuid.UUID(result['forceUpdateTag'])
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext}')
+
+        uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.
+
+        # set the customscript extension that depends on the network watcher extension
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {script-ext} --publisher {script-pub} --version 2.0 '
+                 '--provision-after-extensions {net-ext} --settings "{{\\"commandToExecute\\": \\"echo testing\\"}}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {script-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 1),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+        ])
+
+        # set the VMAccess extension that depends on both the network watcher and script extensions.
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {access-ext} --publisher {access-pub} --version 1.5 '
+                 '--provision-after-extensions {net-ext} {script-ext} --protected-settings "{config_file}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {access-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 2),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+            self.check('provisionAfterExtensions[1]', '{script-ext}'),
+        ])
+
+        # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
     def test_vmss_extension_instance_name(self):
