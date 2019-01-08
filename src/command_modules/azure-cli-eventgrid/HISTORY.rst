@@ -3,7 +3,7 @@
 Release History
 ===============
 
-1.0.0
+0.2.5
 +++++
 * Update Event Grid CLI commands to include 2019-01-01 supported features (namely, deadletter, storage queue as destination, hybrid connection as destination, retry policy and manual validation handshake).
 
