@@ -570,23 +570,18 @@ helps['vm diagnostics set'] = """
 """
 
 disk_long_summary = """
-        Just like any other computer, virtual machines in Azure use disks as a place to store an operating system, applications, and data.
+        Azure Virtual Machines use disks as a place to store an operating system, applications, and data.
         All Azure virtual machines have at least two disks: An operating system disk, and a temporary disk.
         The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
         stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-        Operating System Disk
-        Every virtual machine has one attached operating system disk. It's registered as a SATA drive and is labeled /dev/sda by default.
-        This disk has a maximum capacity of 1023 gigabytes (GB).
 
-        Temporary disk
-        The temporary disk is automatically created for you. On Linux virtual machines, the disk is typically /dev/sdb and is formatted and
-        mounted to /mnt/resource by the Azure Linux Agent. The size of the temporary disk varies, based on the size of the virtual machine.
+        Azure Managed Disks generally have a maximum size of 4096 GB (with the exception of Ultra SSD disks and of larger
+        Standard and Premium disks which are in preview in limited regions). Azure Unmanaged Disks have a maximum capacity of 8192 GB.
 
-        Data disk
-        A data disk is a VHD that's attached to a virtual machine to store application data, or other data you need to keep. Data disks are
-        registered as SCSI drives and are labeled by the creator. Each data disk has a maximum capacity of 1023 GB. The size of the virtual
-        machine determines how many data disks can be attached and the type of storage that can be used to host the disks.
+
+        For more information on azure disks, see: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds
+        and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
 """
 
 helps['vm disk'] = """
@@ -643,7 +638,7 @@ helps['vm disk detach'] = """
     examples:
         - name: Detach a data disk from a VM.
           text: >
-            az vm disk detach -g MyResourceGroup --vm-name MyVm --disk disk_name
+            az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name
 """
 
 helps['vm disk attach'] = """
@@ -652,7 +647,7 @@ helps['vm disk attach'] = """
     long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GB) managed data disk to a VM.
-          text: az vm disk attach -g MyResourceGroup --vm-name MyVm --disk disk_name --new
+          text: az vm disk attach -g MyResourceGroup --vm-name MyVm --name disk_name --new
 """
 
 helps['vm encryption'] = """

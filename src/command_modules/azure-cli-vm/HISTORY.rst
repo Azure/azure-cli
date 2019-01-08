@@ -2,10 +2,9 @@
 
 Release History
 ===============
-
 2.2.12
 ++++++
-* 'vm disk/unmanaged-disk': parameter options are more consistent.
+* 'vm disk/unmanaged-disk' and 'vmss disk': parameter options are more consistent.
 
 2.2.11
 ++++++

@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
-from ._vm_utils import MSI_LOCAL_ID, get_updated_disk_options
+from ._vm_utils import MSI_LOCAL_ID
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
@@ -193,7 +193,6 @@ def load_arguments(self, _):
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
-        c.argument('disk', validator=validate_vm_disk, help='The disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('new', action='store_true', help='create a new disk')
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.', type=int)
@@ -201,9 +200,12 @@ def load_arguments(self, _):
 
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
+        c.argument('disk', options_list=['--name', '-n', c.deprecate(target='--disk', redirect='--name', hide=True)],
+                   help="The name or ID of the managed disk", validator=validate_vm_disk, id_part='name',
+                   completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
 
     with self.argument_context('vm disk detach') as c:
-        c.argument('disk_name', options_list=get_updated_disk_options(c), validator=validate_vm_disk, help='The disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
@@ -262,11 +264,11 @@ def load_arguments(self, _):
         c.argument('vhd_uri', help="Virtual hard disk URI. For example: https://mystorage.blob.core.windows.net/vhds/d1.vhd")
 
     with self.argument_context('vm unmanaged-disk attach') as c:
-        c.argument('disk_name', options_list=get_updated_disk_options(c), help='The data disk name.')
+        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.', type=int)
 
     with self.argument_context('vm unmanaged-disk detach') as c:
-        c.argument('disk_name', options_list=get_updated_disk_options(c), help='The data disk name.')
+        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
 
     for scope in ['vm unmanaged-disk attach', 'vm unmanaged-disk detach']:
         with self.argument_context(scope) as c:
@@ -355,9 +357,12 @@ def load_arguments(self, _):
         c.argument('vmss_name', id_part=None, help='Scale set name')
 
     with self.argument_context('vmss disk') as c:
+        options_list = ['--vmss-name'] + [c.deprecate(target=opt, redirect='--vmss-name', hide=True)for opt in name_arg_type.settings['options_list']]
+        new_vmss_name_type = CLIArgumentType(overrides=vmss_name_type, options_list=options_list)
+
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
-        c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+        c.argument('vmss_name', new_vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
         c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
                    min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('instance_id', help='Scale set VM instance id', min_api='2017-12-01')
