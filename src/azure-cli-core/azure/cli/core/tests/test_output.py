@@ -12,8 +12,22 @@ class TestCoreCLIOutput(unittest.TestCase):
         from azure.cli.core.mock import DummyCli
 
         output_producer = AzOutputProducer(DummyCli())
-        self.assertEqual(5, len(output_producer._FORMAT_DICT))  # five types: json, jsonc, table, tsv, yaml
+        self.assertEqual(6, len(output_producer._FORMAT_DICT))  # six types: json, jsonc, table, tsv, yaml, none
         self.assertIn('yaml', output_producer._FORMAT_DICT)
+        self.assertIn('none', output_producer._FORMAT_DICT)
+
+    def test_configure_output_options(self):
+        from azure.cli.core._output import AzOutputProducer
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.command_modules.configure._consts import OUTPUT_LIST
+
+        output_producer = AzOutputProducer(DummyCli())
+        cli_output_options = set(output_producer._FORMAT_DICT.keys())
+        configure_output_options = set(item["name"] for item in OUTPUT_LIST)
+
+        self.assertEqual(cli_output_options, configure_output_options,
+                         "\n{}'s output options: {}\ndon't match az configure's output options ({})."
+                         .format(AzOutputProducer.__name__, cli_output_options, configure_output_options))
 
 
 if __name__ == '__main__':
