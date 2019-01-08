@@ -14,7 +14,6 @@ from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionUpdateParameters,
     WebHookEventSubscriptionDestination,
-    Topic,
     RetryPolicy,
     EventHubEventSubscriptionDestination,
     StorageQueueEventSubscriptionDestination,
