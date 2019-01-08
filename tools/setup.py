@@ -30,7 +30,7 @@ DEPENDENCIES = [
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'requests',
-    'pyyaml>=3.13',
+    'pyyaml>=4.2b1',
     'knack',
     'six>=1.10.0',
     'tabulate>=0.7.7',
