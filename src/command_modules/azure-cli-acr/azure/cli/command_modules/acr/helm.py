@@ -16,6 +16,7 @@ logger = get_logger(__name__)
 def acr_helm_list(cmd,
                   registry_name,
                   repository='repo',
+                  resource_group_name=None,  # pylint: disable=unused-argument
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
@@ -39,6 +40,7 @@ def acr_helm_show(cmd,
                   chart,
                   version=None,
                   repository='repo',
+                  resource_group_name=None,  # pylint: disable=unused-argument
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
@@ -62,6 +64,7 @@ def acr_helm_delete(cmd,
                     chart,
                     version=None,
                     repository='repo',
+                    resource_group_name=None,  # pylint: disable=unused-argument
                     username=None,
                     password=None,
                     prov=False,
@@ -94,6 +97,7 @@ def acr_helm_push(cmd,
                   chart_package,
                   repository='repo',
                   force=False,
+                  resource_group_name=None,  # pylint: disable=unused-argument
                   username=None,
                   password=None):
     from os.path import isdir, basename
@@ -136,6 +140,7 @@ def acr_helm_push(cmd,
 def acr_helm_repo_add(cmd,
                       registry_name,
                       repository='repo',
+                      resource_group_name=None,  # pylint: disable=unused-argument
                       username=None,
                       password=None):
     helm_command = _get_helm_command()

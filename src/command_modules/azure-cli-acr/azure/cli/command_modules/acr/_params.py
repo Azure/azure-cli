@@ -101,7 +101,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr config content-trust') as c:
         c.argument('status', help="Indicates whether content-trust is enabled or disabled.", arg_type=get_enum_type(PolicyStatus))
 
+    with self.argument_context('acr login') as c:
+        c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
+
     with self.argument_context('acr repository') as c:
+        c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('repository', help="The name of the repository.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('top', type=int, help='Limit the number of items in the results.')
@@ -233,7 +237,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('build_task_name', completer=None)
 
     with self.argument_context('acr helm') as c:
-        c.argument('resource_group_name', help=argparse.SUPPRESS)
+        c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('repository', help=argparse.SUPPRESS)
         c.argument('version', help='The helm chart version.')
 

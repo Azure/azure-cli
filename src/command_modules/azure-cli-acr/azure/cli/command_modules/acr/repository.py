@@ -131,6 +131,7 @@ def _obtain_data_from_registry(login_server,
 def acr_repository_list(cmd,
                         registry_name,
                         top=None,
+                        resource_group_name=None,  # pylint: disable=unused-argument
                         username=None,
                         password=None):
     is_managed_registry = True
@@ -161,6 +162,7 @@ def acr_repository_show_tags(cmd,
                              repository,
                              top=None,
                              orderby=None,
+                             resource_group_name=None,  # pylint: disable=unused-argument
                              username=None,
                              password=None,
                              detail=False):
@@ -212,6 +214,7 @@ def acr_repository_show_manifests(cmd,
                                   repository,
                                   top=None,
                                   orderby=None,
+                                  resource_group_name=None,  # pylint: disable=unused-argument
                                   username=None,
                                   password=None,
                                   detail=False):
@@ -252,6 +255,7 @@ def acr_repository_show(cmd,
                         registry_name,
                         repository=None,
                         image=None,
+                        resource_group_name=None,  # pylint: disable=unused-argument
                         username=None,
                         password=None):
     return _acr_repository_attributes_helper(
@@ -270,6 +274,7 @@ def acr_repository_update(cmd,
                           registry_name,
                           repository=None,
                           image=None,
+                          resource_group_name=None,  # pylint: disable=unused-argument
                           username=None,
                           password=None,
                           delete_enabled=None,
@@ -314,6 +319,7 @@ def _acr_repository_attributes_helper(cli_ctx,
                                       permission,
                                       repository=None,
                                       image=None,
+                                      resource_group_name=None,  # pylint: disable=unused-argument
                                       username=None,
                                       password=None):
     _validate_parameters(repository, image)
@@ -370,6 +376,7 @@ def _acr_repository_attributes_helper(cli_ctx,
 def acr_repository_untag(cmd,
                          registry_name,
                          image,
+                         resource_group_name=None,  # pylint: disable=unused-argument
                          username=None,
                          password=None):
     try:
@@ -401,6 +408,7 @@ def acr_repository_delete(cmd,
                           image=None,
                           tag=None,
                           manifest=None,
+                          resource_group_name=None,  # pylint: disable=unused-argument
                           username=None,
                           password=None,
                           yes=False):
