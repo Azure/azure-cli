@@ -5,6 +5,8 @@ Release History
 
 2.2.11
 ++++++
+* `traffic-manager profile create/update`: Add support for `--custom-headers` and `--status-code-ranges`. Add support for new routing types: Subnet and Multivalue.
+* `traffic-manager endpoint create/update`: Add support for `--custom-headers` and `--subnets`. 
 * `watcher flow-log configure`: Add support for `--format` and `--log-version`.
 * `dns zone update`: Finished issue where using "" to clear resolution and registration VNets didn't work.
 
