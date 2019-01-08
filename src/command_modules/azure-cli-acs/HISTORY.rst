@@ -3,13 +3,10 @@
 Release History
 ===============
 
-2.3.15
-++++++
-* Add Managed OpenShift commands
-
 2.3.14
 ++++++
 * Add Virtual Nodes Preview
+* Add Managed OpenShift commands
 
 2.3.13
 ++++++

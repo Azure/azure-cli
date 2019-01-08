@@ -2325,22 +2325,21 @@ def osa_list(cmd, client, resource_group_name=None):
 
 
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
+                     fqdn,
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
                      compute_count=3,
-                     fqdn='',
                      aad_client_app_id=None,
                      aad_client_app_secret=None,
                      aad_tenant_id=None,
-                     vnet_cidr="10.0.0.0/8",
-                     subnet_cidr="10.0.0.0/24",
-                     vnet_peer_id=None,
+                     vnet_prefix="10.0.0.0/8",
+                     subnet_prefix="10.0.0.0/24",
+                     vnet_peer=None,
                      tags=None,
                      no_wait=False):
 
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
-        location = rg_location
+        location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     agent_pool_profiles = []
     agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='compute',  # Must be 12 chars or less before ACS RP adds to it
@@ -2348,7 +2347,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         vm_size=compute_vm_size,
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.compute,
-        subnet_cidr=subnet_cidr
+        subnet_cidr=subnet_prefix
     )
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
@@ -2357,7 +2356,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         vm_size="Standard_D4s_v3",
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.infra,
-        subnet_cidr=subnet_cidr
+        subnet_cidr=subnet_prefix
     )
 
     agent_pool_profiles.append(agent_node_pool_profile)
@@ -2368,7 +2367,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         count=int(3),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
-        subnet_cidr=subnet_cidr
+        subnet_cidr=subnet_prefix
     )
     identity_providers = []
 
@@ -2393,7 +2392,18 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     default_router_profile = OpenShiftRouterProfile(name='default')
 
-    network_profile = NetworkProfile(vnet_cidr=vnet_cidr, peer_vnet_id=vnet_peer_id)
+    if vnet_peer is not None:
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        if not is_valid_resource_id(vnet_peer):
+            vnet_peer = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network', type='virtualNetwork',
+                name=vnet_peer
+            )
+
+    network_profile = NetworkProfile(vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
 
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,

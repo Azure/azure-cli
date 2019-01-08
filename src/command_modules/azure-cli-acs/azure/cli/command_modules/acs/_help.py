@@ -570,25 +570,25 @@ helps['openshift create'] = """
         - name: --aad-tenant-id
           type: string
           short-summary: The ID of an Azure Active Directory tenant.
-        - name: --vnet-peer-id
+        - name: --vnet-peer
           type: string
-          short-summary: The ID of a subnet in an existing VNet into which to peer the cluster.
-        - name: --vnet-cidr
+          short-summary: The ID or the name of a subnet in an existing VNet into which to peer the cluster.
+        - name: --vnet-prefix
           type: string
           short-summary: The CIDR used on the VNet into which to deploy the cluster.
-        - name: --subnet-cidr
+        - name: --subnet-prefix
           type: string
           short-summary: The CIDR used on the Subnet into which to deploy the cluster.
 
 
     examples:
         - name: Create an OpenShift cluster and auto create an AAD Client
-          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
+          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN}
         - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
-          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN>
-                --aad-client-app-id <APP_ID> --aad-client-app-secret <APP_SECRET> --aad-tenant-id <TENANT_ID> --compute-count 5
+          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN}
+                --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
         - name: Create an Openshift cluster using a custom vnet
-          text : az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn <FQDN> --vnet-peer-id "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
+          text : az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN} --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
 """
 
 helps['openshift scale'] = """
