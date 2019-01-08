@@ -1003,6 +1003,17 @@ helps['vmss extension set'] = """
     - name: --name -n
       populator-commands:
       - az vm extension image list
+    examples:
+        - name: >
+                Set an extension which depends on two previously set extensions. That is, When a VMSS instance is
+                created or reimaged, the customScript extension will be provisioned only after all extensions that
+                it depends on have been provisioned. The extension need not depend on the other extensions for
+                pre-requisite configurations.
+          text: >
+                az vmss extension set --vmss-name my-vmss --name customScript --resource-group my-group \\
+                    --version 2.0 --publisher Microsoft.Azure.Extensions \\
+                    --provision-after-extensions NetworkWatcherAgentLinux VMAccessForLinux  \\
+                    --settings '{\"commandToExecute\": \"echo testing\"}'
 """
 
 helps['vmss extension show'] = """
@@ -1537,22 +1548,29 @@ helps['sig image-version create'] = """
     short-summary: creat a new image version
     long-summary : this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
     examples:
-        - name: add a new image version
+        - name: Add a new image version
           text: |
             az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
-        - name: add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
+        - name: Add a new image version replicated across multiple regions with different replication counts each. Eastus2 will have it's replica count set to the default replica count.
           text: |
-            az sig image-version create --no-wait -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image imageInTheSameResourceGroup
+                az sig image-version create -g MyResourceGroup --gallery-name MyGallery \\
+                --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+                --managed-image image-name --target-regions eastus2 ukwest=3 southindia=2
+        - name: Add a new image version and don't wait on it. Later you can invoke "az sig image-version wait" command when ready to create a vm from the gallery image version
+          text: |
+            az sig image-version create --no-wait -g MyResourceGroup --gallery-name MyGallery \\
+            --gallery-image-definition MyImage --gallery-image-version 1.0.0 \\
+            --managed-image imageInTheSameResourceGroup
 """
 
 helps['sig image-version update'] = """
     type: command
     short-summary: update a share image version
     examples:
-        - name: replicate to a new set of regions
+        - name: Replicate to a new set of regions
           text: |
             az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --target-regions westcentralus=2 eastus2
-        - name: replicate to one more region
+        - name: Replicate to one more region
           text: |
             az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
 

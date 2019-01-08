@@ -382,7 +382,7 @@ def load_arguments(self, _):
     # region VM & VMSS Shared
     for scope in ['vm', 'vmss']:
         with self.argument_context(scope) as c:
-            c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
+            c.argument('no_auto_upgrade', arg_type=get_three_state_flag(), help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -506,6 +506,7 @@ def load_arguments(self, _):
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
         c.argument('extension_instance_name', extension_instance_name_type)
+        c.argument('provision_after_extensions', nargs='+', help='Space-separated list of extension names after which this extension should be provisioned. These extensions must already be set on the vm.')
 
     for scope in ['vm extension image', 'vmss extension image']:
         with self.argument_context(scope) as c:
@@ -572,7 +573,6 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery image version')
         c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
-        c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
 
@@ -581,5 +581,6 @@ def load_arguments(self, _):
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
-                       help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
+                       help='Space-separated list of regions and their replica counts. Use "<region>=<replica count>" to set the replica count for each region. If only the region is specified, the default replica count will be used.')
+            c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
     # endregion

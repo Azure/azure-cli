@@ -1639,7 +1639,6 @@ def _get_log(url, user_name, password, log_file=None):
 def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
@@ -1647,10 +1646,10 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, cert_resource_group_name)
+                                    webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
-    return client.certificates.create_or_update(cert_resource_group_name, cert_name, cert)
+    return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
 def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
