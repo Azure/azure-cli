@@ -610,12 +610,17 @@ disk_long_summary = """
         stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
 
-        Azure Managed Disks generally have a maximum size of 4096 GB (with the exception of Ultra SSD disks and of larger
-        Standard and Premium disks which are in preview in limited regions). Azure Unmanaged Disks have a maximum capacity of 8192 GB.
+        Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
 
 
-        For more information on azure disks, see: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds
-        and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+        For more information, see:
+
+        - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+
+        - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+
+        - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+
 """
 
 helps['vm disk'] = """
@@ -1363,7 +1368,9 @@ helps['vmss identity show'] = """
 helps['disk'] = """
     type: group
     short-summary: Manage Azure Managed Disks.
-"""
+    long-summary: >
+{0}
+""".format(disk_long_summary)
 
 helps['image'] = """
     type: group
