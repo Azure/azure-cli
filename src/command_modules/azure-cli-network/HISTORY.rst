@@ -5,6 +5,7 @@ Release History
 
 2.2.11
 ++++++
+* `ddos-protection update`: Fix issue where supplying `--vnets ""` to remove vnets caused a strack trace.
 * `watcher flow-log configure`: Add support for `--format` and `--log-version`.
 * `dns zone update`: Finished issue where using "" to clear resolution and registration VNets didn't work.
 
