@@ -132,6 +132,7 @@ def acr_repository_list(cmd,
                         registry_name,
                         top=None,
                         resource_group_name=None,  # pylint: disable=unused-argument
+                        tenant_suffix=None,
                         username=None,
                         password=None):
     is_managed_registry = True
@@ -145,6 +146,7 @@ def acr_repository_list(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password)
 
@@ -163,6 +165,7 @@ def acr_repository_show_tags(cmd,
                              top=None,
                              orderby=None,
                              resource_group_name=None,  # pylint: disable=unused-argument
+                             tenant_suffix=None,
                              username=None,
                              password=None,
                              detail=False):
@@ -177,6 +180,7 @@ def acr_repository_show_tags(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -215,6 +219,7 @@ def acr_repository_show_manifests(cmd,
                                   top=None,
                                   orderby=None,
                                   resource_group_name=None,  # pylint: disable=unused-argument
+                                  tenant_suffix=None,
                                   username=None,
                                   password=None,
                                   detail=False):
@@ -226,6 +231,7 @@ def acr_repository_show_manifests(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -256,6 +262,7 @@ def acr_repository_show(cmd,
                         repository=None,
                         image=None,
                         resource_group_name=None,  # pylint: disable=unused-argument
+                        tenant_suffix=None,
                         username=None,
                         password=None):
     return _acr_repository_attributes_helper(
@@ -266,6 +273,7 @@ def acr_repository_show(cmd,
         permission='pull',
         repository=repository,
         image=image,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password)
 
@@ -275,6 +283,7 @@ def acr_repository_update(cmd,
                           repository=None,
                           image=None,
                           resource_group_name=None,  # pylint: disable=unused-argument
+                          tenant_suffix=None,
                           username=None,
                           password=None,
                           delete_enabled=None,
@@ -308,6 +317,7 @@ def acr_repository_update(cmd,
         permission='*',
         repository=repository,
         image=image,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password)
 
@@ -319,7 +329,7 @@ def _acr_repository_attributes_helper(cli_ctx,
                                       permission,
                                       repository=None,
                                       image=None,
-                                      resource_group_name=None,  # pylint: disable=unused-argument
+                                      tenant_suffix=None,
                                       username=None,
                                       password=None):
     _validate_parameters(repository, image)
@@ -338,6 +348,7 @@ def _acr_repository_attributes_helper(cli_ctx,
     login_server, username, password = get_access_credentials(
         cli_ctx=cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -377,6 +388,7 @@ def acr_repository_untag(cmd,
                          registry_name,
                          image,
                          resource_group_name=None,  # pylint: disable=unused-argument
+                         tenant_suffix=None,
                          username=None,
                          password=None):
     try:
@@ -389,6 +401,7 @@ def acr_repository_untag(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -409,6 +422,7 @@ def acr_repository_delete(cmd,
                           tag=None,
                           manifest=None,
                           resource_group_name=None,  # pylint: disable=unused-argument
+                          tenant_suffix=None,
                           username=None,
                           password=None,
                           yes=False):
@@ -421,6 +435,7 @@ def acr_repository_delete(cmd,
                               repository=repository,
                               tag=tag,
                               manifest=manifest,
+                              tenant_suffix=tenant_suffix,
                               username=username,
                               password=password,
                               yes=yes)
@@ -445,6 +460,7 @@ def acr_repository_delete(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -506,6 +522,7 @@ def _legacy_delete(cmd,
                    repository,
                    tag=None,
                    manifest=None,
+                   tenant_suffix=None,
                    username=None,
                    password=None,
                    yes=False):
@@ -517,6 +534,7 @@ def _legacy_delete(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
