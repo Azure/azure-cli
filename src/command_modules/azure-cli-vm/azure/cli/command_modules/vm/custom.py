@@ -1172,7 +1172,7 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False, sku=None,
-                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False):
+                             size_gb=1023, lun=None, caching=None, enable_write_accelerator=False):
     '''attach a managed disk'''
     from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -1183,8 +1183,6 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False,
     if lun is None:
         lun = _get_disk_lun(vm.storage_profile.data_disks)
     if new:
-        if not size_gb:
-            raise CLIError('usage error: --size-gb required to create an empty disk for attach')
         data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.empty,
                              name=parse_resource_id(disk)['name'],
                              disk_size_gb=size_gb, caching=caching,
