@@ -17,6 +17,9 @@ from azure.cli.testsdk.checkers import (
 
 # flake8: noqa
 
+DEFAULT_K8S_CREATE_VERSION = '1.10.9'
+DEFAULT_K8S_UPGRADE_VERSION = '1.11.5'
+
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
@@ -118,7 +121,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
-            'k8s_version': '1.8.11',
+            'k8s_version': DEFAULT_K8S_CREATE_VERSION,
             'vm_size': 'Standard_DS1_v2'
         })
 
@@ -164,7 +167,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade in table format
-        k8s_upgrade_version = '1.9.6'
+        k8s_upgrade_version = DEFAULT_K8S_UPGRADE_VERSION
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(k8s_upgrade_version)
@@ -200,7 +203,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
-            'k8s_version': '1.8.11',
+            'k8s_version': DEFAULT_K8S_CREATE_VERSION,
             'nodepool_name': self.create_random_name('np', 12)
         })
 
