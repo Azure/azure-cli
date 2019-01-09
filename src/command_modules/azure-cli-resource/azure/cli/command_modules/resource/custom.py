@@ -221,7 +221,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
                               no_wait=False):
@@ -262,7 +262,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_subscription_scope(cli_ctx,
                                             template_file=None, template_uri=None,
                                             deployment_name=None, deployment_location=None,
                                             parameters=None, mode=None, validate_only=False,
@@ -1716,7 +1716,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes, useless-object-inheritance
+class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,

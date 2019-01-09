@@ -27,9 +27,9 @@ def handle_exception(ex):
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
-    elif isinstance(ex, KeyboardInterrupt):
+    if isinstance(ex, KeyboardInterrupt):
         return 1
-    elif isinstance(ex, HttpOperationError):
+    if isinstance(ex, HttpOperationError):
         try:
             response_dict = json.loads(ex.response.text)
             error = response_dict['error']

@@ -19,7 +19,7 @@ from azure.cli.core.commands.validators import (
 from azure.cli.core.util import hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys  # pylint:disable=useless-import-alias
+import azure.cli.core.keys as keys
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version

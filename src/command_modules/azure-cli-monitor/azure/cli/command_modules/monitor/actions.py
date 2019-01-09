@@ -21,7 +21,6 @@ def timezone_name_type(value):
     return zone
 
 
-# pylint: disable=chained-comparison
 def timezone_offset_type(value):
 
     try:

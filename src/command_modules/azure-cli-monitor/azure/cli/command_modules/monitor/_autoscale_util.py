@@ -638,7 +638,6 @@ def validate_autoscale_profile(schedule, start, end, recurrence):
         if day not in schedule:
             schedule[day] = {}
 
-        # pylint: disable=chained-comparison
         def _find_conflicting_profile(time):
             conflict_sched = None
             for sched_name, sched_values in schedule[day].items():
