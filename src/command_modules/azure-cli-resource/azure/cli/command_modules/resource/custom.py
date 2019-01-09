@@ -19,11 +19,11 @@ import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
+
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
-
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
 
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -982,9 +982,9 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
         else:
             raise CLIError('Invalid id "{}", as it has no group or subscription field'.format(i))
 
-    if len(set([r['subscription'] for r in resources])) > 1:
+    if len({r['subscription'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same subscription')
-    if len(set([r['resource_group'] for r in resources])) > 1:
+    if len({r['resource_group'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same group')
 
     rcf = _resource_client_factory(cmd.cli_ctx)
@@ -1301,7 +1301,7 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
     profile = Profile(cli_ctx=cli_ctx)
     subscriptions_list = profile.load_cached_subscriptions()
     for sub in subscriptions_list:
-        if sub['id'] == subscription or sub['name'] == subscription:
+        if subscription in (sub['id'], sub['name']):
             return sub['id']
     raise CLIError("Subscription not found in the current context.")
 
@@ -1660,10 +1660,9 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
         lock_list = list_locks(resource_group, resource_provider_namespace, parent_resource_path,
                                resource_type, resource_name)
         return next((lock for lock in lock_list if lock.name == lock_name), None)
-    else:
-        params = lock_client.management_locks.get_at_resource_level(
-            resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
-            resource_name, lock_name)
+    params = lock_client.management_locks.get_at_resource_level(
+        resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
+        resource_name, lock_name)
     _update_lock_parameters(params, level, notes)
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
@@ -1717,7 +1716,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
+class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes, useless-object-inheritance
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None,
@@ -1918,10 +1917,9 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         if len(rt) == 1 and rt[0].api_versions:
             npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
             return npv[0] if npv else rt[0].api_versions[0]
-        else:
-            raise IncorrectUsageError(
-                'API version is required and could not be resolved for resource {}'
-                .format(resource_type))
+        raise IncorrectUsageError(
+            'API version is required and could not be resolved for resource {}'
+            .format(resource_type))
 
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):
