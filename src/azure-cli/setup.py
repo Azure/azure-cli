@@ -119,7 +119,6 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     scripts=[
-        'az',
         'az.completion.sh',
         'az.bat',
     ],
@@ -127,6 +126,11 @@ setup(
         'azure',
         'azure.cli',
     ],
+    entry_points={
+        'console_scripts': [
+            'az=azure.cli.__main__:main',
+        ]
+    },
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
 )

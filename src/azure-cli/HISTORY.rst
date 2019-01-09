@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Fix problem with installations in virtualenvs - https://github.com/Azure/azure-cli/issues/3989
+
 2.0.55
 ++++++
 * Minor fixes

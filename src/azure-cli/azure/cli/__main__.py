@@ -29,23 +29,32 @@ def cli_main(cli, args):
     return cli.invoke(args)
 
 
-az_cli = get_default_cli()
+def main():
+    """Entrypoint for console script
 
-telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
+    This method is invoked by the ``az`` command that is installed by setup.py
+    """
+    az_cli = get_default_cli()
 
-try:
-    telemetry.start()
+    telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
-    exit_code = cli_main(az_cli, sys.argv[1:])
+    try:
+        telemetry.start()
 
-    if exit_code and exit_code != 0:
-        telemetry.set_failure()
-    else:
-        telemetry.set_success()
+        exit_code = cli_main(az_cli, sys.argv[1:])
 
-    sys.exit(exit_code)
-except KeyboardInterrupt:
-    telemetry.set_user_fault('keyboard interrupt')
-    sys.exit(1)
-finally:
-    telemetry.conclude()
+        if exit_code and exit_code != 0:
+            telemetry.set_failure()
+        else:
+            telemetry.set_success()
+
+        sys.exit(exit_code)
+    except KeyboardInterrupt:
+        telemetry.set_user_fault('keyboard interrupt')
+        sys.exit(1)
+    finally:
+        telemetry.conclude()
+
+
+if __name__ == '__main__':
+    main()
