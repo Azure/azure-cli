@@ -906,12 +906,14 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
 
     if tags is not None:
         instance.tags = tags
-    if vnets == "":
-        vnets = []
     if vnets is not None:
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
-        vnet_ids = set([x.id for x in vnets])
-        existing_vnet_ids = set([x.id for x in instance.virtual_networks or []])
+        vnet_ids = set([])
+        if len(vnets) == 1 and not vnets[0]:
+            pass
+        else:
+            vnet_ids = {x.id for x in vnets}
+        existing_vnet_ids = {x.id for x in instance.virtual_networks} or set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
@@ -1113,26 +1115,26 @@ def _build_record(cmd, data):
     try:
         if record_type == 'aaaa':
             return AaaaRecord(ipv6_address=data['ip'])
-        elif record_type == 'a':
+        if record_type == 'a':
             return ARecord(ipv4_address=data['ip'])
-        elif (record_type == 'caa' and
-              supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
+        if (record_type == 'caa' and
+                supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
             return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
-        elif record_type == 'cname':
+        if record_type == 'cname':
             return CnameRecord(cname=data['alias'])
-        elif record_type == 'mx':
+        if record_type == 'mx':
             return MxRecord(preference=data['preference'], exchange=data['host'])
-        elif record_type == 'ns':
+        if record_type == 'ns':
             return NsRecord(nsdname=data['host'])
-        elif record_type == 'ptr':
+        if record_type == 'ptr':
             return PtrRecord(ptrdname=data['host'])
-        elif record_type == 'soa':
+        if record_type == 'soa':
             return SoaRecord(host=data['host'], email=data['email'], serial_number=data['serial'],
                              refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
                              minimum_ttl=data['minimum'])
-        elif record_type == 'srv':
+        if record_type == 'srv':
             return SrvRecord(priority=data['priority'], weight=data['weight'], port=data['port'], target=data['target'])
-        elif record_type in ['txt', 'spf']:
+        if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
     except KeyError as ke:

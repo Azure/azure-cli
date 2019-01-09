@@ -7,6 +7,7 @@ Release History
 ++++++
 * Add Virtual Nodes Preview
 * Add Managed OpenShift commands
+* Minor fixes
 
 2.3.13
 ++++++

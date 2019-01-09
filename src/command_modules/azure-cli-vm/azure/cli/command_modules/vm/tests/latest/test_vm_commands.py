@@ -357,6 +357,50 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_conflict')
+    def test_vm_custom_image_name_conflict(self, resource_group):
+        self.kwargs.update({
+            'vm': 'test-vm',
+            'image1': 'img-from-vm',
+            'image2': 'img-from-vm-id',
+            'image3': 'img-from-disk-id',
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password')
+        vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.cmd('vm stop -g {rg} -n {vm}')
+
+        # set variables up to test against name conflict between disk and vm.
+        self.kwargs.update({
+            'os_disk_vhd_uri': vm1_info['storageProfile']['osDisk']['vhd']['uri'],
+            'vm_id': vm1_info['id'],
+            'os_disk': vm1_info['name']
+        })
+
+        # create disk with same name as vm
+        disk_info = self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux').get_output_in_json()
+        self.kwargs.update({'os_disk_id': disk_info['id']})
+
+        # Deallocate and generalize vm. Do not need to deprovision vm as this test will not recreate a vm from the image.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        # Create image from vm
+        self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from vm id
+        self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from disk id
+        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux', checks=[
+            self.check("sourceVirtualMachine", None),
+            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
+        ])
+
 
 class VMImageWithPlanTest(ScenarioTest):
 
@@ -1152,22 +1196,47 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'pub': 'Microsoft.Azure.NetworkWatcher',
-            'ext': 'NetworkWatcherAgentLinux',
+            'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
             'username': username,
             'config_file': config_file
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
-        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
-            self.check('name', '{ext}'),
-            self.check('publisher', '{pub}'),
+            self.check('name', '{net-ext}'),
+            self.check('publisher', '{net-pub}'),
+            self.check('provisionAfterExtensions', None)
         ]).get_output_in_json()
-        uuid.UUID(result['forceUpdateTag'])
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext}')
+
+        uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.
+
+        # set the customscript extension that depends on the network watcher extension
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {script-ext} --publisher {script-pub} --version 2.0 '
+                 '--provision-after-extensions {net-ext} --settings "{{\\"commandToExecute\\": \\"echo testing\\"}}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {script-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 1),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+        ])
+
+        # set the VMAccess extension that depends on both the network watcher and script extensions.
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {access-ext} --publisher {access-pub} --version 1.5 '
+                 '--provision-after-extensions {net-ext} {script-ext} --protected-settings "{config_file}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {access-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 2),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+            self.check('provisionAfterExtensions[1]', '{script-ext}'),
+        ])
+
+        # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
     def test_vmss_extension_instance_name(self):
@@ -2978,15 +3047,20 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}',
-                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
+                 checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
+
         self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                  checks=self.check('length(@)', 1))
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=2 {location}',
-                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=1 {location} --replica-count 2',
+                 checks=[
+                     self.check('publishingProfile.replicaCount', 2),
+                     self.check('length(publishingProfile.targetRegions)', 2),
+                     self.check('publishingProfile.targetRegions', [dict(name="West US 2", regionalReplicaCount=1), dict(name="East US 2", regionalReplicaCount=2)])
+                 ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))
 

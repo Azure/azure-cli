@@ -22,7 +22,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'japanwest',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -44,7 +44,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'japaneast',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -121,7 +121,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_update,
-            'location': 'westus2',
+            'location': 'australiaeast',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -175,7 +175,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastasia',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -208,7 +208,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'southeastasia',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -247,7 +247,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westus',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -272,7 +272,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westindia',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -302,7 +302,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_show,
-            'location': 'westus2',
+            'location': 'canadacentral',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -334,7 +334,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_show,
-            'location': 'westus2',
+            'location': 'canadaeast',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
@@ -369,7 +369,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_delete,
-            'location': 'westus2',
+            'location': 'eastus',
             'contentKeyPolicyName': policy_name,
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
