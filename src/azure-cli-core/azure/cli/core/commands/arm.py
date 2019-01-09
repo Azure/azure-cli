@@ -147,7 +147,7 @@ def deployment_validate_table_format(result):
         except:  # pylint: disable=bare-except
             error_result['message'] = result['error']['message']
         return error_result
-    elif result.get('properties', None):
+    if result.get('properties', None):
         success_result = OrderedDict()
         success_result['result'] = result['properties']['provisioningState']
         success_result['correlationId'] = result['properties']['correlationId']
@@ -173,6 +173,7 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
     return existing
 
 
+# pylint: disable=too-many-statements
 def register_ids_argument(cli_ctx):
 
     from knack import events
@@ -516,10 +517,10 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         if supports_no_wait and no_wait_enabled:
             return None
-        else:
-            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-            if no_wait_param and setterargs.get(no_wait_param, None):
-                return None
+
+        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+        if no_wait_param and setterargs.get(no_wait_param, None):
+            return None
 
         if _is_poller(result):
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
@@ -950,14 +951,13 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
 
             if len(matches) == 1:
                 return matches[0]
-            elif len(matches) > 1:
+            if len(matches) > 1:
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
-            else:
-                if key in getattr(instance, 'additional_properties', {}):
-                    instance.enable_additional_properties_sending()
-                    return instance.additional_properties[key]
-                raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
+            if key in getattr(instance, 'additional_properties', {}):
+                instance.enable_additional_properties_sending()
+                return instance.additional_properties[key]
+            raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
         if index:
             try:
@@ -971,7 +971,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
 
         if hasattr(instance, make_snake_case(part)):
             return getattr(instance, make_snake_case(part), None)
-        elif part in getattr(instance, 'additional_properties', {}):
+        if part in getattr(instance, 'additional_properties', {}):
             instance.enable_additional_properties_sending()
             return instance.additional_properties[part]
         raise AttributeError()

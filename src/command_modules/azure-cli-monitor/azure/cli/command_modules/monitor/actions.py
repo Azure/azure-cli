@@ -168,7 +168,7 @@ class AlertAddAction(argparse._AppendAction):
         if _type == 'email':
             from azure.mgmt.monitor.models import RuleEmailAction
             return RuleEmailAction(custom_emails=values[1:])
-        elif _type == 'webhook':
+        if _type == 'webhook':
             from azure.mgmt.monitor.models import RuleWebhookAction
             uri = values[1]
             try:
@@ -176,7 +176,6 @@ class AlertAddAction(argparse._AppendAction):
             except ValueError:
                 raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
             return RuleWebhookAction(service_uri=uri, properties=properties)
-
         raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 
@@ -205,7 +204,7 @@ class AutoscaleAddAction(argparse._AppendAction):
         if _type == 'email':
             from azure.mgmt.monitor.models import EmailNotification
             return EmailNotification(custom_emails=values[1:])
-        elif _type == 'webhook':
+        if _type == 'webhook':
             from azure.mgmt.monitor.models import WebhookNotification
             uri = values[1]
             try:
@@ -213,7 +212,6 @@ class AutoscaleAddAction(argparse._AppendAction):
             except ValueError:
                 raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
             return WebhookNotification(service_uri=uri, properties=properties)
-
         raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 

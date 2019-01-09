@@ -56,10 +56,9 @@ def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
         return npv[0] if npv else rt[0].api_versions[0]
-    else:
-        raise CLIError(
-            'API version is required and could not be resolved for resource {}'
-            .format(resource_type))
+    raise CLIError(
+        'API version is required and could not be resolved for resource {}'
+        .format(resource_type))
 
 
 def log_pprint_template(template):

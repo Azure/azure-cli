@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from collections import OrderedDict
 import sys
 import os
 import tempfile
@@ -11,7 +12,6 @@ import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
-from collections import OrderedDict
 
 import requests
 from wheel.install import WHEEL_INFO_RE
@@ -203,8 +203,7 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
             if isinstance(ext, WheelExtension):
                 logger.warning("Extension '%s' is already installed.", extension_name)
                 return
-            else:
-                logger.warning("Overriding development version of '%s' with production version.", extension_name)
+            logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
             source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
         except NoExtensionCandidatesError as err:

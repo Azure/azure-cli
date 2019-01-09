@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
+# pylint: disable=too-few-public-methods,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import errno
 try:
