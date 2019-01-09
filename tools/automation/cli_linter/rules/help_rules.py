@@ -66,7 +66,7 @@ def faulty_help_example_parameters_rule(linter, help_entry):
         num_err = len(violations)
         violation_str = "\n\n".join(violations)
         violation_msg = "\n\tThere is a violation: {}.".format(violation_str) if num_err == 1 else \
-            "\n\tThere are {} violations: {}".format(num_err, violation_str)
+            "\n\tThere are {} violations:\n\n{}".format(num_err, violation_str)
         raise RuleError(violation_msg + "\n\n")
 
 
@@ -89,7 +89,7 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
         parser.parse_args(command_args)
     except ValueError as e:  # handle exception thrown by shlex.
         if str(e) == "No closing quotation":
-            violation = '\t"{}"has no closing quotation.\n\tTo continue an example ' \
+            violation = '\t"{}" has no closing quotation.\n\tTo continue an example ' \
                         'command on the next line, use a "\\" followed by a newline. ' \
                         'If needed, you can escape the "\\", like so "\\\\"'.format(command)
         else:
