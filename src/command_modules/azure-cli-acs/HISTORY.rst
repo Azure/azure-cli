@@ -6,6 +6,7 @@ Release History
 2.3.14
 ++++++
 * Minor fixes
+* Add support for new ACI regions
 
 2.3.13
 ++++++
