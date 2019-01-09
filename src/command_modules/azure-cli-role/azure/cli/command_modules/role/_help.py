@@ -13,9 +13,6 @@ helps['ad sp create-for-rbac'] = """
     parameters:
         - name: --name -n
           short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
-        - name: --password -p
-          short-summary: The password used to log in.
-          long-summary: If not present and `--cert` is not specified, a random password will be generated.
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
@@ -188,7 +185,7 @@ helps['ad app permission grant'] = """
     short-summary: Grant the app an API permission
     examples:
         - name: Grant a native application with permissions to access an existing API with TTL of 2 years
-          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --app-id a0322f79-57df-498f-9d9f-12678 --expires 2
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
 """
 helps['ad app permission list'] = """
     type: command

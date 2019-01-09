@@ -120,9 +120,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
-        return BotTemplateDeployer.create_app(cmd, logger, client, resource_group_name, resource_name, description,
-                                              kind, msa_app_id, password, storageAccountName, location, sku_name,
-                                              appInsightsLocation, language, version)
+        return BotTemplateDeployer.create_app(
+            cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
+            storageAccountName, location, sku_name, appInsightsLocation, language, version)
 
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):

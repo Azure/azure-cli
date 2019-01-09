@@ -29,11 +29,14 @@ def create_file_url(client, share_name, directory_name, file_name, protocol=None
         share_name, directory_name, file_name, protocol=protocol, sas_token=client.sas_token)
 
 
-def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
+def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None,
+                     num_results=None, marker=None):
     if cmd.supported_api_version(min_api='2017-04-17'):
-        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
+        generator = client.list_directories_and_files(
+            share_name, directory_name, timeout=timeout, num_results=num_results, marker=marker, snapshot=snapshot)
     else:
-        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout)
+        generator = client.list_directories_and_files(
+            share_name, directory_name, timeout=timeout, num_results=num_results, marker=marker)
 
     if exclude_dir:
         t_file_properties = cmd.get_models('file.models#FileProperties')

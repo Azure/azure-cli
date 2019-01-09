@@ -57,7 +57,7 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     all_modules=`find $TMP_PKG_DIR -name "*.whl"`; \
     pip install --no-cache-dir $all_modules; \
     pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;' \
- && cat /azure-cli/az.completion | dos2unix > ~/.bashrc \
+ && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \
         | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
@@ -66,12 +66,12 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
         | sort -u \
     )" \
  && apk add --virtual .rundeps $runDeps \
- && apk del .build-deps \
- && cat /usr/local/bin/az | dos2unix > /usr/local/bin/az
+ && apk del .build-deps
 
 WORKDIR /
 
-# Remove CLI source code from the final image.
-RUN rm -rf ./azure-cli
+# Remove CLI source code from the final image and normalize line endings.
+RUN rm -rf ./azure-cli && \
+    dos2unix /root/.bashrc /usr/local/bin/az
 
 CMD bash

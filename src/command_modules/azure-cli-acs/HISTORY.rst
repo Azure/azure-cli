@@ -5,11 +5,12 @@ Release History
 
 2.3.14
 ++++++
-* Add Virtual Nodes Preview
+* Minor fixes
 * Support Service Principal updating operation using "az aks update-credentials --reset-service-principal"
 
 2.3.13
 ++++++
+* Add Virtual Nodes Preview
 * Remove "(PREVIEW)" from AAD arguments to "az aks create"
 * Mark "az acs" commands as deprecated (the ACS service will retire on January 31, 2020)
 * Add support of Network Policy when creating new AKS clusters

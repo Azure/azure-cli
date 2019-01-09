@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.3.9"
+VERSION = "0.3.10"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -37,7 +37,7 @@ DEPENDENCIES = [
     'azure-mgmt-network==2.4.0',
     'azure-mgmt-authorization==0.50.0',
     'azure-cli-core',
-    'pyyaml>=3.13',
+    'pyyaml>=4.2b1',
     'colorama',
     'websocket-client'
 ]

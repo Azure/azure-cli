@@ -13,6 +13,7 @@ import jinja2
 from poet.poet import make_graph, RESOURCE_TEMPLATE
 
 TEMPLATE_FILE_NAME='formula_template.txt'
+CLI_VERSION=os.environ['CLI_VERSION']
 HOMEBREW_UPSTREAM_URL=os.environ['HOMEBREW_UPSTREAM_URL']
 HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-core/master/Formula/azure-cli.rb"
 
@@ -26,6 +27,7 @@ def main():
 
     template = jinja2.Template(template_content)
     content = template.render(
+        cli_version=CLI_VERSION,
         upstream_url=HOMEBREW_UPSTREAM_URL,
         upstream_sha=compute_sha256(HOMEBREW_UPSTREAM_URL),
         resources=collect_resources(),

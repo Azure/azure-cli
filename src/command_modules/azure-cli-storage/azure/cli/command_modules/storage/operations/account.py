@@ -26,8 +26,6 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.identity = Identity()
     if https_only:
         params.enable_https_traffic_only = https_only
-    # temporary fix to allow idempotent create when value is None. (sdk defaults with False)
-    params.is_hns_enabled = None
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
@@ -106,7 +104,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if custom_domain is not None:
         domain = CustomDomain(name=custom_domain)
         if use_subdomain is not None:
-            domain.name = use_subdomain == 'true'
+            domain.use_sub_domain_name = use_subdomain == 'true'
 
     encryption = instance.encryption
     if encryption_services:

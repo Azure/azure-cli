@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.0.55
+++++++
+* `--output`: Introduce 'none' as an output format option.
+
+2.0.54
+++++++
+* Minor fixes
+
+2.0.53
+++++++
+* Minor fixes
+
 2.0.52
 ++++++
 * core: support cross tenant resource provisioning for multi-tenant service principal

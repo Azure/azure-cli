@@ -1946,6 +1946,10 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
+    # Workaround for this addon key which has been seen lowercased in the wild.
+    if 'loganalyticsworkspaceresourceid' in addon.config:
+        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
 
     workspace_resource_id = workspace_resource_id.strip()

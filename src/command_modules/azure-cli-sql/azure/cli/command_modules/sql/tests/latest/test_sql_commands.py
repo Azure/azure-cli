@@ -773,10 +773,10 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='westcentralus')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer()
-    @StorageAccountPreparer()
+    @SqlServerPreparer(location='westcentralus')
+    @StorageAccountPreparer(location='westcentralus')
     @StorageAccountPreparer(parameter_name='storage_account_2',
                             resource_group_parameter_name='resource_group_2')
     def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
@@ -2568,13 +2568,14 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         edition = 'GeneralPurpose'
         family = 'Gen4'
         resource_group_1 = "cl_one"
+        collation = "Serbian_Cyrillic_100_CS_AS"
 
         user = admin_login
 
         # test create sql managed_instance with minimal required parameters
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
-                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {}'
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -2585,7 +2586,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('sku.tier', edition),
                                           JMESPathCheck('sku.family', family),
                                           JMESPathCheck('sku.capacity', v_cores),
-                                          JMESPathCheck('identity', None)]).get_output_in_json()
+                                          JMESPathCheck('identity', None),
+                                          JMESPathCheck('collation', collation)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -2624,8 +2626,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
-                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
-                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family),
+                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {}'
+                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_2),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -2636,7 +2638,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('sku.family', family),
                      JMESPathCheck('sku.capacity', v_cores),
-                     JMESPathCheck('identity.type', 'SystemAssigned')])
+                     JMESPathCheck('identity.type', 'SystemAssigned'),
+                     JMESPathCheck('collation', collation)])
 
         # test show sql managed instance 2
         self.cmd('sql mi show -g {} -n {}'

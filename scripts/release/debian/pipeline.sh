@@ -3,7 +3,7 @@
 # Build APT package in an Azure Container Instances
 # This script assumes the Azure CLI is installed and logged in.
 
-set -ex
+set -exv
 
 : ${DISTRO:?"DISTRO is not set"}
 : ${DISTRO_BASE_IMAGE:?"DISTRO_BASE_IMAGE is not set"}

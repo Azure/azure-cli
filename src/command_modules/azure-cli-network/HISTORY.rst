@@ -3,10 +3,14 @@
 Release History
 ===============
 
-2.2.10
+2.2.11
 ++++++
+* `ddos-protection update`: Fix issue where supplying `--vnets ""` to remove vnets caused a strack trace.
 * `watcher flow-log configure`: Add support for `--format` and `--log-version`.
 * `dns zone update`: Finished issue where using "" to clear resolution and registration VNets didn't work.
+
+2.2.10
+++++++
 * `application-gateway waf-config set`: Added `--exclusion` argument to support WAF exclusions.
 
 2.2.9

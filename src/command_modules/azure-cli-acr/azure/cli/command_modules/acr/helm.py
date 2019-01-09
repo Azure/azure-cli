@@ -3,21 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import re
-from os.path import isdir, basename
-
 from knack.util import CLIError
 from knack.log import get_logger
 
 from ._utils import user_confirmation
-from ._docker_utils import get_access_credentials, request_data_from_registry
+from ._docker_utils import get_access_credentials, request_data_from_registry, RegistryException
 
 
 logger = get_logger(__name__)
-
-
-# https://github.com/kubernetes/helm/blob/b6660cd5c9a9ee35ff24034fcc223b7eaeed3ee2/pkg/tiller/release_server.go#L80
-VALID_NAME = '^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])+(.tgz)(.prov)?$'
 
 
 def acr_helm_list(cmd,
@@ -110,12 +103,10 @@ def acr_helm_push(cmd,
                   resource_group_name=None,
                   username=None,
                   password=None):
+    from os.path import isdir, basename
+
     if isdir(chart_package):
         raise CLIError("Please run 'helm package {}' to generate a chart package first.".format(chart_package))
-
-    chart_name = basename(chart_package)
-    if not re.match(VALID_NAME, chart_name):
-        raise CLIError("Invalid helm package name '{}'. Is it a '*.tgz' or '*.tgz.prov' file?".format(chart_package))
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
@@ -126,16 +117,28 @@ def acr_helm_push(cmd,
         artifact_repository=repository,
         permission='*')
 
+    path = _get_blobs_path(repository, basename(chart_package))
+
     try:
-        return request_data_from_registry(
+        result = request_data_from_registry(
             http_method='patch' if force else 'put',
             login_server=login_server,
-            path=_get_blobs_path(repository, chart_name),
+            path=path,
             username=username,
             password=password,
             file_payload=chart_package)[0]
-    except OSError as e:
-        raise CLIError(e)
+        return result
+    except RegistryException as e:
+        # Fallback using PUT if the chart doesn't exist
+        if e.status_code == 404 and force:
+            return request_data_from_registry(
+                http_method='put',
+                login_server=login_server,
+                path=path,
+                username=username,
+                password=password,
+                file_payload=chart_package)[0]
+        raise
 
 
 def acr_helm_repo_add(cmd,

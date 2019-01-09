@@ -2,6 +2,17 @@
 
 Release History
 ===============
+2.2.12
+++++++
+* `vm/vmss create`: support cross tenant image referencing.
+* `vm diagnostics get-default-config --windows-os`: fix bug in windows os default config.
+* `vmss extension set`: expose `--provision-after-extensions`. It defines what extensions must be provisioned before the extension being set.
+* `sig image-version update`: expose --replica-count for setting the default replication count.
+
+2.2.11
+++++++
+* `disk create`: expose --os-type parameter.
+* `image create --source`: fixed bug where source os disk is mistaken for a VM with the same name, even if the full resource ID is provided.
 
 2.2.10
 ++++++

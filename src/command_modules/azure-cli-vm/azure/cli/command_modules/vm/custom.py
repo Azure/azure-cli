@@ -250,7 +250,7 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 
 # region Disks (Managed)
 def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
-                        size_gb=None, sku='Premium_LRS',
+                        size_gb=None, sku='Premium_LRS', os_type=None,
                         source=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
@@ -274,7 +274,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
     if zone:
         disk.zones = zone
     if disk_iops_read_write is not None:
@@ -508,7 +508,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None):
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
+              aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -657,7 +658,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                     aux_subscriptions=aux_subscriptions).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
@@ -1839,7 +1841,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None):
+                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
+                aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2075,7 +2078,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     # deploy ARM template
     deployment_name = 'vmss_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                     aux_subscriptions=aux_subscriptions).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
@@ -2418,7 +2422,7 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
-                       no_wait=False, extension_instance_name=None):
+                       no_wait=False, extension_instance_name=None, provision_after_extensions=None):
     if not extension_instance_name:
         extension_instance_name = extension_name
 
@@ -2442,7 +2446,8 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
                                           settings=settings,
-                                          auto_upgrade_minor_version=(not no_auto_upgrade))
+                                          auto_upgrade_minor_version=(not no_auto_upgrade),
+                                          provision_after_extensions=provision_after_extensions)
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 
@@ -2563,8 +2568,10 @@ def fix_gallery_image_date_info(date_info):
     return date_info
 
 
-def update_image_version(instance, target_regions=None):
+def update_image_version(instance, target_regions=None, replica_count=None):
     if target_regions:
         instance.publishing_profile.target_regions = target_regions
+    if replica_count:
+        instance.publishing_profile.replica_count = replica_count
     return instance
 # endregion

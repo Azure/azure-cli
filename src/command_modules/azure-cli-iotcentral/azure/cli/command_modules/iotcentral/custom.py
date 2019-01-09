@@ -54,7 +54,7 @@ def iotcentral_app_list(client, resource_group_name=None):
 
 def iotcentral_app_update(client, app_name, parameters, resource_group_name):
     etag = parameters.additional_properties['etag']
-    return client.apps.create_or_update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
+    return client.apps.update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
 
 
 def _check_name_availability(client, app_name):

@@ -108,7 +108,7 @@ def cli_consumption_create_budget(client, budget_name, category, amount, time_gr
     filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
     parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, filters=filters, notifications=None)
     if resource_group_name:
-        return client.create_or_update(resource_group_name, budget_name, parameters)
+        return client.create_or_update_by_resource_group_name(resource_group_name, budget_name, parameters)
     return client.create_or_update(budget_name, parameters)
 
 

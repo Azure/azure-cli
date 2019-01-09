@@ -4,7 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+import subprocess
 import threading
+import time
+
 
 try:
     from urllib.parse import urlparse
@@ -39,12 +42,14 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console
 from azure.cli.core.util import open_page_in_browser
 
+from .tunnel import TunnelServer
+
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           should_create_new_rg, set_location, check_if_asp_exists, check_app_exists,
+                           should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
                            get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
@@ -1019,7 +1024,6 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                 return LongRunningOperation(cmd.cli_ctx)(poller)
             except Exception as ex:  # pylint: disable=broad-except
                 import re
-                import time
                 ex = ex_handler_factory(no_throw=True)(ex)
                 # for non server errors(50x), just throw; otherwise retry 4 times
                 if i == 4 or not re.findall(r'\(50\d\)', str(ex)):
@@ -1225,7 +1229,7 @@ def list_snapshots(cmd, resource_group_name, name, slot=None):
                                    slot)
 
 
-def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,
+def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
                      source_resource_group=None, source_name=None, source_slot=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
@@ -1568,7 +1572,6 @@ def show_cors(cmd, resource_group_name, name, slot=None):
 def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
-    import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
@@ -1636,7 +1639,6 @@ def _get_log(url, user_name, password, log_file=None):
 def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
@@ -1644,10 +1646,10 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
 
     thumb_print = _get_cert(certificate_password, certificate_file)
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, cert_resource_group_name)
+                                    webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
-    return client.certificates.create_or_update(cert_resource_group_name, cert_name, cert)
+    return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
 def _generate_cert_name(thumb_print, hosting_environment, location, resource_group_name):
@@ -2009,7 +2011,6 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
-    import time
     total_trials = (int(timeout) // 2) if timeout else 450
     for _num_trials in range(total_trials):
         time.sleep(2)
@@ -2125,7 +2126,8 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
             version_used_create != "-" else version_used_create
 
     full_sku = get_sku_name(sku)
-    loc_name = set_location(cmd, sku, location)
+    location = set_location(cmd, sku, location)
+    loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
     asp = "appsvc_asp_{}_{}".format(os_val, loc_name)
     rg_name = "appsvc_rg_{}_{}".format(os_val, loc_name)
@@ -2163,7 +2165,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _create_new_asp = check_if_asp_exists(cmd, rg_name, asp, location)
+        _create_new_asp = should_create_new_asp(cmd, rg_name, asp, location)
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
@@ -2175,8 +2177,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _create_new_app = True
     else:
         logger.warning("App service plan '%s' already exists.", asp)
-        _create_new_asp = False
-        _create_new_app = check_app_exists(cmd, rg_name, name)
+        _create_new_app = should_create_new_app(cmd, rg_name, name)
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ....", name)
@@ -2185,7 +2186,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         _set_build_appSetting = True
     else:
         logger.warning("App '%s' already exists", name)
-        if do_deployment:
+        if do_deployment and not is_skip_build:
             # setting the appsettings causes a app restart so we avoid if not needed
             _app_settings = get_app_settings(cmd, rg_name, name)
             if all(not d for d in _app_settings):
@@ -2198,21 +2199,18 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
     # update create_json to include the app_url
     url = _get_url(cmd, rg_name, name)
 
-    if do_deployment and not is_skip_build and _set_build_appSetting:
+    if _set_build_appSetting:
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
         update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
-        # work around until the timeout limits issue for linux is investigated & fixed
-        # wakeup kudu, by making an SCM call
-        import time
-        time.sleep(5)
-        _ping_scm_site(cmd, rg_name, name)
 
+    if do_deployment:
         logger.warning("Creating zip with contents of dir %s ...", src_dir)
         # zip contents & deploy
         zip_file_path = zip_contents_from_dir(src_dir, language)
 
-        logger.warning("Preparing to deploy %s contents to app.",
+        logger.warning("Preparing to deploy %s contents to app."
+                       "This operation can take a while to complete ...",
                        '' if is_skip_build else 'and build')
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file afer deployment, handling exception if user removed the file manually
@@ -2234,3 +2232,76 @@ def _ping_scm_site(cmd, resource_group, name):
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
     requests.get(scm_url + '/api/settings', headers=authorization)
+
+
+def _check_for_ready_tunnel(tunnel_server):
+    return tunnel_server.is_port_set_to_default()
+
+
+def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
+    webapp = show_webapp(cmd, resource_group_name, name, slot)
+    is_linux = webapp.reserved
+    if not is_linux:
+        raise CLIError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
+
+    profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
+    profile_user_name = next(p['userName'] for p in profiles)
+    profile_user_password = next(p['userPWD'] for p in profiles)
+
+    ssh_user_name = 'root'
+    ssh_user_password = 'Docker!'
+
+    if port is None:
+        port = 0  # Will auto-select a free port from 1024-65535
+        logger.info('No port defined, creating on random free port')
+    host_name = name
+
+    if slot is not None:
+        host_name += "-" + slot
+
+    tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
+    _ping_scm_site(cmd, resource_group_name, name)
+
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+
+    _wait_for_tunnel(tunnel_server, False)
+    logger.warning("SSH is available ( username: %s, password: %s )", ssh_user_name, ssh_user_password)
+
+    s = threading.Thread(target=_start_ssh,
+                         args=('localhost', tunnel_server.get_port(), ssh_user_name))
+    s.daemon = True
+    s.start()
+
+    while s.isAlive() and t.isAlive():
+        time.sleep(5)
+
+
+def _wait_for_tunnel(tunnel_server, print_warnings):
+    if not _check_for_ready_tunnel(tunnel_server):
+        if print_warnings:
+            logger.warning('Tunnel is not ready yet, please wait (may take up to 1 minute)')
+        while True:
+            time.sleep(1)
+            if print_warnings:
+                logger.warning('.')
+            if _check_for_ready_tunnel(tunnel_server):
+                break
+
+
+def _start_tunnel(tunnel_server):
+    _wait_for_tunnel(tunnel_server, True)
+    tunnel_server.start_server()
+
+
+def _start_ssh(host_name, port, user_name):
+    subprocess.call("ssh -o StrictHostKeyChecking=no {}@{} -p {}".format(user_name, host_name, port), shell=True)
+
+
+def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
+    import platform
+    if platform.system() == "Windows":
+        raise CLIError('webapp ssh is only supported on linux and mac')
+    else:
+        create_tunnel(cmd, resource_group_name, name, port=None, slot=slot)
