@@ -154,7 +154,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
 
 def _parse_action_removals(actions):
     """ Separates the combined list of keys to remove into webhooks and emails. """
-    flattened = list(set([x for sublist in actions for x in sublist]))
+    flattened = list({x for sublist in actions for x in sublist})
     emails = []
     webhooks = []
     for item in flattened:
