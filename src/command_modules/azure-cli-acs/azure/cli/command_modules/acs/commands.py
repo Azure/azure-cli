@@ -17,13 +17,13 @@ from ._format import aks_versions_table_format
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2018_03_31.operations.'
                         'container_services_operations#ContainerServicesOperations.{}',
         client_factory=cf_container_services
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2018_03_31.operations.'
                         'managed_clusters_operations#ManagedClustersOperations.{}',
         client_factory=cf_managed_clusters
     )
@@ -60,6 +60,7 @@ def load_command_table(self, _):
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('update-credentials', 'aks_update_credentials', supports_no_wait=True)
         g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
         g.custom_command('enable-addons', 'aks_enable_addons', supports_no_wait=True)
         g.custom_command('get-credentials', 'aks_get_credentials')

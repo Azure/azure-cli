@@ -275,6 +275,39 @@ helps['aks delete'] = """
     short-summary: Delete a managed Kubernetes cluster.
 """
 
+helps['aks update-credentials'] = """
+    type: command
+    short-summary: Update credentails for a managed Kubernetes cluster, like service principal, AAD.
+    parameters:
+        - name: --reset-service-principal -s
+          type: bool
+          short-summary: Reset service principal for a managed cluster.
+        - name: --service-principal
+          type: string
+          short-summary: Service principal used for authentication to Azure APIs. 
+        - name: --client-secret
+          type: string
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
+        - name: --reset-aad -a
+          type: bool
+          short-summary: Reset AAD for a managed cluster.
+        - name: --aad-client-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory client application of type "Native". This
+                         application is for user login via kubectl.
+        - name: --aad-server-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This
+                         application represents the managed cluster's apiserver (Server application).
+        - name: --aad-server-app-secret
+          type: string
+          short-summary: The secret of an Azure Active Directory server application.
+        - name: --aad-tenant-id
+          type: string
+          short-summary: The ID of an Azure Active Directory tenant. 
+"""
+
 helps['aks disable-addons'] = """
     type: command
     short-summary: Disable Kubernetes addons.
