@@ -20,5 +20,6 @@ class TestConfigure(unittest.TestCase):
                          "\n{}'s output options: {}\ndon't match az configure's output options ({})."
                          .format(AzOutputProducer.__name__, cli_output_options, configure_output_options))
 
+
 if __name__ == '__main__':
     unittest.main()
