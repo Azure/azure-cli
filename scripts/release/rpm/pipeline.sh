@@ -14,15 +14,14 @@ docker build \
     --build-arg cli_version=${CLI_VERSION} \
     -f ./scripts/release/rpm/Dockerfile \
     -t microsoft/azure-cli:centos7-builder \
-    . &
+    .
 
 # Continue the previous build, and create a container that has the current azure-cli build but not the source code.
 docker build \
     --build-arg cli_version=${CLI_VERSION} \
     -f ./scripts/release/rpm/Dockerfile \
     -t microsoft/azure-cli:centos7 \
-    . &
-wait
+    .
 
 # Extract the built RPM so that it can be distributed independently.
 docker run \
