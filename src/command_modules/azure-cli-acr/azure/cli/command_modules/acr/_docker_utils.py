@@ -147,13 +147,14 @@ def _get_credentials(cli_ctx,
     try:
         registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
         login_server = registry.login_server
-    except ResourceNotFound:
+    except ResourceNotFound as e:
         # Try to use the pre-defined login server suffix to construct login server from registry name.
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
             raise
         registry = None
-        login_server = '{}{}'.format(registry_name, login_server_suffix)
+        login_server = '{}{}'.format(registry_name, login_server_suffix).lower()
+        resource_not_found = str(e)
 
     # Validate the login server is reachable
     try:
@@ -182,14 +183,21 @@ def _get_credentials(cli_ctx,
             logger.warning("Unable to get AAD authorization tokens with message: %s", str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    if not password and registry and registry.admin_user_enabled:
-        try:
-            cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
-            username = cred.username
-            password = cred.passwords[0].value
-            return login_server, username, password
-        except CLIError as e:
-            logger.warning("Unable to get admin user credentials with message: %s", str(e))
+    if not password:
+        error_message = "Unable to get admin user credentials with message"
+        if registry:
+            if registry.admin_user_enabled:
+                try:
+                    cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
+                    username = cred.username
+                    password = cred.passwords[0].value
+                    return login_server, username, password
+                except CLIError as e:
+                    logger.warning("%s: %s", error_message, str(e))
+            else:
+                logger.warning("%s: %s", error_message, "Admin user is disabled.")
+        else:
+            logger.warning("%s: %s", error_message, resource_not_found)
 
     # 4. if we still don't have credentials, prompt the user
     if not password:
