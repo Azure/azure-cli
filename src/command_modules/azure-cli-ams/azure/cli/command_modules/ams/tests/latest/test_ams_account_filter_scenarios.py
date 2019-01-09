@@ -18,7 +18,7 @@ class AmsAccountFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'northcentralus',
             'filterName': filter_name,
             'bitrate': 420,
             'endTimestamp': 100000000,
@@ -79,7 +79,7 @@ class AmsAccountFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_list_and_delete,
-            'location': 'westus2',
+            'location': 'southcentralus',
             'filterName1': filter_name_1,
             'filterName2': filter_name_2,
             'bitrate1': 420,
@@ -125,7 +125,7 @@ class AmsAccountFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_update,
-            'location': 'westus2',
+            'location': 'northeurope',
             'filterName': filter_name,
             'bitrate': 420,
             'endTimestamp': 100000000,
