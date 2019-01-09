@@ -13,6 +13,7 @@ import time
 from json import loads
 from base64 import b64encode
 import requests
+from requests import RequestException
 from requests.utils import to_native_string
 from msrest.http_logger import log_request, log_response
 
@@ -153,6 +154,13 @@ def _get_credentials(cli_ctx,
             raise
         registry = None
         login_server = '{}{}'.format(registry_name, login_server_suffix)
+
+    # Validate the login server is reachable
+    try:
+        requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    except RequestException:
+        raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
+                       "Please verify if the registry exists.")
 
     # 1. if username was specified, verify that password was also specified
     if username:
