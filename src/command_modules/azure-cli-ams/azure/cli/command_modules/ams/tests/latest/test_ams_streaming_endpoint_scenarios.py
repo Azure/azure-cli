@@ -20,7 +20,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'canadacentral',
             'streamingEndpointName': streaming_endpoint_name,
             'identifier': 'id1',
             'expiration': '2030-12-31T16:00:00-08:00',
@@ -33,7 +33,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --scale-units {scaleUnits}', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'Canada Central'),
             self.check('scaleUnits', '{scaleUnits}')
         ])
 
@@ -60,7 +60,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'northeurope',
             'streamingEndpointName': streaming_endpoint_name,
             'availabilitySetName': 'availaTest',
             'description': 'test streaming description',
@@ -80,7 +80,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --ips {ips} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'North Europe'),
             self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('length(accessControl.ip.allow)', '2'),
             self.check('description', '{description}'),
@@ -112,7 +112,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'australiaeast',
             'streamingEndpointName': streaming_endpoint_name,
             'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
@@ -131,7 +131,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'Australia East'),
             self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('cdnProvider', '{cdnProvider}'),
             self.check('cdnProfile', '{cdnProfile}'),
@@ -189,7 +189,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'canadacentral',
             'streamingEndpointName': streaming_endpoint_name,
             'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
@@ -207,7 +207,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'Canada Central'),
             self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('cdnProvider', '{cdnProvider}'),
             self.check('cdnProfile', '{cdnProfile}'),
@@ -228,7 +228,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_show,
-            'location': 'westus2',
+            'location': 'australiasoutheast',
             'streamingEndpointName': streaming_endpoint_name,
             'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
@@ -248,7 +248,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'Australia Southeast'),
             self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('cdnProvider', '{cdnProvider}'),
             self.check('cdnProfile', '{cdnProfile}'),
@@ -269,7 +269,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_delete,
-            'location': 'westus2',
+            'location': 'southindia',
             'streamingEndpointName1': streaming_endpoint_name1,
             'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
@@ -305,7 +305,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_scale,
-            'location': 'westus2',
+            'location': 'westindia',
             'streamingEndpointName': streaming_endpoint_name,
             'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
@@ -342,7 +342,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'centralindia',
             'streamingEndpointName': streaming_endpoint_name,
             'scaleUnits': 4
         })
@@ -364,7 +364,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'centralus',
             'streamingEndpointName': streaming_endpoint_name,
             'scaleUnits': 11
         })
@@ -390,7 +390,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastus2',
             'streamingEndpointName': streaming_endpoint_name,
             'scaleUnits': 12
         })
@@ -416,7 +416,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastus',
             'streamingEndpointName': streaming_endpoint_name,
             'scaleUnits': 13
         })
@@ -440,7 +440,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westus',
             'streamingEndpointName': streaming_endpoint_name,
             'scaleUnits': 14
         })

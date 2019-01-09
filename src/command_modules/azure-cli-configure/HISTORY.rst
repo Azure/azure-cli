@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.20
+++++++
+* Add 'none' as a configurable output format.
 
 2.0.19
 ++++++

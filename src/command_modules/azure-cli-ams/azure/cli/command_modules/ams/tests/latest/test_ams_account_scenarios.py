@@ -15,12 +15,12 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'centralus'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Central US')
         ])
 
         self.cmd('az ams account update -n {amsname} -g {rg} --tags key=value', checks=[
@@ -45,7 +45,7 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'southeastasia'
         })
 
         account = self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}').get_output_in_json()
@@ -67,12 +67,12 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'eastasia'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'East Asia')
         ])
 
         self.kwargs.update({
@@ -99,7 +99,7 @@ class AmsAccountTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastus',
             'amsname2': amsname2,
             'amsname3': amsname3
         })

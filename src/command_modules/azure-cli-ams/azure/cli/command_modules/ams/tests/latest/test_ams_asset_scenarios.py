@@ -19,13 +19,13 @@ class AmsAssetTests(ScenarioTest):
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
             'storageAccountForAsset': storage_account_for_asset,
-            'location': 'westus2',
+            'location': 'australiaeast',
             'container': container
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Australia East')
         ])
 
         self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccountForAsset}', checks=[
@@ -79,12 +79,12 @@ class AmsAssetTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'australiasoutheast'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Australia Southeast')
         ])
 
         assetName = self.create_random_name(prefix='asset', length=12)
@@ -116,7 +116,7 @@ class AmsAssetTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'southindia'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -151,7 +151,7 @@ class AmsAssetTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'centralindia',
             'assetName': assetName,
             'streamingLocatorName': streamingLocatorName,
             'streamingPolicyName': 'Predefined_ClearStreamingOnly'
