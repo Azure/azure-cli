@@ -677,7 +677,7 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
         app_properties=app_properties,
         system_properties=system_properties
     )
-    
+
     if route_name:
         route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
         test_route_input = TestRouteInput(
