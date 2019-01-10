@@ -526,16 +526,16 @@ helps['iot hub routing-endpoint create'] = """
     long-summary: Create a new custom endpoint in your IoT Hub.
     examples:
         - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
-          text: |
-            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
-            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group "[Resource Group]" \\
-            --endpoint-subscription-id "[SubscriptionId]" --connection-string "[Connection String]"
+          text: >
+            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup}
+            --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
         - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
           text: |
             az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
             --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
-            --endpoint-subscription-id "[SubscriptionId]" --connection-string "[Connection String]" \\
-            --container-name "[Container Name]"
+            --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
+            --container-name {ContainerName}
 """
 
 helps['iot hub routing-endpoint list'] = """

@@ -126,8 +126,18 @@ def _process_command_args(command_args):
     result_args = []
     new_commands = []
     unwanted_chars = "$()`"
+    control_operators = ["&&","||"]
 
     for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
+        if arg in control_operators: # handle cases where multiple commands are connected by control operators.
+            idx = command_args.index(arg)
+            maybe_new_command = " ".join(command_args[idx:])
+
+            idx = maybe_new_command.find("az ")
+            if idx != -1:
+                new_commands.append(maybe_new_command[idx:])  # remaining command is in fact a new command / commands.
+            break
+
         arg = arg.strip(unwanted_chars)
         if arg.startswith("az "):  # store any new commands
             new_commands.append(arg)
