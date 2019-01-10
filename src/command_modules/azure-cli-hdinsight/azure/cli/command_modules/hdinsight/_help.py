@@ -19,9 +19,9 @@ helps['hdinsight create'] = """
         - name: Create a cluster with an existing storage account.
           text: |-
               az hdinsight create -t spark -n MyCluster -g MyResourceGroup \\
-              -p "<HTTP password>" \\
+              -p {HTTP_password} \\
               --storage-account MyStorageAccount.blob.core.windows.net \\
-              --storage-account-key "<key>"
+              --storage-account-key {storage_account_key}
 """
 
 helps['hdinsight list'] = """

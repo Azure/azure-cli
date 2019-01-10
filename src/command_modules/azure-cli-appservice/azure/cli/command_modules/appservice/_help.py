@@ -413,7 +413,7 @@ helps['webapp deployment source config-zip'] = """
            text: >
              az webapp deployment source config-zip \\
                  -g {myRG} -n {myAppName} \\
-                 --src {zip/file/path/location}
+                 --src {zip_file_path_location}
 """
 
 helps['webapp deployment source delete'] = """
@@ -993,7 +993,7 @@ helps['functionapp deployment source config-zip'] = """
            text: >
              az functionapp deployment source config-zip \\
                  -g <myRG> -n <myAppName> \\
-                 --src "<zip file path location>"
+                 --src {zip_file_path_location}
 """
 
 helps['functionapp cors'] = """

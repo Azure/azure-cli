@@ -561,7 +561,7 @@ helps['iot hub routing-endpoint show'] = """
         - name: Get an endpoint information from "MyIotHub" IoT Hub.
           text: |
             az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub \\
-            --endpoint-name "[Endpoint Name]"
+            --endpoint-name {endpoint_name}
 """
 
 helps['iot hub routing-endpoint delete'] = """
