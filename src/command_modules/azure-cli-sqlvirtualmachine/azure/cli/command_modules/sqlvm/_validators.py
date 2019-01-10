@@ -43,18 +43,57 @@ def validate_sqlvm_list(cmd, namespace):
 
 
 # pylint: disable=too-many-statements,line-too-long
-def _prompt_for_password(namespace):
-    from knack.prompting import prompt_pass, NoTTYException
-    try:
-        namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
-    except NoTTYException:
-        raise CLIError('Please specify password in non-interactive mode.')
+def validate_load_balancer(cmd, namespace):
+    '''
+    Validates if name or id has been provided. If name has been provided, it assumes the load balancer is in the same group.
+    '''
+    lb = namespace.load_balancer_resource_id
+
+    if not is_valid_resource_id(lb):
+        namespace.load_balancer_resource_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network', type='loadBalancers',
+            name=lb
+        )
 
 
 # pylint: disable=too-many-statements,line-too-long
-def _prompt_for_key(namespace):
-    from knack.prompting import prompt_pass, NoTTYException
-    try:
-        namespace.storage_account_key = prompt_pass('Storage key: ')
-    except NoTTYException:
-        raise CLIError('Please specify storage account key in non-interactive mode.')
+def validate_public_ip_address(cmd, namespace):
+    '''
+    Validates if name or id has been provided. If name has been provided, it assumes the public ip address is in the same group.
+    '''
+    public_ip = namespace.public_ip_address_resource_id
+
+    if public_ip and not is_valid_resource_id(public_ip):
+        namespace.public_ip_address_resource_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network', type='publicIPAddresses',
+            name=public_ip
+        )
+
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_subnet(cmd, namespace):
+    '''
+    Validates if name or id has been provided. If name has been provided, it assumes the public ip address is in the same group.
+    '''
+    subnet = namespace.subnet_resource_id
+    vnet = namespace.vnet_name
+
+    if vnet and '/' in vnet:
+        raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
+
+    subnet_is_id = is_valid_resource_id(subnet)
+    if (subnet_is_id and vnet) or (not subnet_is_id and not vnet):
+        raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
+
+    if not subnet_is_id and vnet:
+        namespace.subnet_resource_id = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network', type='virtualNetworks',
+            name=vnet, child_type_1='subnets',
+            child_name_1=subnet
+        )

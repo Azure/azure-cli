@@ -25,7 +25,13 @@ from azure.cli.core.commands.parameters import (
     get_location_type
 )
 
-from ._validators import validate_sqlvm_group, validate_sqlvm_list
+from ._validators import (
+    validate_sqlvm_group,
+    validate_sqlvm_list,
+    validate_load_balancer,
+    validate_public_ip_address,
+    validate_subnet
+)
 
 
 # pylint: disable=too-many-statements, line-too-long
@@ -42,6 +48,7 @@ def load_arguments(self, _):
     with self.argument_context('sql vm group') as c:
         c.argument('sql_virtual_machine_group_name',
                    options_list=['--name', '-n'],
+                   id_part='name',
                    help='Name of the SQL virtual machine group.')
         c.argument('sql_image_offer',
                    options_list=['--image-offer', '-i'],
@@ -67,7 +74,7 @@ def load_arguments(self, _):
                    options_list=['--service-acc', '-e'],
                    help='Account name under which SQL service will run on all participating SQL virtual machines in the cluster.')
         c.argument('storage_account_url',
-                   options_list=['--storage-acc', '-u'],
+                   options_list=['--storage-account', '-u'],
                    help='Storage account url of the witness storage account.')
         c.argument('storage_account_key',
                    options_list=['--sa-key', '-k'],
@@ -85,9 +92,10 @@ def load_arguments(self, _):
     #    availability group listener params       #
     ###############################################
 
-    with self.argument_context('sql vm group aglistener') as c:
+    with self.argument_context('sql vm group ag-listener') as c:
         c.argument('availability_group_listener_name',
                    options_list=['--name', '-n'],
+                   id_part='name',
                    help='Name of the availability group listener.')
         c.argument('sql_virtual_machine_group_name',
                    options_list=['--group-name', '-r'],
@@ -98,33 +106,29 @@ def load_arguments(self, _):
                    type=int)
         c.argument('availability_group_name',
                    options_list=['--ag-name', '-a'],
-                   help='Name of the availability group.')
+                   help='Name of the availability group. Please refer to '
+                   'https://docs.microsoft.com/en-us/sql/database-engine/availability-groups/windows/use-the-availability-group-wizard-sql-server-management-studio?view=sql-server-2017 '
+                   'to create and availability group')
 
-    with self.argument_context('sql vm group aglistener update') as c:
-        c.argument('remove_sql_virtual_machine_instances',
-                   nargs='+',
-                   options_list=['--remove-sqlvm'],
-                   validator=validate_sqlvm_list,
-                   help="Space-separated name or resource IDs of the SQL virtual machines to be removed.")
-        c.argument('add_sql_virtual_machine_instances',
-                   nargs='+',
-                   options_list=['--add-sqlvm'],
-                   validator=validate_sqlvm_list,
-                   help="Space-separated name or resource IDs of the SQL virtual machines to be added.")
-
-    with self.argument_context('sql vm group aglistener', arg_group='Load Balancer Configuration') as c:
+    with self.argument_context('sql vm group ag-listener', arg_group='Load Balancer Configuration') as c:
         c.argument('ip_address',
                    options_list=['--ip-address', '-i'],
                    help='Private IP address bound to the availability group listener.')
         c.argument('subnet_resource_id',
                    options_list=['--subnet', '-u'],
-                   help='Subnet resource ID used to include private IP.')
+                   validator=validate_subnet,
+                   help='The name or resource id of the subnet to include in the private IP.')
+        c.argument('vnet_name',
+                   options_list=['--vnet-name'],
+                   help='Name of the virtual network. Provide only if name of the subnet has been provided.')
         c.argument('public_ip_address_resource_id',
                    options_list=['--public-ip', '-c'],
-                   help='Resource id of the public IP.')
+                   validator=validate_public_ip_address,
+                   help='Name or resource ID of the public IP.')
         c.argument('load_balancer_resource_id',
                    options_list=['--load-balancer', '-b'],
-                   help='Resource id of the load balancer.')
+                   validator=validate_load_balancer,
+                   help='Name or resource ID of the load balancer.')
         c.argument('probe_port',
                    options_list=['--probe-port', '-e'],
                    help='Probe port.',
@@ -141,11 +145,9 @@ def load_arguments(self, _):
 
     with self.argument_context('sql vm') as c:
         c.argument('sql_virtual_machine_name',
-                   options_list=['--name', '-n'])
-        c.argument('sql_virtual_machine_group_resource_id',
-                   options_list=['--sqlvm-group'],
-                   validator=validate_sqlvm_group,
-                   help='Name or resource ID of the SQL virtual machine group this SQL virtual machine is or will be part of.')
+                   options_list=['--name', '-n'],
+                   id_part='name',
+                   help='Name of the SQL virtual machine.')
         c.argument('location',
                    help='Location. If not provided, virtual machine should be in the same region of resource group.'
                    'You can configure the default location using `az configure --defaults location=<location>`.',
@@ -161,38 +163,31 @@ def load_arguments(self, _):
                    options_list=['--license-type'],
                    arg_type=get_enum_type(SqlServerLicenseType))
 
-    with self.argument_context('sql vm', arg_group='WSFC Domain Credentials') as c:
-        c.argument('cluster_bootstrap_account_password',
-                   options_list=['--boostrap-acc-pwd'],
-                   help='Cluster bootstrap account password.')
-        c.argument('cluster_operator_account_password',
-                   options_list=['--operator-acc-pwd'],
-                   help='Cluster operator account password.')
-        c.argument('sql_service_account_password',
-                   options_list=['--service-acc-pwd'],
-                   help='SQL service account password.')
-
     with self.argument_context('sql vm add-to-group') as c:
         c.argument('sql_virtual_machine_group_resource_id',
                    options_list=['--sqlvm-group', '-r'],
                    validator=validate_sqlvm_group,
                    help='Name or resource ID of the SQL virtual machine group. If only name provided, SQL virtual machine group should be in the same '
                    'resource group of the SQL virtual machine.')
-        c.argument('sql_virtual_machine_name', id_part='name')
+        c.argument('sql_virtual_machine_name',
+                   id_part='name',
+                   help="Name of the SQL virtual machine.")
 
     with self.argument_context('sql vm remove-from-group') as c:
-        c.argument('sql_virtual_machine_name', id_part='name')
+        c.argument('sql_virtual_machine_name',
+                   id_part='name',
+                   help="Name of the SQL virtual machine.")
 
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
         c.argument('cluster_bootstrap_account_password',
                    options_list=['--boostrap-acc-pwd', '-b'],
-                   help='Cluster bootstrap account password.')
+                   help='Password for the cluster bootstrap account if provided in the SQL virtual machine group.')
         c.argument('cluster_operator_account_password',
                    options_list=['--operator-acc-pwd', '-p'],
-                   help='Cluster operator account password.')
+                   help='Password for the cluster operator account provided in the SQL virtual machine group.')
         c.argument('sql_service_account_password',
                    options_list=['--service-acc-pwd', '-s'],
-                   help='SQL service account password.')
+                   help='Password for the SQL service account provided in the SQL virtual machine group.')
 
     with self.argument_context('sql vm', arg_group='Auto Patching Settings') as c:
         c.argument('enable_auto_patching',
@@ -203,6 +198,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(DayOfWeek))
         c.argument('maintenance_window_starting_hour',
                    type=int,
+                   options_list=['--maintenance-window-start-hour'],
                    help='Hour of the day when patching is initiated. Local VM time 0-23 hours.')
         c.argument('maintenance_window_duration',
                    type=int,
@@ -219,9 +215,10 @@ def load_arguments(self, _):
                    type=int,
                    help='Retention period of backup. 1-30 days.')
         c.argument('storage_account_url',
-                   options_list=['--storage-acc'],
+                   options_list=['--storage-account'],
                    help='Storage account url where backup will be taken to.')
         c.argument('storage_access_key',
+                   options_list=['--sa-key'],
                    help='Storage account key where backup will be taken to.')
         c.argument('backup_password',
                    options_list=['--backup-pwd'],
@@ -237,9 +234,11 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(FullBackupFrequencyType))
         c.argument('full_backup_start_time',
                    type=int,
+                   options_list=['--full-backup-start-hour'],
                    help='Start time of a given day during which full backups can take place. 0-23 hours.')
         c.argument('full_backup_window_hours',
                    type=int,
+                   options_list=['--full-backup-duration'],
                    help='Duration of the time window of a given day during which full backups can take place. 1-23 hours.')
         c.argument('log_backup_frequency',
                    type=int,

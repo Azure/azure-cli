@@ -8,7 +8,7 @@ from knack.prompting import prompt_pass
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.cli.core.util import (
-    sdk_no_wait, CLIError,
+    sdk_no_wait
 )
 
 from azure.mgmt.sqlvirtualmachine.models import (
@@ -62,7 +62,6 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
                        sql_image_sku, domain_fqdn, cluster_operator_account, sql_service_account,
                        storage_account_url, storage_account_key=None, location=None, cluster_bootstrap_account=None,
                        file_share_witness_path=None, ou_path=None, tags=None):
-
     '''
     Creates a SQL virtual machine group.
     '''
@@ -129,16 +128,12 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
 def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_virtual_machine_group_name,
                             resource_group_name, availability_group_name, ip_address, subnet_resource_id,
                             load_balancer_resource_id, probe_port, sql_virtual_machine_instances, port=1433,
-                            public_ip_address_resource_id=None):
+                            public_ip_address_resource_id=None, vnet_name=None):
     '''
     Creates an availability group listener
     '''
-    if not is_valid_resource_id(subnet_resource_id):
-        raise CLIError("Invalid subnet resource id.")
-    if not is_valid_resource_id(load_balancer_resource_id):
-        raise CLIError("Invalid load balancer resource id.")
-    if public_ip_address_resource_id and not is_valid_resource_id(public_ip_address_resource_id):
-        raise CLIError("Invalid public IP address resource id.")
+    # Not using vnet, just for validation
+    vnet_name = vnet_name
 
     # Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
@@ -164,31 +159,20 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
     return client.get(resource_group_name, sql_virtual_machine_group_name, availability_group_listener_name)
 
 
-def aglistener_update(instance, remove_sql_virtual_machine_instances=None, add_sql_virtual_machine_instances=None):
+def aglistener_update(instance, sql_virtual_machine_instances=None):
     '''
     Updates an availability group listener
     '''
-
     # Get the list of all current machines in the ag listener
-    vm_list = instance.load_balancer_configurations[0].sql_virtual_machine_instances
-
-    if add_sql_virtual_machine_instances:
-        for sqlvm_resource_id in add_sql_virtual_machine_instances:
-            if sqlvm_resource_id not in vm_list:
-                instance.load_balancer_configurations[0].sql_virtual_machine_instances.append(sqlvm_resource_id)
-
-    if remove_sql_virtual_machine_instances:
-        for sqlvm_resource_id in remove_sql_virtual_machine_instances:
-            if sqlvm_resource_id in vm_list:
-                instance.load_balancer_configurations[0].sql_virtual_machine_instances.remove(sqlvm_resource_id)
+    if sql_virtual_machine_instances:
+        instance.load_balancer_configurations[0].sql_virtual_machine_instances = sql_virtual_machine_instances
 
     return instance
 
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, location=None,
-                 sql_server_license_type=None, sql_virtual_machine_group_resource_id=None, cluster_bootstrap_account_password=None,
-                 cluster_operator_account_password=None, sql_service_account_password=None, enable_auto_patching=None,
+                 sql_server_license_type=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
@@ -208,10 +192,6 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
         namespace='Microsoft.Compute', type='virtualMachines', name=sql_virtual_machine_name)
 
     tags = tags or {}
-
-    wsfc_domain_credentials_object = WsfcDomainCredentials(cluster_bootstrap_account_password=cluster_bootstrap_account_password,
-                                                           cluster_operator_account_password=cluster_operator_account_password,
-                                                           sql_service_account_password=sql_service_account_password)
 
     # If customer has provided any auto_patching settings, enabling plugin should be True
     if (day_of_week or maintenance_window_duration or maintenance_window_starting_hour):
@@ -273,8 +253,6 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
-                                     sql_virtual_machine_group_resource_id=sql_virtual_machine_group_resource_id,
-                                     wsfc_domain_credentials=wsfc_domain_credentials_object,
                                      auto_patching_settings=auto_patching_object,
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
@@ -371,29 +349,46 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
     return instance
 
 
-def add_sqlvm_to_group(instance, sql_virtual_machine_group_resource_id, sql_service_account_password=None,
+def sqlvm_add_to_group(client, cmd, sql_virtual_machine_name, resource_group_name,
+                       sql_virtual_machine_group_resource_id, sql_service_account_password=None,
                        cluster_operator_account_password=None, cluster_bootstrap_account_password=None):
     '''
-    Add a SQL virtual machine to a SQL virtual machine group.
+    Adds a SQL virtual machine to a group.
     '''
 
-    instance.sql_virtual_machine_group_resource_id = sql_virtual_machine_group_resource_id
+    sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
+
     if not sql_service_account_password:
         sql_service_account_password = prompt_pass('SQL Service account password: ', confirm=True)
     if not cluster_operator_account_password:
         cluster_operator_account_password = prompt_pass('Cluster operator account password: ', confirm=True,
                                                         help_string='Password to authenticate with the domain controller.')
 
-    instance.wsfc_domain_credentials = WsfcDomainCredentials(cluster_bootstrap_account_password=cluster_bootstrap_account_password,
-                                                             cluster_operator_account_password=cluster_operator_account_password,
-                                                             sql_service_account_password=sql_service_account_password)
-    return instance
+    sqlvm_object.sql_virtual_machine_group_resource_id = sql_virtual_machine_group_resource_id
+
+    sqlvm_object.wsfc_domain_credentials = WsfcDomainCredentials(cluster_bootstrap_account_password=cluster_bootstrap_account_password,
+                                                                 cluster_operator_account_password=cluster_operator_account_password,
+                                                                 sql_service_account_password=sql_service_account_password)
+
+    # Since it's a running operation, we will do the put and then the get to display the instance.
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update,
+                                                  resource_group_name, sql_virtual_machine_name, sqlvm_object))
+
+    return client.get(resource_group_name, sql_virtual_machine_name)
 
 
-def remove_sqlvm_from_group(instance):
+def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_group_name):
     '''
-    Removes SQL virtual machine from SQL virtual machine group.
+    Removes a SQL virtual machine from a group.
     '''
-    instance.sql_virtual_machine_group_resource_id = None
 
-    return instance
+    sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
+
+    sqlvm_object.sql_virtual_machine_group_resource_id = None
+    sqlvm_object.wsfc_domain_credentials = None
+
+    # Since it's a running operation, we will do the put and then the get to display the instance.
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update,
+                                                  resource_group_name, sql_virtual_machine_name, sqlvm_object))
+
+    return client.get(resource_group_name, sql_virtual_machine_name)
