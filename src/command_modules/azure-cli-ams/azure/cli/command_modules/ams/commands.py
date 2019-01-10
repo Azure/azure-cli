@@ -87,7 +87,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.command('get-streaming-locators', 'list_streaming_locators')
+        g.command('list-streaming-locators', 'list_streaming_locators')
         g.custom_command('get-encryption-key', 'get_encryption_key',
                          custom_command_type=get_custom_sdk('asset', get_assets_client))
         g.generic_update_command('update',
@@ -150,7 +150,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('get-paths', 'list_paths')
-        g.custom_command('get-content-keys', 'list_content_keys',
+        g.custom_command('list-content-keys', 'list_content_keys',
                          custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
 
     with self.command_group('ams streaming-policy', get_sdk('StreamingPolicies', get_streaming_policies_client)) as g:
