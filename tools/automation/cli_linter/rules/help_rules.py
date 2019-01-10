@@ -107,6 +107,7 @@ def _extract_commands_from_example(example_text):
 
     # fold commands spanning multiple lines into one line. Split commands that use pipes
     example_text = example_text.replace("\\\n", " ")
+    example_text = example_text.replace("\\ ", " ")
     example_text = example_text.replace(" | ", "\n")
 
     commands = example_text.splitlines()
