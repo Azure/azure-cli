@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.arguments import CLIArgumentType
 import azure.cli.command_modules.redis._help  # pylint: disable=unused-import
-from knack.arguments import (
-    CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 
 
 def load_arguments(self, _):
