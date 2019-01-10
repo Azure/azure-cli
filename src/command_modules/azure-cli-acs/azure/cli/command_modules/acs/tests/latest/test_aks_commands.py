@@ -14,11 +14,9 @@ from azure.cli.testsdk import (
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
     StringContainCheck, StringContainCheckIgnoreCase)
+from azure.cli.command_modules.acs._format import version_to_tuple
 
 # flake8: noqa
-
-DEFAULT_K8S_CREATE_VERSION = '1.10.9'
-DEFAULT_K8S_UPGRADE_VERSION = '1.11.5'
 
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
@@ -112,6 +110,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
+        create_version, upgrade_version = self.get_test_versions(resource_group_location)
         # kwargs for string formatting
         self.kwargs.update({
             'resource_group': resource_group,
@@ -121,7 +120,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
-            'k8s_version': DEFAULT_K8S_CREATE_VERSION,
+            'k8s_version': create_version,
             'vm_size': 'Standard_DS1_v2'
         })
 
@@ -167,10 +166,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade in table format
-        k8s_upgrade_version = DEFAULT_K8S_UPGRADE_VERSION
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
-            StringContainCheck(k8s_upgrade_version)
+            StringContainCheck(upgrade_version)
         ])
 
         # enable http application routing addon
@@ -193,6 +191,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
+        create_version, _ = self.get_test_versions(resource_group_location)
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -203,7 +202,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
-            'k8s_version': DEFAULT_K8S_CREATE_VERSION,
+            'k8s_version': create_version,
             'nodepool_name': self.create_random_name('np', 12)
         })
 
@@ -471,3 +470,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
                                .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
         return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
+
+    def get_test_versions(self, location):
+        """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
+        versions = self.cmd("az aks get-versions -l eastus --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
+        # sort by semantic version, from newest to oldest
+        versions = sorted(versions, key=version_to_tuple, reverse=True)
+        upgrade_version = versions[0]
+        # find the first version that doesn't start with the latest major.minor.
+        prefix = upgrade_version[:upgrade_version.rfind('.')]
+        create_version = next(x for x in versions if not x.startswith(prefix))
+        return create_version, upgrade_version
