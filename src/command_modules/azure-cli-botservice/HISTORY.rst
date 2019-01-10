@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.5
++++++
+* Improve UX around `az bot publish`
+* Code cleanup in BotTemplateDeployer
+
 0.1.4
 +++++
 * Add deployment status updates to `az bot create`

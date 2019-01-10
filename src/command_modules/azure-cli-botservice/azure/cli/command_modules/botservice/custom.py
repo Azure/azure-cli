@@ -518,6 +518,14 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         logger.info('Detected language javascript. Installing node dependencies in remote bot.')
         kudu_client.install_node_dependencies()
 
-    logger.info('Bot publish completed successfully.')
+    if output.get('active'):
+        logger.info('Deployment successful!')
 
+    if not output.get('active'):
+        scm_url = output.get('url')
+        deployment_id = output.get('id')
+        # Instead of replacing "latest", which would could be in the bot name, we replace "deployments/latest"
+        deployment_url = scm_url.replace('deployments/latest', 'deployments/%s' % deployment_id)
+        logger.error('Deployment failed. To find out more information about this deployment, please visit %s.'
+                    % deployment_url)
     return output

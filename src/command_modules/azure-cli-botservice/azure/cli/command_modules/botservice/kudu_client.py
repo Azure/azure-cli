@@ -113,9 +113,24 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             'command': 'npm install',
             'dir': r'site\wwwroot'
         }
-        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload),
-                                 headers=self.__get_application_json_headers())
-        HttpResponseValidator.check_response_status(response)
+        # npm install can take a very long time to complete. By default, Azure's load balancer will terminate
+        # connections after 230 seconds of no inbound or outbound packets. This timeout is not configurable.
+        try:
+            response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload),
+                                     headers=self.__get_application_json_headers())
+            HttpResponseValidator.check_response_status(response)
+        except CLIError as e:
+            if response.status_code == 500 and 'The request timed out.' in response.text:
+                self.__logger.warn('npm install is taking longer than expected and did not finish within the '
+                                   'Azure-specified timeout of 230 seconds.')
+                self.__logger.warn('The installation is likely still in progress. This is a known issue, please wait a '
+                                   'short while before messaging your bot. You can also visit Kudu to manually install '
+                                   'the npm dependencies. (https://github.com/projectkudu/kudu/wiki)')
+                self.__logger.warn('Your Kudu website for this bot is: %s' % self.__scm_url)
+                return
+            else:
+                raise e
+
         return response.json()
 
     def publish(self, zip_file_path):

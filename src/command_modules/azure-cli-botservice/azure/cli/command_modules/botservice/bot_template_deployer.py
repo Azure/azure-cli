@@ -57,11 +57,11 @@ class BotTemplateDeployer:
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
 
-        smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(smc.deployments.create_or_update(
-            resource_group_name,
-            deployment_name,
-            properties, raw=False))
+        resource_management_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(
+            resource_management_client.deployments.create_or_update(resource_group_name,
+                                                                    deployment_name,
+                                                                    properties, raw=False))
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
@@ -177,8 +177,7 @@ class BotTemplateDeployer:
 
             logger.debug('Detected V4 bot. Adding bot encryption key to Azure parameters.')
 
-            bot_encryption_key = BotTemplateDeployer.get_bot_file_encryption_key()
-            paramsdict['botFileEncryptionKey'] = bot_encryption_key
+            paramsdict['botFileEncryptionKey'] = BotTemplateDeployer.get_bot_file_encryption_key()
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
         # Get and deploy ARM template
