@@ -209,7 +209,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
         enable_auto_backup = True
         if not storage_access_key:
             storage_access_key = prompt_pass('Storage Key: ', confirm=True)
-        if not backup_password:
+        if enable_encryption and not backup_password:
             backup_password = prompt_pass('Backup Password: ', confirm=True)
 
     auto_backup_object = AutoBackupSettings(enable=enable_auto_backup,
@@ -298,7 +298,7 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
         enable_auto_backup = enable_auto_backup if enable_auto_backup is False else True
         if not storage_access_key:
             storage_access_key = prompt_pass('Storage Key: ', confirm=True)
-        if not backup_password:
+        if enable_encryption and not backup_password:
             backup_password = prompt_pass('Backup Password: ', confirm=True)
 
         instance.auto_backup_settings = AutoBackupSettings(enable=enable_auto_backup,

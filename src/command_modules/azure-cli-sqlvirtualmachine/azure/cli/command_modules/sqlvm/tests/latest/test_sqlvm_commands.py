@@ -50,8 +50,8 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
-        ' --size Standard_DS2_v3'
+        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
+                    ' --size Standard_DS2_v2')
         execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
         return {self.parameter_name: name}
 
@@ -175,17 +175,17 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id']),
+                     JMESPathCheck('id', sqlvm_1['id'])
                  ])
 
         # test autopatching enabling succeeds
-        self.cmd('sql vm update -n {} -g {} --day-of-week {} --maintenance-window-duration {} --maintenance-window-starting-hour {}'
+        self.cmd('sql vm update -n {} -g {} --day-of-week {} --maintenance-window-duration {} --maintenance-window-start-hour {}'
                  .format(sqlvm, resource_group, 'Monday', 60, 22),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id']),
+                     JMESPathCheck('id', sqlvm_1['id'])
                  ])
 
         # test autopatching disabling succeeds
@@ -195,18 +195,18 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id']),
+                     JMESPathCheck('id', sqlvm_1['id'])
                  ])
 
         # test backup enabling works
-        self.cmd('sql vm update -n {} -g {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-time {} --full-backup-window-hours {} '
-                 '--storage-access-key {} --storage-acc {} --retention-period {} --log-backup-frequency {}'
+        self.cmd('sql vm update -n {} -g {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-hour {} --full-backup-duration {} '
+                 '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {}'
                  .format(sqlvm, resource_group, 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('provisioningState', "Succeeded"),
-                     JMESPathCheck('id', sqlvm_1['id']),
+                     JMESPathCheck('id', sqlvm_1['id'])
                  ])
 
         # test delete vm
@@ -249,7 +249,7 @@ class SqlVmScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', sqlvm3),
                      JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('provisioningState', "Succeeded")
                  ])
 
         # For allocation purposes, will delete the vms and re create them with different settings.
@@ -269,7 +269,7 @@ class SqlVmScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
         # test create sqlvm1 with auto patching
-        self.cmd('sql vm create -n {} -g {} -l {} --day-of-week {} --maintenance-window-duration {} --maintenance-window-starting-hour {}'
+        self.cmd('sql vm create -n {} -g {} -l {} --day-of-week {} --maintenance-window-duration {} --maintenance-window-start-hour {}'
                  .format(sqlvm1, resource_group, resource_group_location, 'Monday', 60, 22),
                  checks=[
                      JMESPathCheck('name', sqlvm1),
@@ -284,13 +284,13 @@ class SqlVmScenarioTest(ScenarioTest):
         key = self.cmd('storage account keys list -n {} -g {}'
                        .format(storage_account, resource_group)).get_output_in_json()
 
-        self.cmd('sql vm create -n {} -g {} -l {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-time {} --full-backup-window-hours {} '
-                 '--storage-access-key {} --storage-acc {} --retention-period {} --log-backup-frequency {}'
+        self.cmd('sql vm create -n {} -g {} -l {} --backup-schedule-type {} --full-backup-frequency {} --full-backup-start-hour {} --full-backup-duration {} '
+                 '--sa-key {} --storage-account {} --retention-period {} --log-backup-frequency {}'
                  .format(sqlvm2, resource_group, resource_group_location, 'Manual', 'Weekly', 2, 2, key[0]['value'], sa['primaryEndpoints']['blob'], 30, 60),
                  checks=[
                      JMESPathCheck('name', sqlvm2),
                      JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('provisioningState', "Succeeded")
                  ])
 
         # test create sqlvm1 with R services on
@@ -335,7 +335,7 @@ class SqlVmGroupScenarioTest(ScenarioTest):
                               checks=[
                                   JMESPathCheck('name', name),
                                   JMESPathCheck('location', resource_group_location),
-                                  JMESPathCheck('provisioningState', "Succeeded"),
+                                  JMESPathCheck('provisioningState', "Succeeded")
                               ]).get_output_in_json()
 
         # test list sqlvm should be 1
