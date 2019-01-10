@@ -99,7 +99,8 @@ def load_arguments(self, _):
                    help='Name of the availability group listener.')
         c.argument('sql_virtual_machine_group_name',
                    options_list=['--group-name', '-r'],
-                   help='Name of the SQL virtual machine group.')
+                   help='Name of the SQL virtual machine group.',
+                   id_part=None)
         c.argument('port',
                    options_list=['--port', '-p'],
                    help='Listener port.',
