@@ -5,13 +5,13 @@ Release History
 
 0.2.1
 +++++
-* Update Event Grid CLI commands to include 2019-01-01 supported features. Th (namely, deadletter, storage queue as destination, hybrid connection as destination, retry policy and manual validation handshake).
 * Added support for specifying deadletter destination for an event subscription.
 * Added support for using storage queue as a destination for an event subscription.
 * Added support for using hybrid connection as a destination for an event subscription.
 * Added support for specify retry policy parameters for an event subscription.
-
-
+* Added a warning message for manual handshake validation when Webhook as destination is used for an event subscription.
+* Added source-resource-id parameter for all event subscription related commands and mark all other source resource related parameters as deprecated.
+* Enhance the event subscription list commands to resolve usability issues.
 
 0.2.0
 +++++
