@@ -65,8 +65,8 @@ def faulty_help_example_parameters_rule(linter, help_entry):
     if violations:
         num_err = len(violations)
         violation_str = "\n\n".join(violations)
-        violation_msg = "\n\tThere is a violation: {}.".format(violation_str) if num_err == 1 else \
-            "\n\tThere are {} violations:\n\n{}".format(num_err, violation_str)
+        violation_msg = "\n\tThere is a violation:\n{}.".format(violation_str) if num_err == 1 else \
+            "\n\tThere are {} violations:\n{}".format(num_err, violation_str)
         raise RuleError(violation_msg + "\n\n")
 
 

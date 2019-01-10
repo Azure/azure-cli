@@ -97,7 +97,7 @@ helps['keyvault storage sas-definition create'] = """
             az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
             -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
         - name: Add a sas-definition for a blob sas-token
-          text: >
+          text: |
 
             $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \\
             -c container1 -n blob1 --https-only --permissions rw
@@ -176,7 +176,7 @@ helps['keyvault certificate import'] = """
 
             az keyvault create -g my-group -n vaultname
 
-            az keyvault certificate import --vault-name vaultname -n cert_file
+            az keyvault certificate import --vault-name vaultname -n cert_name -f cert_file
 
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled].id" -o tsv)
