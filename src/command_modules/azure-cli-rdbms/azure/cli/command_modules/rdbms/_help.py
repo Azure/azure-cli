@@ -23,7 +23,7 @@ def add_helps(command_group, server_type):
                 short-summary: Create a server.
                 examples:
                     - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
-                      text: | 
+                      text: |
                         az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
                             --sku-name "GP_Gen4_2"
                     - name: Create a {0} server with all paramaters set.
