@@ -3,9 +3,15 @@
 Release History
 ===============
 
-0.2.5
+0.2.1
 +++++
-* Update Event Grid CLI commands to include 2019-01-01 supported features (namely, deadletter, storage queue as destination, hybrid connection as destination, retry policy and manual validation handshake).
+* Update Event Grid CLI commands to include 2019-01-01 supported features. Th (namely, deadletter, storage queue as destination, hybrid connection as destination, retry policy and manual validation handshake).
+* Added support for specifying deadletter destination for an event subscription.
+* Added support for using storage queue as a destination for an event subscription.
+* Added support for using hybrid connection as a destination for an event subscription.
+* Added support for specify retry policy parameters for an event subscription.
+
+
 
 0.2.0
 +++++
