@@ -2,7 +2,7 @@
 
 Release History
 ===============
-0.3.2
+0.4.0
 +++++
 * BREAKING CHANGE: asset group command `ams asset get-streaming-locators` renamed `ams asset list-streaming-locators`.
 * BREAKING CHANGE: streaming-locator group command `ams streaming-locator get-content-keys` renamed `ams streaming-locator list-content-keys`.
