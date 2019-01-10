@@ -1621,7 +1621,8 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
     if reset_service_principal != 1:
         raise CLIError('Please specify "--reset-service-principal".')
     if service_principal is None or client_secret is None:
-        raise CLIError('Please specify --service-principal and --client-secret when --reset-service-principal flag is on.')
+        raise CLIError('Please specify --service-principal and --client-secret '
+                       'when --reset-service-principal flag is on.')
     return sdk_no_wait(no_wait,
                        client.reset_service_principal_profile,
                        resource_group_name,
