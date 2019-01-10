@@ -986,7 +986,7 @@ helps['functionapp deployment source config-zip'] = """
            text: >
              az functionapp deployment source config-zip \\
                  -g <myRG> -n <myAppName> \\
-                 --src <zip file path location>
+                 --src "<zip file path location>"
 """
 
 helps['functionapp cors'] = """

@@ -19,9 +19,9 @@ helps['hdinsight create'] = """
         - name: Create a cluster with an existing storage account.
           text: |-
               az hdinsight create -t spark -n MyCluster -g MyResourceGroup \\
-              -p <HTTP password> \\
+              -p "<HTTP password>" \\
               --storage-account MyStorageAccount.blob.core.windows.net \\
-              --storage-account-key <key>
+              --storage-account-key "<key>"
 """
 
 helps['hdinsight list'] = """
@@ -47,16 +47,16 @@ helps['hdinsight application create'] = """
           text: |-
               az hdinsight application create -n MyCluster -g MyResourceGroup \\
               --application-name MyApplication \\
-              --script-uri https://path/to/install/script.sh
+              --script-uri "https://path/to/install/script.sh" \\
               --script-action-name MyScriptAction \\
-              --script-parameters "-option value"
+              --script-parameters '"-option value"'
         - name: Create an application with a script URI and specified edge node size.
           text: |-
               az hdinsight application create -n MyCluster -g MyResourceGroup \\
               --application-name MyApplication \\
-              --script-uri https://path/to/install/script.sh
+              --script-uri "https://path/to/install/script.sh" \\
               --script-action-name MyScriptAction \\
-              --script-parameters "-option value" \\
+              --script-parameters '"-option value"' \\
               --edgenode-size Standard_D4_v2
 """
 
