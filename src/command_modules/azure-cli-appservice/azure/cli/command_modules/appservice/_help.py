@@ -139,7 +139,7 @@ examples:
       text: >
         az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
           --custom-id CustomId \\
-          --type AzureFiles \\
+          --storage-type AzureFiles \\
           --account-name MyStorageAccount \\
           --share-name MyShare \\
           --access-key MyAccessKey \\
@@ -414,8 +414,8 @@ helps['webapp deployment source config-zip'] = """
          - name: Perform deployment by using zip file content.
            text: >
              az webapp deployment source config-zip \\
-                 -g <myRG> -n <myAppName> \\
-                 --src <zip file path location>
+                 -g {myRG} -n {myAppName} \\
+                 --src {zip/file/path/location}
 """
 
 helps['webapp deployment source delete'] = """

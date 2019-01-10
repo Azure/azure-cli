@@ -54,7 +54,7 @@ helps['storage file upload'] = """
     long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
     examples:
         - name: Upload to a local file to a share.
-          text: az storage file upload -s MyShare -source /path/to/file
+          text: az storage file upload -s MyShare --source /path/to/file
 """
 
 helps['storage blob show'] = """
@@ -86,7 +86,7 @@ helps['storage account create'] = """
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
           min_profile: latest
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
-          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
+          text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
           max_profile: 2017-03-09-profile
 """
 

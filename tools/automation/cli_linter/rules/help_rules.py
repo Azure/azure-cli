@@ -89,8 +89,8 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
         parser.parse_args(command_args)
     except ValueError as e:  # handle exception thrown by shlex.
         if str(e) == "No closing quotation":
-            violation = '\t"{}" has no closing quotation.\n\tTo continue an example ' \
-                        'command on the next line, use a "\\" followed by a newline. ' \
+            violation = '\t"{}"\n\thas no closing quotation. Tip: to continue an example ' \
+                        'command on the next line, use a "\\" followed by a newline.\n\t' \
                         'If needed, you can escape the "\\", like so "\\\\"'.format(command)
         else:
             raise e

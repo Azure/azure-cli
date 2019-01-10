@@ -320,7 +320,7 @@ helps['sql elastic-pool op cancel'] = """
     type: command
     examples:
         - name: Cancel an operation.
-          text: az sql elastic-pool op cancel -g mygroup -s myserver -ep myelasticpool -n d2896db1-2ba8-4c84-bac1-387c430cce40
+          text: az sql elastic-pool op cancel -g mygroup -s myserver --elastic-pool myelasticpool -n d2896db1-2ba8-4c84-bac1-387c430cce40
     """
 helps['sql failover-group'] = """
     type: group
@@ -458,10 +458,12 @@ helps['sql server vnet-rule create'] = """
     examples:
         - name: Create a vnet rule by providing the subnet id.
           text: |
-            az sql server vnet-rule create \\
-              --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
+            az sql server vnet-rule create --server MyAzureSqlServer --name MyVNetRule \\
+              -g MyResourceGroup --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
         - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the SQL server.
-          text: az sql server vnet-rule create --subnet subnetName --vnet-name vnetName
+          text: |
+            az sql server vnet-rule create --server MyAzureSqlServer --name MyVNetRule \\
+                -g MyResourceGroup --subnet subnetName --vnet-name vnetName
     """
 helps['sql mi'] = """
     type: group
