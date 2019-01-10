@@ -285,7 +285,7 @@ helps['aks update-credentials'] = """
           short-summary: Reset service principal for a managed cluster.
         - name: --service-principal
           type: string
-          short-summary: Service principal used for authentication to Azure APIs. 
+          short-summary: Service principal used for authentication to Azure APIs.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if

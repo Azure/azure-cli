@@ -22,8 +22,8 @@ from azure.cli.command_modules.acs.custom import (merge_kubernetes_configuration
                                                   create_application, _update_addons,
                                                   _ensure_container_insights_for_monitoring, k8s_install_cli)
 from azure.mgmt.containerservice.v2018_03_31.models import (ContainerServiceOrchestratorTypes,
-                                                ContainerService,
-                                                ContainerServiceOrchestratorProfile)
+                                                            ContainerService,
+                                                            ContainerServiceOrchestratorProfile)
 from azure.cli.core.util import CLIError
 
 

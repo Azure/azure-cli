@@ -1613,20 +1613,19 @@ def aks_show(cmd, client, resource_group_name, name):
     return _remove_nulls([mc])[0]
 
 
-def aks_update_credentials(cmd, client, resource_group_name, name, 
-               reset_service_principal=False,
-               service_principal=None,
-               client_secret=None,
-               no_wait=False):
+def aks_update_credentials(cmd, client, resource_group_name, name,
+                           reset_service_principal=False,
+                           service_principal=None,
+                           client_secret=None,
+                           no_wait=False):
     if reset_service_principal != 1:
         raise CLIError('Please specify "--reset-service-principal".')
-    
     if service_principal is None or client_secret is None:
         raise CLIError('Please specify --service-principal and --client-secret when --reset-service-principal flag is on.')
-    return sdk_no_wait(no_wait, 
-                        client.reset_service_principal_profile,
-                        resource_group_name,
-                        name, service_principal, client_secret)
+    return sdk_no_wait(no_wait,
+                       client.reset_service_principal_profile,
+                       resource_group_name,
+                       name, service_principal, client_secret)
 
 
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
