@@ -78,7 +78,7 @@ def _expand_file_prefixed_files(args):
         poss_file = arg[ix + 1:]
         if not poss_file:  # if nothing after @ then it can't be a file
             return arg
-        elif ix == 0:
+        if ix == 0:
             try:
                 return _load_file(poss_file)
             except IOError:
@@ -331,8 +331,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 logger.warning('%s: "%s"', id_arg, str(exception))
             if not results:
                 return CommandResultItem(None, exit_code=1, error=CLIError('Encountered more than one exception.'))
-            else:
-                logger.warning('Encountered more than one exception.')
+            logger.warning('Encountered more than one exception.')
 
         if results and len(results) == 1:
             results = results[0]
@@ -377,8 +376,7 @@ class AzCliCommandInvoker(CommandInvoker):
             if cmd_copy.exception_handler:
                 cmd_copy.exception_handler(ex)
                 return CommandResultItem(None, exit_code=1, error=ex)
-            else:
-                six.reraise(*sys.exc_info())
+            six.reraise(*sys.exc_info())
 
     def _run_jobs_serially(self, jobs, ids):
         results, exceptions = [], []
@@ -623,7 +621,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
             result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = result.properties.outputs
             return {key: val['value'] for key, val in outputs.items()} if outputs else {}
-        elif isinstance(result, ClientRawResponse):
+        if isinstance(result, ClientRawResponse):
             # --no-wait returns a ClientRawResponse
             return None
 
@@ -679,10 +677,9 @@ class ExtensionCommandSource(object):
                 return "The behavior of this command has been altered by the following extension: " \
                        "{}".format(self.extension_name)
             return "The behavior of this command has been altered by an extension."
-        else:
-            if self.extension_name:
-                return "This command is from the following extension: {}".format(self.extension_name)
-            return "This command is from an extension."
+        if self.extension_name:
+            return "This command is from the following extension: {}".format(self.extension_name)
+        return "This command is from an extension."
 
     def get_preview_warn_msg(self):
         if self.preview:
@@ -708,6 +705,7 @@ def _load_azure_exception_class():
     return AzureException
 
 
+# pylint: disable=no-member
 def _is_paged(obj):
     # Since loading msrest is expensive, we avoid it until we have to
     import collections
