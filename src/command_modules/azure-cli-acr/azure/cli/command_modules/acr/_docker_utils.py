@@ -13,6 +13,7 @@ import time
 from json import loads
 from base64 import b64encode
 import requests
+from requests import RequestException
 from requests.utils import to_native_string
 from msrest.http_logger import log_request, log_response
 
@@ -25,7 +26,7 @@ from azure.cli.core.cloud import CloudSuffixNotSetException
 
 from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
-from ._utils import get_registry_by_name
+from ._utils import get_registry_by_name, ResourceNotFound
 
 
 logger = get_logger(__name__)
@@ -93,9 +94,8 @@ def _get_aad_token(cli_ctx,
                              verify=(not should_disable_connection_verify()))
 
     if response.status_code not in [200]:
-        raise CLIError(
-            "Access to registry '{}' was denied. Response code: {}.".format(
-                login_server, response.status_code))
+        raise CLIError("Access to registry '{}' was denied. Response code: {}.".format(
+            login_server, response.status_code))
 
     refresh_token = loads(response.content.decode("utf-8"))["refresh_token"]
     if only_refresh_token:
@@ -119,14 +119,16 @@ def _get_aad_token(cli_ctx,
     }
     response = requests.post(authhost, urlencode(content), headers=headers,
                              verify=(not should_disable_connection_verify()))
-    access_token = loads(response.content.decode("utf-8"))["access_token"]
 
-    return access_token
+    if response.status_code not in [200]:
+        raise CLIError("Access to registry '{}' was denied. Response code: {}.".format(
+            login_server, response.status_code))
+
+    return loads(response.content.decode("utf-8"))["access_token"]
 
 
 def _get_credentials(cli_ctx,
                      registry_name,
-                     resource_group_name,
                      username,
                      password,
                      only_refresh_token,
@@ -135,7 +137,6 @@ def _get_credentials(cli_ctx,
                      permission=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -143,18 +144,27 @@ def _get_credentials(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
+    try:
+        registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
+        login_server = registry.login_server
+    except ResourceNotFound as e:
+        # Try to use the pre-defined login server suffix to construct login server from registry name.
+        login_server_suffix = get_login_server_suffix(cli_ctx)
+        if not login_server_suffix:
+            raise
+        registry = None
+        login_server = '{}{}'.format(registry_name, login_server_suffix).lower()
+        resource_not_found = str(e)
+
+    # Validate the login server is reachable
+    try:
+        requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    except RequestException:
+        raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
+                       "Please verify if the registry exists.")
+
     # 1. if username was specified, verify that password was also specified
     if username:
-        # Try to use the pre-defined login server suffix to construct login server from registry name.
-        # This is to avoid a management server request if username/password are already provided.
-        # In all other cases, including the suffix not defined, login server will be obtained from server.
-        login_server_suffix = get_login_server_suffix(cli_ctx)
-        if login_server_suffix:
-            login_server = '{}{}'.format(registry_name, login_server_suffix)
-        else:
-            registry, _ = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
-            login_server = registry.login_server
-
         if not password:
             try:
                 password = prompt_pass(msg='Password: ')
@@ -163,11 +173,8 @@ def _get_credentials(cli_ctx,
 
         return login_server, username, password
 
-    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
-    login_server = registry.login_server
-
     # 2. if we don't yet have credentials, attempt to get a refresh token
-    if not password and registry.sku.name in MANAGED_REGISTRY_SKU:
+    if not password and (not registry or registry.sku.name in MANAGED_REGISTRY_SKU):
         try:
             password = _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
@@ -176,14 +183,21 @@ def _get_credentials(cli_ctx,
             logger.warning("Unable to get AAD authorization tokens with message: %s", str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    if not password and registry.admin_user_enabled:
-        try:
-            cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
-            username = cred.username
-            password = cred.passwords[0].value
-            return login_server, username, password
-        except CLIError as e:
-            logger.warning("Unable to get admin user credentials with message: %s", str(e))
+    if not password:
+        error_message = "Unable to get admin user credentials with message"
+        if registry:
+            if registry.admin_user_enabled:
+                try:
+                    cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
+                    username = cred.username
+                    password = cred.passwords[0].value
+                    return login_server, username, password
+                except CLIError as e:
+                    logger.warning("%s: %s", error_message, str(e))
+            else:
+                logger.warning("%s: %s", error_message, "Admin user is disabled.")
+        else:
+            logger.warning("%s: %s", error_message, resource_not_found)
 
     # 4. if we still don't have credentials, prompt the user
     if not password:
@@ -201,18 +215,15 @@ def _get_credentials(cli_ctx,
 
 def get_login_credentials(cli_ctx,
                           registry_name,
-                          resource_group_name=None,
                           username=None,
                           password=None):
     """Try to get AAD authorization tokens or admin user credentials to log into a registry.
     :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
     return _get_credentials(cli_ctx,
                             registry_name,
-                            resource_group_name,
                             username,
                             password,
                             only_refresh_token=True)
@@ -220,7 +231,6 @@ def get_login_credentials(cli_ctx,
 
 def get_access_credentials(cli_ctx,
                            registry_name,
-                           resource_group_name=None,
                            username=None,
                            password=None,
                            repository=None,
@@ -228,7 +238,6 @@ def get_access_credentials(cli_ctx,
                            permission=None):
     """Try to get AAD authorization tokens or admin user credentials to access a registry.
     :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     :param str repository: Repository for which the access token is requested
@@ -237,7 +246,6 @@ def get_access_credentials(cli_ctx,
     """
     return _get_credentials(cli_ctx,
                             registry_name,
-                            resource_group_name,
                             username,
                             password,
                             only_refresh_token=False,
@@ -251,7 +259,7 @@ def log_registry_response(response):
     :param Response response: The response object
     """
     log_request(None, response.request)
-    log_response(None, response.request, response, result=response)
+    log_response(None, response.request, RegistryResponse(response.request, response))
 
 
 def get_login_server_suffix(cli_ctx):
@@ -350,11 +358,17 @@ def request_data_from_registry(http_method,
             elif response.status_code == 204:
                 return None, None
             elif response.status_code == 401:
-                raise CLIError(parse_error_message('Authentication required.', response))
+                raise RegistryException(
+                    parse_error_message('Authentication required.', response),
+                    response.status_code)
             elif response.status_code == 404:
-                raise CLIError(parse_error_message('The requested data does not exist.', response))
+                raise RegistryException(
+                    parse_error_message('The requested data does not exist.', response),
+                    response.status_code)
             elif response.status_code == 409:
-                raise CLIError(parse_error_message('Failed to request data due to a conflict.', response))
+                raise RegistryException(
+                    parse_error_message('Failed to request data due to a conflict.', response),
+                    response.status_code)
             else:
                 raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
         except CLIError:
@@ -383,3 +397,23 @@ def parse_error_message(error_message, response):
         return '{} Correlation ID: {}.'.format(error_message, correlation_id)
     except (KeyError, TypeError, AttributeError):
         return error_message
+
+
+class RegistryException(CLIError):
+    def __init__(self, message, status_code):
+        super(RegistryException, self).__init__(message)
+        self.status_code = status_code
+
+
+class RegistryResponse(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, request, internal_response):
+        self.request = request
+        self.internal_response = internal_response
+        self.status_code = internal_response.status_code
+        self.headers = internal_response.headers
+        self.encoding = internal_response.encoding
+        self.reason = internal_response.reason
+        self.content = internal_response.content
+
+    def text(self):
+        return self.content.decode(self.encoding or "utf-8")

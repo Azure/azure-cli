@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-set -ex
+set -evx
 
 # Create the debian/ directory for building the azure-cli Debian package
 

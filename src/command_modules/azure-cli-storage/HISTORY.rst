@@ -8,6 +8,7 @@ Release History
 * BREAKING CHANGE: `storage blob/file/container/share list`- Limit default number of results returned to be 5,000.
   Use `--num-results *` for original behavior of returning all results.
 * `storage blob/file/container/share list`- log marker for next page to STDERR and expose `--marker` parameter.
+* Add `storage blob service-properties update` command with support for static websites.
 
 2.2.7
 +++++

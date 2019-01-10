@@ -425,11 +425,11 @@ def _get_azure_subscription_id():
 def _get_shell_type():
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
-    elif 'BASH_VERSION' in os.environ:
+    if 'BASH_VERSION' in os.environ:
         return 'bash'
-    elif 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
+    if 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
         return 'ksh'
-    elif 'WINDIR' in os.environ:
+    if 'WINDIR' in os.environ:
         return 'cmd'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 

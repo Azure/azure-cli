@@ -7,7 +7,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                page_blob_service_factory, file_data_service_factory,
                                                                queue_data_service_factory, table_data_service_factory,
                                                                cloud_storage_account_service_factory,
-                                                               multi_service_properties_factory)
+                                                               multi_service_properties_factory,
+                                                               cf_blob_data_gen_update)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -163,6 +164,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob service-properties', command_type=base_blob_sdk) as g:
         g.storage_command_oauth('show', 'get_blob_service_properties', exception_handler=show_exception_handler)
+        g.storage_command_oauth('update', generic_update=True, getter_name='get_blob_service_properties',
+                                setter_type=get_custom_sdk('blob', cf_blob_data_gen_update),
+                                setter_name='set_service_properties',
+                                client_factory=cf_blob_data_gen_update)
 
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:

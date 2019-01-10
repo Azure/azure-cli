@@ -380,6 +380,29 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
 
+    @ResourceGroupPreparer()
+    def test_storage_blob_update_service_properties(self, resource_group):
+        storage_account = self.create_random_name(prefix='account', length=24)
+
+        self.cmd('storage account create -n {} -g {} --kind StorageV2'.format(storage_account, resource_group))
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        self.storage_cmd('storage blob service-properties show', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False))
+
+        self.storage_cmd('storage blob service-properties update --static-website --index-document index.html '
+                         '--404-document error.html', account_info)
+
+        self.storage_cmd('storage blob service-properties update --delete-retention --delete-retention-period 1',
+                         account_info)
+
+        self.storage_cmd('storage blob service-properties show', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1))
+
 
 if __name__ == '__main__':
     unittest.main()
