@@ -49,7 +49,7 @@ def load_arguments(self, _):
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
 
     with self.argument_context('eventgrid topic key list') as c:
-        c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('topic_name', id_part=None)
 
     with self.argument_context('eventgrid event-subscription') as c:
         c.argument('topic_name', deprecate_info=c.deprecate(expiration='2.1.0', hide=True), help='Name of Event Grid topic', options_list=['--topic-name'], completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))

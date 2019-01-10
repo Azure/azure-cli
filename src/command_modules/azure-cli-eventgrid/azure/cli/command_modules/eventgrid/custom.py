@@ -426,10 +426,7 @@ def _get_storage_queue_destination(endpoint):
                        '/subscriptions/id/resourceGroups/rg/providers/Microsoft.Storage/' +
                        'storageAccounts/sa1/queueServices/default/queues/queueName')
 
-    destination = StorageQueueEventSubscriptionDestination(
-        resource_id=queue_items[0], queue_name=queue_items[1])
-
-    return destination
+    return StorageQueueEventSubscriptionDestination(resource_id=queue_items[0], queue_name=queue_items[1])
 
 
 def _get_deadletter_destination(deadletter_endpoint):
@@ -441,10 +438,7 @@ def _get_deadletter_destination(deadletter_endpoint):
                        '/subscriptions/id/resourceGroups/rg/providers/Microsoft.Storage/' +
                        'storageAccounts/sa1/blobServices/default/containers/containerName')
 
-    deadletter_destination = StorageBlobDeadLetterDestination(
-        resource_id=blob_items[0], blob_container_name=blob_items[1])
-
-    return deadletter_destination
+    return StorageBlobDeadLetterDestination(resource_id=blob_items[0], blob_container_name=blob_items[1])
 
 
 def _validate_retry_policy(max_delivery_attempts, event_ttl):
