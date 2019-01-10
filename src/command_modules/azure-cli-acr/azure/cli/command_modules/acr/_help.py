@@ -315,6 +315,9 @@ helps['acr webhook create'] = """
         - name: Create a webhook for an Azure Container Registry that will deliver docker push events to a service URI with a basic authentication header.
           text: >
             az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
+        - name: Create a webhook for an Azure Container Registry that will deliver helm chart push and delete events to a service URI.
+          text: >
+            az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions chart_push chart_delete
 """
 
 helps['acr webhook delete'] = """

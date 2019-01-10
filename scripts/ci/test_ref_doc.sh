@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
 wd=`cd $(dirname $0); pwd`
 

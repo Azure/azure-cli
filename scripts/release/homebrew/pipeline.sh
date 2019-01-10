@@ -2,7 +2,7 @@
 
 root=$(cd $(dirname $0); pwd)
 
-set -ex
+set -evx
 
 CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 HOMEBREW_UPSTREAM_URL=`cat $BUILD_STAGINGDIRECTORY/github/upstream_url`

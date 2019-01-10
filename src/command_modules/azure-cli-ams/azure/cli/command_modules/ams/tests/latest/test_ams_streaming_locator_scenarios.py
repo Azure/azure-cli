@@ -18,7 +18,7 @@ class AmsStreamingLocatorTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'brazilsouth'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -76,7 +76,7 @@ class AmsStreamingLocatorTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'westus'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -152,7 +152,7 @@ class AmsStreamingLocatorTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'eastus2'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')

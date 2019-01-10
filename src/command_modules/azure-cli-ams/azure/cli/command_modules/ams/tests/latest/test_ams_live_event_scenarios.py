@@ -20,7 +20,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'centralus',
             'streamingProtocol': 'RTMP',
             'liveEventName': live_event_name,
             'encodingType': 'Basic',
@@ -35,12 +35,12 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Central US')
         ])
 
         live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'Central US'),
             self.check('input.streamingProtocol', '{streamingProtocol}'),
             self.check('encoding.encodingType', '{encodingType}'),
             self.check('length(preview.accessControl.ip.allow)', 2),
@@ -76,7 +76,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'southindia',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
             'encodingType': 'Basic'
@@ -84,19 +84,19 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'South India')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags key=value --ips AllowAll', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'South India'),
             self.check('input.streamingProtocol', 'FragmentedMP4'),
             self.check('encoding.encodingType', 'Basic')
         ])
 
         live_event = self.cmd('az ams live-event start -a {amsname} --name {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'South India'),
             self.check('input.streamingProtocol', 'FragmentedMP4')
         ]).get_output_in_json()
 
@@ -112,7 +112,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'brazilsouth',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
             'encodingType': 'Basic'
@@ -120,7 +120,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Brazil South')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags key=value --ips AllowAll --auto-start')
@@ -141,7 +141,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'japaneast',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
             'encodingType': 'Basic'
@@ -149,7 +149,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Japan East')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags key=value --ips AllowAll --auto-start')
@@ -199,7 +199,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westeurope',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
             'liveEventName2': live_event_name2,
@@ -208,7 +208,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'West Europe')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --ips AllowAll --tags key=value')
@@ -233,7 +233,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'northeurope',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
             'liveEventName2': live_event_name2,
@@ -242,7 +242,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'North Europe')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --ips AllowAll --tags key=value')
@@ -272,7 +272,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastus',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
             'encodingType': 'Basic'
@@ -280,19 +280,19 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'East US')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --ips AllowAll --auto-start', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'East US'),
             self.check('input.streamingProtocol', 'FragmentedMP4'),
             self.check('encoding.encodingType', 'Basic')
         ])
 
         live_event = self.cmd('az ams live-event reset -a {amsname} -n {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'East US')
         ]).get_output_in_json()
 
         self.assertNotEquals('Stopping', live_event['resourceState'])
@@ -307,7 +307,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastasia',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name
         })
@@ -343,7 +343,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westus',
             'streamingProtocol': 'RTMP',
             'liveEventName': live_event_name,
             'encodingType': 'Basic',
@@ -358,14 +358,14 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'West US')
         ])
 
         self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 9.10.11.12 --preview-ips 1.1.1.1 0.0.0.0 --key-frame-interval-duration {keyFrameIntervalDuration} --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --vanity-url')
 
         self.cmd('az ams live-event show -a {amsname} -n {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
-            self.check('location', 'West US 2'),
+            self.check('location', 'West US'),
             self.check('input.streamingProtocol', '{streamingProtocol}'),
             self.check('encoding.encodingType', '{encodingType}'),
             self.check('length(preview.accessControl.ip.allow)', 2),

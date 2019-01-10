@@ -3,9 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 # pylint: disable=too-many-lines
-
 from knack.help_files import helps
 
 
@@ -657,6 +655,15 @@ helps['webapp create'] = """
         - name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
           text: >
             az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+"""
+
+helps['webapp ssh'] = """
+    type: command
+    short-summary: (Preview) SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.
+    examples:
+        - name: ssh into a webapp
+          text: >
+            az webapp ssh -n MyUniqueAppName -g MyResourceGroup
 """
 
 helps['webapp up'] = """

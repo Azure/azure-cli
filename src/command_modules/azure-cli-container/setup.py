@@ -37,7 +37,7 @@ DEPENDENCIES = [
     'azure-mgmt-network==2.4.0',
     'azure-mgmt-authorization==0.50.0',
     'azure-cli-core',
-    'pyyaml>=3.13',
+    'pyyaml>=4.2b1',
     'colorama',
     'websocket-client'
 ]

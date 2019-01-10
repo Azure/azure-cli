@@ -3,7 +3,7 @@
 # Build wheel packages containing both CLI product and tests. The script doesn't rely on a pre-existing virtual
 # environment.
 
-set -e
+set -ev
 
 ##############################################
 # clean up and dir search

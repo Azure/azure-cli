@@ -20,7 +20,7 @@ class AmsAssetFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westeurope',
             'container': container
         })
 
@@ -80,7 +80,7 @@ class AmsAssetFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_show,
-            'location': 'westus2',
+            'location': 'brazilsouth',
             'container': container
         })
 
@@ -142,7 +142,7 @@ class AmsAssetFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_list_and_delete,
-            'location': 'westus2',
+            'location': 'japanwest',
             'container': container
         })
 
@@ -202,7 +202,7 @@ class AmsAssetFilterTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_update,
-            'location': 'westus2',
+            'location': 'japaneast',
             'container': container
         })
 

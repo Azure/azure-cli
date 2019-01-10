@@ -76,8 +76,5 @@ def suppress_all_exceptions(fallback_return=None, **kwargs):  # pylint: disable=
                 get_logger(__name__).info('Suppress exception %s', ex)
                 if fallback_return is not None:
                     return fallback_return
-                else:
-                    pass
-
         return _wrapped_func
     return _decorator
