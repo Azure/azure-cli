@@ -668,6 +668,11 @@ helps['iot hub route update'] = """
             --source-type DeviceMessages --route-name R1
 """
 
+helps['iot hub devicestream'] = """
+    type: group
+    short-summary: Manage device streams of an IoT hub.
+"""
+
 helps['iot hub devicestream show'] = """
     type: command
     short-summary: Get IoT Hub’s device streams endpoints.
