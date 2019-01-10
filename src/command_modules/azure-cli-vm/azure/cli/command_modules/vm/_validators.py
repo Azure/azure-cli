@@ -288,15 +288,15 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
-    elif profile == StorageProfile.SAPirImage:
+    if profile == StorageProfile.SAPirImage:
         return 'create unmanaged OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.SASpecializedOSDisk:
+    if profile == StorageProfile.SASpecializedOSDisk:
         return 'attach to existing unmanaged OS disk'
-    elif profile == StorageProfile.ManagedCustomImage:
+    if profile == StorageProfile.ManagedCustomImage:
         return 'create managed OS disk from custom image'
-    elif profile == StorageProfile.ManagedPirImage:
+    if profile == StorageProfile.ManagedPirImage:
         return 'create managed OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.ManagedSpecializedOSDisk:
+    if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
 
 

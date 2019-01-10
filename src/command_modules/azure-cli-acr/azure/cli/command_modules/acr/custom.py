@@ -157,7 +157,7 @@ def acr_update_set(cmd,
     return client.update(resource_group_name, registry_name, parameters)
 
 
-def acr_login(cmd, registry_name, resource_group_name=None, username=None, password=None):
+def acr_login(cmd, registry_name, resource_group_name=None, username=None, password=None):  # pylint: disable=unused-argument
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
@@ -167,7 +167,6 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     login_server, username, password = get_login_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
         username=username,
         password=password)
 

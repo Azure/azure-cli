@@ -2192,15 +2192,25 @@ def _validate_aci_location(norm_location):
     Validate the Azure Container Instance location
     """
     aci_locations = [
+        "australiaeast",
+        "canadacentral",
+        "centralindia",
         "centralus",
+        "eastasia",
         "eastus",
         "eastus2",
+        "eastus2euap",
+        "japaneast",
+        "northcentralus",
+        "northeurope",
+        "southcentralus",
+        "southeastasia",
+        "southindia",
+        "uksouth",
+        "westcentralus",
         "westus",
         "westus2",
-        "northeurope",
-        "westeurope",
-        "southeastasia",
-        "australiaeast"
+        "westeurope"
     ]
 
     if norm_location not in aci_locations:

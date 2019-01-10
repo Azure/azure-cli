@@ -104,8 +104,7 @@ def get_one_of_subscription_locations(cli_ctx):
     result = get_subscription_locations(cli_ctx)
     if result:
         return next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
-    else:
-        raise CLIError('Current subscription does not have valid location list')
+    raise CLIError('Current subscription does not have valid location list')
 
 
 def get_resource_groups(cli_ctx):
