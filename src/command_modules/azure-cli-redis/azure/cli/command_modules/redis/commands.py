@@ -9,6 +9,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules, cf_firewall_rule, cf_linked_server
 from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_exception_handler
 
+
+def load_command_table(self, _):
     redis_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.redis.operations.redis_operations#RedisOperations.{}',
         client_factory=cf_redis)
@@ -33,7 +35,7 @@ from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_excepti
         g.command('force-reboot', 'force_reboot')
         g.custom_command('import-method', 'cli_redis_import_method')
         g.command('import', 'import_data')
-        g.command('list', 'list_cache')
+        g.custom_command('list', 'cli_redis_list_cache')
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
         g.command('show', 'get')
@@ -53,7 +55,7 @@ from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_excepti
         g.command('show', 'get')
         g.command('list', 'list_by_redis_resource')
 
-    with self.command_group('redis linked-server', redis_linked_server) as g:
+    with self.command_group('redis server-link', redis_linked_server) as g:
         g.custom_command('create', 'cli_redis_create_server_link', client_factory=cf_linked_server)
         g.command('delete', 'delete')
         g.command('show', 'get')

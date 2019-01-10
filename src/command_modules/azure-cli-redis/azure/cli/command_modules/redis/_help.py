@@ -64,12 +64,12 @@ helps['redis firewall-rules update'] = """
     short-summary: Update a redis cache firewall rule.
 """
 
-helps['redis linked-server'] = """
+helps['redis server-link'] = """
     type: group
-    short-summary: Manage Redis linked servers.
+    short-summary: Manage Redis server links.
 """
 
-helps['redis linked-server set'] = """
+helps['redis server-link create'] = """
     type: command
-    short-summary: Adds a linked server to the Redis cache (requires Premium SKU).
+    short-summary: Adds a server link to the Redis cache (requires Premium SKU).
 """
