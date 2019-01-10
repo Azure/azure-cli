@@ -17,7 +17,7 @@ from ._format import aks_versions_table_format
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2018_03_31.operations.'
+        operations_tmpl='azure.mgmt.containerservice.v2017_07_01.operations.'
                         'container_services_operations#ContainerServicesOperations.{}',
         client_factory=cf_container_services
     )
