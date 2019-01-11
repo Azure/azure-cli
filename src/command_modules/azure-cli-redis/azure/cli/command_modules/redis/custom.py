@@ -87,7 +87,7 @@ def cli_redis_create(cmd, client,
     :param tags: Json dictionary with Resource tags. Example : {\"testKey\":\"testValue\"}
     """
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
-     # pylint: disable=too-many-function-args
+    # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
         Sku(sku, vm_size[0], vm_size[1:]),
         location,
