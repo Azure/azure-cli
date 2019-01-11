@@ -5,13 +5,11 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
-from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class IoTHubTest(ScenarioTest):
 
     @ResourceGroupPreparer()
-    @AllowLargeResponse()
     def test_iot_hub(self, resource_group, resource_group_location):
         hub = 'iot-hub-for-test-1'
         rg = resource_group
