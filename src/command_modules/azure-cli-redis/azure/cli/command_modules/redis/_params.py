@@ -17,6 +17,9 @@ def load_arguments(self, _):
     with self.argument_context('redis') as c:
         cache_name = CLIArgumentType(options_list=['--name', '-n'], help='Name of the Redis cache.', id_part='name',
                                      completer=get_resource_name_completion_list('Microsoft.Cache/redis'))
+        # pylint:disable=line-too-long
+        cache_name_without_id_part = CLIArgumentType(options_list=['--name', '-n'], help='Name of the Redis cache.', id_part=None,
+                                                     completer=get_resource_name_completion_list('Microsoft.Cache/redis'))
         format_type = CLIArgumentType(options_list=['--file-format'], help='Format of the blob (Example: rdb)')
 
         c.argument('name', arg_type=cache_name)
@@ -45,3 +48,9 @@ def load_arguments(self, _):
         c.argument('primary_cache', help='Resource Id of the Primary redis cache')
         c.argument('rule_name', help='Name of the firewall rule')
         c.argument('cache_name', arg_type=cache_name)
+
+    with self.argument_context('redis firewall-rules list') as c:
+        c.argument('cache_name', arg_type=cache_name_without_id_part)
+
+    with self.argument_context('redis server-link') as c:
+        c.argument('name', arg_type=cache_name_without_id_part)

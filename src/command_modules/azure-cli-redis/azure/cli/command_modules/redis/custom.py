@@ -51,13 +51,13 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
-        instance.redis_configuration,
-        instance.enable_non_ssl_port,
-        instance.tenant_settings,
-        instance.shard_count,
-        instance.minimum_tls_version,
-        instance.sku,
-        instance.tags
+        redis_configuration=instance.redis_configuration,
+        enable_non_ssl_port=instance.enable_non_ssl_port,
+        tenant_settings=instance.tenant_settings,
+        shard_count=instance.shard_count,
+        minimum_tls_version=instance.minimum_tls_version,
+        sku=instance.sku,
+        tags=instance.tags
     )
     return update_params
 
@@ -91,15 +91,15 @@ def cli_redis_create(cmd, client,
     params = RedisCreateParameters(
         Sku(sku, vm_size[0], vm_size[1:]),
         location,
-        redis_configuration,
-        enable_non_ssl_port,
-        tenant_settings,
-        shard_count,
-        minimum_tls_version,
-        subnet_id,
-        static_ip,
-        zones,
-        tags)
+        redis_configuration=redis_configuration,
+        enable_non_ssl_port=enable_non_ssl_port,
+        tenant_settings=tenant_settings,
+        shard_count=shard_count,
+        minimum_tls_version=minimum_tls_version,
+        subnet_id=subnet_id,
+        static_ip=static_ip,
+        zones=zones,
+        tags=tags)
     return client.create(resource_group_name, name, params)
 
 
