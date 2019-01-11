@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+# pylint: disable=too-many-arguments, too-many-locals, too-many-branches, too-many-statements
 import base64
 import json
 import codecs
