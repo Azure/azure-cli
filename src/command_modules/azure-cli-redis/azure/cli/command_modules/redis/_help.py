@@ -22,6 +22,11 @@ helps['redis import'] = """
     short-summary: Import data into a Redis cache.
 """
 
+helps['redis list'] = """
+    type: command
+    short-summary: Lists details about all caches within current Subscription or provided Resource Group.
+"""
+
 helps['redis import-method'] = """
     type: command
     short-summary: (DEPRECATED) Import data into Redis cache.

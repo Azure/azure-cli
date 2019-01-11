@@ -20,7 +20,7 @@ def wrong_vmsize_argument_exception_handler(ex):
                     in format(ex)):
             raise CLIError('Invalid VM size. Example for Valid values: '
                            'For C family (C0, C1, C2, C3, C4, C5, C6), '
-                           'for P family (P1, P2, P3, P4)')
+                           'for P family (P1, P2, P3, P4, P5)')
     raise ex
 
 
@@ -87,6 +87,7 @@ def cli_redis_create(cmd, client,
     :param tags: Json dictionary with Resource tags. Example : {\"testKey\":\"testValue\"}
     """
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
+     # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
         Sku(sku, vm_size[0], vm_size[1:]),
         location,
