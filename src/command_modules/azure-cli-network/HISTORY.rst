@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.12
+++++++
+* `ddos-protection update`: Fix issue with set comprehension causing stack trace.
+
 2.2.11
 ++++++
 * `traffic-manager profile create/update`: Add support for `--custom-headers` and `--status-code-ranges`. Add support for new routing types: Subnet and Multivalue.

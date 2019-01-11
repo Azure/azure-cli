@@ -913,7 +913,7 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
             pass
         else:
             vnet_ids = {x.id for x in vnets}
-        existing_vnet_ids = {x.id for x in instance.virtual_networks} or set([])
+        existing_vnet_ids = {x.id for x in instance.virtual_networks} if instance.virtual_networks else set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
