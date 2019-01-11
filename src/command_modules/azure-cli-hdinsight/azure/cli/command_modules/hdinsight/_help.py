@@ -47,14 +47,14 @@ helps['hdinsight application create'] = """
           text: |-
               az hdinsight application create -n MyCluster -g MyResourceGroup \\
               --application-name MyApplication \\
-              --script-uri "https://path/to/install/script.sh" \\
+              --script-uri https://path/to/install/script.sh \\
               --script-action-name MyScriptAction \\
               --script-parameters '"-option value"'
         - name: Create an application with a script URI and specified edge node size.
           text: |-
               az hdinsight application create -n MyCluster -g MyResourceGroup \\
               --application-name MyApplication \\
-              --script-uri "https://path/to/install/script.sh" \\
+              --script-uri https://path/to/install/script.sh \\
               --script-action-name MyScriptAction \\
               --script-parameters '"-option value"' \\
               --edgenode-size Standard_D4_v2

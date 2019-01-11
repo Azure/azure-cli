@@ -2577,7 +2577,7 @@ helps['network nic list'] = """
     examples:
         - name: List all NICs by internal DNS suffix.
           text: >
-            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=`<dns_suffix>`]"
+            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=`{dnsSuffix}`]"
 """
 
 helps['network nic list-effective-nsg'] = """

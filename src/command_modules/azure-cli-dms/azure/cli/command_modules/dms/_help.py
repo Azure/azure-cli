@@ -44,7 +44,7 @@ helps['dms create'] = """
     examples:
         - name: Create an instance of DMS.
           text: >
-            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet "/subscriptions/{vnet subscription id}/resourceGroups/{vnet resource group}/providers/Microsoft.Network/virtualNetworks/{vnet name}/subnets/{subnet name}" --tags tagName1=tagValue1 tagWithNoValue
+            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet /subscriptions/{vnetSubscriptionId}/resourceGroups/{vnetResourceGroup}/providers/Microsoft.Network/virtualNetworks/{vnetName}/subnets/{subnetName} --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms delete'] = """

@@ -97,7 +97,7 @@ helps['keyvault storage sas-definition create'] = """
             az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
             -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
         - name: Add a sas-definition for a blob sas-token
-          text: |
+          text: >
 
             $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \\
             -c container1 -n blob1 --https-only --permissions rw

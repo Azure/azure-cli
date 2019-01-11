@@ -7,6 +7,8 @@ from ..rule_decorators import help_file_entry_rule
 from ..linter import RuleError
 import shlex
 import mock
+from knack.log import get_logger
+logger = get_logger(__name__)
 
 @help_file_entry_rule
 def unrecognized_help_entry_rule(linter, help_entry):
@@ -52,6 +54,11 @@ def faulty_help_example_parameters_rule(linter, help_entry):
     violations = []
 
     for example in linter.get_help_entry_examples(help_entry):
+        max_profile = example.get('max_profile')
+        if max_profile and max_profile != 'latest':
+            logger.warning("\n\tSKIPPING example: {}\n\tas its max profile is {}, instead of latest.".format(example['text'], example['max_profile']))
+            continue
+
         example_text = example.get('text','')
         commands = _extract_commands_from_example(example_text)
         while commands:
@@ -71,6 +78,7 @@ def faulty_help_example_parameters_rule(linter, help_entry):
 
 
 ### Faulty help example parameters rule helpers
+
 @mock.patch("azure.cli.core.parser.AzCliCommandParser._check_value")
 @mock.patch("argparse.ArgumentParser._get_value")
 @mock.patch("azure.cli.core.parser.AzCliCommandParser.error")

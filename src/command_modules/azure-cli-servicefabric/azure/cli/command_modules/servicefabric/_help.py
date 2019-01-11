@@ -167,7 +167,7 @@ helps["sf cluster durability update"] = """
     examples:
         - name: Change the cluster durability level to 'Silver'.
           text: >
-            az sf cluster durability update -g group-name -n cluster1 --durability-level Silver --node-type 'ns1'
+            az sf cluster durability update -g group-name -n cluster1 --durability-level Silver --node-type nt1
 
 """
 
