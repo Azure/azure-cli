@@ -5,8 +5,8 @@ Release History
 
 0.3.3
 ++++++
-* Added commands for managing firewall-rules, linked-server
-* Support for Availability Zones in create command
+* Added commands for managing firewall-rules, server-link, patch-schedule
+* Support for Availability Zones and Minimum TLS Version in create command
 * Removed the deprecated update-settings command
 * Deprecated Import-Method command. Use Import command instead
 

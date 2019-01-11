@@ -55,6 +55,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         instance.enable_non_ssl_port,
         instance.tenant_settings,
         instance.shard_count,
+        instance.minimum_tls_version,
         instance.sku,
         instance.tags
     )
@@ -65,7 +66,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 def cli_redis_create(cmd, client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
-                     shard_count=None, subnet_id=None, static_ip=None, zones=None):
+                     shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None, zones=None):
     # pylint:disable=line-too-long
     """Create new Redis Cache instance
     :param resource_group_name: Name of resource group
@@ -77,9 +78,13 @@ def cli_redis_create(cmd, client,
     :param enable_non_ssl_port: If the value is true, then the non-ssl redis server port (6379) will be enabled.
     :param tenant_settings: Json dictionary with tenant settings
     :param shard_count: The number of shards to be created on a Premium Cluster Cache.
+    :param minimum_tls_version: Optional: requires clients to use a specified
+     TLS version (or higher) to connect (e,g, '1.0', '1.1', '1.2'). Possible
+     values include: '1.0', '1.1', '1.2'
     :param subnet_id: The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1
     :param static_ip: Required when deploying a redis cache inside an existing Azure Virtual Network.
-    :param zones: A list of availability zones denoting where the resource.
+    :param zones: A list of availability zones denoting where the resource needs to come from.
+    :param tags: Json dictionary with Resource tags. Example : {\"testKey\":\"testValue\"}
     """
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
     params = RedisCreateParameters(
@@ -89,6 +94,7 @@ def cli_redis_create(cmd, client,
         enable_non_ssl_port,
         tenant_settings,
         shard_count,
+        minimum_tls_version,
         subnet_id,
         static_ip,
         zones,

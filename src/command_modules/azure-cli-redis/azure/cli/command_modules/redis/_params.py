@@ -9,6 +9,7 @@ import azure.cli.command_modules.redis._help  # pylint: disable=unused-import
 
 def load_arguments(self, _):
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName
+    from azure.cli.core.util import shell_safe_json_parse
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
     from azure.cli.core.commands.parameters import get_enum_type  # TODO: Move this into Knack
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
@@ -37,6 +38,8 @@ def load_arguments(self, _):
         # pylint: disable=line-too-long
         c.argument('schedule_entries', help="List of Patch schedule entries. Example Value:[{\"dayOfWeek\":\"Monday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]", type=ScheduleEntryList)
         c.argument('tenant_settings', type=JsonString)
+        c.argument('tags', type=JsonString)
+        c.argument('zones', type=shell_safe_json_parse)
         c.argument('linked_server_name', help='Name of the linked redis cache')
         c.argument('secondary_cache', help='Resource Id of the redis cache to be linked as Secondary')
         c.argument('primary_cache', help='Resource Id of the Primary redis cache')
