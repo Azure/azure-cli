@@ -591,16 +591,16 @@ helps['vm diagnostics set'] = """
                 protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
                     'storageAccountSasToken': '$storage_sastoken'}"
 
-                # # Alternatively, if the WAD extension has issues parsing the sas token,
-                # # one can use a storage account key.
-                # storage_account_key=$(az storage account keys list --account-name tosinstorage1win \\
-                #   --query [0].value -o tsv)
-                # protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
-                #   'storageAccountKey': '$storage_account_key'}"
-
                 az vm diagnostics set --settings "$default_config" \\
                     --protected-settings "$protected_settings" \\
                     --resource-group $my_resource_group --vm-name $my_windows_vm
+
+                # # Alternatively, if the WAD extension has issues parsing the sas token,
+                # # one can use a storage account key instead.
+                storage_account_key=$(az storage account keys list --account-name {my_storage_account} \\
+                  --query [0].value -o tsv)
+                protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
+                  'storageAccountKey': '$storage_account_key'}"
 """
 
 disk_long_summary = """
