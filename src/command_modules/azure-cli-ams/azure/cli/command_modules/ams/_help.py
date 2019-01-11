@@ -185,7 +185,7 @@ helps['ams asset list'] = """
             az ams asset list -a amsAccount -g resourceGroup --query [?starts_with(name,'Something')]
 """
 
-helps['ams asset get-streaming-locators'] = """
+helps['ams asset list-streaming-locators'] = """
     type: command
     short-summary: List streaming locators which are associated with this asset.
 """
@@ -369,7 +369,7 @@ helps['ams streaming-locator get-paths'] = """
     short-summary: List paths supported by a streaming locator.
 """
 
-helps['ams streaming-locator get-content-keys'] = """
+helps['ams streaming-locator list-content-keys'] = """
     type: command
     short-summary: List content keys used by a streaming locator.
 """
