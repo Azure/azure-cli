@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.7
++++++
+* Updating dependencies
 
 2.1.6
 +++++
