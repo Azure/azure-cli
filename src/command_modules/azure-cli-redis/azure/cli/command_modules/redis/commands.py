@@ -30,7 +30,7 @@ def load_command_table(self, _):
     with self.command_group('redis', redis_sdk) as g:
         g.custom_command('create', 'cli_redis_create', client_factory=cf_redis,
                          exception_handler=wrong_vmsize_argument_exception_handler)
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.custom_command('export', 'cli_redis_export')
         g.command('force-reboot', 'force_reboot')
         g.custom_command('import-method', 'cli_redis_import_method')

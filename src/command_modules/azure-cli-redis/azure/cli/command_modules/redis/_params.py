@@ -20,7 +20,7 @@ def load_arguments(self, _):
         # pylint:disable=line-too-long
         cache_name_without_id_part = CLIArgumentType(options_list=['--name', '-n'], help='Name of the Redis cache.', id_part=None,
                                                      completer=get_resource_name_completion_list('Microsoft.Cache/redis'))
-        format_type = CLIArgumentType(options_list=['--file-format'], help='Format of the blob (Example: rdb)')
+        format_type = CLIArgumentType(options_list=['--file-format'], help='Format of the blob (Currently rdb is the only supported format, with other formats expected in the future)')
 
         c.argument('name', arg_type=cache_name)
         c.argument('redis_configuration', help='JSON encoded configuration settings. Use @{file} to load from a file.',
