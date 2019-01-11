@@ -110,7 +110,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
-        create_version, upgrade_version = self.get_test_versions(resource_group_location)
+        create_version, upgrade_version = self._get_versions(resource_group_location)
         # kwargs for string formatting
         self.kwargs.update({
             'resource_group': resource_group,
@@ -191,7 +191,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
-        create_version, _ = self.get_test_versions(resource_group_location)
+        create_version, _ = self._get_versions(resource_group_location)
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -471,7 +471,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                                .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
         return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
 
-    def get_test_versions(self, location):
+    def _get_versions(self, location):
         """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
         versions = self.cmd("az aks get-versions -l eastus --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
         # sort by semantic version, from newest to oldest
