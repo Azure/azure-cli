@@ -20,9 +20,9 @@ class RedisCacheTests(ScenarioTest):
             'size': 'P1',
             'name2': self.create_random_name(prefix='redis', length=24),
             'size2': 'C0',
-			'tls_version': '1.2',
-			'tags': "{\\\"test\\\":\\\"tryingzones\\\"}",
-			'zones': "{\\\"1\\\",\\\"2\\\"}",
+            'tls_version': '1.2',
+            'tags': "{\\\"test\\\":\\\"tryingzones\\\"}",
+            'zones': "{\\\"1\\\",\\\"2\\\"}",
             'settings': "{\\\"hello\\\":1}",
             'schedule_entries': "[{\\\"dayOfWeek\\\":\\\"Monday\\\",\\\"startHourUtc\\\":\\\"00\\\",\\\"maintenanceWindow\\\":\\\"PT5H\\\"}]",
             'schedule_entries_update': "[{\\\"dayOfWeek\\\":\\\"Tuesday\\\",\\\"startHourUtc\\\":\\\"01\\\",\\\"maintenanceWindow\\\":\\\"PT10H\\\"}]"
