@@ -7,14 +7,14 @@ from __future__ import print_function
 
 import logging
 import unittest
+import mock
 
 from knack.help import HelpObject, GroupHelpFile, HelpAuthoringException
 
-from azure.cli.core import AzCommandsLoader
 from azure.cli.core._help import ArgumentGroupRegistry, CliCommandHelpFile
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args
-
+from azure.cli.core.tests.test_help_loader import mock_load_command_loader
 
 # TODO update this CLASS to properly load all help...                                                                       .
 class HelpTest(unittest.TestCase):
@@ -64,44 +64,43 @@ class HelpTest(unittest.TestCase):
 
 
 class Load(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from knack.help_files import helps
+        #cls.test_cli = DummyCli(commands_loader_cls=HelpTestCommandLoader)
+        cls.test_cli = DummyCli()
+        cls.helps = helps
 
-    def test_v1_loader(self):
-        with self.assertRaises(SystemExit) as e:
-            cli = DummyCli(commands_loader_cls=HelpTestCommandLoader)
-            cli.invoke(['-h'])
-            print(e)
+    def set_help_py(self):
+        helps = {}
+        helps['test'] = """
+            type: group
+            short-summary: Test Command Group.
+            long-summary: Long summary of the Test Command Group.
+        """
+
+    @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, "test_help_loader", None)])
+    @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    def test_basic(self, mocked_load, mocked_pkg_util):
+        with self.assertRaises(SystemExit):
+            self.test_cli.invoke(["test", "alpha", "-h"])
+
+    @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, "test_help_loader", None)])
+    @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    def test_partial_load_from_help_py(self, mocked_load, mocked_pkg_util):
+        self.helps['test alpha'] = """
+            type: command
+            short-summary: Foo Bar
+            parameters:
+                - name: --arg1 -a
+                  short-summary: A short Summary
+        """
 
 
-class HelpTestCommandLoader(AzCommandsLoader):
 
-    def __init__(self, cli_ctx=None):
-        logging.warning(__name__)
-        from azure.cli.core.commands import CliCommandType
-        compute_custom = CliCommandType(
-            operations_tmpl='{}#{{}}'.format(__name__),
-        )
-        super(HelpTestCommandLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    custom_command_type=compute_custom)
-        self.cmd_to_loader_map = {}
+        with self.assertRaises(SystemExit):
+            self.test_cli.invoke(["test", "alpha", "-h"])
 
-    def load_command_table(self, args):
-        with self.command_group('test') as g:
-            g.custom_command('alpha', 'dummy_handler')
-            g.custom_command('beta', 'dummy_handler')
-
-        for cmd_name in self.command_table:
-            self.cmd_to_loader_map[cmd_name] = [self]  # command loader doubles as main loader and module loader.
-
-        return self.command_table
-
-    def load_arguments(self, command):
-        with self.argument_context('test') as c:
-            c.argument('arg1', options_list=['--arg1', '-a'])
-            c.argument('arg2', options_list=['-b'])
-
-def dummy_handler(arg1, arg2=None, arg3=None):
-    """ Short summary here. Long summary here. Still long summary. """
-    pass
 
 
 def _store_parsers(parser, d):
