@@ -17,7 +17,7 @@ from azure.mgmt.resource.subscriptions.models import \
     (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+                                     ServicePrincipalAuth, _AAD_APPLICATION_FACTORY)
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
@@ -1078,7 +1078,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_arm_client.subscriptions.list.return_value = [self.subscription1]
         cli.cloud.endpoints.active_directory = TEST_ADFS_AUTH_URL
-        finder = SubscriptionFinder(cli, _AUTH_CTX_FACTORY, None, lambda _: mock_arm_client)
+        finder = SubscriptionFinder(cli, _AAD_APPLICATION_FACTORY, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
         subs = finder.find_from_user_account(self.user1, 'bar', None, mgmt_resource)
@@ -1591,19 +1591,19 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
         # test w/ trailing slash
-        r = profile.auth_ctx_factory(cli, 'common', None)
+        r = profile.aad_application_factory(cli, 'common', None)
         self.assertEqual(r.authority.url, adfs_url_1.rstrip('/'))
 
         # test w/o trailing slash
         adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
         cli.cloud.endpoints.active_directory = adfs_url_2
-        r = profile.auth_ctx_factory(cli, 'common', None)
+        r = profile.aad_application_factory(cli, 'common', None)
         self.assertEqual(r.authority.url, adfs_url_2)
 
         # test w/ regular aad
         aad_url = 'https://login.microsoftonline.com'
         cli.cloud.endpoints.active_directory = aad_url
-        r = profile.auth_ctx_factory(cli, 'common', None)
+        r = profile.aad_application_factory(cli, 'common', None)
         self.assertEqual(r.authority.url, aad_url + '/common')
 
 
