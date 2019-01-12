@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.8
++++++
+* support added for hybrid connections and vnetintegrations 
+
 0.2.7
 +++++
 * remove client side sku check for linux app service plan create

@@ -321,12 +321,54 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_id', arg_group='Microsoft', help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
+    
+    with self.argument_context('webapp hybridconnection list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
 
+    with self.argument_context('webapp hybridconnection set') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name')
+        c.argument('hybrid_connection_name')
+
+    with self.argument_context('webapp hybridconnection remove') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name')
+        c.argument('hybrid_connection_name')
+
+    with self.argument_context('appservice hybridconnection set-key') as c:
+        c.argument('asp_name')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name')
+        c.argument('hybrid_connection_name')
+        c.argument('key_type')
+
+    with self.argument_context('webapp vnetintegration list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('webapp vnetintegration set') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('vnet_resource_group')
+        c.argument('vnet_name')
+        c.argument('subnet_name')
+
+    with self.argument_context('webapp vnetintegration remove') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('vnet_name')
+        c.argument('subnet_name')
+        
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        
     with self.argument_context('functionapp create') as c:
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -338,9 +380,9 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
         c.argument('runtime', help='The function runtime stack. Currently supported for Linux apps only', arg_type=get_enum_type(['dotnet', 'node', 'python']))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-
-    # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
+        
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)
+        
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")

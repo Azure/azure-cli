@@ -974,3 +974,71 @@ helps['functionapp cors show'] = """
     type: command
     short-summary: show allowed origins
 """
+
+helps['webapp hybridconnection list'] = """
+    type: command
+    short-summary: lists all the hybrid connections set on the specified app
+    examples:
+        - name: list the hyrbid connections 
+          text: >
+              az webapp hybridconnection list -g <myRG> -n <myAppName>
+"""
+
+helps['webapp hybridconnection set'] = """
+    type: command
+    short-summary: sets an existing hybrid connection on the specified app 
+    examples:
+        - name: set a hybrid connection 
+          text: >
+            az webapp hybridconnection set -g <myRG> -n <myAppName> 
+            --namespace-name <hybridConnectionNamespace> --hybrid-connection-name <hybridConnectionName>
+"""
+
+helps['webapp hybridconnection remove'] = """
+    type: command
+    short-summary: disconnects the specified hybrid connection from the specified app 
+    examples:
+        - name: list the hyrbid connections 
+          text: >
+            az webapp hybridconnection remove -g <myRG> -n <myAppName> 
+            --namespace-name <hybridConnectionNamespace> --hybrid-connection-name <hybridConnectionName>
+"""
+
+helps['appservice hybridconnection set-key'] = """
+    type: command
+    short-summary: specifies which key apps should use when connecting to a hybrid connection 
+    examples:
+        - name: list the hyrbid connections 
+          text: >
+            az webapp hybridconnection set-key --asp-name <hybridConnectionAppServicePlan>-g <appServicePlanResourceGroup> 
+            --namespace-name <hybridConnectionNamespace> --hybrid-connection-name <hybridConnectionName> 
+            --key-type <"primary" | "secondary">
+"""
+
+helps['webapp vnetintegration list'] = """
+    type: command
+    short-summary: lists all the virtual networks the specified app is connected to 
+    examples:
+        - name: list the hyrbid connections 
+          text: >
+            az webapp vnetintegration list -g <myRG> -n <myAppName>
+"""
+
+helps['webapp vnetintegration set'] = """
+    type: command
+    short-summary: sets an existing swift virtual network on the specified app 
+    examples:
+        - name: list the hyrbid connections 
+          text: >
+            az webapp vnetintegration list -g <myRG> -n <myAppName> --vnet-resource-group <vnetRG> --vnet-name <vnetName>
+            --subnet-name <subnetName>
+"""
+
+helps['webapp vnetintegration remove'] = """
+    type: command
+    short-summary: removes the specified swift virtual network from the specified app 
+    examples:
+        - name: list the hyrbid connections 
+          text: >
+            az webapp vnetintegration list -g <myRG> -n <myAppName>  --vnet-name <vnetName> --subnet-name <subnetName>
+"""
