@@ -890,20 +890,6 @@ class WebappSSLCertTest(ScenarioTest):
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
 
-class WebappUndeleteTest(ScenarioTest):
-    @AllowLargeResponse(8192)
-    @ResourceGroupPreparer()
-    def test_webapp_deleted_list(self, resource_group):
-        plan = self.create_random_name(prefix='delete-me-plan', length=24)
-        webapp_name = self.create_random_name(prefix='delete-me-web', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku B1 --tags plan=plan1'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
-        self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
-        self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
-            JMESPathCheck('[0].deletedSiteName', webapp_name)
-        ])
-
-
 class FunctionAppWithPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
     @ResourceGroupPreparer(parameter_name='resource_group2')
