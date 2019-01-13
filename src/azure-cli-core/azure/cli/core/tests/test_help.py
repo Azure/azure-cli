@@ -13,7 +13,7 @@ from knack.help import HelpObject, GroupHelpFile, HelpAuthoringException
 
 from azure.cli.core._help import ArgumentGroupRegistry, CliCommandHelpFile
 from azure.cli.core.mock import DummyCli
-from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args
+from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
 from azure.cli.core.tests.test_help_loader import mock_load_command_loader
 
 # TODO update this CLASS to properly load all help...                                                                       .
@@ -71,14 +71,6 @@ class Load(unittest.TestCase):
         cls.test_cli = DummyCli()
         cls.helps = helps
 
-    def set_help_py(self):
-        helps = {}
-        helps['test'] = """
-            type: group
-            short-summary: Test Command Group.
-            long-summary: Long summary of the Test Command Group.
-        """
-
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, "test_help_loader", None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
     def test_basic(self, mocked_load, mocked_pkg_util):
@@ -87,21 +79,55 @@ class Load(unittest.TestCase):
 
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, "test_help_loader", None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
-    def test_partial_load_from_help_py(self, mocked_load, mocked_pkg_util):
+    def test_load_from_help_py(self, mocked_load, mocked_pkg_util):
         self.helps['test alpha'] = """
             type: command
             short-summary: Foo Bar
+            long-summary: Foo Bar Baz
             parameters:
                 - name: --arg1 -a
-                  short-summary: A short Summary
+                  short-summary: A short summary
+                  populator-commands:
+                  - az foo bar
+                  - az bar baz
+            examples:
+                - name: Alpha Example
+                  text: az test alpha --arg1 a --arg2 b --arg3 c
+                  min_profile: 2017-03-09-profile
+                  max_profile: latest
+                  
         """
 
+        create_invoker_and_load_cmds_and_args(self.test_cli)
+        help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test alpha"), None)
+        self.assertIsNotNone(help_obj)
+
+        self.assertEqual(help_obj.short_summary, "Foo Bar.")
+        self.assertEqual(help_obj.long_summary, "Foo Bar Baz.")
+
+        obj_param_dict = {param.name: param for param in help_obj.parameters}
+        param_name_set = {"--arg1 -a", "--arg2", "--arg3"}
+
+        # test that parameters and help are loaded from command function docstring, argument registry help and help.py
+        self.assertTrue(set(obj_param_dict.keys()).issuperset(param_name_set))
+
+        self.assertEqual(obj_param_dict["--arg2"].short_summary, "Help From code.")
+        self.assertEqual(obj_param_dict["--arg3"].short_summary, "Arg3's help text.")
+
+        self.assertEqual(obj_param_dict["--arg1 -a"].short_summary, "A short summary.")
+        self.assertEqual(obj_param_dict["--arg1 -a"].value_sources[0]['link']['command'], "az foo bar")
+        self.assertEqual(obj_param_dict["--arg1 -a"].value_sources[1]['link']['command'], "az bar baz")
 
 
-        with self.assertRaises(SystemExit):
-            self.test_cli.invoke(["test", "alpha", "-h"])
+        self.assertEqual(help_obj.examples[0].name, "Alpha Example")
+        self.assertEqual(help_obj.examples[0].text, "az test alpha --arg1 a --arg2 b --arg3 c")
+        self.assertEqual(help_obj.examples[0].min_profile, "2017-03-09-profile")
+        self.assertEqual(help_obj.examples[0].max_profile, "latest")
 
-
+    @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, "test_help_loader", None)])
+    @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    def test_load_from_help_yaml(self, mocked_load, mocked_pkg_util):
+        pass
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():
