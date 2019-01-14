@@ -454,6 +454,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         ])
 
 # Helper functions
-    
+
     def _normalize_filename(cmd, string):
         return '"' + string.replace('\\', '/') + '"'
