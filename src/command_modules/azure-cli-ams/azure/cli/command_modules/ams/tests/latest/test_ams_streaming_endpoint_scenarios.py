@@ -68,8 +68,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'scaleUnits': 4,
             'tags': 'foo=bar',
             'ips': '1.1.1.1 2.2.2.2',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml'),
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml')),
             'identifier': 'id1',
             'expiration': '2030-12-31T16:00:00-08:00',
             'base64Key': 'dGVzdGlkMQ=='
@@ -121,8 +121,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 5,
             'tags': 'foo=bar',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml'),
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml')),
             'ip': '4.4.4.4'
         })
 
@@ -152,8 +152,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'description': 'test streaming description2',
             'maxCacheAge': 9,
             'tags': 'foo2=bar2 foo3=bar3',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml'),
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml')),
             'ips': '1.1.1.1 2.2.2.2 192.168.0.0/28'
         })
 
@@ -198,8 +198,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 6,
             'tags': 'foo=bar',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml'))
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -237,8 +237,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 7,
             'tags': 'foo=bar',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml'))
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -278,8 +278,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'maxCacheAge': 11,
             'scaleUnits': 8,
             'tags': 'foo=bar',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml'))
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -315,8 +315,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'scaleUnits': 9,
             'scaleUnits2': 10,
             'tags': 'foo=bar',
-            'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
-            'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
+            'clientAccessPolicy': '@' + self._normalize_filename(_get_test_data_file('clientAccessPolicy.xml')),
+            'crossDomainPolicy': '@' + self._normalize_filename(_get_test_data_file('crossDomainPolicy.xml'))
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -452,3 +452,8 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.cmd('az ams streaming-endpoint list -g {rg} -a {amsname}', checks=[
             self.check('length(@)', 2)
         ])
+
+# Helper functions
+
+    def _normalize_filename(cmd, string):
+        return '"' + string.replace('\\', '/') + '"'
