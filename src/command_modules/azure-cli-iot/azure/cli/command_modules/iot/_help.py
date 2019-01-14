@@ -675,8 +675,8 @@ helps['iot hub devicestream'] = """
 
 helps['iot hub devicestream show'] = """
     type: command
-    short-summary: Get IoT Hub’s device streams endpoints.
-    long-summary: Get IoT Hub’s device streams endpoints.
+    short-summary: Get IoT Hub's device streams endpoints.
+    long-summary: Get IoT Hub's device streams endpoints.
     examples:
         - name: Get all the device streams from "MyIotHub" IoT Hub.
           text: >
