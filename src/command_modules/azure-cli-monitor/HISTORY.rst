@@ -5,7 +5,7 @@ Release History
 
 0.2.7
 +++++
-* Minor fixes
+* `monitor metrics alert create/update`: Improve `--condition` support for special characters.
 
 0.2.6
 +++++
