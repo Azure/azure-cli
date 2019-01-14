@@ -280,7 +280,7 @@ helps['aks update-credentials'] = """
     type: command
     short-summary: Update credentails for a managed Kubernetes cluster, like service principal, AAD.
     parameters:
-        - name: --reset-service-principal -s
+        - name: --reset-service-principal
           type: bool
           short-summary: Reset service principal for a managed cluster.
         - name: --service-principal

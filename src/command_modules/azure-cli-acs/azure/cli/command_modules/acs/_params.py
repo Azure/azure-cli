@@ -214,7 +214,7 @@ def load_arguments(self, _):
                    help='The OS type of the connector')
 
     with self.argument_context('aks update-credentials') as c:
-        c.argument('reset_service_principal', action='store_true', options_list=['--reset-service-principal', '-s'])
+        c.argument('reset_service_principal', action='store_true')
         c.argument('service_principal')
         c.argument('client_secret')
 
