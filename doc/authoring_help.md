@@ -100,7 +100,7 @@ Here are the layers of Project Az help, with each layer overriding the layer bel
 
 ## Page titles for command groups ##
 
-Page titles for your command groups as generated from the source are simply the command syntax, "az vm", but we use friendly titles on the published pages - "Virtual machines - az vm". To do that, ee add the friendly part of the page title to [titlemapping.json](https://github.com/Azure/azure-docs-cli-python/blob/master/titleMapping.json) in the azure-docs-cli-python repo. When you add a new command group, make sure to update the mapping.
+Page titles for your command groups as generated from the source are simply the command syntax, "az vm", but we use friendly titles on the published pages - "Virtual machines - az vm". To do that, ee add the friendly part of the page title to [titlemapping.json](https://github.com/Azure/azure-docs-cli/blob/master/titleMapping.json) in the azure-docs-cli repo. When you add a new command group, make sure to update the mapping.
 
 ## Profile specific help ##
 
@@ -161,4 +161,4 @@ https://docs.microsoft.com/en-us/cli/azure/reference-index
 
 If you are not satisfied with the heading that is automatically provided, please create a PR to update the following file:
 
-https://github.com/Azure/azure-docs-cli-python/blob/master/titleMapping.json
+https://github.com/Azure/azure-docs-cli/blob/master/titleMapping.json
