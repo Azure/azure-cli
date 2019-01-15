@@ -1512,8 +1512,9 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
                          allow_global_reach=None):
+
     if bandwidth_in_mbps is not None:
-        instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
+        instance.service_provider_properties.bandwidth_in_mbps = bandwidth_in_mbps
 
     if peering_location is not None:
         instance.service_provider_properties.peering_location = peering_location
