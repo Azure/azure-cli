@@ -44,6 +44,8 @@ TEST_SUBSCRIPTION = 'testsubscription'
 TEST_AAD_ACCESS_TOKEN = 'testaadaccesstoken'
 TEST_ACR_REFRESH_TOKEN = 'testacrrefreshtoken'
 TEST_ACR_ACCESS_TOKEN = 'testacraccesstoken'
+TEST_REPOSITORY = 'testrepository'
+
 
 class AcrMockCommandsTests(unittest.TestCase):
 
@@ -383,7 +385,6 @@ class AcrMockCommandsTests(unittest.TestCase):
         test_login_server = '{}.azurecr.io'.format(test_registry)
         test_tenant_suffix = 'microsoft'
         test_login_server_with_tenant_suffix = '{}-{}.azurecr.io'.format(test_registry, test_tenant_suffix)
-        test_repository = 'testrepository'
 
         # Registry found, login server without tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -393,8 +394,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_exists=True,
                                    registry_name=test_registry,
                                    login_server=test_login_server,
-                                   tenant_suffix=None,
-                                   repository=test_repository)
+                                   tenant_suffix=None)
 
         # Registry not found, login server without tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -404,8 +404,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_exists=False,
                                    registry_name=test_registry,
                                    login_server=test_login_server,
-                                   tenant_suffix=None,
-                                   repository=test_repository)
+                                   tenant_suffix=None)
 
         # Registry found, login server with tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -415,8 +414,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_exists=True,
                                    registry_name=test_registry,
                                    login_server=test_login_server_with_tenant_suffix,
-                                   tenant_suffix=test_tenant_suffix,
-                                   repository=test_repository)
+                                   tenant_suffix=test_tenant_suffix)
 
         # Registry not found, login server with tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -426,10 +424,9 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_exists=False,
                                    registry_name=test_registry,
                                    login_server=test_login_server_with_tenant_suffix,
-                                   tenant_suffix=test_tenant_suffix,
-                                   repository=test_repository)
+                                   tenant_suffix=test_tenant_suffix)
 
-    def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix, repository):
+    def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
 
@@ -448,12 +445,12 @@ class AcrMockCommandsTests(unittest.TestCase):
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
-        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, repository=repository, permission='*')
-        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:*'.format(repository))
+        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission='*')
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:*'.format(TEST_REPOSITORY))
 
         # Test get access token for artifact image repository
-        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, artifact_repository=repository, permission='*')
-        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:*'.format(repository))
+        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission='*')
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:*'.format(TEST_REPOSITORY))
 
     def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server):
         # Set up AAD token with only access token
