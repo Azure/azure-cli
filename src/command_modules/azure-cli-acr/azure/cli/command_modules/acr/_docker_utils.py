@@ -175,7 +175,7 @@ def _get_credentials(cli_ctx,
         requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     except RequestException:
         if resource_not_found:
-            logger.warning("%s Default the registry login server to '%s'.", resource_not_found, login_server)
+            logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
         raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
                        "Please verify if the registry exists.")
 
