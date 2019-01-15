@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import _load_command_loader
 
 
 class HelpTestCommandLoader(AzCommandsLoader):
@@ -26,22 +25,21 @@ class HelpTestCommandLoader(AzCommandsLoader):
     def load_arguments(self, command):
         with self.argument_context('test') as c:
             c.argument('arg1', options_list=['--arg1', '-a'])
-            c.argument('arg2', options_list=['--arg2'], help="Help From code.")
+            c.argument('arg2', options_list=['--arg2', '-b'], help="Help From code.")
+        with self.argument_context('test alpha') as c:
+            c.positional('arg4', metavar="ARG4")
         self._update_command_definitions()  # pylint: disable=protected-access
 
 
-def dummy_handler(arg1, arg2=None, arg3=None):
+def dummy_handler(arg1, arg2=None, arg3=None, arg4=None):
     """
     Short summary here. Long summary here. Still long summary.
-    :param arg1: arg1's help text
-    :param arg2: arg2's help text
-    :param arg3: arg3's help text
+    :param arg1: arg1's docstring help text
+    :param arg2: arg2's docstring help text
+    :param arg3: arg3's docstring help text
+    :param arg4: arg4's docstring help text
     """
     pass
-
-
-def mock_load_command_loader(loader, args, name, prefix):
-    return _load_command_loader(loader, args, name, "azure.cli.core.tests.")
 
 
 COMMAND_LOADER_CLS = HelpTestCommandLoader

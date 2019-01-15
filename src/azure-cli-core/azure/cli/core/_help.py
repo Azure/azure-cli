@@ -78,7 +78,7 @@ class CLIPrintMixin(CLIHelp):
             _print_indent(u'{0}'.format(e.short_summary), indent)
             indent = 2
             if e.long_summary:
-                _print_indent(u'{0}'.format(e.description), indent)
+                _print_indent(u'{0}'.format(e.long_summary), indent)
             _print_indent(u'{0}'.format(e.command), indent)
             print('')
 

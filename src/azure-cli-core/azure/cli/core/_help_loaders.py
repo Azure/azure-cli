@@ -104,7 +104,7 @@ class BaseHelpLoader(object):
             dir_name = os.path.dirname(loader_file_path)
             files = os.listdir(dir_name)
             for file in files:
-                if file.endswith(".yaml") or file.endswith(".yml"):
+                if file.endswith("help.yaml") or file.endswith("help.yml"):
                     help_file_path = os.path.join(dir_name, file)
                     with open(help_file_path, "r") as f:
                         text = f.read()
