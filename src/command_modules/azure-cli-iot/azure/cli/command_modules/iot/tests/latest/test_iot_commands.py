@@ -5,13 +5,15 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class IoTHubTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_iot_hub(self, resource_group, resource_group_location):
-        hub = 'iot-hub-for-test'
+        hub = 'iot-hub-for-test-1'
         rg = resource_group
         location = resource_group_location
         ehConnectionString = self._get_eventhub_connectionstring(rg)
@@ -264,11 +266,14 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(serviceBusTopics[*])', 0),
                          self.check('length(storageContainers[*])', 0)])
 
+        # Test 'az iot hub devicestream show'
+        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
+
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest'
+        ehNamespace = 'ehNamespaceiothubfortest-1'
         eventHub = 'eventHubiothubfortest'
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
