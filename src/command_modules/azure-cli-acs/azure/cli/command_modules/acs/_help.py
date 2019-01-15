@@ -312,6 +312,9 @@ helps['aks get-credentials'] = """
         - name: --file -f
           type: string
           short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
+        - name: --overwrite-existing
+          type: bool
+          short-summary: Overwrite any existing cluster entry with the same name.
 """
 
 helps['aks get-upgrades'] = """
