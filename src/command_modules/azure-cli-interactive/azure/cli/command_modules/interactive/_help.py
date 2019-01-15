@@ -6,31 +6,12 @@
 
 from knack.help_files import helps
 
-helps["billing"] = """
+helps["interactive"] = """
 "type": |-
-    group
+    command
 "short-summary": |-
-    Manage Azure Billing.
-"""
-
-helps["billing invoice"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get billing invoices for a subscription.
-"""
-
-helps["billing period"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get billing periods for a subscription.
-"""
-
-helps["billing enrollment-account"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get enrollment accounts.
+    Start interactive mode. Installs the Interactive extension if not installed already.
+"long-summary": |
+    For more information on interactive mode, see: https://azure.microsoft.com/en-us/blog/welcome-to-azure-cli-shell/
 """
 

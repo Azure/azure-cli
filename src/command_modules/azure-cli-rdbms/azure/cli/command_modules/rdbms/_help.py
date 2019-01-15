@@ -6,242 +6,711 @@
 
 from knack.help_files import helps
 
-#  pylint: disable=line-too-long
+helps["mariadb server-logs download"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download log files.
+"""
 
+helps["postgres server georestore"] = """
+"type": |-
+    command
+"short-summary": |-
+    Georestore a server from backup.
+"""
 
-def add_helps(command_group, server_type):
-    helps['{}'.format(command_group)] = """
-                type: group
-                short-summary: Manage Azure Database for {} servers.
-                """.format(server_type)
-    helps['{} server'.format(command_group)] = """
-                type: group
-                short-summary: Manage {} servers.
-                """.format(server_type)
-    helps['{} server create'.format(command_group)] = """
-                type: command
-                short-summary: Create a server.
-                examples:
-                    - name: Create a {0} server with only required paramaters in North Europe.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password
-                    - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name GP_Gen4_2
-                    - name: Create a {0} server with all paramaters set.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name B_Gen4_2 --ssl-enforcement Disabled \\
-                            --storage-size 51200 --tags "key=value" --version {{server-version}}
-                """.format(server_type, command_group)
-    helps['{} server restore'.format(command_group)] = """
-                type: command
-                short-summary: Restore a server from backup.
-                examples:
-                    - name: Restore 'testsvr' as 'testsvrnew'.
-                      text: az {0} server restore -g testgroup -n testsvrnew --source-server testsvr --restore-point-in-time "2017-06-15T13:10:00Z"
-                    - name: Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group than the backup.
-                      text: |
-                        az {0} server restore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
-                            --restore-point-in-time "2017-06-15T13:10:00Z"
-                """.format(command_group, server_type)
-    helps['{} server georestore'.format(command_group)] = """
-                type: command
-                short-summary: Georestore a server from backup.
-                examples:
-                    - name: Georestore 'testsvr' as 'testsvrnew' where 'testsvrnew' is in same resource group as 'testsvr'.
-                      text: az {0} server georestore -g testgroup -n testsvrnew --source-server testsvr -l westus2
-                    - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
-                      text: |
-                        az {0} server georestore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
-                            -l westus2 --sku-name GP_Gen4_2
-                """.format(command_group, server_type)
-    helps['mysql server replica'] = """
-                type: group
-                short-summary: Manage cloud replication.
-                """
-    helps['mysql server replica create'] = """
-                type: command
-                short-summary: Create a cloud replica for a server.
-                examples:
-                    - name: Create replica for server testsvr.
-                      text: az mysql server replica create -n testreplsvr -g testgroup -s testsvr
-                    - name: Create replica testreplsvr for server testsvr2, where 'testreplsvr' is in a different resource group.
-                      text: |
-                        az mysql server replica create -n testreplsvr -g testgroup \\
-                            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testsvr2"
-                """
-    helps['mysql server replica stop'] = """
-                type: command
-                short-summary: Stop replica to make it an individual server.
-                examples:
-                    - name: Stop server testsvr as replica and make it an individual server.
-                      text: az mysql server replica stop -g testgroup -n testsvr
-                """
-    helps['mysql server replica list'] = """
-                type: command
-                short-summary: List all replicas for a given server.
-                """
-    helps['{} server update'.format(command_group)] = """
-                type: command
-                short-summary: Update a server.
-                examples:
-                    - name: Update a server's sku.
-                      text: az {0} server update -g testgroup -n testsvrnew --sku-name GP_Gen5_4
-                    - name: Update a server's tags.
-                      text: az {0} server update -g testgroup -n testsvrnew --tags "k1=v1" "k2=v2"
-                """.format(command_group)
-    helps['{} server wait'.format(command_group)] = """
-                type: command
-                short-summary: Wait for server to satisfy certain conditions.
-                """
-    helps['{} server delete'.format(command_group)] = """
-                type: command
-                short-summary: Delete a server.
-                """
-    helps['{} server show'.format(command_group)] = """
-                type: command
-                short-summary: Get the details of a server.
-                """
-    helps['{} server list'.format(command_group)] = """
-                type: command
-                short-summary: List available servers.
-                examples:
-                    - name: List all {0} servers in a subscription.
-                      text: az {1} server list
-                    - name: List all {0} servers in a resource group.
-                      text: az {1} server list -g testgroup
-                """.format(server_type, command_group)
-    helps['{} server firewall-rule'.format(command_group)] = """
-                type: group
-                short-summary: Manage firewall rules for a server.
-                """
-    helps['{} server firewall-rule create'.format(command_group)] = """
-                type: command
-                short-summary: Create a new firewall rule for a server.
-                examples:
-                    - name: Create a firewall rule allowing all connections from all IP addresses.
-                      text: az {} server firewall-rule create -g testgroup -s testsvr -n allowall --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255
-                """.format(command_group)
-    helps['{} server firewall-rule update'.format(command_group)] = """
-                type: command
-                short-summary: Update a firewall rule.
-                examples:
-                    - name: Update a firewall rule's start IP address.
-                      text: az {0} server firewall-rule update -g testgroup -s testsvr -n allowall --start-ip-address 0.0.0.1
-                    - name: Update a firewall rule's start and end IP address.
-                      text: az {0} server firewall-rule update -g testgroup -s testsvr -n allowall --start-ip-address 0.0.0.1 --end-ip-address 255.255.255.254
-                """.format(command_group)
-    helps['{} server firewall-rule delete'.format(command_group)] = """
-                type: command
-                short-summary: Delete a firewall rule.
-                """
-    helps['{} server firewall-rule show'.format(command_group)] = """
-                type: command
-                short-summary: Get the details of a firewall rule.
-                """
-    helps['{} server firewall-rule list'.format(command_group)] = """
-                type: command
-                short-summary: List all firewall rules for a server.
-                """
+helps["mysql server firewall-rule show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of a firewall rule.
+"""
 
-    helps['{} server vnet-rule'.format(command_group)] = """
-                type: group
-                short-summary: Manage a server's virtual network rules.
-                """
-    helps['{} server vnet-rule update'.format(command_group)] = """
-                type: command
-                short-summary: Update a virtual network rule.
-                """
-    helps['{} server vnet-rule create'.format(command_group)] = """
-                type: command
-                short-summary: Create a virtual network rule to allows access to a {} server.
-                examples:
-                    - name: Create a virtual network rule by providing the subnet id.
-                      text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet /subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
-                    - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
-                      text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
-                """.format(server_type, command_group, command_group)
+helps["postgres db delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a database.
+"""
 
-    helps['{} server configuration'.format(command_group)] = """
-                type: group
-                short-summary: Manage configuration values for a server.
-                """
-    helps['{} server configuration set'.format(command_group)] = """
-                type: command
-                short-summary: Update the configuration of a server.
-                examples:
-                    - name: Set a new configuration value.
-                      text: az {0} server configuration set -g testgroup -s testsvr -n {{config_name}} --value {{config_value}}
-                    - name: Set a configuration value to its default.
-                      text: az {0} server configuration set -g testgroup -s testsvr -n {{config_name}}
-                """.format(command_group)
-    helps['{} server configuration show'.format(command_group)] = """
-                type: command
-                short-summary: Get the configuration for a server."
-                """
-    helps['{} server configuration list'.format(command_group)] = """
-                type: command
-                short-summary: List the configuration values for a server.
-                """
-    helps['{} server-logs'.format(command_group)] = """
-                type: group
-                short-summary: Manage server logs.
-                """
-    helps['{} server-logs list'.format(command_group)] = """
-                type: command
-                short-summary: List log files for a server.
-                examples:
-                    - name: List log files for 'testsvr' modified in the last 72 hours (default value).
-                      text: az {0} server-logs list -g testgroup -s testsvr
-                    - name: List log files for 'testsvr' modified in the last 10 hours.
-                      text: az {0} server-logs list -g testgroup -s testsvr --file-last-written 10
-                    - name: List log files for 'testsvr' less than 30Kb in size.
-                      text: az {0} server-logs list -g testgroup -s testsvr --max-file-size 30
-                """.format(command_group)
-    helps['{} server-logs download'.format(command_group)] = """
-                type: command
-                short-summary: Download log files.
-                examples:
-                    - name: Download log files f1 and f2 to the current directory from the server 'testsvr'.
-                      text: az {} server-logs download -g testgroup -s testsvr -n f1.log f2.log
-                """.format(command_group)
-    helps['{} db'.format(command_group)] = """
-                type: group
-                short-summary: Manage {0} databases on a server.
-                """.format(server_type)
-    helps['{} db create'.format(command_group)] = """
-                type: command
-                short-summary: Create a {0} database.
-                examples:
-                    - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --admin-user myadmin --admin-password {{server_admin_password}} --sku-name GP_Gen4_2 --version 5.7
-                    - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}} --admin-user myadmin --admin-password {{server_admin_password}} --sku-name GP_Gen4_2 --version 5.7
-                """.format(server_type, command_group)
-    helps['{} db delete'.format(command_group)] = """
-                type: command
-                short-summary: Delete a database.
-                examples:
-                    - name: Delete database 'testdb' in the server 'testsvr'.
-                      text: az {0} db delete -g testgroup -s testsvr -n testdb
-                """.format(command_group)
-    helps['{} db show'.format(command_group)] = """
-                type: command
-                short-summary: Show the details of a database.
-                examples:
-                    - name: Show database 'testdb' in the server 'testsvr'.
-                      text: az {0} db show -g testgroup -s testsvr -n testdb
-                """.format(command_group)
-    helps['{} db list'.format(command_group)] = """
-                type: command
-                short-summary: List the databases for a server.
-                examples:
-                    - name: List databases in the server 'testsvr'.
-                      text: az {0} db list -g testgroup -s testsvr
-                """.format(command_group)
+helps["mysql server configuration"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage configuration values for a server.
+"""
 
+helps["mysql db delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a database.
+"""
 
-add_helps("mariadb", "MariaDB")
-add_helps("mysql", "MySQL")
-add_helps("postgres", "PostgreSQL")
+helps["mariadb server vnet-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage a server's virtual network rules.
+"""
+
+helps["mariadb server firewall-rule create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a new firewall rule for a server.
+"""
+
+helps["mysql server firewall-rule list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all firewall rules for a server.
+"""
+
+helps["mariadb server create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a server.
+"""
+
+helps["postgres server firewall-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage firewall rules for a server.
+"""
+
+helps["postgres server vnet-rule update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a virtual network rule.
+"""
+
+helps["mysql server firewall-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage firewall rules for a server.
+"""
+
+helps["mysql server replica create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a cloud replica for a server.
+"""
+
+helps["mariadb server firewall-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage firewall rules for a server.
+"""
+
+helps["postgres server wait"] = """
+"type": |-
+    command
+"short-summary": |-
+    Wait for server to satisfy certain conditions.
+"""
+
+helps["mariadb server restore"] = """
+"type": |-
+    command
+"short-summary": |-
+    Restore a server from backup.
+"""
+
+helps["mariadb db delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a database.
+"""
+
+helps["mariadb server wait"] = """
+"type": |-
+    command
+"short-summary": |-
+    Wait for server to satisfy certain conditions.
+"""
+
+helps["mysql server delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a server.
+"""
+
+helps["mariadb server configuration list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the configuration values for a server.
+"""
+
+helps["postgres server vnet-rule create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a virtual network rule to allows access to a PostgreSQL server.
+"""
+
+helps["mysql server-logs"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage server logs.
+"""
+
+helps["mariadb db create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a MariaDB database.
+"""
+
+helps["mariadb server-logs list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List log files for a server.
+"""
+
+helps["postgres server firewall-rule create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a new firewall rule for a server.
+"""
+
+helps["mariadb server vnet-rule update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a virtual network rule.
+"""
+
+helps["postgres server configuration set"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update the configuration of a server.
+"""
+
+helps["mariadb server firewall-rule show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of a firewall rule.
+"""
+
+helps["mariadb db show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the details of a database.
+"""
+
+helps["mysql server-logs download"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download log files.
+"""
+
+helps["mariadb server list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List available servers.
+"""
+
+helps["mariadb server firewall-rule list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all firewall rules for a server.
+"""
+
+helps["mysql server replica"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage cloud replication.
+"""
+
+helps["mysql db create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a MySQL database.
+"""
+
+helps["postgres server delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a server.
+"""
+
+helps["postgres server-logs"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage server logs.
+"""
+
+helps["postgres server update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a server.
+"""
+
+helps["mysql server wait"] = """
+"type": |-
+    command
+"short-summary": |-
+    Wait for server to satisfy certain conditions.
+"""
+
+helps["mariadb server-logs"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage server logs.
+"""
+
+helps["postgres server configuration show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the configuration for a server."
+"""
+
+helps["mysql server"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage MySQL servers.
+"""
+
+helps["postgres server-logs download"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download log files.
+"""
+
+helps["postgres"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage Azure Database for PostgreSQL servers.
+"""
+
+helps["postgres server show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of a server.
+"examples":
+-   "name": |-
+        Get the details of a server.
+    "text": |-
+        az postgres server show --name MyServer --resource-group MyResourceGroup
+"""
+
+helps["postgres server configuration"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage configuration values for a server.
+"""
+
+helps["mysql server show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of a server.
+"""
+
+helps["postgres server-logs list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List log files for a server.
+"""
+
+helps["mysql"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage Azure Database for MySQL servers.
+"""
+
+helps["mysql server vnet-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage a server's virtual network rules.
+"""
+
+helps["postgres server firewall-rule update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a firewall rule.
+"""
+
+helps["mariadb db list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the databases for a server.
+"""
+
+helps["mariadb server configuration show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the configuration for a server."
+"""
+
+helps["postgres server list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List available servers.
+"examples":
+-   "name": |-
+        List available servers.
+    "text": |-
+        az postgres server list --resource-group testgroup
+"""
+
+helps["postgres server firewall-rule delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a firewall rule.
+"""
+
+helps["mariadb"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage Azure Database for MariaDB servers.
+"""
+
+helps["mysql server replica stop"] = """
+"type": |-
+    command
+"short-summary": |-
+    Stop replica to make it an individual server.
+"""
+
+helps["mysql server firewall-rule create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a new firewall rule for a server.
+"""
+
+helps["mariadb server show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of a server.
+"""
+
+helps["mariadb db"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage MariaDB databases on a server.
+"""
+
+helps["mysql server configuration show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the configuration for a server."
+"""
+
+helps["mariadb server georestore"] = """
+"type": |-
+    command
+"short-summary": |-
+    Georestore a server from backup.
+"""
+
+helps["postgres db list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the databases for a server.
+"""
+
+helps["mariadb server delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a server.
+"""
+
+helps["mysql server firewall-rule delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a firewall rule.
+"""
+
+helps["mysql server list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List available servers.
+"""
+
+helps["mysql server configuration list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the configuration values for a server.
+"""
+
+helps["postgres server vnet-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage a server's virtual network rules.
+"""
+
+helps["mysql server vnet-rule update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a virtual network rule.
+"""
+
+helps["mysql server vnet-rule create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a virtual network rule to allows access to a MySQL server.
+"""
+
+helps["mariadb server vnet-rule create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a virtual network rule to allows access to a MariaDB server.
+"""
+
+helps["postgres server configuration list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the configuration values for a server.
+"""
+
+helps["mysql server-logs list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List log files for a server.
+"""
+
+helps["mysql server update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a server.
+"""
+
+helps["mysql server firewall-rule update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a firewall rule.
+"""
+
+helps["postgres server firewall-rule show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of a firewall rule.
+"""
+
+helps["mariadb server firewall-rule delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a firewall rule.
+"""
+
+helps["postgres db"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage PostgreSQL databases on a server.
+"""
+
+helps["mysql server restore"] = """
+"type": |-
+    command
+"short-summary": |-
+    Restore a server from backup.
+"""
+
+helps["mysql db"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage MySQL databases on a server.
+"""
+
+helps["postgres db show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the details of a database.
+"""
+
+helps["postgres db create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a PostgreSQL database.
+"""
+
+helps["mysql db list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the databases for a server.
+"""
+
+helps["mysql server create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a server.
+"examples":
+-   "name": |-
+        Create a server.
+    "text": |-
+        az mysql server create --sku-name GP_Gen4_2 --version {server-version} --location northeurope --name testsvr --admin-user username --resource-group testgroup --admin-password password
+"""
+
+helps["mysql server configuration set"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update the configuration of a server.
+"""
+
+helps["mysql db show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the details of a database.
+"""
+
+helps["mariadb server configuration"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage configuration values for a server.
+"""
+
+helps["mariadb server configuration set"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update the configuration of a server.
+"""
+
+helps["mariadb server"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage MariaDB servers.
+"""
+
+helps["postgres server create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a server.
+"examples":
+-   "name": |-
+        Create a server.
+    "text": |-
+        az postgres server create --sku-name GP_Gen4_2 --version {server-version} --storage-size 51200 --location northeurope --name testsvr --admin-user username --resource-group testgroup --admin-password password
+"""
+
+helps["postgres server firewall-rule list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all firewall rules for a server.
+"""
+
+helps["mariadb server firewall-rule update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a firewall rule.
+"""
+
+helps["mysql server georestore"] = """
+"type": |-
+    command
+"short-summary": |-
+    Georestore a server from backup.
+"""
+
+helps["postgres server"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage PostgreSQL servers.
+"examples":
+-   "name": |-
+        List log files for a server.
+    "text": |-
+        az postgres server-logs list --output json --query [0] --server-name testsvr --resource-group testgroup
+-   "name": |-
+        Download log files.
+    "text": |-
+        az postgres server-logs download --server-name testsvr --name f1.log f2.log --resource-group testgroup
+"""
+
+helps["postgres server restore"] = """
+"type": |-
+    command
+"short-summary": |-
+    Restore a server from backup.
+"""
+
+helps["mariadb server update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a server.
+"""
+
+helps["mysql server replica list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all replicas for a given server.
+"""
+
