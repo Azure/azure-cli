@@ -8,6 +8,7 @@ from __future__ import print_function
 import logging
 import shutil
 import inspect
+from inspect import getmembers as inspect_getmembers
 
 import unittest
 import mock
@@ -18,16 +19,17 @@ from azure.cli.core._help import CliCommandHelpFile
 
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.commands import _load_command_loader
-from azure.cli.core.tests.test_help_dummy_loader import HelpTestCommandLoader
 from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
 
 
+# Command loader module
+MOCKED_COMMAND_LOADER_MOD = "test_help_loaders"
 
-MOCKED_COMMAND_LOADER_MOD = "test_help_dummy_loader"
-
+# mock command loader method so that only the mock command loader can be loaded.
 def mock_load_command_loader(loader, args, name, prefix):
     return _load_command_loader(loader, args, name, "azure.cli.core.tests.")
 
+# mock inspect.getfile to discover directory containing help files.
 def get_mocked_inspect_getfile(expected_arg, return_value):
 
     def inspect_getfile(obj):
@@ -35,8 +37,20 @@ def get_mocked_inspect_getfile(expected_arg, return_value):
             return return_value
         else:
             return inspect.getfile(obj)
-
     return inspect_getfile
+
+# mock getmembers so test help loader can be injected into AzCliHelp class' versioned loader list
+def mock_inspect_getmembers(object, predicate=None):
+    import azure.cli.core.tests.test_help_loaders as possible_loaders
+
+    predicate_repr = repr(predicate)
+    if "_register_help_loaders" in predicate_repr and "is_loader_cls" in predicate_repr:
+        result = inspect_getmembers(object, predicate)
+        result.extend(inspect_getmembers(possible_loaders, predicate))
+        return list(set(result))
+    else:
+        return inspect_getmembers(object, predicate)
+
 
 def _store_parsers(parser, d):
     for s in parser.subparsers.values():
@@ -106,7 +120,6 @@ class Load(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         from knack.help_files import helps
-        #cls.test_cli = DummyCli(commands_loader_cls=HelpTestCommandLoader)
         cls.test_cli = DummyCli()
         cls.helps = helps
 
@@ -187,6 +200,85 @@ class Load(unittest.TestCase):
                   max_profile: latest 
         """
         return self._create_new_temp_file(yaml_help, suffix="help.yaml")
+
+    def set_help_json(self):
+        json_help = """
+            {
+                "version": 2,
+                "content": [
+                    {
+                        "group": {
+                            "name": "test",
+                            "short": "Group json summary",
+                            "long": "Group json description. A.K.A long description",
+                            "hyper-links": [
+                                {
+                                    "title": "Azure Json Test Docs",
+                                    "url": "https://docs.microsoft.com/en-us/azure/test"
+                                },
+                                {
+                                    "url": "https://aka.ms/just-a-url"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "command": {
+                            "name": "test alpha",
+                            "short": "Command json summary",
+                            "long": "Command json description. A.K.A long description",
+                            "hyper-links": [
+                                {
+                                    "title": "Azure Json Test Alpha Docs",
+                                    "url": "https://docs.microsoft.com/en-us/azure/test/alpha"
+                                },
+                                {
+                                    "url": "https://aka.ms/just-a-long-url"
+                                }
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "--arg3",
+                                    "short": "Arg 3's json summary",
+                                    "long": "A truly true description of this parameter.",
+                                    "sources": [
+                                        {
+                                            "string": "Number range: 0 to 10"
+                                        },
+                                        {
+                                            "link": {
+                                                "url": "https://www.foo-json.com",
+                                                "title": "foo-json"
+                                            }
+                                        },
+                                        {
+                                            "link": {
+                                                "command": "az test show",
+                                                "title": "Show test details. Json file"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "ARG4",
+                                    "summary": "Arg4's summary, json. Positional arg, not required"
+                                }
+                            ],
+                            "examples": [
+                                {
+                                    "summary": "A simple example from json",
+                                    "description": "More detail on the simple example.",
+                                    "command": "az test alpha --arg1 alpha --arg2 beta --arg3 chi",
+                                    "min_profile": "2018-03-01-hybrid",
+                                    "max_profile": "latest"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        """
+        return self._create_new_temp_file(json_help, suffix="help.json")
 
     # Mock logic in core.MainCommandsLoader.load_command_table for retrieving installed modules.
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
@@ -293,6 +385,71 @@ class Load(unittest.TestCase):
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 apple --arg2 ball --arg3 cat")
         self.assertEqual(command_help_obj.examples[0].min_profile, "2017-03-09-profile")
         self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+
+    @mock.patch('inspect.getmembers', side_effect=mock_inspect_getmembers)
+    @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
+    @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
+    def test_load_from_help_json(self, mocked_load, mocked_pkg_util, mocked_getmembers):
+        # setup help.py, help.yaml and help.json
+        self.set_help_py()
+        path = self.set_help_yaml()  # either (yaml or json) path should work. As both files are in the same temp dir.
+        self.set_help_json()
+        create_invoker_and_load_cmds_and_args(self.test_cli)
+
+        # mock logic in core._help_loaders for retrieving yaml file from loader path.
+        expected_arg = self.test_cli.invocation.commands_loader.cmd_to_loader_map['test alpha'][0].__class__
+        with mock.patch('inspect.getfile', side_effect=get_mocked_inspect_getfile(expected_arg, path)):
+            group_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test"), None)
+            command_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test alpha"),
+                                    None)
+
+            # Test that group and command help are successfully displayed.
+            with self.assertRaises(SystemExit):
+                self.test_cli.invoke(["test", "-h"])
+            with self.assertRaises(SystemExit):
+                self.test_cli.invoke(["test", "alpha", "-h"])
+
+        # Test group help
+        self.assertIsNotNone(group_help_obj)
+        self.assertEqual(group_help_obj.short_summary, "Group json summary.")
+        self.assertEqual(group_help_obj.long_summary, "Group json description. A.K.A long description.")
+        self.assertEqual(group_help_obj.links[0], {"title": "Azure Json Test Docs", "url": "https://docs.microsoft.com/en-us/azure/test"})
+        self.assertEqual(group_help_obj.links[1], {"url": "https://aka.ms/just-a-url"})
+
+        # Test command help
+        self.assertIsNotNone(command_help_obj)
+        self.assertEqual(command_help_obj.short_summary, "Command json summary.")
+        self.assertEqual(command_help_obj.long_summary, "Command json description. A.K.A long description.")
+        self.assertEqual(command_help_obj.links[0], {"title": "Azure Json Test Alpha Docs", "url": "https://docs.microsoft.com/en-us/azure/test/alpha"})
+        self.assertEqual(command_help_obj.links[1], {"url": "https://aka.ms/just-a-long-url"})
+
+        # test that parameters and help are loaded from command function docstring, argument registry help and help.yaml
+        obj_param_dict = {param.name: param for param in command_help_obj.parameters}
+        param_name_set = {"--arg1 -a", "--arg2 -b", "--arg3", "ARG4"}
+        self.assertTrue(set(obj_param_dict.keys()).issuperset(param_name_set))
+
+        self.assertEqual(obj_param_dict["--arg3"].short_summary, "Arg 3's json summary.")
+        self.assertEqual(obj_param_dict["--arg3"].long_summary, "A truly true description of this parameter.")
+        self.assertEqual(obj_param_dict["--arg3"].value_sources[0], {"string": "Number range: 0 to 10"})
+        self.assertEqual(obj_param_dict["--arg3"].value_sources[1]['link'], {"url": "https://www.foo-json.com", "title": "foo-json"})
+        self.assertEqual(obj_param_dict["--arg3"].value_sources[2]['link'], {"command": "az test show", "title": "Show test details. Json file"})
+
+        self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example from json")
+        self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
+        self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 alpha --arg2 beta --arg3 chi")
+        self.assertEqual(command_help_obj.examples[0].min_profile, "2018-03-01-hybrid")
+        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+
+        # validate other parameters, which have help from help.py and help.yamls
+        self.assertEqual(obj_param_dict["--arg1 -a"].short_summary, "A short summary.")
+        self.assertEqual(obj_param_dict["--arg2 -b"].short_summary, "Arg 2's summary.")
+        self.assertEqual(obj_param_dict["ARG4"].short_summary, "Arg4's summary, yaml. Positional arg, not required.")
+        # arg2's help from help.yaml still preserved.
+        self.assertEqual(obj_param_dict["--arg2 -b"].long_summary, "A true description of this parameter.")
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[0], {"string":"Number range: -5.0 to 5.0"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[1]['link'], {"url":"https://www.foo.com", "title":"foo"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[2]['link'], {"command": "az test show", "title": "Show test details"})
+
 
     # create a temporary file in the temp dir. Return the path of the file.
     def _create_new_temp_file(self, data, suffix=""):

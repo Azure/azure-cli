@@ -128,7 +128,7 @@ class HelpLoaderV1(BaseHelpLoader):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
-        all_data = BaseHelpLoader._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
+        all_data = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
         self._data = self._get_command_data(help_obj.command, all_data)
 
     def _load_help_body(self, help_obj):
@@ -146,7 +146,7 @@ class HelpLoaderV1(BaseHelpLoader):
             for param_obj in help_obj.parameters:
                 loaded_param = next((n for n in self._data["arguments"] if params_equal(param_obj, n)), None)
                 if loaded_param:
-                    BaseHelpLoader._update_obj_from_data_dict(param_obj, loaded_param, self.param_attrs_to_keys)
+                    self._update_obj_from_data_dict(param_obj, loaded_param, self.param_attrs_to_keys)
                 loaded_params.append(param_obj)
             help_obj.parameters = loaded_params
 
