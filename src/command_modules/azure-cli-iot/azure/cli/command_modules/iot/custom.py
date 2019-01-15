@@ -21,7 +21,9 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       RoutingServiceBusTopicEndpointProperties,
                                       RoutingStorageContainerProperties,
                                       RouteProperties,
-                                      RoutingMessage)
+                                      RoutingMessage,
+                                      TestRouteInput,
+                                      TestAllRoutesInput)
 
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
@@ -675,10 +677,27 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
         app_properties=app_properties,
         system_properties=system_properties
     )
+
     if route_name:
         route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
-        return client.iot_hub_resource.test_route(hub_name, resource_group_name, route, route_message)
-    return client.iot_hub_resource.test_all_routes(hub_name, resource_group_name, source_type, route_message)
+        test_route_input = TestRouteInput(
+            message=route_message,
+            twin=None,
+            route=route
+        )
+        return client.iot_hub_resource.test_route(test_route_input, hub_name, resource_group_name)
+    test_all_routes_input = TestAllRoutesInput(
+        routing_source=source_type,
+        message=route_message,
+        twin=None
+    )
+    return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
+
+
+def iot_hub_devicestream_show(client, hub_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    return hub.properties.device_streams
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):

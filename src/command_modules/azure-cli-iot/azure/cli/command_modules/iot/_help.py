@@ -667,3 +667,18 @@ helps['iot hub route update'] = """
             az iot hub route update -g MyResourceGroup --hub-name MyIotHub
             --source-type DeviceMessages --route-name R1
 """
+
+helps['iot hub devicestream'] = """
+    type: group
+    short-summary: Manage device streams of an IoT hub.
+"""
+
+helps['iot hub devicestream show'] = """
+    type: command
+    short-summary: Get IoT Hub's device streams endpoints.
+    long-summary: Get IoT Hub's device streams endpoints.
+    examples:
+        - name: Get all the device streams from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub devicestream show -n MyIotHub
+"""
