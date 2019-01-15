@@ -140,7 +140,8 @@ class HelpLoaderV1(BaseHelpLoader):
                 return param_dict['name'] in param.name.split()
             else:  # for positionals, help file must name must match param name shown when -h is run
                 return param_dict['name'] == param.name
-        if help_obj.type == "command" and self._data.get("arguments"):
+
+        if help_obj.type == "command" and hasattr(help_obj, "parameters") and self._data.get("arguments"):
             loaded_params = []
             for param_obj in help_obj.parameters:
                 loaded_param = next((n for n in self._data["arguments"] if params_equal(param_obj, n)), None)

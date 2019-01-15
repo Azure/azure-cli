@@ -161,6 +161,10 @@ class Load(unittest.TestCase):
             name: test alpha
             summary: Command yaml summary
             description: Command yaml description. A.K.A long description
+            links:
+                - title: Azure Test Alpha Docs
+                  url: "https://docs.microsoft.com/en-us/azure/test/alpha"
+                - url: "https://aka.ms/just-a-long-url"
             arguments:
                 - name: --arg2 # we do not specify the short option in the name.
                   summary: Arg 2's summary
@@ -200,6 +204,9 @@ class Load(unittest.TestCase):
         group_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test"), None)
         command_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test alpha"), None)
 
+        # Test that group and command help are successfully displayed.
+        with self.assertRaises(SystemExit):
+            self.test_cli.invoke(["test", "-h"])
         with self.assertRaises(SystemExit):
             self.test_cli.invoke(["test", "alpha", "-h"])
 
@@ -227,7 +234,7 @@ class Load(unittest.TestCase):
         self.assertEqual(obj_param_dict["--arg1 -a"].value_sources[1]['link']['command'], "az bar baz")
 
         self.assertEqual(command_help_obj.examples[0].short_summary, "Alpha Example")
-        self.assertEqual(command_help_obj.examples[0].long_summary, "az test alpha --arg1 a --arg2 b --arg3 c")
+        self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 a --arg2 b --arg3 c")
         self.assertEqual(command_help_obj.examples[0].min_profile, "2017-03-09-profile")
         self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
 
@@ -245,6 +252,9 @@ class Load(unittest.TestCase):
             group_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test"), None)
             command_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test alpha"), None)
 
+            # Test that group and command help are successfully displayed.
+            with self.assertRaises(SystemExit):
+                self.test_cli.invoke(["test", "-h"])
             with self.assertRaises(SystemExit):
                 self.test_cli.invoke(["test", "alpha", "-h"])
 
@@ -252,11 +262,16 @@ class Load(unittest.TestCase):
         self.assertIsNotNone(group_help_obj)
         self.assertEqual(group_help_obj.short_summary, "Group yaml summary.")
         self.assertEqual(group_help_obj.long_summary, "Group yaml description. A.K.A long description.")
+        self.assertEqual(group_help_obj.links[0], {"title": "Azure Test Docs", "url": "https://docs.microsoft.com/en-us/azure/test"})
+        self.assertEqual(group_help_obj.links[1], {"url": "https://aka.ms/just-a-url"})
+
 
         # Test command help
         self.assertIsNotNone(command_help_obj)
         self.assertEqual(command_help_obj.short_summary, "Command yaml summary.")
         self.assertEqual(command_help_obj.long_summary, "Command yaml description. A.K.A long description.")
+        self.assertEqual(command_help_obj.links[0], {"title": "Azure Test Alpha Docs", "url": "https://docs.microsoft.com/en-us/azure/test/alpha"})
+        self.assertEqual(command_help_obj.links[1], {"url": "https://aka.ms/just-a-long-url"})
 
         # test that parameters and help are loaded from command function docstring, argument registry help and help.yaml
         obj_param_dict = {param.name: param for param in command_help_obj.parameters}
