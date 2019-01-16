@@ -11,6 +11,7 @@ from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackComma
                         _print_indent, CLIHelp)
 
 from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.core.commands import ExtensionCommandSource
 
 logger = get_logger(__name__)
@@ -150,6 +151,10 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             loader = loader_cls(self)
             versioned_loaders[cls_name] = loader
 
+        if len(versioned_loaders) != len({ldr.version for ldr in versioned_loaders.values()}):
+            ldrs_str = " ".join("{}-version:{}".format(cls_name, ldr.version) for cls_name, ldr in versioned_loaders.items())
+            raise CLIError("Two loaders have the same version. Loaders:\n\t{}".format(ldrs_str))
+
         self.versioned_loaders = versioned_loaders
 
 
@@ -196,7 +201,7 @@ class CliHelpFile(KnackHelpFile):
                     self.examples.append(HelpExample(**d))
 
     def load(self, options):
-        ordered_loaders = sorted(self.help_ctx.versioned_loaders.values(), key=lambda ldr: ldr.VERSION)
+        ordered_loaders = sorted(self.help_ctx.versioned_loaders.values(), key=lambda ldr: ldr.version)
         for loader in ordered_loaders:
             loader.versioned_load(self, options)
 

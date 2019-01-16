@@ -116,7 +116,7 @@ class HelpTest(unittest.TestCase):
                 raise HelpAuthoringException('{}, {}'.format(name, ex))
 
 
-class Load(unittest.TestCase):
+class TestHelpLoads(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         from knack.help_files import helps

@@ -53,21 +53,23 @@ COMMAND_LOADER_CLS = TestCommandLoader
 
 # test Help Loader, loads from help.json
 class TestHelpLoader(HelpLoaderV1):
-    VERSION = 2
-
     # This loader has different keys in the data object. Except for "arguments" and "examples".
     core_attrs_to_keys = [("short_summary", "short"), ("long_summary", "long")]
     body_attrs_to_keys = core_attrs_to_keys + [("links", "hyper-links")]
     param_attrs_to_keys = core_attrs_to_keys + [("value_sources", "sources")]
 
-    def _load_raw_data(self, help_obj, parser):
+    @property
+    def version(self):
+        return 2
+
+    def load_raw_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
         all_data = self.get_json_help_for_nouns(command_nouns, cmd_loader_map_ref)
-        self._data = self._get_command_data(help_obj.command, all_data)
+        self._data = self._get_entry_data(help_obj.command, all_data)
 
-    def _load_help_body(self, help_obj):
+    def load_help_body(self, help_obj):
         self._update_obj_from_data_dict(help_obj, self._data, self.body_attrs_to_keys)
 
     # get the json help

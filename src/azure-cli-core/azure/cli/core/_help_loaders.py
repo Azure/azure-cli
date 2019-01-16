@@ -4,45 +4,64 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from knack.help import HelpParameter as KnackHelpParameter
-from azure.cli.core._help import (HelpExample, HelpParameter, CliHelpFile)
-from knack.help import HelpAuthoringException
+from knack.log import get_logger
 
+from azure.cli.core._help import (HelpExample, CliHelpFile)
+import abc
+
+logger = get_logger(__name__)
+
+try:
+    ABC = abc.ABC
+except AttributeError: # Python 2.7, abc exists, but not ABC
+    ABC = abc.ABCMeta('ABC', (object,), {'__slots__': ()})
 
 # BaseHelpLoader defining versioned loader interface. Also contains some helper methods.
-class BaseHelpLoader(object):
+class BaseHelpLoader(ABC):
     def __init__(self, help_ctx=None):
         self.help_ctx = help_ctx
         self._data = None
-    
-    def versioned_load(self, help_obj, parser):
-        self._load_raw_data(help_obj, parser)
-        if self._data_is_applicable():
-            self._load_help_body(help_obj)
-            self._load_help_parameters(help_obj)
-            self._load_help_examples(help_obj)
 
-    @classmethod
-    def get_version(cls):
-        try:
-            cls.VERSION
-        except AttributeError:
-            raise NotImplementedError
+    def versioned_load(self, help_obj, parser):
+        self.load_raw_data(help_obj, parser)
+        if self._data_is_applicable():
+            self.load_help_body(help_obj)
+            self.load_help_parameters(help_obj)
+            self.load_help_examples(help_obj)
+
+    @property
+    @abc.abstractmethod
+    def version(self):
+        pass
 
     def _data_is_applicable(self):
-        return self._data and self.get_version() == self._data.get('version')
+        is_applicable = False
+        ldr_name = self.__class__
+        if self._data:
+            is_applicable = self.version == self._data.get('version')
+            msg = "Data's version matches loader {}'s version.".format(ldr_name) if is_applicable \
+                else "Data's version: {} does not match loader {}'s version: {}".format(self._data.get('version'),
+                                                                                        ldr_name, self.version)
+            logger.info(msg)
+        else:
+            logger.info("There is no applicable data for loader {}.".format(ldr_name))
 
-    def _load_raw_data(self, help_obj, parser):
-        raise NotImplementedError
+        return is_applicable
 
-    def _load_help_body(self, help_obj):
-        raise NotImplementedError
+    @abc.abstractmethod
+    def load_raw_data(self, help_obj, parser):
+        pass
+    @abc.abstractmethod
+    def load_help_body(self, help_obj):
+        pass
 
-    def _load_help_parameters(self, help_obj):
-        raise NotImplementedError
+    @abc.abstractmethod
+    def load_help_parameters(self, help_obj):
+        pass
 
-    def _load_help_examples(self, help_obj):
-        raise NotImplementedError
+    @abc.abstractmethod
+    def load_help_examples(self, help_obj):
+        pass
 
     # Loader static helper methods
 
@@ -112,29 +131,47 @@ class BaseHelpLoader(object):
         return None
 
 class HelpLoaderV0(BaseHelpLoader):
-    VERSION = 0
+
+    @property
+    def version(self):
+        return 0
 
     def versioned_load(self, help_obj, parser):
         super(CliHelpFile, help_obj).load(parser)
 
+    def load_raw_data(self, help_obj, parser):
+        pass
+
+    def load_help_body(self, help_obj):
+        pass
+
+    def load_help_parameters(self, help_obj):
+        pass
+
+    def load_help_examples(self, help_obj):
+        pass
+
 
 class HelpLoaderV1(BaseHelpLoader):
-    VERSION = 1
     core_attrs_to_keys = [("short_summary", "summary"), ("long_summary", "description")]
     body_attrs_to_keys = core_attrs_to_keys + [("links", "links")]
     param_attrs_to_keys = core_attrs_to_keys + [("value_sources", "value-sources")]
 
-    def _load_raw_data(self, help_obj, parser):
+    @property
+    def version(self):
+        return 1
+
+    def load_raw_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
         all_data = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
-        self._data = self._get_command_data(help_obj.command, all_data)
+        self._data = self._get_entry_data(help_obj.command, all_data)
 
-    def _load_help_body(self, help_obj):
+    def load_help_body(self, help_obj):
         self._update_obj_from_data_dict(help_obj, self._data, self.body_attrs_to_keys)
 
-    def _load_help_parameters(self, help_obj):
+    def load_help_parameters(self, help_obj):
         def params_equal(param, param_dict):
             if param_dict['name'].startswith("--"):  # for optionals, help file name must be one of the  long options
                 return param_dict['name'] in param.name.split()
@@ -150,15 +187,17 @@ class HelpLoaderV1(BaseHelpLoader):
                 loaded_params.append(param_obj)
             help_obj.parameters = loaded_params
 
-    def _load_help_examples(self, help_obj):
+    def load_help_examples(self, help_obj):
         if help_obj.type == "command" and self._data.get("examples"):
             help_obj.examples = [HelpExample(**ex) for ex in self._data["examples"] if help_obj._should_include_example(ex)]
 
     @staticmethod
-    def _get_command_data(cmd_name, data):
+    def _get_entry_data(cmd_name, data):
         if data and data.get("content"):
             try:
-                return next(value for elem in data.get("content") for key, value in elem.items() if value.get("name") == cmd_name)
+                entry_data = next(value for elem in data.get("content") for key, value in elem.items() if value.get("name") == cmd_name)
+                entry_data["version"] = data['version']
+                return entry_data
             except StopIteration:
                 pass
         return None
