@@ -134,8 +134,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Name of the storage container.')
         c.argument('endpoint_type', arg_type=get_enum_type(EndpointType),
                    options_list=['--endpoint-type', '--type', '-t'], help='Type of the Routing Endpoint.')
-        c.argument('encoding', options_list=['--encoding', '--en'], arg_type=get_enum_type(EncodingFormat),
-                   help='Encoding format for the container. You may select JSON or AVRO. The default is AVRO. '
+        c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
+                   help='Encoding format for the container. The default is AVRO. '
                         'Note that this field is applicable only for blob container endpoints.')
 
     with self.argument_context('iot hub certificate') as c:
