@@ -271,7 +271,7 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def find_subscriptions_in_vm_with_msi(self, identity_id=None):
+    def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
         import jwt
         from requests import HTTPError
         from msrestazure.azure_active_directory import MSIAuthentication
@@ -304,10 +304,13 @@ class Profile(object):
 
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
-        if not subscriptions:
-            raise CLIError('No access was configured for the VM, hence no subscriptions were found')
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
         user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
+        if not subscriptions:
+            if allow_no_subscriptions:
+                subscriptions = self._build_tenant_level_accounts([tenant])
+            else:
+                raise CLIError('No access was configured for the VM, hence no subscriptions were found')
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=base_name)
