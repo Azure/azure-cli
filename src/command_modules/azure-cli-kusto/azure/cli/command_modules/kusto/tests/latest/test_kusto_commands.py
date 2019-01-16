@@ -15,7 +15,6 @@ class AzureKustoClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_kusto_cluster_life_cycle(self, resource_group):
         self.kwargs.update({
-            'tier': 'Standard',
             'sku': 'D13_v2',
             'name': self.create_random_name(prefix='test', length=20),
             'location': "Central US",
@@ -23,7 +22,7 @@ class AzureKustoClusterTests(ScenarioTest):
         })
 
         # Create cluster
-        self.cmd('az kusto cluster create -n {name} -g {rg} --sku {sku} --tier {tier} --capacity {capacity}',
+        self.cmd('az kusto cluster create -n {name} -g {rg} --sku {sku} --capacity {capacity}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku}'),
                          self.check('state', _running_state),
@@ -56,12 +55,11 @@ class AzureKustoClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_kusto_cluster_stop_start(self, resource_group):
         self.kwargs.update({
-            'tier': 'Standard',
             'sku': 'D13_v2',
             'name': self.create_random_name(prefix='test', length=20),
         })
 
-        self.cmd('az kusto cluster create -n {name} -g {rg} --sku {sku} --tier {tier}',
+        self.cmd('az kusto cluster create -n {name} -g {rg} --sku {sku}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku}'),
                          self.check('state', _running_state),
@@ -92,7 +90,6 @@ class AzureKustoDatabaseTests (ScenarioTest):
     @ResourceGroupPreparer()
     def test_kusto_database_life_cycle(self, resource_group):
         self.kwargs.update({
-            'tier': 'Standard',
             'sku': 'D13_v2',
             'cluster_name': self.create_random_name(prefix='test', length=20),
             'database_name': self.create_random_name(prefix='testdb', length=20),
@@ -102,7 +99,7 @@ class AzureKustoDatabaseTests (ScenarioTest):
         })
 
         # Create cluster
-        self.cmd('az kusto cluster create -n {cluster_name} -g {rg} --sku {sku} --tier {tier}',
+        self.cmd('az kusto cluster create -n {cluster_name} -g {rg} --sku {sku}',
                  checks=[self.check('name', '{cluster_name}'),
                          self.check('sku.name', '{sku}')])
 

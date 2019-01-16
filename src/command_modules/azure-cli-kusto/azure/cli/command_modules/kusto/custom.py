@@ -11,14 +11,11 @@ logger = get_logger(__name__)
 
 
 def cluster_create(cmd,
-                   client,
                    resource_group_name,
                    cluster_name,
                    sku,
                    location=None,
-                   tier="Standard",
                    capacity=None,
-                   tags=None,
                    custom_headers=None,
                    raw=False,
                    polling=True,
@@ -40,7 +37,6 @@ def cluster_create(cmd,
                        resource_group_name=resource_group_name,
                        cluster_name=cluster_name,
                        parameters=_cluster,
-                       tags=tags,
                        custom_headers=custom_headers,
                        raw=raw,
                        polling=polling,
@@ -48,16 +44,12 @@ def cluster_create(cmd,
 
 
 def _cluster_get(cmd,
-                 client,
                  resource_group_name,
                  cluster_name,
                  custom_headers=None,
                  raw=False,
-                 polling=True,
-                 no_wait=False,
                  **kwargs):
 
-    from azure.mgmt.kusto.models import Cluster, AzureSku
     from azure.cli.command_modules.kusto._client_factory import cf_cluster
 
     _client = cf_cluster(cmd.cli_ctx, None)
@@ -70,7 +62,6 @@ def _cluster_get(cmd,
 
 
 def cluster_start(cmd,
-                  client,
                   resource_group_name,
                   cluster_name,
                   custom_headers=None,
@@ -86,11 +77,11 @@ def cluster_start(cmd,
                          cluster_name=cluster_name,
                          custom_headers=custom_headers,
                          raw=raw,
+                         polling=polling,
                          operation_config=kwargs)
 
 
 def cluster_stop(cmd,
-                 client,
                  resource_group_name,
                  cluster_name,
                  custom_headers=None,
@@ -106,17 +97,16 @@ def cluster_stop(cmd,
                         cluster_name=cluster_name,
                         custom_headers=custom_headers,
                         raw=raw,
+                        polling=polling,
                         operation_config=kwargs)
 
 
 def database_create(cmd,
-                    client,
                     resource_group_name,
                     cluster_name,
                     database_name,
                     soft_delete_period_in_days,
                     hot_cache_period_in_days=None,
-                    tags=None,
                     custom_headers=None,
                     raw=False,
                     polling=True,
@@ -127,7 +117,7 @@ def database_create(cmd,
     from azure.cli.command_modules.kusto._client_factory import cf_database
 
     _client = cf_database(cmd.cli_ctx, None)
-    _cluster = _cluster_get(cmd, client, resource_group_name, cluster_name, custom_headers, raw, polling, no_wait, **kwargs)
+    _cluster = _cluster_get(cmd, resource_group_name, cluster_name, custom_headers, raw, **kwargs)
 
     if no_wait:
         location = _cluster.output.location

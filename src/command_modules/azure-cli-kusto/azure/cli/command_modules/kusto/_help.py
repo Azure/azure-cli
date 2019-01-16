@@ -63,6 +63,14 @@ helps['kusto cluster delete'] = """
     short-summary: Delete a Kusto cluster.
 """
 
+helps['kusto cluster wait'] = """
+    type: command
+    short-summary: Wait for a managed Kusto cluster to reach a desired state.
+    long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to
+                  wait for it to complete.
+"""
+
+
 # Kusto database
 helps['kusto database'] = """
     type: group
@@ -101,4 +109,11 @@ helps['kusto database list'] = """
 helps['kusto database show'] = """
     type: command
     short-summary: Get a Kusto database.
+"""
+
+helps['kusto database wait'] = """
+    type: command
+    short-summary: Wait for a managed Kusto database to reach a desired state.
+    long-summary: If an operation on a database was interrupted or was started with `--no-wait`, use this command to
+                  wait for it to complete.
 """
