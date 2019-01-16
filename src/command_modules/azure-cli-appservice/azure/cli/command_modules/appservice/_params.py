@@ -366,6 +366,8 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
+        c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
+        c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
 
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
