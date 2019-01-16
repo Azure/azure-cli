@@ -7,6 +7,7 @@ Release History
 * Increment IotHub mgmt SDK requirement.
 * Minor fixes
 * Update test recordings.
+* Add encoding format to routing-endpoint command.
 
 0.3.4
 +++++
