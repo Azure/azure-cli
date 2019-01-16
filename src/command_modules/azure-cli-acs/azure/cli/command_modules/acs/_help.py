@@ -51,22 +51,22 @@ helps['acs create'] = """
                 --ssh-key-value /path/to/publickey
         - name: Create a DCOS cluster with two agent pools.
           text: |-
-              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
-                {{
-                  "name": "agentpool1"
-                }},
-                {{
-                  "name": "agentpool2"
+              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[ \\
+                {{ \\
+                  "name": "agentpool1" \\
+                }}, \\
+                {{ \\
+                  "name": "agentpool2" \\
                 }}]'
         - name: Create a DCOS cluster where the second agent pool has a vmSize specified.
           text: |-
-              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
-                {{
-                  "name": "agentpool1"
-                }},
-                {{
-                  "name": "agentpool2",
-                  "vmSize": "Standard_D2"
+              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[ \\
+                {{ \\
+                  "name": "agentpool1" \\
+                }}, \\
+                {{ \\
+                  "name": "agentpool2", \\
+                  "vmSize": "Standard_D2" \\
                 }}]'
         - name: Create a DCOS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
@@ -381,7 +381,7 @@ helps['aks install-connector'] = """
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \\
-              --aci-resource-group <ACI resource group>
+              --aci-resource-group ACI-resource-group
         - name: Install the ACI Connector from a custom Helm chart with custom tag.
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
@@ -489,7 +489,7 @@ helps['aks upgrade-connector'] = """
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \\
-              --aci-resource-group <ACI resource group>
+              --aci-resource-group ACI-resource-group
         - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\

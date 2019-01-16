@@ -54,7 +54,7 @@ helps['storage file upload'] = """
     long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
     examples:
         - name: Upload to a local file to a share.
-          text: az storage file upload -s MyShare -source /path/to/file
+          text: az storage file upload -s MyShare --source /path/to/file
 """
 
 helps['storage blob show'] = """

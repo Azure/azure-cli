@@ -83,7 +83,7 @@ helps['batchai cluster create'] = """
                 -i UbuntuLTS -s Standard_NC6 --vm-priority lowpriority \\
                 --min 0 --target 1 --max 10 \\
                 --storage-account-name MyStorageAccount \\
-                --nfs-name MyNfsToMount --afs-name MyAzureFileShareToMount \\
+                --nfs MyNfsToMount --afs-name MyAzureFileShareToMount \\
                 --bfs-name MyBlobContainerNameToMount \\
                 -u AdminUserName -k id_rsa.pub -p ImpossibleToGuessPassword
         - name: Create a cluster using a configuration file.
@@ -237,10 +237,10 @@ helps['batchai experiment delete'] = """
             az batchai experiment delete -g MyResourceGroup -w MyWorkspace -n MyExperiment
         - name: Delete an experiment without asking for confirmation (for non-interactive scenarios).
           text:
-            az batchai experiment delete -g MyResourceGroup -w MyWorkspace -e MyExperiment -y
+            az batchai experiment delete -g MyResourceGroup -w MyWorkspace -n MyExperiment -y
         - name: Request an experiment deletion without waiting for job to be deleted.
           text:
-            az batchai experiment delete -g MyResourceGroup -w MyWorkspace -e MyExperiment --no-wait
+            az batchai experiment delete -g MyResourceGroup -w MyWorkspace -n MyExperiment --no-wait
 """
 
 helps['batchai experiment list'] = """
@@ -274,15 +274,15 @@ helps['batchai job create'] = """
             Create a job to run on a cluster in the same resource group.
           text: |
             az batchai job create -g MyResourceGroup -w MyWorkspace -e MyExperiment -n MyJob \\
-                -r MyCluster -f job.json
+                -c MyCluster -f job.json
         - name:
             Create a job to run on a cluster in a different workspace.
           text: |
             az batchai job create -g MyJobResourceGroup -w MyJobWorkspace -e MyExperiment -n MyJob \\
                 -f job.json \\
-                -r "/subscriptions/00000000-0000-0000-0000-000000000000/"\\
-                "resourceGroups/MyClusterResourceGroup"\\
-                "/providers/Microsoft.BatchAI/workspaces/MyClusterWorkspace/clusters/MyCluster"
+                -c "/subscriptions/00000000-0000-0000-0000-000000000000/\\
+                resourceGroups/MyClusterResourceGroup/\\
+                providers/Microsoft.BatchAI/workspaces/MyClusterWorkspace/clusters/MyCluster"
 """
 
 helps['batchai job terminate'] = """
@@ -442,7 +442,7 @@ helps['batchai file-server create'] = """
     examples:
         - name: Create a NFS file server using a configuration file.
           text:
-            az batchai file-server create -g MyResourceGroup -w MyWorkspace -n MyNFS -c nfs.json
+            az batchai file-server create -g MyResourceGroup -w MyWorkspace -n MyNFS -f nfs.json
         - name: Create a NFS manually providing parameters.
           text: |
             az batchai file-server create -g MyResourceGroup -w MyWorkspace -n MyNFS \\
