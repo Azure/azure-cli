@@ -194,7 +194,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}" '
                  '--container-name {7} --en {8}'
                  .format(hub, rg, storage_endpoint_name, storage_endpoint_type, rg, subscription_id,
-                 storageConnectionString, containerName, storage_encoding_format),
+                         storageConnectionString, containerName, storage_encoding_format),
                  checks=[self.check('length(storageContainers[*])', 1),
                          self.check('storageContainers[0].containerName', containerName),
                          self.check('storageContainers[0].name', storage_endpoint_name),
