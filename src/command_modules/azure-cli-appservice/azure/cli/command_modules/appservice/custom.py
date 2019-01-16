@@ -17,9 +17,18 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error, un
 from binascii import hexlify
 from os import urandom
 import json
+import paramiko
+import socket
 import ssl
 import sys
 import OpenSSL.crypto
+try:
+    import termios
+    import tty
+
+    has_termios = True
+except ImportError:
+    has_termios = False
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -2270,7 +2279,7 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
     logger.warning("SSH is available ( username: %s, password: %s )", ssh_user_name, ssh_user_password)
 
     s = threading.Thread(target=_start_ssh,
-                         args=('localhost', tunnel_server.get_port(), ssh_user_name))
+                         args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
     s.daemon = True
     s.start()
 
@@ -2295,9 +2304,12 @@ def _start_tunnel(tunnel_server):
     tunnel_server.start_server()
 
 
-def _start_ssh(host_name, port, user_name):
-    subprocess.call("ssh -o StrictHostKeyChecking=no {}@{} -p {}".format(user_name, host_name, port), shell=True)
-
+def _start_ssh(host_name, port, user_name, password):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(host_name, port, user_name, password)
+    chan = client.invoke_shell()
+    posix_shell(chan)
 
 def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
     import platform
@@ -2305,3 +2317,34 @@ def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=to
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
         create_tunnel(cmd, resource_group_name, name, port=None, slot=slot)
+
+
+def posix_shell(chan):
+    import select
+
+    oldtty = termios.tcgetattr(sys.stdin)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        tty.setcbreak(sys.stdin.fileno())
+        chan.settimeout(0.0)
+
+        while True:
+            r, w, e = select.select([chan, sys.stdin], [], [])
+            if chan in r:
+                try:
+                    x = paramiko.py3compat.u(chan.recv(1024))
+                    if len(x) == 0:
+                        sys.stdout.write("\r\n*** EOF\r\n")
+                        break
+                    sys.stdout.write(x)
+                    sys.stdout.flush()
+                except socket.timeout:
+                    pass
+            if sys.stdin in r:
+                x = sys.stdin.read(1)
+                if len(x) == 0:
+                    break
+                chan.send(x)
+
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
