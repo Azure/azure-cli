@@ -160,13 +160,6 @@ def update_kusto_database(instance, soft_delete_period_in_days, hot_cache_period
     soft_delete_period_in_days = int(soft_delete_period_in_days)
     hot_cache_period_in_days = int(hot_cache_period_in_days)
 
-    """
-    Update sku kusto database.
-
-    :param soft_delete_period_in_days: The number of days data should be kept
-           before it stops being accessible to queries.
-    :param hot_cache_period_in_days: The number of days of data that should be kept in cache for fast queries.
-    """
     instance.soft_delete_period_in_days = soft_delete_period_in_days
     instance.hot_cache_period_in_days = hot_cache_period_in_days
 
