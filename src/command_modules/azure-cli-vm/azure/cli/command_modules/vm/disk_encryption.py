@@ -118,12 +118,14 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
-        if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = _get_keyvault_key_url(
-                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vm, force)
+
+    # if key name and not key url, get url.
+    if key_encryption_key and '://' not in key_encryption_key:  # if key name and not key url
+        key_encryption_key = _get_keyvault_key_url(
+            cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
     # The following logic was mostly ported from xplat-cli
@@ -472,12 +474,14 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
-        if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = _get_keyvault_key_url(
-                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
+
+    # if key name and not key url, get url.
+    if key_encryption_key and '://' not in key_encryption_key:
+        key_encryption_key = _get_keyvault_key_url(
+            cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
     public_config = {
@@ -612,8 +616,8 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     # verify subscription mataches
     vm_vmss_resource_info = parse_resource_id(vm_or_vmss.id)
     if vm_vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
-        _report_client_side_validation_error(
-            "{} {}'s subscription does not match keyvault's subscription.".format(resource_type, vm_vmss_resource_info['name']))
+        _report_client_side_validation_error("{} {}'s subscription does not match keyvault's subscription."
+                                             .format(resource_type, vm_vmss_resource_info['name']))
 
     # verify region matches
     if key_vault.location.replace(' ', '').lower() != vm_or_vmss.location.replace(' ', '').lower():
