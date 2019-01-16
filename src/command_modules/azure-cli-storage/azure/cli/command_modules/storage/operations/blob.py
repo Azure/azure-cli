@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import os
 from knack.log import get_logger
-
+from knack.util import CLIError
 
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
@@ -49,11 +49,41 @@ def set_delete_policy(client, enable=None, days_retained=None):
         policy.days = days_retained
 
     if policy.enabled and not policy.days:
-        from knack.util import CLIError
         raise CLIError("must specify days-retained")
 
     client.set_blob_service_properties(delete_retention_policy=policy)
     return client.get_blob_service_properties().delete_retention_policy
+
+
+def set_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
+                           static_website=None, index_document=None, error_document_404_path=None):
+    # update
+    kwargs = {}
+    if hasattr(parameters, 'delete_retention_policy'):
+        kwargs['delete_retention_policy'] = parameters.delete_retention_policy
+    if delete_retention is not None:
+        parameters.delete_retention_policy.enabled = delete_retention
+    if delete_retention_period is not None:
+        parameters.delete_retention_policy.days = delete_retention_period
+
+    if hasattr(parameters, 'static_website'):
+        kwargs['static_website'] = parameters.static_website
+    elif any(param is not None for param in [static_website, index_document, error_document_404_path]):
+        raise CLIError('Static websites are only supported for StorageV2 (general-purpose v2) accounts.')
+    if static_website is not None:
+        parameters.static_website.enabled = static_website
+    if index_document is not None:
+        parameters.static_website.index_document = index_document
+    if error_document_404_path is not None:
+        parameters.static_website.error_document_404_path = error_document_404_path
+
+    # checks
+    policy = kwargs.get('delete_retention_policy', None)
+    if policy and policy.enabled and not policy.days:
+        raise CLIError("must specify days-retained")
+
+    client.set_blob_service_properties(**kwargs)
+    return client.get_blob_service_properties()
 
 
 def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
@@ -140,7 +170,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         # remove starting path seperator and normalize
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
         if normalized_blob_name in blobs_to_download:
-            from knack.util import CLIError
             raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
                            'to select for a subset of blobs to download OR utilize the `storage blob download` '
                            'command instead to download individual blobs.'.format(normalized_blob_name))
@@ -367,7 +396,6 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
         blob_service.copy_blob(destination_container, destination_blob_name, source_blob_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException:
-        from knack.util import CLIError
         error_template = 'Failed to copy blob {} to container {}.'
         raise CLIError(error_template.format(source_blob_name, destination_container))
 
@@ -386,6 +414,5 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
         blob_service.copy_blob(destination_container, destination_blob_name, file_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException as ex:
-        from knack.util import CLIError
         error_template = 'Failed to copy file {} to container {}. {}'
         raise CLIError(error_template.format(source_file_name, destination_container, ex))

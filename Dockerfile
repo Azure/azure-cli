@@ -70,7 +70,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
 
 WORKDIR /
 
-# Remove CLI source code from the final image.
-RUN rm -rf ./azure-cli
+# Remove CLI source code from the final image and normalize line endings.
+RUN rm -rf ./azure-cli && \
+    dos2unix /root/.bashrc /usr/local/bin/az
 
 CMD bash

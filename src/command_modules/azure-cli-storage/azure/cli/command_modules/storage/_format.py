@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.profiles import get_sdk, ResourceType
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def build_table_output(result, projection):
@@ -134,6 +137,10 @@ def transform_file_directory_result(cli_ctx):
     list.
     """
     def transformer(result):
+        if getattr(result, 'next_marker', None):
+            logger.warning('Next Marker:')
+            logger.warning(result.next_marker)
+
         t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
         return_list = []
         for each in result:
@@ -142,7 +149,6 @@ def transform_file_directory_result(cli_ctx):
                 setattr(each, 'type', 'file')
             elif isinstance(each, t_dir):
                 setattr(each, 'type', 'dir')
-
             return_list.append(each)
 
         return return_list

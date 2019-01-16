@@ -357,6 +357,50 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_conflict')
+    def test_vm_custom_image_name_conflict(self, resource_group):
+        self.kwargs.update({
+            'vm': 'test-vm',
+            'image1': 'img-from-vm',
+            'image2': 'img-from-vm-id',
+            'image3': 'img-from-disk-id',
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password')
+        vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.cmd('vm stop -g {rg} -n {vm}')
+
+        # set variables up to test against name conflict between disk and vm.
+        self.kwargs.update({
+            'os_disk_vhd_uri': vm1_info['storageProfile']['osDisk']['vhd']['uri'],
+            'vm_id': vm1_info['id'],
+            'os_disk': vm1_info['name']
+        })
+
+        # create disk with same name as vm
+        disk_info = self.cmd('disk create -g {rg} -n {os_disk} --source {os_disk_vhd_uri} --os-type linux').get_output_in_json()
+        self.kwargs.update({'os_disk_id': disk_info['id']})
+
+        # Deallocate and generalize vm. Do not need to deprovision vm as this test will not recreate a vm from the image.
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+
+        # Create image from vm
+        self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from vm id
+        self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
+            self.check("sourceVirtualMachine.id", '{vm_id}'),
+            self.check("storageProfile.osDisk.managedDisk", None)
+        ])
+        # Create image from disk id
+        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux', checks=[
+            self.check("sourceVirtualMachine", None),
+            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
+        ])
+
 
 class VMImageWithPlanTest(ScenarioTest):
 
@@ -651,7 +695,7 @@ class VMWriteAcceleratorScenarioTest(ScenarioTest):
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', True),
             self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
         ])
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk d1 --enable-write-accelerator --new --size-gb 1')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name d1 --enable-write-accelerator --new --size-gb 1')
         self.cmd('vm update -g {rg} -n {vm} --write-accelerator 1=false os=false')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.writeAcceleratorEnabled', False),
@@ -817,7 +861,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
-            'availset': 'availset-test'
+            'availset': 'availset-test-conv'
         })
 
         self.cmd('vm availability-set create -g {rg} -n {availset} --unmanaged --platform-fault-domain-count 3 -l westus2', checks=[
@@ -1152,22 +1196,47 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.kwargs.update({
             'vmss': 'vmss1',
-            'pub': 'Microsoft.Azure.NetworkWatcher',
-            'ext': 'NetworkWatcherAgentLinux',
+            'net-pub': 'Microsoft.Azure.NetworkWatcher', 'script-pub': 'Microsoft.Azure.Extensions', 'access-pub': 'Microsoft.OSTCExtensions',
+            'net-ext': 'NetworkWatcherAgentLinux', 'script-ext': 'customScript', 'access-ext': 'VMAccessForLinux',
             'username': username,
             'config_file': config_file
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        self.cmd('vmss extension set -n {ext} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
-        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext}', checks=[
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
-            self.check('name', '{ext}'),
-            self.check('publisher', '{pub}'),
+            self.check('name', '{net-ext}'),
+            self.check('publisher', '{net-pub}'),
+            self.check('provisionAfterExtensions', None)
         ]).get_output_in_json()
-        uuid.UUID(result['forceUpdateTag'])
-        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext}')
+
+        uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.
+
+        # set the customscript extension that depends on the network watcher extension
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {script-ext} --publisher {script-pub} --version 2.0 '
+                 '--provision-after-extensions {net-ext} --settings "{{\\"commandToExecute\\": \\"echo testing\\"}}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {script-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 1),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+        ])
+
+        # set the VMAccess extension that depends on both the network watcher and script extensions.
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n {access-ext} --publisher {access-pub} --version 1.5 '
+                 '--provision-after-extensions {net-ext} {script-ext} --protected-settings "{config_file}"')
+        # verify
+        self.cmd('vmss extension show -g {rg} --vmss-name {vmss} --name {access-ext}', checks=[
+            self.check('length(provisionAfterExtensions)', 2),
+            self.check('provisionAfterExtensions[0]', '{net-ext}'),
+            self.check('provisionAfterExtensions[1]', '{script-ext}'),
+        ])
+
+        # delete all the extensions
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {access-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {script-ext}')
+        self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {net-ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_2')
     def test_vmss_extension_instance_name(self):
@@ -1409,8 +1478,8 @@ class VMDiskAttachDetachTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image centos --admin-password testPassword0 --authentication-type password')
 
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --new --size-gb 1 --caching ReadOnly')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2} --new --size-gb 2 --lun 2 --sku standard_lrs')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 2),
             self.check('storageProfile.dataDisks[0].name', '{disk1}'),
@@ -1429,7 +1498,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         ])
 
         # ensure data disk luns are managed correctly
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(storageProfile.dataDisks)', 2),
             self.check('storageProfile.dataDisks[0].lun', 2),
@@ -1440,7 +1509,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vm disk detach -g {rg} --vm-name {vm} -n {disk1}')
         self.cmd('vm show -g {rg} -n {vm}',
                  checks=self.check('length(storageProfile.dataDisks)', 0))
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --caching ReadWrite --sku standard_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --caching ReadWrite --sku standard_lrs')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
@@ -1458,10 +1527,10 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku StandardSSD_LRS --data-disk-sizes-gb 1')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1} --new --size-gb 1 --sku premium_lrs')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk2}  --new --size-gb 2 --sku StandardSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --sku premium_lrs')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2}  --new --size-gb 2 --sku StandardSSD_LRS')
         self.cmd('disk create -g {rg} -n {disk3} --size-gb 4 --sku StandardSSD_LRS')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk3}')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'StandardSSD_LRS'),
@@ -1485,8 +1554,8 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('disk show -g {rg} -n {disk1}')
         self.cmd('disk create -g {rg} -n {disk2} --size-gb 4 --sku UltraSSD_LRS')
         self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk {disk1}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1495,7 +1564,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
         self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
-        self.cmd('vm disk attach -g {rg} --vm-name {vm2} --disk {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm2} --name {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
@@ -1526,7 +1595,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
         self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
-        self.cmd('vmss disk attach -g {rg} -n {vmss2} --size-gb 5 --sku UltraSSD_LRS')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
@@ -1701,7 +1770,7 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',
                  checks=self.check('instanceId', '{id}'))
 
-        self.cmd('vmss disk attach -g {rg} -n {vmss} --size-gb 3')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --size-gb 3')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
@@ -1709,7 +1778,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
-        self.cmd('vmss disk detach -g {rg} -n {vmss} --lun 1')
+        self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --lun 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
@@ -1768,12 +1837,12 @@ class VMSSCreateOptions(ScenarioTest):
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs['instance_id'] = instances[0]['instanceId']
 
-        self.cmd('vmss disk attach -g {rg} -n {vmss} --instance-id {instance_id} --disk {disk} --caching {caching}')
+        self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --instance-id {instance_id} --disk {disk} --caching {caching}')
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 1),
             self.check('[0].storageProfile.dataDisks[0].caching', self.kwargs['caching'])
         ])
-        self.cmd('vmss disk detach -g {rg} -n {vmss} --instance-id {instance_id} --lun 0')
+        self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --instance-id {instance_id} --lun 0')
         self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
             self.check('length([0].storageProfile.dataDisks)', 0)
         ])
@@ -2978,15 +3047,20 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured}',
-                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
+                 checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
+
         self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                  checks=self.check('length(@)', 1))
         self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
                  checks=self.check('name', self.kwargs['version']))
 
-        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=2 {location}',
-                 checks=self.check('name', self.kwargs['version']))
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=1 {location} --replica-count 2',
+                 checks=[
+                     self.check('publishingProfile.replicaCount', 2),
+                     self.check('length(publishingProfile.targetRegions)', 2),
+                     self.check('publishingProfile.targetRegions', [dict(name="West US 2", regionalReplicaCount=1), dict(name="East US 2", regionalReplicaCount=2)])
+                 ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))
 

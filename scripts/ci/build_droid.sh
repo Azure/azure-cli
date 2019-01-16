@@ -1,6 +1,8 @@
+#!/usr/bin/env bash
+
 # Build the docker image for A01 automation system
 
-set -e
+set -ev
 
 dp0=`cd $(dirname $0); pwd`
 

@@ -6,6 +6,7 @@
 from __future__ import print_function
 import sys
 import json
+import getpass
 import base64
 import binascii
 import six
@@ -26,9 +27,9 @@ def handle_exception(ex):
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
         return ex.args[1] if len(ex.args) >= 2 else 1
-    elif isinstance(ex, KeyboardInterrupt):
+    if isinstance(ex, KeyboardInterrupt):
         return 1
-    elif isinstance(ex, HttpOperationError):
+    if isinstance(ex, HttpOperationError):
         try:
             response_dict = json.loads(ex.response.text)
             error = response_dict['error']
@@ -353,3 +354,10 @@ def reload_module(module):
     except ImportError:
         pass  # for python 2
     reload(sys.modules[module])
+
+
+def get_default_admin_username():
+    try:
+        return getpass.getuser()
+    except KeyError:
+        return None

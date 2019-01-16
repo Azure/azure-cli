@@ -28,6 +28,7 @@ from azure.cli.command_modules.network._validators import (
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
+    validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -914,7 +915,7 @@ def load_arguments(self, _):
         c.argument('traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
         c.argument('profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
         c.argument('profile_status', options_list=['--status'], help='Status of the Traffic Manager profile.', arg_type=get_enum_type(ProfileStatus))
-        c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic']))
+        c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic', 'Multivalue', 'Subnet']))
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
 
@@ -925,6 +926,8 @@ def load_arguments(self, _):
         c.argument('timeout', help='The time in seconds allowed for endpoints to response to a health check.', type=int)
         c.argument('interval', help='The interval in seconds at which health checks are conducted.', type=int)
         c.argument('max_failures', help='The number of consecutive failed health checks tolerated before an endpoint is considered degraded.', type=int)
+        c.argument('monitor_custom_headers', options_list='--custom-headers', help='Space-separated list of NAME=VALUE pairs.', nargs='+', validator=validate_custom_headers)
+        c.argument('status_code_ranges', help='Space-separated list of status codes in MIN-MAX or VAL format.', nargs='+', validator=validate_status_code_ranges)
 
     with self.argument_context('network traffic-manager profile update') as c:
         c.argument('monitor_protocol', monitor_protocol_type, default=None)
@@ -947,6 +950,8 @@ def load_arguments(self, _):
         c.argument('target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")
         c.argument('weight', help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.", type=int)
         c.argument('geo_mapping', help="Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.", nargs='+')
+        c.argument('subnets', nargs='+', help='Space-separated list of subnet CIDR prefixes (10.0.0.0/24) or subnet ranges (10.0.0.0-11.0.0.0).', validator=validate_subnet_ranges)
+        c.argument('monitor_custom_headers', nargs='+', options_list='--custom-headers', help='Space-separated list of custom headers in KEY=VALUE format.', validator=validate_custom_headers)
 
     with self.argument_context('network traffic-manager endpoint create') as c:
         c.argument('target', help='Fully-qualified DNS name of the endpoint.')

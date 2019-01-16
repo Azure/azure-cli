@@ -1861,47 +1861,6 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
 
 
-class NetworkTrafficManagerScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer('cli_test_traffic_manager')
-    def test_network_traffic_manager(self, resource_group):
-
-        self.kwargs.update({
-            'tm': 'mytmprofile',
-            'endpoint': 'myendpoint',
-            'dns': 'mytrafficmanager001100a'
-        })
-
-        self.cmd('network traffic-manager profile check-dns -n myfoobar1')
-        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method priority --unique-dns-name {dns} --tags foo=doo',
-                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'Priority'))
-        self.cmd('network traffic-manager profile show -g {rg} -n {tm}',
-                 checks=self.check('dnsConfig.relativeName', '{dns}'))
-        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method weighted --tags foo=boo',
-                 checks=self.check('trafficRoutingMethod', 'Weighted'))
-        self.cmd('network traffic-manager profile list -g {rg}')
-
-        # Endpoint tests
-        self.cmd('network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} --type externalEndpoints --weight 50 --target www.microsoft.com',
-                 checks=self.check('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'))
-        self.cmd('network traffic-manager endpoint update -n {endpoint} --profile-name {tm} -g {rg} --type externalEndpoints --weight 25 --target www.contoso.com', checks=[
-            self.check('weight', 25),
-            self.check('target', 'www.contoso.com')
-        ])
-        self.cmd('network traffic-manager endpoint show -g {rg} --profile-name {tm} -t externalEndpoints -n {endpoint}')
-        self.cmd('network traffic-manager endpoint list -g {rg} --profile-name {tm} -t externalEndpoints',
-                 checks=self.check('length(@)', 1))
-
-        # ensure a profile with endpoints can be updated
-        self.cmd('network traffic-manager profile update -n {tm} -g {rg}')
-
-        self.cmd('network traffic-manager endpoint delete -g {rg} --profile-name {tm} -t externalEndpoints -n {endpoint}')
-        self.cmd('network traffic-manager endpoint list -g {rg} --profile-name {tm} -t externalEndpoints',
-                 checks=self.check('length(@)', 0))
-
-        self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
-
-
 # convert to ScenarioTest and re-record when #6009 is fixed
 class NetworkWatcherScenarioTest(LiveScenarioTest):
     import mock

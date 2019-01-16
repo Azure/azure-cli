@@ -693,14 +693,13 @@ class MsiAccountTypes(object):
         from msrestazure.azure_active_directory import MSIAuthentication
         if cli_account_name == MsiAccountTypes.system_assigned:
             return MSIAuthentication(resource=resource)
-        elif cli_account_name == MsiAccountTypes.user_assigned_client_id:
+        if cli_account_name == MsiAccountTypes.user_assigned_client_id:
             return MSIAuthentication(resource=resource, client_id=identity)
-        elif cli_account_name == MsiAccountTypes.user_assigned_object_id:
+        if cli_account_name == MsiAccountTypes.user_assigned_object_id:
             return MSIAuthentication(resource=resource, object_id=identity)
-        elif cli_account_name == MsiAccountTypes.user_assigned_resource_id:
+        if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
             return MSIAuthentication(resource=resource, msi_res_id=identity)
-        else:
-            raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
+        raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
 class SubscriptionFinder(object):

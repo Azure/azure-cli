@@ -41,9 +41,10 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
             resource_name, resource_type)
         try:
             subscription = profile.get_subscription(cli_ctx.data['subscription_id'])
-            raise CLIError("{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
+            raise ResourceNotFound(
+                "{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
         except (KeyError, TypeError):
-            raise CLIError("{} in the current subscription.".format(message))
+            raise ResourceNotFound("{} in the current subscription.".format(message))
 
     elif len(elements) == 1:
         return elements[0]
@@ -319,3 +320,9 @@ def user_confirmation(message, yes=False):
             raise CLIError('Operation cancelled.')
     except NoTTYException:
         raise CLIError('Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+class ResourceNotFound(CLIError):
+    """For exceptions that a resource couldn't be found in user's subscription
+    """
+    pass

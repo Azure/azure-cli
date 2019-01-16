@@ -11,7 +11,7 @@ from azure.mgmt.resource.resources.models import ResourceGroup
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
                          DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT)
+                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT)
 
 
 def _resource_client_factory(cli_ctx, **_):
@@ -129,11 +129,11 @@ def get_lang_from_content(src_path):
     if os.path.isfile(package_json_file):
         runtime_details_dict['language'] = NODE_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_json_file
-        runtime_details_dict['default_sku'] = 'B1'
+        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_python_file:
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = os.path.join(src_path, package_json_file[0])
-        runtime_details_dict['default_sku'] = 'B1'
+        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netlang_glob:
         package_netcore_file = os.path.join(src_path, package_netlang_glob[0])
         runtime_lang = detect_dotnet_lang(package_netcore_file)
