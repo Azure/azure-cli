@@ -9,7 +9,6 @@ from __future__ import print_function
 import collections
 import copy
 import datetime
-import getpass
 import json
 import os
 import signal
@@ -31,6 +30,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from six.moves import urllib_parse
 
 from azure.cli.core import keys
+from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 import azure.mgmt.batchai.models as models
@@ -295,7 +295,7 @@ def _update_user_account_settings(params, admin_user_name, ssh_key, password):
         parent.user_account_settings = models.UserAccountSettings(admin_user_name=None)
     # Get effective user name, password and key trying them in the following order: provided via command line,
     # provided in the config file, current user name and his default public ssh key.
-    effective_user_name = admin_user_name or parent.user_account_settings.admin_user_name or getpass.getuser()
+    effective_user_name = admin_user_name or parent.user_account_settings.admin_user_name or get_default_admin_username()  # pylint: disable=line-too-long
     effective_password = password or parent.user_account_settings.admin_user_password
     # Use default ssh public key only if no password is configured.
     effective_key = (ssh_key or parent.user_account_settings.admin_user_ssh_public_key or

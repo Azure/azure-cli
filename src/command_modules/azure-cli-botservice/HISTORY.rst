@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.4
++++++
+* Add deployment status updates to `az bot create`
+
 0.1.3
 +++++
 * Add support for .bot file parsing when calling `az bot show`

@@ -288,15 +288,15 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
-    elif profile == StorageProfile.SAPirImage:
+    if profile == StorageProfile.SAPirImage:
         return 'create unmanaged OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.SASpecializedOSDisk:
+    if profile == StorageProfile.SASpecializedOSDisk:
         return 'attach to existing unmanaged OS disk'
-    elif profile == StorageProfile.ManagedCustomImage:
+    if profile == StorageProfile.ManagedCustomImage:
         return 'create managed OS disk from custom image'
-    elif profile == StorageProfile.ManagedPirImage:
+    if profile == StorageProfile.ManagedPirImage:
         return 'create managed OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.ManagedSpecializedOSDisk:
+    if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
 
 
@@ -417,6 +417,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
+        namespace.aux_subscriptions = [res['subscription']]
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
@@ -1256,20 +1257,27 @@ def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
+    source_from_vm = False
     try:
         # try capturing from VM, a most common scenario
         res_id = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
-        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+        if res['type'] == 'virtualMachines':
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
+            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            source_from_vm = True
+    except CloudError:
+        pass
+
+    if source_from_vm:
         # pylint: disable=no-member
         namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
-    except CloudError:
+    else:
         namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
@@ -1364,3 +1372,12 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
         namespace.target_regions = regions_info
 # endregion
+
+
+def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
+    if "vmss" in cmd.name:
+        logger.warning("About to power off the VMSS instances...\nThey will continue to be billed. "
+                       "To deallocate VMSS instances, run: az vmss deallocate.")
+    else:
+        logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
+                       "To deallocate a VM, run: az vm deallocate.")

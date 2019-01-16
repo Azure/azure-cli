@@ -2,6 +2,12 @@
 
 Release History
 ===============
+2.3.0
++++++
+* `traffic-manager profile create/update`: Add support for `--custom-headers` and `--status-code-ranges`. Add support for new routing types: Subnet and Multivalue.
+* `traffic-manager endpoint create/update`: Add support for `--custom-headers` and `--subnets`.
+* `ddos-protection update`: Fix issue where supplying `--vnets ""` to remove vnets caused a strack trace.
+
 
 2.2.11
 ++++++

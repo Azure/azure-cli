@@ -1930,6 +1930,10 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
+    # Workaround for this addon key which has been seen lowercased in the wild.
+    if 'loganalyticsworkspaceresourceid' in addon.config:
+        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
 
     workspace_resource_id = workspace_resource_id.strip()
@@ -2188,15 +2192,25 @@ def _validate_aci_location(norm_location):
     Validate the Azure Container Instance location
     """
     aci_locations = [
+        "australiaeast",
+        "canadacentral",
+        "centralindia",
         "centralus",
+        "eastasia",
         "eastus",
         "eastus2",
+        "eastus2euap",
+        "japaneast",
+        "northcentralus",
+        "northeurope",
+        "southcentralus",
+        "southeastasia",
+        "southindia",
+        "uksouth",
+        "westcentralus",
         "westus",
         "westus2",
-        "northeurope",
-        "westeurope",
-        "southeastasia",
-        "australiaeast"
+        "westeurope"
     ]
 
     if norm_location not in aci_locations:

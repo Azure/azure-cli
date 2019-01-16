@@ -15,11 +15,12 @@ import itertools
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
+from msrest.serialization import TZ_UTC
+from msrestazure.azure_exceptions import CloudError
+
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
-from msrest.serialization import TZ_UTC
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.profiles import ResourceType, get_api_version
 from azure.graphrbac.models import GraphErrorException
 
@@ -309,7 +310,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = set([x['principalId'] for x in result if x['principalId']])
+    principal_ids = {x['principalId'] for x in result if x['principalId']}
     if principal_ids:
         graph_client = _graph_client_factory(cmd.cli_ctx)
         stubs = _get_object_stubs(graph_client, principal_ids)
@@ -390,7 +391,7 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
 def _get_displayable_name(graph_object):
     if getattr(graph_object, 'user_principal_name', None):
         return graph_object.user_principal_name
-    elif getattr(graph_object, 'service_principal_names', None):
+    if getattr(graph_object, 'service_principal_names', None):
         return graph_object.service_principal_names[0]
     return graph_object.display_name or ''
 
@@ -506,12 +507,12 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
     result = client.applications.list(filter=(' and '.join(sub_filters)))
     if sub_filters or include_all:
         return result
-    else:
-        result = list(itertools.islice(result, 101))
-        if len(result) == 101:
-            logger.warning("The result is not complete. You can still use '--all' to get all of them with"
-                           " long latency expected, or provide a filter through command arguments")
-        return result[:100]
+
+    result = list(itertools.islice(result, 101))
+    if len(result) == 101:
+        logger.warning("The result is not complete. You can still use '--all' to get all of them with"
+                       " long latency expected, or provide a filter through command arguments")
+    return result[:100]
 
 
 def list_application_owners(cmd, identifier):
@@ -547,12 +548,12 @@ def list_sps(cmd, spn=None, display_name=None, query_filter=None, show_mine=None
 
     if sub_filters or include_all:
         return result
-    else:
-        result = list(itertools.islice(result, 101))
-        if len(result) == 101:
-            logger.warning("The result is not complete. You can still use '--all' to get all of them with"
-                           " long latency expected, or provide a filter through command arguments")
-        return result[:100]
+
+    result = list(itertools.islice(result, 101))
+    if len(result) == 101:
+        logger.warning("The result is not complete. You can still use '--all' to get all of them with"
+                       " long latency expected, or provide a filter through command arguments")
+    return result[:100]
 
 
 def list_owned_objects(client, object_type=None):
@@ -1006,9 +1007,9 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
         if cert:
             return graph_client.applications.update_key_credentials(app_object_id, result)
         return graph_client.applications.update_password_credentials(app_object_id, result)
-    else:
-        raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
-            key_id, identifier))
+
+    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
+        key_id, identifier))
 
 
 def _resolve_service_principal(client, identifier):
@@ -1018,8 +1019,7 @@ def _resolve_service_principal(client, identifier):
         return result[0].object_id
     if _is_guid(identifier):
         return identifier  # assume an object id
-    else:
-        raise CLIError("service principal '{}' doesn't exist".format(identifier))
+    raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
 def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,

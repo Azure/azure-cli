@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.55
+++++++
+* `--output`: Introduce 'none' as an output format option.
+
 2.0.54
 ++++++
 * Minor fixes

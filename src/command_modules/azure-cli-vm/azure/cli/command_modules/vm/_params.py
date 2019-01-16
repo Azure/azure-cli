@@ -9,6 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
@@ -65,7 +66,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
-            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
+            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
 
     for scope in ['disk create', 'snapshot create']:
@@ -192,17 +193,19 @@ def load_arguments(self, _):
 
     with self.argument_context('vm disk') as c:
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
-        c.argument('disk', validator=validate_vm_disk, help='disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('new', action='store_true', help='create a new disk')
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
     with self.argument_context('vm disk attach') as c:
         c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
+        c.argument('disk', options_list=['--name', '-n', c.deprecate(target='--disk', redirect='--name', hide=True)],
+                   help="The name or ID of the managed disk", validator=validate_vm_disk, id_part='name',
+                   completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
 
     with self.argument_context('vm disk detach') as c:
-        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
+        c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
@@ -256,13 +259,13 @@ def load_arguments(self, _):
         c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
     with self.argument_context('vm unmanaged-disk') as c:
-        c.argument('disk_size', help='Size of disk (GiB)', default=1023, type=int)
         c.argument('new', action='store_true', help='Create a new disk.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
         c.argument('vhd_uri', help="Virtual hard disk URI. For example: https://mystorage.blob.core.windows.net/vhds/d1.vhd")
 
     with self.argument_context('vm unmanaged-disk attach') as c:
-        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name(optional when create a new disk)')
+        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
 
     with self.argument_context('vm unmanaged-disk detach') as c:
         c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
@@ -354,9 +357,12 @@ def load_arguments(self, _):
         c.argument('vmss_name', id_part=None, help='Scale set name')
 
     with self.argument_context('vmss disk') as c:
+        options_list = ['--vmss-name'] + [c.deprecate(target=opt, redirect='--vmss-name', hide=True)for opt in name_arg_type.settings['options_list']]
+        new_vmss_name_type = CLIArgumentType(overrides=vmss_name_type, options_list=options_list)
+
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
-        c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
+        c.argument('vmss_name', new_vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
         c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
                    min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('instance_id', help='Scale set VM instance id', min_api='2017-12-01')
@@ -381,7 +387,7 @@ def load_arguments(self, _):
     # region VM & VMSS Shared
     for scope in ['vm', 'vmss']:
         with self.argument_context(scope) as c:
-            c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
+            c.argument('no_auto_upgrade', arg_type=get_three_state_flag(), help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -411,10 +417,11 @@ def load_arguments(self, _):
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@{path}` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+            c.ignore('aux_subscriptions')
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
-            c.argument('admin_username', help='Username for the VM.', default=_get_default_admin_username())
+            c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
             c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
@@ -504,6 +511,7 @@ def load_arguments(self, _):
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
         c.argument('extension_instance_name', extension_instance_name_type)
+        c.argument('provision_after_extensions', nargs='+', help='Space-separated list of extension names after which this extension should be provisioned. These extensions must already be set on the vm.')
 
     for scope in ['vm extension image', 'vmss extension image']:
         with self.argument_context(scope) as c:
@@ -570,7 +578,6 @@ def load_arguments(self, _):
         c.argument('description', help='the description of the gallery image version')
         c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
-        c.argument('replica_count', help='default replicate count. For region specific, use --target-regions', type=int)
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
 
@@ -579,13 +586,6 @@ def load_arguments(self, _):
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
-                       help='space separated region list, use "<region>=<replicate count>" to apply region specific replicate count')
+                       help='Space-separated list of regions and their replica counts. Use "<region>=<replica count>" to set the replica count for each region. If only the region is specified, the default replica count will be used.')
+            c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
     # endregion
-
-
-def _get_default_admin_username():
-    import getpass
-    try:
-        return getpass.getuser()
-    except KeyError:
-        return None

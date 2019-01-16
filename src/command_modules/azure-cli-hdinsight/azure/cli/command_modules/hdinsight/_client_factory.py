@@ -25,3 +25,23 @@ def cf_hdinsight(cli_ctx, *_, **__):
 
 def cf_hdinsight_clusters(cli_ctx, *_, **__):
     return cf_hdinsight(cli_ctx).clusters
+
+
+def cf_hdinsight_script_actions(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).script_actions
+
+
+def cf_hdinsight_script_execution_history(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).script_execution_history
+
+
+def cf_hdinsight_applications(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).applications
+
+
+def cf_hdinsight_extensions(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).extensions
+
+
+def cf_hdinsight_locations(cli_ctx, *_, **__):
+    return cf_hdinsight(cli_ctx).locations

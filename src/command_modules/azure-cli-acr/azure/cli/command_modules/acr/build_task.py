@@ -356,7 +356,7 @@ def acr_build_task_list_builds(cmd,
     if image:
         from .repository import get_image_digest
         try:
-            repository, _, manifest = get_image_digest(cmd.cli_ctx, registry_name, resource_group_name, image)
+            repository, _, manifest = get_image_digest(cmd.cli_ctx, registry_name, image)
             filter_str = _add_build_filter(
                 filter_str, 'OutputImageManifests', '{}@{}'.format(repository, manifest), 'contains')
         except CLIError as e:

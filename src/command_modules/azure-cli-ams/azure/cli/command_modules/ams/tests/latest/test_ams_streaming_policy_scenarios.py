@@ -18,12 +18,12 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'westus'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'West US')
         ])
 
         streamingPolicyName = self.create_random_name(prefix='spn', length=10)
@@ -56,12 +56,12 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'eastus2'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'East US 2')
         ])
 
         streamingPolicyName = self.create_random_name(prefix='spn', length=10)
@@ -128,12 +128,12 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'canadacentral'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Canada Central')
         ])
 
         streamingPolicyName = self.create_random_name(prefix='spn', length=10)

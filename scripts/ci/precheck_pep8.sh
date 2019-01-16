@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
 # install flake 8
 pip install -qqq flake8
