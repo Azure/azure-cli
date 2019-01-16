@@ -5,6 +5,7 @@
 
 from ..rule_decorators import help_file_entry_rule
 from ..linter import RuleError
+from ..util import LinterError
 import shlex
 import mock
 from knack.log import get_logger
@@ -85,7 +86,7 @@ def faulty_help_example_parameters_rule(linter, help_entry):
 def _lint_example_command(command, parser, mocked_error_method, mocked_get_value, mocked_check_value):
     def get_value_side_effect(action, arg_string):
         return arg_string
-    mocked_error_method.side_effect = SystemExit  # mock call of parser.error so usage won't be printed.
+    mocked_error_method.side_effect = LinterError  # mock call of parser.error so usage won't be printed.
     mocked_get_value.side_effect = get_value_side_effect
 
     violation = None
@@ -102,7 +103,7 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
                         'If needed, you can escape the "\\", like so "\\\\"'.format(command)
         else:
             raise e
-    except SystemExit:  # handle parsing failure due to invalid option
+    except LinterError:  # handle parsing failure due to invalid option
         violation = '\t"{}" is not a valid command'.format(command)
         if mocked_error_method.called:
             call_args = mocked_error_method.call_args
