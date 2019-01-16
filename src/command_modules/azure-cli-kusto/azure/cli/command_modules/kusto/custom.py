@@ -124,7 +124,9 @@ def database_create(cmd,
     else:
         location = _cluster.location
 
-    _database = Database(location=location, soft_delete_period_in_days=soft_delete_period_in_days, hot_cache_period_in_days=hot_cache_period_in_days)
+    _database = Database(location=location,
+                         soft_delete_period_in_days=soft_delete_period_in_days,
+                         hot_cache_period_in_days=hot_cache_period_in_days)
 
     return sdk_no_wait(no_wait,
                        _client.create_or_update,
@@ -161,7 +163,8 @@ def update_kusto_database(instance, soft_delete_period_in_days, hot_cache_period
     """
     Update sku kusto database.
 
-    :param soft_delete_period_in_days: The number of days data should be kept before it stops being accessible to queries.
+    :param soft_delete_period_in_days: The number of days data should be kept
+           before it stops being accessible to queries.
     :param hot_cache_period_in_days: The number of days of data that should be kept in cache for fast queries.
     """
     instance.soft_delete_period_in_days = soft_delete_period_in_days

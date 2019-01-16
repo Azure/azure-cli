@@ -14,8 +14,6 @@ from azure.cli.core.commands.parameters import (get_enum_type)
 def load_arguments(self, _):
 
     # Kusto clusters
-
-
     sku_arg_type = CLIArgumentType(help='The name of the sku.',
                                    arg_type=get_enum_type(AzureSkuName))
 
