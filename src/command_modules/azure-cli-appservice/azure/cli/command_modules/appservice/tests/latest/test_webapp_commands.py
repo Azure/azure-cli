@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import jmespath
 import mock
 import uuid
 import os
@@ -866,6 +867,28 @@ class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppWithAppInsightsKey(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_with_app_insights_key(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwithappinsights', 40)
+        app_insights_key = '00000000-0000-0000-0000-123456789123'
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows'
+                 ' --app-insights-key {}'
+                 .format(resource_group, functionapp_name, storage_account, app_insights_key)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck("[?name=='APPINSIGHTS_INSTRUMENTATIONKEY'].value|[0]", app_insights_key)
+        ])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
