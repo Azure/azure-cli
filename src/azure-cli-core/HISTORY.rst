@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* auth: enable tenant level account for managed service identity
 
 2.0.55
 ++++++
