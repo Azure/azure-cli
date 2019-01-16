@@ -2167,11 +2167,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
     def _mock_thread_count():
         return 1
 
-    def _configure_network_watcher(self):
-        # ensure network watcher RG exists and is configured for our location
-        self.cmd('group create -g NetworkWatcherRg -l westcentralus')
-        self.cmd('network watcher configure -g NetworkWatcherRg --locations westcentralus --enabled')
-
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westcentralus')
     @AllowLargeResponse()
@@ -2184,7 +2179,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture': 'capture1',
             'private-ip': '10.0.0.9'
         })
-        self._configure_network_watcher()
+
         vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}').get_output_in_json()
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
@@ -2207,7 +2202,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'sa': storage_account
         })
 
-        self._configure_network_watcher()
         self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
@@ -2223,7 +2217,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'capture': 'capture1'
         })
-        self._configure_network_watcher()
+
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm}')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -2244,7 +2238,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'loc': resource_group_location,
             'sa': storage_account
         })
-        self._configure_network_watcher()
 
         # set up resource to troubleshoot
         self.cmd('storage container create -n troubleshooting --account-name {sa}')
@@ -2269,7 +2262,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm3': 'vm3',
             'cm': 'cm1'
         })
-        self._configure_network_watcher()
 
         self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
         self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
