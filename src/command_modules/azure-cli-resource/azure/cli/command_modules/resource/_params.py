@@ -37,6 +37,8 @@ def load_arguments(self, _):
     existing_policy_set_definition_name_type = CLIArgumentType(options_list=['--name', '-n'], completer=get_policy_set_completion_list, help='The policy set definition name.')
     subscription_type = CLIArgumentType(options_list='--subscription', FilesCompleter=get_subscription_id_list, help='The subscription id of the policy [set] definition.')
     management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
+    identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
+    identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -129,12 +131,12 @@ def load_arguments(self, _):
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
-        c.argument('identity_scope', help="Scope that the system assigned identity can access")
-        c.argument('identity_role', options_list=['--role', '--identity-role'], help="Role name or id that will be assigned to the managed identity")
+        c.argument('identity_scope', arg_type=identity_scope_type)
+        c.argument('identity_role', arg_type=identity_role_type)
 
     with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('identity_scope', help="Scope that the system assigned identity can access")
-        c.argument('identity_role', options_list=['--role', '--identity-role'], help="Role name or id that will be assigned to the managed identity")
+        c.argument('identity_scope', arg_type=identity_scope_type)
+        c.argument('identity_role', arg_type=identity_role_type)
 
     with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)

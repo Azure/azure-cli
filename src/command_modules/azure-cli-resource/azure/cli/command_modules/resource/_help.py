@@ -493,7 +493,7 @@ helps['policy assignment create'] = """
             az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity
         - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
           text: >
-            az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --identity-role Contributor
+            az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
 """
 helps['policy assignment delete'] = """
     type: command
@@ -520,7 +520,7 @@ helps['policy assignment identity assign'] = """
             az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment
         - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
           text: >
-            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --identity-role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
 """
 helps['policy assignment identity show'] = """
     type: command

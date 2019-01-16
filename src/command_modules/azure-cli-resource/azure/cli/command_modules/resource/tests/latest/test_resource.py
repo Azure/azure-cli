@@ -879,7 +879,7 @@ class PolicyScenarioTest(ScenarioTest):
 
         # create a role assignment for the identity using 'identity assign'
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
-            assignmentIdentity = self.cmd('policy assignment identity assign -n {pan} -g {rg} --identity-scope {idScope} --identity-role {idRole}', checks=[
+            assignmentIdentity = self.cmd('policy assignment identity assign -n {pan} -g {rg} --identity-scope {idScope} --role {idRole}', checks=[
                 self.check('type', 'SystemAssigned'),
                 self.exists('principalId'),
                 self.exists('tenantId')
