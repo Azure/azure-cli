@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.2
++++++
+* Bug fixes.
+
 0.4.1
 +++++
 * Fixed bugs for budget API to show notifications.
