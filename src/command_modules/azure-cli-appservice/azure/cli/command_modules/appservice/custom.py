@@ -2012,20 +2012,21 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
     total_trials = (int(timeout) // 2) if timeout else 450
-    for _num_trials in range(total_trials):
+    num_trials = 0
+    while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
+        num_trials = num_trials + 1
         if res_dict.get('status', 0) == 3:
-            logger.warning("Zip deployment failed status %s", res_dict['status_text'])
-            break
+            raise CLIError("Zip deployment failed.")
         elif res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        raise ValueError("""Deployment is taking longer than expected. Please verify
+        raise CLIError("""Deployment is taking longer than expected. Please verify
                             status at '{}' beforing launching the app""".format(deployment_status_url))
     return res_dict
 
