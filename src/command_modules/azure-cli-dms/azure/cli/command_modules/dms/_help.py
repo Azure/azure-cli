@@ -44,7 +44,7 @@ helps['dms create'] = """
     examples:
         - name: Create an instance of DMS.
           text: >
-            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet /subscriptions/{vnet subscription id}/resourceGroups/{vnet resource group}/providers/Microsoft.Network/virtualNetworks/{vnet name}/subnets/{subnet name} --tags tagName1=tagValue1 tagWithNoValue
+            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet /subscriptions/{vnetSubscriptionId}/resourceGroups/{vnetResourceGroup}/providers/Microsoft.Network/virtualNetworks/{vnetName}/subnets/{subnetName} --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms delete'] = """
@@ -185,10 +185,10 @@ helps['dms project task create'] = r"""
     examples:
         - name: Create and start a Task which performs no validation checks.
           text: >
-            az dms project task create --database-options-json C:\CLI Files\databaseOptions.json -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json '{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}' --target-connection-json C:\CLI Files\targetConnection.json
+            az dms project task create --database-options-json "C:\CLI Files\databaseOptions.json" -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json "{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}" --target-connection-json "C:\CLI Files\targetConnection.json"
         - name: Create and start a Task which performs all validation checks.
           text: >
-            az dms project task create --database-options-json C:\CLI Files\databaseOptions.json -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json C:\CLI Files\sourceConnection.json --target-connection-json C:\CLI Files\targetConnection.json --enable-data-integrity-validation=True --enable-query-analysis-validation --enable-schema-validation
+            az dms project task create --database-options-json "C:\CLI Files\databaseOptions.json" -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json "C:\CLI Files\sourceConnection.json" --target-connection-json "C:\CLI Files\targetConnection.json" --enable-data-integrity-validation --enable-query-analysis-validation --enable-schema-validation
         - name: The format of the database options JSON object.
           text: >
             [
