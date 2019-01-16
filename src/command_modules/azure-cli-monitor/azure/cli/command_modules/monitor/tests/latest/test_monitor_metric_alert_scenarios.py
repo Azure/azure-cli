@@ -49,6 +49,9 @@ class MonitorTests(ScenarioTest):
             self.check('length(criteria.allOf[0].dimensions)', 1),
             self.check('length(criteria.allOf[1].dimensions)', 0)
         ])
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --enabled false', checks=[
+            self.check('enabled', False)
+        ])
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 1))
         self.cmd('monitor metrics alert show -g {rg} -n {alert}')

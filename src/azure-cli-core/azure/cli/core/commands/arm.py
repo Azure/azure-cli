@@ -244,7 +244,7 @@ def register_ids_argument(cli_ctx):
             errors = [arg for arg in required_args if getattr(namespace, arg.name, None) is None]
             if errors:
                 missing_required = ' '.join((arg.options_list[0] for arg in errors))
-                raise ValueError('({} | {}) are required'.format(missing_required, '--ids'))
+                raise CLIError('({} | {}) are required'.format(missing_required, '--ids'))
             return
 
         # show warning if names are used in conjunction with --ids
