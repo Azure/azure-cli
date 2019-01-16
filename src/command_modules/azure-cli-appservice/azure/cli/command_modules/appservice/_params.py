@@ -374,3 +374,11 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type)
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")
+
+    with self.argument_context('functionapp plan') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name')
+        c.argument('sku', required=True, help='The SKU of the app service plan.')
+        c.argument('number_of_workers', help='The number of workers for the app service plan.')
+        c.argument('tags', arg_type=tags_type)
