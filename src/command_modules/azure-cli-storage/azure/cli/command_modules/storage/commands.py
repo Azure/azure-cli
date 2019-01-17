@@ -388,9 +388,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage entity', table_sdk,
                             custom_command_type=get_custom_sdk('table', table_data_service_factory)) as g:
         from ._format import transform_boolean_for_table, transform_entity_show
-        from ._transformers import create_boolean_result_output_transformer, transform_entity_query_output, transform_entities_result, transform_entity_result
+        from ._transformers import (create_boolean_result_output_transformer,
+                                    transform_entity_query_output,
+                                    transform_entities_result,
+                                    transform_entity_result)
 
-        g.storage_command('query', 'query_entities', table_transformer=transform_entity_query_output, transform=transform_entities_result)
+        g.storage_command('query',
+                          'query_entities',
+                          table_transformer=transform_entity_query_output,
+                          transform=transform_entities_result)
         g.storage_command('replace', 'update_entity')
         g.storage_command('merge', 'merge_entity')
         g.storage_command('delete', 'delete_entity', transform=create_boolean_result_output_transformer('deleted'),
