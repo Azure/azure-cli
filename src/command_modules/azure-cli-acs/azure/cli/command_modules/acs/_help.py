@@ -278,7 +278,7 @@ helps['aks delete'] = """
 
 helps['aks update-credentials'] = """
     type: command
-    short-summary: Update credentails for a managed Kubernetes cluster, like service principal, AAD.
+    short-summary: Update credentails for a managed Kubernetes cluster, like service principal.
     parameters:
         - name: --reset-service-principal
           type: bool
