@@ -104,12 +104,14 @@ def assert_help_objs_equal(old_help, new_help):
     assert_true_or_warn(old_help.long_summary, new_help.long_summary)
     assert_true_or_warn(old_help.command, new_help.command)
 
-    old_examples = sorted(old_help.examples, key=lambda x: x.name)
-    new_examples = sorted(new_help.examples, key=lambda x: x.name)
+    old_examples = sorted(old_help.examples, key=lambda x: x.short_summary)
+    new_examples = sorted(new_help.examples, key=lambda x: x.short_summary)
     assert_true_or_warn(len(old_examples), len(new_examples))
     # note: this cannot test if min / max version were added as these fields weren't stored in helpfile objects previously.
     for old_ex, new_ex in zip(old_examples, new_examples):
-        assert_true_or_warn (old_ex.text, new_ex.text)
+        assert_true_or_warn (old_ex.short_summary, new_ex.short_summary)
+        assert_true_or_warn (old_ex.command, new_ex.command)
+        assert_true_or_warn (old_ex.long_summary, new_ex.long_summary)
 
     assert_true_or_warn(old_help.deprecate_info, new_help.deprecate_info)
     assert_true_or_warn(old_help.preview_info, new_help.preview_info)
@@ -126,12 +128,9 @@ def assert_help_objs_equal(old_help, new_help):
 
 def assert_params_equal(old_parameters, new_parameters):
     for old, new in zip(old_parameters, new_parameters):
-        assert_true_or_warn (old.short_summary, new.short_summary)
-        assert_true_or_warn (old.long_summary, new.long_summary)
-
-        old_value_sources = sorted(old.value_sources)
-        new_value_sources = sorted(new.value_sources)
-        assert_true_or_warn (old_value_sources, new_value_sources)
+        assert_true_or_warn(old.short_summary, new.short_summary)
+        assert_true_or_warn(old.long_summary, new.long_summary)
+        assert_true_or_warn(old.value_sources, new.value_sources)
 
 
 def assert_true_or_warn(x, y):

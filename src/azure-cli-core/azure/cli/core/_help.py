@@ -291,10 +291,12 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
 class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
     def __init__(self, **_data):
+        # Old attributes
         _data['name'] = _data.get('name', '')
         _data['text'] = _data.get('text', '')
         super(HelpExample, self).__init__(_data)
 
+        # new attributes in lieu of old attributes. TODO: SHOULD WE DELETE OLD ATTRS?? TO ENFORCE new ones?
         self.short_summary = _data.get('summary', '') if _data.get('summary', '') else self.name
         self.command = _data.get('command', '') if _data.get('command', '') else self.text
         self.long_summary = _data.get('description', '')
