@@ -97,7 +97,7 @@ def load_arguments(self, _):
         c.argument('metadata', action='store_true')
         c.argument('dimension', nargs='*', validator=validate_metric_dimension)
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*')
-        c.argument('metrics', nargs='+', help='Space-separated list of metric names to retrieve.')
+        c.argument('metrics', nargs='+')
         c.argument('orderby', help='Aggregation to use for sorting results and the direction of the sort. Only one order can be specificed. Examples: sum asc')
         c.argument('top', help='Max number of records to retrieve. Valid only if --filter used.')
         c.argument('filters', options_list='--filter')

@@ -134,6 +134,8 @@ helps['monitor metrics list'] = """
     parameters:
         - name: --aggregation
           short-summary: The list of aggregation types (space-separated) to retrieve.
+          populator-commands:
+            - az monitor metrics list-definitions
         - name: --interval
           short-summary: >
             The interval over which to aggregate metrics, in ##h##m format.
@@ -144,8 +146,12 @@ helps['monitor metrics list'] = """
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
           short-summary: The list of dimensions (space-separated) the metrics are queried into.
+          populator-commands:
+            - az monitor metrics list-definitions
         - name: --namespace
           short-summary: Namespace to query metric definitions for.
+          populator-commands:
+            - az monitor metrics list-definitions
         - name: --offset
           short-summary: >
             Time offset of the query range, in ##d##h format.
@@ -154,6 +160,12 @@ helps['monitor metrics list'] = """
             the end time will be calculated by adding the offset. If used with --end-time (default), then
             the start time will be calculated by subtracting the offset. If --start-time and --end-time are
             provided, then --offset will be ignored.
+        - name: --metrics
+          short-summary: >
+            Space-separated list of metric names to retrieve.
+          populator-commands:
+            - az monitor metrics list-definitions
+
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
