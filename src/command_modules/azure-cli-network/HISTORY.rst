@@ -4,6 +4,7 @@ Release History
 ===============
 2.3.1
 ++++++
+* `express-route update`: Fix issue where `--bandwidth` argument was ignored.
 * `ddos-protection update`: Fix issue with set comprehension causing stack trace.
 
 2.3.0
