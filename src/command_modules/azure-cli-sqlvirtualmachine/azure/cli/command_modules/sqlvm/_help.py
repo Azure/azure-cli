@@ -128,5 +128,5 @@ helps['sql vm group ag-listener update'] = """
     examples:
         - name: Replace the SQL virtual machines that were in the availability group.
           text: >
-            az sql vm group ag-listener update --sqlvms sqlvm3 sqlvm4
+            az sql vm group ag-listener update --sqlvms sqlvm3 sqlvm4 --group-name mygroup
     """
