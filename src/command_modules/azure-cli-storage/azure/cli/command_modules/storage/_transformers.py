@@ -64,31 +64,17 @@ def transform_entity_query_output(result):
 
 
 def transform_entities_result(result):
-    new_items = []
     for entity in result.items:
-        new_items.append(transform_entity_result(entity))
-    return {
-        'items': new_items,
-        'nextMarker': result.next_marker
-    }
+        transform_entity_result(entity)
+    return result
 
 
 def transform_entity_result(entity):
-    new_entity = {}
     for key in entity.keys():
-        old_property = entity[key]
-        if hasattr(old_property, 'encrypt') \
-                and hasattr(old_property, 'type') \
-                and hasattr(old_property, 'value') \
-                and isinstance(old_property.value, bytes):
-            new_entity[key] = {
-                'encrypt': old_property.encrypt,
-                'type': old_property.type,
-                'value': base64.b64encode(old_property.value).decode()
-            }
-        else:
-            new_entity[key] = old_property
-    return new_entity
+        property = entity[key]
+        if hasattr(property, 'value') and isinstance(property.value, bytes):
+            property.value = base64.b64encode(property.value).decode()
+    return entity
 
 
 def transform_logging_list_output(result):
