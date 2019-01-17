@@ -220,6 +220,7 @@ def load_arguments(self, _):
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
     with self.argument_context('vm secret') as c:
+        c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
         c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)
         c.argument('certificate', help='key vault certificate name or its full secret URL')
         c.argument('certificate_store', help='Windows certificate store names. Default: My')
