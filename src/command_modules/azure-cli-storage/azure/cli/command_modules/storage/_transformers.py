@@ -77,8 +77,10 @@ def transform_entity_result(entity):
     new_entity = {}
     for key in entity.keys():
         old_property = entity[key]
-        if (hasattr(old_property, 'encrypt') and hasattr(old_property, 'type') and hasattr(old_property, 'value')
-            and isinstance(old_property.value, bytes)):
+        if hasattr(old_property, 'encrypt') \
+                and hasattr(old_property, 'type') \
+                and hasattr(old_property, 'value') \
+                and isinstance(old_property.value, bytes):
             new_entity[key] = {
                 'encrypt': old_property.encrypt,
                 'type': old_property.type,
