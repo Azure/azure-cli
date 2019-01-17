@@ -5,6 +5,8 @@ Release History
 
 2.3.14
 ++++++
+* Add Virtual Nodes Preview
+* Add Managed OpenShift commands
 * Minor fixes
 * Add support for new ACI regions
 * Support Service Principal updating operation using "az aks update-credentials --reset-service-principal"

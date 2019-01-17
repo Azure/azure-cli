@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* az login: enable tenant level account for managed service identity
+
 2.1.2
 ++++++
 * az login: expose --use-cert-sn-issuer flag for service principal login with cert auto-rolls

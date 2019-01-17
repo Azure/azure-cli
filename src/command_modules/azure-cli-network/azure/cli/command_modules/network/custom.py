@@ -433,8 +433,10 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
     if timeout is not None:
         instance.request_timeout = timeout
     if connection_draining_timeout is not None:
-        instance.connection_draining.enabled = bool(connection_draining_timeout)
-        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout or 1
+        instance.connection_draining = {
+            'enabled': bool(connection_draining_timeout),
+            'drain_timeout_in_sec': connection_draining_timeout or 1
+        }
     if host_name is not None:
         instance.host_name = host_name
     if host_name_from_backend_pool is not None:
@@ -913,7 +915,7 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
             pass
         else:
             vnet_ids = {x.id for x in vnets}
-        existing_vnet_ids = {x.id for x in instance.virtual_networks} or set([])
+        existing_vnet_ids = {x.id for x in instance.virtual_networks} if instance.virtual_networks else set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
@@ -3010,7 +3012,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    routing_method, unique_dns_name, monitor_path=None,
                                    monitor_port=80, monitor_protocol=MonitorProtocol.http.value,
                                    profile_status=ProfileStatus.enabled.value,
-                                   ttl=30, tags=None, interval=None, timeout=None, max_failures=None):
+                                   ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
+                                   monitor_custom_headers=None, status_code_ranges=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
     client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
@@ -3024,13 +3027,16 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                                    path=monitor_path,
                                                    interval_in_seconds=interval,
                                                    timeout_in_seconds=timeout,
-                                                   tolerated_number_of_failures=max_failures))
+                                                   tolerated_number_of_failures=max_failures,
+                                                   custom_headers=monitor_custom_headers,
+                                                   expected_status_code_ranges=status_code_ranges))
     return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
 
 
 def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
-                                   ttl=None, timeout=None, interval=None, max_failures=None):
+                                   ttl=None, timeout=None, interval=None, max_failures=None,
+                                   monitor_custom_headers=None, status_code_ranges=None):
     if tags is not None:
         instance.tags = tags
     if profile_status is not None:
@@ -3054,6 +3060,10 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
         instance.monitor_config.timeout_in_seconds = timeout
     if max_failures is not None:
         instance.monitor_config.tolerated_number_of_failures = max_failures
+    if monitor_custom_headers is not None:
+        instance.monitor_config.custom_headers = monitor_custom_headers
+    if status_code_ranges is not None:
+        instance.monitor_config.expected_status_code_ranges = status_code_ranges
 
     # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
     for endpoint in instance.endpoints:
@@ -3068,7 +3078,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
-                                    min_child_endpoints=None, geo_mapping=None):
+                                    min_child_endpoints=None, geo_mapping=None,
+                                    monitor_custom_headers=None, subnets=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).endpoints
@@ -3078,7 +3089,9 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                         endpoint_location=endpoint_location,
                         endpoint_monitor_status=endpoint_monitor_status,
                         min_child_endpoints=min_child_endpoints,
-                        geo_mapping=geo_mapping)
+                        geo_mapping=geo_mapping,
+                        subnets=subnets,
+                        custom_headers=monitor_custom_headers)
 
     return ncf.create_or_update(resource_group_name, profile_name, endpoint_type, endpoint_name,
                                 endpoint)
@@ -3087,7 +3100,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
-                                    weight=None, min_child_endpoints=None, geo_mapping=None):
+                                    weight=None, min_child_endpoints=None, geo_mapping=None,
+                                    subnets=None, monitor_custom_headers=None):
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
     if endpoint_status is not None:
@@ -3106,6 +3120,10 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
         instance.min_child_endpoints = min_child_endpoints
     if geo_mapping is not None:
         instance.geo_mapping = geo_mapping
+    if subnets is not None:
+        instance.subnets = subnets
+    if monitor_custom_headers:
+        instance.custom_headers = monitor_custom_headers
 
     return instance
 

@@ -22,14 +22,14 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: Create a server.
                 examples:
-                    - name: Create a {0} server with only required paramaters in North Europe.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password
                     - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name GP_Gen4_2
+                      text: |
+                        az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+                            --sku-name "GP_Gen4_2"
                     - name: Create a {0} server with all paramaters set.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name B_Gen4_2 --ssl-enforcement Disabled \\
+                      text: |
+                        az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+                            --sku-name "B_Gen4_2" --ssl-enforcement Disabled \\
                             --storage-size 51200 --tags "key=value" --version {{server-version}}
                 """.format(server_type, command_group)
     helps['{} server restore'.format(command_group)] = """
@@ -53,7 +53,7 @@ def add_helps(command_group, server_type):
                     - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
                             -l westus2 --sku-name GP_Gen4_2
                 """.format(command_group, server_type)
     helps['mysql server replica'] = """
@@ -215,9 +215,9 @@ def add_helps(command_group, server_type):
                 short-summary: Create a {0} database.
                 examples:
                     - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --admin-user myadmin --admin-password {{server_admin_password}} --sku-name GP_Gen4_2 --version 5.7
+                      text: az {1} db create -g testgroup -s testsvr -n testdb
                     - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}} --admin-user myadmin --admin-password {{server_admin_password}} --sku-name GP_Gen4_2 --version 5.7
+                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}}
                 """.format(server_type, command_group)
     helps['{} db delete'.format(command_group)] = """
                 type: command

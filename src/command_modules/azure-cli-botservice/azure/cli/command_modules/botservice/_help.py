@@ -60,9 +60,9 @@ helps['bot facebook create'] = """
     short-summary: Create the Facebook Channel on a bot.
     examples:
         - name: Create the Facebook Channel for a bot
-          text: |-
-            az bot facebook create -n botName -g MyResourceGroup -appid myAppId
-            --page-d myPageId --secret mySecret --token myToken
+          text: |
+            az bot facebook create -n botName -g MyResourceGroup --appid myAppId \\
+            --page-id myPageId --secret mySecret --token myToken
 """
 helps['bot email create'] = """
     type: command
@@ -70,7 +70,7 @@ helps['bot email create'] = """
     examples:
         - name: Create the Email Channel for a bot
           text: |-
-            az bot email create -n botName -g MyResourceGroup -a abc@outlook.com
+            az bot email create -n botName -g MyResourceGroup -a abc@outlook.com \\
             -p password
 """
 helps['bot msteams create'] = """
@@ -97,8 +97,8 @@ helps['bot kik create'] = """
     examples:
         - name: Create the Kik Channel for a bot.
           text: |-
-            az bot kik create -n botName -g MyResourceGroup -u mykikname
-            -p password --key key --is-validated
+            az bot kik create -n botName -g MyResourceGroup -u mykikname \\
+            --key key --is-validated
 """
 helps['bot directline create'] = """
     type: command
@@ -123,8 +123,8 @@ helps['bot sms create'] = """
     examples:
         - name: Create the SMS Channel for a bot.
           text: |-
-            az bot sms create -n botName -g MyResourceGroup --account-sid sid
-            --auth-token token --is-validated
+            az bot sms create -n botName -g MyResourceGroup --account-sid sid \\
+            --auth-token token --is-validated --phone 1234567890
 """
 helps['bot slack create'] = """
     type: command
@@ -132,7 +132,7 @@ helps['bot slack create'] = """
     examples:
         - name: Create the Slack Channel for a bot.
           text: |-
-            az bot slack create -n botName -g MyResourceGroup --client-id clientid
+            az bot slack create -n botName -g MyResourceGroup --client-id clientid \\
             --client-secret secret --verification-token token
 """
 helps['bot authsetting'] = """
@@ -145,9 +145,9 @@ helps['bot authsetting create'] = """
     examples:
         - name: Create a new OAuth connection setting on a bot.
           text: |-
-            az bot authsetting create -g MyResourceGroup -n botName -c myConnectionName
-            --client-id clientId --client-secret secret --scopes "scope1 scope2" --service google
-            --parameters id=myid
+            az bot authsetting create -g MyResourceGroup -n botName -c myConnectionName \\
+            --client-id clientId --client-secret secret --provider-scope-string "scope1 scope2"\\
+            --service google --parameters id=myid
 """
 helps['bot authsetting show'] = """
     type: command
