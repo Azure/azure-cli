@@ -24,19 +24,21 @@ helps['redis import'] = """
 
 helps['redis list'] = """
     type: command
-    short-summary: Lists details about all caches within current Subscription or provided Resource Group.
+    short-summary: List Redis Caches.
+    long-summary: Lists details about all caches within current Subscription or provided Resource Group.
 """
 
 helps['redis import-method'] = """
     type: command
     short-summary: (DEPRECATED) Import data into Redis cache.
     long-summary: |
-        WARNING: This command is deprecated. Instead, use the `import` command.
+        WARNING: This command is deprecated. Use the `import` command instead.
 """
 
 helps['redis update'] = """
     type: command
-    short-summary: Scale or update settings of a Redis cache.
+    short-summary: Update a Redis cache.
+    long-summary: Scale or update settings of a Redis cache.
 """
 
 helps['redis patch-schedule'] = """
@@ -47,11 +49,13 @@ helps['redis patch-schedule'] = """
 helps['redis patch-schedule create'] = """
     type: command
     short-summary: Create patching schedule for Redis cache.
+    long-summary: Usage example - az redis patch-schedule create --name testCacheName --resource-group testResourceGroup --schedule-entries '[{\"dayOfWeek\":\"Tuesday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]'
 """
 
 helps['redis patch-schedule update'] = """
     type: command
-    short-summary: Replace the patching schedule for Redis cache.
+    short-summary: Update the patching schedule for Redis cache.
+    long-summary: Usage example - az redis patch-schedule update --name testCacheName --resource-group testResourceGroup --schedule-entries '[{\"dayOfWeek\":\"Tuesday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]'
 """
 
 helps['redis firewall-rules'] = """
@@ -62,6 +66,7 @@ helps['redis firewall-rules'] = """
 helps['redis firewall-rules create'] = """
     type: command
     short-summary: Create a redis cache firewall rule.
+    long-summary: Usage example - az redis firewall-rules create --name testCacheName --resource-group testResourceGroup  --start-ip 10.10.10.10 --end-ip 20.20.20.20 --rule-name 10to20
 """
 
 helps['redis firewall-rules update'] = """

@@ -9,34 +9,20 @@ from azure.cli.command_modules.redis._client_factory import cf_redis
 
 logger = get_logger(__name__)
 
-
-def wrong_vmsize_argument_exception_handler(ex):
-
-    from msrest.exceptions import ClientException
-    if isinstance(ex, ClientException):
-        if ("The value of the parameter 'properties.sku.family/properties.sku.capacity' is invalid"
-                in format(ex)) \
-                or ("The value of the parameter 'properties.sku.family' is invalid"
-                    in format(ex)):
-            raise CLIError('Invalid VM size. Example for Valid values: '
-                           'For C family (C0, C1, C2, C3, C4, C5, C6), '
-                           'for P family (P1, P2, P3, P4, P5)')
-    raise ex
-
+allowed_c_family_sizes = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+allowed_p_family_sizes = ['p1', 'p2', 'p3', 'p4', 'p5']
+wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
+                              'For Standard Sku : (C0, C1, C2, C3, C4, C5, C6), '
+                              'for Premium Sku : (P1, P2, P3, P4, P5)')
 
 # region Custom Commands
+
 
 # pylint: disable=unused-argument
 def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix, container, file_format)
     return client.export_data(resource_group_name, name, parameters)
-
-
-# pylint: disable=unused-argument
-def cli_redis_import_method(cmd, client, resource_group_name, name, files, file_format=None):
-    logger.warning('This command is getting deprecated. Please use "redis import" command')
-    return client.import_data(resource_group_name, name, files, file_format)
 
 
 # pylint: disable=unused-argument
@@ -68,29 +54,13 @@ def cli_redis_create(cmd, client,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None, zones=None):
     # pylint:disable=line-too-long
-    """Create new Redis Cache instance
-    :param resource_group_name: Name of resource group
-    :param name: Name of redis cache
-    :param location: Location
-    :param sku: What type of redis cache to deploy. Valid values: (Basic, Standard, Premium).
-    :param vm_size: What size of redis cache to deploy. Valid values for C family (C0, C1, C2, C3, C4, C5, C6), for P family (P1, P2, P3, P4)
-    :param redis_configuration: All Redis Settings. Few possible keys rdb-backup-enabled, rdb-storage-connection-string, rdb-backup-frequency, maxmemory-delta, maxmemory-policy, notify-keyspace-events, maxmemory-samples, slowlog-log-slower-than, slowlog-max-len, list-max-ziplist-entries, list-max-ziplist-value, hash-max-ziplist-entries, hash-max-ziplist-value, set-max-intset-entries, zset-max-ziplist-entries, zset-max-ziplist-value etc.
-    :param enable_non_ssl_port: If the value is true, then the non-ssl redis server port (6379) will be enabled.
-    :param tenant_settings: Json dictionary with tenant settings
-    :param shard_count: The number of shards to be created on a Premium Cluster Cache.
-    :param minimum_tls_version: Optional: requires clients to use a specified
-     TLS version (or higher) to connect (e,g, '1.0', '1.1', '1.2'). Possible
-     values include: '1.0', '1.1', '1.2'
-    :param subnet_id: The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1
-    :param static_ip: Required when deploying a redis cache inside an existing Azure Virtual Network.
-    :param zones: A list of availability zones denoting where the resource needs to come from.
-    :param tags: Json dictionary with Resource tags. Example : {\"testKey\":\"testValue\"}
-    """
+    if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
+        raise wrong_vmsize_error
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
     # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
-        Sku(sku, vm_size[0], vm_size[1:]),
-        location,
+        sku=Sku(name=sku, family=vm_size[0], capacity=vm_size[1:]),
+        location=location,
         redis_configuration=redis_configuration,
         enable_non_ssl_port=enable_non_ssl_port,
         tenant_settings=tenant_settings,
@@ -104,33 +74,31 @@ def cli_redis_create(cmd, client,
 
 
 # pylint: disable=unused-argument
-def cli_redis_create_server_link(cmd, client, primary_cache, secondary_cache):
+def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_to_link, replication_role):
     redis_client = cf_redis(cmd.cli_ctx)
-    primary_cache_resource = get_cache_from_resource_id(redis_client, primary_cache)
-    primary_cache_resource_group = get_resource_group_name_by_resource_id(primary_cache)
-    secondary_cache_resource = get_cache_from_resource_id(redis_client, secondary_cache)
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if not is_valid_resource_id(server_to_link):
+        server_to_link = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Cache', type='Redis',
+            name=server_to_link
+        )
+
+    cache_to_link = get_cache_from_resource_id(redis_client, server_to_link)
 
     from azure.mgmt.redis.models import RedisLinkedServerCreateParameters
-    params = RedisLinkedServerCreateParameters(secondary_cache_resource.id,
-                                               secondary_cache_resource.location, 'Secondary')
-    return client.create(primary_cache_resource_group, primary_cache_resource.name,
-                         secondary_cache_resource.name, params)
+    params = RedisLinkedServerCreateParameters(linked_redis_cache_id=cache_to_link.id,
+                                               linked_redis_cache_location=cache_to_link.location,
+                                               server_role=replication_role)
+    return client.create(resource_group_name, name, cache_to_link.name, params)
 
 
 def cli_redis_list_cache(client, resource_group_name=None):
     cache_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(cache_list)
-
-
-def get_resource_group_name_by_resource_id(resource_id):
-    """Returns the resource group name from parsing the resource id.
-    :param str resource_id: The resource id
-    """
-    resource_id = resource_id.lower()
-    resource_group_keyword = '/resourcegroups/'
-    return resource_id[resource_id.index(resource_group_keyword) + len(
-        resource_group_keyword): resource_id.index('/providers/')]
 
 
 def get_cache_from_resource_id(client, cache_resource_id):

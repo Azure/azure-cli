@@ -7,7 +7,6 @@ from azure.cli.core.commands import CliCommandType
 
 # pylint: disable=line-too-long
 from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules, cf_firewall_rule, cf_linked_server
-from azure.cli.command_modules.redis.custom import wrong_vmsize_argument_exception_handler
 
 
 def load_command_table(self, _):
@@ -28,19 +27,18 @@ def load_command_table(self, _):
         client_factory=cf_linked_server)
 
     with self.command_group('redis', redis_sdk) as g:
-        g.custom_command('create', 'cli_redis_create', client_factory=cf_redis,
-                         exception_handler=wrong_vmsize_argument_exception_handler)
+        g.custom_command('create', 'cli_redis_create', client_factory=cf_redis)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('export', 'cli_redis_export')
         g.command('force-reboot', 'force_reboot')
-        g.custom_command('import-method', 'cli_redis_import_method')
+        g.command('import-method', 'import_data', deprecate_info=g.deprecate(redirect='redis import'))
         g.command('import', 'import_data')
+        g.command('list-all', 'list', deprecate_info=g.deprecate(redirect='redis list', hide='2.0.34'))
         g.custom_command('list', 'cli_redis_list_cache')
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
         g.command('show', 'get')
-        g.generic_update_command('update', exception_handler=wrong_vmsize_argument_exception_handler,
-                                 setter_name='update', custom_func_name='cli_redis_update')
+        g.generic_update_command('update', setter_name='update', custom_func_name='cli_redis_update')
 
     with self.command_group('redis patch-schedule', redis_patch) as g:
         g.command('create', 'create_or_update')

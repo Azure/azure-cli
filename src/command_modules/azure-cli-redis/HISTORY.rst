@@ -5,10 +5,12 @@ Release History
 
 0.3.3
 ++++++
-* Added commands for managing firewall-rules, server-link, patch-schedule
-* Support for Availability Zones and Minimum TLS Version in create command
-* Removed the deprecated update-settings command
-* Deprecated Import-Method command. Use Import command instead
+* Added commands for managing firewall-rules (create, update, delete, show, list)
+* Added commands for managing server-link (create, delete, show, list)
+* Added commands for managing patch-schedule (create, update, delete, show)
+* `az redis create` : Support for Availability Zones and Minimum TLS Version
+* Removed 'az redis update-settings' command
+* Added warning message for deprecating 'az redis import-method' command.
 
 0.3.2
 +++++
