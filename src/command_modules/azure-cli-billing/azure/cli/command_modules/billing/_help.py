@@ -7,30 +7,22 @@
 from knack.help_files import helps
 
 helps["billing"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Billing.
+type: group
+short-summary: Manage Azure Billing.
 """
 
 helps["billing enrollment-account"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get enrollment accounts.
+type: group
+short-summary: Get enrollment accounts.
 """
 
 helps["billing invoice"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get billing invoices for a subscription.
+type: group
+short-summary: Get billing invoices for a subscription.
 """
 
 helps["billing period"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get billing periods for a subscription.
+type: group
+short-summary: Get billing periods for a subscription.
 """
 

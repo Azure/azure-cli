@@ -1,29 +1,10 @@
-import yaml
+import ruamel.yaml as yaml
 
-from collections import OrderedDict
+from ruamel.ordereddict import ordereddict as OrderedDict
+from ruamel.yaml.comments import CommentedMap
 from string import Template
-from yaml import Dumper, Loader
-from yaml.representer import SafeRepresenter
-from yaml.constructor import SafeConstructor
 
 class HelpFileWriter():
-    # custom loader and dumper that preserve order in yaml when working with OrderedDict
-    class CustomLoader(Loader):
-        pass
-
-    class CustomDumper(Dumper):
-        pass
-
-    def ordered_representer(dumper, data):
-        return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
-
-    def ordered_constructor(loader, node):
-        return OrderedDict(loader.construct_pairs(node))
-
-    CustomLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, ordered_constructor)
-    CustomDumper.add_representer(OrderedDict, ordered_representer)
-    CustomLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_SCALAR_TAG, SafeConstructor.construct_scalar)
-    #CustomDumper.add_representer(unicode, SafeRepresenter.represent_unicode)
     help_file_header = \
 """# coding=utf-8
 # --------------------------------------------------------------------------------------------
@@ -33,7 +14,6 @@ class HelpFileWriter():
 
 from knack.help_files import helps
 """
-
     def __init__(self, help_file_path, module_help_docs, command_examples_dict, help_files):
         self.help_file_path = help_file_path
         self.module_help_docs = module_help_docs
@@ -44,7 +24,7 @@ from knack.help_files import helps
 
     def add_command_examples(self):
         for command in self.module_help_docs:
-            help_dict = yaml.load(self.module_help_docs[command], Loader=self.CustomLoader)
+            help_dict = yaml.round_trip_load(self.module_help_docs[command])
             az_command = 'az {0}'.format(command)
             crafted_examples = [key for key in self.command_examples_dict if key.startswith(az_command)]
             command_parameters = set()
@@ -73,16 +53,26 @@ from knack.help_files import helps
                                 examples_to_remove.add(existing_example['text'])
 
                 help_dict['examples'] = [example_dict for example_dict in help_dict['examples'] if example_dict['text'] not in examples_to_remove]
-                # add chosen crafted examples
-                for crafted_example in examples_to_add:
-                    example_text_decoded = bytes(crafted_example.encode('utf-8')).decode('unicode_escape'))
-                    example_name_decoded = self.command_examples_dict[crafted_example] #str(bytes(self.command_examples_dict[crafted_example].encode('utf-8')).decode('unicode_escape'))
-                    help_dict['examples'].append(OrderedDict([('name', example_name_decoded),
-                                                              ('text', example_text_decoded),
-                                                              ('crafted', 'True')]))
-                    self.command_examples_dict.pop(crafted_example)
+                for example in help_dict['examples']:
+                    example['text'] = str(bytes(example['text'].decode('utf-8')).decode('unicode_escape'))
 
-            help_doc = yaml.dump(help_dict, Dumper=self.CustomDumper, indent=4, default_style='|', default_flow_style=False)
+                # add crafted examples
+                for crafted_example_text in examples_to_add:
+                    example_text_decoded = str(bytes(crafted_example_text.decode('utf-8')).decode('unicode_escape'))
+                    example_name_decoded = str(bytes(self.command_examples_dict[crafted_example_text].decode('utf-8')).decode('unicode_escape'))
+                    help_dict['examples'].append(CommentedMap([('name', example_name_decoded),
+                                                               ('text', crafted_example_text),
+                                                               ('crafted', 'True')]))
+                    self.command_examples_dict.pop(crafted_example_text)
+
+            # add escape slash for future loads since it gets removed on load
+            # replace angle brackets with curly braces
+            if 'examples' in help_dict:
+                for example in help_dict['examples']:
+                    example['text'] = example['text'].replace('\\', '\\\\').replace('<', '{').replace('>', '}')
+                    example['name'] = example['name'].replace('\\', '\\\\').replace('<', '{').replace('>', '}')
+
+            help_doc = yaml.round_trip_dump(help_dict, indent=4, default_flow_style=False, allow_unicode=True)
             self.module_help_docs[command] = help_doc
 
     def dump(self):

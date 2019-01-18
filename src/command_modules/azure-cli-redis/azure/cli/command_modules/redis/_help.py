@@ -7,85 +7,59 @@
 from knack.help_files import helps
 
 helps["redis"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage dedicated Redis caches for your Azure applications.
-"examples":
--   "name": |-
-        Gets a Redis cache (resource description).
-    "text": |-
-        az redis show --output json --name MyRedisCache --resource-group MyResourceGroup
-    "crafted": |-
-        True
--   "name": |-
-        Create new Redis Cache instance.
-    "text": |-
-        az redis create --vm-size <vm-size> --resource-group MyResourceGroup --sku Basic --location westus2 --name MyPrimaryResource
-    "crafted": |-
-        True
+type: group
+short-summary: Manage dedicated Redis caches for your Azure applications.
+examples:
+-   name: Create new Redis Cache instance.
+    text: az redis create --vm-size {vm-size} --resource-group MyResourceGroup --sku
+        Basic --location westus2 --name MyPrimaryResource
+    crafted: 'True'
+-   name: Gets a Redis cache (resource description).
+    text: az redis show --output json --name MyRedisCache --resource-group MyResourceGroup
+    crafted: 'True'
 """
 
 helps["redis export"] = """
-"type": |-
-    command
-"short-summary": |-
-    Export data stored in a Redis cache.
+type: command
+short-summary: Export data stored in a Redis cache.
 """
 
 helps["redis import"] = """
-"type": |-
-    command
-"short-summary": |-
-    Import data into a Redis cache.
+type: command
+short-summary: Import data into a Redis cache.
 """
 
 helps["redis import-method"] = """
-"type": |-
-    command
-"short-summary": |-
-    Import data into a Redis cache.
+type: command
+short-summary: Import data into a Redis cache.
 """
 
 helps["redis list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List Redis caches.
-"examples":
--   "name": |-
-        Retrieve a Redis cache's access keys.
-    "text": |-
-        az redis list-keys --name MyRedisCache --resource-group MyResourceGroup
-    "crafted": |-
-        True
+type: command
+short-summary: List Redis caches.
+examples:
+-   name: Retrieve a Redis cache's access keys.
+    text: az redis list-keys --name MyRedisCache --resource-group MyResourceGroup
+    crafted: 'True'
 """
 
 helps["redis list-all"] = """
-"type": |-
-    command
-"short-summary": |-
-    Gets all Redis caches in the specified subscription.
+type: command
+short-summary: Gets all Redis caches in the specified subscription.
 """
 
 helps["redis patch-schedule"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Redis patch schedules.
+type: group
+short-summary: Manage Redis patch schedules.
 """
 
 helps["redis update"] = """
-"type": |-
-    command
-"short-summary": |-
-    Scale or update settings of a Redis cache.
+type: command
+short-summary: Scale or update settings of a Redis cache.
 """
 
 helps["redis update-settings"] = """
-"type": |-
-    command
-"short-summary": |-
-    Update the settings of a Redis cache.
+type: command
+short-summary: Update the settings of a Redis cache.
 """
 
