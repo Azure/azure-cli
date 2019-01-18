@@ -47,11 +47,14 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
     def verify_entity_operations(self, account_info, table_name):
         self.storage_cmd(
-            'storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
+            'storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something '
+            'binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
             account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
-            .assert_with_checks(JMESPathCheck('name', 'test'), JMESPathCheck('value', 'something'), JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
+            .assert_with_checks(JMESPathCheck('name', 'test'),
+                                JMESPathCheck('value', 'something'),
+                                JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
         self.storage_cmd(
             'storage entity show -t {} --row-key 001 --partition-key 001 --select name',
             account_info, table_name).assert_with_checks(JMESPathCheck('name', 'test'),
@@ -61,7 +64,9 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
                          account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
-            .assert_with_checks(JMESPathCheck('name', 'test'), JMESPathCheck('value', 'newval'), JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
+            .assert_with_checks(JMESPathCheck('name', 'test'),
+                                JMESPathCheck('value', 'newval'),
+                                JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
 
         self.storage_cmd('storage entity replace -t {} -e rowkey=001 partitionkey=001 cat=hat',
                          account_info, table_name)
@@ -74,7 +79,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
                          account_info, table_name)
         self.storage_cmd_negative('storage entity show -t {} --row-key 001 --partition-key 001',
                                   account_info, table_name)
-        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
+        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something '
+                         'binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
                          account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=002 partitionkey=002 name=test2 value=something2',
                          account_info, table_name)
