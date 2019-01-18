@@ -268,6 +268,7 @@ def validate_managed_registry(cli_ctx, registry_name, resource_group_name=None, 
 
     return registry, resource_group_name
 
+
 def get_validate_platform(os_type, platform):
     """Gets and validates the Platform from both flags
     :param str os_type: The name of OS passed by user in --os flag
@@ -280,9 +281,9 @@ def get_validate_platform(os_type, platform):
 
     if platform:
         platform_split = platform.split('/', 1)
-        platform_os = platform_split[0] 
+        platform_os = platform_split[0]
         platform_arch = platform_split[1] if len(platform_split) > 1 else Architecture.amd64.value
-    
+
     if os_type and platform:
         if os_type.lower() != platform_os.lower():
             raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'")
@@ -299,12 +300,12 @@ def get_validate_platform(os_type, platform):
     if platform_os not in valid_os:
         raise CLIError(
             "'{0}' is not a valid value for '--os' flag. Valid options are {1}".format(platform_os, ','.join(valid_os))
-            )
+        )
     if platform_arch.split('/')[0] not in valid_arch:
         raise CLIError(
             "'{0}' is not a valid value for architecture in '--platform' flag.  Valid options are {1}".format(platform_arch, ','.join(valid_arch))
-            )
-    
+        )
+
     return platform_os, platform_arch
 
 

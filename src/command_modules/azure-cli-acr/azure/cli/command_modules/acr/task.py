@@ -335,7 +335,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
-            os=os_type, 
+            os=os_type,
             platform=platform
         ),
         agent_configuration=AgentProperties(
