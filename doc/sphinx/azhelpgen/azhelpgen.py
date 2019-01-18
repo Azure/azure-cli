@@ -114,7 +114,7 @@ class AzHelpGenDirective(Directive):
                             pass
                         yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
                     if arg.value_sources:
-                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(_get_populator_commands(arg.value_sources)))
+                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(_get_populator_commands(arg)))
                     yield ''
             yield ''
             if len(help_file.examples) > 0:
