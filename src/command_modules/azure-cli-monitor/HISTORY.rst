@@ -9,6 +9,7 @@ Release History
 
 0.2.7
 +++++
+* `monitor metrics alert update`: Fix issue where `--add\remove-action` would not work in some cases.
 * `monitor metrics alert create/update`: Improve `--condition` support for special characters.
 
 0.2.6

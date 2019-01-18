@@ -305,6 +305,6 @@ def get_action_group_id_validator(dest):
                     type='actionGroups',
                     name=group
                 )
-            action_group_ids.append(group)
+            action_group_ids.append(group.lower())
         setattr(namespace, dest, action_group_ids)
     return validate_action_group_ids
