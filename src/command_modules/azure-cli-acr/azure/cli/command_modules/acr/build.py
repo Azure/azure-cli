@@ -44,7 +44,7 @@ def acr_build(cmd,
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type='', 
+              os_type='',
               platform=''):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
@@ -107,7 +107,7 @@ def acr_build(cmd,
         else:
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
-    
+
     platform_os, platform_arch = get_validate_platform(os_type, platform)
     logger.warning("OS is {0} and Architecture is {1}".format(platform_os, platform_arch))
 
