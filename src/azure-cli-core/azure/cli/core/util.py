@@ -121,22 +121,21 @@ def get_az_version_string():
         print(val, file=output)
 
     def _get_version_string(name, version_dict):
-        from distutils.version import LooseVersion
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         local = version_dict['local']
         pypi = version_dict.get('pypi', None)
-        # logger.info('Module'.ljust(40) + 'Local Version'.rjust(20) + 'Public Version'.rjust(20))  # pylint: disable=logging-not-lazy
         if LooseVersion(pypi) > LooseVersion(local):
-            return name.ljust(20) + local.rjust(20) + 'UPDATE AVAILABLE ({})'.format(pypi).rjust(40)
+            return name.ljust(20) + local.rjust(20) + ' *'
         return name.ljust(20) + local.rjust(20)
 
     ver_string = _get_version_string(CLI_PACKAGE_NAME, versions.pop(CLI_PACKAGE_NAME))
-    if 'UPDATE' in ver_string:
+    if '*' in ver_string:
         updates_available += 1
     _print(ver_string)
     _print()
     for name in sorted(versions.keys()):
         ver_string = _get_version_string(name, versions.pop(name))
-        if 'UPDATE' in ver_string:
+        if '*' in ver_string:
             updates_available += 1
         _print(ver_string)
     _print()
@@ -160,12 +159,8 @@ def get_az_version_string():
     _print()
     _print('Legal docs and information: aka.ms/AzureCliLegal')
     _print()
-    if updates_available:
-        _print('You have {} updates available.'.format(updates_available))
-    else:
-        _print('Your CLI is up-to-date.')
     version_string = output.getvalue()
-    return version_string
+    return version_string, updates_available
 
 
 def get_json_object(json_string):
