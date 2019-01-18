@@ -25,7 +25,7 @@ class MonitorArgumentContext(AzArgumentContext):
         self.extra('parent', options_list='--{}-parent'.format(alias), arg_group=arg_group,
                    help="Target resource parent path, if applicable.")
         self.extra('resource_type', options_list='--{}-type'.format(alias), arg_group=arg_group,
-                   help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
+                   help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines')")
         self.extra('resource_group_name', options_list=['--resource-group', '-g'], arg_group=arg_group)
 
 
