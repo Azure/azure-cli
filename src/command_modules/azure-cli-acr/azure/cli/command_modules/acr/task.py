@@ -18,7 +18,6 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     PlatformProperties,
     SourceTriggerEvent,
     AuthInfo,
-    Architecture,
     DockerBuildStep,
     FileTaskStep,
     TaskRunRequest,
@@ -32,7 +31,6 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     BaseImageTriggerUpdateParameters,
     AuthInfoUpdateParameters,
     SourceControlType,
-    OS
 )
 from ._utils import validate_managed_registry, get_validate_platform
 from ._stream_utils import stream_logs
@@ -144,7 +142,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         )
 
     platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.warning("OS is {0} and Architecture is {1}".format(platform_os, platform_arch))
+    logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
 
     task_create_parameters = Task(
         location=registry.location,

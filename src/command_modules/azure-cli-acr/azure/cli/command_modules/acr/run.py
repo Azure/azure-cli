@@ -12,7 +12,6 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.containerregistry.v2018_09_01.models import (
     FileTaskRunRequest,
     PlatformProperties,
-    OS
 )
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
@@ -72,7 +71,7 @@ def acr_run(cmd,
         logger.warning("Sending context to registry: %s...", registry_name)
 
     platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.warning("OS is {0} and Architecture is {1}".format(platform_os, platform_arch))
+    logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
 
     request = FileTaskRunRequest(
         task_file_path=file,
