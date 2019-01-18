@@ -276,6 +276,22 @@ helps['aks delete'] = """
     short-summary: Delete a managed Kubernetes cluster.
 """
 
+helps['aks update-credentials'] = """
+    type: command
+    short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
+    parameters:
+        - name: --reset-service-principal
+          type: bool
+          short-summary: Reset service principal for a managed cluster.
+        - name: --service-principal
+          type: string
+          short-summary: Service principal used for authentication to Azure APIs.
+        - name: --client-secret
+          type: string
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
+"""
+
 helps['aks disable-addons'] = """
     type: command
     short-summary: Disable Kubernetes addons.
