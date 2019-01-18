@@ -170,11 +170,6 @@ parameters:
 helps["lab vm"] = """
 type: group
 short-summary: Manage VMs in an Azure DevTest Lab.
-examples:
--   name: Delete virtual machine.
-    text: az lab vm delete --name MyVirtualMachine --lab-name MyLab --resource-group
-        MyResourceGroup
-    crafted: 'True'
 """
 
 helps["lab vm apply-artifacts"] = """

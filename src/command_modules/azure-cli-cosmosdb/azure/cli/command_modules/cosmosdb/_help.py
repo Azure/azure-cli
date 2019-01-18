@@ -23,33 +23,6 @@ examples:
 helps["cosmosdb collection"] = """
 type: group
 short-summary: Manage Azure Cosmos DB collections.
-examples:
--   name: Creates an Azure Cosmos DB collection.
-    text: az cosmosdb collection create --resource-group-name MyResourceGroup --db-name
-        MyDb --name MyCosmosDBAccount --url-connection {url-connection} --key {key}
-        --collection-name MyCollection
-    crafted: 'True'
--   name: Lists all Azure Cosmos DB collections.
-    text: az cosmosdb collection list --output json --resource-group-name MyResourceGroup
-        --db-name MyDb --name MyCosmosDBAccount
-    crafted: 'True'
--   name: Shows an Azure Cosmos DB collection and its offer.
-    text: az cosmosdb collection show --resource-group-name MyResourceGroup --output
-        json --query [0] --db-name MyDb --name MyCosmosDBAccount --collection-name
-        MyCollection
-    crafted: 'True'
--   name: Returns a boolean indicating whether the collection exists.
-    text: az cosmosdb collection exists --resource-group-name MyResourceGroup --db-name
-        MyDb --collection-name MyCollection --name MyCosmosDBAccount
-    crafted: 'True'
--   name: Updates an Azure Cosmos DB collection.
-    text: az cosmosdb collection update --throughput {throughput} --resource-group-name
-        MyResourceGroup --db-name MyDb --collection-name MyCollection --name MyCosmosDBAccount
-    crafted: 'True'
--   name: Deletes an Azure Cosmos DB collection.
-    text: az cosmosdb collection delete --resource-group-name MyResourceGroup --db-name
-        MyDb --collection-name MyCollection --name MyCosmosDBAccount
-    crafted: 'True'
 """
 
 helps["cosmosdb create"] = """
@@ -64,18 +37,6 @@ examples:
 helps["cosmosdb database"] = """
 type: group
 short-summary: Manage Azure Cosmos DB databases.
-examples:
--   name: Returns a boolean indicating whether the database exists.
-    text: az cosmosdb database exists --resource-group-name MyResourceGroup --db-name
-        MyDb --name MyCosmosDBAccount
-    crafted: 'True'
--   name: Creates an Azure Cosmos DB database.
-    text: az cosmosdb database create --resource-group-name MyResourceGroup --key
-        {key} --db-name MyDb --url-connection {url-connection} --name MyCosmosDBAccount
-    crafted: 'True'
--   name: Lists all Azure Cosmos DB databases.
-    text: az cosmosdb database list --resource-group-name MyResourceGroup --name MyCosmosDBAccount
-    crafted: 'True'
 """
 
 helps["cosmosdb delete"] = """

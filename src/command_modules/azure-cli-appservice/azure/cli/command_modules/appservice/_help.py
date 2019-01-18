@@ -449,10 +449,6 @@ short-summary: Update a function app.
 helps["webapp"] = """
 type: group
 short-summary: Manage web apps.
-examples:
--   name: Creates a remote connection using a tcp tunnel to your web app.
-    text: az webapp remote-connection create --name MyWebapp --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["webapp auth"] = """

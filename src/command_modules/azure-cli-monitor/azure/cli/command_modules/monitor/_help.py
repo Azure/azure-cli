@@ -681,13 +681,6 @@ short-summary: Updates an autoscale setting.
 helps["monitor diagnostic-settings"] = """
 type: group
 short-summary: Manage service diagnostic settings.
-examples:
--   name: Gets the active diagnostic settings for the specified resource.
-    text: az monitor diagnostic-settings show --resource {resource} --name MyDiagnosticSetting
-    crafted: 'True'
--   name: Gets the active diagnostic settings list for the specified resource.
-    text: az monitor diagnostic-settings list --resource {resource}
-    crafted: 'True'
 """
 
 helps["monitor diagnostic-settings categories"] = """
@@ -768,10 +761,6 @@ short-summary: Update diagnostic settings.
 helps["monitor log-profiles"] = """
 type: group
 short-summary: Manage log profiles.
-examples:
--   name: List the log profiles.
-    text: az monitor log-profiles list --query [0]
-    crafted: 'True'
 """
 
 helps["monitor log-profiles create"] = """

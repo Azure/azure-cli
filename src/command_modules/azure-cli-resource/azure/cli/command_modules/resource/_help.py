@@ -287,10 +287,6 @@ short-summary: Place the CLI in a waiting state until a deployment condition is 
 helps["feature"] = """
 type: group
 short-summary: Manage resource provider features.
-examples:
--   name: Gets the preview feature with the specified name.
-    text: az feature show --namespace {namespace} --name MyFeature
-    crafted: 'True'
 """
 
 helps["feature list"] = """
@@ -314,14 +310,6 @@ examples:
 helps["group"] = """
 type: group
 short-summary: Manage resource groups and template deployments.
-examples:
--   name: Captures a resource group as a template.
-    text: az group export --output json --include-parameter-default-value  --name
-        MyResourceGroup
-    crafted: 'True'
--   name: Gets a resource group.
-    text: az group show --name MyResourceGroup
-    crafted: 'True'
 """
 
 helps["group create"] = """
@@ -351,18 +339,6 @@ examples:
 helps["group deployment"] = """
 type: group
 short-summary: Manage Azure Resource Manager deployments.
-examples:
--   name: Gets a deployment.
-    text: az group deployment show --name MyDeployment --query [0] --resource-group
-        MyResourceGroup
-    crafted: 'True'
--   name: Get all the deployments for a resource group.
-    text: az group deployment list --output json --resource-group MyResourceGroup
-    crafted: 'True'
--   name: Deletes a deployment from the deployment history.
-    text: az group deployment delete --name MyDeployment --no-wait  --resource-group
-        MyResourceGroup
-    crafted: 'True'
 """
 
 helps["group deployment create"] = """
@@ -410,11 +386,6 @@ short-summary: Export the template used for a deployment.
 helps["group deployment operation"] = """
 type: group
 short-summary: Manage deployment operations.
-examples:
--   name: Gets all deployments operations for a deployment.
-    text: az group deployment operation list --output json --name MyDeployment --resource-group
-        MyResourceGroup
-    crafted: 'True'
 """
 
 helps["group deployment validate"] = """
@@ -890,10 +861,6 @@ short-summary: Update a policy set definition.
 helps["provider"] = """
 type: group
 short-summary: Manage resource providers.
-examples:
--   name: Gets the specified resource provider.
-    text: az provider show --namespace {namespace}
-    crafted: 'True'
 """
 
 helps["provider list"] = """
@@ -939,11 +906,6 @@ short-summary: Unregister a provider.
 helps["resource"] = """
 type: group
 short-summary: Manage Azure resources.
-examples:
--   name: Moves resources from one resource group to another(can be under different
-        subscription).
-    text: az resource move --ids {ids} --destination-group {destination-group}
-    crafted: 'True'
 """
 
 helps["resource create"] = """
@@ -1225,9 +1187,5 @@ short-summary: Place the CLI in a waiting state until a condition of a resources
 helps["tag"] = """
 type: group
 short-summary: Manage resource tags.
-examples:
--   name: Creates a tag in the subscription.
-    text: az tag create --name MyTag
-    crafted: 'True'
 """
 

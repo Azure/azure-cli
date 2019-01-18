@@ -66,11 +66,6 @@ short-summary: Manage Batch applications.
 helps["batch application package"] = """
 type: group
 short-summary: Manage Batch application packages.
-examples:
--   name: Deletes an application package record and its associated binary file.
-    text: az batch application package delete --application-id {application-id} --name
-        MyBatchAccount --version {version} --yes  --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["batch application package activate"] = """
@@ -197,10 +192,6 @@ short-summary: Update the properties of a Batch job. Updating a property in a su
 helps["batch job task-counts"] = """
 type: group
 short-summary: View the number of tasks in a Batch job and their states.
-examples:
--   name: Gets the task counts for the specified job.
-    text: az batch job task-counts show --job-id {job-id}
-    crafted: 'True'
 """
 
 helps["batch job-schedule"] = """
@@ -239,15 +230,6 @@ short-summary: Manage Batch service quotas at the region level.
 helps["batch node"] = """
 type: group
 short-summary: Manage Batch compute nodes.
-examples:
--   name: Restarts the specified compute node.
-    text: az batch node reboot --node-reboot-option requeue --node-id {node-id} --pool-id
-        {pool-id}
-    crafted: 'True'
--   name: Lists the compute nodes in the specified pool.
-    text: az batch node list --account-endpoint {account-endpoint} --account-name
-        MyAccount --pool-id {pool-id}
-    crafted: 'True'
 """
 
 helps["batch node file"] = """
@@ -299,13 +281,6 @@ short-summary: Update the properties of a user account on a Batch compute node. 
 helps["batch pool"] = """
 type: group
 short-summary: Manage Batch pools.
-examples:
--   name: Deletes a pool from the specified account.
-    text: az batch pool delete --yes  --pool-id {pool-id}
-    crafted: 'True'
--   name: Gets information about the specified pool.
-    text: az batch pool show --output json --query [0] --pool-id {pool-id}
-    crafted: 'True'
 """
 
 helps["batch pool all-statistics"] = """
@@ -377,14 +352,6 @@ short-summary: View usage metrics of Batch pools.
 helps["batch task"] = """
 type: group
 short-summary: Manage Batch tasks.
-examples:
--   name: Lists all of the tasks that are associated with the specified job.
-    text: az batch task list --job-id {job-id}
-    crafted: 'True'
--   name: Gets information about the specified task.
-    text: az batch task show --output json --query [0] --job-id {job-id} --task-id
-        {task-id}
-    crafted: 'True'
 """
 
 helps["batch task create"] = """

@@ -9,13 +9,6 @@ from knack.help_files import helps
 helps["container"] = """
 type: group
 short-summary: Manage Azure Container Instances.
-examples:
--   name: Stops all containers in a container group.
-    text: az container stop --name MyContainerGroup --resource-group MyResourceGroup
-    crafted: 'True'
--   name: Restarts all containers in a container group.
-    text: az container restart --name MyContainerGroup --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["container attach"] = """

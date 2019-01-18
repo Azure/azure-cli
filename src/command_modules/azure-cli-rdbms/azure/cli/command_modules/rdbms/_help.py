@@ -782,15 +782,6 @@ examples:
 helps["postgres server vnet-rule"] = """
 type: group
 short-summary: Manage a server's virtual network rules.
-examples:
--   name: Gets a list of virtual network rules in a server.
-    text: az postgres server vnet-rule list --server-name MyServer --resource-group
-        MyResourceGroup
-    crafted: 'True'
--   name: Deletes the virtual network rule with the given name.
-    text: az postgres server vnet-rule delete --resource-group MyResourceGroup --server-name
-        MyServer --name MyVnetRule
-    crafted: 'True'
 """
 
 helps["postgres server vnet-rule create"] = """

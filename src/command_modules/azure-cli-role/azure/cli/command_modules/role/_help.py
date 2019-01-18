@@ -186,10 +186,6 @@ examples:
 helps["ad group"] = """
 type: group
 short-summary: Manage Azure Active Directory groups.
-examples:
--   name: Gets group information from the directory.
-    text: az ad group show --output json --group {group} --query [0]
-    crafted: 'True'
 """
 
 helps["ad group create"] = """
@@ -204,13 +200,6 @@ examples:
 helps["ad group member"] = """
 type: group
 short-summary: Manage Azure Active Directory group members.
-examples:
--   name: Add a member to a group.
-    text: az ad group member add --group {group} --member-id {member-id}
-    crafted: 'True'
--   name: Gets the members of a group.
-    text: az ad group member list --group {group}
-    crafted: 'True'
 """
 
 helps["ad group member check"] = """
@@ -410,17 +399,6 @@ examples:
 helps["ad user"] = """
 type: group
 short-summary: Manage Azure Active Directory users and user authentication.
-examples:
--   name: Request parameters for creating a new work or school account user.
-    text: az ad user create --output json --password {password} --user-principal-name
-        MyUserPrincipal --display-name MyDisplay
-    crafted: 'True'
--   name: Gets user information from the directory.
-    text: az ad user show --upn-or-object-id {upn-or-object-id}
-    crafted: 'True'
--   name: Delete a user.
-    text: az ad user delete --upn-or-object-id {upn-or-object-id}
-    crafted: 'True'
 """
 
 helps["ad user get-member-groups"] = """

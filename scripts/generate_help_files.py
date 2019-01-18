@@ -25,52 +25,53 @@ from knack.help_files import helps
     def add_command_examples(self):
         for command in self.module_help_docs:
             help_dict = yaml.round_trip_load(self.module_help_docs[command])
-            az_command = 'az {0}'.format(command)
-            crafted_examples = [key for key in self.command_examples_dict if key.startswith(az_command)]
-            command_parameters = set()
-            if command in self.help_files:
-                for parameter in self.help_files[command].parameters:
-                    command_parameters = command_parameters.union(set(parameter.name_source))
+            # only add examples to commands
+            if help_dict['type'] == 'command':
+                az_command = 'az {0}'.format(command)
+                crafted_examples = [key for key in self.command_examples_dict if key.startswith(az_command)]
+                if len(crafted_examples) != 0:
+                    if 'examples' not in help_dict:
+                        help_dict['examples'] = []
 
-            if len(crafted_examples) != 0:
-                if 'examples' not in help_dict:
-                    help_dict['examples'] = []
-
-                examples_to_add = set(crafted_examples)
-                examples_to_remove = set()
-                for crafted_example in crafted_examples:
+                    command_parameters = set()
                     if command in self.help_files:
-                        # check if this example will replace any existing examples
-                        crafted_example_params = set(crafted_example.split()).intersection(command_parameters)
-                        for existing_example in help_dict['examples']:
-                            # leave non-crafted examples alone
-                            if 'crafted' not in existing_example or existing_example['crafted'] != 'True' or existing_example['text'] in examples_to_remove:
-                                continue
+                        for parameter in self.help_files[command].parameters:
+                            command_parameters = command_parameters.union(set(parameter.name_source))
 
-                            # check if params of an existing crafted example form a subset of params of a new crafted example
-                            existing_example_params = set(existing_example['text'].split()).intersection(command_parameters)
-                            if existing_example_params.issubset(crafted_example_params):
-                                examples_to_remove.add(existing_example['text'])
+                    examples_to_add = set(crafted_examples)
+                    examples_to_remove = set()
+                    for crafted_example in crafted_examples:
+                        if command in self.help_files:
+                            # check if this example will replace any existing examples
+                            crafted_example_params = set(crafted_example.split()).intersection(command_parameters)
+                            for existing_example in help_dict['examples']:
+                                # leave non-crafted examples alone
+                                if 'crafted' not in existing_example or existing_example['crafted'] != 'True' or existing_example['text'] in examples_to_remove:
+                                    continue
 
-                help_dict['examples'] = [example_dict for example_dict in help_dict['examples'] if example_dict['text'] not in examples_to_remove]
-                for example in help_dict['examples']:
-                    example['text'] = str(bytes(example['text'].decode('utf-8')).decode('unicode_escape'))
+                                # check if params of an existing crafted example form a subset of params of a new crafted example
+                                existing_example_params = set(existing_example['text'].split()).intersection(command_parameters)
+                                if existing_example_params.issubset(crafted_example_params):
+                                    examples_to_remove.add(existing_example['text'])
 
-                # add crafted examples
-                for crafted_example_text in examples_to_add:
-                    example_text_decoded = str(bytes(crafted_example_text.decode('utf-8')).decode('unicode_escape'))
-                    example_name_decoded = str(bytes(self.command_examples_dict[crafted_example_text].decode('utf-8')).decode('unicode_escape'))
-                    help_dict['examples'].append(CommentedMap([('name', example_name_decoded),
-                                                               ('text', crafted_example_text),
-                                                               ('crafted', 'True')]))
-                    self.command_examples_dict.pop(crafted_example_text)
+                    # remove bad crafted examples
+                    help_dict['examples'] = [example_dict for example_dict in help_dict['examples'] if example_dict['text'] not in examples_to_remove]
 
-            # add escape slash for future loads since it gets removed on load
-            # replace angle brackets with curly braces
-            if 'examples' in help_dict:
-                for example in help_dict['examples']:
-                    example['text'] = example['text'].replace('\\', '\\\\').replace('<', '{').replace('>', '}')
-                    example['name'] = example['name'].replace('\\', '\\\\').replace('<', '{').replace('>', '}')
+                    # add new crafted examples
+                    for crafted_example_text in examples_to_add:
+                        example_text_decoded = str(bytes(crafted_example_text.decode('utf-8')).decode('unicode_escape'))
+                        example_name_decoded = self.command_examples_dict[crafted_example_text]#str(bytes(self.command_examples_dict[crafted_example_text].decode('utf-8')).decode('unicode_escape'))
+                        help_dict['examples'].append(CommentedMap([('name', example_name_decoded),
+                                                                   ('text', crafted_example_text),
+                                                                   ('crafted', 'True')]))
+                        self.command_examples_dict.pop(crafted_example_text)
+
+                # add escape slash for future loads since it gets removed on load
+                # replace angle brackets with curly braces
+                if 'examples' in help_dict:
+                    for example in help_dict['examples']:
+                        example['text'] = example['text'].replace('\\', '\\\\').replace('<', '{').replace('>', '}')
+                        example['name'] = example['name'].replace('\\', '\\\\').replace('<', '{').replace('>', '}')
 
             help_doc = yaml.round_trip_dump(help_dict, indent=4, default_flow_style=False, allow_unicode=True)
             self.module_help_docs[command] = help_doc

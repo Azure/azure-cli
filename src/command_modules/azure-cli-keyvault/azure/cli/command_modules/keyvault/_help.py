@@ -9,23 +9,11 @@ from knack.help_files import helps
 helps["keyvault"] = """
 type: group
 short-summary: Manage KeyVault keys, secrets, and certificates.
-examples:
--   name: Update security policy settings for a Key Vault.
-    text: az keyvault set-policy --secret-permissions backup --object-id {object-id}
-        --name MyKeyVault
-    crafted: 'True'
 """
 
 helps["keyvault certificate"] = """
 type: group
 short-summary: Manage certificates.
-examples:
--   name: List certificates in a specified key vault.
-    text: az keyvault certificate list --output json --vault-name MyVault
-    crafted: 'True'
--   name: Gets information about a certificate.
-    text: az keyvault certificate show --vault-name MyVault --name MyCertificate
-    crafted: 'True'
 """
 
 helps["keyvault certificate contact"] = """
@@ -144,13 +132,6 @@ short-summary: Delete a key vault.
 helps["keyvault key"] = """
 type: group
 short-summary: Manage keys.
-examples:
--   name: List keys in the specified vault.
-    text: az keyvault key list --vault-name MyVault
-    crafted: 'True'
--   name: Gets the public part of a stored key.
-    text: az keyvault key show --vault-name MyVault --name MyKey
-    crafted: 'True'
 """
 
 helps["keyvault list"] = """
@@ -161,11 +142,6 @@ short-summary: List key vaults.
 helps["keyvault network-rule"] = """
 type: group
 short-summary: Manage vault network ACLs.
-examples:
--   name: Add a network rule to the network ACLs for a Key Vault.
-    text: az keyvault network-rule add --ip-address {ip-address} --resource-group
-        MyResourceGroup --name MyKeyVault
-    crafted: 'True'
 """
 
 helps["keyvault recover"] = """
@@ -177,34 +153,6 @@ long-summary: Recovers a previously deleted key vault for which soft delete was 
 helps["keyvault secret"] = """
 type: group
 short-summary: Manage secrets.
-examples:
--   name: Download a secret from a KeyVault.
-    text: az keyvault secret download --file {file} --encoding ascii --vault-name
-        MyVault --name MySecret
-    crafted: 'True'
--   name: Sets a secret in a specified key vault.
-    text: az keyvault secret set --value {value} --vault-name MyVault --name MySecret
-    crafted: 'True'
--   name: Backs up the specified secret.
-    text: az keyvault secret backup --vault-name MyVault --file-path {file-path} --name
-        MySecret
-    crafted: 'True'
--   name: List secrets in a specified key vault.
-    text: az keyvault secret list --vault-name MyVault
-    crafted: 'True'
--   name: List all versions of the specified secret.
-    text: az keyvault secret list-versions --output json --query [0] --vault-name
-        MyVault --name MySecret
-    crafted: 'True'
--   name: Restores a backed up secret to a vault.
-    text: az keyvault secret restore --vault-name MyVault --file-path {file-path}
-    crafted: 'True'
--   name: Deletes a secret from a specified key vault.
-    text: az keyvault secret delete --vault-name MyVault --name MySecret
-    crafted: 'True'
--   name: Get a specified secret from a given key vault.
-    text: az keyvault secret show --id {id} --vault-name MyVault
-    crafted: 'True'
 """
 
 helps["keyvault show"] = """

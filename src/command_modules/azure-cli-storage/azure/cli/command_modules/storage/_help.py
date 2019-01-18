@@ -14,10 +14,6 @@ short-summary: Manage Azure Cloud Storage resources.
 helps["storage account"] = """
 type: group
 short-summary: Manage storage accounts.
-examples:
--   name: Checks that the storage account name is valid and is not already in use.
-    text: az storage account check-name --name MyStorageAccount
-    crafted: 'True'
 """
 
 helps["storage account create"] = """
@@ -205,19 +201,6 @@ examples:
 helps["storage blob"] = """
 type: group
 short-summary: Manage object storage for unstructured data (blobs).
-examples:
--   name: Creates a read-only snapshot of a blob.
-    text: az storage blob snapshot --container-name MyContainer --metadata  --connection-string
-        {connection-string} --name MyBlob
-    crafted: 'True'
--   name: Downloads a blob to a file path, with automatic chunking and progress notifications.
-    text: az storage blob download --container-name MyContainer --query [0] --name
-        MyBlob --no-progress  --file {file} --connection-string {connection-string}
-    crafted: 'True'
--   name: Sets system properties on the blob.
-    text: az storage blob update --content-encoding {content-encoding} --container-name
-        MyContainer --content-type {content-type} --name MyBlob
-    crafted: 'True'
 """
 
 helps["storage blob copy"] = """
@@ -425,15 +408,6 @@ examples:
 helps["storage blob lease"] = """
 type: group
 short-summary: Manage storage blob leases.
-examples:
--   name: Requests a new lease.
-    text: az storage blob lease acquire --blob-name MyBlob --container-name MyContainer
-        --lease-duration {lease-duration}
-    crafted: 'True'
--   name: Releases the lease.
-    text: az storage blob lease release --blob-name MyBlob --container-name MyContainer
-        --lease-id {lease-id}
-    crafted: 'True'
 """
 
 helps["storage blob list"] = """
@@ -456,11 +430,6 @@ examples:
 helps["storage blob metadata"] = """
 type: group
 short-summary: Manage blob metadata.
-examples:
--   name: Returns all user-defined metadata for the specified blob or snapshot.
-    text: az storage blob metadata show --container-name MyContainer --account-name
-        MyAccount --name MyBlob
-    crafted: 'True'
 """
 
 helps["storage blob service-properties"] = """
@@ -618,16 +587,6 @@ examples:
 helps["storage container"] = """
 type: group
 short-summary: Manage blob storage containers.
-examples:
--   name: Gets the permissions for the specified container.
-    text: az storage container show-permission --output json --connection-string {connection-string}
-        --name MyContainer
-    crafted: 'True'
--   name: Returns all user-defined metadata and system properties for the specified
-        container.
-    text: az storage container show --connection-string {connection-string} --name
-        MyContainer
-    crafted: 'True'
 """
 
 helps["storage container create"] = """
@@ -718,11 +677,6 @@ short-summary: Manage container metadata.
 helps["storage container policy"] = """
 type: group
 short-summary: Manage container stored access policies.
-examples:
--   name: List stored access policies on a containing object.
-    text: az storage container policy list --account-key {account-key} --container-name
-        MyContainer --account-name MyAccount
-    crafted: 'True'
 """
 
 helps["storage cors"] = """
@@ -778,11 +732,6 @@ parameters:
 helps["storage directory"] = """
 type: group
 short-summary: Manage file storage directories.
-examples:
--   name: Creates a new directory under the specified share or parent directory.
-    text: az storage directory create --share-name MyShare --connection-string {connection-string}
-        --name MyDirectory
-    crafted: 'True'
 """
 
 helps["storage directory exists"] = """
@@ -808,11 +757,6 @@ short-summary: Manage file storage directory metadata.
 helps["storage entity"] = """
 type: group
 short-summary: Manage table storage entities.
-examples:
--   name: Get an entity from the specified table.
-    text: az storage entity show --table-name MyTable --row-key {row-key} --partition-key
-        {partition-key}
-    crafted: 'True'
 """
 
 helps["storage entity insert"] = """
@@ -865,14 +809,6 @@ examples:
 helps["storage file"] = """
 type: group
 short-summary: Manage file shares that use the SMB 3.0 protocol.
-examples:
--   name: Marks the specified file for deletion.
-    text: az storage file delete --share-name MyShare --path {path}
-    crafted: 'True'
--   name: Downloads a file to a file path, with automatic chunking and progress notifications.
-    text: az storage file download --share-name MyShare --connection-string {connection-string}
-        --path {path} --dest {dest}
-    crafted: 'True'
 """
 
 helps["storage file copy"] = """
@@ -1126,11 +1062,6 @@ parameters:
 helps["storage message"] = """
 type: group
 short-summary: Manage queue storage messages.
-examples:
--   name: Adds a new message to the back of the message queue.
-    text: az storage message put --content {content} --account-name MyAccount --account-key
-        {account-key} --queue-name MyQueue
-    crafted: 'True'
 """
 
 helps["storage metrics"] = """
@@ -1181,13 +1112,6 @@ examples:
 helps["storage queue"] = """
 type: group
 short-summary: Manage storage queues.
-examples:
--   name: Creates a queue under the given account.
-    text: az storage queue create --connection-string {connection-string} --name MyQueue
-    crafted: 'True'
--   name: Deletes the specified queue and any messages it contains.
-    text: az storage queue delete --connection-string {connection-string} --name MyQueue
-    crafted: 'True'
 """
 
 helps["storage queue list"] = """
@@ -1208,11 +1132,6 @@ short-summary: Manage shared access policies for a storage queue.
 helps["storage share"] = """
 type: group
 short-summary: Manage file shares.
-examples:
--   name: Returns all user-defined metadata and system properties for the specified
-        share.
-    text: az storage share show --connection-string {connection-string} --name MyFileShare
-    crafted: 'True'
 """
 
 helps["storage share create"] = """
@@ -1272,13 +1191,6 @@ short-summary: Create a URI to access a file share.
 helps["storage table"] = """
 type: group
 short-summary: Manage NoSQL key-value storage.
-examples:
--   name: Deletes the specified table and any data it contains.
-    text: az storage table delete --connection-string {connection-string} --name MyTable
-    crafted: 'True'
--   name: Creates a new table in the storage account.
-    text: az storage table create --connection-string {connection-string} --name MyTable
-    crafted: 'True'
 """
 
 helps["storage table list"] = """

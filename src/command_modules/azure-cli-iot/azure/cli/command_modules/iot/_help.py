@@ -11,39 +11,11 @@ type: group
 short-summary: Manage Internet of Things (IoT) assets.
 long-summary: Comprehensive IoT data-plane functionality is available in the Azure
     IoT CLI Extension. For more info and install guide go to https://github.com/Azure/azure-iot-cli-extension
-examples:
--   name: Delete an IoT Edge deployment.
-    text: az iot edge deployment delete --hub-name MyHub --config-id {config-id}
-    crafted: 'True'
--   name: Send an mqtt device-to-cloud message.
-    text: az iot device send-d2c-message --device-id {device-id} --login {login} --da
-        {da}
-    crafted: 'True'
--   name: Send a cloud-to-device message.
-    text: az iot device c2d-message send --login {login} --properties {properties}
-        --device-id {device-id} --da {da}
-    crafted: 'True'
--   name: List IoT Edge deployments in an IoT Hub.
-    text: az iot edge deployment list --login {login} --hub-name MyHub
-    crafted: 'True'
--   name: Create an IoT Edge deployment in the target IoT Hub.
-    text: az iot edge deployment create --content ../modules_content.json --target-condition
-        "tags.building=9 and tags.environment='test'" --config-id {config-id} --hub-name
-        MyHub
-    crafted: 'True'
--   name: Set edge modules on a single device.
-    text: az iot edge set-modules --content ../modules_content.json --device-id [Device
-        ID] --hub-name [IoTHub Name]
-    crafted: 'True'
 """
 
 helps["iot dps"] = """
 type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
-examples:
--   name: List device enrollments in an Azure IoT Hub Device Provisioning Service.
-    text: az iot dps enrollment list --dps-name MyDps --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["iot dps access-policy"] = """
@@ -334,34 +306,6 @@ examples:
 helps["iot hub"] = """
 type: group
 short-summary: Manage Azure IoT hubs.
-examples:
--   name: List devices in an IoT Hub.
-    text: az iot hub device-identity list --edge-enabled false --hub-name MyHub
-    crafted: 'True'
--   name: Get a device twin definition.
-    text: az iot hub device-twin show --device-id {device-id} --hub-name MyHub
-    crafted: 'True'
--   name: Create a device in an IoT Hub.
-    text: az iot hub device-identity create --device-id {device-id} --hub-name MyHub
-    crafted: 'True'
--   name: Delete an IoT Hub device.
-    text: az iot hub device-identity delete --device-id {device-id} --hub-name MyHub
-    crafted: 'True'
--   name: Monitor device telemetry & messages sent to an IoT Hub.
-    text: az iot hub monitor-events --hub-name MyHub
-    crafted: 'True'
--   name: Update an IoT Hub device.
-    text: az iot hub device-identity update --device-id {device-id} --set capabilities.iotEdge=true
-        --output json --login {login}
-    crafted: 'True'
--   name: Show a given IoT Hub device connection string.
-    text: az iot hub device-identity show-connection-string --device-id {device-id}
-        --hub-name MyHub
-    crafted: 'True'
--   name: Update device twin definition.
-    text: az iot hub device-twin update --login {login} --set tags='{"location":{"region":"US"}}'
-        --device-id [Device ID] --hub-name [IoTHub Name] --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["iot hub certificate"] = """

@@ -19,11 +19,6 @@ short-summary: Manage databases.
 helps["sql db audit-policy"] = """
 type: group
 short-summary: Manage a database's auditing policy.
-examples:
--   name: Gets a database's blob auditing policy.
-    text: az sql db audit-policy show --output json --server {server} --name MyAzureSQLDatabase
-        --query [0] --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["sql db audit-policy update"] = """
@@ -255,11 +250,6 @@ examples:
 helps["sql db tde"] = """
 type: group
 short-summary: Manage a database's transparent data encryption.
-examples:
--   name: Gets a database's transparent data encryption configuration.
-    text: az sql db tde show --server {server} --database {database} --resource-group
-        MyResourceGroup
-    crafted: 'True'
 """
 
 helps["sql db tde set"] = """
@@ -270,11 +260,6 @@ short-summary: Sets a database's transparent data encryption configuration.
 helps["sql db threat-policy"] = """
 type: group
 short-summary: Manage a database's threat detection policies.
-examples:
--   name: Gets a database's threat detection policy.
-    text: az sql db threat-policy show --output json --server {server} --name MyAzureSQLDatabase
-        --query [0] --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["sql db threat-policy update"] = """
@@ -541,10 +526,6 @@ examples:
 helps["sql server"] = """
 type: group
 short-summary: Manage SQL servers.
-examples:
--   name: Gets a server.
-    text: az sql server show --resource-group MyResourceGroup --name MyAzureSQLServer
-    crafted: 'True'
 """
 
 helps["sql server ad-admin"] = """
@@ -603,11 +584,6 @@ short-summary: Sets a server to which DNS alias should point
 helps["sql server firewall-rule"] = """
 type: group
 short-summary: Manage a server's firewall rules.
-examples:
--   name: Deletes a firewall rule.
-    text: az sql server firewall-rule delete --server {server} --resource-group MyResourceGroup
-        --name MyFirewallRule
-    crafted: 'True'
 """
 
 helps["sql server firewall-rule create"] = """

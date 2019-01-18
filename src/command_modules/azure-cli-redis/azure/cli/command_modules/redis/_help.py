@@ -9,14 +9,6 @@ from knack.help_files import helps
 helps["redis"] = """
 type: group
 short-summary: Manage dedicated Redis caches for your Azure applications.
-examples:
--   name: Create new Redis Cache instance.
-    text: az redis create --vm-size {vm-size} --resource-group MyResourceGroup --sku
-        Basic --location westus2 --name MyPrimaryResource
-    crafted: 'True'
--   name: Gets a Redis cache (resource description).
-    text: az redis show --output json --name MyRedisCache --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["redis export"] = """

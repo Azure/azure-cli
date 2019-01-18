@@ -86,6 +86,12 @@ helps["acs kubernetes get-credentials"] = """
 type: command
 short-summary: Download and install credentials to access a cluster.  This command
     requires the same private-key used to create the cluster.
+examples:
+-   name: Download and install credentials to access a cluster.  This command requires
+        the same private-key used to create the cluster.
+    text: az acs kubernetes get-credentials --name MyContainerService --resource-group
+        MyResourceGroup
+    crafted: 'True'
 """
 
 helps["acs kubernetes install-cli"] = """

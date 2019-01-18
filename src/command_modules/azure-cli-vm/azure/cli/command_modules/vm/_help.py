@@ -9,15 +9,6 @@ from knack.help_files import helps
 helps["acs"] = """
 type: group
 short-summary: Manage Azure Container Services.
-examples:
--   name: Download and install credentials to access a cluster.  This command requires
-        the same private-key used to create the cluster.
-    text: az acs kubernetes get-credentials --name MyContainerService --resource-group
-        MyResourceGroup
-    crafted: 'True'
--   name: Launch a proxy and browse the Kubernetes web UI.
-    text: az acs kubernetes browse --name MyContainerService --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["acs create"] = """
@@ -58,10 +49,6 @@ short-summary: Get the details for a container service.
 helps["disk"] = """
 type: group
 short-summary: Manage Azure Managed Disks.
-examples:
--   name: Gets information about a disk.
-    text: az disk show --resource-group MyResourceGroup --output json --name MyManagedDisk
-    crafted: 'True'
 """
 
 helps["disk create"] = """
@@ -130,12 +117,6 @@ short-summary: Place the CLI in a waiting state until a condition of a managed d
 helps["identity"] = """
 type: group
 short-summary: Managed Service Identities
-examples:
--   name: Create or update an identity in the specified subscription and resource
-        group.
-    text: az identity create --output json --resource-group MyResourceGroup --query
-        [0] --name MyIdentityResource
-    crafted: 'True'
 """
 
 helps["identity list"] = """
@@ -151,18 +132,6 @@ short-summary: Lists available operations for the Managed Identity provider
 helps["image"] = """
 type: group
 short-summary: Manage custom virtual machine images.
-examples:
--   name: Copy a managed image (or vm) to other regions.
-    text: az image copy --target-resource-group {target-resource-group} --target-location
-        {target-location} --source-object-name MySourceObject --source-resource-group
-        {source-resource-group} --cleanup {cleanup}
-    crafted: 'True'
--   name: Gets an image.
-    text: az image show --output json --resource-group MyResourceGroup --name MyImage
-    crafted: 'True'
--   name: Deletes an Image.
-    text: az image delete --name MyImage --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["image create"] = """
@@ -202,11 +171,6 @@ short-summary: create a share image gallery.
 helps["sig image-definition"] = """
 type: group
 short-summary: create an image definition
-examples:
--   name: Retrieves information about a gallery Image Definition.
-    text: az sig image-definition show --gallery-name MyGallery --gallery-image-definition
-        {gallery-image-definition} --resource-group MyResourceGroup
-    crafted: 'True'
 """
 
 helps["sig image-definition create"] = """
@@ -231,16 +195,6 @@ short-summary: update a share image defintiion.
 helps["sig image-version"] = """
 type: group
 short-summary: create a new version from an image defintion
-examples:
--   name: Retrieves information about a gallery Image Version.
-    text: az sig image-version show --gallery-name MyGallery --gallery-image-definition
-        {gallery-image-definition} --resource-group MyResourceGroup
-    crafted: 'True'
--   name: List gallery Image Versions in a gallery Image Definition.
-    text: az sig image-version list --output json --gallery-name MyGallery --query
-        [0] --gallery-image-definition {gallery-image-definition} --resource-group
-        MyResourceGroup
-    crafted: 'True'
 """
 
 helps["sig image-version create"] = """
@@ -1492,7 +1446,7 @@ examples:
         az vm start --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
 -   name: Start a stopped VM.
-    text: az vm start --output json
+    text: az vm start --output xml
     crafted: 'True'
 """
 
@@ -1988,11 +1942,6 @@ examples:
 helps["vmss nic"] = """
 type: group
 short-summary: Manage network interfaces of a VMSS.
-examples:
--   name: Gets all network interfaces in a virtual machine scale set.
-    text: az vmss nic list --output json --query [0] --vmss-name MyVmss --resource-group
-        MyResourceGroup
-    crafted: 'True'
 """
 
 helps["vmss reimage"] = """
