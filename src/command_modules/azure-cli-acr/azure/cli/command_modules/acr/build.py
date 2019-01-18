@@ -16,8 +16,6 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.containerregistry.v2018_09_01.models import (
     DockerBuildRequest,
     PlatformProperties,
-    Architecture,
-    OS
 )
 
 from ._utils import validate_managed_registry, get_validate_platform
@@ -31,7 +29,7 @@ logger = get_logger(__name__)
 BUILD_NOT_SUPPORTED = 'Builds are only supported for managed registries.'
 
 
-def acr_build(cmd,
+def acr_build(cmd,  # pylint: disable=too-many-locals
               client,
               registry_name,
               source_location,
@@ -109,7 +107,7 @@ def acr_build(cmd,
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
     platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.warning("OS is {0} and Architecture is {1}".format(platform_os, platform_arch))
+    logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
 
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
