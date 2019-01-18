@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.14
+++++++
+* Add support for Platform flag.
 
 2.1.13
 ++++++
