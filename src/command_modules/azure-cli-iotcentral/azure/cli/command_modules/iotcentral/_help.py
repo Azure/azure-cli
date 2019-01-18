@@ -6,13 +6,6 @@
 
 from knack.help_files import helps
 
-helps["iotcentral app update"] = """
-"type": |-
-    command
-"short-summary": |-
-    Update metadata for an IoT Central application.
-"""
-
 helps["iotcentral"] = """
 "type": |-
     group
@@ -20,18 +13,11 @@ helps["iotcentral"] = """
     Manage IoT Central assets.
 """
 
-helps["iotcentral app show"] = """
+helps["iotcentral app"] = """
 "type": |-
-    command
+    group
 "short-summary": |-
-    Get the details of an IoT Central application.
-"""
-
-helps["iotcentral app list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List IoT Central applications.
+    Manage IoT Central applications.
 """
 
 helps["iotcentral app create"] = """
@@ -43,13 +29,15 @@ helps["iotcentral app create"] = """
     For an introduction to IoT Central, see https://docs.microsoft.com/en-us/azure/iot-central/.
     The F1 Sku is no longer supported. Please use the S1 Sku (default) for app creation.
     For more pricing information, please visit https://azure.microsoft.com/en-us/pricing/details/iot-central/.
-"""
-
-helps["iotcentral app"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage IoT Central applications.
+"examples":
+-   "name": |-
+        Create an IoT Central application in the standard pricing tier S1, in the region of the resource group.
+    "text": |
+        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource --subdomain my-app-subdomain
+-   "name": |-
+        Create an IoT Central application with the standard pricing tier S1 in the 'westus' region, with a custom display name, based on the iotc-default template.
+    "text": |
+        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus --subdomain my-app-subdomain --template iotc-default@1.0.0 --display-name 'My Custom Display Name'
 """
 
 helps["iotcentral app delete"] = """
@@ -57,10 +45,40 @@ helps["iotcentral app delete"] = """
     command
 "short-summary": |-
     Delete an IoT Central application.
+"""
+
+helps["iotcentral app list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List IoT Central applications.
 "examples":
 -   "name": |-
-        Delete an IoT Central application.
-    "text": |-
-        az iotcentral app delete --resource-group MyResourceGroup --name MyIoTCentralApplication
+        List all IoT Central applications in a subscription.
+    "text": |
+        az iotcentral app list
+-   "name": |-
+        List all IoT Central applications in the resource group 'MyGroup'
+    "text": |
+        az iotcentral app list --resource-group MyGroup
+"""
+
+helps["iotcentral app show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the details of an IoT Central application.
+"examples":
+-   "name": |-
+        Show an IoT Central application.
+    "text": |
+        az iotcentral app show --name MyApp
+"""
+
+helps["iotcentral app update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update metadata for an IoT Central application.
 """
 

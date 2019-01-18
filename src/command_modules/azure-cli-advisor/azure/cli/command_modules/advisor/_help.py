@@ -6,11 +6,11 @@
 
 from knack.help_files import helps
 
-helps["advisor configuration update"] = """
+helps["advisor"] = """
 "type": |-
-    command
+    group
 "short-summary": |-
-    Update Azure Advisor configuration.
+    Manage Azure Advisor.
 """
 
 helps["advisor configuration"] = """
@@ -27,25 +27,27 @@ helps["advisor configuration list"] = """
     List Azure Advisor configuration for the entire subscription.
 """
 
-helps["advisor recommendation list"] = """
+helps["advisor configuration show"] = """
 "type": |-
     command
 "short-summary": |-
-    List Azure Advisor recommendations.
+    Show Azure Advisor configuration for the given subscription or resource group.
 """
 
-helps["advisor"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Advisor.
-"""
-
-helps["advisor recommendation enable"] = """
+helps["advisor configuration update"] = """
 "type": |-
     command
 "short-summary": |-
-    Enable Azure Advisor recommendations.
+    Update Azure Advisor configuration.
+"examples":
+-   "name": |-
+        Update low CPU threshold for a given subscription to 20%.
+    "text": |
+        az advisor configuration update -l 20
+-   "name": |-
+        Exclude a given resource group from recommendation generation.
+    "text": |
+        az advisor configuration update -g myRG -e
 """
 
 helps["advisor recommendation"] = """
@@ -55,17 +57,24 @@ helps["advisor recommendation"] = """
     Review Azure Advisor recommendations.
 """
 
-helps["advisor configuration show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show Azure Advisor configuration for the given subscription or resource group.
-"""
-
 helps["advisor recommendation disable"] = """
 "type": |-
     command
 "short-summary": |-
     Disable Azure Advisor recommendations.
+"""
+
+helps["advisor recommendation enable"] = """
+"type": |-
+    command
+"short-summary": |-
+    Enable Azure Advisor recommendations.
+"""
+
+helps["advisor recommendation list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List Azure Advisor recommendations.
 """
 

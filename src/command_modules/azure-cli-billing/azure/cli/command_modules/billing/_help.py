@@ -13,6 +13,13 @@ helps["billing"] = """
     Manage Azure Billing.
 """
 
+helps["billing enrollment-account"] = """
+"type": |-
+    group
+"short-summary": |-
+    Get enrollment accounts.
+"""
+
 helps["billing invoice"] = """
 "type": |-
     group
@@ -25,12 +32,5 @@ helps["billing period"] = """
     group
 "short-summary": |-
     Get billing periods for a subscription.
-"""
-
-helps["billing enrollment-account"] = """
-"type": |-
-    group
-"short-summary": |-
-    Get enrollment accounts.
 """
 

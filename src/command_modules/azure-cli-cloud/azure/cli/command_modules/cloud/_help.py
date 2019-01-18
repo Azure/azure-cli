@@ -6,30 +6,32 @@
 
 from knack.help_files import helps
 
-helps["cloud unregister"] = """
+helps["cloud"] = """
 "type": |-
-    command
+    group
 "short-summary": |-
-    Unregister a cloud.
+    Manage registered Azure clouds.
 """
 
-helps["cloud update"] = """
+helps["cloud list"] = """
 "type": |-
     command
 "short-summary": |-
-    Update the configuration of a cloud.
-"""
-
-helps["cloud show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get the details of a registered cloud.
+    List registered clouds.
 "examples":
 -   "name": |-
-        Get the details of a registered cloud.
+        List registered clouds.
     "text": |-
-        az cloud show --output json --query [0]
+        az cloud list --output json
+    "crafted": |-
+        True
+"""
+
+helps["cloud list-profiles"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the supported profiles for a cloud.
 """
 
 helps["cloud register"] = """
@@ -51,31 +53,35 @@ helps["cloud set"] = """
         Set the active cloud.
     "text": |-
         az cloud set --name MyRegisteredCloud
+    "crafted": |-
+        True
 """
 
-helps["cloud list"] = """
+helps["cloud show"] = """
 "type": |-
     command
 "short-summary": |-
-    List registered clouds.
+    Get the details of a registered cloud.
 "examples":
 -   "name": |-
-        List registered clouds.
+        Get the details of a registered cloud.
     "text": |-
-        az cloud list --output json
+        az cloud show --output json --query [0]
+    "crafted": |-
+        True
 """
 
-helps["cloud"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage registered Azure clouds.
-"""
-
-helps["cloud list-profiles"] = """
+helps["cloud unregister"] = """
 "type": |-
     command
 "short-summary": |-
-    List the supported profiles for a cloud.
+    Unregister a cloud.
+"""
+
+helps["cloud update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update the configuration of a cloud.
 """
 

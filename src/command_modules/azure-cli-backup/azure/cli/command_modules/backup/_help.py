@@ -6,27 +6,39 @@
 
 from knack.help_files import helps
 
-helps["backup restore"] = """
+helps["backup"] = """
 "type": |-
     group
 "short-summary": |-
-    Restore backed up items from recovery points in a Recovery Services vault.
+    Manage Azure Backups.
 """
 
-helps["backup policy list"] = """
+helps["backup container"] = """
+"type": |-
+    group
+"short-summary": |-
+    Resource which houses items or applications to be protected.
+"""
+
+helps["backup container list"] = """
 "type": |-
     command
 "short-summary": |-
-    List all policies for a Recovery services vault.
-"examples":
--   "name": |-
-        List all items protected by a backup policy.
-    "text": |-
-        az backup policy list-associated-items --output json --resource-group MyResourceGroup --vault-name MyVault --query [0] --name MyBackupPolicy
--   "name": |-
-        List all policies for a Recovery services vault.
-    "text": |-
-        az backup policy list --output json --vault-name MyVault --resource-group MyResourceGroup
+    List containers registered to a Recovery services vault.
+"""
+
+helps["backup container show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show details of a container registered to a Recovery services vault.
+"""
+
+helps["backup item"] = """
+"type": |-
+    group
+"short-summary": |-
+    An item which is already protected or backed up to an Azure Recovery services vault with an associated policy.
 """
 
 helps["backup item list"] = """
@@ -39,27 +51,8 @@ helps["backup item list"] = """
         List all backed up items within a container.
     "text": |-
         az backup item list --vault-name MyVault --resource-group MyResourceGroup
-"""
-
-helps["backup job show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show details of a particular job.
-"""
-
-helps["backup vault delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Delete an existing Recovery services vault.
-"""
-
-helps["backup job"] = """
-"type": |-
-    group
-"short-summary": |-
-    Entity which contains details of the job.
+    "crafted": |-
+        True
 """
 
 helps["backup item set-policy"] = """
@@ -69,11 +62,46 @@ helps["backup item set-policy"] = """
     Update the policy associated with this item.
 """
 
-helps["backup restore files unmount-rp"] = """
+helps["backup item show"] = """
 "type": |-
     command
 "short-summary": |-
-    Close access to the recovery point.
+    Show details of a particular backed up item.
+"""
+
+helps["backup job"] = """
+"type": |-
+    group
+"short-summary": |-
+    Entity which contains details of the job.
+"""
+
+helps["backup job list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all backup jobs of a Recovery Services vault.
+"examples":
+-   "name": |-
+        List all backup jobs of a Recovery Services vault.
+    "text": |-
+        az backup job list --vault-name MyVault --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["backup job show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show details of a particular job.
+"""
+
+helps["backup job stop"] = """
+"type": |-
+    command
+"short-summary": |-
+    Suspend or terminate a currently running job.
 """
 
 helps["backup job wait"] = """
@@ -83,25 +111,159 @@ helps["backup job wait"] = """
     Wait until either the job completes or the specified timeout value is reached.
 """
 
-helps["backup vault show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show details of a particular Recovery service vault.
-"""
-
-helps["backup item"] = """
+helps["backup policy"] = """
 "type": |-
     group
 "short-summary": |-
-    An item which is already protected or backed up to an Azure Recovery services vault with an associated policy.
+    A backup policy defines when you want to take a backup and for how long you would retain each backup copy.
 """
 
-helps["backup vault create"] = """
+helps["backup policy delete"] = """
 "type": |-
     command
 "short-summary": |-
-    Create a new Recovery Services vault.
+    Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To  associate another policy with a Backup item, use the backup item set-policy command.
+"""
+
+helps["backup policy get-default-for-vm"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the default policy with default values to backup a VM.
+"""
+
+helps["backup policy list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all policies for a Recovery services vault.
+"examples":
+-   "name": |-
+        List all policies for a Recovery services vault.
+    "text": |-
+        az backup policy list --output json --vault-name MyVault --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["backup policy list-associated-items"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all items protected by a backup policy.
+"examples":
+-   "name": |-
+        List all items protected by a backup policy.
+    "text": |-
+        az backup policy list-associated-items --output json --resource-group MyResourceGroup --vault-name MyVault --query [0] --name MyBackupPolicy
+    "crafted": |-
+        True
+"""
+
+helps["backup policy set"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update the properties of the backup policy.
+"""
+
+helps["backup policy show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show details of a particular policy.
+"""
+
+helps["backup protection"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage protection of your items, enable protection or disable it, or take on-demand backups.
+"""
+
+helps["backup protection backup-now"] = """
+"type": |-
+    command
+"short-summary": |-
+    Perform an on-demand backup of a backed up item.
+"""
+
+helps["backup protection check-vm"] = """
+"type": |-
+    command
+"short-summary": |-
+    Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
+"examples":
+-   "name": |-
+        Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
+    "text": |-
+        az backup protection check-vm --vm-id <vm-id>
+    "crafted": |-
+        True
+"""
+
+helps["backup protection disable"] = """
+"type": |-
+    command
+"short-summary": |-
+    Stop protecting a backed up Azure VM.
+"examples":
+-   "name": |-
+        Stop protecting a backed up Azure VM.
+    "text": "az backup protection disable --container-name MyContainer --delete-backup-data\
+        \ false --resource-group MyResourceGroup --item-name MyItem --vault-name MyVault\
+        \ --yes "
+    "crafted": |-
+        True
+"""
+
+helps["backup protection enable-for-vm"] = """
+"type": |-
+    command
+"short-summary": |-
+    Start protecting a previously unprotected Azure VM as per the specified policy to a Recovery services vault.
+"examples":
+-   "name": |-
+        Start protecting a previously unprotected Azure VM as per the specified policy to a Recovery services vault.
+    "text": |-
+        az backup protection enable-for-vm --vm <vm> --policy-name MyPolicy --vault-name MyVault --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["backup recoverypoint"] = """
+"type": |-
+    group
+"short-summary": |-
+    A snapshot of data at that point-of-time, stored in Recovery Services Vault, from which you can restore information.
+"""
+
+helps["backup recoverypoint list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List all recovery points of a backed up item.
+"""
+
+helps["backup recoverypoint show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Shows details of a particular recovery point.
+"""
+
+helps["backup restore"] = """
+"type": |-
+    group
+"short-summary": |-
+    Restore backed up items from recovery points in a Recovery Services vault.
+"""
+
+helps["backup restore files"] = """
+"type": |-
+    group
+"short-summary": |-
+    Gives access to all files of a recovery point.
 """
 
 helps["backup restore files mount-rp"] = """
@@ -111,18 +273,32 @@ helps["backup restore files mount-rp"] = """
     Download a script which mounts files of a recovery point.
 """
 
-helps["backup container list"] = """
+helps["backup restore files unmount-rp"] = """
 "type": |-
     command
 "short-summary": |-
-    List containers registered to a Recovery services vault.
+    Close access to the recovery point.
 """
 
-helps["backup job stop"] = """
+helps["backup restore restore-disks"] = """
 "type": |-
     command
 "short-summary": |-
-    Suspend or terminate a currently running job.
+    Restore disks of the backed VM from the specified recovery point.
+"""
+
+helps["backup vault"] = """
+"type": |-
+    group
+"short-summary": |-
+    Online storage entity in Azure used to hold data such as backup copies, recovery points and backup policies.
+"""
+
+helps["backup vault backup-properties"] = """
+"type": |-
+    group
+"short-summary": |-
+    Properties of the Recovery Services vault.
 """
 
 helps["backup vault backup-properties set"] = """
@@ -139,87 +315,18 @@ helps["backup vault backup-properties show"] = """
     Gets backup related properties of the Recovery Services vault.
 """
 
-helps["backup restore restore-disks"] = """
+helps["backup vault create"] = """
 "type": |-
     command
 "short-summary": |-
-    Restore disks of the backed VM from the specified recovery point.
+    Create a new Recovery Services vault.
 """
 
-helps["backup recoverypoint show"] = """
+helps["backup vault delete"] = """
 "type": |-
     command
 "short-summary": |-
-    Shows details of a particular recovery point.
-"""
-
-helps["backup container"] = """
-"type": |-
-    group
-"short-summary": |-
-    Resource which houses items or applications to be protected.
-"""
-
-helps["backup restore files"] = """
-"type": |-
-    group
-"short-summary": |-
-    Gives access to all files of a recovery point.
-"""
-
-helps["backup vault"] = """
-"type": |-
-    group
-"short-summary": |-
-    Online storage entity in Azure used to hold data such as backup copies, recovery points and backup policies.
-"""
-
-helps["backup protection"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage protection of your items, enable protection or disable it, or take on-demand backups.
-"""
-
-helps["backup protection enable-for-vm"] = """
-"type": |-
-    command
-"short-summary": |-
-    Start protecting a previously unprotected Azure VM as per the specified policy to a Recovery services vault.
-"""
-
-helps["backup protection disable"] = """
-"type": |-
-    command
-"short-summary": |-
-    Stop protecting a backed up Azure VM.
-"examples":
--   "name": |-
-        Stop protecting a backed up Azure VM.
-    "text": "az backup protection disable --container-name MyContainer --delete-backup-data\
-        \ false --resource-group MyResourceGroup --item-name MyItem --vault-name MyVault\
-        \ --yes "
-"""
-
-helps["backup"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Backups.
-"""
-
-helps["backup policy show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show details of a particular policy.
-"""
-
-helps["backup policy list-associated-items"] = """
-"type": |-
-    command
-"short-summary": |-
-    List all items protected by a backup policy.
+    Delete an existing Recovery services vault.
 """
 
 helps["backup vault list"] = """
@@ -232,94 +339,14 @@ helps["backup vault list"] = """
         List Recovery service vaults within a subscription.
     "text": |-
         az backup vault list --output json --query [0]
+    "crafted": |-
+        True
 """
 
-helps["backup protection backup-now"] = """
+helps["backup vault show"] = """
 "type": |-
     command
 "short-summary": |-
-    Perform an on-demand backup of a backed up item.
-"""
-
-helps["backup recoverypoint list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List all recovery points of a backed up item.
-"""
-
-helps["backup policy get-default-for-vm"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get the default policy with default values to backup a VM.
-"""
-
-helps["backup container show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show details of a container registered to a Recovery services vault.
-"""
-
-helps["backup recoverypoint"] = """
-"type": |-
-    group
-"short-summary": |-
-    A snapshot of data at that point-of-time, stored in Recovery Services Vault, from which you can restore information.
-"""
-
-helps["backup protection check-vm"] = """
-"type": |-
-    command
-"short-summary": |-
-    Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
-"""
-
-helps["backup policy"] = """
-"type": |-
-    group
-"short-summary": |-
-    A backup policy defines when you want to take a backup and for how long you would retain each backup copy.
-"""
-
-helps["backup item show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show details of a particular backed up item.
-"""
-
-helps["backup policy set"] = """
-"type": |-
-    command
-"short-summary": |-
-    Update the properties of the backup policy.
-"""
-
-helps["backup job list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List all backup jobs of a Recovery Services vault.
-"examples":
--   "name": |-
-        List all backup jobs of a Recovery Services vault.
-    "text": |-
-        az backup job list --vault-name MyVault --resource-group MyResourceGroup
-"""
-
-helps["backup vault backup-properties"] = """
-"type": |-
-    group
-"short-summary": |-
-    Properties of the Recovery Services vault.
-"""
-
-helps["backup policy delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Before you can delete a Backup protection policy, the policy must not have any associated Backup items. To  associate another policy with a Backup item, use the backup item set-policy command.
+    Show details of a particular Recovery service vault.
 """
 

@@ -1,15 +1,17 @@
 import yaml
 
-from yaml import Dumper, Loader
 from collections import OrderedDict
 from string import Template
+from yaml import Dumper, Loader
+from yaml.representer import SafeRepresenter
+from yaml.constructor import SafeConstructor
 
-class HelpFile():
+class HelpFileWriter():
     # custom loader and dumper that preserve order in yaml when working with OrderedDict
-    class OrderedLoader(Loader):
+    class CustomLoader(Loader):
         pass
 
-    class OrderedDumper(Dumper):
+    class CustomDumper(Dumper):
         pass
 
     def ordered_representer(dumper, data):
@@ -18,8 +20,10 @@ class HelpFile():
     def ordered_constructor(loader, node):
         return OrderedDict(loader.construct_pairs(node))
 
-    OrderedDumper.add_representer(OrderedDict, ordered_representer)
-    OrderedLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, ordered_constructor)
+    CustomLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, ordered_constructor)
+    CustomDumper.add_representer(OrderedDict, ordered_representer)
+    CustomLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_SCALAR_TAG, SafeConstructor.construct_scalar)
+    #CustomDumper.add_representer(unicode, SafeRepresenter.represent_unicode)
     help_file_header = \
 """# coding=utf-8
 # --------------------------------------------------------------------------------------------
@@ -30,35 +34,60 @@ class HelpFile():
 from knack.help_files import helps
 """
 
-    def __init__(self, help_file_path, module_help_docs, command_examples_dict):
+    def __init__(self, help_file_path, module_help_docs, command_examples_dict, help_files):
         self.help_file_path = help_file_path
         self.module_help_docs = module_help_docs
         self.command_examples_dict = command_examples_dict
+        self.help_files = help_files
 
         self.add_command_examples()
 
     def add_command_examples(self):
         for command in self.module_help_docs:
-            help_dict = yaml.load(self.module_help_docs[command], Loader=self.OrderedLoader)
-            # remove existing examples
-            help_dict.pop('examples', None)
+            help_dict = yaml.load(self.module_help_docs[command], Loader=self.CustomLoader)
             az_command = 'az {0}'.format(command)
-            if az_command in self.command_examples_dict:
-                help_dict['examples'] = []
-                for example_name in self.command_examples_dict[az_command]:
-                    example_text = str(self.command_examples_dict[az_command][example_name])
-                    # decode escapes
-                    example_name_decoded = str(bytes(example_name.encode('utf-8')).decode('unicode_escape'))
-                    example_text_decoded = str(bytes(example_text.encode('utf-8')).decode('unicode_escape'))
-                    help_dict['examples'].append(OrderedDict([('name', example_name_decoded),
-                                                              ('text', example_text_decoded)]))
+            crafted_examples = [key for key in self.command_examples_dict if key.startswith(az_command)]
+            command_parameters = set()
+            if command in self.help_files:
+                for parameter in self.help_files[command].parameters:
+                    command_parameters = command_parameters.union(set(parameter.name_source))
 
-            help_doc = yaml.dump(help_dict, Dumper=self.OrderedDumper, indent=4, default_style='|', default_flow_style=False)
+            if len(crafted_examples) != 0:
+                if 'examples' not in help_dict:
+                    help_dict['examples'] = []
+
+                examples_to_add = set(crafted_examples)
+                examples_to_remove = set()
+                for crafted_example in crafted_examples:
+                    if command in self.help_files:
+                        # check if this example will replace any existing examples
+                        crafted_example_params = set(crafted_example.split()).intersection(command_parameters)
+                        for existing_example in help_dict['examples']:
+                            # leave non-crafted examples alone
+                            if 'crafted' not in existing_example or existing_example['crafted'] != 'True' or existing_example['text'] in examples_to_remove:
+                                continue
+
+                            # check if params of an existing crafted example form a subset of params of a new crafted example
+                            existing_example_params = set(existing_example['text'].split()).intersection(command_parameters)
+                            if existing_example_params.issubset(crafted_example_params):
+                                examples_to_remove.add(existing_example['text'])
+
+                help_dict['examples'] = [example_dict for example_dict in help_dict['examples'] if example_dict['text'] not in examples_to_remove]
+                # add chosen crafted examples
+                for crafted_example in examples_to_add:
+                    example_text_decoded = bytes(crafted_example.encode('utf-8')).decode('unicode_escape'))
+                    example_name_decoded = self.command_examples_dict[crafted_example] #str(bytes(self.command_examples_dict[crafted_example].encode('utf-8')).decode('unicode_escape'))
+                    help_dict['examples'].append(OrderedDict([('name', example_name_decoded),
+                                                              ('text', example_text_decoded),
+                                                              ('crafted', 'True')]))
+                    self.command_examples_dict.pop(crafted_example)
+
+            help_doc = yaml.dump(help_dict, Dumper=self.CustomDumper, indent=4, default_style='|', default_flow_style=False)
             self.module_help_docs[command] = help_doc
 
     def dump(self):
         help_str = ''
-        for command in self.module_help_docs:
+        for command in sorted(self.module_help_docs):
             command_doc_string = self.module_help_docs[command].rstrip()
             help_str += 'helps["{0}"] = \"\"\"\n{1}\n\"\"\"\n\n'.format(command, command_doc_string)
 
@@ -76,14 +105,19 @@ def main(command_examples_json_path):
 
     from azure.cli.core import get_default_cli
     from azure.cli.core.commands import (_load_module_command_loader, BLACKLISTED_MODS)
+    from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
+    from azure.cli.core._help import CliCommandHelpFile
     from importlib import import_module
     from knack.help_files import helps
 
     cli_ctx = get_default_cli()
+    from knack import events
+    from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
+
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
-                                    parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
-    invoker.commands_loader.skip_applicability = True
+                                     parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation = invoker
+    invoker.commands_loader.skip_applicability = True
     command_modules_package = import_module('azure.cli.command_modules')
     installed_command_modules = [modname for _, modname, _ in
                                  pkgutil.iter_modules(command_modules_package.__path__)
@@ -92,9 +126,24 @@ def main(command_examples_json_path):
     # get helps being defined for each module
     all_module_help_docs = {}
     for module in installed_command_modules:
-        _load_module_command_loader(invoker.commands_loader, None, module)
-        all_module_help_docs[module] = helps.copy()
+        _load_module_command_loader(cli_ctx.invocation.commands_loader, None, module)
+        all_module_help_docs[module] = OrderedDict([(command, helps[command]) for command in sorted(helps.keys(), reverse=True)])
         helps.clear()
+
+    invoker.commands_loader.load_command_table(None)
+    # turn off applicability check for all loaders
+    for loaders in invoker.commands_loader.cmd_to_loader_map.values():
+        for loader in loaders:
+            loader.skip_applicability = True
+
+    for command in invoker.commands_loader.command_table:
+        invoker.commands_loader.load_arguments(command)
+
+    register_global_subscription_argument(cli_ctx)
+    register_ids_argument(cli_ctx)  # global subscription must be registered first!
+    cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
+    invoker.parser.load_command_table(invoker.commands_loader)
+    help_files = dict([(help_file.command, help_file) for help_file in get_all_help(cli_ctx) if isinstance(help_file, CliCommandHelpFile)])
 
     command_examples_dict = {}
     with open(command_examples_json_path) as command_examples_json:
@@ -102,8 +151,8 @@ def main(command_examples_json_path):
 
     for module_name in all_module_help_docs:
         help_file_path = "../src/command_modules/azure-cli-{0}/azure/cli/command_modules/{0}/_help.py".format(module_name)
-        help_file = HelpFile(help_file_path, all_module_help_docs[module_name], command_examples_dict)
-        help_file.dump()
+        help_file_writer = HelpFileWriter(help_file_path, all_module_help_docs[module_name], command_examples_dict, help_files)
+        help_file_writer.dump()
 
 if __name__ == "__main__":
     import argparse

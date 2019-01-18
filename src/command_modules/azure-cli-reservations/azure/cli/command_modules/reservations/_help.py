@@ -6,6 +6,20 @@
 
 from knack.help_files import helps
 
+helps["reservations"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage Azure Reservations.
+"""
+
+helps["reservations catalog"] = """
+"type": |-
+    group
+"short-summary": |-
+    See catalog of available reservations
+"""
+
 helps["reservations catalog show"] = """
 "type": |-
     command
@@ -28,6 +42,82 @@ helps["reservations catalog show"] = """
         Type of the resource for which the skus should be provided.
 """
 
+helps["reservations reservation"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage reservation entities
+"""
+
+helps["reservations reservation list"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get all reservations.
+"long-summary": |
+    List all reservations within a reservation order.
+"parameters":
+-   "name": |-
+        --reservation-order-id
+    "type": |-
+        string
+    "short-summary": |-
+        Id of container reservation order
+"examples":
+-   "name": |-
+        Get all reservations.
+    "text": |-
+        az reservations reservation list --query [0] --reservation-order-id <reservation-order-id>
+    "crafted": |-
+        True
+"""
+
+helps["reservations reservation list-history"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get history of a reservation.
+"parameters":
+-   "name": |-
+        --reservation-order-id
+    "type": |-
+        string
+    "short-summary": |-
+        Order id of the reservation
+-   "name": |-
+        --reservation-id
+    "type": |-
+        string
+    "short-summary": |-
+        Reservation id of the reservation
+"""
+
+helps["reservations reservation merge"] = """
+"type": |-
+    command
+"short-summary": |-
+    Merge two reservations.
+"parameters":
+-   "name": |-
+        --reservation-order-id
+    "type": |-
+        string
+    "short-summary": |-
+        Reservation order id of the reservations to merge
+-   "name": |-
+        --reservation-id-1 -1
+    "type": |-
+        string
+    "short-summary": |-
+        Id of the first reservation to merge
+-   "name": |-
+        --reservation-id-2 -2
+    "type": |-
+        string
+    "short-summary": |-
+        Id of the second reservation to merge
+"""
+
 helps["reservations reservation show"] = """
 "type": |-
     command
@@ -48,34 +138,36 @@ helps["reservations reservation show"] = """
         Reservation id of reservation to look up
 """
 
-helps["reservations catalog"] = """
-"type": |-
-    group
-"short-summary": |-
-    See catalog of available reservations
-"""
-
-helps["reservations reservation"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage reservation entities
-"""
-
-helps["reservations reservation-order-id list"] = """
+helps["reservations reservation split"] = """
 "type": |-
     command
 "short-summary": |-
-    Get list of applicable reservation order ids.
-"long-summary": |
-    Get applicable reservations that are applied to this subscription.
+    Split a reservation.
 "parameters":
 -   "name": |-
-        --subscription-id
+        --reservation-order-id
     "type": |-
         string
     "short-summary": |-
-        Id of the subscription to look up applied reservations
+        Reservation order id of the reservation to split
+-   "name": |-
+        --reservation-id
+    "type": |-
+        string
+    "short-summary": |-
+        Reservation id of the reservation to split
+-   "name": |-
+        --quantity-1 -1
+    "type": |-
+        int
+    "short-summary": |-
+        Quantity of the first reservation that will be created from split operation
+-   "name": |-
+        --quantity-2 -2
+    "type": |-
+        int
+    "short-summary": |-
+        Quantity of the second reservation that will be created from split operation
 """
 
 helps["reservations reservation update"] = """
@@ -116,39 +208,20 @@ helps["reservations reservation update"] = """
         Type of the Instance Flexibility to update the reservation with
 """
 
-helps["reservations"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Reservations.
-"""
-
-helps["reservations reservation list"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get all reservations.
-"long-summary": |
-    List all reservations within a reservation order.
-"parameters":
--   "name": |-
-        --reservation-order-id
-    "type": |-
-        string
-    "short-summary": |-
-        Id of container reservation order
-"examples":
--   "name": |-
-        Get all reservations.
-    "text": |-
-        az reservations reservation list --query [0] --reservation-order-id <reservation-order-id>
-"""
-
 helps["reservations reservation-order"] = """
 "type": |-
     group
 "short-summary": |-
     Manage reservation order, which is container for reservations
+"""
+
+helps["reservations reservation-order list"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get all reservation orders
+"long-summary": |
+    List of all the reservation orders that the user has access to in the current tenant.
 """
 
 helps["reservations reservation-order show"] = """
@@ -167,73 +240,6 @@ helps["reservations reservation-order show"] = """
         Id of reservation order to look up
 """
 
-helps["reservations reservation split"] = """
-"type": |-
-    command
-"short-summary": |-
-    Split a reservation.
-"parameters":
--   "name": |-
-        --reservation-order-id
-    "type": |-
-        string
-    "short-summary": |-
-        Reservation order id of the reservation to split
--   "name": |-
-        --reservation-id
-    "type": |-
-        string
-    "short-summary": |-
-        Reservation id of the reservation to split
--   "name": |-
-        --quantity-1 -1
-    "type": |-
-        int
-    "short-summary": |-
-        Quantity of the first reservation that will be created from split operation
--   "name": |-
-        --quantity-2 -2
-    "type": |-
-        int
-    "short-summary": |-
-        Quantity of the second reservation that will be created from split operation
-"""
-
-helps["reservations reservation merge"] = """
-"type": |-
-    command
-"short-summary": |-
-    Merge two reservations.
-"parameters":
--   "name": |-
-        --reservation-order-id
-    "type": |-
-        string
-    "short-summary": |-
-        Reservation order id of the reservations to merge
--   "name": |-
-        --reservation-id-1 -1
-    "type": |-
-        string
-    "short-summary": |-
-        Id of the first reservation to merge
--   "name": |-
-        --reservation-id-2 -2
-    "type": |-
-        string
-    "short-summary": |-
-        Id of the second reservation to merge
-"""
-
-helps["reservations reservation-order list"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get all reservation orders
-"long-summary": |
-    List of all the reservation orders that the user has access to in the current tenant.
-"""
-
 helps["reservations reservation-order-id"] = """
 "type": |-
     group
@@ -241,23 +247,19 @@ helps["reservations reservation-order-id"] = """
     See reservation order ids that are applied to subscription
 """
 
-helps["reservations reservation list-history"] = """
+helps["reservations reservation-order-id list"] = """
 "type": |-
     command
 "short-summary": |-
-    Get history of a reservation.
+    Get list of applicable reservation order ids.
+"long-summary": |
+    Get applicable reservations that are applied to this subscription.
 "parameters":
 -   "name": |-
-        --reservation-order-id
+        --subscription-id
     "type": |-
         string
     "short-summary": |-
-        Order id of the reservation
--   "name": |-
-        --reservation-id
-    "type": |-
-        string
-    "short-summary": |-
-        Reservation id of the reservation
+        Id of the subscription to look up applied reservations
 """
 

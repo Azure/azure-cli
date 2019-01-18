@@ -6,285 +6,22 @@
 
 from knack.help_files import helps
 
-helps["aks enable-addons"] = """
+helps["acs"] = """
 "type": |-
-    command
+    group
 "short-summary": |-
-    Enable Kubernetes addons.
-"long-summary": |-
-    These addons are available:
-        http_application_routing - configure ingress with automatic public DNS name creation.
-        monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
-"parameters":
--   "name": |-
-        --addons -a
-    "type": |-
-        string
-    "short-summary": |-
-        Enable the Kubernetes addons in a comma-separated list.
--   "name": |-
-        --workspace-resource-id
-    "type": |-
-        string
-    "short-summary": |-
-        The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+    Manage Azure Container Services.
+"long-summary": |
+    ACS will be retired as a standalone service on January 31, 2020.
+
+    If you use the Kubernetes orchestrator, please migrate to AKS by January 31, 2020.
 """
 
-helps["aks remove-connector"] = """
+helps["acs browse"] = """
 "type": |-
     command
 "short-summary": |-
-    (PREVIEW) Remove the ACI Connector from a managed Kubernetes cluster.
-"parameters":
--   "name": |-
-        --connector-name
-    "type": |-
-        string
-    "short-summary": |-
-        Name of the ACI Connector.
--   "name": |-
-        --graceful
-    "type": |-
-        bool
-    "short-summary": |-
-        Use a "cordon and drain" strategy to evict pods safely before removing the ACI node.
--   "name": |-
-        --os-type
-    "type": |-
-        string
-    "short-summary": |-
-        Remove support for deploying ACIs of this operating system type.
-"""
-
-helps["aks delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Delete a managed Kubernetes cluster.
-"examples":
--   "name": |-
-        Delete a managed Kubernetes cluster.
-    "text": |-
-        az aks delete --name MyManagedCluster --resource-group MyResourceGroup
-"""
-
-helps["aks install-connector"] = """
-"type": |-
-    command
-"short-summary": |-
-    (PREVIEW) Install the ACI Connector on a managed Kubernetes cluster.
-"parameters":
--   "name": |-
-        --chart-url
-    "type": |-
-        string
-    "short-summary": |-
-        URL of a Helm chart that installs ACI Connector.
--   "name": |-
-        --connector-name
-    "type": |-
-        string
-    "short-summary": |-
-        Name of the ACI Connector.
--   "name": |-
-        --os-type
-    "type": |-
-        string
-    "short-summary": |-
-        Install support for deploying ACIs of this operating system type.
--   "name": |-
-        --service-principal
-    "type": |-
-        string
-    "short-summary": |-
-        Service principal used for authentication to Azure APIs.
-    "long-summary": |-
-        If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
--   "name": |-
-        --client-secret
-    "type": |-
-        string
-    "short-summary": |-
-        Secret associated with the service principal. This argument is required if `--service-principal` is specified.
--   "name": |-
-        --image-tag
-    "type": |-
-        string
-    "short-summary": |-
-        The image tag of the virtual kubelet. Use 'latest' if it is not specified
--   "name": |-
-        --aci-resource-group
-    "type": |-
-        string
-    "short-summary": |-
-        The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
--   "name": |-
-        --location -l
-    "type": |-
-        string
-    "short-summary": |-
-        The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
-"""
-
-helps["aks browse"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show the dashboard for a Kubernetes cluster in a web browser.
-"parameters":
--   "name": |-
-        --disable-browser
-    "type": |-
-        bool
-    "short-summary": |-
-        Don't launch a web browser after establishing port-forwarding.
-    "long-summary": |-
-        Add this argument when launching a web browser manually, or for automated testing.
--   "name": |-
-        --listen-port
-    "short-summary": |-
-        The listening port for the dashboard.
-    "long-sumarry": |-
-        Add this argument when the default listening port is used by another process or unavailable.
-"examples":
--   "name": |-
-        Show the dashboard for a Kubernetes cluster in a web browser.
-    "text": |-
-        az aks browse --name MyManagedCluster --resource-group MyResourceGroup
-"""
-
-helps["aks get-credentials"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get access credentials for a managed Kubernetes cluster.
-"parameters":
--   "name": |-
-        --admin -a
-    "type": |-
-        bool
-    "short-summary": |-
-        Get cluster administrator credentials.  Default: cluster user credentials.
--   "name": |-
-        --file -f
-    "type": |-
-        string
-    "short-summary": |-
-        Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
-"""
-
-helps["acs list-locations"] = """
-"type": |-
-    command
-"short-summary": |-
-    List locations where Azure Container Service is in preview and in production.
-"""
-
-helps["aks disable-addons"] = """
-"type": |-
-    command
-"short-summary": |-
-    Disable Kubernetes addons.
-"parameters":
--   "name": |-
-        --addons -a
-    "type": |-
-        string
-    "short-summary": |-
-        Disable the Kubernetes addons in a comma-separated list.
-"""
-
-helps["acs dcos install-cli"] = """
-"type": |-
-    command
-"short-summary": |-
-    Download and install the DC/OS command-line tool for a cluster.
-"""
-
-helps["aks list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List managed Kubernetes clusters.
-"""
-
-helps["aks upgrade-connector"] = """
-"type": |-
-    command
-"short-summary": |-
-    (PREVIEW) Upgrade the ACI Connector on a managed Kubernetes cluster.
-"parameters":
--   "name": |-
-        --chart-url
-    "type": |-
-        string
-    "short-summary": |-
-        URL of a Helm chart that installs ACI Connector.
--   "name": |-
-        --connector-name
-    "type": |-
-        string
-    "short-summary": |-
-        Name of the ACI Connector.
--   "name": |-
-        --os-type
-    "type": |-
-        string
-    "short-summary": |-
-        Install support for deploying ACIs of this operating system type.
--   "name": |-
-        --service-principal
-    "type": |-
-        string
-    "short-summary": |-
-        Service principal used for authentication to Azure APIs.
-    "long-summary": |-
-        If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
--   "name": |-
-        --client-secret
-    "type": |-
-        string
-    "short-summary": |-
-        Secret associated with the service principal. This argument is required if `--service-principal` is specified.
--   "name": |-
-        --image-tag
-    "type": |-
-        string
-    "short-summary": |-
-        The image tag of the virtual kubelet. Use 'latest' if it is not specified
--   "name": |-
-        --aci-resource-group
-    "type": |-
-        string
-    "short-summary": |-
-        The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
--   "name": |-
-        --location -l
-    "type": |-
-        string
-    "short-summary": |-
-        The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
-"""
-
-helps["aks install-cli"] = """
-"type": |-
-    command
-"short-summary": |-
-    Download and install kubectl, the Kubernetes command-line tool.
-"""
-
-helps["acs show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show the details for a container service.
-"""
-
-helps["aks get-versions"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get the versions available for creating a managed Kubernetes cluster.
+    Show the dashboard for a service container's orchestrator in a web browser.
 """
 
 helps["acs create"] = """
@@ -315,86 +52,41 @@ helps["acs create"] = """
         Note that DC/OS clusters will have 1 or 2 additional public agents.
 "examples":
 -   "name": |-
+        Create a DCOS cluster with an existing SSH key.
+    "text": |-
+        az acs create --orchestrator-type DCOS -g MyResourceGroup -n MyContainerService \
+          --ssh-key-value /path/to/publickey
+-   "name": |-
+        Create a DCOS cluster with two agent pools.
+    "text": |-
+        az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
+          {
+            "name": "agentpool1"
+          },
+          {
+            "name": "agentpool2"
+          }]'
+-   "name": |-
+        Create a DCOS cluster where the second agent pool has a vmSize specified.
+    "text": |-
+        az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
+          {
+            "name": "agentpool1"
+          },
+          {
+            "name": "agentpool2",
+            "vmSize": "Standard_D2"
+          }]'
+-   "name": |-
+        Create a DCOS cluster with agent-profiles specified from a file.
+    "text": |-
+        az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
+-   "name": |-
         Create a container service.
     "text": |-
         az acs create --generate-ssh-keys  --name MyContainerService --orchestrator-type kubernetes --resource-group MyResourceGroup
-"""
-
-helps["acs kubernetes install-cli"] = """
-"type": |-
-    command
-"short-summary": |-
-    Download and install the Kubernetes command-line tool for a cluster.
-"""
-
-helps["aks"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Kubernetes Services.
-"examples":
--   "name": |-
-        (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
-    "text": |-
-        az aks use-dev-spaces --name my-aks --resource-group my-aks-group
--   "name": |-
-        Get the versions available for creating a managed Kubernetes cluster.
-    "text": |-
-        az aks get-versions --location westus2
--   "name": |-
-        Get access credentials for a managed Kubernetes cluster.
-    "text": |-
-        az aks get-credentials --name MyManagedCluster --resource-group MyResourceGroup
-"""
-
-helps["aks scale"] = """
-"type": |-
-    command
-"short-summary": |-
-    Scale the node pool in a managed Kubernetes cluster.
-"parameters":
--   "name": |-
-        --node-count -c
-    "type": |-
-        int
-    "short-summary": |-
-        Number of nodes in the Kubernetes node pool.
-"examples":
--   "name": |-
-        Scale the node pool in a managed Kubernetes cluster.
-    "text": |-
-        az aks scale --node-count <node-count> --resource-group MyResourceGroup --name MyManagedCluster
-"""
-
-helps["aks upgrade"] = """
-"type": |-
-    command
-"short-summary": |-
-    Upgrade a managed Kubernetes cluster to a newer version.
-"long-summary": |-
-    Kubernetes will be unavailable during cluster upgrades.
-"parameters":
--   "name": |-
-        --kubernetes-version -k
-    "type": |-
-        string
-    "short-summary": |-
-        Version of Kubernetes to upgrade the cluster to, such as "1.7.12" or "1.8.7".
-    "populator-commands":
-    - |-
-        `az aks get-upgrades`
-"examples":
--   "name": |-
-        Upgrade a managed Kubernetes cluster to a newer version.
-    "text": |-
-        az aks upgrade --resource-group MyResourceGroup --kubernetes-version <kubernetes-version> --name MyManagedCluster
-"""
-
-helps["aks get-upgrades"] = """
-"type": |-
-    command
-"short-summary": |-
-    Get the upgrade versions available for a managed Kubernetes cluster.
+    "crafted": |-
+        True
 """
 
 helps["acs dcos"] = """
@@ -404,6 +96,13 @@ helps["acs dcos"] = """
     Commands to manage a DC/OS-orchestrated Azure Container Service.
 """
 
+helps["acs dcos install-cli"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download and install the DC/OS command-line tool for a cluster.
+"""
+
 helps["acs kubernetes"] = """
 "type": |-
     group
@@ -411,75 +110,39 @@ helps["acs kubernetes"] = """
     Commands to manage a Kubernetes-orchestrated Azure Container Service.
 "examples":
 -   "name": |-
+        Launch a proxy and browse the Kubernetes web UI.
+    "text": |-
+        az acs kubernetes browse --name MyContainerService --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["acs kubernetes get-credentials"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download and install credentials to access a cluster.  This command requires the same private-key used to create the cluster.
+"examples":
+-   "name": |-
         Download and install credentials to access a cluster.  This command requires the same private-key used to create the cluster.
     "text": |-
         az acs kubernetes get-credentials --name MyContainerService --resource-group MyResourceGroup
+    "crafted": |-
+        True
 """
 
-helps["aks remove-dev-spaces"] = """
+helps["acs kubernetes install-cli"] = """
 "type": |-
     command
 "short-summary": |-
-    (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+    Download and install the Kubernetes command-line tool for a cluster.
 """
 
-helps["aks use-dev-spaces"] = """
+helps["acs list-locations"] = """
 "type": |-
     command
 "short-summary": |-
-    (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
-"parameters":
--   "name": |-
-        --update
-    "type": |-
-        bool
-    "short-summary": |-
-        Update to the latest Azure Dev Spaces client components.
--   "name": |-
-        --space -s
-    "type": |-
-        string
-    "short-summary": |-
-        Name of the new or existing dev space to select. Defaults to an interactive selection experience.
-"""
-
-helps["acs"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Container Services.
-"long-summary": |
-    ACS will be retired as a standalone service on January 31, 2020.
-
-    If you use the Kubernetes orchestrator, please migrate to AKS by January 31, 2020.
-"""
-
-helps["acs wait"] = """
-"type": |-
-    command
-"short-summary": |-
-    Wait for a container service to reach a desired state.
-"long-summary": |-
-    If an operation on a container service was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
-"""
-
-helps["acs browse"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show the dashboard for a service container's orchestrator in a web browser.
-"""
-
-helps["aks show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show the details for a managed Kubernetes cluster.
-"examples":
--   "name": |-
-        Show the details for a managed Kubernetes cluster.
-    "text": |-
-        az aks show --output json --name MyManagedCluster --query [0] --resource-group MyResourceGroup
+    List locations where Azure Container Service is in preview and in production.
 """
 
 helps["acs scale"] = """
@@ -496,18 +159,56 @@ helps["acs scale"] = """
         The number of agents for the container service.
 """
 
-helps["aks wait"] = """
+helps["acs show"] = """
 "type": |-
     command
 "short-summary": |-
-    Wait for a managed Kubernetes cluster to reach a desired state.
+    Show the details for a container service.
+"""
+
+helps["acs wait"] = """
+"type": |-
+    command
+"short-summary": |-
+    Wait for a container service to reach a desired state.
 "long-summary": |-
-    If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+    If an operation on a container service was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+"""
+
+helps["aks"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage Azure Kubernetes Services.
+"""
+
+helps["aks browse"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the dashboard for a Kubernetes cluster in a web browser.
+"parameters":
+-   "name": |-
+        --disable-browser
+    "type": |-
+        bool
+    "short-summary": |-
+        Don't launch a web browser after establishing port-forwarding.
+    "long-summary": |-
+        Add this argument when launching a web browser manually, or for automated testing.
+-   "name": |-
+        --listen-port
+    "short-summary": |-
+        The listening port for the dashboard.
+    "long-sumarry": |-
+        Add this argument when the default listening port is used by another process or unavailable.
 "examples":
 -   "name": |-
-        Wait for a managed Kubernetes cluster to reach a desired state.
+        Show the dashboard for a Kubernetes cluster in a web browser.
     "text": |-
-        az aks wait --name MyManagedCluster --created <created> --resource-group MyResourceGroup
+        az aks browse --name MyManagedCluster --resource-group MyResourceGroup
+    "crafted": |-
+        True
 """
 
 helps["aks create"] = """
@@ -715,15 +416,500 @@ helps["aks create"] = """
         The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
 "examples":
 -   "name": |-
+        Create a Kubernetes cluster with an existing SSH public key.
+    "text": |-
+        az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
+-   "name": |-
+        Create a Kubernetes cluster with a specific version.
+    "text": |-
+        az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.7
+-   "name": |-
+        Create a Kubernetes cluster with a larger node pool.
+    "text": |-
+        az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
+-   "name": |-
         Create a new managed Kubernetes cluster.
     "text": |-
         az aks create --node-count 7 --name MyManagedCluster --enable-addons <enable-addons> --generate-ssh-keys  --resource-group MyResourceGroup
+    "crafted": |-
+        True
 """
 
-helps["acs kubernetes get-credentials"] = """
+helps["aks delete"] = """
 "type": |-
     command
 "short-summary": |-
-    Download and install credentials to access a cluster.  This command requires the same private-key used to create the cluster.
+    Delete a managed Kubernetes cluster.
+"examples":
+-   "name": |-
+        Delete a managed Kubernetes cluster.
+    "text": |-
+        az aks delete --name MyManagedCluster --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["aks disable-addons"] = """
+"type": |-
+    command
+"short-summary": |-
+    Disable Kubernetes addons.
+"parameters":
+-   "name": |-
+        --addons -a
+    "type": |-
+        string
+    "short-summary": |-
+        Disable the Kubernetes addons in a comma-separated list.
+"examples":
+-   "name": |-
+        Disable Kubernetes addons.
+    "text": |-
+        az aks disable-addons --resource-group MyResourceGroup --addons <addons> --name MyManagedCluster
+    "crafted": |-
+        True
+"""
+
+helps["aks enable-addons"] = """
+"type": |-
+    command
+"short-summary": |-
+    Enable Kubernetes addons.
+"long-summary": |-
+    These addons are available:
+        http_application_routing - configure ingress with automatic public DNS name creation.
+        monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+"parameters":
+-   "name": |-
+        --addons -a
+    "type": |-
+        string
+    "short-summary": |-
+        Enable the Kubernetes addons in a comma-separated list.
+-   "name": |-
+        --workspace-resource-id
+    "type": |-
+        string
+    "short-summary": |-
+        The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+"examples":
+-   "name": |-
+        Enable Kubernetes addons.
+    "text": |-
+        az aks enable-addons --name MyManagedCluster --addons <addons> --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["aks get-credentials"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get access credentials for a managed Kubernetes cluster.
+"parameters":
+-   "name": |-
+        --admin -a
+    "type": |-
+        bool
+    "short-summary": |-
+        Get cluster administrator credentials.  Default: cluster user credentials.
+-   "name": |-
+        --file -f
+    "type": |-
+        string
+    "short-summary": |-
+        Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
+"examples":
+-   "name": |-
+        Get access credentials for a managed Kubernetes cluster.
+    "text": |-
+        az aks get-credentials --name MyManagedCluster --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["aks get-upgrades"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the upgrade versions available for a managed Kubernetes cluster.
+"examples":
+-   "name": |-
+        Get the upgrade versions available for a managed Kubernetes cluster.
+    "text": |-
+        az aks get-upgrades --output json --resource-group MyResourceGroup --name MyManagedCluster
+    "crafted": |-
+        True
+"""
+
+helps["aks get-versions"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the versions available for creating a managed Kubernetes cluster.
+"examples":
+-   "name": |-
+        Get the versions available for creating a managed Kubernetes cluster.
+    "text": |-
+        az aks get-versions --location westus2
+    "crafted": |-
+        True
+"""
+
+helps["aks install-cli"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download and install kubectl, the Kubernetes command-line tool.
+"""
+
+helps["aks install-connector"] = """
+"type": |-
+    command
+"short-summary": |-
+    (PREVIEW) Install the ACI Connector on a managed Kubernetes cluster.
+"parameters":
+-   "name": |-
+        --chart-url
+    "type": |-
+        string
+    "short-summary": |-
+        URL of a Helm chart that installs ACI Connector.
+-   "name": |-
+        --connector-name
+    "type": |-
+        string
+    "short-summary": |-
+        Name of the ACI Connector.
+-   "name": |-
+        --os-type
+    "type": |-
+        string
+    "short-summary": |-
+        Install support for deploying ACIs of this operating system type.
+-   "name": |-
+        --service-principal
+    "type": |-
+        string
+    "short-summary": |-
+        Service principal used for authentication to Azure APIs.
+    "long-summary": |-
+        If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
+-   "name": |-
+        --client-secret
+    "type": |-
+        string
+    "short-summary": |-
+        Secret associated with the service principal. This argument is required if `--service-principal` is specified.
+-   "name": |-
+        --image-tag
+    "type": |-
+        string
+    "short-summary": |-
+        The image tag of the virtual kubelet. Use 'latest' if it is not specified
+-   "name": |-
+        --aci-resource-group
+    "type": |-
+        string
+    "short-summary": |-
+        The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
+-   "name": |-
+        --location -l
+    "type": |-
+        string
+    "short-summary": |-
+        The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
+"examples":
+-   "name": |-
+        Install the ACI Connector for Linux to a managed Kubernetes cluster.
+    "text": |-
+        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
+-   "name": |-
+        Install the ACI Connector for Windows to a managed Kubernetes cluster.
+    "text": |-
+        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \
+           --connector-name aci-connector --os-type Windows
+-   "name": |-
+        Install the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
+    "text": |-
+        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector --os-type Both
+-   "name": |-
+        Install the ACI Connector using a specific service principal in a specific resource group.
+    "text": |-
+        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \
+          --aci-resource-group <ACI resource group>
+-   "name": |-
+        Install the ACI Connector from a custom Helm chart with custom tag.
+    "text": |-
+        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
+-   "name": |-
+        (PREVIEW) Install the ACI Connector on a managed Kubernetes cluster.
+    "text": |-
+        az aks install-connector --os-type <os-type> --name MyManagedCluster --connector-name MyConnector --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["aks list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List managed Kubernetes clusters.
+"""
+
+helps["aks remove-connector"] = """
+"type": |-
+    command
+"short-summary": |-
+    (PREVIEW) Remove the ACI Connector from a managed Kubernetes cluster.
+"parameters":
+-   "name": |-
+        --connector-name
+    "type": |-
+        string
+    "short-summary": |-
+        Name of the ACI Connector.
+-   "name": |-
+        --graceful
+    "type": |-
+        bool
+    "short-summary": |-
+        Use a "cordon and drain" strategy to evict pods safely before removing the ACI node.
+-   "name": |-
+        --os-type
+    "type": |-
+        string
+    "short-summary": |-
+        Remove support for deploying ACIs of this operating system type.
+"examples":
+-   "name": |-
+        Remove the ACI Connector from a cluster using the graceful mode.
+    "text": |-
+        az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name MyConnector --graceful
+"""
+
+helps["aks remove-dev-spaces"] = """
+"type": |-
+    command
+"short-summary": |-
+    (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+"examples":
+-   "name": |-
+        Remove Azure Dev Spaces from a managed Kubernetes cluster.
+    "text": |-
+        az aks remove-dev-spaces -g my-aks-group -n my-aks
+-   "name": |-
+        Remove Azure Dev Spaces from a managed Kubernetes cluster without prompting.
+    "text": |-
+        az aks remove-dev-spaces -g my-aks-group -n my-aks --yes
+"""
+
+helps["aks scale"] = """
+"type": |-
+    command
+"short-summary": |-
+    Scale the node pool in a managed Kubernetes cluster.
+"parameters":
+-   "name": |-
+        --node-count -c
+    "type": |-
+        int
+    "short-summary": |-
+        Number of nodes in the Kubernetes node pool.
+"examples":
+-   "name": |-
+        Scale the node pool in a managed Kubernetes cluster.
+    "text": |-
+        az aks scale --node-count <node-count> --resource-group MyResourceGroup --name MyManagedCluster
+    "crafted": |-
+        True
+"""
+
+helps["aks show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the details for a managed Kubernetes cluster.
+"examples":
+-   "name": |-
+        Show the details for a managed Kubernetes cluster.
+    "text": |-
+        az aks show --output json --name MyManagedCluster --query [0] --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["aks upgrade"] = """
+"type": |-
+    command
+"short-summary": |-
+    Upgrade a managed Kubernetes cluster to a newer version.
+"long-summary": |-
+    Kubernetes will be unavailable during cluster upgrades.
+"parameters":
+-   "name": |-
+        --kubernetes-version -k
+    "type": |-
+        string
+    "short-summary": |-
+        Version of Kubernetes to upgrade the cluster to, such as "1.7.12" or "1.8.7".
+    "populator-commands":
+    - |-
+        `az aks get-upgrades`
+"examples":
+-   "name": |-
+        Upgrade a managed Kubernetes cluster to a newer version.
+    "text": |-
+        az aks upgrade --resource-group MyResourceGroup --kubernetes-version <kubernetes-version> --name MyManagedCluster
+    "crafted": |-
+        True
+"""
+
+helps["aks upgrade-connector"] = """
+"type": |-
+    command
+"short-summary": |-
+    (PREVIEW) Upgrade the ACI Connector on a managed Kubernetes cluster.
+"parameters":
+-   "name": |-
+        --chart-url
+    "type": |-
+        string
+    "short-summary": |-
+        URL of a Helm chart that installs ACI Connector.
+-   "name": |-
+        --connector-name
+    "type": |-
+        string
+    "short-summary": |-
+        Name of the ACI Connector.
+-   "name": |-
+        --os-type
+    "type": |-
+        string
+    "short-summary": |-
+        Install support for deploying ACIs of this operating system type.
+-   "name": |-
+        --service-principal
+    "type": |-
+        string
+    "short-summary": |-
+        Service principal used for authentication to Azure APIs.
+    "long-summary": |-
+        If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
+-   "name": |-
+        --client-secret
+    "type": |-
+        string
+    "short-summary": |-
+        Secret associated with the service principal. This argument is required if `--service-principal` is specified.
+-   "name": |-
+        --image-tag
+    "type": |-
+        string
+    "short-summary": |-
+        The image tag of the virtual kubelet. Use 'latest' if it is not specified
+-   "name": |-
+        --aci-resource-group
+    "type": |-
+        string
+    "short-summary": |-
+        The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
+-   "name": |-
+        --location -l
+    "type": |-
+        string
+    "short-summary": |-
+        The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
+"examples":
+-   "name": |-
+        Upgrade the ACI Connector for Linux to a managed Kubernetes cluster.
+    "text": |-
+        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector
+-   "name": |-
+        Upgrade the ACI Connector for Windows to a managed Kubernetes cluster.
+    "text": |-
+        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \
+           --connector-name aci-connector --os-type Windows
+-   "name": |-
+        Upgrade the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
+    "text": |-
+        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector --os-type Both
+-   "name": |-
+        Upgrade the ACI Connector to use a specific service principal in a specific resource group.
+    "text": |-
+        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \
+          --aci-resource-group <ACI resource group>
+-   "name": |-
+        Upgrade the ACI Connector from a custom Helm chart with custom tag.
+    "text": |-
+        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \
+          --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
+"""
+
+helps["aks use-dev-spaces"] = """
+"type": |-
+    command
+"short-summary": |-
+    (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+"parameters":
+-   "name": |-
+        --update
+    "type": |-
+        bool
+    "short-summary": |-
+        Update to the latest Azure Dev Spaces client components.
+-   "name": |-
+        --space -s
+    "type": |-
+        string
+    "short-summary": |-
+        Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+"examples":
+-   "name": |-
+        Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
+    "text": |-
+        az aks use-dev-spaces -g my-aks-group -n my-aks
+-   "name": |-
+        Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces         client components and selecting a new or existing dev space 'my-space'.
+    "text": |-
+        az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
+-   "name": |-
+        Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space         'develop/my-space' without prompting for confirmation.
+    "text": |-
+        az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
+-   "name": |-
+        (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+    "text": |-
+        az aks use-dev-spaces --name my-aks --resource-group my-aks-group
+    "crafted": |-
+        True
+"""
+
+helps["aks wait"] = """
+"type": |-
+    command
+"short-summary": |-
+    Wait for a managed Kubernetes cluster to reach a desired state.
+"long-summary": |-
+    If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+"examples":
+-   "name": |-
+        Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
+    "text": |-
+        az aks wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
+-   "name": |-
+        Wait for a managed Kubernetes cluster to reach a desired state.
+    "text": |-
+        az aks wait --name MyManagedCluster --created <created> --resource-group MyResourceGroup
+    "crafted": |-
+        True
 """
 

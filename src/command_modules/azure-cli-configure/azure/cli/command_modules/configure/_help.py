@@ -16,5 +16,20 @@ helps["configure"] = """
         --defaults -d
     "short-summary": |
         Space-separated 'name=value' pairs for common argument defaults.
+"examples":
+-   "name": |-
+        Set default resource group, webapp and VM names.
+    "text": |-
+        az configure --defaults group=myRG web=myweb vm=myvm
+-   "name": |-
+        Clear default webapp and VM names.
+    "text": |-
+        az configure --defaults vm='' web=''
+-   "name": |-
+        Manage Azure CLI configuration. This command is interactive.
+    "text": |-
+        az configure --defaults group=myRG web=myweb vm=myvm
+    "crafted": |-
+        True
 """
 

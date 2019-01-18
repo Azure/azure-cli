@@ -6,39 +6,264 @@
 
 from knack.help_files import helps
 
-helps["storage blob service-properties delete-policy show"] = """
+helps["storage"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage Azure Cloud Storage resources.
+"""
+
+helps["storage account"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage accounts.
+"examples":
+-   "name": |-
+        Checks that the storage account name is valid and is not already in use.
+    "text": |-
+        az storage account check-name --name MyStorageAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage account create"] = """
 "type": |-
     command
 "short-summary": |-
-    Show the storage blob delete-policy.
+    Create a storage account.
+"long-summary": |
+    The SKU of the storage account defaults to 'Standard_RAGRS'.
+"examples":
+-   "name": |-
+        Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
+    "text": |-
+        az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
+    "min_profile": |-
+        latest
+-   "name": |-
+        Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
+    "text": |-
+        az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
+    "max_profile": |-
+        2017-03-09-profile
+-   "name": |-
+        Create a storage account.
+    "text": |-
+        az storage account create --kind BlobStorage --resource-group MyResourceGroup --sku Standard_LRS --location westus --name MyStorageAccount
+    "crafted": |-
+        True
 """
 
-helps["storage blob metadata"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage blob metadata.
-"""
-
-helps["storage queue policy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage shared access policies for a storage queue.
-"""
-
-helps["storage directory metadata"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage file storage directory metadata.
-"""
-
-helps["storage share url"] = """
+helps["storage account delete"] = """
 "type": |-
     command
 "short-summary": |-
-    Create a URI to access a file share.
+    Delete a storage account.
+"examples":
+-   "name": |-
+        Delete a storage account using a resource ID.
+    "text": |-
+        az storage account delete --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{StorageAccount}
+-   "name": |-
+        Delete a storage account using an account name and resource group.
+    "text": |-
+        az storage account delete -n MyStorageAccount -g MyResourceGroup
+-   "name": |-
+        Delete a storage account.
+    "text": |-
+        az storage account delete --resource-group MyResourceGroup --yes  --name MyStorageAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage account generate-sas"] = """
+"type": |-
+    command
+"parameters":
+-   "name": |-
+        --services
+    "short-summary": |-
+        The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.
+-   "name": |-
+        --resource-types
+    "short-summary": |-
+        The resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.
+-   "name": |-
+        --expiry
+    "short-summary": |-
+        Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.
+-   "name": |-
+        --start
+    "short-summary": |-
+        Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes valid. Defaults to the time of the request.
+-   "name": |-
+        --account-name
+    "short-summary": |-
+        Storage account name. Must be used in conjunction with either storage account key or a SAS token. Environment Variable: AZURE_STORAGE_ACCOUNT
+"examples":
+-   "name": |-
+        Generate a sas token for the account that is valid for queue and table services on Linux.
+    "text": |
+        end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage account generate-sas --permissions cdlruwap --account-name MyStorageAccount --services qt --resource-types sco --expiry $end -otsv
+-   "name": |-
+        Generate a sas token for the account that is valid for queue and table services on MacOS.
+    "text": |
+        end=`date -v+30M '+%Y-%m-%dT%H:%MZ'`
+        az storage account generate-sas --permissions cdlruwap --account-name MyStorageAccount --services qt --resource-types sco --expiry $end -otsv
+-   "name": |-
+        Generates a shared access signature for the account.
+    "text": |-
+        az storage account generate-sas --output json --expiry 2018-02-01't'12:20'z' --permissions <permissions> --services <services> --account-key <account-key> --resource-types <resource-types> --account-name MyAccount --https-only <https-only>
+    "crafted": |-
+        True
+"""
+
+helps["storage account keys"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage account keys.
+"""
+
+helps["storage account keys list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the primary and secondary keys for a storage account.
+"examples":
+-   "name": |-
+        List the primary and secondary keys for a storage account.
+    "text": |-
+        az storage account keys list -g MyResourceGroup -n MyStorageAccount
+-   "name": |-
+        List the primary and secondary keys for a storage account.
+    "text": |-
+        az storage account keys list --output json --query [0] --account-name MyStorageAccount --resource-group MyResourceGroup
+    "crafted": |-
+        True
+"""
+
+helps["storage account list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List storage accounts.
+"examples":
+-   "name": |-
+        List all storage accounts in a subscription.
+    "text": |-
+        az storage account list
+-   "name": |-
+        List all storage accounts in a resource group.
+    "text": |-
+        az storage account list -g MyResourceGroup
+-   "name": |-
+        List storage accounts.
+    "text": |-
+        az storage account list --query [0]
+    "crafted": |-
+        True
+"""
+
+helps["storage account network-rule"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage network rules.
+"""
+
+helps["storage account network-rule add"] = """
+"type": |-
+    command
+"short-summary": |-
+    Add a network rule.
+"long-summary": |
+    Rules can be created for an IPv4 address, address range (CIDR format), or a virtual network subnet.
+"examples":
+-   "name": |-
+        Create a rule to allow a specific address-range.
+    "text": |-
+        az storage account network-rule add -g myRg --account-name mystorageaccount --ip-address 23.45.1.0/24
+-   "name": |-
+        Create a rule to allow access for a subnet.
+    "text": |-
+        az storage account network-rule add -g myRg --account-name mystorageaccount --vnet myvnet --subnet mysubnet
+-   "name": |-
+        Add a network rule.
+    "text": |-
+        az storage account network-rule add --subnet mysubnet --account-name mystorageaccount --resource-group myRg
+    "crafted": |-
+        True
+"""
+
+helps["storage account network-rule list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List network rules.
+"examples":
+-   "name": |-
+        List network rules.
+    "text": |-
+        az storage account network-rule list --account-name MyAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage account network-rule remove"] = """
+"type": |-
+    command
+"short-summary": |-
+    Remove a network rule.
+"""
+
+helps["storage account show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show storage account properties.
+"examples":
+-   "name": |-
+        Show properties for a storage account by resource ID.
+    "text": |-
+        az storage account show --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{StorageAccount}
+-   "name": |-
+        Show properties for a storage account using an account name and resource group.
+    "text": |-
+        az storage account show -g MyResourceGroup -n MyStorageAccount
+-   "name": |-
+        Show storage account properties.
+    "text": |-
+        az storage account show --resource-group MyResourceGroup --name MyStorageAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage account show-connection-string"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the connection string for a storage account.
+"examples":
+-   "name": |-
+        Get a connection string for a storage account.
+    "text": |-
+        az storage account show-connection-string -g MyResourceGroup -n MyStorageAccount
+-   "name": |-
+        Get the connection string for a storage account.
+    "text": |-
+        az storage account show-connection-string --resource-group MyResourceGroup --name MyStorageAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage account show-usage"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the current count and limit of the storage accounts under the subscription.
 """
 
 helps["storage account update"] = """
@@ -51,91 +276,55 @@ helps["storage account update"] = """
         Update the properties of a storage account.
     "text": |-
         az storage account update --default-action Allow --resource-group MyResourceGroup --name MyStorageAccount
+    "crafted": |-
+        True
 """
 
-helps["storage logging update"] = """
+helps["storage blob"] = """
 "type": |-
-    command
+    group
 "short-summary": |-
-    Update logging settings for a storage account.
-"parameters":
--   "name": |-
-        --services
-    "short-summary": |-
-        The storage service(s) for which to update logging info: (b)lob (q)ueue (t)able. Can be combined.
--   "name": |-
-        --log
-    "short-summary": |-
-        The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.
--   "name": |-
-        --retention
-    "short-summary": |-
-        Number of days for which to retain logs. 0 to disable.
--   "name": |-
-        --version
-    "short-summary": |-
-        Version of the logging schema.
-"""
-
-helps["storage logging show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show logging settings for a storage account.
-"parameters":
--   "name": |-
-        --services
-    "short-summary": |-
-        The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.
-"""
-
-helps["storage cors clear"] = """
-"type": |-
-    command
-"short-summary": |-
-    Remove all CORS rules from a storage account.
-"parameters":
--   "name": |-
-        --services
-    "short-summary": |
-        The storage service(s) to remove rules from. Allowed options are: (b)lob, (f)ile, (q)ueue, (t)able. Can be combined.
-"""
-
-helps["storage entity insert"] = """
-"type": |-
-    command
-"short-summary": |-
-    Insert an entity into a table.
-"parameters":
--   "name": |-
-        --table-name -t
-    "type": |-
-        string
-    "short-summary": |-
-        The name of the table to insert the entity into.
--   "name": |-
-        --entity -e
-    "type": |-
-        list
-    "short-summary": |-
-        Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
-    "long-summary": |-
-        The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key, convert it to a fixed-width string which can be canonically sorted. For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
--   "name": |-
-        --if-exists
-    "type": |-
-        string
-    "short-summary": |-
-        Behavior when an entity already exists for the specified PartitionKey and RowKey.
--   "name": |-
-        --timeout
-    "short-summary": |-
-        The server timeout, expressed in seconds.
+    Manage object storage for unstructured data (blobs).
 "examples":
 -   "name": |-
-        Insert an entity into a table.
+        Downloads a blob to a file path, with automatic chunking and progress notifications.
     "text": |-
-        az storage entity insert --sas-token <sas-token> --entity <entity> --table-name MyTable --account-name MyAccount --if-exists fail
+        az storage blob download --container-name MyContainer --query [0] --name MyBlob --no-progress  --file <file> --connection-string <connection-string>
+    "crafted": |-
+        True
+-   "name": |-
+        Sets system properties on the blob.
+    "text": |-
+        az storage blob update --content-encoding <content-encoding> --container-name MyContainer --content-type <content-type> --name MyBlob
+    "crafted": |-
+        True
+-   "name": |-
+        Creates a read-only snapshot of a blob.
+    "text": |-
+        az storage blob snapshot --container-name MyContainer --metadata  --connection-string <connection-string> --name MyBlob
+    "crafted": |-
+        True
+"""
+
+helps["storage blob copy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
+"""
+
+helps["storage blob copy start"] = """
+"type": |-
+    command
+"short-summary": |-
+    Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
+"examples":
+-   "name": |-
+        Copies a blob asynchronously.
+    "text": |-
+        az storage blob copy start --destination-blob <destination-blob> --destination-container <destination-container> --source-container <source-container> --source-blob <source-blob>
+    "crafted": |-
+        True
 """
 
 helps["storage blob copy start-batch"] = """
@@ -200,64 +389,175 @@ helps["storage blob copy start-batch"] = """
         string
     "short-summary": |-
         The shared access signature for the source storage account.
-"""
-
-helps["storage share list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List the file shares in a storage account.
 "examples":
 -   "name": |-
-        List the file shares in a storage account.
+        Copy multiple blobs or files to a blob container.
     "text": |-
-        az storage share list --output json --account-name MyAccount
+        az storage blob copy start-batch --destination-container <destination-container> --source-account-name MySourceAccount --source-container <source-container> --account-name MyAccount
+    "crafted": |-
+        True
 """
 
-helps["storage account network-rule add"] = """
+helps["storage blob delete"] = """
 "type": |-
     command
 "short-summary": |-
-    Add a network rule.
+    Mark a blob or snapshot for deletion.
 "long-summary": |
-    Rules can be created for an IPv4 address, address range (CIDR format), or a virtual network subnet.
+    The blob is marked for later deletion during garbage collection.  In order to delete a blob, all of its snapshots must also be deleted. Both can be removed at the same time.
+"examples":
+-   "name": |-
+        Delete a blob.
+    "text": |-
+        az storage blob delete -c MyContainer -n MyBlob
+-   "name": |-
+        Mark a blob or snapshot for deletion.
+    "text": |-
+        az storage blob delete --container-name MyContainer --name MyBlob
+    "crafted": |-
+        True
 """
 
-helps["storage table policy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage shared access policies of a storage table.
-"""
-
-helps["storage account show"] = """
+helps["storage blob delete-batch"] = """
 "type": |-
     command
 "short-summary": |-
-    Show storage account properties.
+    Delete blobs from a blob container recursively.
+"parameters":
+-   "name": |-
+        --source -s
+    "type": |-
+        string
+    "short-summary": |-
+        The blob container from where the files will be deleted.
+    "long-summary": |-
+        The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
+-   "name": |-
+        --pattern
+    "type": |-
+        string
+    "short-summary": |-
+        The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+-   "name": |-
+        --dryrun
+    "type": |-
+        bool
+    "short-summary": |-
+        Show the summary of the operations to be taken instead of actually deleting the file(s).
+-   "name": |-
+        --if-match
+    "type": |-
+        string
+    "short-summary": |-
+        An ETag value, or the wildcard character (*). Specify this header to perform the operation only if the resource's ETag matches the value specified.
+-   "name": |-
+        --if-none-match
+    "type": |-
+        string
+    "short-summary": |-
+        An ETag value, or the wildcard character (*).
+    "long-summary": |-
+        Specify this header to perform the operation only if the resource's ETag does not match the value specified. Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
 "examples":
 -   "name": |-
-        Show storage account properties.
-    "text": |-
-        az storage account show --resource-group MyResourceGroup --name MyStorageAccount
+        Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
+    "text": |
+        date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
 -   "name": |-
-        Get the connection string for a storage account.
+        Delete blobs from a blob container recursively.
     "text": |-
-        az storage account show-connection-string --resource-group MyResourceGroup --name MyStorageAccount
+        az storage blob delete-batch --source <source> --pattern <pattern> --if-unmodified-since 2018-02-01't'12:20'z'
+    "crafted": |-
+        True
 """
 
-helps["storage container legal-hold"] = """
+helps["storage blob download-batch"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download blobs from a blob container recursively.
+"parameters":
+-   "name": |-
+        --source -s
+    "type": |-
+        string
+    "short-summary": |-
+        The blob container from where the files will be downloaded.
+    "long-summary": |-
+        The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
+-   "name": |-
+        --destination -d
+    "type": |-
+        string
+    "short-summary": |-
+        The existing destination folder for this download operation.
+-   "name": |-
+        --pattern
+    "type": |-
+        string
+    "short-summary": |-
+        The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+-   "name": |-
+        --dryrun
+    "type": |-
+        bool
+    "short-summary": |-
+        Show the summary of the operations to be taken instead of actually downloading the file(s).
+"examples":
+-   "name": |-
+        Download all blobs that end with .py
+    "text": |-
+        az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
+-   "name": |-
+        Download blobs from a blob container recursively.
+    "text": |-
+        az storage blob download-batch --no-progress  --source MyContainer --account-name MyStorageAccount --destination . --pattern *.py
+    "crafted": |-
+        True
+"""
+
+helps["storage blob exists"] = """
+"type": |-
+    command
+"short-summary": |-
+    Check for the existence of a blob in a container.
+"parameters":
+-   "name": |-
+        --name -n
+    "short-summary": |-
+        The blob name.
+"examples":
+-   "name": |-
+        Check for the existence of a blob in a container.
+    "text": |-
+        az storage blob exists --account-key <account-key> --container-name MyContainer --account-name MyAccount --name MyBlob
+    "crafted": |-
+        True
+"""
+
+helps["storage blob generate-sas"] = """
+"type": |-
+    command
+"examples":
+-   "name": |-
+        Generate a sas token for a blob with read-only permissions.
+    "text": |
+        end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob generate-sas --account-name MyStorageAccount -c MyContainer -n MyBlob --permissions r --expiry $end --https-only
+-   "name": |-
+        Generates a shared access signature for the blob.
+    "text": |-
+        az storage blob generate-sas --container-name MyContainer --expiry 2018-02-01't'12:20'z' --permissions <permissions> --name MyBlob --output json --https-only <https-only> --start 2018-01-01't'12:20'z'
+    "crafted": |-
+        True
+"""
+
+helps["storage blob incremental-copy"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage container legal holds.
-"""
-
-helps["storage directory"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage file storage directories.
+    Manage blob incremental copy operations.
 """
 
 helps["storage blob incremental-copy start"] = """
@@ -267,6 +567,103 @@ helps["storage blob incremental-copy start"] = """
     Copies an incremental copy of a blob asynchronously.
 "long-summary": |-
     This operation returns a copy operation properties object, including a copy ID you can use to check or abort the copy operation. The Blob service copies blobs on a best-effort basis. The source blob for an incremental copy operation must be a page blob. Call get_blob_properties on the destination blob to check the status of the copy operation. The final blob will be committed when the copy completes.
+"examples":
+-   "name": |-
+        Upload all files that end with .py unless blob exists and has been modified since given date.
+    "text": |-
+        az storage blob incremental-copy start --source-container MySourceContainer --source-blob MyBlob --source-account-name MySourceAccount --source-account-key MySourceKey --source-snapshot MySnapshot --destination-container MyDestinationContainer --destination-blob MyDestinationBlob
+"""
+
+helps["storage blob lease"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage blob leases.
+"examples":
+-   "name": |-
+        Requests a new lease.
+    "text": |-
+        az storage blob lease acquire --blob-name MyBlob --container-name MyContainer --lease-duration <lease-duration>
+    "crafted": |-
+        True
+-   "name": |-
+        Releases the lease.
+    "text": |-
+        az storage blob lease release --blob-name MyBlob --container-name MyContainer --lease-id <lease-id>
+    "crafted": |-
+        True
+"""
+
+helps["storage blob list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List blobs in a given container.
+"parameters":
+-   "name": |-
+        --include
+    "short-summary": |-
+        Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.
+"examples":
+-   "name": |-
+        List all storage blobs in a container whose names start with 'foo'; will match names such as 'foo', 'foobar', and 'foo/bar'
+    "text": |-
+        az storage blob list -c MyContainer --prefix foo
+-   "name": |-
+        List blobs in a given container.
+    "text": |-
+        az storage blob list --container-name MyContainer --include  --connection-string <connection-string> --query [0]
+    "crafted": |-
+        True
+"""
+
+helps["storage blob metadata"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage blob metadata.
+"examples":
+-   "name": |-
+        Returns all user-defined metadata for the specified blob or snapshot.
+    "text": |-
+        az storage blob metadata show --container-name MyContainer --account-name MyAccount --name MyBlob
+    "crafted": |-
+        True
+"""
+
+helps["storage blob service-properties"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage blob service properties.
+"examples":
+-   "name": |-
+        Update storage blob service properties.
+    "text": |-
+        az storage blob service-properties update --404-document <404-document> --index-document <index-document> --account-name MyAccount --static-website false
+    "crafted": |-
+        True
+"""
+
+helps["storage blob service-properties delete-policy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage blob delete-policy service properties.
+"""
+
+helps["storage blob service-properties delete-policy show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the storage blob delete-policy.
+"""
+
+helps["storage blob service-properties delete-policy update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update the storage blob delete-policy.
 """
 
 helps["storage blob set-tier"] = """
@@ -289,32 +686,68 @@ helps["storage blob set-tier"] = """
         The timeout parameter is expressed in seconds. This method may make multiple calls to the Azure service and the timeout will apply to each call individually.
 "long-summary": |
     For block blob this command only supports block blob on standard storage accounts. For page blob, this command only supports for page blobs on premium accounts.
-"""
-
-helps["storage blob url"] = """
-"type": |-
-    command
-"short-summary": |-
-    Create the url to access a blob.
 "examples":
 -   "name": |-
-        Creates the url to access a blob.
+        Set the block or page tiers on the blob.
     "text": |-
-        az storage blob url --container-name MyContainer --name MyBlob
+        az storage blob set-tier --account-key <account-key> --container-name MyContainer --account-name MyAccount --tier <tier> --name MyBlob
+    "crafted": |-
+        True
 """
 
-helps["storage file"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage file shares that use the SMB 3.0 protocol.
-"""
-
-helps["storage queue list"] = """
+helps["storage blob show"] = """
 "type": |-
     command
 "short-summary": |-
-    List queues in a storage account.
+    Get the details of a blob.
+"examples":
+-   "name": |-
+        Show all properties of a blob.
+    "text": |-
+        az storage blob show -c MyContainer -n MyBlob
+-   "name": |-
+        Get the details of a blob.
+    "text": |-
+        az storage blob show --account-key <account-key> --container-name MyContainer --account-name MyAccount --query [0] --name MyBlob
+    "crafted": |-
+        True
+"""
+
+helps["storage blob upload"] = """
+"type": |-
+    command
+"short-summary": |-
+    Upload a file to a storage blob.
+"long-summary": |-
+    Creates a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
+"parameters":
+-   "name": |-
+        --type -t
+    "short-summary": |-
+        Defaults to 'page' for *.vhd files, or 'block' otherwise.
+-   "name": |-
+        --maxsize-condition
+    "short-summary": |-
+        The max length in bytes permitted for an append blob.
+-   "name": |-
+        --validate-content
+    "short-summary": |-
+        Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.
+-   "name": |-
+        --tier
+    "short-summary": |-
+        A page blob tier value to set the blob to. The tier correlates to the size of the blob and number of allowed IOPS. This is only applicable to page blobs on premium storage accounts.
+"examples":
+-   "name": |-
+        Upload to a blob.
+    "text": |-
+        az storage blob upload -f /path/to/file -c MyContainer -n MyBlob
+-   "name": |-
+        Upload a file to a storage blob.
+    "text": |-
+        az storage blob upload --no-progress  --file /path/to/file --container-name MyContainer --name MyBlob
+    "crafted": |-
+        True
 """
 
 helps["storage blob upload-batch"] = """
@@ -379,100 +812,73 @@ helps["storage blob upload-batch"] = """
         --lease-id
     "short-summary": |-
         Required if the blob has an active lease
-"""
-
-helps["storage queue metadata"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage the metadata for a storage queue.
-"""
-
-helps["storage logging"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage service logging information.
-"""
-
-helps["storage file upload-batch"] = """
-"type": |-
-    command
-"short-summary": |-
-    Upload files from a local directory to an Azure Storage File Share in a batch operation.
-"parameters":
--   "name": |-
-        --source -s
-    "type": |-
-        string
-    "short-summary": |-
-        The directory to upload files from.
--   "name": |-
-        --destination -d
-    "type": |-
-        string
-    "short-summary": |-
-        The destination of the upload operation.
-    "long-summary": |-
-        The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
--   "name": |-
-        --destination-path
-    "type": |-
-        string
-    "short-summary": |-
-        The directory where the source data is copied to. If omitted, data is copied to the root directory.
--   "name": |-
-        --pattern
-    "type": |-
-        string
-    "short-summary": |-
-        The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
--   "name": |-
-        --dryrun
-    "type": |-
-        bool
-    "short-summary": |-
-        List the files and blobs to be uploaded. No actual data transfer will occur.
--   "name": |-
-        --max-connections
-    "type": |-
-        integer
-    "short-summary": |-
-        The maximum number of parallel connections to use. Default value is 1.
--   "name": |-
-        --validate-content
-    "type": |-
-        bool
-    "short-summary": |-
-        If set, calculates an MD5 hash for each range of the file for validation.
-    "long-summary": |
-        The storage service checks the hash of the content that has arrived is identical to the hash that was sent. This is mostly valuable for detecting bitflips during transfer if using HTTP instead of HTTPS. This hash is not stored.
-"""
-
-helps["storage file list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List files and directories in a share.
-"parameters":
--   "name": |-
-        --exclude-dir
-    "type": |-
-        bool
-    "short-summary": |-
-        List only files in the given share.
 "examples":
 -   "name": |-
-        List files and directories in a share.
+        Upload all files that end with .py unless blob exists and has been modified since given date.
     "text": |-
-        az storage file list --share-name MyShare --connection-string <connection-string>
+        az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
+-   "name": |-
+        Upload files from a local directory to a blob container.
+    "text": |-
+        az storage blob upload-batch --source directory_path --destination MyContainer
+    "crafted": |-
+        True
 """
 
-helps["storage account show-connection-string"] = """
+helps["storage blob url"] = """
 "type": |-
     command
 "short-summary": |-
-    Get the connection string for a storage account.
+    Create the url to access a blob.
+"examples":
+-   "name": |-
+        Creates the url to access a blob.
+    "text": |-
+        az storage blob url --container-name MyContainer --name MyBlob
+    "crafted": |-
+        True
+"""
+
+helps["storage container"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage blob storage containers.
+"examples":
+-   "name": |-
+        Gets the permissions for the specified container.
+    "text": |-
+        az storage container show-permission --output json --connection-string <connection-string> --name MyContainer
+    "crafted": |-
+        True
+-   "name": |-
+        Returns all user-defined metadata and system properties for the specified container.
+    "text": |-
+        az storage container show --connection-string <connection-string> --name MyContainer
+    "crafted": |-
+        True
+"""
+
+helps["storage container create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a container in a storage account.
+"examples":
+-   "name": |-
+        Create a storage container in a storage account.
+    "text": |-
+        az storage container create -n MyStorageContainer
+-   "name": |-
+        Create a storage container in a storage account and return an error if the container already exists.
+    "text": |-
+        az storage container create -n MyStorageContainer --fail-on-exist
+-   "name": |-
+        Create a container in a storage account.
+    "text": |-
+        az storage container create --name MyStorageContainer
+    "crafted": |-
+        True
 """
 
 helps["storage container delete"] = """
@@ -487,25 +893,103 @@ helps["storage container delete"] = """
         Marks the specified container for deletion.
     "text": |-
         az storage container delete --account-key <account-key> --account-name MyAccount --name MyContainer
+    "crafted": |-
+        True
 """
 
-helps["storage blob service-properties"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage blob service properties.
-"""
-
-helps["storage container create"] = """
+helps["storage container exists"] = """
 "type": |-
     command
 "short-summary": |-
-    Create a container in a storage account.
+    Check for the existence of a storage container.
 "examples":
 -   "name": |-
-        Create a container in a storage account.
+        Check for the existence of a storage container.
     "text": |-
-        az storage container create --name MyStorageContainer
+        az storage container exists --account-key <account-key> --account-name MyAccount --name MyContainer
+    "crafted": |-
+        True
+"""
+
+helps["storage container generate-sas"] = """
+"type": |-
+    command
+"examples":
+-   "name": |-
+        Generate a sas token for blob container and use it to upload a blob.
+    "text": |
+        end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        sas=`az storage container generate-sas -n MyContainer --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+        az storage blob upload -n MyBlob -c MyContainer --account-name MyStorageAccount -f file.txt --sas-token $sas
+-   "name": |-
+        Generates a shared access signature for the container.
+    "text": |-
+        az storage container generate-sas --connection-string <connection-string> --expiry 2018-02-01't'12:20'z' --permissions <permissions> --name MyContainer
+    "crafted": |-
+        True
+"""
+
+helps["storage container immutability-policy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage container immutability policies.
+"""
+
+helps["storage container lease"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage blob storage container leases.
+"""
+
+helps["storage container legal-hold"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage container legal holds.
+"""
+
+helps["storage container legal-hold show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Get the legal hold properties of a container.
+"""
+
+helps["storage container list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List containers in a storage account.
+"examples":
+-   "name": |-
+        List containers in a storage account.
+    "text": |-
+        az storage container list --output json --account-name MyAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage container metadata"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage container metadata.
+"""
+
+helps["storage container policy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage container stored access policies.
+"examples":
+-   "name": |-
+        List stored access policies on a containing object.
+    "text": |-
+        az storage container policy list --account-key <account-key> --container-name MyContainer --account-name MyAccount
+    "crafted": |-
+        True
 """
 
 helps["storage cors"] = """
@@ -513,145 +997,6 @@ helps["storage cors"] = """
     group
 "short-summary": |-
     Manage storage service Cross-Origin Resource Sharing (CORS).
-"""
-
-helps["storage blob copy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
-"""
-
-helps["storage file copy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage file copy operations.
-"""
-
-helps["storage blob list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List blobs in a given container.
-"parameters":
--   "name": |-
-        --include
-    "short-summary": |-
-        Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.
-"examples":
--   "name": |-
-        List blobs in a given container.
-    "text": |-
-        az storage blob list --container-name MyContainer --include  --connection-string <connection-string> --query [0]
-"""
-
-helps["storage directory exists"] = """
-"type": |-
-    command
-"short-summary": |-
-    Check for the existence of a storage directory.
-"examples":
--   "name": |-
-        Check for the existence of a storage directory.
-    "text": |-
-        az storage directory exists --share-name MyShare --account-key <account-key> --account-name MyAccount --name MyDirectory
-"""
-
-helps["storage file delete-batch"] = """
-"type": |-
-    command
-"short-summary": |-
-    Delete files from an Azure Storage File Share.
-"parameters":
--   "name": |-
-        --source -s
-    "type": |-
-        string
-    "short-summary": |-
-        The source of the file delete operation. The source can be the file share URL or the share name.
--   "name": |-
-        --pattern
-    "type": |-
-        string
-    "short-summary": |-
-        The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
--   "name": |-
-        --dryrun
-    "type": |-
-        bool
-    "short-summary": |-
-        List the files and blobs to be deleted. No actual data deletion will occur.
-"""
-
-helps["storage file exists"] = """
-"type": |-
-    command
-"short-summary": |-
-    Check for the existence of a file.
-"examples":
--   "name": |-
-        Check for the existence of a file.
-    "text": |-
-        az storage file exists --share-name MyShare --timeout <timeout> --path <path> --connection-string <connection-string> --output json
-"""
-
-helps["storage account network-rule"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage network rules.
-"""
-
-helps["storage blob delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Mark a blob or snapshot for deletion.
-"long-summary": |
-    The blob is marked for later deletion during garbage collection.  In order to delete a blob, all of its snapshots must also be deleted. Both can be removed at the same time.
-"examples":
--   "name": |-
-        Mark a blob or snapshot for deletion.
-    "text": |-
-        az storage blob delete --container-name MyContainer --name MyBlob
--   "name": |-
-        Delete blobs from a blob container recursively.
-    "text": |-
-        az storage blob delete-batch --source <source> --pattern <pattern> --if-unmodified-since 2018-02-01't'12:20'z'
-"""
-
-helps["storage metrics update"] = """
-"type": |-
-    command
-"short-summary": |-
-    Update metrics settings for a storage account.
-"parameters":
--   "name": |-
-        --services
-    "short-summary": |-
-        The storage services from which to retrieve metrics info: (b)lob (q)ueue (t)able. Can be combined.
--   "name": |-
-        --hour
-    "short-summary": |-
-        Update the hourly metrics
--   "name": |-
-        --minute
-    "short-summary": |-
-        Update the by-minute metrics
--   "name": |-
-        --api
-    "short-summary": |-
-        Specify whether to include API in metrics. Applies to both hour and minute metrics if both are specified. Must be specified if hour or minute metrics are enabled and being updated.
--   "name": |-
-        --retention
-    "short-summary": |-
-        Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute metrics if both are specified.
-"examples":
--   "name": |-
-        Update metrics settings for a storage account.
-    "text": |-
-        az storage metrics update --retention <retention> --account-name MyAccount --hour false --api false --services <services> --minute false
 """
 
 helps["storage cors add"] = """
@@ -686,320 +1031,56 @@ helps["storage cors add"] = """
         Space-separated list of response headers to expose to CORS clients.
 """
 
-helps["storage table"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage NoSQL key-value storage.
-"""
-
-helps["storage share create"] = """
+helps["storage cors clear"] = """
 "type": |-
     command
 "short-summary": |-
-    Creates a new share under the specified account.
-"examples":
--   "name": |-
-        Creates a new share under the specified account.
-    "text": |-
-        az storage share create --quota <quota> --connection-string <connection-string> --name MyFileShare
-"""
-
-helps["storage share"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage file shares.
-"""
-
-helps["storage account generate-sas"] = """
-"type": |-
-    command
+    Remove all CORS rules from a storage account.
 "parameters":
 -   "name": |-
         --services
-    "short-summary": |-
-        The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.
--   "name": |-
-        --resource-types
-    "short-summary": |-
-        The resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.
--   "name": |-
-        --expiry
-    "short-summary": |-
-        Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.
--   "name": |-
-        --start
-    "short-summary": |-
-        Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes valid. Defaults to the time of the request.
--   "name": |-
-        --account-name
-    "short-summary": |-
-        Storage account name. Must be used in conjunction with either storage account key or a SAS token. Environment Variable: AZURE_STORAGE_ACCOUNT
+    "short-summary": |
+        The storage service(s) to remove rules from. Allowed options are: (b)lob, (f)ile, (q)ueue, (t)able. Can be combined.
 """
 
-helps["storage account"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage accounts.
-"""
-
-helps["storage share metadata"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage the metadata of a file share.
-"""
-
-helps["storage container legal-hold show"] = """
+helps["storage cors list"] = """
 "type": |-
     command
 "short-summary": |-
-    Get the legal hold properties of a container.
-"""
-
-helps["storage container list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List containers in a storage account.
-"examples":
--   "name": |-
-        List containers in a storage account.
-    "text": |-
-        az storage container list --output json --account-name MyAccount
-"""
-
-helps["storage blob exists"] = """
-"type": |-
-    command
-"short-summary": |-
-    Check for the existence of a blob in a container.
+    List all CORS rules for a storage account.
 "parameters":
 -   "name": |-
-        --name -n
-    "short-summary": |-
-        The blob name.
-"examples":
--   "name": |-
-        Check for the existence of a blob in a container.
-    "text": |-
-        az storage blob exists --account-key <account-key> --container-name MyContainer --account-name MyAccount --name MyBlob
+        --services
+    "short-summary": |
+        The storage service(s) to list rules for. Allowed options are: (b)lob, (f)ile, (q)ueue, (t)able. Can be combined.
 """
 
-helps["storage entity"] = """
+helps["storage directory"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage table storage entities.
-"""
-
-helps["storage share exists"] = """
-"type": |-
-    command
-"short-summary": |-
-    Check for the existence of a file share.
-"""
-
-helps["storage container generate-sas"] = """
-"type": |-
-    command
-"""
-
-helps["storage container exists"] = """
-"type": |-
-    command
-"short-summary": |-
-    Check for the existence of a storage container.
+    Manage file storage directories.
 "examples":
 -   "name": |-
-        Check for the existence of a storage container.
+        Creates a new directory under the specified share or parent directory.
     "text": |-
-        az storage container exists --account-key <account-key> --account-name MyAccount --name MyContainer
+        az storage directory create --share-name MyShare --connection-string <connection-string> --name MyDirectory
+    "crafted": |-
+        True
 """
 
-helps["storage container metadata"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage container metadata.
-"""
-
-helps["storage blob lease"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage blob leases.
-"""
-
-helps["storage blob delete-batch"] = """
+helps["storage directory exists"] = """
 "type": |-
     command
 "short-summary": |-
-    Delete blobs from a blob container recursively.
-"parameters":
--   "name": |-
-        --source -s
-    "type": |-
-        string
-    "short-summary": |-
-        The blob container from where the files will be deleted.
-    "long-summary": |-
-        The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
--   "name": |-
-        --pattern
-    "type": |-
-        string
-    "short-summary": |-
-        The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
--   "name": |-
-        --dryrun
-    "type": |-
-        bool
-    "short-summary": |-
-        Show the summary of the operations to be taken instead of actually deleting the file(s).
--   "name": |-
-        --if-match
-    "type": |-
-        string
-    "short-summary": |-
-        An ETag value, or the wildcard character (*). Specify this header to perform the operation only if the resource's ETag matches the value specified.
--   "name": |-
-        --if-none-match
-    "type": |-
-        string
-    "short-summary": |-
-        An ETag value, or the wildcard character (*).
-    "long-summary": |-
-        Specify this header to perform the operation only if the resource's ETag does not match the value specified. Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
-"""
-
-helps["storage account show-usage"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show the current count and limit of the storage accounts under the subscription.
-"""
-
-helps["storage file generate-sas"] = """
-"type": |-
-    command
-"""
-
-helps["storage account network-rule list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List network rules.
-"""
-
-helps["storage file url"] = """
-"type": |-
-    command
-"short-summary": |-
-    Create the url to access a file.
+    Check for the existence of a storage directory.
 "examples":
 -   "name": |-
-        Creates the url to access a file.
+        Check for the existence of a storage directory.
     "text": |-
-        az storage file url --share-name MyShare --connection-string <connection-string> --path <path>
-"""
-
-helps["storage file download-batch"] = """
-"type": |-
-    command
-"short-summary": |-
-    Download files from an Azure Storage File Share to a local directory in a batch operation.
-"parameters":
--   "name": |-
-        --source -s
-    "type": |-
-        string
-    "short-summary": |-
-        The source of the file download operation. The source can be the file share URL or the share name.
--   "name": |-
-        --destination -d
-    "type": |-
-        string
-    "short-summary": |-
-        The local directory where the files are downloaded to. This directory must already exist.
--   "name": |-
-        --pattern
-    "type": |-
-        string
-    "short-summary": |-
-        The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
--   "name": |-
-        --dryrun
-    "type": |-
-        bool
-    "short-summary": |-
-        List the files and blobs to be downloaded. No actual data transfer will occur.
--   "name": |-
-        --max-connections
-    "type": |-
-        integer
-    "short-summary": |-
-        The maximum number of parallel connections to use. Default value is 1.
--   "name": |-
-        --validate-content
-    "type": |-
-        bool
-    "short-summary": |-
-        If set, calculates an MD5 hash for each range of the file for validation.
-    "long-summary": |
-        The storage service checks the hash of the content that has arrived is identical to the hash that was sent. This is mostly valuable for detecting bitflips during transfer if using HTTP instead of HTTPS. This hash is not stored.
-"""
-
-helps["storage blob download-batch"] = """
-"type": |-
-    command
-"short-summary": |-
-    Download blobs from a blob container recursively.
-"parameters":
--   "name": |-
-        --source -s
-    "type": |-
-        string
-    "short-summary": |-
-        The blob container from where the files will be downloaded.
-    "long-summary": |-
-        The source can be the container URL or the container name. When the source is the container URL, the storage account name will be parsed from the URL.
--   "name": |-
-        --destination -d
-    "type": |-
-        string
-    "short-summary": |-
-        The existing destination folder for this download operation.
--   "name": |-
-        --pattern
-    "type": |-
-        string
-    "short-summary": |-
-        The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
--   "name": |-
-        --dryrun
-    "type": |-
-        bool
-    "short-summary": |-
-        Show the summary of the operations to be taken instead of actually downloading the file(s).
-"""
-
-helps["storage blob copy start"] = """
-"type": |-
-    command
-"short-summary": |-
-    Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
-"examples":
--   "name": |-
-        Copies a blob asynchronously.
-    "text": |-
-        az storage blob copy start --destination-blob <destination-blob> --destination-container <destination-container> --source-container <source-container> --source-blob <source-blob>
--   "name": |-
-        Copy multiple blobs or files to a blob container.
-    "text": |-
-        az storage blob copy start-batch --destination-container <destination-container> --source-account-name MySourceAccount --source-container <source-container> --account-name MyAccount
+        az storage directory exists --share-name MyShare --account-key <account-key> --account-name MyAccount --name MyDirectory
+    "crafted": |-
+        True
 """
 
 helps["storage directory list"] = """
@@ -1009,11 +1090,114 @@ helps["storage directory list"] = """
     List directories in a share.
 """
 
-helps["storage metrics"] = """
+helps["storage directory metadata"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage storage service metrics.
+    Manage file storage directory metadata.
+"""
+
+helps["storage entity"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage table storage entities.
+"examples":
+-   "name": |-
+        Get an entity from the specified table.
+    "text": |-
+        az storage entity show --table-name MyTable --row-key <row-key> --partition-key <partition-key>
+    "crafted": |-
+        True
+"""
+
+helps["storage entity insert"] = """
+"type": |-
+    command
+"short-summary": |-
+    Insert an entity into a table.
+"parameters":
+-   "name": |-
+        --table-name -t
+    "type": |-
+        string
+    "short-summary": |-
+        The name of the table to insert the entity into.
+-   "name": |-
+        --entity -e
+    "type": |-
+        list
+    "short-summary": |-
+        Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
+    "long-summary": |-
+        The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key, convert it to a fixed-width string which can be canonically sorted. For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
+-   "name": |-
+        --if-exists
+    "type": |-
+        string
+    "short-summary": |-
+        Behavior when an entity already exists for the specified PartitionKey and RowKey.
+-   "name": |-
+        --timeout
+    "short-summary": |-
+        The server timeout, expressed in seconds.
+"examples":
+-   "name": |-
+        Insert an entity into a table.
+    "text": |-
+        az storage entity insert --sas-token <sas-token> --entity <entity> --table-name MyTable --account-name MyAccount --if-exists fail
+    "crafted": |-
+        True
+"""
+
+helps["storage entity query"] = """
+"type": |-
+    command
+"short-summary": |-
+    List entities which satisfy a query.
+"parameters":
+-   "name": |-
+        --marker
+    "type": |-
+        list
+    "short-summary": |-
+        Space-separated list of key=value pairs. Must contain a nextpartitionkey and a nextrowkey.
+    "long-summary": |-
+        This value can be retrieved from the next_marker field of a previous generator object if max_results was specified and that generator has finished enumerating results. If specified, this generator will begin returning results from the point where the previous generator stopped.
+"examples":
+-   "name": |-
+        List entities which satisfy a query.
+    "text": |-
+        az storage entity query --filter <filter> --account-key <account-key> --table-name MyTable --account-name MyAccount --select <select>
+    "crafted": |-
+        True
+"""
+
+helps["storage file"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage file shares that use the SMB 3.0 protocol.
+"examples":
+-   "name": |-
+        Downloads a file to a file path, with automatic chunking and progress notifications.
+    "text": |-
+        az storage file download --share-name MyShare --connection-string <connection-string> --path <path> --dest <dest>
+    "crafted": |-
+        True
+-   "name": |-
+        Marks the specified file for deletion.
+    "text": |-
+        az storage file delete --share-name MyShare --path <path>
+    "crafted": |-
+        True
+"""
+
+helps["storage file copy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage file copy operations.
 """
 
 helps["storage file copy start-batch"] = """
@@ -1086,79 +1270,149 @@ helps["storage file copy start-batch"] = """
         The shared access signature for the source storage account.
 """
 
-helps["storage"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage Azure Cloud Storage resources.
-"""
-
-helps["storage message"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage queue storage messages.
-"""
-
-helps["storage account create"] = """
+helps["storage file delete-batch"] = """
 "type": |-
     command
 "short-summary": |-
-    Create a storage account.
-"long-summary": |
-    The SKU of the storage account defaults to 'Standard_RAGRS'.
-"examples":
--   "name": |-
-        Create a storage account.
-    "text": |-
-        az storage account create --kind BlobStorage --resource-group MyResourceGroup --sku Standard_LRS --location westus --name MyStorageAccount
-"""
-
-helps["storage blob service-properties delete-policy update"] = """
-"type": |-
-    command
-"short-summary": |-
-    Update the storage blob delete-policy.
-"""
-
-helps["storage table list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List tables in a storage account.
-"examples":
--   "name": |-
-        List tables in a storage account.
-    "text": |-
-        az storage table list --query [0] --account-name MyAccount
-"""
-
-helps["storage entity query"] = """
-"type": |-
-    command
-"short-summary": |-
-    List entities which satisfy a query.
+    Delete files from an Azure Storage File Share.
 "parameters":
 -   "name": |-
-        --marker
+        --source -s
     "type": |-
-        list
+        string
     "short-summary": |-
-        Space-separated list of key=value pairs. Must contain a nextpartitionkey and a nextrowkey.
-    "long-summary": |-
-        This value can be retrieved from the next_marker field of a previous generator object if max_results was specified and that generator has finished enumerating results. If specified, this generator will begin returning results from the point where the previous generator stopped.
+        The source of the file delete operation. The source can be the file share URL or the share name.
+-   "name": |-
+        --pattern
+    "type": |-
+        string
+    "short-summary": |-
+        The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+-   "name": |-
+        --dryrun
+    "type": |-
+        bool
+    "short-summary": |-
+        List the files and blobs to be deleted. No actual data deletion will occur.
 "examples":
 -   "name": |-
-        List entities which satisfy a query.
+        Delete files from an Azure Storage File Share.
     "text": |-
-        az storage entity query --filter <filter> --account-key <account-key> --table-name MyTable --account-name MyAccount --select <select>
+        az storage file delete-batch --account-key <account-key> --source <source> --account-name MyAccount
+    "crafted": |-
+        True
 """
 
-helps["storage blob"] = """
+helps["storage file download-batch"] = """
+"type": |-
+    command
+"short-summary": |-
+    Download files from an Azure Storage File Share to a local directory in a batch operation.
+"parameters":
+-   "name": |-
+        --source -s
+    "type": |-
+        string
+    "short-summary": |-
+        The source of the file download operation. The source can be the file share URL or the share name.
+-   "name": |-
+        --destination -d
+    "type": |-
+        string
+    "short-summary": |-
+        The local directory where the files are downloaded to. This directory must already exist.
+-   "name": |-
+        --pattern
+    "type": |-
+        string
+    "short-summary": |-
+        The pattern used for file globbing. The supported patterns are '*', '?', '[seq]', and '[!seq]'.
+-   "name": |-
+        --dryrun
+    "type": |-
+        bool
+    "short-summary": |-
+        List the files and blobs to be downloaded. No actual data transfer will occur.
+-   "name": |-
+        --max-connections
+    "type": |-
+        integer
+    "short-summary": |-
+        The maximum number of parallel connections to use. Default value is 1.
+-   "name": |-
+        --validate-content
+    "type": |-
+        bool
+    "short-summary": |-
+        If set, calculates an MD5 hash for each range of the file for validation.
+    "long-summary": |
+        The storage service checks the hash of the content that has arrived is identical to the hash that was sent. This is mostly valuable for detecting bitflips during transfer if using HTTP instead of HTTPS. This hash is not stored.
+"examples":
+-   "name": |-
+        Download files from an Azure Storage File Share to a local directory in a batch operation.
+    "text": |-
+        az storage file download-batch --account-key <account-key> --source <source> --account-name MyAccount --destination <destination> --pattern <pattern>
+    "crafted": |-
+        True
+"""
+
+helps["storage file exists"] = """
+"type": |-
+    command
+"short-summary": |-
+    Check for the existence of a file.
+"examples":
+-   "name": |-
+        Check for the existence of a file.
+    "text": |-
+        az storage file exists --share-name MyShare --timeout <timeout> --path <path> --connection-string <connection-string> --output json
+    "crafted": |-
+        True
+"""
+
+helps["storage file generate-sas"] = """
+"type": |-
+    command
+"examples":
+-   "name": |-
+        Generate a sas token for a file.
+    "text": |
+        end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
+-   "name": |-
+        Generates a shared access signature for the file.
+    "text": |-
+        az storage file generate-sas --share-name MyShare --path <path> --expiry 2018-02-01't'12:20'z' --permissions <permissions> --https-only <https-only> --account-name MyAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage file list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List files and directories in a share.
+"parameters":
+-   "name": |-
+        --exclude-dir
+    "type": |-
+        bool
+    "short-summary": |-
+        List only files in the given share.
+"examples":
+-   "name": |-
+        List files and directories in a share.
+    "text": |-
+        az storage file list --share-name MyShare --connection-string <connection-string>
+    "crafted": |-
+        True
+"""
+
+helps["storage file metadata"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage object storage for unstructured data (blobs).
+    Manage file metadata.
 """
 
 helps["storage file upload"] = """
@@ -1170,106 +1424,147 @@ helps["storage file upload"] = """
     Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
 "examples":
 -   "name": |-
+        Upload to a local file to a share.
+    "text": |-
+        az storage file upload -s MyShare -source /path/to/file
+-   "name": |-
         Upload a file to a share that uses the SMB 3.0 protocol.
     "text": |-
         az storage file upload --share-name MyShare --source <source> --metadata  --connection-string <connection-string>
+    "crafted": |-
+        True
 """
 
-helps["storage account keys"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage account keys.
-"""
-
-helps["storage blob generate-sas"] = """
-"type": |-
-    command
-"""
-
-helps["storage blob service-properties delete-policy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage blob delete-policy service properties.
-"""
-
-helps["storage blob incremental-copy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage blob incremental copy operations.
-"""
-
-helps["storage cors list"] = """
+helps["storage file upload-batch"] = """
 "type": |-
     command
 "short-summary": |-
-    List all CORS rules for a storage account.
+    Upload files from a local directory to an Azure Storage File Share in a batch operation.
+"parameters":
+-   "name": |-
+        --source -s
+    "type": |-
+        string
+    "short-summary": |-
+        The directory to upload files from.
+-   "name": |-
+        --destination -d
+    "type": |-
+        string
+    "short-summary": |-
+        The destination of the upload operation.
+    "long-summary": |-
+        The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
+-   "name": |-
+        --destination-path
+    "type": |-
+        string
+    "short-summary": |-
+        The directory where the source data is copied to. If omitted, data is copied to the root directory.
+-   "name": |-
+        --pattern
+    "type": |-
+        string
+    "short-summary": |-
+        The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
+-   "name": |-
+        --dryrun
+    "type": |-
+        bool
+    "short-summary": |-
+        List the files and blobs to be uploaded. No actual data transfer will occur.
+-   "name": |-
+        --max-connections
+    "type": |-
+        integer
+    "short-summary": |-
+        The maximum number of parallel connections to use. Default value is 1.
+-   "name": |-
+        --validate-content
+    "type": |-
+        bool
+    "short-summary": |-
+        If set, calculates an MD5 hash for each range of the file for validation.
+    "long-summary": |
+        The storage service checks the hash of the content that has arrived is identical to the hash that was sent. This is mostly valuable for detecting bitflips during transfer if using HTTP instead of HTTPS. This hash is not stored.
+"""
+
+helps["storage file url"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create the url to access a file.
+"examples":
+-   "name": |-
+        Creates the url to access a file.
+    "text": |-
+        az storage file url --share-name MyShare --connection-string <connection-string> --path <path>
+    "crafted": |-
+        True
+"""
+
+helps["storage logging"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage service logging information.
+"""
+
+helps["storage logging show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show logging settings for a storage account.
 "parameters":
 -   "name": |-
         --services
-    "short-summary": |
-        The storage service(s) to list rules for. Allowed options are: (b)lob, (f)ile, (q)ueue, (t)able. Can be combined.
+    "short-summary": |-
+        The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.
 """
 
-helps["storage file metadata"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage file metadata.
-"""
-
-helps["storage queue"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage storage queues.
-"""
-
-helps["storage blob show"] = """
+helps["storage logging update"] = """
 "type": |-
     command
 "short-summary": |-
-    Get the details of a blob.
+    Update logging settings for a storage account.
+"parameters":
+-   "name": |-
+        --services
+    "short-summary": |-
+        The storage service(s) for which to update logging info: (b)lob (q)ueue (t)able. Can be combined.
+-   "name": |-
+        --log
+    "short-summary": |-
+        The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.
+-   "name": |-
+        --retention
+    "short-summary": |-
+        Number of days for which to retain logs. 0 to disable.
+-   "name": |-
+        --version
+    "short-summary": |-
+        Version of the logging schema.
+"""
+
+helps["storage message"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage queue storage messages.
 "examples":
 -   "name": |-
-        Get the details of a blob.
+        Adds a new message to the back of the message queue.
     "text": |-
-        az storage blob show --account-key <account-key> --container-name MyContainer --account-name MyAccount --query [0] --name MyBlob
+        az storage message put --content <content> --account-name MyAccount --account-key <account-key> --queue-name MyQueue
+    "crafted": |-
+        True
 """
 
-helps["storage account delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Delete a storage account.
-"examples":
--   "name": |-
-        Delete a storage account.
-    "text": |-
-        az storage account delete --resource-group MyResourceGroup --yes  --name MyStorageAccount
-"""
-
-helps["storage container"] = """
+helps["storage metrics"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage blob storage containers.
-"""
-
-helps["storage container policy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage container stored access policies.
-"""
-
-helps["storage container immutability-policy"] = """
-"type": |-
-    group
-"short-summary": |-
-    Manage container immutability policies.
+    Manage storage service metrics.
 """
 
 helps["storage metrics show"] = """
@@ -1291,65 +1586,158 @@ helps["storage metrics show"] = """
         Show metrics settings for a storage account.
     "text": |-
         az storage metrics show --services <services> --account-name MyAccount
+    "crafted": |-
+        True
 """
 
-helps["storage account keys list"] = """
+helps["storage metrics update"] = """
 "type": |-
     command
 "short-summary": |-
-    List the primary and secondary keys for a storage account.
-"examples":
--   "name": |-
-        List the primary and secondary keys for a storage account.
-    "text": |-
-        az storage account keys list --output json --query [0] --account-name MyStorageAccount --resource-group MyResourceGroup
-"""
-
-helps["storage blob upload"] = """
-"type": |-
-    command
-"short-summary": |-
-    Upload a file to a storage blob.
-"long-summary": |-
-    Creates a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
+    Update metrics settings for a storage account.
 "parameters":
 -   "name": |-
-        --type -t
+        --services
     "short-summary": |-
-        Defaults to 'page' for *.vhd files, or 'block' otherwise.
+        The storage services from which to retrieve metrics info: (b)lob (q)ueue (t)able. Can be combined.
 -   "name": |-
-        --maxsize-condition
+        --hour
     "short-summary": |-
-        The max length in bytes permitted for an append blob.
+        Update the hourly metrics
 -   "name": |-
-        --validate-content
+        --minute
     "short-summary": |-
-        Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.
+        Update the by-minute metrics
 -   "name": |-
-        --tier
+        --api
     "short-summary": |-
-        A page blob tier value to set the blob to. The tier correlates to the size of the blob and number of allowed IOPS. This is only applicable to page blobs on premium storage accounts.
+        Specify whether to include API in metrics. Applies to both hour and minute metrics if both are specified. Must be specified if hour or minute metrics are enabled and being updated.
+-   "name": |-
+        --retention
+    "short-summary": |-
+        Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute metrics if both are specified.
 "examples":
 -   "name": |-
-        Upload files from a local directory to a blob container.
+        Update metrics settings for a storage account.
     "text": |-
-        az storage blob upload-batch --source directory_path --destination MyContainer
--   "name": |-
-        Upload a file to a storage blob.
-    "text": |-
-        az storage blob upload --no-progress  --file /path/to/file --container-name MyContainer --name MyBlob
+        az storage metrics update --retention <retention> --account-name MyAccount --hour false --api false --services <services> --minute false
+    "crafted": |-
+        True
 """
 
-helps["storage account list"] = """
+helps["storage queue"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage storage queues.
+"examples":
+-   "name": |-
+        Creates a queue under the given account.
+    "text": |-
+        az storage queue create --connection-string <connection-string> --name MyQueue
+    "crafted": |-
+        True
+-   "name": |-
+        Deletes the specified queue and any messages it contains.
+    "text": |-
+        az storage queue delete --connection-string <connection-string> --name MyQueue
+    "crafted": |-
+        True
+"""
+
+helps["storage queue list"] = """
 "type": |-
     command
 "short-summary": |-
-    List storage accounts.
+    List queues in a storage account.
+"""
+
+helps["storage queue metadata"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage the metadata for a storage queue.
+"""
+
+helps["storage queue policy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage shared access policies for a storage queue.
+"""
+
+helps["storage share"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage file shares.
 "examples":
 -   "name": |-
-        List storage accounts.
+        Returns all user-defined metadata and system properties for the specified share.
     "text": |-
-        az storage account list --query [0]
+        az storage share show --connection-string <connection-string> --name MyFileShare
+    "crafted": |-
+        True
+"""
+
+helps["storage share create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Creates a new share under the specified account.
+"examples":
+-   "name": |-
+        Creates a new share under the specified account.
+    "text": |-
+        az storage share create --quota <quota> --connection-string <connection-string> --name MyFileShare
+    "crafted": |-
+        True
+"""
+
+helps["storage share exists"] = """
+"type": |-
+    command
+"short-summary": |-
+    Check for the existence of a file share.
+"""
+
+helps["storage share generate-sas"] = """
+"type": |-
+    command
+"examples":
+-   "name": |-
+        Generate a sas token for a fileshare and use it to upload a file.
+    "text": |
+        end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        sas=`az storage share generate-sas -n MyShare --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+        az storage file upload -s MyShare --account-name MyStorageAccount --source file.txt  --sas-token $sas
+-   "name": |-
+        Generates a shared access signature for the share.
+    "text": |-
+        az storage share generate-sas --https-only <https-only> --connection-string <connection-string> --expiry 2018-02-01't'12:20'z' --permissions <permissions> --name MyFileShare
+    "crafted": |-
+        True
+"""
+
+helps["storage share list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the file shares in a storage account.
+"examples":
+-   "name": |-
+        List the file shares in a storage account.
+    "text": |-
+        az storage share list --output json --account-name MyAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage share metadata"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage the metadata of a file share.
 """
 
 helps["storage share policy"] = """
@@ -1359,22 +1747,51 @@ helps["storage share policy"] = """
     Manage shared access policies of a storage file share.
 """
 
-helps["storage share generate-sas"] = """
+helps["storage share url"] = """
 "type": |-
     command
+"short-summary": |-
+    Create a URI to access a file share.
 """
 
-helps["storage container lease"] = """
+helps["storage table"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage blob storage container leases.
+    Manage NoSQL key-value storage.
+"examples":
+-   "name": |-
+        Deletes the specified table and any data it contains.
+    "text": |-
+        az storage table delete --connection-string <connection-string> --name MyTable
+    "crafted": |-
+        True
+-   "name": |-
+        Creates a new table in the storage account.
+    "text": |-
+        az storage table create --connection-string <connection-string> --name MyTable
+    "crafted": |-
+        True
 """
 
-helps["storage account network-rule remove"] = """
+helps["storage table list"] = """
 "type": |-
     command
 "short-summary": |-
-    Remove a network rule.
+    List tables in a storage account.
+"examples":
+-   "name": |-
+        List tables in a storage account.
+    "text": |-
+        az storage table list --query [0] --account-name MyAccount
+    "crafted": |-
+        True
+"""
+
+helps["storage table policy"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage shared access policies of a storage table.
 """
 

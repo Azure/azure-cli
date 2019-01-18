@@ -6,18 +6,11 @@
 
 from knack.help_files import helps
 
-helps["cdn profile"] = """
+helps["cdn"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage CDN profiles to define an edge network.
-"""
-
-helps["cdn endpoint start"] = """
-"type": |-
-    command
-"short-summary": |-
-    Start a CDN endpoint.
+    Manage Azure Content Delivery Networks (CDNs).
 """
 
 helps["cdn custom-domain"] = """
@@ -25,34 +18,6 @@ helps["cdn custom-domain"] = """
     group
 "short-summary": |-
     Manage Azure CDN Custom Domains to provide custom host names for endpoints.
-"""
-
-helps["cdn endpoint purge"] = """
-"type": |-
-    command
-"short-summary": |-
-    Purge pre-loaded content for a CDN endpoint.
-"""
-
-helps["cdn profile list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List CDN profiles.
-"""
-
-helps["cdn profile create"] = """
-"type": |-
-    command
-"short-summary": |-
-    Create a new CDN profile.
-"parameters":
--   "name": |-
-        --sku
-    "type": |-
-        string
-    "short-summary": |
-        The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile. Defaults to Standard_Akamai.
 """
 
 helps["cdn custom-domain create"] = """
@@ -81,6 +46,25 @@ helps["cdn custom-domain create"] = """
         string
     "short-summary": |-
         The host name of the custom domain. Must be a domain name.
+"examples":
+-   "name": |-
+        Create a custom domain within an endpoint and profile.
+    "text": |
+        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \
+            -n domain-name --hostname www.example.com
+"""
+
+helps["cdn custom-domain delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete the custom domain of a CDN.
+"examples":
+-   "name": |-
+        Delete a custom domain.
+    "text": |
+        az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile \
+            -n domain-name
 """
 
 helps["cdn custom-domain show"] = """
@@ -88,13 +72,12 @@ helps["cdn custom-domain show"] = """
     command
 "short-summary": |-
     Show details for the custom domain of a CDN.
-"""
-
-helps["cdn endpoint create"] = """
-"type": |-
-    command
-"short-summary": |-
-    Create a named endpoint to connect to a CDN.
+"examples":
+-   "name": |-
+        Get the details of a custom domain.
+    "text": |
+        az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile \
+            -n domain-name
 """
 
 helps["cdn edge-node"] = """
@@ -104,27 +87,6 @@ helps["cdn edge-node"] = """
     View all available CDN edge nodes.
 """
 
-helps["cdn endpoint load"] = """
-"type": |-
-    command
-"short-summary": |-
-    Pre-load content for a CDN endpoint.
-"""
-
-helps["cdn custom-domain delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Delete the custom domain of a CDN.
-"""
-
-helps["cdn profile update"] = """
-"type": |-
-    command
-"short-summary": |-
-    Update a CDN profile.
-"""
-
 helps["cdn endpoint"] = """
 "type": |-
     group
@@ -132,25 +94,89 @@ helps["cdn endpoint"] = """
     Manage CDN endpoints.
 """
 
+helps["cdn endpoint create"] = """
+"type": |-
+    command
+"short-summary": |-
+    Create a named endpoint to connect to a CDN.
+"examples":
+-   "name": |-
+        Create an endpoint to service content for hostname over HTTP or HTTPS.
+    "text": |
+        az cdn endpoint create -g group -n endpoint --profile-name profile \
+            --origin www.example.com
+-   "name": |-
+        Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
+    "text": |
+        az cdn endpoint create -g group -n endpoint --profile-name profile \
+            --origin www.example.com 88 4444
+-   "name": |-
+        Create an endpoint with a custom domain with compression and only HTTPS.
+    "text": |
+        az cdn endpoint create -g group -n endpoint --profile-name profile \
+            --origin www.example.com --no-http --enable-compression
+"""
+
+helps["cdn endpoint delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a CDN endpoint.
+"examples":
+-   "name": |-
+        Delete a CDN endpoint.
+    "text": |
+        az cdn endpoint delete -g group -n endpoint --profile-name profile-name
+"""
+
 helps["cdn endpoint list"] = """
 "type": |-
     command
 "short-summary": |-
     List available endpoints for a CDN.
+"examples":
+-   "name": |-
+        List all endpoints within a given CDN profile.
+    "text": |
+        az cdn endpoint list -g group --profile-name profile-name
 """
 
-helps["cdn profile delete"] = """
+helps["cdn endpoint load"] = """
 "type": |-
     command
 "short-summary": |-
-    Delete a CDN profile.
+    Pre-load content for a CDN endpoint.
+"examples":
+-   "name": |-
+        Pre-load Javascript and CSS content for an endpoint.
+    "text": |
+        az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths \
+            '/scripts/app.js' '/styles/main.css'
 """
 
-helps["cdn"] = """
+helps["cdn endpoint purge"] = """
 "type": |-
-    group
+    command
 "short-summary": |-
-    Manage Azure Content Delivery Networks (CDNs).
+    Purge pre-loaded content for a CDN endpoint.
+"examples":
+-   "name": |-
+        Purge pre-loaded Javascript and CSS content.
+    "text": |
+        az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths \
+            '/scripts/app.js' '/styles/*'
+"""
+
+helps["cdn endpoint start"] = """
+"type": |-
+    command
+"short-summary": |-
+    Start a CDN endpoint.
+"examples":
+-   "name": |-
+        Start a CDN endpoint.
+    "text": |
+        az cdn endpoint start -g group -n endpoint --profile-name profile-name
 """
 
 helps["cdn endpoint stop"] = """
@@ -158,6 +184,11 @@ helps["cdn endpoint stop"] = """
     command
 "short-summary": |-
     Stop a CDN endpoint.
+"examples":
+-   "name": |-
+        Stop a CDN endpoint.
+    "text": |
+        az cdn endpoint stop -g group -n endpoint --profile-name profile-name
 """
 
 helps["cdn endpoint update"] = """
@@ -165,6 +196,16 @@ helps["cdn endpoint update"] = """
     command
 "short-summary": |-
     Update a CDN endpoint to manage how content is delivered.
+"examples":
+-   "name": |-
+        Turn off HTTP traffic for an endpoint.
+    "text": |
+        az cdn endpoint update -g group -n endpoint --profile-name profile --no-http
+-   "name": |-
+        Enable content compression for an endpoint.
+    "text": |
+        az cdn endpoint update -g group -n endpoint --profile-name profile \
+            --enable-compression
 """
 
 helps["cdn origin"] = """
@@ -174,10 +215,60 @@ helps["cdn origin"] = """
     List or show existing origins related to CDN endpoints.
 """
 
-helps["cdn endpoint delete"] = """
+helps["cdn profile"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage CDN profiles to define an edge network.
+"""
+
+helps["cdn profile create"] = """
 "type": |-
     command
 "short-summary": |-
-    Delete a CDN endpoint.
+    Create a new CDN profile.
+"parameters":
+-   "name": |-
+        --sku
+    "type": |-
+        string
+    "short-summary": |
+        The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile. Defaults to Standard_Akamai.
+"examples":
+-   "name": |-
+        Create a CDN profile using Verizon premium CDN.
+    "text": |
+        az cdn profile create -g group -n profile --sku Premium_Verizon
+"""
+
+helps["cdn profile delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a CDN profile.
+"examples":
+-   "name": |-
+        Delete a CDN profile.
+    "text": |
+        az cdn profile delete -g group -n profile
+"""
+
+helps["cdn profile list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List CDN profiles.
+"examples":
+-   "name": |-
+        List CDN profiles in a resource group.
+    "text": |
+        az cdn profile list -g group
+"""
+
+helps["cdn profile update"] = """
+"type": |-
+    command
+"short-summary": |-
+    Update a CDN profile.
 """
 

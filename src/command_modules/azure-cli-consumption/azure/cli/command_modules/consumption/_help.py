@@ -6,53 +6,18 @@
 
 from knack.help_files import helps
 
-helps["consumption reservation summary"] = """
+helps["consumption"] = """
 "type": |-
     group
 "short-summary": |-
-    List reservation summaries.
+    Manage consumption of Azure resources.
 """
 
-helps["consumption budget show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show budget for an Azure subscription.
-"""
-
-helps["consumption reservation"] = """
+helps["consumption budget"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage reservations for Azure resources.
-"""
-
-helps["consumption marketplace"] = """
-"type": |-
-    group
-"short-summary": |-
-    Inspect the marketplace usage data of an Azure subscription within a billing period.
-"""
-
-helps["consumption usage"] = """
-"type": |-
-    group
-"short-summary": |-
-    Inspect the usage of Azure resources.
-"""
-
-helps["consumption budget list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List budgets for an Azure subscription.
-"""
-
-helps["consumption pricesheet show"] = """
-"type": |-
-    command
-"short-summary": |-
-    Show the price sheet for an Azure subscription within a billing period.
+    Manage budgets for an Azure subscription.
 """
 
 helps["consumption budget create"] = """
@@ -62,11 +27,32 @@ helps["consumption budget create"] = """
     Create a budget for an Azure subscription.
 """
 
-helps["consumption budget"] = """
+helps["consumption budget delete"] = """
+"type": |-
+    command
+"short-summary": |-
+    Delete a budget for an Azure subscription.
+"""
+
+helps["consumption budget list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List budgets for an Azure subscription.
+"""
+
+helps["consumption budget show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show budget for an Azure subscription.
+"""
+
+helps["consumption marketplace"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage budgets for an Azure subscription.
+    Inspect the marketplace usage data of an Azure subscription within a billing period.
 """
 
 helps["consumption marketplace list"] = """
@@ -83,11 +69,39 @@ helps["consumption pricesheet"] = """
     Inspect the price sheet of an Azure subscription within a billing period.
 """
 
+helps["consumption pricesheet show"] = """
+"type": |-
+    command
+"short-summary": |-
+    Show the price sheet for an Azure subscription within a billing period.
+"""
+
+helps["consumption reservation"] = """
+"type": |-
+    group
+"short-summary": |-
+    Manage reservations for Azure resources.
+"""
+
 helps["consumption reservation detail"] = """
 "type": |-
     group
 "short-summary": |-
     List reservation details.
+"""
+
+helps["consumption reservation detail list"] = """
+"type": |-
+    command
+"short-summary": |-
+    List the details of a reservation by order id or reservation id.
+"""
+
+helps["consumption reservation summary"] = """
+"type": |-
+    group
+"short-summary": |-
+    List reservation summaries.
 """
 
 helps["consumption reservation summary list"] = """
@@ -100,27 +114,15 @@ helps["consumption reservation summary list"] = """
         List reservation summaries for daily or monthly by order Id or reservation id.
     "text": |-
         az consumption reservation summary list --start-date 2018-01-01 in utc --end-date 2018-02-01 in utc --query [0] --grain <grain> --reservation-order-id <reservation-order-id>
+    "crafted": |-
+        True
 """
 
-helps["consumption"] = """
+helps["consumption usage"] = """
 "type": |-
     group
 "short-summary": |-
-    Manage consumption of Azure resources.
-"""
-
-helps["consumption reservation detail list"] = """
-"type": |-
-    command
-"short-summary": |-
-    List the details of a reservation by order id or reservation id.
-"""
-
-helps["consumption budget delete"] = """
-"type": |-
-    command
-"short-summary": |-
-    Delete a budget for an Azure subscription.
+    Inspect the usage of Azure resources.
 """
 
 helps["consumption usage list"] = """
