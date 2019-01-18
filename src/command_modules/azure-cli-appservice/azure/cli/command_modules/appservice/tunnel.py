@@ -54,7 +54,7 @@ class TunnelServer(object):
         self.sock.bind((self.local_addr, self.local_port))
         if self.local_port == 0:
             self.local_port = self.sock.getsockname()[1]
-            logger.warning('Auto-selecting port: %s', self.local_port)
+            logger.info('Auto-selecting port: %s', self.local_port)
         logger.info('Finished initialization')
 
     def create_basic_auth(self):
@@ -69,7 +69,7 @@ class TunnelServer(object):
             if sock.connect_ex(('', self.local_port)) == 0:
                 logger.info('Port %s is NOT open', self.local_port)
             else:
-                logger.warning('Port %s is open', self.local_port)
+                logger.info('Port %s is open', self.local_port)
                 is_port_open = True
             return is_port_open
 
@@ -117,7 +117,7 @@ class TunnelServer(object):
                 logger.info('Websocket tracing enabled')
                 websocket.enableTrace(True)
             else:
-                logger.warning('Websocket tracing disabled, use --verbose flag to enable')
+                logger.info('Websocket tracing disabled, use --verbose flag to enable')
                 websocket.enableTrace(False)
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
@@ -133,11 +133,11 @@ class TunnelServer(object):
             debugger_thread.start()
             web_socket_thread.start()
             logger.info('Both debugger and websocket threads started...')
-            logger.warning('Successfully connected to local server..')
+            logger.info('Successfully connected to local server..')
             debugger_thread.join()
             web_socket_thread.join()
             logger.info('Both debugger and websocket threads stopped...')
-            logger.warning('Stopped local server..')
+            logger.info('Stopped local server..')
 
     def _listen_to_web_socket(self, client, ws_socket, index):
         while True:
@@ -173,7 +173,7 @@ class TunnelServer(object):
                     ws_socket.send_binary(responseData)
                     logger.info('Done sending to websocket, index: %s', index)
                 else:
-                    logger.warning('Client disconnected %s', index)
+                    logger.info('Client disconnected %s', index)
                     client.close()
                     ws_socket.close()
                     break
