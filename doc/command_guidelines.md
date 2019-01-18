@@ -111,6 +111,8 @@ The following are standard names and behavioral descriptions for CRUD commands c
 - `SHOW` - command to show the properties of a resource, backed server-side by a GET request. All `show` commands should be registered using the `show_command` or `custom_show_command` helpers to ensure `404(Not Found)` is always returning an exit code of 3.
 - `LIST` - command to list instances of a resource, backed server-side by a GET request. When there are multiple "list-type" commands within an SDK to list resources at different levels (for example, listing resources in a subscription vice in a resource group) the functionality should be exposed by have a single list command with arguments to control the behavior. For example, if `--resource-group` is provided, the command will call `list_by_resource_group`; otherwise, it will call `list_by_subscription`.
 - `DELETE` - command to delete a resource, backed server-side by a DELETE request. Delete commands return nothing on success.
+- `WAIT` - command that polls a GET endpoint until a condition is reached. If any command within a command group or subgroup exposes
+  the `--no-wait` parameter, this command should be exposed.
 
 ## Non-standard Commands
 
