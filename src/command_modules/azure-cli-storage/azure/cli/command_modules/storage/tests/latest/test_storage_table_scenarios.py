@@ -47,33 +47,40 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
     def verify_entity_operations(self, account_info, table_name):
         self.storage_cmd(
-            'storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
+            'storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something '
+            'binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
             account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
-            .assert_with_checks(JMESPathCheck('name', 'test'), JMESPathCheck('value', 'something'))
+            .assert_with_checks(JMESPathCheck('name', 'test'),
+                                JMESPathCheck('value', 'something'),
+                                JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
         self.storage_cmd(
             'storage entity show -t {} --row-key 001 --partition-key 001 --select name',
             account_info, table_name).assert_with_checks(JMESPathCheck('name', 'test'),
-                                                         JMESPathCheck('value', None))
+                                                         JMESPathCheck('value', None),
+                                                         JMESPathCheck('binaryProperty.value', None))
         self.storage_cmd('storage entity merge -t {} -e rowkey=001 partitionkey=001 name=test value=newval',
                          account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
-            .assert_with_checks(JMESPathCheck('name', 'test'), JMESPathCheck('value', 'newval'))
+            .assert_with_checks(JMESPathCheck('name', 'test'),
+                                JMESPathCheck('value', 'newval'),
+                                JMESPathCheck('binaryProperty.value', 'AAECAwQF'))
 
         self.storage_cmd('storage entity replace -t {} -e rowkey=001 partitionkey=001 cat=hat',
                          account_info, table_name)
         self.storage_cmd('storage entity show -t {} --row-key 001 --partition-key 001',
                          account_info, table_name) \
             .assert_with_checks(JMESPathCheck('cat', 'hat'), JMESPathCheck('name', None),
-                                JMESPathCheck('value', None))
+                                JMESPathCheck('value', None), JMESPathCheck('binaryProperty.value', None))
 
         self.storage_cmd('storage entity delete -t {} --row-key 001 --partition-key 001',
                          account_info, table_name)
         self.storage_cmd_negative('storage entity show -t {} --row-key 001 --partition-key 001',
                                   account_info, table_name)
-        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
+        self.storage_cmd('storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something '
+                         'binaryProperty=AAECAwQF binaryProperty@odata.type=Edm.Binary',
                          account_info, table_name)
         self.storage_cmd('storage entity insert -t {} -e rowkey=002 partitionkey=002 name=test2 value=something2',
                          account_info, table_name)
