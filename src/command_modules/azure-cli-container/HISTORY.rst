@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.3.12
+++++++
+* Adding 'az container start' command
+
 0.3.11
 ++++++
 * Updating dependencies
