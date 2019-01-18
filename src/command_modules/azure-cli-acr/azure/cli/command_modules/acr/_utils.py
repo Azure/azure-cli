@@ -292,12 +292,18 @@ def get_validate_platform(os_type, platform):
         pass
 
     platform_os = platform_os.title()
+    platform_arch = platform_arch.title()
     valid_os = [item.value.title() for item in OS]
+    valid_arch = [item.value.title() for item in Architecture]
 
     if platform_os not in valid_os:
-        raise CLIError("'{}' is not a valid value for '--os'".format(platform_os))
-
-    # TODO: Not checking the same for Arch since it could have extra string added to it, like 'arm/v7'
+        raise CLIError(
+            "'{0}' is not a valid value for '--os' flag. Valid options are {1}".format(platform_os, ','.join(valid_os))
+            )
+    if platform_arch.split('/')[0] not in valid_arch:
+        raise CLIError(
+            "'{0}' is not a valid value for architecture in '--platform' flag.  Valid options are {1}".format(platform_arch, ','.join(valid_arch))
+            )
     
     return platform_os, platform_arch
 
