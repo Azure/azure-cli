@@ -34,7 +34,7 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     SourceControlType,
     OS
 )
-from ._utils import validate_managed_registry
+from ._utils import validate_managed_registry, get_validate_platform
 from ._stream_utils import stream_logs
 from ._run_polling import get_run_with_polling
 
@@ -60,7 +60,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     git_access_token=None,
                     image_names=None,
                     status='Enabled',
-                    os_type=OS.linux.value,
+                    os_type='',
+                    platform='',
                     cpu=DEFAULT_CPU,
                     timeout=DEFAULT_TIMEOUT_IN_SEC,
                     values=None,
@@ -142,12 +143,15 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             name=base_image_trigger_name
         )
 
+    platform_os, platform_arch = get_validate_platform(os_type, platform)
+    logger.warning("OS is {0} and Architecture is {1}".format(platform_os, platform_arch))
+
     task_create_parameters = Task(
         location=registry.location,
         step=step,
         platform=PlatformProperties(
-            os=os_type,
-            architecture=Architecture.amd64.value
+            os=platform_os,
+            architecture=platform_arch
         ),
         status=status,
         timeout=timeout,
@@ -210,6 +214,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     # task parameters
                     status=None,
                     os_type=None,
+                    platform=None,
                     cpu=None,
                     timeout=None,
                     context_path=None,
@@ -330,7 +335,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
-            os=os_type
+            os=os_type, 
+            platform=platform
         ),
         agent_configuration=AgentProperties(
             cpu=cpu

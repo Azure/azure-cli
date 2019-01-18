@@ -268,6 +268,39 @@ def validate_managed_registry(cli_ctx, registry_name, resource_group_name=None, 
 
     return registry, resource_group_name
 
+def get_validate_platform(os_type, platform):
+    """Gets and validates the Platform from both flags
+    :param str os_type: The name of OS passed by user in --os flag
+    :param str platform: The name of Platform passed by user in --platform flag
+    """
+    from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture
+    # Defaults
+    platform_os = OS.linux.value
+    platform_arch = Architecture.amd64.value
+
+    if platform:
+        platform_split = platform.split('/', 1)
+        platform_os = platform_split[0] 
+        platform_arch = platform_split[1] if len(platform_split) > 1 else Architecture.amd64.value
+    
+    if os_type and platform:
+        if os_type.lower() != platform_os.lower():
+            raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'")
+    elif os_type:
+        platform_os = os_type
+    else:
+        pass
+
+    platform_os = platform_os.title()
+    valid_os = [item.value.title() for item in OS]
+
+    if platform_os not in valid_os:
+        raise CLIError("'{}' is not a valid value for '--os'".format(platform_os))
+
+    # TODO: Not checking the same for Arch since it could have extra string added to it, like 'arm/v7'
+    
+    return platform_os, platform_arch
+
 
 def validate_premium_registry(cli_ctx, registry_name, resource_group_name=None, message=None):
     """Raise CLIError if the registry in not in Premium SKU.

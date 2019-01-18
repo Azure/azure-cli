@@ -20,7 +20,7 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     OS
 )
 
-from ._utils import validate_managed_registry
+from ._utils import validate_managed_registry, get_validate_platform
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
@@ -44,7 +44,8 @@ def acr_build(cmd,
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type=OS.linux.value):
+              os_type='', 
+              platform=''):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
@@ -106,13 +107,15 @@ def acr_build(cmd,
         else:
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
+    
+    platform_os, platform_arch = get_validate_platform(os_type, platform)
+    logger.warning("OS is {0} and Architecture is {1}".format(platform_os, platform_arch))
 
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
         is_push_enabled=is_push_enabled,
         source_location=source_location,
-        platform=PlatformProperties(
-            os=os_type, architecture=Architecture.amd64.value),
+        platform=PlatformProperties(os=platform_os, architecture=platform_arch),
         docker_file_path=docker_file_path,
         timeout=timeout,
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []))
