@@ -15,7 +15,8 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     PolicyStatus,
     RunStatus,
     TaskStatus,
-    BaseImageTriggerType
+    BaseImageTriggerType,
+    DefaultAction
 )
 from azure.mgmt.containerregistry.v2018_02_01_preview.models import (
     BuildTaskStatus,
@@ -90,6 +91,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
         c.argument('platform', options_list=['--platform'], help='The platform required for this build.')
+
+    for scope in ['acr create', 'acr update']:
+        with self.argument_context(scope, arg_group='Network Rule') as c:
+            c.argument('default_action', arg_type=get_enum_type(DefaultAction),
+                       help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
 
     with self.argument_context('acr import') as c:
         c.argument('source', help="The source identifier in the format '[registry.azurecr.io/]repository[:tag]' or '[registry.azurecr.io/]repository@digest'.")
@@ -253,3 +259,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr helm push') as c:
         c.positional('chart_package', help="The helm chart package.", completer=FilesCompleter())
         c.argument('force', help='Overwrite the existing chart package.', action='store_true')
+
+    with self.argument_context('acr network-rule') as c:
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('vnet_name', help='Name of a virtual network.')
+        c.argument('ip_address', help='IPv4 address or CIDR range.')

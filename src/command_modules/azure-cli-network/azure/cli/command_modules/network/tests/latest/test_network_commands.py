@@ -857,8 +857,10 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route get-stats --resource-group {rg} --name {er}',
                  checks=self.check('type(@)', 'object'))
 
-        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test',
-                 checks=self.check('tags.test', 'Test'))
+        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test --bandwidth 100', checks=[
+            self.check('tags.test', 'Test'),
+            self.check('serviceProviderProperties.bandwidthInMbps', 100)
+        ])
 
         self.cmd('network express-route update -g {rg} -n {er} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))

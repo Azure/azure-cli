@@ -74,6 +74,11 @@ helps['acr helm repo'] = """
     short-summary: Manage helm chart repositories for Azure Container Registries.
     """
 
+helps['acr network-rule'] = """
+    type: group
+    short-summary: Manage network rules for Azure Container Registries.
+    """
+
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if an Azure Container Registry name is valid and available for use.
@@ -758,4 +763,43 @@ helps['acr helm repo add'] = """
         - name: Add a helm chart repository from an Azure Container Registry to manage helm charts.
           text: >
             az acr helm repo add -n MyRegistry
+"""
+
+helps['acr network-rule list'] = """
+    type: command
+    short-summary: List network rules.
+    examples:
+        - name: List network rules for a registry.
+          text: >
+            az acr network-rule list -n MyRegistry
+"""
+
+helps['acr network-rule add'] = """
+    type: command
+    short-summary: Add a network rule.
+    examples:
+        - name: Add a rule to allow access for a subnet in the same resource group as the registry.
+          text: >
+            az acr network-rule add -n MyRegistry --vnet-name myvnet --subnet mysubnet
+        - name: Add a rule to allow access for a subnet in a different subscription or resource group.
+          text: >
+            az acr network-rule add -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+        - name: Add a rule to allow access for a specific IP address-range.
+          text: >
+            az acr network-rule add -n MyRegistry --ip-address 23.45.1.0/24
+"""
+
+helps['acr network-rule remove'] = """
+    type: command
+    short-summary: Remove a network rule.
+    examples:
+        - name: Remove a rule that allows access for a subnet in the same resource group as the registry.
+          text: >
+            az acr network-rule remove -n MyRegistry --vnet-name myvnet --subnet mysubnet
+        - name: Remove a rule that allows access for a subnet in a different subscription or resource group.
+          text: >
+            az acr network-rule remove -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+        - name: Remove a rule that allows access for a specific IP address-range.
+          text: >
+            az acr network-rule remove -n MyRegistry --ip-address 23.45.1.0/24
 """
