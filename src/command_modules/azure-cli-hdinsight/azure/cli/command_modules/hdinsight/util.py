@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-MSI_LOCAL_ID = '[system]'
-
 
 def get_key_for_storage_account(cmd, storage_account):  # pylint: disable=unused-argument
     from ._client_factory import cf_storage
@@ -54,18 +52,12 @@ def get_storage_account_endpoint(cmd, storage_account, dfs):
 
 def build_identities_info(identities):
     from azure.mgmt.hdinsight.models import ClusterIdentity, ResourceIdentityType
-    identities = identities or []
-    identity_type = ResourceIdentityType.none
-    if not identities or MSI_LOCAL_ID in identities:
-        identity_type = ResourceIdentityType.system_assigned
-    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
-    if external_identities and identity_type == ResourceIdentityType.system_assigned:
-        identity_type = ResourceIdentityType.system_assigned_user_assigned
-    elif external_identities:
+    identity = None
+    if identities:
         identity_type = ResourceIdentityType.user_assigned
-    identity = ClusterIdentity(type=identity_type)
-    if external_identities:
-        identity.user_assigned_identities = {e: {} for e in external_identities}
+        identity = ClusterIdentity(type=identity_type)
+        identity.user_assigned_identities = {e: {} for e in identities}
+
     return identity
 
 

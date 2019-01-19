@@ -58,22 +58,16 @@ def validate_subnet(cmd, namespace):
 def validate_msi(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id
-    from knack.util import CLIError
-    from .util import MSI_LOCAL_ID
 
     if namespace.assign_identity is not None:
-        identities = namespace.assign_identity or []
-        for (idx, identity) in enumerate(identities):
-            if identity == MSI_LOCAL_ID:
-                raise CLIError('usage error: System-assigned managed identity is not supported')
-            elif not is_valid_resource_id(identity):
-                identities[idx] = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=namespace.resource_group_name,
-                    namespace='Microsoft.ManagedIdentity',
-                    type='userAssignedIdentities',
-                    name=identity
-                )
+        if not is_valid_resource_id(namespace.assign_identity):
+            namespace.assign_identity = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.ManagedIdentity',
+                type='userAssignedIdentities',
+                name=namespace.assign_identity
+            )
 
 
 # Validate domain service.

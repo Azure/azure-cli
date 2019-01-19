@@ -140,8 +140,8 @@ def load_arguments(self, _):
                    arg_group='Customer Managed Key', help='Algorithm identifier for encryption.')
 
         # Managed Service Identity
-        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', validator=validate_msi,
-                   help="The name or ID of user assigned identities.")
+        c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,
+                   help="The name or ID of user assigned identity.")
 
     # application
     with self.argument_context('hdinsight application') as c:

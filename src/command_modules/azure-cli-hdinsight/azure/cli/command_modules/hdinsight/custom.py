@@ -30,7 +30,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    assign_identity=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
                    encryption_algorithm='RSA-OAEP', esp=False):
-    from .util import MSI_LOCAL_ID, build_identities_info, build_virtual_network_profile, parse_domain_name, \
+    from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
@@ -218,8 +218,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             for s in additional_storage_accounts
         ]
 
-    cluster_identity = build_identities_info(assign_identity)
-    msi_resource_id = assign_identity and next((x for x in assign_identity if x != MSI_LOCAL_ID), None)
+    cluster_identity = assign_identity and build_identities_info([assign_identity])
 
     domain_name = domain and parse_domain_name(domain)
     if not ldaps_urls and domain_name:
@@ -233,7 +232,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         domain_user_password=cluster_admin_password,
         cluster_users_group_dns=cluster_users_group_dns,
         aadds_resource_id=domain,
-        msi_resource_id=msi_resource_id
+        msi_resource_id=assign_identity
     )
 
     disk_encryption_properties = encryption_vault_uri and DiskEncryptionProperties(
@@ -241,7 +240,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         key_name=encryption_key_name,
         key_version=encryption_key_version,
         encryption_algorithm=encryption_algorithm,
-        msi_resource_id=msi_resource_id
+        msi_resource_id=assign_identity
     )
 
     create_params = ClusterCreateParametersExtended(
