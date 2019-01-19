@@ -54,7 +54,7 @@ class TunnelServer(object):
         self.sock.bind((self.local_addr, self.local_port))
         if self.local_port == 0:
             self.local_port = self.sock.getsockname()[1]
-            logger.info('Auto-selecting port: %s', self.local_port)
+            logger.warning('Auto-selecting port: %s', self.local_port)
         logger.info('Finished initialization')
 
     def create_basic_auth(self):
@@ -73,7 +73,7 @@ class TunnelServer(object):
                 is_port_open = True
             return is_port_open
 
-    def is_port_set_to_default(self):
+    def is_webapp_up(self):
         import certifi
         import urllib3
         try:
@@ -97,10 +97,10 @@ class TunnelServer(object):
         msg = r.read().decode('utf-8')
         logger.info('Status response message: %s', msg)
         if 'FAIL' in msg.upper():
-            logger.warning('WARNING - Remote debugging may not be setup properly. Reponse content: %s', msg)
+            logger.info('WARNING - Remote debugging may not be setup properly. Reponse content: %s', msg)
+            return False
         if '2222' in msg:
             return True
-        return False
 
     def _listen(self):
         self.sock.listen(100)
