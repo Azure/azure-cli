@@ -216,9 +216,6 @@ def assert_help_objs_equal(old_help, new_help):
         assert_true_or_warn (old_ex.command, new_ex.command)
         assert_true_or_warn (old_ex.long_summary, new_ex.long_summary)
 
-    assert_true_or_warn(old_help.deprecate_info, new_help.deprecate_info)
-    assert_true_or_warn(old_help.preview_info, new_help.preview_info)
-
     # group and not command, we are done checking.
     if old_help.type == "group":
         return
