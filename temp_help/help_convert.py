@@ -6,7 +6,6 @@
 import sys
 from importlib import import_module
 import os
-import subprocess
 import difflib
 from pprint import pprint
 
@@ -32,6 +31,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 failed = 0
 
 loaded_helps = {}
+help_to_mods = {}
 
 
 def get_all_help(cli_ctx):
@@ -116,24 +116,30 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     invoker.parser.load_command_table(invoker.commands_loader)
 
 # this must be called before loading any command modules. Otherwise helps object will have every help.py file's contents
-def convert(target_mod_file, mod_name, test=False):
+def convert(target_mod_or_file, mod_name, test=False):
     global loaded_helps
-    try:
-        target_mod = import_module(target_mod_file)
-    except ModuleNotFoundError as e: # azure.cli.command_modules.core
-        print(e)
-        print("\n")
-        return (None, None)
-    help_dict = target_mod.helps
-    loader_file_path = os.path.abspath(target_mod.__file__)
+    global help_to_mods
 
-    out_file = os.path.join(os.path.dirname(loader_file_path), "help.yaml")
+    if os.path.exists(target_mod_or_file):
+        out_file = target_mod_or_file
+        target_mod = import_module("{}.{}._help".format(PACKAGE_PREFIX, mod_name))
+
+    else: # else not a file, but a mod.
+        try:
+            target_mod = import_module(target_mod_or_file)
+        except ModuleNotFoundError as e: # azure.cli.command_modules.core
+            print(e)
+            return (None, None)
+        loader_file_path = os.path.abspath(target_mod.__file__)
+        out_file = os.path.join(os.path.dirname(loader_file_path), "help.yaml")
+
     if test and os.path.exists(out_file):
         print("{}/help.yaml already exists. Will remove and rewrite: {}\n".format(mod_name, out_file))
         os.remove(out_file)
 
     # the modules keys are keys added to helps object from fresh import....
-    mod_help = {k: v for k, v in help_dict.items() if k not in loaded_helps}
+    help_dict = target_mod.helps
+    mod_help = {k: v for k, v in help_dict.items() if k not in loaded_helps and mod_name not in help_to_mods.get(k, [None])}
 
     result = _get_new_yaml_dict(mod_help)
 
@@ -141,8 +147,26 @@ def convert(target_mod_file, mod_name, test=False):
     for key, value in mod_help.items():
         loaded_helps[key] = value
 
+    for cmd in mod_help.keys():
+        mods = help_to_mods.get(cmd, [])
+        help_to_mods[cmd] = mods + [mod_name]
+
     return out_file, result
 
+def delete(target_mods):
+    print(target_mods)
+    for mod_name in target_mods:
+        try:
+            target_mod = import_module(mod_name)
+        except ModuleNotFoundError as e:  # azure.cli.command_modules.core
+            print(e)
+            print("SKIPPING...")
+            continue
+        loader_file_path = os.path.abspath(target_mod.__file__)
+        yaml_file = os.path.join(os.path.dirname(loader_file_path), "help.yaml")
+        if os.path.exists(yaml_file):
+            print("Removing {}".format(yaml_file))
+            os.remove(yaml_file)
 
 def get_all_mod_names():
     installed_dists = get_installed_cli_distributions()
@@ -284,7 +308,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     test = False
 
-    msg = 'Usage: python help_convert.py (MOD | --test | MOD "--test")\n'
+    msg = 'Usage: python help_convert.py (MOD | --test | --delete | --all | MOD --test)\n'
 
     if "--help" in args or "-h" in args:
         print(msg)
@@ -300,15 +324,25 @@ if __name__ == "__main__":
             test = True
 
     target_mods = None
-    if args[0].lower() == "--test":
+    if args[0].lower() in ["--test", "--all"]:
         # convert all modules and test
         mod_names = get_all_mod_names()
         target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
-        test = True
+        if args[0].lower() == "--test":
+            test = True
+    elif args[0].lower() == "--delete":
+        mod_names = get_all_mod_names()
+        target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
+        delete(target_mods)
+        exit(0)
     else:
         mod_names = [args[0]]
         # attempt to find and load the desired module.
-        target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, args[0])]
+        if "_help.py" not in mod_names[0]:
+            target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod_names[0])]
+        else:
+            target_mods = [mod_names[0]]
+            mod_names = [os.path.split(os.path.split(mod_names[0])[0])[1]] # if help.py, get mod name
 
     if test:
         # convert _help.py contents to help.yaml. Write out help.yaml
@@ -346,35 +380,25 @@ if __name__ == "__main__":
         for command in old_loaded_help:
             diff_dict[command] = (old_loaded_help[command], new_loaded_help[command])
 
-        print("Verifying that help objects are the same for {0}/_help.py and {0}/help.yaml.".format(args[0]))
-        # verify that contents the same
-        print(len(diff_dict))
-        print(len(loaded_helps))
+        print("Verifying that help objects are the same for _help.py and help.yaml.")
         assert len(diff_dict) == len(loaded_helps)
         for old, new in diff_dict.values():
             assert_help_objs_equal(old, new)
 
-        print("Running linter on {}.".format(args[0]))
-        linter_args = ["azdev", "cli-lint", "--module", args[0]]
-        completed_process = subprocess.run(linter_args, stderr=subprocess.STDOUT)
-        if completed_process.returncode != 0:
-            if failed:
-                print("{} assertion(s) failed.".format(failed))
-
-            print("Done. Linter failed for {}/help.yaml.".format(args[0]))
-            exit(1)
-
-        if not failed:
-            print("Done! Successfully tested and generated {0}/help.yaml in {0} module".format(args[0]))
-        else:
-            print("Done. {} assertion(s) failed.".format(failed))
-            exit(1)
-
     else:
-        print("Generating help.yaml file...")
-        out_file, result = convert(target_mods[0], args[0])
-        print(out_file)
-        print(result)
-        with open(out_file, "w") as f:
-            yaml.dump(result, f)
-        print("Done! Successfully generated {0}/help.yaml in {0} module.".format(args[0]))
+        if len(target_mods) == 1:
+            print("Generating help.yaml file...")
+            out_file, result = convert(target_mods[0], mod_names[0])
+            with open(out_file, "w") as f:
+                yaml.dump(result, f)
+            print("Done! Successfully generated {0}/help.yaml in {0} module.".format(mod_names[0]))
+        else:
+            print("Generating help.yaml files...")
+            for mod, mod_name in zip(target_mods, mod_names):
+                out_file, result = convert(mod, mod_name)
+                if out_file is None or result is None:
+                    continue
+                with open(out_file, "w") as f:
+                    yaml.dump(result, f)
+                print("Successfully generated {0}/help.yaml in {0} module.".format(mod_name))
+
