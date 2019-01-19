@@ -330,11 +330,17 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName"
             )
 
+    platform_os = None
+    platform_arch = None
+    if os_type or platform:
+        platform_os, platform_arch = get_validate_platform(os_type, platform)
+        logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
+
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
-            os=os_type,
-            platform=platform
+            os=platform_os if platform_os else os_type,
+            architecture=platform_arch if platform_arch else None
         ),
         agent_configuration=AgentProperties(
             cpu=cpu
