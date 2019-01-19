@@ -19,6 +19,8 @@ from azure.cli.core.file_util import _store_parsers, _is_group
 try:
     from ruamel.yaml import YAML
     yaml = YAML()
+    yaml.width = 1000 # prevents wrapping around in dumper.
+    yaml.allow_duplicate_keys = True # TODO: line
 except ImportError as e:
     msg = "{}\npip install ruamel.Yaml to use this script.".format(e)
     exit(msg)
@@ -116,13 +118,18 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
 # this must be called before loading any command modules. Otherwise helps object will have every help.py file's contents
 def convert(target_mod_file, mod_name, test=False):
     global loaded_helps
-    target_mod = import_module(target_mod_file)
+    try:
+        target_mod = import_module(target_mod_file)
+    except ModuleNotFoundError as e: # azure.cli.command_modules.core
+        print(e)
+        print("\n")
+        return (None, None)
     help_dict = target_mod.helps
     loader_file_path = os.path.abspath(target_mod.__file__)
 
     out_file = os.path.join(os.path.dirname(loader_file_path), "help.yaml")
     if test and os.path.exists(out_file):
-        print("{}/help.yaml already exists.\nwill remove and rewrite: {}\n".format(mod_name, out_file))
+        print("{}/help.yaml already exists. Will remove and rewrite: {}\n".format(mod_name, out_file))
         os.remove(out_file)
 
     # the modules keys are keys added to helps object from fresh import....
@@ -297,6 +304,7 @@ if __name__ == "__main__":
         # convert all modules and test
         mod_names = get_all_mod_names()
         target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
+        test = True
     else:
         mod_names = [args[0]]
         # attempt to find and load the desired module.
@@ -309,6 +317,8 @@ if __name__ == "__main__":
 
         for mod, mod_name in zip(target_mods, mod_names):
             file, help_dict = convert(mod, mod_name, test=True)
+            if file is None or help_dict is None:
+                continue
             file_to_help[file] = help_dict
 
         print("Loading Commands...")
@@ -322,7 +332,7 @@ if __name__ == "__main__":
 
         print("Now writing out new help.yaml file contents...")
         for file, help_dict in file_to_help.items():
-            print("Writing {}...".format(file))
+            print("Writing {} ...".format(file))
             with open(file, "w") as f:
                 yaml.dump(help_dict, f)
 
@@ -363,6 +373,8 @@ if __name__ == "__main__":
     else:
         print("Generating help.yaml file...")
         out_file, result = convert(target_mods[0], args[0])
+        print(out_file)
+        print(result)
         with open(out_file, "w") as f:
             yaml.dump(result, f)
         print("Done! Successfully generated {0}/help.yaml in {0} module.".format(args[0]))
