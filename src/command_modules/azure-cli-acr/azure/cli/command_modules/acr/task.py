@@ -142,7 +142,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         )
 
     platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
+    logger.info("OS is %s and Architecture is %s", platform_os, platform_arch)
 
     task_create_parameters = Task(
         location=registry.location,
@@ -334,7 +334,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     platform_arch = None
     if os_type or platform:
         platform_os, platform_arch = get_validate_platform(os_type, platform)
-        logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
+        logger.info("OS is %s and Architecture is %s", platform_os, platform_arch)
 
     taskUpdateParameters = TaskUpdateParameters(
         status=status,

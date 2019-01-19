@@ -71,7 +71,7 @@ def acr_run(cmd,
         logger.warning("Sending context to registry: %s...", registry_name)
 
     platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.warning("OS is %s and Architecture is %s", platform_os, platform_arch)
+    logger.info("OS is %s and Architecture is %s", platform_os, platform_arch)
 
     request = FileTaskRunRequest(
         task_file_path=file,
