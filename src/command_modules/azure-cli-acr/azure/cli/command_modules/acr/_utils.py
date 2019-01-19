@@ -299,11 +299,12 @@ def get_validate_platform(os_type, platform):
 
     if platform_os not in valid_os:
         raise CLIError(
-            "'{0}' is not a valid value for '--os' flag. Valid options are {1}".format(platform_os, ','.join(valid_os))
+            "'{0}' is not a valid value for OS specified in --os or --platform. " \
+            "Valid options are {1}".format(platform_os, ','.join(valid_os))
         )
     if platform_arch.split('/')[0] not in valid_arch:
         raise CLIError(
-            "'{0}' is not a valid value for architecture in '--platform' flag. " \
+            "'{0}' is not a valid value for Architecture specified in --platform. " \
             "Valid options are {1}".format(platform_arch, ','.join(valid_arch))
         )
 
