@@ -4,7 +4,7 @@ Release History
 ===============
 2.1.14
 ++++++
-* Add support for Platform flag.
+* Add --platform parameter for `acr build`, `acr task create` and `acr task update` commands
 
 2.1.13
 ++++++
