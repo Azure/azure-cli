@@ -30,6 +30,15 @@ helps['hdinsight create'] = """
               --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
               --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
               --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com
+        - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/en-us/azure/hdinsight/kafka/apache-kafka-byok.
+          text: |-
+             az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
+             -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\
+             --storage-account MyStorageAccount \\
+             --encryption-key-name kafkaClusterKey \\
+             --encryption-key-version 00000000000000000000000000000000 \\
+             --encryption-vault-uri https://MyKeyVault.vault.azure.net \\
+             --assign-identity MyMSI
 """
 
 helps['hdinsight list'] = """

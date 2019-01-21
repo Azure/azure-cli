@@ -49,8 +49,7 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
-        raise CLIError(
-            'usage error: [--subnet ID | --subnet NAME --vnet-name NAME]')
+        raise CLIError('usage error: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
 
 
