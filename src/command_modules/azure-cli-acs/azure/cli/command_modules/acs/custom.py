@@ -58,19 +58,20 @@ from azure.mgmt.containerservice.v2018_03_31.models import ManagedCluster
 from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.models import OpenShiftAgentPoolProfileRole
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProvider
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterAADIdentityProvider
-from azure.mgmt.containerservice.models import OpenShiftManagedCluster
-from azure.mgmt.containerservice.models import OpenShiftRouterProfile
-from azure.mgmt.containerservice.models import OpenShiftManagedClusterAuthProfile
-from azure.mgmt.containerservice.models import NetworkProfile
+# from azure.mgmt.containerservice.models import OpenShiftManagedClusterAgentPoolProfile
+# from azure.mgmt.containerservice.models import OpenShiftAgentPoolProfileRole
+# from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProvider
+# from azure.mgmt.containerservice.models import OpenShiftManagedClusterAADIdentityProvider
+# from azure.mgmt.containerservice.models import OpenShiftManagedCluster
+# from azure.mgmt.containerservice.models import OpenShiftRouterProfile
+# from azure.mgmt.containerservice.models import OpenShiftManagedClusterAuthProfile
+# from azure.mgmt.containerservice.models import NetworkProfile
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
+from ._client_factory import _osa_client_factory
 
 logger = get_logger(__name__)
 
@@ -2128,13 +2129,16 @@ def _ensure_aks_service_principal(cli_ctx,
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
 
-def _ensure_osa_aad(cli_ctx,
+def _ensure_osa_aad(cmd,
                     aad_client_app_id=None,
                     aad_client_app_secret=None,
                     aad_tenant_id=None,
                     identifier=None,
                     name=None, update=False):
-    rbac_client = get_graph_rbac_management_client(cli_ctx)
+
+    OpenShiftManagedClusterAADIdentityProvider = cmd.get_models('OpenShiftManagedClusterAADIdentityProvider')
+    
+    rbac_client = get_graph_rbac_management_client(cmd.cli_ctx)
     if not aad_client_app_id:
         if not aad_client_app_secret and update:
             aad_client_app_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
@@ -2175,7 +2179,7 @@ def _ensure_osa_aad(cli_ctx,
             aad_client_app_secret = 'whatever'
     # Get the TenantID
     if aad_tenant_id is None:
-        profile = Profile(cli_ctx=cli_ctx)
+        profile = Profile(cli_ctx=cmd.cli_ctx)
         _, _, aad_tenant_id = profile.get_login_credentials()
     return OpenShiftManagedClusterAADIdentityProvider(
         client_id=aad_client_app_id,
@@ -2353,7 +2357,7 @@ def osa_list(cmd, client, resource_group_name=None):
     return _remove_osa_nulls(list(managed_clusters))
 
 
-def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
+def openshift_create(cmd, resource_group_name, name,  # pylint: disable=too-many-locals
                      fqdn,
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
@@ -2366,6 +2370,13 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False):
+
+    OpenShiftManagedClusterAgentPoolProfile, OpenShiftAgentPoolProfileRole = cmd.get_models(
+        'OpenShiftManagedClusterAgentPoolProfile', 'OpenShiftAgentPoolProfileRole')
+    OpenShiftManagedClusterIdentityProvider, OpenShiftManagedClusterAADIdentityProvider = cmd.get_models(
+                'OpenShiftManagedClusterIdentityProvider', 'OpenShiftManagedClusterAADIdentityProvider')
+    OpenShiftManagedCluster, OpenShiftRouterProfile, OpenShiftManagedClusterAuthProfile, NetworkProfile = cmd.get_models(
+        'OpenShiftManagedCluster', 'OpenShiftRouterProfile', 'OpenShiftManagedClusterAuthProfile', 'NetworkProfile')
 
     if location is None:
         location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -2403,10 +2414,11 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
     update_aad_secret = False
     try:
-        client.get(resource_group_name, name)
+        client = _osa_client_factory(cmd.cli_ctx)
+        client.open_shift_managed_clusters.get(resource_group_name, name)
     except CloudError:
         update_aad_secret = True
-    osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
+    osa_aad_identity = _ensure_osa_aad(cmd,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
                                        aad_tenant_id=aad_tenant_id, identifier=fqdn,
@@ -2446,7 +2458,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     try:
         # long_running_operation_timeout=300
-        return sdk_no_wait(no_wait, client.create_or_update,
+        client = _osa_client_factory(cmd.cli_ctx)
+        return sdk_no_wait(no_wait, client.open_shift_managed_clusters.create_or_update,
                            resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
     except CloudError as ex:
         raise ex

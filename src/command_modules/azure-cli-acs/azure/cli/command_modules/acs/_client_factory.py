@@ -6,6 +6,12 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
+def _osa_client_factory(cli_ctx, **kwargs):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_OSA,
+                                   subscription_id=kwargs.get('subscription_id'),
+                                   aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 def cf_compute_service(cli_ctx, *_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
@@ -19,8 +25,9 @@ def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
 
 
-def cf_openshift_managed_clusters(cli_ctx, *_):
-    return get_osa_container_service_client(cli_ctx).open_shift_managed_clusters
+def cf_openshift_managed_clusters(cli_ctx, _):
+    #return get_osa_container_service_client(cli_ctx).open_shift_managed_clusters
+    return _osa_client_factory(cli_ctx).open_shift_managed_clusters
 
 
 def cf_resource_groups(cli_ctx, subscription_id=None):
@@ -50,10 +57,10 @@ def get_container_service_client(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
 
 
-def get_osa_container_service_client(cli_ctx, **_):
-    from azure.mgmt.containerservice import ContainerServiceClient
+# def get_osa_container_service_client(cli_ctx, **_):
+#     from azure.mgmt.containerservice import ContainerServiceClient
 
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
+#     return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):
