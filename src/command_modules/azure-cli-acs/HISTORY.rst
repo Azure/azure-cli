@@ -1,11 +1,6 @@
 .. :changelog:
 
 Release History
-===============
-
-2.3.15
-++++++
-* Addon name case insenstive in "az aks enable-addons /disable-addons"
 
 2.3.14
 ++++++
@@ -14,6 +9,7 @@ Release History
 * Minor fixes
 * Add support for new ACI regions
 * Support Service Principal updating operation using "az aks update-credentials --reset-service-principal"
+* Addon name case insenstive in "az aks enable-addons /disable-addons"
 
 2.3.13
 ++++++
