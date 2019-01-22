@@ -37,8 +37,8 @@ def acr_run(cmd,
             no_wait=False,
             timeout=None,
             resource_group_name=None,
-            os_type='',
-            platform=''):
+            os_type=None,
+            platform=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
