@@ -12,11 +12,12 @@ if __name__ == "__main__":
         with open("mod.txt", "r") as f:
             for line in f:
                 module_names.append(f.readline())
-
+        os.remove("mod.txt")
         with open(os.devnull, 'w') as devnull: # silence stdout by redirecting to devnull
             for mod in module_names:
                 args = ["python", "./help_convert.py", mod, "--test"]
                 subprocess.run(args, stdout=devnull)
+
 
     elif args[0].lower() == "--extensions":
         pass

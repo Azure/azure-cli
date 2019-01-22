@@ -285,13 +285,13 @@ if __name__ == "__main__":
     args = [arg.strip() for arg in sys.argv[1:]]
     test = False
 
-    msg = 'Usage: python help_convert.py (MOD | --test | --delete | --all | MOD --test | MOD --package {myext-package})\n'
+    msg = 'Usage: python help_convert.py (MOD | --test | --delete | --all | MOD --test | path/help.py --package {myext.package})\n'
 
     if "--help" in args or "-h" in args:
         print(msg)
         exit(0)
 
-    if len(args) > 2 or len(args) == 0:
+    if len(args) > 3 or len(args) == 0:
         exit(msg)
 
     if len(args) == 2:
@@ -299,6 +299,11 @@ if __name__ == "__main__":
             exit(msg)
         else:
             test = True
+    if len(args) == 3:
+        if not args[0].lower().endswith("_help.py") or args[1].lower() != "--package":
+            exit(msg)
+        else:
+            raise NotImplementedError
 
     target_mods = None
     # if args[0].lower() in ["--test", "--all"]:

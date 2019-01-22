@@ -13,8 +13,9 @@ logger = get_logger(__name__)
 
 try:
     ABC = abc.ABC
-except AttributeError: # Python 2.7, abc exists, but not ABC
+except AttributeError:  # Python 2.7, abc exists, but not ABC
     ABC = abc.ABCMeta('ABC', (object,), {'__slots__': ()})
+
 
 # BaseHelpLoader defining versioned loader interface. Also contains some helper methods.
 class BaseHelpLoader(ABC):
@@ -51,6 +52,7 @@ class BaseHelpLoader(ABC):
     @abc.abstractmethod
     def load_raw_data(self, help_obj, parser):
         pass
+
     @abc.abstractmethod
     def load_help_body(self, help_obj):
         pass
@@ -129,6 +131,7 @@ class BaseHelpLoader(ABC):
                         text = f.read()
                         return _parse_yaml_from_string(text, help_file_path)
         return None
+
 
 class HelpLoaderV0(BaseHelpLoader):
 

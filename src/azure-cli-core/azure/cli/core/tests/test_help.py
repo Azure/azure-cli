@@ -25,9 +25,11 @@ from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_
 # Command loader module
 MOCKED_COMMAND_LOADER_MOD = "test_help_loaders"
 
+
 # mock command loader method so that only the mock command loader can be loaded.
 def mock_load_command_loader(loader, args, name, prefix):
     return _load_command_loader(loader, args, name, "azure.cli.core.tests.")
+
 
 # mock inspect.getfile to discover directory containing help files.
 def get_mocked_inspect_getfile(expected_arg, return_value):
@@ -38,6 +40,7 @@ def get_mocked_inspect_getfile(expected_arg, return_value):
         else:
             return inspect.getfile(obj)
     return inspect_getfile
+
 
 # mock getmembers so test help loader can be injected into AzCliHelp class' versioned loader list
 def mock_inspect_getmembers(object, predicate=None):
@@ -59,6 +62,7 @@ def _store_parsers(parser, d):
             for c in s.choices.values():
                 d[_get_parser_name(c)] = c
                 _store_parsers(c, d)
+
 
 def _is_group(parser):
     return getattr(parser, 'choices', None) is not None
@@ -135,9 +139,8 @@ class TestHelpLoads(unittest.TestCase):
         self.helps['test'] = """
             type: group
             short-summary: Foo Bar Group
-            long-summary: Foo Bar Baz Group is a fun group     
+            long-summary: Foo Bar Baz Group is a fun group
         """
-
 
         self.helps['test alpha'] = """
             type: command
@@ -155,13 +158,13 @@ class TestHelpLoads(unittest.TestCase):
                 - name: Alpha Example
                   text: az test alpha --arg1 a --arg2 b --arg3 c
                   min_profile: 2017-03-09-profile
-                  max_profile: latest          
+                  max_profile: latest
         """
 
     def set_help_yaml(self):
         yaml_help = """
         version: 1
-        content: 
+        content:
         - group:
             name: test
             summary: Group yaml summary
@@ -181,7 +184,7 @@ class TestHelpLoads(unittest.TestCase):
             arguments:
                 - name: --arg2 # we do not specify the short option in the name.
                   summary: Arg 2's summary
-                  description: A true description of this parameter. 
+                  description: A true description of this parameter.
                   value-sources:
                     - string: "Number range: -5.0 to 5.0"
                     - link:
@@ -192,12 +195,12 @@ class TestHelpLoads(unittest.TestCase):
                         title: Show test details
                 - name: ARG4  # Note: positional's are discouraged in the CLI.
                   summary: Arg4's summary, yaml. Positional arg, not required
-            examples:                  
+            examples:
                 - summary: A simple example
                   description: More detail on the simple example.
                   command: az test alpha --arg1 apple --arg2 ball --arg3 cat
                   min_profile: 2017-03-09-profile
-                  max_profile: latest 
+                  max_profile: latest
         """
         return self._create_new_temp_file(yaml_help, suffix="help.yaml")
 
@@ -342,7 +345,7 @@ class TestHelpLoads(unittest.TestCase):
         expected_arg = self.test_cli.invocation.commands_loader.cmd_to_loader_map['test alpha'][0].__class__
         with mock.patch('inspect.getfile', side_effect=get_mocked_inspect_getfile(expected_arg, yaml_path)):
             group_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test"), None)
-            command_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test alpha"), None)
+            command_help_obj = next((help for help in get_all_help(self.test_cli) if help.command == "test alpha"), None)  # pylint: disable=line-too-long
 
             # Test that group and command help are successfully displayed.
             with self.assertRaises(SystemExit):
@@ -357,12 +360,12 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(group_help_obj.links[0], {"title": "Azure Test Docs", "url": "https://docs.microsoft.com/en-us/azure/test"})
         self.assertEqual(group_help_obj.links[1], {"url": "https://aka.ms/just-a-url"})
 
-
         # Test command help
         self.assertIsNotNone(command_help_obj)
         self.assertEqual(command_help_obj.short_summary, "Command yaml summary.")
         self.assertEqual(command_help_obj.long_summary, "Command yaml description. A.K.A long description.")
-        self.assertEqual(command_help_obj.links[0], {"title": "Azure Test Alpha Docs", "url": "https://docs.microsoft.com/en-us/azure/test/alpha"})
+        self.assertEqual(command_help_obj.links[0], {"title": "Azure Test Alpha Docs",
+                                                     "url": "https://docs.microsoft.com/en-us/azure/test/alpha"})
         self.assertEqual(command_help_obj.links[1], {"url": "https://aka.ms/just-a-long-url"})
 
         # test that parameters and help are loaded from command function docstring, argument registry help and help.yaml
@@ -376,9 +379,11 @@ class TestHelpLoads(unittest.TestCase):
 
         self.assertEqual(obj_param_dict["--arg2 -b"].short_summary, "Arg 2's summary.")
         self.assertEqual(obj_param_dict["--arg2 -b"].long_summary, "A true description of this parameter.")
-        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[0], {"string":"Number range: -5.0 to 5.0"})
-        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[1]['link'], {"url":"https://www.foo.com", "title":"foo"})
-        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[2]['link'], {"command": "az test show", "title": "Show test details"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[0], {"string": "Number range: -5.0 to 5.0"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[1]['link'], {"url": "https://www.foo.com",
+                                                                                "title": "foo"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[2]['link'], {"command": "az test show",
+                                                                                "title": "Show test details"})
 
         self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example")
         self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
@@ -413,14 +418,16 @@ class TestHelpLoads(unittest.TestCase):
         self.assertIsNotNone(group_help_obj)
         self.assertEqual(group_help_obj.short_summary, "Group json summary.")
         self.assertEqual(group_help_obj.long_summary, "Group json description. A.K.A long description.")
-        self.assertEqual(group_help_obj.links[0], {"title": "Azure Json Test Docs", "url": "https://docs.microsoft.com/en-us/azure/test"})
+        self.assertEqual(group_help_obj.links[0], {"title": "Azure Json Test Docs",
+                                                   "url": "https://docs.microsoft.com/en-us/azure/test"})
         self.assertEqual(group_help_obj.links[1], {"url": "https://aka.ms/just-a-url"})
 
         # Test command help
         self.assertIsNotNone(command_help_obj)
         self.assertEqual(command_help_obj.short_summary, "Command json summary.")
         self.assertEqual(command_help_obj.long_summary, "Command json description. A.K.A long description.")
-        self.assertEqual(command_help_obj.links[0], {"title": "Azure Json Test Alpha Docs", "url": "https://docs.microsoft.com/en-us/azure/test/alpha"})
+        self.assertEqual(command_help_obj.links[0], {"title": "Azure Json Test Alpha Docs",
+                                                     "url": "https://docs.microsoft.com/en-us/azure/test/alpha"})
         self.assertEqual(command_help_obj.links[1], {"url": "https://aka.ms/just-a-long-url"})
 
         # test that parameters and help are loaded from command function docstring, argument registry help and help.yaml
@@ -431,8 +438,10 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(obj_param_dict["--arg3"].short_summary, "Arg 3's json summary.")
         self.assertEqual(obj_param_dict["--arg3"].long_summary, "A truly true description of this parameter.")
         self.assertEqual(obj_param_dict["--arg3"].value_sources[0], {"string": "Number range: 0 to 10"})
-        self.assertEqual(obj_param_dict["--arg3"].value_sources[1]['link'], {"url": "https://www.foo-json.com", "title": "foo-json"})
-        self.assertEqual(obj_param_dict["--arg3"].value_sources[2]['link'], {"command": "az test show", "title": "Show test details. Json file"})
+        self.assertEqual(obj_param_dict["--arg3"].value_sources[1]['link'],
+                         {"url": "https://www.foo-json.com", "title": "foo-json"})
+        self.assertEqual(obj_param_dict["--arg3"].value_sources[2]['link'],
+                         {"command": "az test show", "title": "Show test details. Json file"})
 
         self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example from json")
         self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
@@ -446,10 +455,11 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(obj_param_dict["ARG4"].short_summary, "Arg4's summary, yaml. Positional arg, not required.")
         # arg2's help from help.yaml still preserved.
         self.assertEqual(obj_param_dict["--arg2 -b"].long_summary, "A true description of this parameter.")
-        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[0], {"string":"Number range: -5.0 to 5.0"})
-        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[1]['link'], {"url":"https://www.foo.com", "title":"foo"})
-        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[2]['link'], {"command": "az test show", "title": "Show test details"})
-
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[0], {"string": "Number range: -5.0 to 5.0"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[1]['link'], {"url": "https://www.foo.com",
+                                                                                "title": "foo"})
+        self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[2]['link'], {"command": "az test show",
+                                                                                "title": "Show test details"})
 
     # create a temporary file in the temp dir. Return the path of the file.
     def _create_new_temp_file(self, data, suffix=""):

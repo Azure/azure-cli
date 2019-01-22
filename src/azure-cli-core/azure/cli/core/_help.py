@@ -51,7 +51,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_header(self, cli_name, help_file):
         super(CLIPrintMixin, self)._print_header(cli_name, help_file)
 
-        links = help_file.links # TODO: this needs to be updated to handle links obj not just link text
+        links = help_file.links  # TODO: this needs to be updated to handle links obj not just link text
         if links:
             link_text = "{} and {}".format(", ".join([link["url"] for link in links[0:-1]]), links[-1]["url"]) if len(links) > 1 else links[0]["url"]
             link_text = "For more information, see: {}\n".format(link_text)
@@ -60,7 +60,6 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
-
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
@@ -144,7 +143,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         import inspect
 
         def is_loader_cls(cls):
-            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader'and issubclass(cls, help_loaders.BaseHelpLoader) # pylint: disable=line-too-long
+            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader'and issubclass(cls, help_loaders.BaseHelpLoader)  # pylint: disable=line-too-long
 
         versioned_loaders = {}
         for cls_name, loader_cls in inspect.getmembers(help_loaders, is_loader_cls):
@@ -313,5 +312,5 @@ class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-at
         super(HelpParameter, self).update_from_data(data)
         # original help.py value_sources are strings, update command strings to value-source dict
         if self.value_sources:
-            self.value_sources = [str_or_dict if isinstance(str_or_dict, dict) else {"link": {"command" : str_or_dict}}
+            self.value_sources = [str_or_dict if isinstance(str_or_dict, dict) else {"link": {"command": str_or_dict}}
                                   for str_or_dict in self.value_sources]
