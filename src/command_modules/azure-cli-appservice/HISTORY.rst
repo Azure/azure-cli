@@ -3,6 +3,7 @@
 Release History
 ===============
 * functionapp: add support for app insights on functionapp create
+* webapp: bugfixes for webapp ssh
 
 0.2.11
 ++++++

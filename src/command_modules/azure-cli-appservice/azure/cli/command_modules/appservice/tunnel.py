@@ -54,7 +54,7 @@ class TunnelServer(object):
         self.sock.bind((self.local_addr, self.local_port))
         if self.local_port == 0:
             self.local_port = self.sock.getsockname()[1]
-            logger.warning('Auto-selecting port: %s', self.local_port)
+            logger.info('Auto-selecting port: %s', self.local_port)
         logger.info('Finished initialization')
 
     def create_basic_auth(self):
@@ -101,6 +101,7 @@ class TunnelServer(object):
             return False
         if '2222' in msg:
             return True
+        return False
 
     def _listen(self):
         self.sock.listen(100)
@@ -108,7 +109,7 @@ class TunnelServer(object):
         basic_auth_string = self.create_basic_auth()
         while True:
             self.client, _address = self.sock.accept()
-            self.client.settimeout(1800)
+            self.client.settimeout(60 * 20)
             host = 'wss://{}{}'.format(self.remote_addr, '.scm.azurewebsites.net/AppServiceTunnel/Tunnel.ashx')
             basic_auth_header = 'Authorization: Basic {}'.format(basic_auth_string)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
@@ -124,6 +125,7 @@ class TunnelServer(object):
                                         class_=TunnelWebSocket,
                                         header=[basic_auth_header],
                                         sslopt={'cert_reqs': ssl.CERT_NONE},
+                                        timeout=60 * 20,
                                         enable_multithread=True)
             logger.info('Websocket, connected status: %s', self.ws.connected)
             index = index + 1
@@ -140,8 +142,8 @@ class TunnelServer(object):
             logger.info('Stopped local server..')
 
     def _listen_to_web_socket(self, client, ws_socket, index):
-        while True:
-            try:
+        try:
+            while True:
                 logger.info('Waiting for websocket data, connection status: %s, index: %s', ws_socket.connected, index)
                 data = ws_socket.recv()
                 logger.info('Received websocket data: %s, index: %s', data, index)
@@ -152,17 +154,17 @@ class TunnelServer(object):
                     client.sendall(response)
                     logger.info('Done sending to debugger, index: %s', index)
                 else:
-                    logger.info('Client disconnected!, index: %s', index)
-                    client.close()
-                    ws_socket.close()
                     break
-            except:
-                client.close()
-                ws_socket.close()
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info(ex)
+        finally:
+            logger.info('Client disconnected!, index: %s', index)
+            client.close()
+            ws_socket.close()
 
     def _listen_to_client(self, client, ws_socket, index):
-        while True:
-            try:
+        try:
+            while True:
                 logger.info('Waiting for debugger data, index: %s', index)
                 buf = bytearray(4096)
                 nbytes = client.recv_into(buf, 4096)
@@ -173,14 +175,14 @@ class TunnelServer(object):
                     ws_socket.send_binary(responseData)
                     logger.info('Done sending to websocket, index: %s', index)
                 else:
-                    logger.info('Client disconnected %s', index)
-                    client.close()
-                    ws_socket.close()
                     break
-            except:
-                traceback.print_exc(file=sys.stdout)
-                client.close()
-                ws_socket.close()
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info(ex)
+            logger.warning("Connection Timed Out")
+        finally:
+            logger.info('Client disconnected %s', index)
+            client.close()
+            ws_socket.close()
 
     def start_server(self):
         self._listen()

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import subprocess
 import threading
 import time
 
@@ -20,6 +19,9 @@ import json
 import ssl
 import sys
 import OpenSSL.crypto
+
+from fabric import Connection
+
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -2287,8 +2289,6 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     t.daemon = True
     t.start()
 
-    #_wait_for_tunnel(tunnel_server)
-
     s = threading.Thread(target=_start_ssh_session,
                          args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
     s.daemon = True
@@ -2304,7 +2304,9 @@ def _wait_for_webapp(tunnel_server):
         if is_webapp_up(tunnel_server):
             break
         if tries == 0:
-            logger.warning('Webapp is not ready yet, please wait')
+            logger.warning('Connection is not ready yet, please wait')
+        if tries == 60:
+            raise CLIError("Timeout Error, Unable to establish a connection")
         tries = tries + 1
         logger.warning('.')
         time.sleep(1)
@@ -2314,13 +2316,32 @@ def _start_tunnel(tunnel_server):
     tunnel_server.start_server()
 
 
-def _start_ssh_session(host_name, port, user_name, user_password):
-    logger.warning("SSH username: %s, password: %s ", user_name, user_password)
+def _start_ssh_session(hostname, port, username, password):
+    tries = 0
     while True:
-        #exit_code = subprocess.call("ssh -q -c aes128-cbc,3des-cbc,aes256-cbc -o StrictHostKeyChecking=no {}@{} -p {}".format(user_name, host_name, port), shell=True)
-        #if exit_code in [0, 130]: # success or ctrl+C
-        #    break
-        time.sleep(1)
+        try:
+            c = Connection(host=hostname,
+                           port=port,
+                           user=username,
+                           # connect_timeout=60*10,
+                           connect_kwargs={"password": password})
+            break
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info(ex)
+            if tries == 0:
+                logger.warning('Connection is not ready yet, please wait')
+            if tries == 60:
+                raise CLIError("Timeout Error, Unable to establish a connection")
+            tries = tries + 1
+            logger.warning('.')
+            time.sleep(1)
+    try:
+        c.run('cat /etc/motd', pty=True)
+        c.run('source /etc/profile; /bin/ash', pty=True)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info(ex)
+    finally:
+        c.close()
 
 
 def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
