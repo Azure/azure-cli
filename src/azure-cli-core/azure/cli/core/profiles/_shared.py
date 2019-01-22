@@ -83,10 +83,10 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_ACS: '2017-07-01', # Microsoft.ContainerServices / ACS
-        ResourceType.MGMT_AKS: '2018-03-31', # Microsoft.ContainerServices / AKS
-        ResourceType.MGMT_AKS_PREVIEW: '2018-08-01-preview', # Microsoft.ContainerServices / AKS
-        ResourceType.MGMT_OSA: '2018-09-30-preview', # Microsoft.ContainerServices / OSA
+        ResourceType.MGMT_ACS: '2017-07-01', # Microsoft.ContainerService / ACS
+        ResourceType.MGMT_AKS: '2018-03-31', # Microsoft.ContainerService / AKS
+        ResourceType.MGMT_AKS_PREVIEW: '2018-08-01-preview', # Microsoft.ContainerService / AKS
+        ResourceType.MGMT_OSA: '2018-09-30-preview', # Microsoft.ContainerService / OSA
         ResourceType.MGMT_STORAGE: '2018-07-01',
         ResourceType.MGMT_NETWORK: '2018-10-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2018-10-01', {
