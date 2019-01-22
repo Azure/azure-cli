@@ -73,7 +73,7 @@ DEPENDENCIES = [
     'six',
     'tabulate>=0.7.7,<=0.8.2',
     'wheel==0.30.0',
-    'azure-mgmt-resource==2.0.0'
+    'azure-mgmt-resource==2.1.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
