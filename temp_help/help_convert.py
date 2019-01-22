@@ -6,10 +6,13 @@
 import sys
 from importlib import import_module
 import os
-import difflib
-from pprint import pprint
+
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 from knack.util import CLIError
+from knack.help_files import helps
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.util import get_installed_cli_distributions
 from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
@@ -19,7 +22,7 @@ try:
     from ruamel.yaml import YAML
     yaml = YAML()
     yaml.width = 1000 # prevents wrapping around in dumper.
-    yaml.allow_duplicate_keys = True # TODO: line
+    yaml.allow_duplicate_keys = True # TODO: allow duplicate keys within help entries. see az container create. Remove this.
 except ImportError as e:
     msg = "{}\npip install ruamel.Yaml to use this script.".format(e)
     exit(msg)
@@ -31,11 +34,8 @@ COMPONENT_PREFIX = 'azure-cli-'
 failed = 0
 
 loaded_helps = {}
-help_to_mods = {}
-
 
 def get_all_help(cli_ctx):
-
     invoker = cli_ctx.invocation
     help_ctx = cli_ctx.help_cls(cli_ctx)
     if not invoker:
@@ -75,7 +75,10 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
                                      parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
     cli_ctx.invocation = invoker
     invoker.commands_loader.skip_applicability = True
-    invoker.commands_loader.load_command_table(None)
+    temp_help = helps.copy()
+    invoker.commands_loader.load_command_table(None) # this ends up loading all the helpfiles, which could be problematic with duplicate key commands like acs create
+    helps.clear()
+    helps.update(temp_help)
 
     # turn off applicability check for applicable loaders
     new_cmd_to_loader_map = {}
@@ -118,7 +121,6 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
 # this must be called before loading any command modules. Otherwise helps object will have every help.py file's contents
 def convert(target_mod_or_file, mod_name, test=False):
     global loaded_helps
-    global help_to_mods
 
     if os.path.exists(target_mod_or_file):
         out_file = target_mod_or_file
@@ -128,8 +130,8 @@ def convert(target_mod_or_file, mod_name, test=False):
         try:
             target_mod = import_module(target_mod_or_file)
         except ModuleNotFoundError as e: # azure.cli.command_modules.core
-            print(e)
-            return (None, None)
+            logger.warning(e)
+            return None, None
         loader_file_path = os.path.abspath(target_mod.__file__)
         out_file = os.path.join(os.path.dirname(loader_file_path), "help.yaml")
 
@@ -139,22 +141,15 @@ def convert(target_mod_or_file, mod_name, test=False):
 
     # the modules keys are keys added to helps object from fresh import....
     help_dict = target_mod.helps
-    mod_help = {k: v for k, v in help_dict.items() if k not in loaded_helps and mod_name not in help_to_mods.get(k, [None])}
-
-    result = _get_new_yaml_dict(mod_help)
+    result = _get_new_yaml_dict(help_dict)
 
     # clear modules help from knack.helps, store help.py info
-    for key, value in mod_help.items():
+    for key, value in help_dict.items():
         loaded_helps[key] = value
-
-    for cmd in mod_help.keys():
-        mods = help_to_mods.get(cmd, [])
-        help_to_mods[cmd] = mods + [mod_name]
 
     return out_file, result
 
 def delete(target_mods):
-    print(target_mods)
     for mod_name in target_mods:
         try:
             target_mod = import_module(mod_name)
@@ -266,24 +261,7 @@ def assert_params_equal(old_parameters, new_parameters):
 
 def assert_true_or_warn(x, y):
     try:
-        if x != y:
-            if isinstance(x, str):
-                matcher = difflib.SequenceMatcher(a=x, b=y)
-                print("Ratio: {}".format(matcher.ratio()))
-                d = difflib.Differ()
-                result = list(d.compare(x.splitlines(keepends=True), y.splitlines(keepends=True)))
-
-                help_link = "https://docs.python.org/3.7/library/difflib.html#difflib.Differ"
-                print("Showing diff... (See {} for more info).".format(help_link))
-                pprint(result)
-
-                if matcher.ratio() > 0.9:
-                    print("These two values have a similarity ratio of {}/1.0. "
-                          "Test will count them as similar. Please review.".format(matcher.ratio()))
-                else:
-                    assert x == y
-            else:
-                assert x == y
+        assert x == y
 
     except AssertionError:
         # if is list try to find exactly where there is failure
@@ -291,24 +269,23 @@ def assert_true_or_warn(x, y):
             for x_1, y_1 in zip(x, y):
                 assert_true_or_warn(x_1, y_1)
         else:
-            print("\nvalues:\n\n{}\n\nand\n\n{}\n\nare not equal.\n".format(x, y))
+            msg = "\nvalues:\n\n{}\n\nand\n\n{}\n\nare not equal.\n".format(x, y)
 
             global failed
             failed+=1
-
-            if failed > 15:
-                print("More than 15 assertions failed. Exiting tests.\n")
-                exit(1)
+            if failed:
+                msg = "{}{}".format(msg, "-------------------\nAssertion Failed!!!\nExiting test.\n-------------------\n")
+                exit(msg)
 
 
 if __name__ == "__main__":
     if sys.version_info[0] < 3:
         raise Exception("This script requires Python 3")
 
-    args = sys.argv[1:]
+    args = [arg.strip() for arg in sys.argv[1:]]
     test = False
 
-    msg = 'Usage: python help_convert.py (MOD | --test | --delete | --all | MOD --test)\n'
+    msg = 'Usage: python help_convert.py (MOD | --test | --delete | --all | MOD --test | MOD --package {myext-package})\n'
 
     if "--help" in args or "-h" in args:
         print(msg)
@@ -324,16 +301,22 @@ if __name__ == "__main__":
             test = True
 
     target_mods = None
-    if args[0].lower() in ["--test", "--all"]:
-        # convert all modules and test
-        mod_names = get_all_mod_names()
-        target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
-        if args[0].lower() == "--test":
-            test = True
-    elif args[0].lower() == "--delete":
+    # if args[0].lower() in ["--test", "--all"]:
+    #     # convert all modules and test
+    #     mod_names = get_all_mod_names()
+    #     target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
+    #     if args[0].lower() == "--test":
+    #         test = True
+    if args[0].lower() == "--delete":
         mod_names = get_all_mod_names()
         target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
         delete(target_mods)
+        exit(0)
+    elif args[0].lower() == "--get-all-mods":
+        mod_names = get_all_mod_names()
+        with open("mod.txt", "w") as f:
+            for name in mod_names:
+                f.write(name + "\n")
         exit(0)
     else:
         mod_names = [args[0]]
@@ -366,7 +349,7 @@ if __name__ == "__main__":
 
         print("Now writing out new help.yaml file contents...")
         for file, help_dict in file_to_help.items():
-            print("Writing {} ...".format(file))
+            logger.warning("Writing {} ...".format(file))
             with open(file, "w") as f:
                 yaml.dump(help_dict, f)
 
@@ -380,7 +363,8 @@ if __name__ == "__main__":
         for command in old_loaded_help:
             diff_dict[command] = (old_loaded_help[command], new_loaded_help[command])
 
-        print("Verifying that help objects are the same for _help.py and help.yaml.")
+        logger.warning("Loaded {} help objects".format(len(new_loaded_help)))
+        logger.warning("Verifying that help objects are the same for _help.py and help.yaml.")
         assert len(diff_dict) == len(loaded_helps)
         for old, new in diff_dict.values():
             assert_help_objs_equal(old, new)
