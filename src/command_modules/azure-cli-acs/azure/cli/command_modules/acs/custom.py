@@ -47,31 +47,27 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
-from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile
+from azure.cli.core.profiles import ResourceType
+# from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
+# from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
-from azure.mgmt.containerservice.models import ContainerServiceServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedCluster
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAADProfile
+# from azure.mgmt.containerservice.models import ContainerServiceServicePrincipalProfile
+# from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
+# from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
+# from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
+# from azure.mgmt.containerservice.v2018_03_31.models import ManagedCluster
+# from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAgentPoolProfile
-# from azure.mgmt.containerservice.models import OpenShiftManagedClusterAgentPoolProfile
-# from azure.mgmt.containerservice.models import OpenShiftAgentPoolProfileRole
-# from azure.mgmt.containerservice.models import OpenShiftManagedClusterIdentityProvider
-# from azure.mgmt.containerservice.models import OpenShiftManagedClusterAADIdentityProvider
-# from azure.mgmt.containerservice.models import OpenShiftManagedCluster
-# from azure.mgmt.containerservice.models import OpenShiftRouterProfile
-# from azure.mgmt.containerservice.models import OpenShiftManagedClusterAuthProfile
-# from azure.mgmt.containerservice.models import NetworkProfile
+# from azure.mgmt.containerservice.v2018_03_31.models import ManagedClusterAgentPoolProfile
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
-from ._client_factory import _osa_client_factory
+from ._client_factory import (_osa_client_factory, 
+                              _aks_client_factory, 
+                              _aks_preview_client_factory,
+                              _acs_client_factory)
 
 logger = get_logger(__name__)
 
@@ -1425,7 +1421,7 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
             raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
-def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
+def aks_create(cmd, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
@@ -1456,6 +1452,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_wait=False):
+               
+    ManagedClusterAgentPoolProfile, ManagedClusterAADProfile = cmd.get_models('ManagedClusterAgentPoolProfile', 'ManagedClusterAADProfile')
+    ContainerServiceSshConfiguration, ContainerServiceSshPublicKey = cmd.get_models(
+        'ContainerServiceSshConfiguration', 'ContainerServiceSshPublicKey')
+    ContainerServiceLinuxProfile, ContainerServiceServicePrincipalProfile, ContainerServiceNetworkProfile, ContainerServiceStorageProfileTypes = cmd.get_models(
+        'ContainerServiceLinuxProfile', 'ContainerServiceServicePrincipalProfile', 'ContainerServiceNetworkProfile', 'ContainerServiceStorageProfileTypes')
+    ManagedCluster = cmd.get_models('ManagedCluster')
+
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
     subscription_id = _get_subscription_id(cmd.cli_ctx)
@@ -1558,7 +1562,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            return sdk_no_wait(no_wait, client.create_or_update,
+            client = _aks_preview_client_factory(cmd.cli_ctx)
+            return sdk_no_wait(no_wait, client.managed_clusters.create_or_update,
                                resource_group_name=resource_group_name, resource_name=name, parameters=mc)
         except CloudError as ex:
             retry_exception = ex
@@ -1570,7 +1575,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
-    instance = client.get(resource_group_name, name)
+    client = _aks_client_factory(cmd.cli_ctx)
+    instance = client.managed_clusters.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(
@@ -1584,12 +1590,13 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     )
 
     # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.managed_clusters.create_or_update, resource_group_name, name, instance)
 
 
-def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
+def aks_enable_addons(cmd, resource_group_name, name, addons, workspace_resource_id=None,
                       subnet_name=None, no_wait=False):
-    instance = client.get(resource_group_name, name)
+    client = _aks_client_factory(cmd.cli_ctx)
+    instance = client.managed_clusters.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
@@ -1599,21 +1606,23 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
 
     # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.managed_clusters.create_or_update, resource_group_name, name, instance)
 
 
-def aks_get_versions(cmd, client, location):
-    return client.list_orchestrators(location, resource_type='managedClusters')
+def aks_get_versions(cmd, location):
+    client = _aks_client_factory(cmd.cli_ctx)
+    return client.managed_clusters.list_orchestrators(location, resource_type='managedClusters')
 
 
-def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
+def aks_get_credentials(cmd, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
                         overwrite_existing=False):
+    client = _aks_client_factory(cmd.cli_ctx)
     credentialResults = None
     if admin:
-        credentialResults = client.list_cluster_admin_credentials(resource_group_name, name)
+        credentialResults = client.managed_clusters.list_cluster_admin_credentials(resource_group_name, name)
     else:
-        credentialResults = client.list_cluster_user_credentials(resource_group_name, name)
+        credentialResults = client.managed_clusters.list_cluster_user_credentials(resource_group_name, name)
 
     if not credentialResults:
         raise CLIError("No Kubernetes credentials found.")
@@ -1632,37 +1641,41 @@ ADDONS = {
 }
 
 
-def aks_list(cmd, client, resource_group_name=None):
+def aks_list(cmd, resource_group_name=None):
+    client = _aks_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        managed_clusters = client.list_by_resource_group(resource_group_name)
+        managed_clusters = client.managed_clusters.list_by_resource_group(resource_group_name)
     else:
-        managed_clusters = client.list()
+        managed_clusters = client.managed_clusters.list()
     return _remove_nulls(list(managed_clusters))
 
 
-def aks_show(cmd, client, resource_group_name, name):
-    mc = client.get(resource_group_name, name)
+def aks_show(cmd, resource_group_name, name):
+    client = _aks_client_factory(cmd.cli_ctx)
+    mc = client.managed_clusters.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
 
 
-def aks_update_credentials(cmd, client, resource_group_name, name,
+def aks_update_credentials(cmd, resource_group_name, name,
                            reset_service_principal=False,
                            service_principal=None,
                            client_secret=None,
                            no_wait=False):
+    client = _aks_client_factory(cmd.cli_ctx)
     if reset_service_principal != 1:
         raise CLIError('Please specify "--reset-service-principal".')
     if service_principal is None or client_secret is None:
         raise CLIError('Please specify --service-principal and --client-secret '
                        'when --reset-service-principal flag is on.')
     return sdk_no_wait(no_wait,
-                       client.reset_service_principal_profile,
+                       client.managed_clusters.reset_service_principal_profile,
                        resource_group_name,
                        name, service_principal, client_secret)
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
-    instance = client.get(resource_group_name, name)
+def aks_scale(cmd, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
+    client = _aks_client_factory(cmd.cli_ctx)
+    instance = client.managed_clusters.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     for agent_profile in instance.agent_pool_profiles:
         if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
@@ -2349,11 +2362,12 @@ def _validate_aci_location(norm_location):
                        ' The available locations are "{}"'.format(','.join(aci_locations)))
 
 
-def osa_list(cmd, client, resource_group_name=None):
+def osa_list(cmd, resource_group_name=None):
+    client = _osa_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        managed_clusters = client.list_by_resource_group(resource_group_name)
+        managed_clusters = client.open_shift_managed_clusters.list_by_resource_group(resource_group_name)
     else:
-        managed_clusters = client.list()
+        managed_clusters = client.open_shift_managed_clusters.list()
     return _remove_osa_nulls(list(managed_clusters))
 
 
@@ -2374,7 +2388,7 @@ def openshift_create(cmd, resource_group_name, name,  # pylint: disable=too-many
     OpenShiftManagedClusterAgentPoolProfile, OpenShiftAgentPoolProfileRole = cmd.get_models(
         'OpenShiftManagedClusterAgentPoolProfile', 'OpenShiftAgentPoolProfileRole')
     OpenShiftManagedClusterIdentityProvider, OpenShiftManagedClusterAADIdentityProvider = cmd.get_models(
-                'OpenShiftManagedClusterIdentityProvider', 'OpenShiftManagedClusterAADIdentityProvider')
+        'OpenShiftManagedClusterIdentityProvider', 'OpenShiftManagedClusterAADIdentityProvider')
     OpenShiftManagedCluster, OpenShiftRouterProfile, OpenShiftManagedClusterAuthProfile, NetworkProfile = cmd.get_models(
         'OpenShiftManagedCluster', 'OpenShiftRouterProfile', 'OpenShiftManagedClusterAuthProfile', 'NetworkProfile')
 
@@ -2465,13 +2479,15 @@ def openshift_create(cmd, resource_group_name, name,  # pylint: disable=too-many
         raise ex
 
 
-def openshift_show(cmd, client, resource_group_name, name):
-    mc = client.get(resource_group_name, name)
+def openshift_show(cmd, resource_group_name, name):
+    client = _osa_client_factory(cmd.cli_ctx)
+    mc = client.open_shift_managed_clusters.get(resource_group_name, name)
     return _remove_osa_nulls([mc])[0]
 
 
-def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
-    instance = client.get(resource_group_name, name)
+def openshift_scale(cmd, resource_group_name, name, compute_count, no_wait=False):
+    client = _osa_client_factory(cmd.cli_ctx)
+    instance = client.open_shift_managed_clusters.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     instance.agent_pool_profiles[0].count = int(compute_count)  # pylint: disable=no-member
 
@@ -2479,4 +2495,4 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.open_shift_managed_clusters.create_or_update, resource_group_name, name, instance)

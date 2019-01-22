@@ -32,10 +32,7 @@ class CustomResourceType(object):  # pylint: disable=too-few-public-methods
 
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
 
-    MGMT_ACS = ('azure.mgmt.containerservice', 'ContainerServiceClient')
-    MGMT_AKS = ('azure.mgmt.containerservice', 'ContainerServiceClient')
-    MGMT_AKS_PREVIEW = ('azure.mgmt.containerservice', 'ContainerServiceClient')
-    MGMT_OSA = ('azure.mgmt.containerservice', 'ContainerServiceClient')
+    MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
@@ -83,10 +80,11 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_ACS: '2017-07-01', # Microsoft.ContainerServices / ACS
-        ResourceType.MGMT_AKS: '2018-03-31', # Microsoft.ContainerServices / AKS
-        ResourceType.MGMT_AKS_PREVIEW: '2018-08-01-preview', # Microsoft.ContainerServices / AKS
-        ResourceType.MGMT_OSA: '2018-09-30-preview', # Microsoft.ContainerServices / OSA
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2018-03-31', {
+            'container_services': '2017-07-01',
+            'managed_clusters': '2018-08-01-preview',
+            'open_shift_managed_clusters': '2018-09-30-preview'
+        }),
         ResourceType.MGMT_STORAGE: '2018-07-01',
         ResourceType.MGMT_NETWORK: '2018-10-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2018-10-01', {

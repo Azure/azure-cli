@@ -3,30 +3,48 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType
+def _acs_client_factory(cli_ctx, **kwargs):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, subscription_id=kwargs.get('subscription_id'),
+                                   aux_subscriptions=kwargs.get('aux_subscriptions'))
+
+def _aks_client_factory(cli_ctx, **kwargs):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, subscription_id=kwargs.get('subscription_id'),
+                                   aux_subscriptions=kwargs.get('aux_subscriptions'))
+
+
+def _aks_preview_client_factory(cli_ctx, **kwargs):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, subscription_id=kwargs.get('subscription_id'),
+                                   aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 def _osa_client_factory(cli_ctx, **kwargs):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_OSA,
-                                   subscription_id=kwargs.get('subscription_id'),
+    return get_mgmt_service_client(cli_ctx, subscription_id=kwargs.get('subscription_id'),
                                    aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 def cf_compute_service(cli_ctx, *_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 
 
-def cf_container_services(cli_ctx, *_):
-    return get_container_service_client(cli_ctx).container_services
+def cf_container_services(cli_ctx, _):
+    return _acs_client_factory(cli_ctx).container_services
 
 
-def cf_managed_clusters(cli_ctx, *_):
-    return get_container_service_client(cli_ctx).managed_clusters
+def cf_managed_clusters(cli_ctx, _):
+    return _aks_client_factory(cli_ctx).managed_clusters
+
+
+def cf_managed_clusters_preview(cli_ctx, _):
+    return _aks_preview_client_factory(cli_ctx).managed_clusters
 
 
 def cf_openshift_managed_clusters(cli_ctx, _):
-    #return get_osa_container_service_client(cli_ctx).open_shift_managed_clusters
     return _osa_client_factory(cli_ctx).open_shift_managed_clusters
 
 
@@ -49,18 +67,6 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
         if matched:
             subscription_id = matched.groupdict()['subscription']
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
-
-
-def get_container_service_client(cli_ctx, **_):
-    from azure.mgmt.containerservice import ContainerServiceClient
-
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
-
-
-# def get_osa_container_service_client(cli_ctx, **_):
-#     from azure.mgmt.containerservice import ContainerServiceClient
-
-#     return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):
