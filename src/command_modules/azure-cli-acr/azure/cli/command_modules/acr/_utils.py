@@ -289,8 +289,6 @@ def get_validate_platform(os_type, platform):
             raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'")
     elif os_type:
         platform_os = os_type
-    else:
-        pass
 
     platform_os = platform_os.title()
     platform_arch = platform_arch.title()
