@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.15
+++++++
+* Addon name case insenstive in "az aks enable-addons /disable-addons"
+
 2.3.14
 ++++++
 * Add Virtual Nodes Preview
