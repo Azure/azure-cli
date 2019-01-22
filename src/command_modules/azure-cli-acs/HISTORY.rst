@@ -1,6 +1,7 @@
 .. :changelog:
 
 Release History
+===============
 
 2.3.14
 ++++++
