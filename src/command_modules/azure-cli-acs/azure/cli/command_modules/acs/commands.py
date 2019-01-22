@@ -28,8 +28,7 @@ def load_command_table(self, _):
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.managed_clusters_operations#ManagedClustersOperations.{}',
-        client_factory=cf_managed_clusters,
-        resource_type=ResourceType.MGMT_AKS
+        client_factory=cf_managed_clusters
     )
 
     managed_clusters_preview_sdk = CliCommandType(
@@ -61,19 +60,19 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.wait_command('wait')
 
-    # # ACS Mesos DC/OS commands
+    # ACS Mesos DC/OS commands
     with self.command_group('acs dcos', container_services_sdk) as g:
         g.custom_command('browse', 'dcos_browse')
         g.custom_command('install-cli', 'dcos_install_cli', client_factory=None)
 
-    # # ACS Kubernetes commands
+    # ACS Kubernetes commands
     with self.command_group('acs kubernetes', container_services_sdk) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
 
     # AKS commands
-    with self.command_group('aks', managed_clusters_sdk, resource_type=ResourceType.MGMT_AKS) as g:
+    with self.command_group('aks', managed_clusters_sdk, operation_group='managed_clusters') as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
@@ -100,7 +99,7 @@ def load_command_table(self, _):
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)
 
     # OSA commands
-    with self.command_group('openshift', openshift_managed_clusters_sdk, resource_type=ResourceType.MGMT_OSA) as g:
+    with self.command_group('openshift', openshift_managed_clusters_sdk, operation_group='open_shift_managed_clusters') as g:
         g.custom_command('create', 'openshift_create', supports_no_wait=True)
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.custom_command('scale', 'openshift_scale', supports_no_wait=True)

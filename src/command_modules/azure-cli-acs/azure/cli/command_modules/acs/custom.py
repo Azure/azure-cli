@@ -1453,12 +1453,12 @@ def aks_create(cmd, resource_group_name, name, ssh_key_value,  # pylint: disable
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_wait=False):
                
-    ManagedClusterAgentPoolProfile, ManagedClusterAADProfile = cmd.get_models('ManagedClusterAgentPoolProfile', 'ManagedClusterAADProfile', resource_type=ResourceType.MGMT_AKS_PREVIEW)
+    ManagedClusterAgentPoolProfile, ManagedClusterAADProfile = cmd.get_models('ManagedClusterAgentPoolProfile', 'ManagedClusterAADProfile')
     ContainerServiceSshConfiguration, ContainerServiceSshPublicKey = cmd.get_models(
         'ContainerServiceSshConfiguration', 'ContainerServiceSshPublicKey')
     ContainerServiceLinuxProfile, ContainerServiceServicePrincipalProfile, ContainerServiceNetworkProfile, ContainerServiceStorageProfileTypes = cmd.get_models(
         'ContainerServiceLinuxProfile', 'ContainerServiceServicePrincipalProfile', 'ContainerServiceNetworkProfile', 'ContainerServiceStorageProfileTypes')
-    ManagedCluster = cmd.get_models('ManagedCluster', resource_type=ResourceType.MGMT_AKS_PREVIEW)
+    ManagedCluster = cmd.get_models('ManagedCluster')
 
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
