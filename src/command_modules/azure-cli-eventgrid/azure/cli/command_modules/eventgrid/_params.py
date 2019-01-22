@@ -52,23 +52,23 @@ def load_arguments(self, _):
         c.argument('topic_name', id_part=None)
 
     with self.argument_context('eventgrid event-subscription') as c:
-        c.argument('topic_name', deprecate_info=c.deprecate(expiration='2.1.0', hide=True), help='Name of Event Grid topic', options_list=['--topic-name'], completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('topic_name', deprecate_info=c.deprecate(redirect="--source-resource-id", expiration='2.1.0', hide=True), help='Name of Event Grid topic', options_list=['--topic-name'], completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
         c.argument('event_subscription_name', arg_type=name_type, help='Name of the event subscription')
         c.argument('max_delivery_attempts', help="Maximum number of delivery attempts. Must be a number between 1 and 30.")
         c.argument('event_ttl', help="Event time to live (in minutes). Must be a number between 1 and 1440.")
         c.argument('deadletter_endpoint', help="The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.")
 
     with self.argument_context('eventgrid event-subscription create') as c:
-        c.argument('resource_group_name', deprecate_info=c.deprecate(expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
+        c.argument('resource_group_name', deprecate_info=c.deprecate(redirect="--source-resource-id", expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
 
     with self.argument_context('eventgrid event-subscription delete') as c:
-        c.argument('resource_group_name', deprecate_info=c.deprecate(expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
+        c.argument('resource_group_name', deprecate_info=c.deprecate(redirect="--source-resource-id", expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
 
     with self.argument_context('eventgrid event-subscription update') as c:
-        c.argument('resource_group_name', deprecate_info=c.deprecate(expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
+        c.argument('resource_group_name', deprecate_info=c.deprecate(redirect="--source-resource-id", expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
 
     with self.argument_context('eventgrid event-subscription show') as c:
-        c.argument('resource_group_name', deprecate_info=c.deprecate(expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
+        c.argument('resource_group_name', deprecate_info=c.deprecate(redirect="--source-resource-id", expiration='2.1.0', hide=True), arg_type=resource_group_name_type)
         c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.", )
 
     with self.argument_context('eventgrid topic-type') as c:
