@@ -1751,7 +1751,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon == 'aciConnector':
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
-        # noticed an addon name unification issue
+        # addon name is case insensitive
         addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
         if enable:
             # add new addons or update existing ones and enable them
