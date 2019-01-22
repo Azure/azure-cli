@@ -18,10 +18,27 @@ helps['hdinsight create'] = """
     examples:
         - name: Create a cluster with an existing storage account.
           text: |-
-              az hdinsight create -t spark -n MyCluster -g MyResourceGroup \\
-              -p {HTTP_password} \\
-              --storage-account MyStorageAccount.blob.core.windows.net \\
-              --storage-account-key {storage_account_key}
+              az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+              -p "HttpPassword1234!" \\
+              --storage-account MyStorageAccount
+        - name: Create a cluster with Enterprise Security Package.
+          text: |-
+              az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+              -p "HttpPassword1234!" \\
+              --storage-account MyStorageAccount \\
+              --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
+              --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
+              --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
+              --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com
+        - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/en-us/azure/hdinsight/kafka/apache-kafka-byok.
+          text: |-
+             az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
+             -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\
+             --storage-account MyStorageAccount \\
+             --encryption-key-name kafkaClusterKey \\
+             --encryption-key-version 00000000000000000000000000000000 \\
+             --encryption-vault-uri https://MyKeyVault.vault.azure.net \\
+             --assign-identity MyMSI
 """
 
 helps['hdinsight list'] = """
@@ -32,6 +49,11 @@ helps['hdinsight list'] = """
 helps['hdinsight wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until an operation is complete.
+"""
+
+helps['hdinsight rotate-disk-encryption-key'] = """
+    type: command
+    short-summary: Rotate disk encryption key of the specified HDInsight cluster.
 """
 
 helps['hdinsight application'] = """
@@ -45,14 +67,14 @@ helps['hdinsight application create'] = """
     examples:
         - name: Create an application with a script URI.
           text: |-
-              az hdinsight application create -n MyCluster -g MyResourceGroup \\
+              az hdinsight application create -g MyResourceGroup -n MyCluster \\
               --application-name MyApplication \\
               --script-uri https://path/to/install/script.sh \\
               --script-action-name MyScriptAction \\
               --script-parameters '"-option value"'
         - name: Create an application with a script URI and specified edge node size.
           text: |-
-              az hdinsight application create -n MyCluster -g MyResourceGroup \\
+              az hdinsight application create -g MyResourceGroup -n MyCluster \\
               --application-name MyApplication \\
               --script-uri https://path/to/install/script.sh \\
               --script-action-name MyScriptAction \\
