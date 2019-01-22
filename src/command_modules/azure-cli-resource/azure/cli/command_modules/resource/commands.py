@@ -240,6 +240,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
 
+    with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
+        g.custom_command('assign', 'set_identity')
+        g.custom_show_command('show', 'show_identity')
+        g.custom_command('remove', 'remove_identity')
+
     with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
         g.custom_command('delete', 'delete_policy_definition')
