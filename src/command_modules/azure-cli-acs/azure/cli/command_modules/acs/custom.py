@@ -1741,7 +1741,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
 
-    addon_profiles = instance.addon_profiles or {}
+    addon_profiles = instance.addon_profiles or {} 
 
     os_type = 'Linux'
 
