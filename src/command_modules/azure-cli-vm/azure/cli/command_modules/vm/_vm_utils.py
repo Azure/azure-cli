@@ -74,10 +74,9 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
     from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
-    resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
-
     id_parts = parse_resource_id(value)
-
+    resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                              subscription_id=id_parts.get('subscription', None)).resources
     rg = id_parts.get('resource_group', resource_group)
     ns = id_parts.get('namespace', provider_namespace)
 

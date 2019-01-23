@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 
 
 class HDInsightClusterTests(ScenarioTest):
-    location = 'northcentralus'
+    location = 'eastus2'
 
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
@@ -287,11 +287,11 @@ class HDInsightClusterTests(ScenarioTest):
         self.kwargs.update({
             'loc': self.location,
             'cluster': self.create_random_name(prefix='hdicli-', length=16),
-            'http-password': 'Password1!',
+            'http_password': 'Password1!',
             'cluster_type': 'spark'
         })
 
-        create_cluster_format = 'az hdinsight create -n {cluster} -g {rg} -l {loc} -p {http-password} -t {cluster_type} ' \
+        create_cluster_format = 'az hdinsight create -n {cluster} -g {rg} -l {loc} -p {http_password} -t {cluster_type} ' \
                                 + ' '.join(additional_create_arguments)
         self.cmd(create_cluster_format, checks=[
             self.check('properties.provisioningState', 'Succeeded'),
@@ -306,14 +306,14 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
     @staticmethod
-    def _wasb_arguments(storage_account_info, specify_key=True, specify_container=True):
+    def _wasb_arguments(storage_account_info, specify_key=False, specify_container=True):
         storage_account_name, storage_account_key = storage_account_info
         storage_account_key = storage_account_key.strip()
 
         key_args = ' --storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
         container_args = ' --storage-default-container {}'.format('default') if specify_container else ""
 
-        return '--storage-account {}.blob.core.windows.net{}{}'\
+        return '--storage-account {}{}{}'\
             .format(storage_account_name, key_args, container_args)
 
     @staticmethod
