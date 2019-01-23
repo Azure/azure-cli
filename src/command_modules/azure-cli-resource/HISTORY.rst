@@ -4,6 +4,7 @@ Release History
 ===============
 2.1.9
 +++++
+`group deployment create`: support uri based parameters file 
 * `policy assignment create/list/show`: support managed identity on policy assignments
 
 2.1.8
