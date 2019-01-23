@@ -921,7 +921,7 @@ class CredsCache(object):
         if self._should_flush_to_disk:
             with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                            'w+') as cred_file:
-                cred_file.write(json.dumps(self.adal_token_cache.serialize()))
+                cred_file.write(self.adal_token_cache.serialize())
 
     def retrieve_token_for_user(self, username, tenant, resource):
         app = _create_aad_application(self._cli_ctx, tenant, self.adal_token_cache)
@@ -964,7 +964,8 @@ class CredsCache(object):
             import msal
             #all_entries = open(self._token_file)
             self._adal_token_cache = msal.SerializableTokenCache()
-            self._adal_token_cache.deserialize(_load_tokens_from_file(self._token_file))
+            temp = json.dumps(_load_tokens_from_file(self._token_file))
+            self._adal_token_cache.deserialize(temp)
         return self._adal_token_cache
 
     def save_service_principal_cred(self, sp_entry_key, sp_credential):
