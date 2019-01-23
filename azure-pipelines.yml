@@ -6,8 +6,8 @@ jobs:
   displayName: Extract Metadata
 
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: Bash@3
     displayName: 'Extract Version'
@@ -26,8 +26,8 @@ jobs:
 
   dependsOn: ExtractMetadata
   condition: succeeded()
-  queue:
-    name: Hosted VS2017
+  pool:
+    vmImage: 'vs2017-win2016'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -56,8 +56,8 @@ jobs:
 
   dependsOn: ExtractMetadata
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: Bash@3
     displayName: 'Bash Script'
@@ -78,8 +78,8 @@ jobs:
 
   dependsOn: BuildDockerImage
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -112,8 +112,8 @@ jobs:
 
   dependsOn: ExtractMetadata
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
@@ -140,8 +140,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -189,8 +189,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -245,8 +245,8 @@ jobs:
 
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
-  queue:
-    name: Hosted macOS
+  pool:
+    vmImage: 'macOS-10.13'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -284,8 +284,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
@@ -306,8 +306,8 @@ jobs:
 
   dependsOn: BuildYumPackage
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -341,8 +341,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -371,8 +371,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -401,8 +401,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -432,8 +432,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -463,8 +463,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -494,8 +494,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -524,8 +524,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -562,8 +562,8 @@ jobs:
    - BuildDebianStretch
    - BuildUbuntuCosmic
   condition: succeededOrFailed()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -616,8 +616,8 @@ jobs:
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
