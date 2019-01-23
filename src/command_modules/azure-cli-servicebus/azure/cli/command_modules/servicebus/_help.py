@@ -416,7 +416,7 @@ helps['servicebus topic subscription list'] = """
     short-summary: List the Subscription by Service Bus Topic
     examples:
         - name: Shows the Subscription by Service Bus Topic.
-          text: az servicebus topic subscription list --resource-group myresourcegroup --namespace-name mynamespace
+          text: az servicebus topic subscription list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
 """
 
 helps['servicebus topic subscription delete'] = """
@@ -456,7 +456,7 @@ helps['servicebus topic subscription rule list'] = """
     short-summary: List the ServiceBus Rule by Subscription
     examples:
         - name: Shows the Rule ServiceBus by Subscription.
-          text: az servicebus topic subscription rule list --resource-group myresourcegroup --namespace-name mynamespace
+          text: az servicebus topic subscription rule list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
            --subscription-name mysubscription
 """
 
@@ -507,7 +507,7 @@ helps['servicebus georecovery-alias authorization-rule keys list'] = """
     short-summary: List the keys and connection strings of Authorization Rule for the Service Bus Namespace
     examples:
         - name: List the keys and connection strings of Authorization Rule for the namespace.
-          text: az servicebus georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+          text: az servicebus georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --alias myaliasname
 """
 
 helps['servicebus georecovery-alias break-pair'] = """

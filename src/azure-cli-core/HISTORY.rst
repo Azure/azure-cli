@@ -2,10 +2,13 @@
 
 Release History
 ===============
+2.0.56
+++++++
+* auth: enable tenant level account for managed service identity
 
 2.0.55
 ++++++
-* Minor fixes
+* `--output`: Introduce 'none' as an output format option.
 
 2.0.54
 ++++++

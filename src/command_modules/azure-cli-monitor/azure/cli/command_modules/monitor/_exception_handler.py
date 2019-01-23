@@ -10,7 +10,10 @@ def monitor_exception_handler(ex):
 
     if isinstance(ex, ErrorResponseException):
         # work around for issue: https://github.com/Azure/azure-sdk-for-python/issues/1556
-        error_payload = ex.response.json()
+        try:
+            error_payload = ex.response.json()
+        except ValueError:
+            raise CLIError(ex)
         error_payload = {k.lower(): v for k, v in error_payload.items()}
         if 'error' in error_payload:
             error_payload = error_payload['error']

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
 from knack.log import get_logger
 from .url_quote_util import encode_url_path
 
@@ -60,6 +61,20 @@ def transform_entity_query_output(result):
             new_entry[key] = row[key]
         new_results.append(new_entry)
     return new_results
+
+
+def transform_entities_result(result):
+    for entity in result.items:
+        transform_entity_result(entity)
+    return result
+
+
+def transform_entity_result(entity):
+    for key in entity.keys():
+        entity_property = entity[key]
+        if hasattr(entity_property, 'value') and isinstance(entity_property.value, bytes):
+            entity_property.value = base64.b64encode(entity_property.value).decode()
+    return entity
 
 
 def transform_logging_list_output(result):

@@ -10,7 +10,7 @@ from knack.help_files import helps
 
 vm_ids_example = """        - name: {0}
           text: >
-            az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+            az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv) {2}
 """
 
 helps['vm secret'] = """
@@ -399,7 +399,7 @@ helps['vm convert'] = """
         - name: Convert a VM with unmanaged disks to use managed disks.
           text: az vm convert -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Convert all VMs with unmanaged disks in a resource group to use managed disks.', 'vm convert'))
+""".format(vm_ids_example.format('Convert all VMs with unmanaged disks in a resource group to use managed disks.', 'vm convert', ''))
 
 helps['vm'] = """
     type: group
@@ -417,7 +417,7 @@ helps['vm user delete'] = """
         - name: Delete a user account.
           text: az vm user delete -u username -n MyVm -g MyResourceGroup
 {0}
-""".format(vm_ids_example.format('Delete a user on all VMs in a resource group.', 'az vm user delete -u username'))
+""".format(vm_ids_example.format('Delete a user on all VMs in a resource group.', 'vm user delete -u username', ''))
 
 helps['vm user reset-ssh'] = """
     type: command
@@ -428,7 +428,7 @@ helps['vm user reset-ssh'] = """
         - name: Reset the SSH configuration.
           text: az vm user reset-ssh -n MyVm -g MyResourceGroup
 {0}
-""".format(vm_ids_example.format("Reset the SSH server on all VMs in a resource group.", 'vm user reset-ssh'))
+""".format(vm_ids_example.format("Reset the SSH server on all VMs in a resource group.", 'vm user reset-ssh', ''))
 
 helps['vm user update'] = """
     type: command
@@ -443,7 +443,7 @@ helps['vm user update'] = """
           text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
 {0}
 """.format(vm_ids_example.format('Update a user on all VMs in a resource group.',
-                                 'vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)"'))
+                                 'vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)"', ''))
 
 helps['vm availability-set'] = """
     type: group
@@ -466,7 +466,7 @@ helps[vm_boot_diagnostics_disable] = """
     short-summary: Disable the boot diagnostics on a VM.
     examples:
 {0}
-""".format(vm_ids_example.format('Disable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_disable))
+""".format(vm_ids_example.format('Disable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_disable, ''))
 
 vm_boot_diagnostics_enable = 'vm boot-diagnostics enable'
 vm_boot_diagnostics_enable_cmd = "{0} --storage https://mystor.blob.core.windows.net/".format(vm_boot_diagnostics_enable)
@@ -478,7 +478,7 @@ helps[vm_boot_diagnostics_enable] = """
           short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/)
     examples:
 {0}
-""".format(vm_ids_example.format('Enable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_enable_cmd))
+""".format(vm_ids_example.format('Enable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_enable_cmd, ''))
 
 boot_diagnostics_log = 'vm boot-diagnostics get-boot-log'
 helps[boot_diagnostics_log] = """
@@ -486,7 +486,7 @@ helps[boot_diagnostics_log] = """
     short-summary: Get the boot diagnostics log from a VM.
     examples:
 {0}
-""".format(vm_ids_example.format('Get diagnostics logs for all VMs in a resource group.', boot_diagnostics_log))
+""".format(vm_ids_example.format('Get diagnostics logs for all VMs in a resource group.', boot_diagnostics_log, ''))
 
 helps['acs'] = """
     type: group
@@ -591,36 +591,36 @@ helps['vm diagnostics set'] = """
                 protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
                     'storageAccountSasToken': '$storage_sastoken'}"
 
-                # # Alternatively, if the WAD extension has issues parsing the sas token,
-                # # one can use a storage account key.
-                # storage_account_key=$(az storage account keys list --account-name tosinstorage1win \\
-                #   --query [0].value -o tsv)
-                # protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
-                #   'storageAccountKey': '$storage_account_key'}"
-
                 az vm diagnostics set --settings "$default_config" \\
                     --protected-settings "$protected_settings" \\
                     --resource-group $my_resource_group --vm-name $my_windows_vm
+
+                # # Alternatively, if the WAD extension has issues parsing the sas token,
+                # # one can use a storage account key instead.
+                storage_account_key=$(az storage account keys list --account-name {my_storage_account} \\
+                  --query [0].value -o tsv)
+                protected_settings="{'storageAccountName': '$my_diagnostic_storage_account', \\
+                  'storageAccountKey': '$storage_account_key'}"
 """
 
 disk_long_summary = """
-        Just like any other computer, virtual machines in Azure use disks as a place to store an operating system, applications, and data.
+        Azure Virtual Machines use disks as a place to store an operating system, applications, and data.
         All Azure virtual machines have at least two disks: An operating system disk, and a temporary disk.
         The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
         stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-        Operating System Disk
-        Every virtual machine has one attached operating system disk. It's registered as a SATA drive and is labeled /dev/sda by default.
-        This disk has a maximum capacity of 1023 gigabytes (GB).
 
-        Temporary disk
-        The temporary disk is automatically created for you. On Linux virtual machines, the disk is typically /dev/sdb and is formatted and
-        mounted to /mnt/resource by the Azure Linux Agent. The size of the temporary disk varies, based on the size of the virtual machine.
+        Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
 
-        Data disk
-        A data disk is a VHD that's attached to a virtual machine to store application data, or other data you need to keep. Data disks are
-        registered as SCSI drives and are labeled by the creator. Each data disk has a maximum capacity of 1023 GB. The size of the virtual
-        machine determines how many data disks can be attached and the type of storage that can be used to host the disks.
+
+        For more information, see:
+
+        - Azure Disks - https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds.
+
+        - Larger Managed Disks in Public Preview - https://azure.microsoft.com/en-us/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
+
+        - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-ultra-ssd
+
 """
 
 helps['vm disk'] = """
@@ -643,7 +643,7 @@ helps['vm unmanaged-disk attach'] = """
     long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GB) unmanaged data disk to a VM.
-          text: az vm unmanaged-disk attach -g MyResourceGroup --vm-name MyVm
+          text: az vm unmanaged-disk attach -g MyResourceGroup --vm-name MyVm --new
         - name: Attach an existing data disk to a VM as unmanaged.
           text: >
             az vm unmanaged-disk attach -g MyResourceGroup --vm-name MyVm \\
@@ -665,10 +665,10 @@ helps['vm unmanaged-disk list'] = """
     examples:
         - name: List the unmanaged disks attached to a VM.
           text: az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm
-        - name: List unmanaged disks with IDs containing the string "data_disk".
+        - name: List unmanaged disks with names containing the string "data_disk".
           text: >
-            az vm unmanaged-disk list --ids \\
-                $(az resource list --query "[?contains(name, 'data_disk')].id" -o tsv)
+            az vm unmanaged-disk list -g MyResourceGroup --vm-name MyVm \\
+                --query "[?contains(name, 'data_disk')]" --output table
 """
 
 helps['vm disk detach'] = """
@@ -677,7 +677,7 @@ helps['vm disk detach'] = """
     examples:
         - name: Detach a data disk from a VM.
           text: >
-            az vm disk detach -g MyResourceGroup --vm-name MyVm -n disk_name
+            az vm disk detach -g MyResourceGroup --vm-name MyVm --name disk_name
 """
 
 helps['vm disk attach'] = """
@@ -686,7 +686,7 @@ helps['vm disk attach'] = """
     long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
     examples:
         - name: Attach a new default sized (1023 GB) managed data disk to a VM.
-          text: az vm disk attach -g MyResourceGroup --vm-name MyVm --disk disk_name --new
+          text: az vm disk attach -g MyResourceGroup --vm-name MyVm --name disk_name --new
 """
 
 helps['vm encryption'] = """
@@ -731,10 +731,6 @@ helps['vm extension list'] = """
     examples:
         - name: List attached extensions to a named VM.
           text: az vm extension list -g MyResourceGroup --vm-name MyVm
-        - name: List attached extensions with IDs containing the string "MyExtension".
-          text: >
-            az vm extension list --ids \\
-                $(az resource list --query "[?contains(name, 'MyExtension')].id" -o tsv)
 """
 
 helps['vm extension delete'] = """
@@ -1107,7 +1103,7 @@ helps['vm delete'] = """
           text: >
             az vm delete -g MyResourceGroup -n MyVm --yes
 {0}
-""".format(vm_ids_example.format('Delete all VMs in a resource group.', 'vm delete'))
+""".format(vm_ids_example.format('Delete all VMs in a resource group.', 'vm delete', ''))
 
 helps['vm deallocate'] = """
     type: command
@@ -1132,7 +1128,7 @@ helps['vm get-instance-view'] = """
         - name: Use a resource group and name to get instance view information of a VM.
           text: az vm get-instance-view -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Get instance views for all VMs in a resource group.', 'vm get-instance-view'))
+""".format(vm_ids_example.format('Get instance views for all VMs in a resource group.', 'vm get-instance-view', ''))
 
 helps['vm list'] = """
     type: command
@@ -1154,7 +1150,7 @@ helps['vm list-ip-addresses'] = """
         - name: Get the IP addresses for a VM.
           text: az vm list-ip-addresses -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Get IP addresses for all VMs in a resource group.', 'vm list-ip-addresses'))
+""".format(vm_ids_example.format('Get IP addresses for all VMs in a resource group.', 'vm list-ip-addresses', ''))
 
 helps['vm list-sizes'] = """
     type: command
@@ -1179,7 +1175,7 @@ helps['vm list-vm-resize-options'] = """
         - name: List all available VM sizes for resizing.
           text: az vm list-vm-resize-options -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('List available sizes for all VMs in a resource group.', 'vm list-vm-resize-options'))
+""".format(vm_ids_example.format('List available sizes for all VMs in a resource group.', 'vm list-vm-resize-options', ''))
 
 helps['vm list-skus'] = """
     type: command
@@ -1211,7 +1207,7 @@ helps['vm open-port'] = """
         - name: Open a range of ports on a VM to inbound traffic with the highest priority.
           text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
 {0}
-""".format(vm_ids_example.format('Open all ports for all VMs in a resource group.', 'vm open-port'))
+""".format(vm_ids_example.format('Open all ports for all VMs in a resource group.', 'vm open-port', "--port '*'"))
 
 helps['vm redeploy'] = """
     type: command
@@ -1220,7 +1216,7 @@ helps['vm redeploy'] = """
         - name: Redeploy a VM.
           text: az vm redeploy -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Redeploy all VMs in a resource group.', 'vm redeploy'))
+""".format(vm_ids_example.format('Redeploy all VMs in a resource group.', 'vm redeploy', ''))
 
 helps['vm resize'] = """
     type: command
@@ -1235,7 +1231,7 @@ helps['vm resize'] = """
         - name: Resize a VM.
           text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2
 {0}
-""".format(vm_ids_example.format('Resize all VMs in a resource group.', 'vm resize --size Standard_DS3_v2'))
+""".format(vm_ids_example.format('Resize all VMs in a resource group.', 'vm resize --size Standard_DS3_v2', ''))
 
 helps['vm restart'] = """
     type: command
@@ -1244,7 +1240,7 @@ helps['vm restart'] = """
         - name: Restart a VM.
           text: az vm restart -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Restart all VMs in a resource group.', 'vm restart'))
+""".format(vm_ids_example.format('Restart all VMs in a resource group.', 'vm restart', ''))
 
 helps['vm show'] = """
     type: command
@@ -1253,7 +1249,7 @@ helps['vm show'] = """
         - name: Show information about a VM.
           text: az vm show -g MyResourceGroup -n MyVm -d
 {0}
-""".format(vm_ids_example.format('Get the details for all VMs in a resource group.', 'vm show -d'))
+""".format(vm_ids_example.format('Get the details for all VMs in a resource group.', 'vm show -d', ''))
 
 helps['vm start'] = """
     type: command
@@ -1262,7 +1258,7 @@ helps['vm start'] = """
         - name: Start a stopped VM.
           text: az vm start -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Start all VMs in a resource group.', 'vm start'))
+""".format(vm_ids_example.format('Start all VMs in a resource group.', 'vm start', ''))
 
 helps['vm stop'] = """
     type: command
@@ -1272,7 +1268,7 @@ helps['vm stop'] = """
         - name: Power off (stop) a running VM.
           text: az vm stop -g MyResourceGroup -n MyVm
 {0}
-""".format(vm_ids_example.format('Stop all VMs in a resource group.', 'vm stop'))
+""".format(vm_ids_example.format('Stop all VMs in a resource group.', 'vm stop', ''))
 
 helps['vm wait'] = """
     type: command
@@ -1281,7 +1277,7 @@ helps['vm wait'] = """
         - name: Wait until a VM is created.
           text: az vm wait -g MyResourceGroup -n MyVm --created
 {0}
-""".format(vm_ids_example.format('Wait until all VMs in a resource group are deleted.', 'vm wait --deleted'))
+""".format(vm_ids_example.format('Wait until all VMs in a resource group are deleted.', 'vm wait --deleted', ''))
 
 helps['vm identity'] = """
     type: group
@@ -1368,7 +1364,9 @@ helps['vmss identity show'] = """
 helps['disk'] = """
     type: group
     short-summary: Manage Azure Managed Disks.
-"""
+    long-summary: >
+{0}
+""".format(disk_long_summary)
 
 helps['image'] = """
     type: group

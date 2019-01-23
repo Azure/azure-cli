@@ -168,7 +168,7 @@ helps['relay wcfrelay create'] = """
     short-summary: Create the Relay Service WCF Relay
     examples:
         - name: Create Relay Service WCF Relay.
-          text: az relay wcfrelay create --resource-group myresourcegroup --namespace-name mynamespace --name myrelay
+          text: az relay wcfrelay create --resource-group myresourcegroup --namespace-name mynamespace --name myrelay --relay-type NetTcp
 """
 
 helps['relay wcfrelay update'] = """
@@ -176,7 +176,7 @@ helps['relay wcfrelay update'] = """
     short-summary: Updates existing Relay Service WCF Relay
     examples:
         - name: Updates Relay Service WCF Relay.
-          text: az relay wcfrelay update --resource-group myresourcegroup --namespace-name mynamespace --name myrelay --auto-delete-on-idle PT3M
+          text: az relay wcfrelay update --resource-group myresourcegroup --namespace-name mynamespace --name myrelay
 """
 
 helps['relay wcfrelay show'] = """
@@ -272,7 +272,7 @@ helps['relay hyco update'] = """
     short-summary: Updates the Relay Service Hybrid Connection
     examples:
         - name: Updates existing Relay Service Hybrid Connection.
-          text: az relay hyco update --resource-group myresourcegroup --namespace-name mynamespace --name myhyco --support-ordering True
+          text: az relay hyco update --resource-group myresourcegroup --namespace-name mynamespace --name myhyco
 """
 
 helps['relay hyco show'] = """

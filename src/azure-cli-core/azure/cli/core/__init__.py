@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.55"
+__version__ = "2.0.56"
 
 import os
 import sys
@@ -104,6 +104,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.command_table = self.command_table
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
+    # pylint: disable=too-many-statements
     def load_command_table(self, args):
         from importlib import import_module
         import pkgutil
@@ -323,7 +324,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         doc_string_source = command_kwargs.get('doc_string_source', None)
         if not doc_string_source:
             return
-        elif not isinstance(doc_string_source, str):
+        if not isinstance(doc_string_source, str):
             raise CLIError("command authoring error: applying doc_string_source '{}' directly will cause slowdown. "
                            'Import by string name instead.'.format(doc_string_source.__name__))
 
@@ -359,13 +360,11 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         version = get_api_version(self.cli_ctx, resource_type)
         if isinstance(version, str):
             return version
-        else:
-            version = getattr(version, operation_group, None)
-            if version:
-                return version
-            else:
-                from azure.cli.core.profiles._shared import APIVersionException
-                raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
+        version = getattr(version, operation_group, None)
+        if version:
+            return version
+        from azure.cli.core.profiles._shared import APIVersionException
+        raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version
@@ -380,7 +379,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
-        elif operation_group:
+        if operation_group:
             return getattr(api_support, operation_group)
         return api_support
 

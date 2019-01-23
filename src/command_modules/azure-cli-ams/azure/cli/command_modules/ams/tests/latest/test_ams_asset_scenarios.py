@@ -19,13 +19,13 @@ class AmsAssetTests(ScenarioTest):
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
             'storageAccountForAsset': storage_account_for_asset,
-            'location': 'westus2',
+            'location': 'australiaeast',
             'container': container
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Australia East')
         ])
 
         self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccountForAsset}', checks=[
@@ -79,12 +79,12 @@ class AmsAssetTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'australiasoutheast'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'West US 2')
+            self.check('location', 'Australia Southeast')
         ])
 
         assetName = self.create_random_name(prefix='asset', length=12)
@@ -116,7 +116,7 @@ class AmsAssetTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2'
+            'location': 'southindia'
         })
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
@@ -143,7 +143,7 @@ class AmsAssetTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_asset_get_streaming_locators(self, storage_account_for_create):
+    def test_ams_asset_list_streaming_locators(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         assetName = self.create_random_name(prefix='asset', length=12)
         streamingLocatorName = self.create_random_name(prefix='str', length=12)
@@ -151,7 +151,7 @@ class AmsAssetTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'centralindia',
             'assetName': assetName,
             'streamingLocatorName': streamingLocatorName,
             'streamingPolicyName': 'Predefined_ClearStreamingOnly'
@@ -161,6 +161,6 @@ class AmsAssetTests(ScenarioTest):
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
         self.cmd('az ams streaming-locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName}')
 
-        self.cmd('az ams asset get-streaming-locators -a {amsname} -n {assetName} -g {rg}', checks=[
+        self.cmd('az ams asset list-streaming-locators -a {amsname} -n {assetName} -g {rg}', checks=[
             self.check('length(@)', 1)
         ])

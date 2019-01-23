@@ -2,6 +2,13 @@
 
 Release History
 ===============
+0.3.12
+++++++
+* Updating dependencies
+
+0.3.11
+++++++
+* Updating dependencies
 
 0.3.10
 ++++++

@@ -59,6 +59,7 @@ class TestProfile(unittest.TestCase):
                                              cls.display_name2,
                                              cls.state2,
                                              cls.tenant_id)
+        cls.test_msi_tenant = '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
         cls.test_msi_access_token = ('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1'
                                      'USIsImtpZCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1USJ9.eyJhdWQiOiJodHRwczovL21hbmF'
                                      'nZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC81NDg'
@@ -899,6 +900,43 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_get_client_class, mock_get):
+
+        class ClientStub:
+            def __init__(self, *args, **kwargs):
+                self.subscriptions = mock.MagicMock()
+                self.subscriptions.list.return_value = []
+                self.config = mock.MagicMock()
+
+        mock_get_client_class.return_value = ClientStub
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+
+        test_token_entry = {
+            'token_type': 'Bearer',
+            'access_token': TestProfile.test_msi_access_token
+        }
+        encoded_test_token = json.dumps(test_token_entry).encode()
+        good_response = mock.MagicMock()
+        good_response.status_code = 200
+        good_response.content = encoded_test_token
+        mock_get.return_value = good_response
+
+        subscriptions = profile.find_subscriptions_in_vm_with_msi(allow_no_subscriptions=True)
+
+        # assert
+        self.assertEqual(len(subscriptions), 1)
+        s = subscriptions[0]
+        self.assertEqual(s['user']['name'], 'systemAssignedIdentity')
+        self.assertEqual(s['user']['type'], 'servicePrincipal')
+        self.assertEqual(s['user']['assignedIdentityInfo'], 'MSI')
+        self.assertEqual(s['name'], 'N/A(tenant level account)')
+        self.assertEqual(s['id'], self.test_msi_tenant)
+        self.assertEqual(s['tenantId'], self.test_msi_tenant)
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)

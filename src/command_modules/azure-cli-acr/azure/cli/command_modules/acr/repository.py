@@ -15,7 +15,7 @@ from knack.log import get_logger
 
 from azure.cli.core.util import should_disable_connection_verify
 
-from ._utils import validate_managed_registry, user_confirmation
+from ._utils import validate_managed_registry, user_confirmation, ResourceNotFound
 from ._docker_utils import (
     request_data_from_registry,
     get_access_credentials,
@@ -131,19 +131,22 @@ def _obtain_data_from_registry(login_server,
 def acr_repository_list(cmd,
                         registry_name,
                         top=None,
-                        resource_group_name=None,
+                        resource_group_name=None,  # pylint: disable=unused-argument
+                        tenant_suffix=None,
                         username=None,
                         password=None):
     is_managed_registry = True
     try:
-        _, resource_group_name = validate_managed_registry(cmd.cli_ctx, registry_name, resource_group_name)
+        validate_managed_registry(cmd.cli_ctx, registry_name)
+    except ResourceNotFound:
+        pass
     except CLIError:
         is_managed_registry = False
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password)
 
@@ -161,20 +164,23 @@ def acr_repository_show_tags(cmd,
                              repository,
                              top=None,
                              orderby=None,
-                             resource_group_name=None,
+                             resource_group_name=None,  # pylint: disable=unused-argument
+                             tenant_suffix=None,
                              username=None,
                              password=None,
                              detail=False):
     is_managed_registry = True
     try:
-        _, resource_group_name = validate_managed_registry(cmd.cli_ctx, registry_name, resource_group_name)
+        validate_managed_registry(cmd.cli_ctx, registry_name)
+    except ResourceNotFound:
+        pass
     except CLIError:
         is_managed_registry = False
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -212,17 +218,20 @@ def acr_repository_show_manifests(cmd,
                                   repository,
                                   top=None,
                                   orderby=None,
-                                  resource_group_name=None,
+                                  resource_group_name=None,  # pylint: disable=unused-argument
+                                  tenant_suffix=None,
                                   username=None,
                                   password=None,
                                   detail=False):
-    _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, SHOW_MANIFESTS_NOT_SUPPORTED)
+    try:
+        validate_managed_registry(cmd.cli_ctx, registry_name, None, SHOW_MANIFESTS_NOT_SUPPORTED)
+    except ResourceNotFound:
+        pass
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -252,7 +261,8 @@ def acr_repository_show(cmd,
                         registry_name,
                         repository=None,
                         image=None,
-                        resource_group_name=None,
+                        resource_group_name=None,  # pylint: disable=unused-argument
+                        tenant_suffix=None,
                         username=None,
                         password=None):
     return _acr_repository_attributes_helper(
@@ -263,7 +273,7 @@ def acr_repository_show(cmd,
         permission='pull',
         repository=repository,
         image=image,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password)
 
@@ -272,7 +282,8 @@ def acr_repository_update(cmd,
                           registry_name,
                           repository=None,
                           image=None,
-                          resource_group_name=None,
+                          resource_group_name=None,  # pylint: disable=unused-argument
+                          tenant_suffix=None,
                           username=None,
                           password=None,
                           delete_enabled=None,
@@ -306,7 +317,7 @@ def acr_repository_update(cmd,
         permission='*',
         repository=repository,
         image=image,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password)
 
@@ -318,12 +329,14 @@ def _acr_repository_attributes_helper(cli_ctx,
                                       permission,
                                       repository=None,
                                       image=None,
-                                      resource_group_name=None,
+                                      tenant_suffix=None,
                                       username=None,
                                       password=None):
     _validate_parameters(repository, image)
-    _, resource_group_name = validate_managed_registry(
-        cli_ctx, registry_name, resource_group_name, ATTRIBUTES_NOT_SUPPORTED)
+    try:
+        validate_managed_registry(cli_ctx, registry_name, None, ATTRIBUTES_NOT_SUPPORTED)
+    except ResourceNotFound:
+        pass
 
     if image:
         # If --image is specified, repository must be empty.
@@ -335,7 +348,7 @@ def _acr_repository_attributes_helper(cli_ctx,
     login_server, username, password = get_access_credentials(
         cli_ctx=cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -374,18 +387,21 @@ def _acr_repository_attributes_helper(cli_ctx,
 def acr_repository_untag(cmd,
                          registry_name,
                          image,
-                         resource_group_name=None,
+                         resource_group_name=None,  # pylint: disable=unused-argument
+                         tenant_suffix=None,
                          username=None,
                          password=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, UNTAG_NOT_SUPPORTED)
+    try:
+        validate_managed_registry(cmd.cli_ctx, registry_name, None, UNTAG_NOT_SUPPORTED)
+    except ResourceNotFound:
+        pass
 
     repository, tag, _ = _parse_image_name(image)
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -405,7 +421,8 @@ def acr_repository_delete(cmd,
                           image=None,
                           tag=None,
                           manifest=None,
-                          resource_group_name=None,
+                          resource_group_name=None,  # pylint: disable=unused-argument
+                          tenant_suffix=None,
                           username=None,
                           password=None,
                           yes=False):
@@ -418,7 +435,7 @@ def acr_repository_delete(cmd,
                               repository=repository,
                               tag=tag,
                               manifest=manifest,
-                              resource_group_name=resource_group_name,
+                              tenant_suffix=tenant_suffix,
                               username=username,
                               password=password,
                               yes=yes)
@@ -431,8 +448,10 @@ def acr_repository_delete(cmd,
     if manifest is not None:
         raise CLIError("The parameter --manifest is redundant and deprecated. Please use --image to delete an image.")
 
-    _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
+    try:
+        validate_managed_registry(cmd.cli_ctx, registry_name, None, DELETE_NOT_SUPPORTED)
+    except ResourceNotFound:
+        pass
 
     if image:
         # If --image is specified, repository/tag/manifest must be empty.
@@ -441,7 +460,7 @@ def acr_repository_delete(cmd,
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -503,17 +522,19 @@ def _legacy_delete(cmd,
                    repository,
                    tag=None,
                    manifest=None,
-                   resource_group_name=None,
+                   tenant_suffix=None,
                    username=None,
                    password=None,
                    yes=False):
-    _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
+    try:
+        validate_managed_registry(cmd.cli_ctx, registry_name, None, DELETE_NOT_SUPPORTED)
+    except ResourceNotFound:
+        pass
 
     login_server, username, password = get_access_credentials(
         cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         repository=repository,
@@ -615,7 +636,7 @@ def _delete_manifest_confirmation(login_server,
     return manifest
 
 
-def get_image_digest(cli_ctx, registry_name, resource_group_name, image):
+def get_image_digest(cli_ctx, registry_name, image):
     repository, tag, manifest = _parse_image_name(image, allow_digest=True)
 
     if manifest:
@@ -625,7 +646,6 @@ def get_image_digest(cli_ctx, registry_name, resource_group_name, image):
     login_server, username, password = get_access_credentials(
         cli_ctx=cli_ctx,
         registry_name=registry_name,
-        resource_group_name=resource_group_name,
         repository=repository,
         permission='pull')
 

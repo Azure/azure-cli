@@ -5,15 +5,19 @@
 # pylint: disable=too-many-statements
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class IoTHubTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_iot_hub(self, resource_group, resource_group_location):
-        hub = 'iot-hub-for-test'
+        hub = 'iot-hub-for-test-1'
         rg = resource_group
         location = resource_group_location
+        containerName = 'iothubcontainer1'
+        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
         subscription_id = self._get_current_subscription()
 
@@ -154,6 +158,9 @@ class IoTHubTest(ScenarioTest):
 
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'
+        storage_endpoint_name = 'Storage1'
+        storage_endpoint_type = 'azurestoragecontainer'
+        storage_encoding_format = 'json'
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
@@ -182,6 +189,18 @@ class IoTHubTest(ScenarioTest):
                  .format(hub, rg, endpoint_name),
                  checks=[self.check('resourceGroup', rg),
                          self.check('name', endpoint_name)])
+
+        # Test 'az iot hub routing-endpoint create' with storage endpoint
+        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}" '
+                 '--container-name {7} --encoding {8}'
+                 .format(hub, rg, storage_endpoint_name, storage_endpoint_type, rg, subscription_id,
+                         storageConnectionString, containerName, storage_encoding_format),
+                 checks=[self.check('length(storageContainers[*])', 1),
+                         self.check('storageContainers[0].containerName', containerName),
+                         self.check('storageContainers[0].name', storage_endpoint_name),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(eventHubs[*])', 1)])
 
         # Test 'az iot hub route create'
         route_name = 'route1'
@@ -262,13 +281,16 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('length(eventHubs[*])', 0),
                          self.check('length(serviceBusQueues[*])', 0),
                          self.check('length(serviceBusTopics[*])', 0),
-                         self.check('length(storageContainers[*])', 0)])
+                         self.check('length(storageContainers[*])', 1)])
+
+        # Test 'az iot hub devicestream show'
+        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest'
+        ehNamespace = 'ehNamespaceiothubfortest-1'
         eventHub = 'eventHubiothubfortest'
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
@@ -285,6 +307,19 @@ class IoTHubTest(ScenarioTest):
         output = self.cmd('eventhubs eventhub authorization-rule keys list --resource-group {0} --namespace-name {1} --eventhub-name {2} --name {3}'
                           .format(rg, ehNamespace, eventHub, eventHubPolicy))
         return output.get_output_in_json()['primaryConnectionString']
+
+    def _get_azurestorage_connectionstring(self, rg, container_name):
+        storage_name = 'iothubteststorage1'
+
+        self.cmd('storage account create --resource-group {0} --name {1}'
+                 .format(rg, storage_name))
+
+        self.cmd('storage container create --name {0} --account-name {1}'
+                 .format(container_name, storage_name))
+
+        output = self.cmd('storage account show-connection-string --resource-group {0} --name {1}'
+                          .format(rg, storage_name))
+        return output.get_output_in_json()['connectionString']
 
     def _get_current_subscription(self):
         output = self.cmd('account show')

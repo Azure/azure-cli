@@ -36,6 +36,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
                                    DeletedAppRestoreRequest, DefaultErrorResponseException,
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
+from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -1838,10 +1839,19 @@ class _StackRuntimeHelper(object):
         self._stacks = result
 
 
+def get_app_insights_key(cli_ctx, resource_group, name):
+    appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
+    appinsights = appinsights_client.components.get(resource_group, name)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        raise CLIError("App Insights {} under resource group {} was not found.".format(name, resource_group))
+    return appinsights.instrumentation_key
+
+
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
-                    deployment_source_url=None, deployment_source_branch='master',
-                    deployment_local_git=None, deployment_container_image_name=None, tags=None):
+                    app_insights=None, app_insights_key=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None,
+                    deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1926,6 +1936,14 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
+
+    if app_insights_key is not None:
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                      value=app_insights_key))
+    elif app_insights is not None:
+        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                      value=instrumentation_key))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -2012,20 +2030,21 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
     import requests
     total_trials = (int(timeout) // 2) if timeout else 450
-    for _num_trials in range(total_trials):
+    num_trials = 0
+    while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
         res_dict = response.json()
+        num_trials = num_trials + 1
         if res_dict.get('status', 0) == 3:
-            logger.warning("Zip deployment failed status %s", res_dict['status_text'])
-            break
+            raise CLIError("Zip deployment failed.")
         elif res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        raise ValueError("""Deployment is taking longer than expected. Please verify
+        raise CLIError("""Deployment is taking longer than expected. Please verify
                             status at '{}' beforing launching the app""".format(deployment_status_url))
     return res_dict
 

@@ -326,62 +326,62 @@ helps['policy definition create'] = """
             examples:
                 - name: Create a read-only policy.
                   text: |
-                    az policy definition create --name readOnlyStorage --rules '{
-                        "if":
-                        {
-                            "field": "type",
-                            "equals": "Microsoft.Storage/storageAccounts/write"
-                        },
-                        "then":
-                        {
-                            "effect": "deny"
-                        }
+                    az policy definition create --name readOnlyStorage --rules '{ \\
+                        "if": \\
+                        { \\
+                            "field": "type", \\
+                            "equals": "Microsoft.Storage/storageAccounts/write" \\
+                        }, \\
+                        "then": \\
+                        { \\
+                            "effect": "deny" \\
+                        } \\
                     }'
                 - name: Create a policy parameter definition.
                   text: |
-                    az policy definition create --name allowedLocations --rules '{
-                        "if": {
-                            "allOf": [
-                                {
-                                    "field": "location",
-                                    "notIn": "[parameters('listOfAllowedLocations')]"
-                                },
-                                {
-                                    "field": "location",
-                                    "notEquals": "global"
-                                },
-                                {
-                                    "field": "type",
-                                    "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
-                                }
-                            ]
-                        },
-                        "then": {
-                            "effect": "deny"
-                        }
+                    az policy definition create --name allowedLocations --rules '{ \\
+                        "if": { \\
+                            "allOf": [ \\
+                                { \\
+                                    "field": "location", \\
+                                    "notIn": "[parameters('listOfAllowedLocations')]" \\
+                                }, \\
+                                { \\
+                                    "field": "location", \\
+                                    "notEquals": "global" \\
+                                }, \\
+                                { \\
+                                    "field": "type", \\
+                                    "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories" \\
+                                } \\
+                            ] \\
+                        }, \\
+                        "then": { \\
+                            "effect": "deny" \\
+                        } \\
                     }' \\
-                    --params '{
-                        "allowedLocations": {
-                            "type": "array",
-                            "metadata": {
-                                "description": "The list of locations that can be specified when deploying resources",
-                                "strongType": "location",
-                                "displayName": "Allowed locations"
-                            }
-                        }
+                    --params '{ \\
+                        "allowedLocations": { \\
+                            "type": "array", \\
+                            "metadata": { \\
+                                "description": "The list of locations that can be specified when deploying resources", \\
+                                "strongType": "location", \\
+                                "displayName": "Allowed locations" \\
+                            } \\
+                        } \\
                     }'
                 - name: Create a read-only policy that can be applied within a management group.
                   text: |
-                    az policy definition create -n readOnlyStorage --management-group 'MyManagementGroup' --rules '{
-                        "if":
-                        {
-                            "field": "type",
-                            "equals": "Microsoft.Storage/storageAccounts/write"
-                        },
-                        "then":
-                        {
-                            "effect": "deny"
-                        }
+                    az policy definition create -n readOnlyStorage --management-group 'MyManagementGroup' --rules '{ \\
+                        "if": \\
+                        { \\
+                            "field": "type", \\
+                            "equals": "Microsoft.Storage/storageAccounts/write" \\
+                        }, \\
+                        "then": \\
+                        { \\
+                            "effect": "deny" \\
+                        } \\
                     }'
 """
 helps['policy definition delete'] = """
@@ -420,17 +420,17 @@ helps['policy set-definition create'] = """
             examples:
                 - name: Create a policy set definition.
                   text: |
-                    az policy set-definition create -n readOnlyStorage --definitions '[
-                            {
-                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy"
-                            }
+                    az policy set-definition create -n readOnlyStorage --definitions '[ \\
+                            { \\
+                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \\
+                            } \\
                         ]'
                 - name: Create a policy set definition to be used by a subscription.
                   text: |
-                    az policy set-definition create -n readOnlyStorage --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[
-                            {
-                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy"
-                            }
+                    az policy set-definition create -n readOnlyStorage --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[ \\
+                            { \\
+                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \\
+                            } \\
                         ]'
 """
 helps['policy set-definition delete'] = """
@@ -468,26 +468,32 @@ helps['policy assignment create'] = """
               subscription:      /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333
               resource group:    /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup
               resource:          /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
-                az policy assignment create --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup' --policy {PolicyName} -p '{
-                    "allowedLocations": {
-                        "value": [
-                            "australiaeast",
-                            "eastus",
-                            "japaneast"
-                        ]
-                    }
+                az policy assignment create --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup' --policy {PolicyName} -p '{ \\
+                    "allowedLocations": { \\
+                        "value": [ \\
+                            "australiaeast", \\
+                            "eastus", \\
+                            "japaneast" \\
+                        ] \\
+                    } \\
                 }'
         - name: Create a resource policy assignment and provide rule parameter values.
           text: |
-                az policy assignment create --policy {PolicyName} -p '{
-                    "allowedLocations": {
-                        "value": [
-                            "australiaeast",
-                            "eastus",
-                            "japaneast"
-                        ]
-                    }
+                az policy assignment create --policy {PolicyName} -p '{ \\
+                    "allowedLocations": { \\
+                        "value": [ \\
+                            "australiaeast", \\
+                            "eastus", \\
+                            "japaneast" \\
+                        ] \\
+                    } \\
                 }'
+        - name: Create a resource policy assignment with a system assigned identity.
+          text: >
+            az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity
+        - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
+          text: >
+            az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
 """
 helps['policy assignment delete'] = """
     type: command
@@ -500,6 +506,29 @@ helps['policy assignment show'] = """
 helps['policy assignment list'] = """
     type: command
     short-summary: List resource policy assignments.
+"""
+helps['policy assignment identity'] = """
+    type: group
+    short-summary: Manage a policy assignment's managed identity.
+"""
+helps['policy assignment identity assign'] = """
+    type: command
+    short-summary: Add a system assigned identity to a policy assignment.
+    examples:
+        - name: Add a system assigned managed identity to a policy assignment.
+          text: >
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment
+        - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
+          text: >
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+"""
+helps['policy assignment identity show'] = """
+    type: command
+    short-summary: Show a policy assignment's managed identity.
+"""
+helps['policy assignment identity remove'] = """
+    type: command
+    short-summary: Remove a managed identity from a policy assignment.
 """
 helps['resource'] = """
     type: group
@@ -580,20 +609,20 @@ helps['resource create'] = """
     examples:
        - name: Create an API app by providing a full JSON configuration.
          text: |
-            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties '{
-                        "kind": "api",
-                        "location": "West US",
-                        "properties": {
-                            "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}"
-                        }
+            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties '{ \\
+                        "kind": "api", \\
+                        "location": "West US", \\
+                        "properties": { \\
+                            "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}" \\
+                        } \\
                     }'
        - name: Create a resource by loading JSON configuration from a file.
          text: >
             az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile
        - name: Create a web app with the minimum required configuration information.
          text: |
-            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties '{
-                    "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}"
+            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties '{ \\
+                    "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}" \\
                 }'
 """
 
@@ -623,10 +652,10 @@ helps['resource invoke-action'] = """
          text: >
             az resource invoke-action --action capture \\
               --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName} \\
-              --request-body '{
-                "vhdPrefix": "myPrefix",
-                "destinationContainerName": "myContainer",
-                "overwriteVhds": true
+              --request-body '{ \\
+                "vhdPrefix": "myPrefix", \\
+                "destinationContainerName": "myContainer", \\
+                "overwriteVhds": true \\
             }'
 """
 
@@ -713,10 +742,10 @@ helps['group deployment create'] = """
             az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
         - name: Create a deployment from a local template file, using parameters from a JSON string.
           text: |
-            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{
-                    "location": {
-                        "value": "westus"
-                    }
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{ \\
+                    "location": { \\
+                        "value": "westus" \\
+                    } \\
                 }'
         - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
           text: >
@@ -764,10 +793,10 @@ helps['deployment create'] = """
             az deployment create --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
         - name: Create a deployment from a local template file, using parameters from a JSON string.
           text: |
-            az deployment create --location WestUS --template-file azuredeploy.json --parameters '{
-                    "policyName": {
-                        "value": "policy2"
-                    }
+            az deployment create --location WestUS --template-file azuredeploy.json --parameters '{ \\
+                    "policyName": { \\
+                        "value": "policy2" \\
+                    } \\
                 }'
         - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
           text: >

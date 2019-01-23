@@ -35,7 +35,16 @@ from azure.cli.command_modules.acr._docker_utils import (
     get_authorization_header,
     EMPTY_GUID
 )
+from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
 from azure.cli.core.mock import DummyCli
+
+
+TEST_TENANT = 'testtenant'
+TEST_SUBSCRIPTION = 'testsubscription'
+TEST_AAD_ACCESS_TOKEN = 'testaadaccesstoken'
+TEST_ACR_REFRESH_TOKEN = 'testacrrefreshtoken'
+TEST_ACR_ACCESS_TOKEN = 'testacraccesstoken'
+TEST_REPOSITORY = 'testrepository'
 
 
 class AcrMockCommandsTests(unittest.TestCase):
@@ -367,72 +376,124 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
     @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
     @mock.patch('requests.post', autospec=True)
     @mock.patch('requests.get', autospec=True)
-    def test_get_docker_credentials(self, mock_requests_get, mock_requests_post, mock_get_registry_by_name, mock_get_raw_token):
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_docker_credentials(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name):
+        test_registry = 'testregistry'
+        test_login_server = '{}.azurecr.io'.format(test_registry)
+        test_tenant_suffix = 'microsoft'
+        test_login_server_with_tenant_suffix = '{}-{}.azurecr.io'.format(test_registry, test_tenant_suffix)
+
+        # Registry found, login server without tenant suffix
+        self._core_token_scenarios(mock_get_raw_token,
+                                   mock_requests_get,
+                                   mock_requests_post,
+                                   mock_get_registry_by_name,
+                                   registry_exists=True,
+                                   registry_name=test_registry,
+                                   login_server=test_login_server,
+                                   tenant_suffix=None)
+
+        # Registry not found, login server without tenant suffix
+        self._core_token_scenarios(mock_get_raw_token,
+                                   mock_requests_get,
+                                   mock_requests_post,
+                                   mock_get_registry_by_name,
+                                   registry_exists=False,
+                                   registry_name=test_registry,
+                                   login_server=test_login_server,
+                                   tenant_suffix=None)
+
+        # Registry found, login server with tenant suffix
+        self._core_token_scenarios(mock_get_raw_token,
+                                   mock_requests_get,
+                                   mock_requests_post,
+                                   mock_get_registry_by_name,
+                                   registry_exists=True,
+                                   registry_name=test_registry,
+                                   login_server=test_login_server_with_tenant_suffix,
+                                   tenant_suffix=test_tenant_suffix)
+
+        # Registry not found, login server with tenant suffix
+        self._core_token_scenarios(mock_get_raw_token,
+                                   mock_requests_get,
+                                   mock_requests_post,
+                                   mock_get_registry_by_name,
+                                   registry_exists=False,
+                                   registry_name=test_registry,
+                                   login_server=test_login_server_with_tenant_suffix,
+                                   tenant_suffix=test_tenant_suffix)
+
+    def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
 
-        registry = Registry(location='westus', sku=Sku(name='Standard'))
-        registry.login_server = 'testregistry.azurecr.io'
-        mock_get_registry_by_name.return_value = registry, None
+        if registry_exists:
+            registry = Registry(location='westus', sku=Sku(name='Standard'))
+            registry.login_server = login_server
+            mock_get_registry_by_name.return_value = registry, None
+        else:
+            # Mock the registry could not be found
+            mock_get_registry_by_name.side_effect = ResourceNotFound('The resource could not be found.')
+
+        self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, login_server)
+
+        # Test get refresh token
+        get_login_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix)
+        self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
+
+        # Test get access token for container image repository
+        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission='*')
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:*'.format(TEST_REPOSITORY))
+
+        # Test get access token for artifact image repository
+        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission='*')
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:*'.format(TEST_REPOSITORY))
+
+    def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server):
+        # Set up AAD token with only access token
+        mock_get_aad_token.return_value = ('Bearer', TEST_AAD_ACCESS_TOKEN, {}), TEST_SUBSCRIPTION, TEST_TENANT
 
         # Set up challenge response
         challenge_response = mock.MagicMock()
         challenge_response.headers = {
-            'WWW-Authenticate': 'Bearer realm="https://testregistry.azurecr.io/oauth2/token",service="testregistry.azurecr.io"'
+            'WWW-Authenticate': 'Bearer realm="https://{}/oauth2/token",service="{}"'.format(login_server, login_server)
         }
         challenge_response.status_code = 401
         mock_requests_get.return_value = challenge_response
 
         # Set up refresh/access token response
-        refresh_token_response = mock.MagicMock()
-        refresh_token_response.headers = {}
-        refresh_token_response.status_code = 200
-        refresh_token_response.content = json.dumps({
-            'refresh_token': 'testrefreshtoken',
-            'access_token': 'testaccesstoken'}).encode()
-        mock_requests_post.return_value = refresh_token_response
+        token_response = mock.MagicMock()
+        token_response.headers = {}
+        token_response.status_code = 200
+        token_response.content = json.dumps({
+            'refresh_token': TEST_ACR_REFRESH_TOKEN,
+            'access_token': TEST_ACR_ACCESS_TOKEN}).encode()
+        mock_requests_post.return_value = token_response
 
-        # Set up AAD token with only access token
-        mock_get_raw_token.return_value = ('Bearer', 'aadaccesstoken', {}), 'testsubscription', 'testtenant'
-        get_login_credentials(cmd.cli_ctx, 'testregistry')
-        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/', verify=mock.ANY)
+    def _validate_refresh_token_request(self, mock_requests_get, mock_requests_post, login_server):
+        mock_requests_get.assert_called_with('https://{}/v2/'.format(login_server), verify=mock.ANY)
         mock_requests_post.assert_called_with(
-            'https://testregistry.azurecr.io/oauth2/exchange',
+            'https://{}/oauth2/exchange'.format(login_server),
             urlencode({
                 'grant_type': 'access_token',
-                'service': 'testregistry.azurecr.io',
-                'tenant': 'testtenant',
-                'access_token': 'aadaccesstoken'
+                'service': login_server,
+                'tenant': TEST_TENANT,
+                'access_token': TEST_AAD_ACCESS_TOKEN
             }),
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             verify=mock.ANY)
 
-        # Test get access token for container image repository
-        get_access_credentials(cmd.cli_ctx, 'testregistry', repository='testrepository', permission='*')
+    def _validate_access_token_request(self, mock_requests_get, mock_requests_post, login_server, scope):
         mock_requests_post.assert_called_with(
-            'https://testregistry.azurecr.io/oauth2/token',
+            'https://{}/oauth2/token'.format(login_server),
             urlencode({
                 'grant_type': 'refresh_token',
-                'service': 'testregistry.azurecr.io',
-                'scope': 'repository:testrepository:*',
-                'refresh_token': 'testrefreshtoken'
-            }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            verify=mock.ANY)
-
-        # Test get access token for artifact image repository
-        get_access_credentials(cmd.cli_ctx, 'testregistry', artifact_repository='testrepository', permission='*')
-        mock_requests_post.assert_called_with(
-            'https://testregistry.azurecr.io/oauth2/token',
-            urlencode({
-                'grant_type': 'refresh_token',
-                'service': 'testregistry.azurecr.io',
-                'scope': 'artifact-repository:testrepository:*',
-                'refresh_token': 'testrefreshtoken'
+                'service': login_server,
+                'scope': scope,
+                'refresh_token': TEST_ACR_REFRESH_TOKEN
             }),
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             verify=mock.ANY)

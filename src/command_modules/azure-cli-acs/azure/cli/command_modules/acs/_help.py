@@ -51,22 +51,22 @@ helps['acs create'] = """
                 --ssh-key-value /path/to/publickey
         - name: Create a DCOS cluster with two agent pools.
           text: |-
-              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
-                {{
-                  "name": "agentpool1"
-                }},
-                {{
-                  "name": "agentpool2"
+              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[ \\
+                {{ \\
+                  "name": "agentpool1" \\
+                }}, \\
+                {{ \\
+                  "name": "agentpool2" \\
                 }}]'
         - name: Create a DCOS cluster where the second agent pool has a vmSize specified.
           text: |-
-              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
-                {{
-                  "name": "agentpool1"
-                }},
-                {{
-                  "name": "agentpool2",
-                  "vmSize": "Standard_D2"
+              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[ \\
+                {{ \\
+                  "name": "agentpool1" \\
+                }}, \\
+                {{ \\
+                  "name": "agentpool2", \\
+                  "vmSize": "Standard_D2" \\
                 }}]'
         - name: Create a DCOS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
@@ -276,6 +276,22 @@ helps['aks delete'] = """
     short-summary: Delete a managed Kubernetes cluster.
 """
 
+helps['aks update-credentials'] = """
+    type: command
+    short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
+    parameters:
+        - name: --reset-service-principal
+          type: bool
+          short-summary: Reset service principal for a managed cluster.
+        - name: --service-principal
+          type: string
+          short-summary: Service principal used for authentication to Azure APIs.
+        - name: --client-secret
+          type: string
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
+"""
+
 helps['aks disable-addons'] = """
     type: command
     short-summary: Disable Kubernetes addons.
@@ -312,6 +328,9 @@ helps['aks get-credentials'] = """
         - name: --file -f
           type: string
           short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
+        - name: --overwrite-existing
+          type: bool
+          short-summary: Overwrite any existing cluster entry with the same name.
 """
 
 helps['aks get-upgrades'] = """
@@ -378,7 +397,7 @@ helps['aks install-connector'] = """
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \\
-              --aci-resource-group <ACI resource group>
+              --aci-resource-group ACI-resource-group
         - name: Install the ACI Connector from a custom Helm chart with custom tag.
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
@@ -486,7 +505,7 @@ helps['aks upgrade-connector'] = """
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \\
-              --aci-resource-group <ACI resource group>
+              --aci-resource-group ACI-resource-group
         - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
@@ -538,4 +557,90 @@ helps['aks wait'] = """
         - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
           text: |-
             az aks wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
+"""
+
+# OpenShift command help
+
+helps['openshift'] = """
+     type: group
+     short-summary: (PREVIEW) Manage Azure OpenShift Services.
+"""
+
+helps['openshift create'] = """
+    type: command
+    short-summary: (PREVIEW) Create a new managed OpenShift cluster.
+    parameters:
+        - name: --compute-vm-size -s
+          type: string
+          short-summary: Size of Virtual Machines to create as OpenShift nodes.
+        - name: --compute-count -c
+          type: int
+          short-summary: Number of nodes in the OpenShift node pool.
+        - name: --fqdn
+          type: string
+          short-summary: FQDN for OpenShift API server loadbalancer internal hostname. For example
+                         myopenshiftcluster.eastus.cloudapp.azure.com
+        - name: --aad-client-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.
+        - name: --aad-client-app-secret
+          type: string
+          short-summary: The secret of an Azure Active Directory client application.
+        - name: --aad-tenant-id
+          type: string
+          short-summary: The ID of an Azure Active Directory tenant.
+        - name: --vnet-peer
+          type: string
+          short-summary: The ID or the name of a subnet in an existing VNet into which to peer the cluster.
+        - name: --vnet-prefix
+          type: string
+          short-summary: The CIDR used on the VNet into which to deploy the cluster.
+        - name: --subnet-prefix
+          type: string
+          short-summary: The CIDR used on the Subnet into which to deploy the cluster.
+
+
+    examples:
+        - name: Create an OpenShift cluster and auto create an AAD Client
+          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN}
+        - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
+          text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN}
+                --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
+        - name: Create an Openshift cluster using a custom vnet
+          text : az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN} --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
+"""
+
+helps['openshift scale'] = """
+    type: command
+    short-summary: (PREVIEW) Scale the compute pool in a managed OpenShift cluster.
+    parameters:
+        - name: --compute-count -c
+          type: int
+          short-summary: Number of nodes in the OpenShift compute pool.
+"""
+
+helps['openshift show'] = """
+    type: command
+    short-summary: (PREVIEW) Show the details for a managed OpenShift cluster.
+"""
+
+helps['openshift delete'] = """
+    type: command
+    short-summary: (PREVIEW) Delete a managed OpenShift cluster.
+"""
+
+helps['openshift list'] = """
+    type: command
+    short-summary: (PREVIEW) List managed OpenShift clusters.
+"""
+
+helps['openshift wait'] = """
+    type: command
+    short-summary: (PREVIEW) Wait for a managed OpenShift cluster to reach a desired state.
+    long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to
+                  wait for it to complete.
+    examples:
+        - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
+          text: |-
+            az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
 """

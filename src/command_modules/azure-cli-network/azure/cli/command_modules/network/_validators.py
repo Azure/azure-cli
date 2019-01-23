@@ -737,6 +737,9 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
         'endpoint_location': '--endpoint-location',
         'geo_mapping': '--geo-mapping'
     }
+    validate_subnet_ranges(namespace)
+    validate_custom_headers(namespace)
+
     required_options = []
 
     # determine which options are required based on profile and routing method
@@ -1278,6 +1281,72 @@ def validate_custom_error_pages(namespace):
         except (ValueError, TypeError):
             raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
     namespace.custom_error_pages = values
+
+
+def validate_custom_headers(namespace):
+
+    if not namespace.monitor_custom_headers:
+        return
+
+    values = []
+    for item in namespace.monitor_custom_headers:
+        try:
+            item_split = item.split('=', 1)
+            values.append({'name': item_split[0], 'value': item_split[1]})
+        except IndexError:
+            raise CLIError('usage error: --custom-headers KEY=VALUE')
+
+    namespace.monitor_custom_headers = values
+
+
+def validate_status_code_ranges(namespace):
+
+    if not namespace.status_code_ranges:
+        return
+
+    values = []
+    for item in namespace.status_code_ranges:
+        item_split = item.split('-', 1)
+        usage_error = CLIError('usage error: --status-code-ranges VAL | --status-code-ranges MIN-MAX')
+        try:
+            if len(item_split) == 1:
+                values.append({'min': int(item_split[0]), 'max': int(item_split[0])})
+            elif len(item_split) == 2:
+                values.append({'min': int(item_split[0]), 'max': int(item_split[1])})
+            else:
+                raise usage_error
+        except ValueError:
+            raise usage_error
+
+    namespace.status_code_ranges = values
+
+
+def validate_subnet_ranges(namespace):
+
+    if not namespace.subnets:
+        return
+
+    values = []
+    for item in namespace.subnets:
+        try:
+            item_split = item.split('-', 1)
+            if len(item_split) == 2:
+                values.append({'first': item_split[0], 'last': item_split[1]})
+                continue
+        except ValueError:
+            pass
+
+        try:
+            item_split = item.split(':', 1)
+            if len(item_split) == 2:
+                values.append({'first': item_split[0], 'scope': item_split[1]})
+                continue
+        except ValueError:
+            pass
+
+        values.append({'first': item})
+
+    namespace.subnets = values
 
 
 # pylint: disable=too-few-public-methods

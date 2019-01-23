@@ -2,9 +2,13 @@
 
 Release History
 ===============
+* functionapp: add support for app insights on functionapp create
+
 0.2.11
 ++++++
 * webapp: az webapp config ssl upload, handling the scenario of uploading certificates on apps that are hosted on an ASE, where the ASE RG & App RG are different
+* webapp: az webapp up --sku defaults to P1V1 if the os is linux
+* webapp, functionapp: webapp deployment source config-zip, fixed to show the right error message when a deployment fails 
 * webapp: add az webapp ssh
 
 0.2.10

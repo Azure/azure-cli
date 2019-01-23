@@ -16,7 +16,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'westindia',
             'streaming_protocol': 'FragmentedMP4',
             'liveEventName': live_event_name
         })
@@ -64,7 +64,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'southindia',
             'streaming_protocol': 'FragmentedMP4',
             'liveEventName': live_event_name
         })
@@ -100,7 +100,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'southeastasia',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name
         })
@@ -140,7 +140,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
-            'location': 'westus2',
+            'location': 'eastasia',
             'streaming_protocol': 'FragmentedMP4',
             'liveEventName': live_event_name
         })

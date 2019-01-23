@@ -2,8 +2,13 @@
 
 Release History
 ===============
+2.2.13
+++++++
+* `vm encryption enable`: now validates --disk encryption keyvault and that key encryption keyvault exists, in line with `vmss encryption enable`. Exposes --force. For more info: see issues #8111 and #8110
+
 2.2.12
 ++++++
+* 'vm disk/unmanaged-disk' and 'vmss disk': parameter options are more consistent.
 * `vm/vmss create`: support cross tenant image referencing.
 * `vm diagnostics get-default-config --windows-os`: fix bug in windows os default config.
 * `vmss extension set`: expose `--provision-after-extensions`. It defines what extensions must be provisioned before the extension being set.

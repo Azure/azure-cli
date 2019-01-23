@@ -213,6 +213,11 @@ def load_arguments(self, _):
         c.argument('os_type', get_enum_type(aci_connector_os_type),
                    help='The OS type of the connector')
 
+    with self.argument_context('aks update-credentials') as c:
+        c.argument('reset_service_principal', action='store_true')
+        c.argument('service_principal')
+        c.argument('client_secret')
+
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
@@ -237,6 +242,19 @@ def load_arguments(self, _):
 
     with self.argument_context('aks remove-dev-spaces') as c:
         c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
+
+    # OpenShift command argument configuration
+    with self.argument_context('openshift') as c:
+        c.argument('resource_name', name_type, help='Name of the managed OpenShift cluster.',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
+        c.argument('name', name_type, help='Name of the managed OpenShift cluster.',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/OpenShiftManagedClusters'))
+        c.argument('compute_count', options_list=['--compute-count', '-c'], type=int, default=4)
+        c.argument('tags', tags_type)
+
+    with self.argument_context('openshift create') as c:
+        c.argument('name', validator=validate_linux_host_name)
+        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
 
 
 def _get_default_install_location(exe_name):

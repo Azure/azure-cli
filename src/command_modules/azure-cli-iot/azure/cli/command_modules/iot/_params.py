@@ -15,7 +15,7 @@ from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
                                                           AllocationPolicy,
                                                           AccessRightsDescription)
-from azure.cli.command_modules.iot.shared import EndpointType, RouteSourceType
+from azure.cli.command_modules.iot.shared import EndpointType, RouteSourceType, EncodingFormat
 
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
@@ -134,6 +134,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Name of the storage container.')
         c.argument('endpoint_type', arg_type=get_enum_type(EndpointType),
                    options_list=['--endpoint-type', '--type', '-t'], help='Type of the Routing Endpoint.')
+        c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
+                   help='Encoding format for the container. The default is AVRO. '
+                        'Note that this field is applicable only for blob container endpoints.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,

@@ -55,12 +55,14 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
 
     # process action removals
     if remove_actions is not None:
-        instance.actions = [x for x in instance.actions if x.action_group_id not in remove_actions]
+        instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in remove_actions]
 
     # process action additions
     if add_actions is not None:
         for action in add_actions:
-            match = next((x for x in instance.actions if action.action_group_id == x.action_group_id), None)
+            match = next(
+                (x for x in instance.actions if action.action_group_id.lower() == x.action_group_id.lower()), None
+            )
             if match:
                 match.webhook_properties = action.webhook_properties
             else:
@@ -186,7 +188,7 @@ def _parse_actions(actions):
 
 def _parse_action_removals(actions):
     """ Separates the combined list of keys to remove into webhooks and emails. """
-    flattened = list(set([x for sublist in actions for x in sublist]))
+    flattened = list({x for sublist in actions for x in sublist})
     emails = []
     webhooks = []
     for item in flattened:

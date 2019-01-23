@@ -55,7 +55,7 @@ def _detect_ade_status(vm):
     ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
     if ade is None:
         return False, False
-    elif ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
+    if ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
         return False, True
 
     return True, False   # we believe impossible to have both old & new ADE
@@ -69,7 +69,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
                key_encryption_key=None,
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
-               encrypt_format_all=False):
+               encrypt_format_all=False,
+               force=False):
     from msrestazure.tools import parse_resource_id
     from knack.util import CLIError
 
@@ -117,9 +118,14 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
-        if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = _get_keyvault_key_url(
-                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
+
+    #  to avoid bad server errors, ensure the vault has the right configurations
+    _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vm, force)
+
+    # if key name and not key url, get url.
+    if key_encryption_key and '://' not in key_encryption_key:  # if key name and not key url
+        key_encryption_key = _get_keyvault_key_url(
+            cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
     # The following logic was mostly ported from xplat-cli
@@ -468,12 +474,14 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
-        if '://' not in key_encryption_key:  # appears a key name
-            key_encryption_key = _get_keyvault_key_url(
-                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     #  to avoid bad server errors, ensure the vault has the right configurations
     _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
+
+    # if key name and not key url, get url.
+    if key_encryption_key and '://' not in key_encryption_key:
+        key_encryption_key = _get_keyvault_key_url(
+            cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
     public_config = {
@@ -577,13 +585,15 @@ def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
     return result
 
 
-def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, vmss, force):
+def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, vm_or_vmss, force):
     def _report_client_side_validation_error(msg):
         if force:
-            logger.warning(msg)
+            logger.warning("WARNING: %s %s", msg, "Encryption might fail.")
         else:
             from knack.util import CLIError
-            raise CLIError(msg)
+            raise CLIError("ERROR: {}".format(msg))
+
+    resource_type = "VMSS" if vm_or_vmss.type.lower().endswith("virtualmachinescalesets") else "VM"
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -595,7 +605,7 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
 
     # ensure vault has 'EnabledForDiskEncryption' permission
     if not key_vault.properties.enabled_for_disk_encryption:
-        _report_client_side_validation_error("keyvault '{}' is not enabled for disk encryption. ".format(
+        _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(
             disk_vault_resource_info['resource_name']))
 
     if kek_vault_id:
@@ -604,12 +614,12 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
             client.get(kek_vault_info['resource_group'], kek_vault_info['name'])
 
     # verify subscription mataches
-    vmss_resource_info = parse_resource_id(vmss.id)
-    if vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
-        _report_client_side_validation_error(
-            "VM scale set's subscription doesn't match keyvault's subscription. Encryption might fail")
+    vm_vmss_resource_info = parse_resource_id(vm_or_vmss.id)
+    if vm_vmss_resource_info['subscription'].lower() != disk_vault_resource_info['subscription'].lower():
+        _report_client_side_validation_error("{} {}'s subscription does not match keyvault's subscription."
+                                             .format(resource_type, vm_vmss_resource_info['name']))
 
     # verify region matches
-    if key_vault.location.replace(' ', '').lower() != vmss.location.replace(' ', '').lower():
+    if key_vault.location.replace(' ', '').lower() != vm_or_vmss.location.replace(' ', '').lower():
         _report_client_side_validation_error(
-            "VM scale set's region doesn't match keyvault's region. Encryption might fail")
+            "{} {}'s region does not match keyvault's region.".format(resource_type, vm_vmss_resource_info['name']))
