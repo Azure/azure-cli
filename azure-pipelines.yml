@@ -1,13 +1,13 @@
 resources:
 - repo: self
 
-phases:
-- phase: ExtractMetadata
+jobs:
+- job: ExtractMetadata
   displayName: Extract Metadata
 
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: Bash@3
     displayName: 'Extract Version'
@@ -21,13 +21,13 @@ phases:
     inputs:
       ArtifactName: metadata
 
-- phase: BuildWindowsMSI
+- job: BuildWindowsMSI
   displayName: Build Windows MSI
 
   dependsOn: ExtractMetadata
   condition: succeeded()
-  queue:
-    name: Hosted VS2017
+  pool:
+    vmImage: 'vs2017-win2016'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -51,13 +51,13 @@ phases:
 
 
 
-- phase: BuildDockerImage
+- job: BuildDockerImage
   displayName: Build Docker Image
 
   dependsOn: ExtractMetadata
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: Bash@3
     displayName: 'Bash Script'
@@ -73,13 +73,13 @@ phases:
 
 
 
-- phase: TestDockerImage
+- job: TestDockerImage
   displayName: Test Docker Image
 
   dependsOn: BuildDockerImage
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -107,13 +107,13 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: BuildPythonWheel
+- job: BuildPythonWheel
   displayName: Build Python Wheels
 
   dependsOn: ExtractMetadata
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.7'
@@ -135,13 +135,13 @@ phases:
 
 
 
-- phase: TestPythonWheel
+- job: TestPythonWheel
   displayName: Test Python Wheels
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -184,13 +184,13 @@ phases:
     displayName: 'Test pip Install'
 
 
-- phase: BuildHomebrewFormula
+- job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -240,13 +240,13 @@ phases:
 
 
 
-- phase: TestHomebrewFormula
+- job: TestHomebrewFormula
   displayName: Test Homebrew Formula
 
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
-  queue:
-    name: Hosted macOS
+  pool:
+    vmImage: 'macOS-10.13'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -279,13 +279,13 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: BuildYumPackage
+- job: BuildYumPackage
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
@@ -301,13 +301,13 @@ phases:
 
 
 
-- phase: TestYumPackage
+- job: TestYumPackage
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -336,13 +336,13 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: BuildUbuntuXenial
+- job: BuildUbuntuXenial
   displayName: Build Ubuntu Xenial Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -366,13 +366,13 @@ phases:
 
 
 
-- phase: BuildUbuntuArtful
+- job: BuildUbuntuArtful
   displayName: Build Ubuntu Artful Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -396,13 +396,13 @@ phases:
 
 
 
-- phase: BuildUbuntuTrusty
+- job: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -427,13 +427,13 @@ phases:
 
 
 
-- phase: BuildUbuntuBionic
+- job: BuildUbuntuBionic
   displayName: Build Ubuntu Bionic Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -458,13 +458,13 @@ phases:
 
 
 
-- phase: BuildDebianWheezy
+- job: BuildDebianWheezy
   displayName: Build Debian Wheezy Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -489,13 +489,13 @@ phases:
 
 
 
-- phase: BuildDebianJessie
+- job: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -519,13 +519,13 @@ phases:
 
 
 
-- phase: BuildDebianStretch
+- job: BuildDebianStretch
   displayName: Build Debian Stretch Package
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -549,7 +549,7 @@ phases:
 
 
 
-- phase: TestLinuxPackages
+- job: TestLinuxPackages
   displayName: Test Linux Packages
 
   dependsOn:
@@ -562,8 +562,8 @@ phases:
    - BuildDebianStretch
    - BuildUbuntuCosmic
   condition: succeededOrFailed()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Metadata'
@@ -611,13 +611,13 @@ phases:
        done
     displayName: 'Bash Script'
 
-- phase: BuildUbuntuCosmic
+- job: BuildUbuntuCosmic
   displayName: Build Ubuntu Cosmic
 
   dependsOn: BuildPythonWheel
   condition: succeeded()
-  queue:
-    name: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-16.04'
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
