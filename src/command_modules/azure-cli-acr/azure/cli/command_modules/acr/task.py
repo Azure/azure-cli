@@ -340,8 +340,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         status=status,
         platform=PlatformUpdateParameters(
             os=platform_os if platform_os else os_type,
-            architecture=platform_arch if platform_arch else None,
-            variant=platform_variant if platform_variant else None
+            architecture=platform_arch,
+            variant=platform_variant
         ),
         agent_configuration=AgentProperties(
             cpu=cpu

@@ -15,7 +15,10 @@ from ._constants import (
     ACR_RESOURCE_PROVIDER,
     STORAGE_RESOURCE_TYPE,
     MANAGED_REGISTRY_SKU,
-    CLASSIC_REGISTRY_SKU
+    CLASSIC_REGISTRY_SKU,
+    VALID_OS,
+    VALID_ARCH,
+    VALID_VARIANT
 )
 from ._client_factory import (
     get_arm_service_client,
@@ -288,30 +291,27 @@ def get_validate_platform(os_type, platform):
 
     if os_type and platform:
         if os_type.lower() != platform_os.lower():
-            raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'")
+            raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'.")
     elif os_type:
         platform_os = os_type
 
     platform_os = platform_os.title()
     platform_arch = platform_arch.title()
-    valid_os = [item.value.title() for item in OS]
-    valid_arch = [item.value.title() for item in Architecture]
-    valid_variant = [item.value for item in Variant]
 
-    if platform_os not in valid_os:
+    if platform_os not in VALID_OS:
         raise CLIError(
             "'{0}' is not a valid value for OS specified in --os or --platform. "
-            "Valid options are {1}".format(platform_os, ','.join(valid_os))
+            "Valid options are {1}.".format(platform_os, ','.join(VALID_OS))
         )
-    if platform_arch not in valid_arch:
+    if platform_arch not in VALID_ARCH:
         raise CLIError(
             "'{0}' is not a valid value for Architecture specified in --platform. "
-            "Valid options are {1}".format(platform_arch, ','.join(valid_arch))
+            "Valid options are {1}.".format(platform_arch, ','.join(VALID_ARCH))
         )
-    if platform_variant and (platform_variant not in valid_variant):
+    if platform_variant and (platform_variant not in VALID_VARIANT):
         raise CLIError(
             "'{0}' is not a valid value for Variant specified in --platform. "
-            "Valid options are {1}".format(platform_variant, ','.join(valid_variant))
+            "Valid options are {1}.".format(platform_variant, ','.join(VALID_VARIANT))
         )
 
     return platform_os, platform_arch, platform_variant
