@@ -70,8 +70,7 @@ def acr_run(cmd,
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.info("OS is %s and Architecture is %s", platform_os, platform_arch)
+    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
 
     request = FileTaskRunRequest(
         task_file_path=file,
@@ -79,7 +78,11 @@ def acr_run(cmd,
         values=(set_value if set_value else []) + (set_secret if set_secret else []),
         source_location=source_location,
         timeout=timeout,
-        platform=PlatformProperties(os=platform_os, platform=platform_arch)
+        platform=PlatformProperties(
+            os=platform_os,
+            architecture=platform_arch,
+            variant=platform_variant
+        )
     )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(

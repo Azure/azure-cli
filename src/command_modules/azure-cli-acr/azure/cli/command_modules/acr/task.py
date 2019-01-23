@@ -141,15 +141,15 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             name=base_image_trigger_name
         )
 
-    platform_os, platform_arch = get_validate_platform(os_type, platform)
-    logger.info("OS is %s and Architecture is %s", platform_os, platform_arch)
+    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
 
     task_create_parameters = Task(
         location=registry.location,
         step=step,
         platform=PlatformProperties(
             os=platform_os,
-            architecture=platform_arch
+            architecture=platform_arch,
+            variant=platform_variant
         ),
         status=status,
         timeout=timeout,
@@ -332,15 +332,16 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     platform_os = None
     platform_arch = None
+    platform_variant = None
     if os_type or platform:
-        platform_os, platform_arch = get_validate_platform(os_type, platform)
-        logger.info("OS is %s and Architecture is %s", platform_os, platform_arch)
+        platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
 
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
             os=platform_os if platform_os else os_type,
-            architecture=platform_arch if platform_arch else None
+            architecture=platform_arch if platform_arch else None,
+            variant=platform_variant if platform_variant else None
         ),
         agent_configuration=AgentProperties(
             cpu=cpu

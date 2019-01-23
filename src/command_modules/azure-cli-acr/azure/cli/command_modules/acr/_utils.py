@@ -274,15 +274,17 @@ def get_validate_platform(os_type, platform):
     :param str os_type: The name of OS passed by user in --os flag
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture
+    from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture, Variant
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
+    platform_variant = None
 
     if platform:
-        platform_split = platform.split('/', 1)
+        platform_split = platform.split('/')
         platform_os = platform_split[0]
         platform_arch = platform_split[1] if len(platform_split) > 1 else Architecture.amd64.value
+        platform_variant = platform_split[2] if len(platform_split) > 2 else None
 
     if os_type and platform:
         if os_type.lower() != platform_os.lower():
@@ -294,19 +296,25 @@ def get_validate_platform(os_type, platform):
     platform_arch = platform_arch.title()
     valid_os = [item.value.title() for item in OS]
     valid_arch = [item.value.title() for item in Architecture]
+    valid_variant = [item.value for item in Variant]
 
     if platform_os not in valid_os:
         raise CLIError(
             "'{0}' is not a valid value for OS specified in --os or --platform. "
             "Valid options are {1}".format(platform_os, ','.join(valid_os))
         )
-    if platform_arch.split('/')[0] not in valid_arch:
+    if platform_arch not in valid_arch:
         raise CLIError(
             "'{0}' is not a valid value for Architecture specified in --platform. "
             "Valid options are {1}".format(platform_arch, ','.join(valid_arch))
         )
+    if platform_variant and (platform_variant not in valid_variant):
+        raise CLIError(
+            "'{0}' is not a valid value for Variant specified in --platform. "
+            "Valid options are {1}".format(platform_variant, ','.join(valid_variant))
+        )
 
-    return platform_os, platform_arch
+    return platform_os, platform_arch, platform_variant
 
 
 def validate_premium_registry(cli_ctx, registry_name, resource_group_name=None, message=None):
