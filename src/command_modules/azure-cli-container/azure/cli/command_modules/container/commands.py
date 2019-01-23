@@ -29,3 +29,4 @@ def load_command_table(self, _):
     with self.command_group('container', container_group_sdk) as g:
         g.command('restart', 'restart')
         g.command('stop', 'stop')
+        g.command('start', 'start')
