@@ -1,8 +1,8 @@
 resources:
 - repo: self
 
-phases:
-- phase: ExtractMetadata
+jobs:
+- job: ExtractMetadata
   displayName: Extract Metadata
 
   condition: succeeded()
@@ -21,7 +21,7 @@ phases:
     inputs:
       ArtifactName: metadata
 
-- phase: BuildWindowsMSI
+- job: BuildWindowsMSI
   displayName: Build Windows MSI
 
   dependsOn: ExtractMetadata
@@ -51,7 +51,7 @@ phases:
 
 
 
-- phase: BuildDockerImage
+- job: BuildDockerImage
   displayName: Build Docker Image
 
   dependsOn: ExtractMetadata
@@ -73,7 +73,7 @@ phases:
 
 
 
-- phase: TestDockerImage
+- job: TestDockerImage
   displayName: Test Docker Image
 
   dependsOn: BuildDockerImage
@@ -107,7 +107,7 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: BuildPythonWheel
+- job: BuildPythonWheel
   displayName: Build Python Wheels
 
   dependsOn: ExtractMetadata
@@ -135,7 +135,7 @@ phases:
 
 
 
-- phase: TestPythonWheel
+- job: TestPythonWheel
   displayName: Test Python Wheels
 
   dependsOn: BuildPythonWheel
@@ -184,7 +184,7 @@ phases:
     displayName: 'Test pip Install'
 
 
-- phase: BuildHomebrewFormula
+- job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
@@ -240,7 +240,7 @@ phases:
 
 
 
-- phase: TestHomebrewFormula
+- job: TestHomebrewFormula
   displayName: Test Homebrew Formula
 
   dependsOn: BuildHomebrewFormula
@@ -279,7 +279,7 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: BuildYumPackage
+- job: BuildYumPackage
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
@@ -301,7 +301,7 @@ phases:
 
 
 
-- phase: TestYumPackage
+- job: TestYumPackage
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
@@ -336,7 +336,7 @@ phases:
     displayName: 'Bash Script'
 
 
-- phase: BuildUbuntuXenial
+- job: BuildUbuntuXenial
   displayName: Build Ubuntu Xenial Package
 
   dependsOn: BuildPythonWheel
@@ -366,7 +366,7 @@ phases:
 
 
 
-- phase: BuildUbuntuArtful
+- job: BuildUbuntuArtful
   displayName: Build Ubuntu Artful Package
 
   dependsOn: BuildPythonWheel
@@ -396,7 +396,7 @@ phases:
 
 
 
-- phase: BuildUbuntuTrusty
+- job: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
 
   dependsOn: BuildPythonWheel
@@ -427,7 +427,7 @@ phases:
 
 
 
-- phase: BuildUbuntuBionic
+- job: BuildUbuntuBionic
   displayName: Build Ubuntu Bionic Package
 
   dependsOn: BuildPythonWheel
@@ -458,7 +458,7 @@ phases:
 
 
 
-- phase: BuildDebianWheezy
+- job: BuildDebianWheezy
   displayName: Build Debian Wheezy Package
 
   dependsOn: BuildPythonWheel
@@ -489,7 +489,7 @@ phases:
 
 
 
-- phase: BuildDebianJessie
+- job: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
   dependsOn: BuildPythonWheel
@@ -519,7 +519,7 @@ phases:
 
 
 
-- phase: BuildDebianStretch
+- job: BuildDebianStretch
   displayName: Build Debian Stretch Package
 
   dependsOn: BuildPythonWheel
@@ -549,7 +549,7 @@ phases:
 
 
 
-- phase: TestLinuxPackages
+- job: TestLinuxPackages
   displayName: Test Linux Packages
 
   dependsOn:
@@ -611,7 +611,7 @@ phases:
        done
     displayName: 'Bash Script'
 
-- phase: BuildUbuntuCosmic
+- job: BuildUbuntuCosmic
   displayName: Build Ubuntu Cosmic
 
   dependsOn: BuildPythonWheel
