@@ -23,3 +23,4 @@ python -m automation.tests.verify_readme_history
 #    python -m automation.tests.verify_package_versions --base-repo $latestCliReleaseDir --base-tag $latestCliReleaseTag
 # fi
 
+
