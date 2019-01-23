@@ -277,7 +277,7 @@ def get_validate_platform(os_type, platform):
     :param str os_type: The name of OS passed by user in --os flag
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture, Variant
+    from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
