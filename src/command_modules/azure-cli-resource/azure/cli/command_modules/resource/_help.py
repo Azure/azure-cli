@@ -1293,4 +1293,3 @@ examples:
     text: az tag create --name MyTag
     crafted: 'True'
 """
-

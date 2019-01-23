@@ -939,4 +939,3 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
-

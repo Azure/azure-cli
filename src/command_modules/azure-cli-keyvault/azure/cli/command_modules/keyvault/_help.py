@@ -282,4 +282,3 @@ helps["keyvault update"] = """
 type: command
 short-summary: Update the properties of a key vault.
 """
-

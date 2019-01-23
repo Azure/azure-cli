@@ -456,4 +456,3 @@ parameters:
     type: string
     short-summary: Job ID to poll for completion.
 """
-

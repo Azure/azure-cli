@@ -74,4 +74,3 @@ helps["iotcentral app update"] = """
 type: command
 short-summary: Update metadata for an IoT Central application.
 """
-

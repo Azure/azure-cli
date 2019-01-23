@@ -835,4 +835,3 @@ examples:
     text: az iot hub update --set {set} --name MyIotHub
     crafted: true
 """
-

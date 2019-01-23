@@ -1023,4 +1023,3 @@ examples:
     text: az monitor metrics list-definitions --resource {resource}
     crafted: true
 """
-

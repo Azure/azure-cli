@@ -1542,4 +1542,3 @@ helps["webapp webjob triggered run"] = """
 type: command
 short-summary: Run a specific triggered webjob hosted on a webapp.
 """
-
