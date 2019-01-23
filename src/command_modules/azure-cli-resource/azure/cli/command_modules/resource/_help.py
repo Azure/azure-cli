@@ -747,10 +747,10 @@ helps['group deployment create'] = """
                         "value": "westus" \\
                     } \\
                 }'
-        - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
+        - name: Create a deployment from a local template, using a local parameter file, a remote parameter file, and selectively overriding key/value pairs.
           text: >
             az group deployment create -g MyResourceGroup --template-file azuredeploy.json \\
-                --parameters @params.json --parameters MyValue=This MyArray=@array.json
+                --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
 helps['group deployment export'] = """
     type: command
@@ -798,10 +798,10 @@ helps['deployment create'] = """
                         "value": "policy2" \\
                     } \\
                 }'
-        - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
+        - name: Create a deployment from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
           text: >
-            az deployment create --location WestUS --template-file azuredeploy.json \\
-                --parameters @params.json --parameters MyValue=This MyArray=@array.json
+            az deployment create --location WestUS --template-file azuredeploy.json  \\
+                --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
 helps['deployment export'] = """
     type: command
