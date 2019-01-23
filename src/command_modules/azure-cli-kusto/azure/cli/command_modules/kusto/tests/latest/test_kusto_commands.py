@@ -94,6 +94,8 @@ class AzureKustoDatabaseTests (ScenarioTest):
             'cluster_name': self.create_random_name(prefix='test', length=20),
             'database_name': self.create_random_name(prefix='testdb', length=20),
             'location': "Central US",
+            'soft_delete_period': '10:00:00:00',
+            'hot_cache_period': '5:00:00:00',
             'soft_delete_period_in_days': 10,
             'hot_cache_period_in_days': 5
         })
@@ -104,18 +106,20 @@ class AzureKustoDatabaseTests (ScenarioTest):
                          self.check('sku.name', '{sku}')])
 
         # Create database
-        self.cmd('az kusto database create --cluster-name {cluster_name} -g {rg} -n {database_name}  --soft-delete-period {soft_delete_period_in_days} --hot-cache-period {hot_cache_period_in_days}',
+        self.cmd('az kusto database create --cluster-name {cluster_name} -g {rg} -n {database_name}  --soft-delete-period {soft_delete_period} --hot-cache-period {hot_cache_period}',
                  checks=[self.check('name', '{cluster_name}/{database_name}'),
                          self.check('softDeletePeriodInDays', '{soft_delete_period_in_days}'),
                          self.check('hotCachePeriodInDays', '{hot_cache_period_in_days}')])
 
         # Update database
         self.kwargs.update({
+            'soft_delete_period': '20:00:00:00',
+            'hot_cache_period': '10:00:00:00',
             'soft_delete_period_in_days': 20,
             'hot_cache_period_in_days': 10
         })
 
-        self.cmd('az kusto database update --cluster-name {cluster_name} -g {rg} -n {database_name}  --soft-delete-period {soft_delete_period_in_days} --hot-cache-period {hot_cache_period_in_days}',
+        self.cmd('az kusto database update --cluster-name {cluster_name} -g {rg} -n {database_name}  --soft-delete-period {soft_delete_period} --hot-cache-period {hot_cache_period}',
                  checks=[self.check('name', '{cluster_name}/{database_name}'),
                          self.check('softDeletePeriodInDays', '{soft_delete_period_in_days}'),
                          self.check('hotCachePeriodInDays', '{hot_cache_period_in_days}')])

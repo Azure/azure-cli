@@ -37,7 +37,7 @@ def load_command_table(self, _):
                             client_factory=cf_database) as g:
         g.custom_command('create', 'database_create', supports_no_wait=True, validator=validate_database_args)
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='update_kusto_database', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_kusto_database', validator=validate_database_args, supports_no_wait=True)
         g.command('list', 'list_by_cluster')
         g.show_command('show', 'get')
         g.wait_command('wait')
