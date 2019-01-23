@@ -189,7 +189,7 @@ def dcos_browse(cmd, client, name, resource_group, disable_browser=False, ssh_ke
     _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
 
 
-def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file): 
+def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
     if not os.path.isfile(ssh_key_file):
         raise CLIError('Private key file {} does not exist'.format(ssh_key_file))
 
