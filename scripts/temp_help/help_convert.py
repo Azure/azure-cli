@@ -343,6 +343,9 @@ if __name__ == "__main__":
                 continue
             file_to_help[file] = help_dict
 
+        if not file_to_help:
+            exit("No help.yaml file generated for {}.".format(", ".join(mod_names)))
+
         print("Loading Commands...")
         # setup CLI
         az_cli = DummyCli()

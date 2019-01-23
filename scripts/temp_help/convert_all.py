@@ -16,13 +16,20 @@ if __name__ == "__main__":
         module_names = []
         with open("mod.txt", "r") as f:
             for line in f:
-                module_names.append(f.readline())
+                module_names.append(line)
         os.remove("mod.txt")
+        successes = 0
         with open(os.devnull, 'w') as devnull: # silence stdout by redirecting to devnull
             for mod in module_names:
                 args = ["python", "./help_convert.py", mod, "--test"]
-                subprocess.run(args, stdout=devnull)
+                completed_process = subprocess.run(args, stdout=devnull)
+                if completed_process.returncode == 0:
+                    successes += 1
 
+        if successes:
+            print("\n----------------------------------------------------------"
+                    "Successfuly converted {} help.py files to help.yaml files."
+                  "\n----------------------------------------------------------".format(successes))
 
     elif args[0].lower() == "--extensions":
         pass
