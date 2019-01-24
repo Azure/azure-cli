@@ -3,6 +3,7 @@
 Release History
 ===============
 * functionapp: add support for app insights on functionapp create
+* functionapp: add support for app service plan creation (including Elastic Premium)
 
 0.2.11
 ++++++
