@@ -288,6 +288,8 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUMV2'
     elif tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
+    elif tier in ['EP1', 'EP2', 'EP3']:
+        return 'ElasticPremium'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -1845,6 +1847,13 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     if appinsights is None or appinsights.instrumentation_key is None:
         raise CLIError("App Insights {} under resource group {} was not found.".format(name, resource_group))
     return appinsights.instrumentation_key
+
+
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
+                                        number_of_workers=None, location=None, tags=None):
+    # This command merely shadows 'az appservice plan create' except with a few parameters
+    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
+                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
