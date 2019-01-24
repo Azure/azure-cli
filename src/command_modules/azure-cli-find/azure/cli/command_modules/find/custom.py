@@ -16,6 +16,7 @@ WAIT_MESSAGE = ['I\'m an AI bot (learn more: aka.ms/aladdinkb); Let me see how I
 
 EXTENSION_NAME = 'find'
 
+
 def process_query(cli_term):
     print(random.choice(WAIT_MESSAGE))
     response = call_aladdin_service(cli_term)
