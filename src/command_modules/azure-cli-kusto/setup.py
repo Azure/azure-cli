@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -14,7 +12,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.3.13"
+VERSION = "0.1.0"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -31,14 +29,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-containerinstance==1.4.0',
-    'azure-mgmt-loganalytics==0.2.0',
-    'azure-mgmt-network==2.4.0',
-    'azure-mgmt-authorization==0.50.0',
     'azure-cli-core',
-    'pyyaml>=4.2b1',
-    'colorama',
-    'websocket-client'
+    'azure-mgmt-kusto==0.2.0',
+    'six'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -47,9 +40,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-container',
+    name='azure-cli-kusto',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools container Command Module',
+    description='Microsoft Azure Command-Line Tools KUSTO Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -60,8 +53,8 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.container',
+        'azure.cli.command_modules.kusto'
     ],
     install_requires=DEPENDENCIES,
-    cmdclass=cmdclass,
+    cmdclass=cmdclass
 )
