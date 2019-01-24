@@ -77,7 +77,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
-                    resource_group_name=None):
+                    resource_group_name=None,
+                    target=None):
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
@@ -98,7 +99,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             docker_file_path=file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
             context_path=context_path,
-            context_access_token=git_access_token
+            context_access_token=git_access_token,
+            target=None
         )
 
     registry, resource_group_name = validate_managed_registry(

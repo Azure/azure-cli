@@ -16,7 +16,7 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
 )
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry
+from ._utils import validate_managed_registry, get_credentials
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -38,7 +38,9 @@ def acr_run(cmd,
             no_wait=False,
             timeout=None,
             resource_group_name=None,
-            os_type=OS.linux.value):
+            os_type=OS.linux.value,
+            auth_mode=None,
+            credentials=[]):
 
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
@@ -76,7 +78,11 @@ def acr_run(cmd,
         values=(set_value if set_value else []) + (set_secret if set_secret else []),
         source_location=source_location,
         timeout=timeout,
-        platform=PlatformProperties(os=os_type)
+        platform=PlatformProperties(os=os_type),
+        credentials=get_credentials(
+            auth_mode=auth_mode,
+            credentials=credentials
+        )
     )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
