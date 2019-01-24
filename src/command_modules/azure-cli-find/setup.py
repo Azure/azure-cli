@@ -15,7 +15,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.2.13"
+VERSION = "0.3.0"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -32,7 +32,8 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'whoosh'
+    'whoosh',
+    'colorama~=0.3.7'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -43,7 +44,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 setup(
     name='azure-cli-find',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools Find Command Module',
+    description='Intelligent querying for CLI Example information.',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',

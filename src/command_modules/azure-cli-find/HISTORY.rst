@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.3.0
+++++++
+* Major functionality update
 
 0.2.13
 ++++++

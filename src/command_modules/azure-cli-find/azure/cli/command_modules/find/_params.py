@@ -6,5 +6,4 @@
 
 def load_arguments(self, _):
     with self.argument_context('find') as c:
-        c.argument('criteria', options_list=['--search-query', '-q'], help='Query text to find.', nargs='+')
-        c.argument('reindex', help='Clear the current index and reindex the command modules.')
+        c.positional('cli_term', help='An Azure CLI command or group for which you need an example.')
