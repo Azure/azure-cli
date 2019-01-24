@@ -261,8 +261,7 @@ def get_credentials(auth_mode=SourceRegistryLoginMode.default, credentials=[]):
         if len(cred_split) != 3:
             raise CLIError(
                 "Please provide the credentials in the form of "
-                "'registryName;username;password'. Incorrect credentials: %s",
-                credential
+                "'registryName;username;password'. Incorrect credentials: '{}'".format(credential)
             )
         customRegistries[cred_split[0]] = CustomRegistryCredentials(
             user_name=cred_split[1],
