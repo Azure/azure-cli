@@ -578,7 +578,7 @@ helps['acr build'] = """
             az acr build -r MyRegistry .
         - name: Queue a remote GitHub context as a Windows build and x86 architecture, tag it, and push it to the registry.
           text: >
-            az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --os Windows --platform windows/x86
+            az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform Windows/x86
         - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
           text: >
             az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
