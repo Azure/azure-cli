@@ -8,7 +8,14 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
-from azure.mgmt.containerregistry.v2018_09_01.models import SkuName, Sku
+from azure.mgmt.containerregistry.v2018_09_01.models import (
+    SkuName, 
+    Sku,
+    Credentials,
+    SourceRegistryCredentials,
+    CustomRegistryCredentials,
+    SourceRegistryLoginMode
+)
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -238,6 +245,38 @@ def _parameters(registry_name,
         parameters['storageAccountId'] = {'value': storage_account_id}
 
     return parameters
+
+
+def get_credentials(auth_mode=SourceRegistryLoginMode.default, credentials=[]):
+    """Get the credential object from the input
+    :param str auth_mode: The login mode for the source registry
+    :param [] credentials: The list of credentials
+    """
+    sourceRegistryCredentials = SourceRegistryCredentials(login_mode=auth_mode)
+    logger.warning("Loginmode: %s", sourceRegistryCredentials)
+
+    customRegistries = dict()
+    for credential in credentials:
+        cred_split = credential.split(';', 2)
+        if len(cred_split) != 3:
+            raise CLIError(
+                "Please provide the credentials in the form of "
+                "'registryName;username;password'. Incorrect credentials: %s",
+                credential
+            )
+        customRegistries[cred_split[0]] = CustomRegistryCredentials(
+            user_name=cred_split[1],
+            password=cred_split[2]
+        )
+
+    for k, v in customRegistries.items():
+        logger.warning("k: %s", k)
+        logger.warning("v: %s", v)
+
+    return Credentials(
+        source_registry=sourceRegistryCredentials,
+        custom_registries=customRegistries
+    )
 
 
 def random_storage_account_name(cli_ctx, registry_name):

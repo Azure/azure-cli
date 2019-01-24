@@ -20,7 +20,7 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     OS
 )
 
-from ._utils import validate_managed_registry
+from ._utils import validate_managed_registry, get_credentials
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
@@ -44,7 +44,10 @@ def acr_build(cmd,
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type=OS.linux.value):
+              os_type=OS.linux.value,
+              auth_mode=None,
+              credentials=[],
+              target=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
@@ -115,7 +118,13 @@ def acr_build(cmd,
             os=os_type, architecture=Architecture.amd64.value),
         docker_file_path=docker_file_path,
         timeout=timeout,
-        arguments=(arg if arg else []) + (secret_arg if secret_arg else []))
+        arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+        credentials=get_credentials(
+            auth_mode=auth_mode,
+            credentials=credentials
+        ),
+        target=target
+    )
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
