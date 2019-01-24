@@ -55,6 +55,11 @@ helps['ad sp create-for-rbac'] = """
           text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
     """
 
+helps['ad sp update'] = """
+    type: command
+    short-summary: update a service principal
+"""
+
 helps['ad sp credential'] = """
     type: group
     short-summary: manage a service principal's credentials.
@@ -222,6 +227,14 @@ helps['ad app permission delete'] = """
         - name: remove an AAD graph permission
           text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
 """
+helps['ad app permission list-grants'] = """
+    type: command
+    short-summary: List Oauth2 permission grants
+    examples:
+        - name: list oauth2 permissions granted to the service principal
+          text: az ad app permission list-grants --id e042ec79-34cd-498f-9d9f-1234234123456
+"""
+
 helps['ad app credential'] = """
     type: group
     short-summary: manage an application's password or certificate credentials

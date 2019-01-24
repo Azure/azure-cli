@@ -349,6 +349,10 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             # ensure we can update other properties #7728
             self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
             self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
+
+            # ensure we can update SP's properties #5948
+            self.cmd('az ad sp update --id {app} --set appRoleAssignmentRequired=true')
+            self.cmd('az ad sp show --id {app}')
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)
@@ -362,7 +366,8 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
         self.kwargs = {
             'app': "http://" + self.create_random_name('cli-app-', 15),
             'graph_resource': '00000002-0000-0000-c000-000000000000',
-            'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a'
+            'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a',
+            'target_api2': '311a71cc-e848-46a1-bdf8-97ff7156d8e6'
         }
         app_id = None
         try:
@@ -373,7 +378,12 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             permissions = self.cmd('ad app permission list --id {app_id}', checks=[
                 self.check('length([*])', 1)
             ]).get_output_in_json()
-            self.assertTrue(dateutil.parser.parse(permissions[0]['grantedTime']))  # verify it is a time
+            self.assertTrue(dateutil.parser.parse(permissions[0]['expiryTime']))  # verify it is a time
+            self.cmd('ad app permission list-grants --id {app_id}', checks=self.check('length([*])', 1))
+            self.cmd('ad app permission list-grants --id {app_id} --show-resource-name',
+                     checks=self.check('[0].resourceDisplayName', "Windows Azure Active Directory"))
+            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api2}=Scope')
+            self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
             self.cmd('ad app permission delete --id {app_id} --api {graph_resource}')
             self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
         finally:
