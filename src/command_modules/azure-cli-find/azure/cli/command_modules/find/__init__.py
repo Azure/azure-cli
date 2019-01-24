@@ -20,7 +20,7 @@ class FindCommandsLoader(AzCommandsLoader):
         load_command_table(self, args)
         return self.command_table
 
-    def load_arguments(self, command:
+    def load_arguments(self, command):
         from azure.cli.command_modules.find._params import load_arguments
         with self.argument_context('find') as c:
             c.ignore('_subscription')  # hide global subscription param
