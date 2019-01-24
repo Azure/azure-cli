@@ -712,6 +712,17 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
     return result
 
 
+def _get_grant_permissions(graph_client, client_sp_object_id):
+    try:
+        grant_info = graph_client.oauth2.get(
+            filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
+    except CloudError as ex:  # Graph doesn't follow the ARM error; otherwise would be caught by msrest-azure
+        if ex.status_code == 404:
+            return []
+        raise
+    return grant_info.additional_properties['value']
+
+
 def list_permissions(cmd, identifier):
     # the important and hard part is to tell users which permissions have been granted.
     # we will due diligence to dig out what matters
@@ -720,9 +731,7 @@ def list_permissions(cmd, identifier):
 
     # first get the permission grant history
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    grant_info = graph_client.oauth2.get(
-        filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
-    grant_histories = grant_info.additional_properties['value']
+    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id)
 
     # get original permissions required by the application, we will cross check the history
     # and mark out granted ones
@@ -734,7 +743,7 @@ def list_permissions(cmd, identifier):
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
         granted_times = 'N/A'
         if result:
-            granted_times = ', '.join([x['startTime'] for x in grant_histories if
+            granted_times = ', '.join([x['startTime'] for x in grant_permissions if
                                        x['resourceId'] == result[0].object_id])
         setattr(p, 'grantedTime', granted_times)
     return permissions
@@ -748,9 +757,14 @@ def add_permission(cmd, identifier, api, api_permissions):
     for e in api_permissions:
         access_id, access_type = e.split('=')
         resource_accesses.append(ResourceAccess(id=access_id, type=access_type))
-    required_resource_access = RequiredResourceAccess(resource_app_id=api,
-                                                      resource_access=resource_accesses)
-    existing.append(required_resource_access)
+
+    existing_resource_access = next((e for e in existing if e.resource_app_id == api), None)
+    if existing_resource_access:
+        existing_resource_access.resource_access += resource_accesses
+    else:
+        required_resource_access = RequiredResourceAccess(resource_app_id=api,
+                                                          resource_access=resource_accesses)
+        existing.append(required_resource_access)
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
     graph_client.applications.patch(application.object_id, update_parameter)
     logger.warning('Invoking "az ad app permission grant --id %s --api %s" is needed to make the '
@@ -775,6 +789,13 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
     # Get the Service Principal ObjectId for associated app
     associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, api)
 
+    # ensure to remove the older grant
+    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id)
+    to_delete = [p['objectId'] for p in grant_permissions if p['clientId'] == client_sp_object_id and
+                 p['resourceId'] == associated_sp_object_id]
+    for p in to_delete:
+        graph_client.oauth2.delete(p)
+
     # Build payload
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=1)
@@ -798,9 +819,7 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
     }
 
     # Grant OAuth2 permissions
-    response = graph_client.oauth2.grant(payload)  # pylint: disable=no-member
-
-    return response
+    return graph_client.oauth2.grant(payload)  # pylint: disable=no-member
 
 
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
