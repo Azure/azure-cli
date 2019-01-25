@@ -36,6 +36,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
                                    DeletedAppRestoreRequest, DefaultErrorResponseException,
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
+from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -287,6 +288,8 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUMV2'
     elif tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
+    elif tier in ['EP1', 'EP2', 'EP3']:
+        return 'ElasticPremium'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -1838,10 +1841,26 @@ class _StackRuntimeHelper(object):
         self._stacks = result
 
 
+def get_app_insights_key(cli_ctx, resource_group, name):
+    appinsights_client = get_mgmt_service_client(cli_ctx, ApplicationInsightsManagementClient)
+    appinsights = appinsights_client.components.get(resource_group, name)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        raise CLIError("App Insights {} under resource group {} was not found.".format(name, resource_group))
+    return appinsights.instrumentation_key
+
+
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
+                                        number_of_workers=None, location=None, tags=None):
+    # This command merely shadows 'az appservice plan create' except with a few parameters
+    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
+                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+
+
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
-                    deployment_source_url=None, deployment_source_branch='master',
-                    deployment_local_git=None, deployment_container_image_name=None, tags=None):
+                    app_insights=None, app_insights_key=None, deployment_source_url=None,
+                    deployment_source_branch='master', deployment_local_git=None,
+                    deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1926,6 +1945,14 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
+
+    if app_insights_key is not None:
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                      value=app_insights_key))
+    elif app_insights is not None:
+        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                      value=instrumentation_key))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)

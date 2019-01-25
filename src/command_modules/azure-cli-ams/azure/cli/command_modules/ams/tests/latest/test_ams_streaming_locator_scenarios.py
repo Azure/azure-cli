@@ -146,7 +146,7 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_streaming_locator_get_content_keys(self, resource_group, storage_account_for_create):
+    def test_ams_streaming_locator_list_content_keys(self, resource_group, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
 
         self.kwargs.update({
@@ -178,7 +178,7 @@ class AmsStreamingLocatorTests(ScenarioTest):
 
         self.cmd('az ams streaming-locator create -n {streamingLocatorName} -a {amsname} -g {rg} --content-key-policy-name {contentKeyPolicyName} --streaming-policy-name {streamingPolicyName} --asset-name {assetName}')
 
-        self.cmd('az ams streaming-locator get-content-keys -a {amsname} -n {streamingLocatorName} -g {rg}', checks=[
+        self.cmd('az ams streaming-locator list-content-keys -a {amsname} -n {streamingLocatorName} -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('@[0].policyName', '{contentKeyPolicyName}')
         ])

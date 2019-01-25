@@ -433,8 +433,10 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
     if timeout is not None:
         instance.request_timeout = timeout
     if connection_draining_timeout is not None:
-        instance.connection_draining.enabled = bool(connection_draining_timeout)
-        instance.connection_draining.drain_timeout_in_sec = connection_draining_timeout or 1
+        instance.connection_draining = {
+            'enabled': bool(connection_draining_timeout),
+            'drain_timeout_in_sec': connection_draining_timeout or 1
+        }
     if host_name is not None:
         instance.host_name = host_name
     if host_name_from_backend_pool is not None:
@@ -913,7 +915,7 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
             pass
         else:
             vnet_ids = {x.id for x in vnets}
-        existing_vnet_ids = {x.id for x in instance.virtual_networks} or set([])
+        existing_vnet_ids = {x.id for x in instance.virtual_networks} if instance.virtual_networks else set([])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
@@ -1512,8 +1514,9 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
                          allow_global_reach=None):
+
     if bandwidth_in_mbps is not None:
-        instance.service_provider_properties.bandwith_in_mbps = bandwidth_in_mbps
+        instance.service_provider_properties.bandwidth_in_mbps = bandwidth_in_mbps
 
     if peering_location is not None:
         instance.service_provider_properties.peering_location = peering_location

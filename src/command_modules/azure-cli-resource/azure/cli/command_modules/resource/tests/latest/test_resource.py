@@ -315,7 +315,9 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
-            'dn': self.create_random_name('azure-cli-sub-level-deployment', 40)
+            # params-uri below is the raw file url of the subscription_level_parameters.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
+            'dn': self.create_random_name('azure-cli-sub-level-desubscription_level_parametersployment', 40)
         })
 
         self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
@@ -323,6 +325,10 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
         ])
 
         self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -369,12 +375,18 @@ class DeploymentTest(ScenarioTest):
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
+            # params-uri below is the raw file url of the test_params.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
             'dn': 'azure-cli-deployment'
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -618,10 +630,10 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
-    def applyPolicyAtScope(self, scope, policy):
+    def applyPolicyAtScope(self, scope, policyId):
         # create a policy assignment at the given scope
         self.kwargs.update({
-            'pol': policy,
+            'pol': policyId,
             'pan': self.create_random_name('cli-test-polassg', 24),   # limit is 24 characters at MG scope
             'padn': self.create_random_name('test_assignment', 20),
             'scope': scope
@@ -802,6 +814,97 @@ class PolicyScenarioTest(ScenarioTest):
     def test_resource_policy_default(self, resource_group):
         self.resource_policy_operations(resource_group)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_identity')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_identity(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location
+        })
+
+        # create a policy assignment with managed identity using a built in policy definition
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity', checks=[
+            self.check('name', '{pan}'),
+            self.check('location', '{location}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ]).get_output_in_json()['identity']
+
+        # ensure managed identity details are retrievable directly through 'policy assignment identity' commands
+        self.cmd('policy assignment identity show -n {pan} -g {rg}', checks=[
+            self.check('type', assignmentIdentity['type']),
+            self.check('principalId', assignmentIdentity['principalId']),
+            self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # remove the managed identity and ensure it is removed when retrieving the policy assignment
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'None')
+        ])
+
+        # add an identity using 'identity assign'
+        self.cmd('policy assignment identity assign -n {pan} -g {rg}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+            self.exists('tenantId')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using --assign-identity
+        self.kwargs.update({
+            'idScope': '/subscriptions/{sub}/resourceGroups/{rg}'.format(**self.kwargs),
+            'idRole': 'Reader'
+        })
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('name', '{pan}'),
+                self.check('location', '{location}'),
+                self.check('identity.type', 'SystemAssigned'),
+                self.exists('identity.principalId'),
+                self.exists('identity.tenantId')
+            ]).get_output_in_json()['identity']
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using 'identity assign'
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment identity assign -n {pan} -g {rg} --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('type', 'SystemAssigned'),
+                self.exists('principalId'),
+                self.exists('tenantId')
+            ]).get_output_in_json()
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse()
     def test_resource_policy_management_group(self, resource_group):
@@ -850,9 +953,9 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+                self.resource_policyset_operations(resource_group, None, '89aebce6-7c12-4e98-8b32-54b514921a15')
         else:
-            self.resource_policyset_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+            self.resource_policyset_operations(resource_group, None, '89aebce6-7c12-4e98-8b32-54b514921a15')
 
     @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):

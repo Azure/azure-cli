@@ -2,6 +2,16 @@
 
 Release History
 ===============
+
+0.3.13
+++++++
+* Adding 'az container start' command
+* Allow using decimal values for CPU during container creation
+
+0.3.12
+++++++
+* Updating dependencies
+
 0.3.11
 ++++++
 * Updating dependencies

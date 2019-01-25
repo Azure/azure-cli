@@ -52,6 +52,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_clusters')
         g.wait_command('wait')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('rotate-disk-encryption-key', 'rotate_hdi_cluster_key', supports_no_wait=True)
+        g.command('update', 'update', supports_no_wait=True)
 
     # usage operations
     with self.command_group('hdinsight', hdinsight_locations_sdk, client_factory=cf_hdinsight_locations) as g:

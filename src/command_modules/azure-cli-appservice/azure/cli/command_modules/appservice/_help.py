@@ -137,7 +137,7 @@ examples:
       text: >
         az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
           --custom-id CustomId \\
-          --type AzureFiles \\
+          --storage-type AzureFiles \\
           --account-name MyStorageAccount \\
           --share-name MyShare \\
           --access-key MyAccessKey \\
@@ -412,8 +412,8 @@ helps['webapp deployment source config-zip'] = """
          - name: Perform deployment by using zip file content.
            text: >
              az webapp deployment source config-zip \\
-                 -g <myRG> -n <myAppName> \\
-                 --src <zip file path location>
+                 -g {myRG} -n {myAppName} \\
+                 --src {zipFilePathLocation}
 """
 
 helps['webapp deployment source delete'] = """
@@ -992,8 +992,8 @@ helps['functionapp deployment source config-zip'] = """
          - name: Perform deployment by using zip file content.
            text: >
              az functionapp deployment source config-zip \\
-                 -g <myRG> -n <myAppName> \\
-                 --src <zip file path location>
+                 -g {myRG>} -n {myAppName} \\
+                 --src {zipFilePathLocation}
 """
 
 helps['functionapp cors'] = """
@@ -1025,4 +1025,21 @@ helps['functionapp cors remove'] = """
 helps['functionapp cors show'] = """
     type: command
     short-summary: show allowed origins
+"""
+
+helps['functionapp plan'] = """
+    type: group
+    short-summary: Manage App Service Plans for an Azure Function
+"""
+
+helps['functionapp plan create'] = """
+    type: command
+    short-summary: Create an App Service Plan for an Azure Function
+    examples:
+        - name: Create a basic app service plan.
+          text: >
+            az functionapp plan create -g MyResourceGroup -n MyPlan --sku B1
+        - name: Create a standard app service plan with with four workers.
+          text: >
+            az functionapp plan create -g MyResourceGroup -n MyPlan --number-of-workers 4 --sku S1
 """
