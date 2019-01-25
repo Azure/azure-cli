@@ -603,6 +603,33 @@ helps["policy assignment delete"] = """
     short-summary: Delete a resource policy assignment.
 """
 
+helps['policy assignment identity'] = """
+    type: group
+    short-summary: Manage a policy assignment's managed identity.
+"""
+
+helps['policy assignment identity assign'] = """
+    type: command
+    short-summary: Add a system assigned identity to a policy assignment.
+    examples:
+        - name: Add a system assigned managed identity to a policy assignment.
+          text: >
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment
+        - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
+          text: >
+            az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+"""
+
+helps['policy assignment identity remove'] = """
+    type: command
+    short-summary: Remove a managed identity from a policy assignment.
+"""
+
+helps['policy assignment identity show'] = """
+    type: command
+    short-summary: Show a policy assignment's managed identity.
+"""
+
 helps["policy assignment list"] = """
     type: command
     short-summary: List resource policy assignments.
