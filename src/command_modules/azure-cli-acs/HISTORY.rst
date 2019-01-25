@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* az aks enable-addons /disable-addons: support case insensitive name
+
 2.3.14
 ++++++
 * Add Virtual Nodes Preview
