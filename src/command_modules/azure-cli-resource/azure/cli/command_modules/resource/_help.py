@@ -6,12 +6,14 @@
 
 from knack.help_files import helps
 
-helps["account lock"] = """
+# pylint: disable=line-too-long, too-many-lines
+
+helps['account lock'] = """
     type: group
     short-summary: Manage Azure subscription level locks.
 """
 
-helps["account lock create"] = """
+helps['account lock create'] = """
     type: command
     short-summary: Create a subscription lock.
     examples:
@@ -20,7 +22,7 @@ helps["account lock create"] = """
             az account lock create --lock-type ReadOnly -n lockName
     """
 
-helps["account lock delete"] = """
+helps['account lock delete'] = """
     type: command
     short-summary: Delete a subscription lock.
     examples:
@@ -29,7 +31,7 @@ helps["account lock delete"] = """
             az account lock delete --name lockName
     """
 
-helps["account lock list"] = """
+helps['account lock list'] = """
     type: command
     short-summary: List lock information in the subscription.
     examples:
@@ -38,7 +40,7 @@ helps["account lock list"] = """
             az account lock list
     """
 
-helps["account lock show"] = """
+helps['account lock show'] = """
     type: command
     short-summary: Show the details of a subscription lock
     examples:
@@ -47,7 +49,7 @@ helps["account lock show"] = """
             az account lock show -n lockname
     """
 
-helps["account lock update"] = """
+helps['account lock update'] = """
     type: command
     short-summary: Update a subscription lock.
     examples:
@@ -56,12 +58,12 @@ helps["account lock update"] = """
             az account lock update --name lockName --notes newNotesHere --lock-type CanNotDelete
     """
 
-helps["account management-group"] = """
+helps['account management-group'] = """
     type: group
     short-summary: Manage Azure Management Groups.
 """
 
-helps["account management-group create"] = """
+helps['account management-group create'] = """
     type: command
     short-summary: Create a new management group.
     long-summary: Create a new management group.
@@ -90,7 +92,7 @@ helps["account management-group create"] = """
              az account management-group create --name GroupName --display-name DisplayName --parent ParentId/ParentName
 """
 
-helps["account management-group delete"] = """
+helps['account management-group delete'] = """
     type: command
     short-summary: Delete an existing management group.
     long-summary: Delete an existing management group.
@@ -104,7 +106,7 @@ helps["account management-group delete"] = """
              az account management-group delete --name GroupName
 """
 
-helps["account management-group list"] = """
+helps['account management-group list'] = """
     type: command
     short-summary: List all management groups.
     long-summary: List of all management groups in the current tenant.
@@ -114,7 +116,7 @@ helps["account management-group list"] = """
              az account management-group list
 """
 
-helps["account management-group show"] = """
+helps['account management-group show'] = """
     type: command
     short-summary: Get a specific management group.
     long-summary: Get the details of the management group.
@@ -140,12 +142,12 @@ helps["account management-group show"] = """
              az account management-group show --name GroupName -e -r
 """
 
-helps["account management-group subscription"] = """
+helps['account management-group subscription'] = """
     type: group
     short-summary: Subscription operations for Management Groups.
 """
 
-helps["account management-group subscription add"] = """
+helps['account management-group subscription add'] = """
     type: command
     short-summary: Add a subscription to a management group.
     long-summary: Add a subscription to a management group.
@@ -162,7 +164,7 @@ helps["account management-group subscription add"] = """
              az account management-group subscription add --name GroupName --subscription Subscription
 """
 
-helps["account management-group subscription remove"] = """
+helps['account management-group subscription remove'] = """
     type: command
     short-summary: Remove an existing subscription from a management group.
     long-summary: Remove an existing subscription from a management group.
@@ -179,7 +181,7 @@ helps["account management-group subscription remove"] = """
              az account management-group subscription remove --name GroupName --subscription Subscription
 """
 
-helps["account management-group update"] = """
+helps['account management-group update'] = """
     type: command
     short-summary: Update an existing management group.
     long-summary: Update an existing management group.
@@ -205,12 +207,12 @@ helps["account management-group update"] = """
              az account management-group update --name GroupName --display-name DisplayName --parent ParentId/ParentName
 """
 
-helps["deployment"] = """
+helps['deployment'] = """
     type: group
     short-summary: Manage Azure Resource Manager deployments at subscription scope.
 """
 
-helps["deployment create"] = """
+helps['deployment create'] = """
     type: command
     short-summary: Start a deployment.
     parameters:
@@ -236,17 +238,17 @@ helps["deployment create"] = """
                 --parameters @params.json --parameters MyValue=This MyArray=@array.json
 """
 
-helps["deployment export"] = """
+helps['deployment export'] = """
     type: command
     short-summary: Export the template used for a deployment.
 """
 
-helps["deployment operation"] = """
+helps['deployment operation'] = """
     type: group
     short-summary: Manage deployment operations.
 """
 
-helps["deployment validate"] = """
+helps['deployment validate'] = """
     type: command
     short-summary: Validate whether a template is syntactically correct.
     parameters:
@@ -257,32 +259,32 @@ helps["deployment validate"] = """
             It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 """
 
-helps["deployment wait"] = """
+helps['deployment wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a deployment condition is met.
 """
 
-helps["feature"] = """
+helps['feature'] = """
     type: group
     short-summary: Manage resource provider features.
 """
 
-helps["feature list"] = """
+helps['feature list'] = """
     type: command
     short-summary: List preview features.
 """
 
-helps["feature register"] = """
+helps['feature register'] = """
     type: command
     short-summary: register a preview feature.
 """
 
-helps["group"] = """
+helps['group'] = """
     type: group
     short-summary: Manage resource groups and template deployments.
 """
 
-helps["group create"] = """
+helps['group create'] = """
     type: command
     short-summary: Create a new resource group.
     examples:
@@ -291,7 +293,7 @@ helps["group create"] = """
             az group create -l westus -n MyResourceGroup
 """
 
-helps["group delete"] = """
+helps['group delete'] = """
     type: command
     short-summary: Delete a resource group.
     examples:
@@ -300,12 +302,12 @@ helps["group delete"] = """
             az group delete -n MyResourceGroup
 """
 
-helps["group deployment"] = """
+helps['group deployment'] = """
     type: group
     short-summary: Manage Azure Resource Manager deployments.
 """
 
-helps["group deployment create"] = """
+helps['group deployment create'] = """
     type: command
     short-summary: Start a deployment.
     parameters:
@@ -331,17 +333,17 @@ helps["group deployment create"] = """
                 --parameters @params.json --parameters MyValue=This MyArray=@array.json
 """
 
-helps["group deployment export"] = """
+helps['group deployment export'] = """
     type: command
     short-summary: Export the template used for a deployment.
 """
 
-helps["group deployment operation"] = """
+helps['group deployment operation'] = """
     type: group
     short-summary: Manage deployment operations.
 """
 
-helps["group deployment validate"] = """
+helps['group deployment validate'] = """
     type: command
     short-summary: Validate whether a template is syntactically correct.
     parameters:
@@ -352,12 +354,12 @@ helps["group deployment validate"] = """
             It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 """
 
-helps["group deployment wait"] = """
+helps['group deployment wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a deployment condition is met.
 """
 
-helps["group exists"] = """
+helps['group exists'] = """
     type: command
     short-summary: Check if a resource group exists.
     examples:
@@ -366,7 +368,7 @@ helps["group exists"] = """
             az group exists -n MyResourceGroup
 """
 
-helps["group list"] = """
+helps['group list'] = """
     type: command
     short-summary: List resource groups.
     examples:
@@ -375,12 +377,12 @@ helps["group list"] = """
             az group list --query "[?location=='westus']"
 """
 
-helps["group lock"] = """
+helps['group lock'] = """
     type: group
     short-summary: Manage Azure resource group locks.
 """
 
-helps["group lock create"] = """
+helps['group lock create'] = """
     type: command
     short-summary: Create a resource group lock.
     examples:
@@ -389,7 +391,7 @@ helps["group lock create"] = """
             az group lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
     """
 
-helps["group lock delete"] = """
+helps['group lock delete'] = """
     type: command
     short-summary: Delete a resource group lock.
     examples:
@@ -398,7 +400,7 @@ helps["group lock delete"] = """
             az group lock delete --name lockName -g MyResourceGroup
     """
 
-helps["group lock list"] = """
+helps['group lock list'] = """
     type: command
     short-summary: List lock information in the resource-group.
     examples:
@@ -407,7 +409,7 @@ helps["group lock list"] = """
             az group lock list -g MyResourceGroup
     """
 
-helps["group lock show"] = """
+helps['group lock show'] = """
     type: command
     short-summary: Show the details of a resource group lock
     examples:
@@ -416,7 +418,7 @@ helps["group lock show"] = """
             az group lock show -n lockname -g MyResourceGroup
     """
 
-helps["group lock update"] = """
+helps['group lock update'] = """
     type: command
     short-summary: Update a resource group lock.
     examples:
@@ -425,22 +427,22 @@ helps["group lock update"] = """
             az group lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
     """
 
-helps["group update"] = """
+helps['group update'] = """
     type: command
     short-summary: Update a resource group.
 """
 
-helps["group wait"] = """
+helps['group wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the resource group is met.
 """
 
-helps["lock"] = """
+helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
 """
 
-helps["lock create"] = """
+helps['lock create'] = """
     type: command
     short-summary: Create a lock.
     long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
@@ -450,7 +452,7 @@ helps["lock create"] = """
             az lock create --name lockName --resource-group group --lock-type ReadOnly
     """
 
-helps["lock delete"] = """
+helps['lock delete'] = """
     type: command
     short-summary: Delete a lock.
     examples:
@@ -459,7 +461,7 @@ helps["lock delete"] = """
             az lock delete --name lockName --resource-group group
     """
 
-helps["lock list"] = """
+helps['lock list'] = """
     type: command
     short-summary: List lock information.
     examples:
@@ -471,7 +473,7 @@ helps["lock list"] = """
             az lock list
     """
 
-helps["lock show"] = """
+helps['lock show'] = """
     type: command
     short-summary: Show the properties of a lock
     examples:
@@ -480,7 +482,7 @@ helps["lock show"] = """
             az lock show -n lockname
     """
 
-helps["lock update"] = """
+helps['lock update'] = """
     type: command
     short-summary: Update a lock.
     examples:
@@ -489,12 +491,12 @@ helps["lock update"] = """
             az lock update --name lockName --resource-group group --notes newNotesHere --lock-type CanNotDelete
     """
 
-helps["managedapp"] = """
+helps['managedapp'] = """
     type: group
     short-summary: Manage template solutions provided and maintained by Independent Software Vendors (ISVs).
 """
 
-helps["managedapp create"] = """
+helps['managedapp create'] = """
     type: command
     short-summary: Create a managed application.
     examples:
@@ -510,12 +512,12 @@ helps["managedapp create"] = """
                 --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 
-helps["managedapp definition"] = """
+helps['managedapp definition'] = """
     type: group
     short-summary: Manage Azure Managed Applications.
 """
 
-helps["managedapp definition create"] = """
+helps['managedapp definition create'] = """
     type: command
     short-summary: Create a managed application definition.
     examples:
@@ -531,37 +533,37 @@ helps["managedapp definition create"] = """
                 --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
 
-helps["managedapp definition delete"] = """
+helps['managedapp definition delete'] = """
     type: command
     short-summary: Delete a managed application definition.
 """
 
-helps["managedapp definition list"] = """
+helps['managedapp definition list'] = """
     type: command
     short-summary: List managed application definitions.
 """
 
-helps["managedapp delete"] = """
+helps['managedapp delete'] = """
     type: command
     short-summary: Delete a managed application.
 """
 
-helps["managedapp list"] = """
+helps['managedapp list'] = """
     type: command
     short-summary: List managed applications.
 """
 
-helps["policy"] = """
+helps['policy'] = """
     type: group
     short-summary: Manage resource policies.
 """
 
-helps["policy assignment"] = """
+helps['policy assignment'] = """
     type: group
     short-summary: Manage resource policy assignments.
 """
 
-helps["policy assignment create"] = """
+helps['policy assignment create'] = """
     type: command
     short-summary: Create a resource policy assignment.
     parameters:
@@ -598,7 +600,7 @@ helps["policy assignment create"] = """
                 }'
 """
 
-helps["policy assignment delete"] = """
+helps['policy assignment delete'] = """
     type: command
     short-summary: Delete a resource policy assignment.
 """
@@ -630,22 +632,22 @@ helps['policy assignment identity show'] = """
     short-summary: Show a policy assignment's managed identity.
 """
 
-helps["policy assignment list"] = """
+helps['policy assignment list'] = """
     type: command
     short-summary: List resource policy assignments.
 """
 
-helps["policy assignment show"] = """
+helps['policy assignment show'] = """
     type: command
     short-summary: Show a resource policy assignment.
 """
 
-helps["policy definition"] = """
+helps['policy definition'] = """
     type: group
     short-summary: Manage resource policy definitions.
 """
 
-helps["policy definition create"] = """
+helps['policy definition create'] = """
             type: command
             short-summary: Create a policy definition.
             parameters:
@@ -720,32 +722,32 @@ helps["policy definition create"] = """
                     }'
 """
 
-helps["policy definition delete"] = """
+helps['policy definition delete'] = """
     type: command
     short-summary: Delete a policy definition.
 """
 
-helps["policy definition list"] = """
+helps['policy definition list'] = """
     type: command
     short-summary: List policy definitions.
 """
 
-helps["policy definition show"] = """
+helps['policy definition show'] = """
     type: command
     short-summary: Show a policy definition.
 """
 
-helps["policy definition update"] = """
+helps['policy definition update'] = """
     type: command
     short-summary: Update a policy definition.
 """
 
-helps["policy set-definition"] = """
+helps['policy set-definition'] = """
     type: group
     short-summary: Manage resource policy set definitions.
 """
 
-helps["policy set-definition create"] = """
+helps['policy set-definition create'] = """
             type: command
             short-summary: Create a policy set definition.
             parameters:
@@ -775,32 +777,32 @@ helps["policy set-definition create"] = """
                         ]'
 """
 
-helps["policy set-definition delete"] = """
+helps['policy set-definition delete'] = """
     type: command
     short-summary: Delete a policy set definition.
 """
 
-helps["policy set-definition list"] = """
+helps['policy set-definition list'] = """
     type: command
     short-summary: List policy set definitions.
 """
 
-helps["policy set-definition show"] = """
+helps['policy set-definition show'] = """
     type: command
     short-summary: Show a policy set definition.
 """
 
-helps["policy set-definition update"] = """
+helps['policy set-definition update'] = """
     type: command
     short-summary: Update a policy set definition.
 """
 
-helps["provider"] = """
+helps['provider'] = """
     type: group
     short-summary: Manage resource providers.
 """
 
-helps["provider list"] = """
+helps['provider list'] = """
     type: command
     examples:
         - name: Display all resource types for the network resource provider.
@@ -808,37 +810,37 @@ helps["provider list"] = """
             az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
 """
 
-helps["provider operation"] = """
+helps['provider operation'] = """
     type: group
     short-summary: Get provider operations metadatas.
 """
 
-helps["provider operation list"] = """
+helps['provider operation list'] = """
     type: command
     short-summary: Get operations from all providers.
 """
 
-helps["provider operation show"] = """
+helps['provider operation show'] = """
     type: command
     short-summary: Get an individual provider's operations.
 """
 
-helps["provider register"] = """
+helps['provider register'] = """
     type: command
     short-summary: Register a provider.
 """
 
-helps["provider unregister"] = """
+helps['provider unregister'] = """
     type: command
     short-summary: Unregister a provider.
 """
 
-helps["resource"] = """
+helps['resource'] = """
     type: group
     short-summary: Manage Azure resources.
 """
 
-helps["resource create"] = """
+helps['resource create'] = """
     type: command
     short-summary: create a resource.
     examples:
@@ -861,7 +863,7 @@ helps["resource create"] = """
                 }'
 """
 
-helps["resource delete"] = """
+helps['resource delete'] = """
     type: command
     short-summary: Delete a resource.
     examples:
@@ -876,7 +878,7 @@ helps["resource delete"] = """
             az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
 """
 
-helps["resource invoke-action"] = """
+helps['resource invoke-action'] = """
     type: command
     short-summary: Invoke an action on the resource.
     long-summary: >
@@ -899,7 +901,7 @@ helps["resource invoke-action"] = """
             }'
 """
 
-helps["resource link"] = """
+helps['resource link'] = """
     type: group
     short-summary: Manage links between resources.
     long-summary: >
@@ -908,7 +910,7 @@ helps["resource link"] = """
         as a single unit.
 """
 
-helps["resource link create"] = """
+helps['resource link create'] = """
     type: command
     short-summary: Create a new link between resources.
     long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
@@ -918,7 +920,7 @@ helps["resource link create"] = """
             az resource link create --link-id {SourceID} --target-id {ResourceID} --notes "SourceID depends on ResourceID"
 """
 
-helps["resource link delete"] = """
+helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
     long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
@@ -928,7 +930,7 @@ helps["resource link delete"] = """
             az resource link delete --link-id {LinkID}
 """
 
-helps["resource link list"] = """
+helps['resource link list'] = """
     type: command
     short-summary: List resource links.
     examples:
@@ -940,13 +942,13 @@ helps["resource link list"] = """
             az resource link list --scope /subscriptions/{SubID}/resourceGroups/{ResourceGroup}
 """
 
-helps["resource link show"] = """
+helps['resource link show'] = """
     type: command
     short-summary: Get details for a resource link.
     long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 """
 
-helps["resource link update"] = """
+helps['resource link update'] = """
     type: command
     short-summary: Update link between resources.
     long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
@@ -956,7 +958,7 @@ helps["resource link update"] = """
             az resource link update --link-id {LinkID} --notes "some notes to explain this link"
 """
 
-helps["resource list"] = """
+helps['resource list'] = """
     type: command
     short-summary: List resources.
     examples:
@@ -977,12 +979,12 @@ helps["resource list"] = """
             az resource list --tag test=example
 """
 
-helps["resource lock"] = """
+helps['resource lock'] = """
     type: group
     short-summary: Manage Azure resource level locks.
 """
 
-helps["resource lock create"] = """
+helps['resource lock create'] = """
     type: command
     short-summary: Create a resource-level lock.
     examples:
@@ -994,7 +996,7 @@ helps["resource lock create"] = """
             az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}
     """
 
-helps["resource lock delete"] = """
+helps['resource lock delete'] = """
     type: command
     short-summary: Delete a resource-level lock.
     examples:
@@ -1006,7 +1008,7 @@ helps["resource lock delete"] = """
             az resource lock delete -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VMName}
     """
 
-helps["resource lock list"] = """
+helps['resource lock list'] = """
     type: command
     short-summary: List lock information in the resource-level.
     examples:
@@ -1015,7 +1017,7 @@ helps["resource lock list"] = """
             az resource lock list -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 
-helps["resource lock show"] = """
+helps['resource lock show'] = """
     type: command
     short-summary: Show the details of a resource-level lock
     examples:
@@ -1024,7 +1026,7 @@ helps["resource lock show"] = """
             az resource lock show -n lockname -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 
-helps["resource lock update"] = """
+helps['resource lock update'] = """
     type: command
     short-summary: Update a resource-level lock.
     examples:
@@ -1033,7 +1035,7 @@ helps["resource lock update"] = """
             az resource lock update --name lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
     """
 
-helps["resource show"] = """
+helps['resource show'] = """
     type: command
     short-summary: Get the details of a resource.
     examples:
@@ -1054,7 +1056,7 @@ helps["resource show"] = """
             az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
 """
 
-helps["resource tag"] = """
+helps['resource tag'] = """
     type: command
     short-summary: Tag a resource.
     examples:
@@ -1066,17 +1068,17 @@ helps["resource tag"] = """
             az resource tag --tags vmlist=vm1 --id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
 """
 
-helps["resource update"] = """
+helps['resource update'] = """
     type: command
     short-summary: Update a resource.
 """
 
-helps["resource wait"] = """
+helps['resource wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of a resources is met.
 """
 
-helps["tag"] = """
+helps['tag'] = """
     type: group
     short-summary: Manage resource tags.
 """

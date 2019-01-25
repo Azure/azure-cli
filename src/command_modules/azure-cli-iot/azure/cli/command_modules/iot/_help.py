@@ -6,7 +6,7 @@
 
 from knack.help_files import helps
 
-helps["iot"] = """
+helps['iot'] = """
     type: group
     short-summary: Manage Internet of Things (IoT) assets.
     long-summary: Comprehensive IoT data-plane functionality is available
@@ -14,17 +14,17 @@ helps["iot"] = """
                   go to https://github.com/Azure/azure-iot-cli-extension
 """
 
-helps["iot dps"] = """
+helps['iot dps'] = """
     type: group
     short-summary: Manage Azure IoT Hub Device Provisioning Service.
 """
 
-helps["iot dps access-policy"] = """
+helps['iot dps access-policy'] = """
     type: group
     short-summary: Manage Azure IoT Hub Device Provisioning Service access policies.
 """
 
-helps["iot dps access-policy create"] = """
+helps['iot dps access-policy create'] = """
     type: command
     short-summary: Create a new shared access policy in an Azure IoT Hub device provisioning service.
     examples:
@@ -33,7 +33,7 @@ helps["iot dps access-policy create"] = """
             az iot dps access-policy create --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentRead
 """
 
-helps["iot dps access-policy delete"] = """
+helps['iot dps access-policy delete'] = """
     type: command
     short-summary: Delete a shared access policies in an Azure IoT Hub device provisioning service.
     examples:
@@ -42,7 +42,7 @@ helps["iot dps access-policy delete"] = """
             az iot dps access-policy delete --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
 """
 
-helps["iot dps access-policy list"] = """
+helps['iot dps access-policy list'] = """
     type: command
     short-summary: List all shared access policies in an Azure IoT Hub device provisioning service.
     examples:
@@ -51,7 +51,7 @@ helps["iot dps access-policy list"] = """
             az iot dps access-policy list --dps-name MyDps --resource-group MyResourceGroup
 """
 
-helps["iot dps access-policy show"] = """
+helps['iot dps access-policy show'] = """
     type: command
     short-summary: Show details of a shared access policies in an Azure IoT Hub device provisioning service.
     examples:
@@ -60,7 +60,7 @@ helps["iot dps access-policy show"] = """
             az iot dps access-policy show --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
 """
 
-helps["iot dps access-policy update"] = """
+helps['iot dps access-policy update'] = """
     type: command
     short-summary: Update a shared access policy in an Azure IoT Hub device provisioning service.
     examples:
@@ -69,12 +69,12 @@ helps["iot dps access-policy update"] = """
             az iot dps access-policy update --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentWrite
 """
 
-helps["iot dps certificate"] = """
+helps['iot dps certificate'] = """
     type: group
     short-summary: Manage Azure IoT Hub Device Provisioning Service certificates.
 """
 
-helps["iot dps certificate create"] = """
+helps['iot dps certificate create'] = """
     type: command
     short-summary: Create/upload an Azure IoT Hub Device Provisioning Service certificate.
     examples:
@@ -86,7 +86,7 @@ helps["iot dps certificate create"] = """
             az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer
 """
 
-helps["iot dps certificate delete"] = """
+helps['iot dps certificate delete'] = """
     type: command
     short-summary: Delete an Azure IoT Hub Device Provisioning Service certificate.
     examples:
@@ -95,7 +95,7 @@ helps["iot dps certificate delete"] = """
             az iot dps certificate delete --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --etag AAAAAAAAAAA=
 """
 
-helps["iot dps certificate generate-verification-code"] = """
+helps['iot dps certificate generate-verification-code'] = """
     type: command
     short-summary: Generate a verification code for an Azure IoT Hub Device Provisioning Service certificate.
     long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this
@@ -107,7 +107,7 @@ helps["iot dps certificate generate-verification-code"] = """
             --etag AAAAAAAAAAA=
 """
 
-helps["iot dps certificate list"] = """
+helps['iot dps certificate list'] = """
     type: command
     short-summary: List all certificates contained within an Azure IoT Hub device provisioning service
     examples:
@@ -116,7 +116,7 @@ helps["iot dps certificate list"] = """
             az iot dps certificate list --dps-name MyDps --resource-group MyResourceGroup
 """
 
-helps["iot dps certificate show"] = """
+helps['iot dps certificate show'] = """
     type: command
     short-summary: Show information about a particular Azure IoT Hub Device Provisioning Service certificate.
     examples:
@@ -125,7 +125,7 @@ helps["iot dps certificate show"] = """
             az iot dps certificate show --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
 """
 
-helps["iot dps certificate update"] = """
+helps['iot dps certificate update'] = """
     type: command
     short-summary: Update an Azure IoT Hub Device Provisioning Service certificate.
     long-summary: Upload a new certificate to replace the existing certificate with the same name.
@@ -140,7 +140,7 @@ helps["iot dps certificate update"] = """
             --path /certificates/NewCertificate.cer --etag AAAAAAAAAAA=
 """
 
-helps["iot dps certificate verify"] = """
+helps['iot dps certificate verify'] = """
     type: command
     short-summary: Verify an Azure IoT Hub Device Provisioning Service certificate.
     long-summary: Verify a certificate by uploading a verification certificate containing the verification code obtained
@@ -152,7 +152,7 @@ helps["iot dps certificate verify"] = """
             --path /certificates/Verification.pem --etag AAAAAAAAAAA=
 """
 
-helps["iot dps create"] = """
+helps['iot dps create'] = """
     type: command
     short-summary: Create an Azure IoT Hub device provisioning service.
     long-summary: For an introduction to Azure IoT Hub Device Provisioning Service, see https://docs.microsoft.com/en-us/azure/iot-dps/about-iot-dps
@@ -165,7 +165,7 @@ helps["iot dps create"] = """
             az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
 """
 
-helps["iot dps delete"] = """
+helps['iot dps delete'] = """
     type: command
     short-summary: Delete an Azure IoT Hub device provisioning service.
     examples:
@@ -174,12 +174,12 @@ helps["iot dps delete"] = """
             az iot dps delete --name MyDps --resource-group MyResourceGroup
 """
 
-helps["iot dps linked-hub"] = """
+helps['iot dps linked-hub'] = """
     type: group
     short-summary: Manage Azure IoT Hub Device Provisioning Service linked IoT hubs.
 """
 
-helps["iot dps linked-hub create"] = """
+helps['iot dps linked-hub create'] = """
     type: command
     short-summary: Create a linked IoT hub in an Azure IoT Hub device provisioning service.
     examples:
@@ -195,7 +195,7 @@ helps["iot dps linked-hub create"] = """
             --location westus --allocation-weight 10 --apply-allocation-policy True
 """
 
-helps["iot dps linked-hub delete"] = """
+helps['iot dps linked-hub delete'] = """
     type: command
     short-summary: Update a linked IoT hub in an Azure IoT Hub device provisioning service.
     examples:
@@ -204,7 +204,7 @@ helps["iot dps linked-hub delete"] = """
             az iot dps linked-hub delete --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
 """
 
-helps["iot dps linked-hub list"] = """
+helps['iot dps linked-hub list'] = """
     type: command
     short-summary: List all linked IoT hubs in an Azure IoT Hub device provisioning service.
     examples:
@@ -213,7 +213,7 @@ helps["iot dps linked-hub list"] = """
             az iot dps linked-hub list --dps-name MyDps --resource-group MyResourceGroup
 """
 
-helps["iot dps linked-hub show"] = """
+helps['iot dps linked-hub show'] = """
     type: command
     short-summary: Show details of a linked IoT hub in an Azure IoT Hub device provisioning service.
     examples:
@@ -222,7 +222,7 @@ helps["iot dps linked-hub show"] = """
             az iot dps linked-hub show --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
 """
 
-helps["iot dps linked-hub update"] = """
+helps['iot dps linked-hub update'] = """
     type: command
     short-summary: Update a linked IoT hub in an Azure IoT Hub device provisioning service.
     examples:
@@ -232,7 +232,7 @@ helps["iot dps linked-hub update"] = """
             --allocation-weight 10 --apply-allocation-policy True
 """
 
-helps["iot dps list"] = """
+helps['iot dps list'] = """
     type: command
     short-summary: List Azure IoT Hub device provisioning services.
     examples:
@@ -244,7 +244,7 @@ helps["iot dps list"] = """
             az iot dps list --resource-group MyResourceGroup
 """
 
-helps["iot dps show"] = """
+helps['iot dps show'] = """
     type: command
     short-summary: Get the details of an Azure IoT Hub device provisioning service.
     examples:
@@ -253,7 +253,7 @@ helps["iot dps show"] = """
             az iot dps show --name MyDps --resource-group MyResourceGroup
 """
 
-helps["iot dps update"] = """
+helps['iot dps update'] = """
     type: command
     short-summary: Update an Azure IoT Hub device provisioning service.
     examples:
@@ -262,17 +262,17 @@ helps["iot dps update"] = """
             az iot dps update --name MyDps --resource-group MyResourceGroup --set properties.allocationPolicy="GeoLatency"
 """
 
-helps["iot hub"] = """
+helps['iot hub'] = """
     type: group
     short-summary: Manage Azure IoT hubs.
 """
 
-helps["iot hub certificate"] = """
+helps['iot hub certificate'] = """
     type: group
     short-summary: Manage IoT Hub certificates.
 """
 
-helps["iot hub certificate create"] = """
+helps['iot hub certificate create'] = """
     type: command
     short-summary: Create/upload an Azure IoT Hub certificate.
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
@@ -286,7 +286,7 @@ helps["iot hub certificate create"] = """
             az iot hub certificate create --hub-name MyIotHub --name MyCertificate --path /certificates/Certificate.cer
 """
 
-helps["iot hub certificate delete"] = """
+helps['iot hub certificate delete'] = """
     type: command
     short-summary: Deletes an Azure IoT Hub certificate.
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
@@ -297,7 +297,7 @@ helps["iot hub certificate delete"] = """
             az iot hub certificate delete --hub-name MyIotHub --name MyCertificate --etag AAAAAAAAAAA=
 """
 
-helps["iot hub certificate generate-verification-code"] = """
+helps['iot hub certificate generate-verification-code'] = """
     type: command
     short-summary: Generates a verification code for an Azure IoT Hub certificate.
     long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this
@@ -310,7 +310,7 @@ helps["iot hub certificate generate-verification-code"] = """
             AAAAAAAAAAA=
 """
 
-helps["iot hub certificate list"] = """
+helps['iot hub certificate list'] = """
     type: command
     short-summary: Lists all certificates contained within an Azure IoT Hub
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
@@ -321,7 +321,7 @@ helps["iot hub certificate list"] = """
             az iot hub certificate list --hub-name MyIotHub
 """
 
-helps["iot hub certificate show"] = """
+helps['iot hub certificate show'] = """
     type: command
     short-summary: Shows information about a particular Azure IoT Hub certificate.
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
@@ -332,7 +332,7 @@ helps["iot hub certificate show"] = """
             az iot hub certificate show --hub-name MyIotHub --name MyCertificate
 """
 
-helps["iot hub certificate update"] = """
+helps['iot hub certificate update'] = """
     type: command
     short-summary: Update an Azure IoT Hub certificate.
     long-summary: Uploads a new certificate to replace the existing certificate with the same name. For a detailed explanation of CA certificates in Azure IoT Hub,
@@ -348,7 +348,7 @@ helps["iot hub certificate update"] = """
             AAAAAAAAAAA=
 """
 
-helps["iot hub certificate verify"] = """
+helps['iot hub certificate verify'] = """
     type: command
     short-summary: Verifies an Azure IoT Hub certificate.
     long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained
@@ -361,12 +361,12 @@ helps["iot hub certificate verify"] = """
             AAAAAAAAAAA=
 """
 
-helps["iot hub consumer-group"] = """
+helps['iot hub consumer-group'] = """
     type: group
     short-summary: Manage the event hub consumer groups of an IoT hub.
 """
 
-helps["iot hub consumer-group create"] = """
+helps['iot hub consumer-group create'] = """
     type: command
     short-summary: Create an event hub consumer group.
     examples:
@@ -378,22 +378,22 @@ helps["iot hub consumer-group create"] = """
             az iot hub consumer-group create --hub-name MyIotHub --event-hub-name operationsMonitoringEvents --name cg1
 """
 
-helps["iot hub consumer-group delete"] = """
+helps['iot hub consumer-group delete'] = """
     type: command
     short-summary: Delete an event hub consumer group.
 """
 
-helps["iot hub consumer-group list"] = """
+helps['iot hub consumer-group list'] = """
     type: command
     short-summary: List event hub consumer groups.
 """
 
-helps["iot hub consumer-group show"] = """
+helps['iot hub consumer-group show'] = """
     type: command
     short-summary: Get the details for an event hub consumer group.
 """
 
-helps["iot hub create"] = """
+helps['iot hub create'] = """
     type: command
     short-summary: Create an Azure IoT hub.
     long-summary: For an introduction to Azure IoT Hub, see https://docs.microsoft.com/azure/iot-hub/
@@ -407,7 +407,7 @@ helps["iot hub create"] = """
             --partition-count 4
 """
 
-helps["iot hub delete"] = """
+helps['iot hub delete'] = """
     type: command
     short-summary: Delete an IoT hub.
 """
@@ -427,27 +427,27 @@ helps['iot hub devicestream show'] = """
             az iot hub devicestream show -n MyIotHub
 """
 
-helps["iot hub job"] = """
+helps['iot hub job'] = """
     type: group
     short-summary: Manage jobs in an IoT hub.
 """
 
-helps["iot hub job cancel"] = """
+helps['iot hub job cancel'] = """
     type: command
     short-summary: Cancel a job in an IoT hub.
 """
 
-helps["iot hub job list"] = """
+helps['iot hub job list'] = """
     type: command
     short-summary: List the jobs in an IoT hub.
 """
 
-helps["iot hub job show"] = """
+helps['iot hub job show'] = """
     type: command
     short-summary: Get the details of a job in an IoT hub.
 """
 
-helps["iot hub list"] = """
+helps['iot hub list'] = """
     type: command
     short-summary: List IoT hubs.
     examples:
@@ -459,17 +459,17 @@ helps["iot hub list"] = """
             az iot hub list --resource-group MyGroup
 """
 
-helps["iot hub list-skus"] = """
+helps['iot hub list-skus'] = """
     type: command
     short-summary: List available pricing tiers.
 """
 
-helps["iot hub policy"] = """
+helps['iot hub policy'] = """
     type: group
     short-summary: Manage shared access policies of an IoT hub.
 """
 
-helps["iot hub policy create"] = """
+helps['iot hub policy create'] = """
     type: command
     short-summary: Create a new shared access policy in an IoT hub.
     examples:
@@ -478,27 +478,27 @@ helps["iot hub policy create"] = """
             az iot hub policy create --hub-name MyIotHub --name new-policy --permissions RegistryWrite ServiceConnect DeviceConnect
 """
 
-helps["iot hub policy delete"] = """
+helps['iot hub policy delete'] = """
     type: command
     short-summary: Delete a shared access policy from an IoT hub.
 """
 
-helps["iot hub policy list"] = """
+helps['iot hub policy list'] = """
     type: command
     short-summary: List shared access policies of an IoT hub.
 """
 
-helps["iot hub policy show"] = """
+helps['iot hub policy show'] = """
     type: command
     short-summary: Get the details of a shared access policy of an IoT hub.
 """
 
-helps["iot hub route"] = """
+helps['iot hub route'] = """
     type: group
     short-summary: Manage routes of an IoT hub.
 """
 
-helps["iot hub route create"] = """
+helps['iot hub route create'] = """
     type: command
     short-summary: Create a route in IoT Hub.
     long-summary: Create a route to send specific data source and condition to a desired endpoint.
@@ -514,7 +514,7 @@ helps["iot hub route create"] = """
             --condition true --enabled true
 """
 
-helps["iot hub route delete"] = """
+helps['iot hub route delete'] = """
     type: command
     short-summary: Delete all or mentioned route for your IoT Hub.
     long-summary: Delete a route or all routes for your IoT Hub.
@@ -530,7 +530,7 @@ helps["iot hub route delete"] = """
             az iot hub route delete -g MyResourceGroup --hub-name MyIotHub
 """
 
-helps["iot hub route list"] = """
+helps['iot hub route list'] = """
     type: command
     short-summary: Get all the routes in IoT Hub.
     long-summary: Get information on all routes from an IoT Hub.
@@ -543,7 +543,7 @@ helps["iot hub route list"] = """
             az iot hub route list -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
 """
 
-helps["iot hub route show"] = """
+helps['iot hub route show'] = """
     type: command
     short-summary: Get information about the route in IoT Hub.
     long-summary: Get information on a specific route in your IoT Hub.
@@ -553,7 +553,7 @@ helps["iot hub route show"] = """
             az iot hub route show -g MyResourceGroup --hub-name MyIotHub --route-name [Route Name]
 """
 
-helps["iot hub route test"] = """
+helps['iot hub route test'] = """
     type: command
     short-summary: Test all routes or mentioned route in IoT Hub.
     long-summary: Test all existing routes or mentioned route in your IoT Hub.
@@ -567,7 +567,7 @@ helps["iot hub route test"] = """
             az iot hub route test -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
 """
 
-helps["iot hub route update"] = """
+helps['iot hub route update'] = """
     type: command
     short-summary: Update a route in IoT Hub.
     long-summary: Updates a route in IoT Hub. You can change the source, enpoint or query on the route.
@@ -578,12 +578,12 @@ helps["iot hub route update"] = """
             --source-type DeviceMessages --route-name R1
 """
 
-helps["iot hub routing-endpoint"] = """
+helps['iot hub routing-endpoint'] = """
     type: group
     short-summary: Manage custom endpoints of an IoT hub.
 """
 
-helps["iot hub routing-endpoint create"] = """
+helps['iot hub routing-endpoint create'] = """
     type: command
     short-summary: Add an endpoint to your IoT Hub.
     long-summary: Create a new custom endpoint in your IoT Hub.
@@ -601,7 +601,7 @@ helps["iot hub routing-endpoint create"] = """
             --container-name [Container Name]
 """
 
-helps["iot hub routing-endpoint delete"] = """
+helps['iot hub routing-endpoint delete'] = """
     type: command
     short-summary: Delete all or mentioned endpoint for your IoT Hub.
     long-summary: Delete an endpoint for your IoT Hub. We recommend that you delete
@@ -620,7 +620,7 @@ helps["iot hub routing-endpoint delete"] = """
             az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
 """
 
-helps["iot hub routing-endpoint list"] = """
+helps['iot hub routing-endpoint list'] = """
     type: command
     short-summary: Get information on all the endpoints for your IoT Hub.
     long-summary: Get information on all endpoints in your IoT Hub.
@@ -635,7 +635,7 @@ helps["iot hub routing-endpoint list"] = """
             --endpoint-type eventhub
 """
 
-helps["iot hub routing-endpoint show"] = """
+helps['iot hub routing-endpoint show'] = """
     type: command
     short-summary: Get information on mentioned endpoint for your IoT Hub.
     long-summary: Get information on a specific endpoint in your IoT Hub
@@ -646,12 +646,12 @@ helps["iot hub routing-endpoint show"] = """
             --endpoint-name [Endpoint Name]
 """
 
-helps["iot hub show"] = """
+helps['iot hub show'] = """
     type: command
     short-summary: Get the details of an IoT hub.
 """
 
-helps["iot hub show-connection-string"] = """
+helps['iot hub show-connection-string'] = """
     type: command
     short-summary: Show the connection strings for an IoT hub.
     examples:
@@ -669,17 +669,17 @@ helps["iot hub show-connection-string"] = """
             az iot hub show-connection-string
 """
 
-helps["iot hub show-quota-metrics"] = """
+helps['iot hub show-quota-metrics'] = """
     type: command
     short-summary: Get the quota metrics for an IoT hub.
 """
 
-helps["iot hub show-stats"] = """
+helps['iot hub show-stats'] = """
     type: command
     short-summary: Get the statistics for an IoT hub.
 """
 
-helps["iot hub update"] = """
+helps['iot hub update'] = """
     type: command
     short-summary: Update metadata for an IoT hub.
     examples:

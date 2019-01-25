@@ -6,22 +6,22 @@
 
 from knack.help_files import helps
 
-helps["keyvault"] = """
+helps['keyvault'] = """
     type: group
     short-summary: Manage KeyVault keys, secrets, and certificates.
 """
 
-helps["keyvault certificate"] = """
+helps['keyvault certificate'] = """
     type: group
     short-summary: Manage certificates.
 """
 
-helps["keyvault certificate contact"] = """
+helps['keyvault certificate contact'] = """
     type: group
     short-summary: Manage contacts for certificate management.
 """
 
-helps["keyvault certificate create"] = """
+helps['keyvault certificate create'] = """
     type: command
     short-summary: Create a Key Vault certificate.
     long-summary: Certificates can be used as a secrets for provisioned virtual machines.
@@ -40,7 +40,7 @@ helps["keyvault certificate create"] = """
               --image debian --secrets "$vm_secrets"
 """
 
-helps["keyvault certificate download"] = """
+helps['keyvault certificate download'] = """
     type: command
     short-summary: Download the public portion of a Key Vault certificate.
     long-summary: The certificate formatted as either PEM or DER. PEM is the default.
@@ -55,7 +55,7 @@ helps["keyvault certificate download"] = """
             openssl x509 -in cert.crt -inform DER  -noout -sha1 -fingerprint
 """
 
-helps["keyvault certificate get-default-policy"] = """
+helps['keyvault certificate get-default-policy'] = """
     type: command
     short-summary: Get the default policy for self-signed certificates.
     long-summary: |
@@ -70,7 +70,7 @@ helps["keyvault certificate get-default-policy"] = """
               -p "$(az keyvault certificate get-default-policy)"
 """
 
-helps["keyvault certificate import"] = """
+helps['keyvault certificate import'] = """
     type: command
     short-summary: Import a certificate into KeyVault.
     long-summary: Certificates can also be used as a secrets in provisioned virtual machines.
@@ -94,69 +94,69 @@ helps["keyvault certificate import"] = """
               --image debian --secrets "$vm_secrets"
 """
 
-helps["keyvault certificate issuer"] = """
+helps['keyvault certificate issuer'] = """
     type: group
     short-summary: Manage certificate issuer information.
 """
 
-helps["keyvault certificate issuer admin"] = """
+helps['keyvault certificate issuer admin'] = """
     type: group
     short-summary: Manage admin information for certificate issuers.
 """
 
-helps["keyvault certificate pending"] = """
+helps['keyvault certificate pending'] = """
     type: group
     short-summary: Manage pending certificate creation operations.
 """
 
-helps["keyvault create"] = """
+helps['keyvault create'] = """
     type: command
     short-summary: Create a key vault.
     long-summary: Default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
 """
 
-helps["keyvault delete"] = """
+helps['keyvault delete'] = """
     type: command
     short-summary: Delete a key vault.
 """
 
-helps["keyvault key"] = """
+helps['keyvault key'] = """
     type: group
     short-summary: Manage keys.
 """
 
-helps["keyvault list"] = """
+helps['keyvault list'] = """
     type: command
     short-summary: List key vaults.
 """
 
-helps["keyvault network-rule"] = """
+helps['keyvault network-rule'] = """
     type: group
     short-summary: Manage vault network ACLs.
 """
 
-helps["keyvault recover"] = """
+helps['keyvault recover'] = """
     type: command
     short-summary: Recover a key vault.
     long-summary: Recovers a previously deleted key vault for which soft delete was enabled.
 """
 
-helps["keyvault secret"] = """
+helps['keyvault secret'] = """
     type: group
     short-summary: Manage secrets.
 """
 
-helps["keyvault show"] = """
+helps['keyvault show'] = """
     type: command
     short-summary: Show details of a key vault.
 """
 
-helps["keyvault storage"] = """
+helps['keyvault storage'] = """
     type: group
     short-summary: Manage storage accounts.
 """
 
-helps["keyvault storage add"] = """
+helps['keyvault storage add'] = """
     type: command
     examples:
         - name: Create a storage account and setup a vault to manage its keys
@@ -171,12 +171,12 @@ helps["keyvault storage add"] = """
             --auto-regenerate-key --regeneration-period P90D  --resource-id $id
 """
 
-helps["keyvault storage sas-definition"] = """
+helps['keyvault storage sas-definition'] = """
     type: group
     short-summary: Manage storage account SAS definitions.
 """
 
-helps["keyvault storage sas-definition create"] = """
+helps['keyvault storage sas-definition create'] = """
     type: command
     examples:
         - name: Add a sas-definition for an account sas-token
@@ -201,7 +201,7 @@ helps["keyvault storage sas-definition create"] = """
             -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
 """
 
-helps["keyvault update"] = """
+helps['keyvault update'] = """
     type: command
     short-summary: Update the properties of a key vault.
 """
