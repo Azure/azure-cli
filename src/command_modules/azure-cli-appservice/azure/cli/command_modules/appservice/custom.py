@@ -1856,6 +1856,13 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
                                    sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
 
 
+def is_plan_Elastic_Premium(plan_info):
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier == 'ElasticPremium'
+    return False
+
+
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, deployment_source_url=None,
@@ -1870,6 +1877,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -1939,7 +1947,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
-    if consumption_plan_location is None:
+    if consumption_plan_location is None and not is_plan_Elastic_Premium(plan_info):
         site_config.always_on = True
     else:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
