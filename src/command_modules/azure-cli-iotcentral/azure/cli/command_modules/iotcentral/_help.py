@@ -30,13 +30,16 @@ examples:
         az iotcentral app create --resource-group MyResourceGroup --name my-app-resource --subdomain my-app-subdomain
 -   name: Create an IoT Central application with the standard pricing tier S1 in the 'westus' region, with a custom display name, based on the iotc-default template.
     text: >
-        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus
-        --subdomain my-app-subdomain --template iotc-default@1.0.0 --display-name 'My Custom Display Name'
+        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus --subdomain my-app-subdomain --template iotc-default@1.0.0 --display-name 'My Custom Display Name'
 """
 
 helps['iotcentral app delete'] = """
 type: command
 short-summary: Delete an IoT Central application.
+examples:
+-   name: Delete an IoT Central application.
+    text: az iotcentral app delete --resource-group MyResourceGroup --name MyIoTCentralApplication
+    crafted: true
 """
 
 helps['iotcentral app list'] = """

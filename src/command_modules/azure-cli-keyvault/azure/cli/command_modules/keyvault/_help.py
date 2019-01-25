@@ -29,16 +29,19 @@ long-summary: Certificates can be used as a secrets for provisioned virtual mach
 examples:
 -   name: Create a self-signed certificate with the default policy and add it to a virtual machine.
     text: |
-        az keyvault certificate create --vault-name vaultname -n cert1 \
+        az keyvault certificate create --vault-name vaultname -n cert1 \\
           -p "$(az keyvault certificate get-default-policy)"
 
-        secrets=$(az keyvault secret list-versions --vault-name vaultname \
+        secrets=$(az keyvault secret list-versions --vault-name vaultname \\
           -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
         vm_secrets=$(az vm secret format -s "$secrets")
 
-        az vm create -g group-name -n vm-name --admin-username deploy  \
+        az vm create -g group-name -n vm-name --admin-username deploy  \\
           --image debian --secrets "$vm_secrets"
+-   name: Create a Key Vault certificate.
+    text: az keyvault certificate create --disabled false --policy {policy} --vault-name MyVault --name MyCertificate
+    crafted: true
 """
 
 helps['keyvault certificate download'] = """
@@ -48,11 +51,11 @@ long-summary: The certificate formatted as either PEM or DER. PEM is the default
 examples:
 -   name: Download a certificate as PEM and check its fingerprint in openssl.
     text: |
-        az keyvault certificate download --vault-name vault -n cert-name -f cert.pem && \
+        az keyvault certificate download --vault-name vault -n cert-name -f cert.pem && \\
         openssl x509 -in cert.pem -inform PEM  -noout -sha1 -fingerprint
 -   name: Download a certificate as DER and check its fingerprint in openssl.
     text: |
-        az keyvault certificate download --vault-name vault -n cert-name -f cert.crt -e DER && \
+        az keyvault certificate download --vault-name vault -n cert-name -f cert.crt -e DER && \\
         openssl x509 -in cert.crt -inform DER  -noout -sha1 -fingerprint
 """
 
@@ -67,7 +70,7 @@ long-summary: |
 examples:
 -   name: Create a self-signed certificate with the default policy
     text: |
-        az keyvault certificate create --vault-name vaultname -n cert1 \
+        az keyvault certificate create --vault-name vaultname -n cert1 \\
           -p "$(az keyvault certificate get-default-policy)"
 """
 
@@ -86,12 +89,12 @@ examples:
 
         az keyvault certificate import --vault-name vaultname -n cert_name -f cert_file
 
-        secrets=$(az keyvault secret list-versions --vault-name vaultname \
+        secrets=$(az keyvault secret list-versions --vault-name vaultname \\
           -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
         vm_secrets=$(az vm secret format -s "$secrets")
 
-        az vm create -g group-name -n vm-name --admin-username deploy  \
+        az vm create -g group-name -n vm-name --admin-username deploy  \\
           --image debian --secrets "$vm_secrets"
 """
 
@@ -114,6 +117,10 @@ helps['keyvault create'] = """
 type: command
 short-summary: Create a key vault.
 long-summary: Default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
+examples:
+-   name: Create a key vault.
+    text: az keyvault create --resource-group MyResourceGroup --location westus2 --name MyKeyVault
+    crafted: true
 """
 
 helps['keyvault delete'] = """
@@ -150,6 +157,10 @@ short-summary: Manage secrets.
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a key vault.
+examples:
+-   name: Show details of a key vault.
+    text: az keyvault show --name MyKeyVault
+    crafted: true
 """
 
 helps['keyvault storage'] = """
@@ -165,10 +176,10 @@ examples:
         $id = az storage account create -g resourcegroup -n storageacct --query id
 
         # assign the Azure Key Vault service the "Storage Account Key Operator Service Role" role.
-        az role assignment create --role "Storage Account Key Operator Service Role" --scope $id \
+        az role assignment create --role "Storage Account Key Operator Service Role" --scope $id \\
         --assignee cfa8b339-82a2-471a-a3c9-0fc0be7a4093
 
-        az keyvault storage add --vault-name vault -n storageacct --active-key-name key1    \
+        az keyvault storage add --vault-name vault -n storageacct --active-key-name key1    \\
         --auto-regenerate-key --regeneration-period P90D  --resource-id $id
 """
 
@@ -183,23 +194,21 @@ examples:
 -   name: Add a sas-definition for an account sas-token
     text: |4
 
-        $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw \
-        --resource-types sco --services bfqt --https-only --account-name storageacct     \
+        $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw \\
+        --resource-types sco --services bfqt --https-only --account-name storageacct     \\
         --account-key 00000000
 
-        az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \
+        az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
         -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
 -   name: Add a sas-definition for a blob sas-token
     text: >4
 
-        $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \
-        -c container1 -n blob1 --https-only --permissions rw
+        $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \\ -c container1 -n blob1 --https-only --permissions rw
 
         $url = az storage blob url --account-name storageacct -c container1 -n blob1
 
 
-        az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \
-        -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
+        az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\ -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
 """
 
 helps['keyvault update'] = """

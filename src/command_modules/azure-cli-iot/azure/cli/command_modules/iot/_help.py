@@ -101,8 +101,7 @@ long-summary: This verification code is used to complete the proof of possession
 examples:
 -   name: Generate a verification code for MyCertificate
     text: >
-        az iot dps certificate generate-verification-code --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
-        --etag AAAAAAAAAAA=
+        az iot dps certificate generate-verification-code --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --etag AAAAAAAAAAA=
 """
 
 helps['iot dps certificate list'] = """
@@ -130,12 +129,10 @@ long-summary: Upload a new certificate to replace the existing certificate with 
 examples:
 -   name: Update a CA certificate in an Azure IoT Hub device provisioning service by uploading a new PEM file.
     text: >
-        az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
-        --path /certificates/NewCertificate.pem --etag AAAAAAAAAAA=
+        az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/NewCertificate.pem --etag AAAAAAAAAAA=
 -   name: Update a CA certificate in an Azure IoT Hub device provisioning service by uploading a new CER file.
     text: >
-        az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
-        --path /certificates/NewCertificate.cer --etag AAAAAAAAAAA=
+        az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/NewCertificate.cer --etag AAAAAAAAAAA=
 """
 
 helps['iot dps certificate verify'] = """
@@ -145,8 +142,7 @@ long-summary: Verify a certificate by uploading a verification certificate conta
 examples:
 -   name: Verify ownership of the MyCertificate private key.
     text: >
-        az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
-        --path /certificates/Verification.pem --etag AAAAAAAAAAA=
+        az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Verification.pem --etag AAAAAAAAAAA=
 """
 
 helps['iot dps create'] = """
@@ -182,14 +178,10 @@ short-summary: Create a linked IoT hub in an Azure IoT Hub device provisioning s
 examples:
 -   name: Create a linked IoT hub in an Azure IoT Hub device provisioning service
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string
-        HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=
-        --location westus
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus
 -   name: Create a linked IoT hub in an Azure IoT Hub device provisioning service which applies allocation weight and weight being 10
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string
-        HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=
-        --location westus --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus --allocation-weight 10 --apply-allocation-policy True
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -225,8 +217,7 @@ short-summary: Update a linked IoT hub in an Azure IoT Hub device provisioning s
 examples:
 -   name: Update linked IoT hub 'MyLinkedHub.azure-devices.net' in an Azure IoT Hub device provisioning service
     text: >
-        az iot dps linked-hub update --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub.azure-devices.net
-        --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub update --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub.azure-devices.net --allocation-weight 10 --apply-allocation-policy True
 """
 
 helps['iot dps list'] = """
@@ -299,8 +290,7 @@ long-summary: This verification code is used to complete the proof of possession
 examples:
 -   name: Generates a verification code for MyCertificate
     text: >
-        az iot hub certificate generate-verification-code --hub-name MyIotHub --name MyCertificate --etag
-        AAAAAAAAAAA=
+        az iot hub certificate generate-verification-code --hub-name MyIotHub --name MyCertificate --etag AAAAAAAAAAA=
 """
 
 helps['iot hub certificate list'] = """
@@ -330,12 +320,10 @@ long-summary: Uploads a new certificate to replace the existing certificate with
 examples:
 -   name: Updates a CA certificate in an IoT hub by uploading a new PEM file.
     text: >
-        az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path /certificates/NewCertificate.pem --etag
-        AAAAAAAAAAA=
+        az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path /certificates/NewCertificate.pem --etag AAAAAAAAAAA=
 -   name: Updates a CA certificate in an IoT hub by uploading a new CER file.
     text: >
-        az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path /certificates/NewCertificate.cer --etag
-        AAAAAAAAAAA=
+        az iot hub certificate update --hub-name MyIotHub --name MyCertificate --path /certificates/NewCertificate.cer --etag AAAAAAAAAAA=
 """
 
 helps['iot hub certificate verify'] = """
@@ -345,8 +333,7 @@ long-summary: Verifies a certificate by uploading a verification certificate con
 examples:
 -   name: Verifies ownership of the MyCertificate private key.
     text: >
-        az iot hub certificate verify --hub-name MyIotHub --name MyCertificate --path /certificates/Verification.pem --etag
-        AAAAAAAAAAA=
+        az iot hub certificate verify --hub-name MyIotHub --name MyCertificate --path /certificates/Verification.pem --etag AAAAAAAAAAA=
 """
 
 helps['iot hub consumer-group'] = """
@@ -391,8 +378,7 @@ examples:
         az iot hub create --resource-group MyResourceGroup --name MyIotHub
 -   name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region.
     text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1 --location westus
-        --partition-count 4
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1 --location westus --partition-count 4
 """
 
 helps['iot hub delete'] = """
@@ -445,6 +431,9 @@ examples:
 -   name: List all IoT hubs in the resource group 'MyGroup'
     text: >
         az iot hub list --resource-group MyGroup
+-   name: List IoT hubs.
+    text: az iot hub list --resource-group MyGroup
+    crafted: true
 """
 
 helps['iot hub list-skus'] = """
@@ -479,6 +468,10 @@ short-summary: List shared access policies of an IoT hub.
 helps['iot hub policy show'] = """
 type: command
 short-summary: Get the details of a shared access policy of an IoT hub.
+examples:
+-   name: Get the details of a shared access policy of an IoT hub.
+    text: az iot hub policy show --query [0] --hub-name MyHub --name MySharedAccessPolicy
+    crafted: true
 """
 
 helps['iot hub route'] = """
@@ -493,13 +486,10 @@ long-summary: Create a route to send specific data source and condition to a des
 examples:
 -   name: Create a new route "R1".
     text: >
-        az iot hub route create -g MyResourceGroup --hub-name MyIotHub
-        --endpoint-name E2 --source-type DeviceMessages --route-name R1
+        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source-type DeviceMessages --route-name R1
 -   name: Create a new route "R1" with all parameters.
     text: >
-        az iot hub route create -g MyResourceGroup --hub-name MyIotHub
-        --endpoint-name E2 --source-type DeviceMessages --route-name R1
-        --condition true --enabled true
+        az iot hub route create -g MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --source-type DeviceMessages --route-name R1 --condition true --enabled true
 """
 
 helps['iot hub route delete'] = """
@@ -561,8 +551,7 @@ long-summary: Updates a route in IoT Hub. You can change the source, enpoint or 
 examples:
 -   name: Update source type of route "R1" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub route update -g MyResourceGroup --hub-name MyIotHub
-        --source-type DeviceMessages --route-name R1
+        az iot hub route update -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages --route-name R1
 """
 
 helps['iot hub routing-endpoint'] = """
@@ -577,14 +566,12 @@ long-summary: Create a new custom endpoint in your IoT Hub.
 examples:
 -   name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
     text: >
-        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
-        --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup}
-        --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
+        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
 -   name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
     text: |
-        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \
-        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \
-        --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \
+        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
+        --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
+        --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
         --container-name {ContainerName}
 """
 
@@ -595,12 +582,10 @@ long-summary: Delete an endpoint for your IoT Hub. We recommend that you delete 
 examples:
 -   name: Delete endpoint "E2" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-        --endpoint-name E2
+        az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name E2
 -   name: Delete all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
-        --endpoint-type eventhub
+        az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-type eventhub
 -   name: Delete all the endpoints from "MyIotHub" IoT Hub.
     text: >
         az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
@@ -616,8 +601,7 @@ examples:
         az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
 -   name: Get all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
     text: >
-        az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
-        --endpoint-type eventhub
+        az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub --endpoint-type eventhub
 """
 
 helps['iot hub routing-endpoint show'] = """
@@ -627,13 +611,17 @@ long-summary: Get information on a specific endpoint in your IoT Hub
 examples:
 -   name: Get an endpoint information from "MyIotHub" IoT Hub.
     text: |
-        az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub \
+        az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub \\
         --endpoint-name {endpointName}
 """
 
 helps['iot hub show'] = """
 type: command
 short-summary: Get the details of an IoT hub.
+examples:
+-   name: Get the details of an IoT hub.
+    text: az iot hub show --query [0] --name MyIoTHub
+    crafted: true
 """
 
 helps['iot hub show-connection-string'] = """
@@ -652,11 +640,18 @@ examples:
 -   name: Show the connection strings for all IoT hubs in a subscription.
     text: >
         az iot hub show-connection-string
+-   name: Show the connection strings for an IoT hub.
+    text: az iot hub show-connection-string --key secondary --policy-name service
+    crafted: true
 """
 
 helps['iot hub show-quota-metrics'] = """
 type: command
 short-summary: Get the quota metrics for an IoT hub.
+examples:
+-   name: Get the quota metrics for an IoT hub.
+    text: az iot hub show-quota-metrics --query [0]
+    crafted: true
 """
 
 helps['iot hub show-stats'] = """
@@ -671,4 +666,7 @@ examples:
 -   name: Add a firewall filter rule to accept traffic from the IP mask 127.0.0.0/31.
     text: >
         az iot hub update --name MyIotHub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31
+-   name: Update metadata for an IoT hub.
+    text: az iot hub update --set {set} --name MyIotHub
+    crafted: true
 """

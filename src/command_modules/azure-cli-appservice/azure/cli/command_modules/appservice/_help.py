@@ -31,8 +31,11 @@ examples:
         az appservice plan create -g MyResourceGroup -n MyPlan
 -   name: Create a standard app service plan with with four Linux workers.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan \
+        az appservice plan create -g MyResourceGroup -n MyPlan \\
             --is-linux --number-of-workers 4 --sku S1
+-   name: Create an app service plan.
+    text: az appservice plan create --name MyPlan --sku B1 --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['appservice plan delete'] = """
@@ -47,16 +50,27 @@ examples:
 -   name: List all free tier App Service plans.
     text: >
         az appservice plan list --query "[?sku.tier=='Free']"
+-   name: List app service plans.
+    text: az appservice plan list --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['appservice plan show'] = """
 type: command
 short-summary: Get the app service plans for a resource group or a set of resource groups.
+examples:
+-   name: Get the app service plans for a resource group or a set of resource groups.
+    text: az appservice plan show --output json --resource-group MyResourceGroup --name MyAppServicePlan
+    crafted: true
 """
 
 helps['appservice plan update'] = """
 type: command
 short-summary: Update an app service plan.
+examples:
+-   name: Update an app service plan.
+    text: az appservice plan update --resource-group MyResourceGroup --sku B1 --name MyAppServicePlan
+    crafted: true
 """
 
 helps['functionapp'] = """
@@ -82,11 +96,19 @@ short-summary: Delete a function app's settings.
 helps['functionapp config appsettings list'] = """
 type: command
 short-summary: Show settings for a function app.
+examples:
+-   name: Show settings for a function app.
+    text: az functionapp config appsettings list --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['functionapp config appsettings set'] = """
 type: command
 short-summary: Update a function app's settings.
+examples:
+-   name: Update a function app's settings.
+    text: az functionapp config appsettings set --settings {settings} --resource-group MyResourceGroup --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp config hostname'] = """
@@ -132,6 +154,10 @@ short-summary: Configure SSL certificates.
 helps['functionapp config ssl bind'] = """
 type: command
 short-summary: Bind an SSL certificate to a function app.
+examples:
+-   name: Bind an SSL certificate to a function app.
+    text: az functionapp config ssl bind --ssl-type IP --resource-group MyResourceGroup --certificate-thumbprint {certificate-thumbprint} --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp config ssl delete'] = """
@@ -152,6 +178,10 @@ short-summary: Unbind an SSL certificate from a function app.
 helps['functionapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a function app.
+examples:
+-   name: Upload an SSL certificate to a function app.
+    text: az functionapp config ssl upload --certificate-password {certificate-password} --query [0] --certificate-file {certificate-file} --resource-group MyResourceGroup --output json --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp cors'] = """
@@ -165,7 +195,10 @@ short-summary: Add allowed origins
 examples:
 -   name: add a new allowed origin
     text: >
-        az functionapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+        az functionapp cors add -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
+-   name: Add allowed origins.
+    text: az functionapp cors add --resource-group {myRG} --allowed-origins https://myapps.com --name {myAppName}
+    crafted: true
 """
 
 helps['functionapp cors remove'] = """
@@ -174,10 +207,13 @@ short-summary: Remove allowed origins
 examples:
 -   name: remove an allowed origin
     text: >
-        az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+        az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
 -   name: remove all allowed origins
     text: >
-        az functionapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
+        az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+-   name: Remove allowed origins.
+    text: az functionapp cors remove --resource-group {myRG} --allowed-origins https://myapps.com --name {myAppName}
+    crafted: true
 """
 
 helps['functionapp cors show'] = """
@@ -193,11 +229,18 @@ examples:
 -   name: Create a basic function app.
     text: >
         az functionapp create -g MyResourceGroup  -p MyPlan -n MyUniqueAppName -s MyStorageAccount
+-   name: Create a function app.
+    text: az functionapp create --consumption-plan-location {consumption-plan-location} --storage-account MyStorageAccount --resource-group MyResourceGroup  --name MyUniqueAppName
+    crafted: true
 """
 
 helps['functionapp delete'] = """
 type: command
 short-summary: Delete a function app.
+examples:
+-   name: Delete a function app.
+    text: az functionapp delete --resource-group MyResourceGroup --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp deployment'] = """
@@ -226,11 +269,11 @@ short-summary: Get a URL for a git repository endpoint to clone and push to for 
 examples:
 -   name: Get an endpoint and add it as a git remote.
     text: >
-        az functionapp deployment source config-local-git \
+        az functionapp deployment source config-local-git \\
             -g MyResourceGroup -n MyUniqueApp
 
-        git remote add azure \
-            https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
+        git remote add azure \\
+            https://{deploy_user_name}@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
 """
 
 helps['functionapp deployment source config-zip'] = """
@@ -246,9 +289,12 @@ long-summary: >
 examples:
 -   name: Perform deployment by using zip file content.
     text: >
-        az functionapp deployment source config-zip \
-            -g {myRG>} -n {myAppName} \
+        az functionapp deployment source config-zip \\
+            -g {myRG}} -n {myAppName} \\
             --src {zipFilePathLocation}
+-   name: Perform deployment using the kudu zip push deployment for a function app.
+    text: az functionapp deployment source config-zip --src {src} --name MyFunctionApp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp deployment source delete'] = """
@@ -264,6 +310,10 @@ short-summary: Get the details of a source control deployment configuration.
 helps['functionapp deployment source sync'] = """
 type: command
 short-summary: Synchronize from the repository. Only needed under manual integration mode.
+examples:
+-   name: Synchronize from the repository. Only needed under manual integration mode.
+    text: az functionapp deployment source sync --resource-group MyResourceGroup --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp deployment user'] = """
@@ -278,8 +328,7 @@ long-summary: All function and web apps in the subscription will be impacted sin
 examples:
 -   name: Set FTP and git deployment credentials for all apps.
     text: >
-        az functionapp deployment user set
-        --user-name MyUserName
+        az functionapp deployment user set --user-name MyUserName
 """
 
 helps['functionapp identity'] = """
@@ -307,6 +356,10 @@ short-summary: Disable functionapp's managed service identity
 helps['functionapp identity show'] = """
 type: command
 short-summary: display functionapp's managed service identity
+examples:
+-   name: Display functionapp's managed service identity.
+    text: az functionapp identity show --output json --resource-group MyResourceGroup --query [0] --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp list'] = """
@@ -319,6 +372,9 @@ examples:
 -   name: List all running function apps.
     text: >
         az functionapp list --query "[?state=='Running']"
+-   name: List function apps.
+    text: az functionapp list --output json
+    crafted: true
 """
 
 helps['functionapp list-consumption-locations'] = """
@@ -329,21 +385,37 @@ short-summary: List available locations for running function apps.
 helps['functionapp restart'] = """
 type: command
 short-summary: Restart a function app.
+examples:
+-   name: Restart a function app.
+    text: az functionapp restart --resource-group MyResourceGroup --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp show'] = """
 type: command
 short-summary: Get the details of a function app.
+examples:
+-   name: Get the details of a function app.
+    text: az functionapp show --name MyFunctionApp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp start'] = """
 type: command
 short-summary: Start a function app.
+examples:
+-   name: Start a function app.
+    text: az functionapp start --resource-group MyResourceGroup --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp stop'] = """
 type: command
 short-summary: Stop a function app.
+examples:
+-   name: Stop a function app.
+    text: az functionapp stop --resource-group MyResourceGroup --name MyFunctionApp
+    crafted: true
 """
 
 helps['functionapp update'] = """
@@ -372,15 +444,15 @@ short-summary: Update the authentication settings for the webapp.
 examples:
 -   name: Enable AAD by enabling authentication and setting AAD-associated parameters. Default provider is set to AAD. Must have created a AAD service principal beforehand.
     text: >
-        az webapp auth update  -g myResourceGroup -n myUniqueApp --enabled true \
-          --action LoginWithAzureActiveDirectory \
-          --aad-allowed-token-audiences https://webapp_name.azurewebsites.net/.auth/login/aad/callback \
-          --aad-client-id ecbacb08-df8b-450d-82b3-3fced03f2b27 --aad-client-secret very_secret_password \
+        az webapp auth update  -g myResourceGroup -n myUniqueApp --enabled true \\
+          --action LoginWithAzureActiveDirectory \\
+          --aad-allowed-token-audiences https://webapp_name.azurewebsites.net/.auth/login/aad/callback \\
+          --aad-client-id ecbacb08-df8b-450d-82b3-3fced03f2b27 --aad-client-secret very_secret_password \\
           --aad-token-issuer-url https://sts.windows.net/54826b22-38d6-4fb2-bad9-b7983a3e9c5a/
 -   name: Allow Facebook authentication by setting FB-associated parameters and turning on public-profile and email scopes; allow anonymous users
     text: >
-        az webapp auth update -g myResourceGroup -n myUniqueApp --action AllowAnonymous \
-          --facebook-app-id my_fb_id --facebook-app-secret my_fb_secret \
+        az webapp auth update -g myResourceGroup -n myUniqueApp --action AllowAnonymous \\
+          --facebook-app-id my_fb_id --facebook-app-secret my_fb_secret \\
           --facebook-oauth-scopes public_profile email
 """
 
@@ -402,11 +474,19 @@ short-summary: Configure web app settings.
 helps['webapp config appsettings delete'] = """
 type: command
 short-summary: Delete web app settings.
+examples:
+-   name: Delete web app settings.
+    text: az webapp config appsettings delete --name MyWebapp --setting-names {setting-names} --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config appsettings list'] = """
 type: command
 short-summary: Get the details of a web app's settings.
+examples:
+-   name: Get the details of a web app's settings.
+    text: az webapp config appsettings list --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config appsettings set'] = """
@@ -416,6 +496,9 @@ examples:
 -   name: Set the default NodeJS version to 6.9.1 for a web app.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
+-   name: Set a web app's settings.
+    text: az webapp config appsettings set --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1 --name MyUniqueApp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config backup'] = """
@@ -461,6 +544,10 @@ short-summary: Delete a web app's connection strings.
 helps['webapp config connection-string list'] = """
 type: command
 short-summary: Get a web app's connection strings.
+examples:
+-   name: Get a web app's connection strings.
+    text: az webapp config connection-string list --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config connection-string set'] = """
@@ -469,8 +556,11 @@ short-summary: Update a web app's connection strings.
 examples:
 -   name: Add a mysql connection string.
     text: >
-        az webapp config connection-string set -g MyResourceGroup -n MyUniqueApp -t mysql \
+        az webapp config connection-string set -g MyResourceGroup -n MyUniqueApp -t mysql \\
             --settings mysql1='Server=myServer;Database=myDB;Uid=myUser;Pwd=myPwd;'
+-   name: Update a web app's connection strings.
+    text: az webapp config connection-string set --settings {settings} --connection-string-type ApiHub --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config container'] = """
@@ -486,6 +576,10 @@ short-summary: Delete a web app container's settings.
 helps['webapp config container set'] = """
 type: command
 short-summary: Set a web app container's settings.
+examples:
+-   name: Set a web app container's settings.
+    text: az webapp config container set --docker-registry-server-password {docker-registry-server-password} --docker-custom-image-name MyDockerCustomImage --resource-group MyResourceGroup --docker-registry-server-url {docker-registry-server-url} --name MyWebapp --docker-registry-server-user {docker-registry-server-user}
+    crafted: true
 """
 
 helps['webapp config container show'] = """
@@ -501,6 +595,10 @@ short-summary: Configure hostnames for a web app.
 helps['webapp config hostname add'] = """
 type: command
 short-summary: Bind a hostname to a web app.
+examples:
+-   name: Bind a hostname to a web app.
+    text: az webapp config hostname add --webapp-name MyWebapp --hostname {hostname} --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config hostname delete'] = """
@@ -516,16 +614,28 @@ short-summary: Get the external-facing IP address for a web app.
 helps['webapp config hostname list'] = """
 type: command
 short-summary: List all hostname bindings for a web app.
+examples:
+-   name: List all hostname bindings for a web app.
+    text: az webapp config hostname list --webapp-name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config set'] = """
 type: command
 short-summary: Set a web app's configuration.
+examples:
+-   name: Set a web app's configuration.
+    text: az webapp config set --always-on false --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp config show'] = """
 type: command
 short-summary: Get the details of a web app's configuration.
+examples:
+-   name: Get the details of a web app's configuration.
+    text: az webapp config show --output json --name MyWebapp --query [0] --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config snapshot'] = """
@@ -558,11 +668,19 @@ short-summary: Configure SSL certificates for web apps.
 helps['webapp config ssl bind'] = """
 type: command
 short-summary: Bind an SSL certificate to a web app.
+examples:
+-   name: Bind an SSL certificate to a web app.
+    text: az webapp config ssl bind --ssl-type IP --resource-group MyResourceGroup --certificate-thumbprint {certificate-thumbprint} --name MyWebapp
+    crafted: true
 """
 
 helps['webapp config ssl delete'] = """
 type: command
 short-summary: Delete an SSL certificate from a web app.
+examples:
+-   name: Delete an SSL certificate from a web app.
+    text: az webapp config ssl delete --certificate-thumbprint {certificate-thumbprint} --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config ssl list'] = """
@@ -578,6 +696,10 @@ short-summary: Unbind an SSL certificate from a web app.
 helps['webapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a web app.
+examples:
+-   name: Upload an SSL certificate to a web app.
+    text: az webapp config ssl upload --certificate-password {certificate-password} --query [0] --certificate-file {certificate-file} --resource-group MyResourceGroup --output json --name MyWebapp
+    crafted: true
 """
 
 helps['webapp config storage-account'] = """
@@ -591,12 +713,12 @@ short-summary: Add an Azure storage account configuration to a web app. (Linux W
 examples:
 -   name: Add a connection to the Azure Files file share called MyShare in the storage account named MyStorageAccount.
     text: >
-        az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \
-          --custom-id CustomId \
-          --storage-type AzureFiles \
-          --account-name MyStorageAccount \
-          --share-name MyShare \
-          --access-key MyAccessKey \
+        az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --storage-type AzureFiles \\
+          --account-name MyStorageAccount \\
+          --share-name MyShare \\
+          --access-key MyAccessKey \\
           --mount-path /path/to/mount
 """
 
@@ -616,8 +738,8 @@ short-summary: Update an existing Azure storage account configuration on a web a
 examples:
 -   name: Update the mount path for a connection to the Azure Files file share with the ID MyId.
     text: >
-        az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \
-          --custom-id CustomId \
+        az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
           --mount-path /path/to/new/mount
 """
 
@@ -632,7 +754,10 @@ short-summary: Add allowed origins
 examples:
 -   name: add a new allowed origin
     text: >
-        az webapp cors add -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+        az webapp cors add -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
+-   name: Add allowed origins.
+    text: az webapp cors add --name {myAppName} --allowed-origins https://myapps.com --resource-group {myRG}
+    crafted: true
 """
 
 helps['webapp cors remove'] = """
@@ -641,10 +766,13 @@ short-summary: Remove allowed origins
 examples:
 -   name: remove an allowed origin
     text: >
-        az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins https://myapps.com
+        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
 -   name: remove all allowed origins
     text: >
-        az webapp cors remove -g <myRG> -n <myAppName> --allowed-origins *
+        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+-   name: Remove allowed origins.
+    text: az webapp cors remove --name {myAppName} --allowed-origins https://myapps.com --resource-group {myRG}
+    crafted: true
 """
 
 helps['webapp cors show'] = """
@@ -663,11 +791,18 @@ examples:
 -   name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+-   name: Create a web app.
+    text: az webapp create --resource-group MyResourceGroup --plan MyPlan --name MyUniqueAppName
+    crafted: true
 """
 
 helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.
+examples:
+-   name: Delete a web app.
+    text: az webapp delete --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp deleted'] = """
@@ -706,6 +841,10 @@ short-summary: Manage container-based continuous deployment.
 helps['webapp deployment container config'] = """
 type: command
 short-summary: Configure continuous deployment via containers.
+examples:
+-   name: Configure continuous deployment via containers.
+    text: az webapp deployment container config --enable-cd false --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp deployment container show-cd-url'] = """
@@ -716,6 +855,10 @@ short-summary: Get the URL which can be used to configure webhooks for continuou
 helps['webapp deployment list-publishing-profiles'] = """
 type: command
 short-summary: Get the details for available web app deployment profiles.
+examples:
+-   name: Get the details for available web app deployment profiles.
+    text: az webapp deployment list-publishing-profiles --output json --resource-group MyResourceGroup --query [0] --name MyWebapp
+    crafted: true
 """
 
 helps['webapp deployment slot'] = """
@@ -731,6 +874,10 @@ short-summary: Configure deployment slot auto swap.
 helps['webapp deployment slot create'] = """
 type: command
 short-summary: Create a deployment slot.
+examples:
+-   name: Create a deployment slot.
+    text: az webapp deployment slot create --slot {slot} --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp deployment slot delete'] = """
@@ -741,6 +888,10 @@ short-summary: Delete a deployment slot.
 helps['webapp deployment slot list'] = """
 type: command
 short-summary: List all deployment slots.
+examples:
+-   name: List all deployment slots.
+    text: az webapp deployment slot list --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp deployment slot swap'] = """
@@ -749,8 +900,11 @@ short-summary: Change deployment slots for a web app.
 examples:
 -   name: Swap a staging slot into production for the MyUniqueApp web app.
     text: >
-        az webapp deployment slot swap  -g MyResourceGroup -n MyUniqueApp --slot staging \
+        az webapp deployment slot swap  -g MyResourceGroup -n MyUniqueApp --slot staging \\
             --target-slot production
+-   name: Change deployment slots for a web app.
+    text: az webapp deployment slot swap --target-slot {target-slot} --slot {slot} --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp deployment source'] = """
@@ -769,11 +923,14 @@ short-summary: Get a URL for a git repository endpoint to clone and push to for 
 examples:
 -   name: Get an endpoint and add it as a git remote.
     text: >
-        az webapp deployment source config-local-git \
+        az webapp deployment source config-local-git \\
             -g MyResourceGroup -n MyUniqueApp
 
-        git remote add azure \
-            https://<deploy_user_name>@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
+        git remote add azure \\
+            https://{deploy_user_name}@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git
+-   name: Get a URL for a git repository endpoint to clone and push to for web app deployment.
+    text: az webapp deployment source config-local-git --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp deployment source config-zip'] = """
@@ -789,9 +946,12 @@ long-summary: >
 examples:
 -   name: Perform deployment by using zip file content.
     text: >
-        az webapp deployment source config-zip \
-            -g {myRG} -n {myAppName} \
+        az webapp deployment source config-zip \\
+            -g {myRG} -n {myAppName} \\
             --src {zipFilePathLocation}
+-   name: Perform deployment using the kudu zip push deployment for a webapp.
+    text: az webapp deployment source config-zip --src {src} --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp deployment source delete'] = """
@@ -822,6 +982,9 @@ examples:
 -   name: Set FTP and git deployment credentials for all apps.
     text: >
         az webapp deployment user set --user-name MyUserName
+-   name: Update deployment credentials.
+    text: az webapp deployment user set --user-name MyUserName --password {password}
+    crafted: true
 """
 
 helps['webapp identity'] = """
@@ -839,6 +1002,9 @@ examples:
 -   name: enable identity for the webapp.
     text: >
         az webapp identity assign -g MyResourceGroup -n MyUniqueApp
+-   name: Assign or disable managed service identity to the webapp.
+    text: az webapp identity assign --resource-group MyResourceGroup --name MyUniqueApp
+    crafted: true
 """
 
 helps['webapp identity remove'] = """
@@ -849,6 +1015,10 @@ short-summary: Disable webapp's managed service identity
 helps['webapp identity show'] = """
 type: command
 short-summary: display webapp's managed service identity
+examples:
+-   name: Display webapp's managed service identity.
+    text: az webapp identity show --output json --name MyWebapp --query [0] --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp list'] = """
@@ -876,12 +1046,20 @@ short-summary: Manage web app logs.
 helps['webapp log config'] = """
 type: command
 short-summary: Configure logging for a web app.
+examples:
+-   name: Configure logging for a web app.
+    text: az webapp log config --web-server-logging filesystem --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp log download'] = """
 type: command
 short-summary: Download a web app's log history as a zip file.
 long-summary: This command may not work with web apps running on Linux.
+examples:
+-   name: Download a web app's log history as a zip file.
+    text: az webapp log download --slot {slot} --resource-group MyResourceGroup --log-file {log-file} --name MyWebapp
+    crafted: true
 """
 
 helps['webapp log show'] = """
@@ -893,16 +1071,28 @@ helps['webapp log tail'] = """
 type: command
 short-summary: Start live log tracing for a web app.
 long-summary: This command may not work with web apps running on Linux.
+examples:
+-   name: Start live log tracing for a web app.
+    text: az webapp log tail --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp restart'] = """
 type: command
 short-summary: Restart a web app.
+examples:
+-   name: Restart a web app.
+    text: az webapp restart --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp show'] = """
 type: command
 short-summary: Get the details of a web app.
+examples:
+-   name: Get the details of a web app.
+    text: az webapp show --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp ssh'] = """
@@ -917,11 +1107,19 @@ examples:
 helps['webapp start'] = """
 type: command
 short-summary: Start a web app.
+examples:
+-   name: Start a web app.
+    text: az webapp start --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp stop'] = """
 type: command
 short-summary: Stop a web app.
+examples:
+-   name: Stop a web app.
+    text: az webapp stop --name MyWebapp --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp traffic-routing'] = """
@@ -960,6 +1158,9 @@ examples:
 -   name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
+-   name: Experimental command to create and deploy a web app. Current supports includes Node, Python on Linux & .NET Core, ASP.NET, staticHtml on Windows.
+    text: az webapp up --name MyWebapp
+    crafted: true
 """
 
 helps['webapp update'] = """
@@ -969,6 +1170,9 @@ examples:
 -   name: Update the tags of a web app.
     text: >
         az webapp update -g MyResourceGroup -n MyAppName --set tags.tagName=tagValue
+-   name: Update a web app.
+    text: az webapp update --https-only false --name MyAppName --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp webjob'] = """
@@ -984,6 +1188,10 @@ short-summary: Allows management operations of continuous webjobs on a webapp.
 helps['webapp webjob continuous list'] = """
 type: command
 short-summary: List all continuous webjobs on a selected webapp.
+examples:
+-   name: List all continuous webjobs on a selected webapp.
+    text: az webapp webjob continuous list --resource-group MyResourceGroup --name MyWebapp
+    crafted: true
 """
 
 helps['webapp webjob continuous remove'] = """

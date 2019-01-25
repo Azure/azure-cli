@@ -31,6 +31,9 @@ examples:
 -   name: Queue a remote GitHub context as a Windows build, tag it, and push it to the registry.
     text: >
         az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --os Windows
+-   name: Queues a quick build, providing streamed logs for an Azure Container Registry.
+    text: az acr build --registry MyRegistry . --image sample/hello-world:{{.Run.ID}}
+    crafted: true
 """
 
 helps['acr build-task'] = """
@@ -159,6 +162,9 @@ examples:
 -   name: Check if a registry name already exists.
     text: >
         az acr check-name -n doesthisnameexist
+-   name: Checks if an Azure Container Registry name is valid and available for use.
+    text: az acr check-name --name doesthisnameexist
+    crafted: true
 """
 
 helps['acr config'] = """
@@ -199,6 +205,9 @@ examples:
 -   name: Create an Azure Container Registry with a new storage account with the Classic SKU (Classic registries are being deprecated by March 2019).
     text: >
         az acr create -n MyRegistry -g MyResourceGroup --sku Classic
+-   name: Creates an Azure Container Registry.
+    text: az acr create --name MyRegistry --sku Standard --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['acr credential'] = """
@@ -228,6 +237,9 @@ examples:
 -   name: Get a password used to log in to an Azure Container Registry.
     text: >
         az acr credential show -n MyRegistry --query passwords[0].value
+-   name: Get the login credentials for an Azure Container Registry.
+    text: az acr credential show --name MyRegistry
+    crafted: true
 """
 
 helps['acr delete'] = """
@@ -317,6 +329,9 @@ examples:
 -   name: Import an image from a public repository in Docker Hub
     text: >
         az acr import -n MyRegistry --source docker.io/sourcerepository:sourcetag -t targetrepository:targettag
+-   name: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
+    text: az acr import --source sourceregistry.azurecr.io/sourcerepository:sourcetag --name MyRegistry
+    crafted: true
 """
 
 helps['acr list'] = """
@@ -329,6 +344,9 @@ examples:
 -   name: List container registries in a resource group and show the results in a table.
     text: >
         az acr list -g MyResourceGroup -o table
+-   name: Lists all the container registries under the current subscription.
+    text: az acr list --output json --query [0] --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['acr login'] = """
@@ -339,6 +357,9 @@ examples:
 -   name: Log in to an Azure Container Registry
     text: >
         az acr login -n MyRegistry
+-   name: Log in to an Azure Container Registry through the Docker CLI.
+    text: az acr login --name MyRegistry
+    crafted: true
 """
 
 helps['acr network-rule'] = """
@@ -451,6 +472,9 @@ examples:
     text: az acr repository delete -n MyRegistry --image hello-world:latest
 -   name: Delete an image by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
     text: az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
+-   name: Delete a repository or image in an Azure Container Registry.
+    text: az acr repository delete --yes  --image hello-world:latest --name MyRegistry
+    crafted: true
 """
 
 helps['acr repository list'] = """
@@ -459,6 +483,9 @@ short-summary: List repositories in an Azure Container Registry.
 examples:
 -   name: List repositories in a given Azure Container Registry.
     text: az acr repository list -n MyRegistry
+-   name: List repositories in an Azure Container Registry.
+    text: az acr repository list --output json --name MyRegistry
+    crafted: true
 """
 
 helps['acr repository show'] = """
@@ -471,6 +498,9 @@ examples:
     text: az acr repository show -n MyRegistry --image hello-world:latest
 -   name: Get the attributes of the image referenced by digest 'hello-world@sha256:abc123'.
     text: az acr repository show -n MyRegistry --image hello-world@sha256:abc123
+-   name: Get the attributes of a repository or image in an Azure Container Registry.
+    text: az acr repository show --image hello-world:latest --name MyRegistry
+    crafted: true
 """
 
 helps['acr repository show-manifests'] = """
@@ -483,6 +513,9 @@ examples:
     text: az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc
 -   name: Show the detailed information of the latest 10 manifests ordered by timestamp of a repository in an Azure Container Registry.
     text: az acr repository show-manifests -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
+-   name: Show manifests of a repository in an Azure Container Registry.
+    text: az acr repository show-manifests --repository MyRepository --name MyRegistry
+    crafted: true
 """
 
 helps['acr repository show-tags'] = """
@@ -495,6 +528,9 @@ examples:
     text: az acr repository show-tags -n MyRegistry --repository MyRepository --detail
 -   name: Show the detailed information of the latest 10 tags ordered by timestamp of a repository in an Azure Container Registry.
     text: az acr repository show-tags -n MyRegistry --repository MyRepository --top 10 --orderby time_desc --detail
+-   name: Show tags for a repository in an Azure Container Registry.
+    text: az acr repository show-tags --output json --repository MyRepository --name MyRegistry
+    crafted: true
 """
 
 helps['acr repository untag'] = """
@@ -504,6 +540,9 @@ long-summary: This command does not delete the manifest referenced by the tag or
 examples:
 -   name: Untag an image from a repository.
     text: az acr repository untag -n MyRegistry --image hello-world:latest
+-   name: Untag an image in an Azure Container Registry.
+    text: az acr repository untag --image hello-world:latest --name MyRegistry
+    crafted: true
 """
 
 helps['acr repository update'] = """
@@ -537,6 +576,9 @@ examples:
 -   name: Get the login server for an Azure Container Registry.
     text: >
         az acr show -n MyRegistry --query loginServer
+-   name: Get the details of an Azure Container Registry.
+    text: az acr show --output json --query [0] --name MyRegistry
+    crafted: true
 """
 
 helps['acr show-usage'] = """
@@ -614,6 +656,9 @@ examples:
 -   name: List all of the runs that built the image 'hello-world' for a registry and show the results in a table.
     text: >
         az acr task list-runs -r MyRegistry --image hello-world -o table
+-   name: List all of the executed runs for an Azure Container Registry, with the ability to filter by a specific Task.
+    text: az acr task list-runs --registry MyRegistry --output json
+    crafted: true
 """
 
 helps['acr task logs'] = """
@@ -641,6 +686,9 @@ examples:
 -   name: Trigger a task.
     text: >
         az acr task run -n MyTask -r MyRegistry
+-   name: Manually trigger a task that might otherwise be waiting for git commits or base image update triggers.
+    text: az acr task run --registry MyRegistry --name MyTask
+    crafted: true
 """
 
 helps['acr task show'] = """
@@ -696,6 +744,9 @@ examples:
 -   name: Enable the administrator user account for an Azure Container Registry.
     text: >
         az acr update -n MyRegistry --admin-enabled true
+-   name: Update an Azure Container Registry.
+    text: az acr update --admin-enabled true --name MyRegistry
+    crafted: true
 """
 
 helps['acr webhook'] = """
@@ -786,4 +837,3 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
-

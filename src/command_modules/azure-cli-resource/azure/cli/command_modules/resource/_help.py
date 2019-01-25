@@ -226,15 +226,18 @@ examples:
         az deployment create --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
 -   name: Create a deployment from a local template file, using parameters from a JSON string.
     text: |
-        az deployment create --location WestUS --template-file azuredeploy.json --parameters '{ \
-                "policyName": { \
-                    "value": "policy2" \
-                } \
+        az deployment create --location WestUS --template-file azuredeploy.json --parameters '{ \\
+                "policyName": { \\
+                    "value": "policy2" \\
+                } \\
             }'
 -   name: Create a deployment from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az deployment create --location WestUS --template-file azuredeploy.json  \
+        az deployment create --location WestUS --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+-   name: Start a deployment.
+    text: az deployment create --template-file {template-file} --location WestUS
+    crafted: true
 """
 
 helps['deployment export'] = """
@@ -271,11 +274,19 @@ short-summary: Manage resource provider features.
 helps['feature list'] = """
 type: command
 short-summary: List preview features.
+examples:
+-   name: List preview features.
+    text: az feature list --namespace {namespace}
+    crafted: true
 """
 
 helps['feature register'] = """
 type: command
 short-summary: register a preview feature.
+examples:
+-   name: Register a preview feature.
+    text: az feature register --namespace {namespace} --name MyFeature
+    crafted: true
 """
 
 helps['group'] = """
@@ -290,6 +301,9 @@ examples:
 -   name: Create a new resource group in the West US region.
     text: >
         az group create -l westus -n MyResourceGroup
+-   name: Create a new resource group.
+    text: az group create --location westus --name MyResourceGroup
+    crafted: true
 """
 
 helps['group delete'] = """
@@ -299,6 +313,9 @@ examples:
 -   name: Delete a resource group.
     text: >
         az group delete -n MyResourceGroup
+-   name: Delete a resource group.
+    text: az group delete --no-wait  --yes  --name MyResourceGroup
+    crafted: true
 """
 
 helps['group deployment'] = """
@@ -321,15 +338,18 @@ examples:
         az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
 -   name: Create a deployment from a local template file, using parameters from a JSON string.
     text: |
-        az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{ \
-                "location": { \
-                    "value": "westus" \
-                } \
+        az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{ \\
+                "location": { \\
+                    "value": "westus" \\
+                } \\
             }'
 -   name: Create a deployment from a local template, using a local parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az group deployment create -g MyResourceGroup --template-file azuredeploy.json \
+        az group deployment create -g MyResourceGroup --template-file azuredeploy.json \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+-   name: Start a deployment.
+    text: az group deployment create --template-file {template-file} --parameters @myparameters.json --resource-group MyResourceGroup --name MyDeployment
+    crafted: true
 """
 
 helps['group deployment export'] = """
@@ -351,6 +371,10 @@ parameters:
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+examples:
+-   name: Validate whether a template is syntactically correct.
+    text: az group deployment validate --template-file {template-file} --parameters {parameters} --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['group deployment wait'] = """
@@ -365,6 +389,9 @@ examples:
 -   name: Check if 'MyResourceGroup' exists.
     text: >
         az group exists -n MyResourceGroup
+-   name: Check if a resource group exists.
+    text: az group exists --name MyResourceGroup
+    crafted: true
 """
 
 helps['group list'] = """
@@ -429,6 +456,10 @@ examples:
 helps['group update'] = """
 type: command
 short-summary: Update a resource group.
+examples:
+-   name: Update a resource group.
+    text: az group update --set {set} --name MyResourceGroup
+    crafted: true
 """
 
 helps['group wait'] = """
@@ -449,6 +480,9 @@ examples:
 -   name: Create a read-only subscription level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
+-   name: Create a lock.
+    text: az lock create --lock-type ReadOnly --resource-group group --notes {notes} --name lockName
+    crafted: true
 """
 
 helps['lock delete'] = """
@@ -458,6 +492,9 @@ examples:
 -   name: Delete a resource group-level lock
     text: >
         az lock delete --name lockName --resource-group group
+-   name: Delete a lock.
+    text: az lock delete --resource-group group --name lockName
+    crafted: true
 """
 
 helps['lock list'] = """
@@ -501,13 +538,13 @@ short-summary: Create a managed application.
 examples:
 -   name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition ID.
     text: |
-        az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog \
-            -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \
+        az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog \\
+            -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
             -d "/subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Solutions/applianceDefinitions/{ApplianceDefinition}"
 -   name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product.
     text: |
-        az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace \
-            -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \
+        az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace \\
+            -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
             --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 
@@ -522,13 +559,13 @@ short-summary: Create a managed application definition.
 examples:
 -   name: Create a managed application defintion.
     text: >
-        az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \
-            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \
+        az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --package-file-uri "https://path/to/myPackage.zip"
 -   name: Create a managed application defintion with inline values for createUiDefinition and mainTemplate.
     text: >
-        az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \
-            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \
+        az managedapp definition create -g MyResourceGroup -n MyManagedAppDef -l eastus --display-name "MyManagedAppDef" \\
+            --description "My Managed App Def description" -a "myPrincipalId:myRoleId" --lock-level None \\
             --create-ui-definition @myCreateUiDef.json --main-template @myMainTemplate.json
 """
 
@@ -577,25 +614,25 @@ examples:
            subscription:      /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333
            resource group:    /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup
            resource:          /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
-             az policy assignment create --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup' --policy {PolicyName} -p '{ \
-                 "allowedLocations": { \
-                     "value": [ \
-                         "australiaeast", \
-                         "eastus", \
-                         "japaneast" \
-                     ] \
-                 } \
+             az policy assignment create --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup' --policy {PolicyName} -p '{ \\
+                 "allowedLocations": { \\
+                     "value": [ \\
+                         "australiaeast", \\
+                         "eastus", \\
+                         "japaneast" \\
+                     ] \\
+                 } \\
              }'
 -   name: Create a resource policy assignment and provide rule parameter values.
     text: |
-        az policy assignment create --policy {PolicyName} -p '{ \
-            "allowedLocations": { \
-                "value": [ \
-                    "australiaeast", \
-                    "eastus", \
-                    "japaneast" \
-                ] \
-            } \
+        az policy assignment create --policy {PolicyName} -p '{ \\
+            "allowedLocations": { \\
+                "value": [ \\
+                    "australiaeast", \\
+                    "eastus", \\
+                    "japaneast" \\
+                ] \\
+            } \\
         }'
 -   name: Create a resource policy assignment with a system assigned identity.
     text: >
@@ -668,62 +705,62 @@ parameters:
 examples:
 -   name: Create a read-only policy.
     text: |
-        az policy definition create --name readOnlyStorage --rules '{ \
-            "if": \
-            { \
-                "field": "type", \
-                "equals": "Microsoft.Storage/storageAccounts/write" \
-            }, \
-            "then": \
-            { \
-                "effect": "deny" \
-            } \
+        az policy definition create --name readOnlyStorage --rules '{ \\
+            "if": \\
+            { \\
+                "field": "type", \\
+                "equals": "Microsoft.Storage/storageAccounts/write" \\
+            }, \\
+            "then": \\
+            { \\
+                "effect": "deny" \\
+            } \\
         }'
 -   name: Create a policy parameter definition.
     text: |
-        az policy definition create --name allowedLocations --rules '{ \
-            "if": { \
-                "allOf": [ \
-                    { \
-                        "field": "location", \
-                        "notIn": "[parameters('listOfAllowedLocations')]" \
-                    }, \
-                    { \
-                        "field": "location", \
-                        "notEquals": "global" \
-                    }, \
-                    { \
-                        "field": "type", \
-                        "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories" \
-                    } \
-                ] \
-            }, \
-            "then": { \
-                "effect": "deny" \
-            } \
-        }' \
-        --params '{ \
-            "allowedLocations": { \
-                "type": "array", \
-                "metadata": { \
-                    "description": "The list of locations that can be specified when deploying resources", \
-                    "strongType": "location", \
-                    "displayName": "Allowed locations" \
-                } \
-            } \
+        az policy definition create --name allowedLocations --rules '{ \\
+            "if": { \\
+                "allOf": [ \\
+                    { \\
+                        "field": "location", \\
+                        "notIn": "[parameters('listOfAllowedLocations')]" \\
+                    }, \\
+                    { \\
+                        "field": "location", \\
+                        "notEquals": "global" \\
+                    }, \\
+                    { \\
+                        "field": "type", \\
+                        "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories" \\
+                    } \\
+                ] \\
+            }, \\
+            "then": { \\
+                "effect": "deny" \\
+            } \\
+        }' \\
+        --params '{ \\
+            "allowedLocations": { \\
+                "type": "array", \\
+                "metadata": { \\
+                    "description": "The list of locations that can be specified when deploying resources", \\
+                    "strongType": "location", \\
+                    "displayName": "Allowed locations" \\
+                } \\
+            } \\
         }'
 -   name: Create a read-only policy that can be applied within a management group.
     text: |
-        az policy definition create -n readOnlyStorage --management-group 'MyManagementGroup' --rules '{ \
-            "if": \
-            { \
-                "field": "type", \
-                "equals": "Microsoft.Storage/storageAccounts/write" \
-            }, \
-            "then": \
-            { \
-                "effect": "deny" \
-            } \
+        az policy definition create -n readOnlyStorage --management-group 'MyManagementGroup' --rules '{ \\
+            "if": \\
+            { \\
+                "field": "type", \\
+                "equals": "Microsoft.Storage/storageAccounts/write" \\
+            }, \\
+            "then": \\
+            { \\
+                "effect": "deny" \\
+            } \\
         }'
 """
 
@@ -768,17 +805,17 @@ parameters:
 examples:
 -   name: Create a policy set definition.
     text: |
-        az policy set-definition create -n readOnlyStorage --definitions '[ \
-                { \
-                    "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \
-                } \
+        az policy set-definition create -n readOnlyStorage --definitions '[ \\
+                { \\
+                    "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \\
+                } \\
             ]'
 -   name: Create a policy set definition to be used by a subscription.
     text: |
-        az policy set-definition create -n readOnlyStorage --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[ \
-                { \
-                    "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \
-                } \
+        az policy set-definition create -n readOnlyStorage --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[ \\
+                { \\
+                    "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \\
+                } \\
             ]'
 """
 
@@ -813,6 +850,9 @@ examples:
 -   name: Display all resource types for the network resource provider.
     text: >
         az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
+-   name: Gets all resource providers for a subscription.
+    text: az provider list --output json
+    crafted: true
 """
 
 helps['provider operation'] = """
@@ -833,6 +873,10 @@ short-summary: Get an individual provider's operations.
 helps['provider register'] = """
 type: command
 short-summary: Register a provider.
+examples:
+-   name: Register a provider.
+    text: az provider register --namespace {namespace}
+    crafted: true
 """
 
 helps['provider unregister'] = """
@@ -851,20 +895,20 @@ short-summary: create a resource.
 examples:
 -   name: Create an API app by providing a full JSON configuration.
     text: |
-        az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties '{ \
-                    "kind": "api", \
-                    "location": "West US", \
-                    "properties": { \
-                        "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}" \
-                    } \
+        az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties '{ \\
+                    "kind": "api", \\
+                    "location": "West US", \\
+                    "properties": { \\
+                        "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}" \\
+                    } \\
                 }'
 -   name: Create a resource by loading JSON configuration from a file.
     text: >
         az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile
 -   name: Create a web app with the minimum required configuration information.
     text: |
-        az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties '{ \
-                "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}" \
+        az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties '{ \\
+                "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}" \\
             }'
 """
 
@@ -881,6 +925,9 @@ examples:
 -   name: Delete a subnet using a resource identifier.
     text: >
         az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
+-   name: Delete a resource.
+    text: az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Web/sites/MyWebapp
+    crafted: true
 """
 
 helps['resource invoke-action'] = """
@@ -893,17 +940,20 @@ long-summary: >
 examples:
 -   name: Power-off a vm, specified by Id.
     text: >
-        az resource invoke-action --action powerOff \
+        az resource invoke-action --action powerOff \\
           --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName}
 -   name: Capture information for a stopped vm.
     text: >
-        az resource invoke-action --action capture \
-          --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName} \
-          --request-body '{ \
-            "vhdPrefix": "myPrefix", \
-            "destinationContainerName": "myContainer", \
-            "overwriteVhds": true \
+        az resource invoke-action --action capture \\
+          --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName} \\
+          --request-body '{ \\
+            "vhdPrefix": "myPrefix", \\
+            "destinationContainerName": "myContainer", \\
+            "overwriteVhds": true \\
         }'
+-   name: Invoke an action on the resource.
+    text: az resource invoke-action --action {action} --namespace {namespace} --name MyResource --resource-group MyResourceGroup --resource-type {resource-type} --request-body {request-body}
+    crafted: true
 """
 
 helps['resource link'] = """
@@ -939,9 +989,9 @@ helps['resource link list'] = """
 type: command
 short-summary: List resource links.
 examples:
--   name: List links, filtering with <filter-string>
+-   name: List links, filtering with {filter-string}
     text: >
-        az resource link list --filter <filter-string>
+        az resource link list --filter {filter-string}
 -   name: List all links for resource group {ResourceGroup} in subscription {SubID}
     text: >
         az resource link list --scope /subscriptions/{SubID}/resourceGroups/{ResourceGroup}
@@ -982,6 +1032,9 @@ examples:
 -   name: List all resources with the tag 'test' that have the value 'example'.
     text: >
         az resource list --tag test=example
+-   name: List resources.
+    text: az resource list --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['resource lock'] = """
@@ -1059,6 +1112,9 @@ examples:
 -   name: Show an application gateway path rule.
     text: >
         az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
+-   name: Get the details of a resource.
+    text: az resource show --resource-group MyResourceGroup --resource-type "Microsoft.Compute/virtualMachines" --name MyVm
+    crafted: true
 """
 
 helps['resource tag'] = """
@@ -1071,11 +1127,18 @@ examples:
 -   name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
     text: >
         az resource tag --tags vmlist=vm1 --id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+-   name: Tag a resource.
+    text: az resource tag --tags vmlist=vm1 --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+    crafted: true
 """
 
 helps['resource update'] = """
 type: command
 short-summary: Update a resource.
+examples:
+-   name: Update a resource.
+    text: az resource update --ids {ids} --set {set} --api-version {api-version}
+    crafted: true
 """
 
 helps['resource wait'] = """
