@@ -7,25 +7,21 @@
 from knack.help_files import helps
 
 helps["appservice"] = """
-
 type: group
 short-summary: Manage App Service plans.
 """
 
 helps["appservice list-locations"] = """
-
     type: command
     short-summary: List regions where a plan sku is available.
 """
 
 helps["appservice plan"] = """
-
     type: group
     short-summary: Manage app service plans.
 """
 
 helps["appservice plan create"] = """
-
     type: command
     short-summary: Create an app service plan.
     examples:
@@ -39,13 +35,11 @@ helps["appservice plan create"] = """
 """
 
 helps["appservice plan delete"] = """
-
     type: command
     short-summary: Delete an app service plan.
 """
 
 helps["appservice plan list"] = """
-
     type: command
     short-summary: List app service plans.
     examples:
@@ -55,139 +49,116 @@ helps["appservice plan list"] = """
 """
 
 helps["appservice plan show"] = """
-
     type: command
     short-summary: Get the app service plans for a resource group or a set of resource groups.
 """
 
 helps["appservice plan update"] = """
-
     type: command
     short-summary: Update an app service plan.
 """
 
 helps["functionapp"] = """
-
     type: group
     short-summary: Manage function apps.
 """
 
 helps["functionapp config"] = """
-
     type: group
     short-summary: Configure a function app.
 """
 
 helps["functionapp config appsettings"] = """
-
     type: group
     short-summary: Configure function app settings.
 """
 
 helps["functionapp config appsettings delete"] = """
-
     type: command
     short-summary: Delete a function app's settings.
 """
 
 helps["functionapp config appsettings list"] = """
-
     type: command
     short-summary: Show settings for a function app.
 """
 
 helps["functionapp config appsettings set"] = """
-
     type: command
     short-summary: Update a function app's settings.
 """
 
 helps["functionapp config hostname"] = """
-
     type: group
     short-summary: Configure hostnames for a function app.
 """
 
 helps["functionapp config hostname add"] = """
-
     type: command
     short-summary: Bind a hostname to a function app.
 """
 
 helps["functionapp config hostname delete"] = """
-
     type: command
     short-summary: Unbind a hostname from a function app.
 """
 
 helps["functionapp config hostname get-external-ip"] = """
-
     type: command
     short-summary: Get the external-facing IP address for a function app.
 """
 
 helps["functionapp config hostname list"] = """
-
     type: command
     short-summary: List all hostname bindings for a function app.
 """
 
 helps["functionapp config set"] = """
-
     type: command
     short-summary: Set the web app's configuration.
 """
 
 helps["functionapp config show"] = """
-
     type: command
     short-summary: Get the details of a web app's configuration.
 """
 
 helps["functionapp config ssl"] = """
-
     type: group
     short-summary: Configure SSL certificates.
 """
 
 helps["functionapp config ssl bind"] = """
-
     type: command
     short-summary: Bind an SSL certificate to a function app.
 """
 
 helps["functionapp config ssl delete"] = """
-
     type: command
     short-summary: Delete an SSL certificate from a function app.
 """
 
 helps["functionapp config ssl list"] = """
-
     type: command
     short-summary: List SSL certificates for a function app.
 """
 
 helps["functionapp config ssl unbind"] = """
-
     type: command
     short-summary: Unbind an SSL certificate from a function app.
 """
 
 helps["functionapp config ssl upload"] = """
-
     type: command
     short-summary: Upload an SSL certificate to a function app.
 """
 
 helps["functionapp cors"] = """
-
     type: group
     short-summary: Manage Cross-Origin Resource Sharing (CORS)
 """
 
 helps["functionapp cors add"] = """
-
     type: command
     short-summary: Add allowed origins
     examples:
@@ -197,7 +168,6 @@ helps["functionapp cors add"] = """
 """
 
 helps["functionapp cors remove"] = """
-
     type: command
     short-summary: Remove allowed origins
     examples:
@@ -210,13 +180,11 @@ helps["functionapp cors remove"] = """
 """
 
 helps["functionapp cors show"] = """
-
     type: command
     short-summary: show allowed origins
 """
 
 helps["functionapp create"] = """
-
     type: command
     short-summary: Create a function app.
     long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
@@ -227,37 +195,31 @@ helps["functionapp create"] = """
 """
 
 helps["functionapp delete"] = """
-
     type: command
     short-summary: Delete a function app.
 """
 
 helps["functionapp deployment"] = """
-
     type: group
     short-summary: Manage function app deployments.
 """
 
 helps["functionapp deployment list-publishing-profiles"] = """
-
     type: command
     short-summary: Get the details for available function app deployment profiles.
 """
 
 helps["functionapp deployment source"] = """
-
     type: group
     short-summary: Manage function app deployment via source control.
 """
 
 helps["functionapp deployment source config"] = """
-
     type: command
     short-summary: Manage deployment from git or Mercurial repositories.
 """
 
 helps["functionapp deployment source config-local-git"] = """
-
     type: command
     short-summary: Get a URL for a git repository endpoint to clone and push to for function app deployment.
     examples:
@@ -271,7 +233,6 @@ helps["functionapp deployment source config-local-git"] = """
 """
 
 helps["functionapp deployment source config-zip"] = """
-
     type: command
     short-summary: Perform deployment using the kudu zip push deployment for a function app.
     long-summary: >
@@ -290,31 +251,26 @@ helps["functionapp deployment source config-zip"] = """
 """
 
 helps["functionapp deployment source delete"] = """
-
     type: command
     short-summary: Delete a source control deployment configuration.
 """
 
 helps["functionapp deployment source show"] = """
-
     type: command
     short-summary: Get the details of a source control deployment configuration.
 """
 
 helps["functionapp deployment source sync"] = """
-
     type: command
     short-summary: Synchronize from the repository. Only needed under manual integration mode.
 """
 
 helps["functionapp deployment user"] = """
-
     type: group
     short-summary: Manage user credentials for deployment.
 """
 
 helps["functionapp deployment user set"] = """
-
     type: command
     short-summary: Update deployment credentials.
     long-summary: All function and web apps in the subscription will be impacted since they share
@@ -327,13 +283,11 @@ helps["functionapp deployment user set"] = """
 """
 
 helps["functionapp identity"] = """
-
     type: group
     short-summary: manage functionapp's managed service identity
 """
 
 helps["functionapp identity assign"] = """
-
     type: command
     short-summary: assign or disable managed service identity to the functionapp
     examples:
@@ -346,19 +300,16 @@ helps["functionapp identity assign"] = """
 """
 
 helps["functionapp identity remove"] = """
-
     type: command
     short-summary: Disable functionapp's managed service identity
 """
 
 helps["functionapp identity show"] = """
-
     type: command
     short-summary: display functionapp's managed service identity
 """
 
 helps["functionapp list"] = """
-
     type: command
     short-summary: List function apps.
     examples:
@@ -371,61 +322,51 @@ helps["functionapp list"] = """
 """
 
 helps["functionapp list-consumption-locations"] = """
-
     type: command
     short-summary: List available locations for running function apps.
 """
 
 helps["functionapp restart"] = """
-
     type: command
     short-summary: Restart a function app.
 """
 
 helps["functionapp show"] = """
-
     type: command
     short-summary: Get the details of a function app.
 """
 
 helps["functionapp start"] = """
-
     type: command
     short-summary: Start a function app.
 """
 
 helps["functionapp stop"] = """
-
     type: command
     short-summary: Stop a function app.
 """
 
 helps["functionapp update"] = """
-
     type: command
     short-summary: Update a function app.
 """
 
 helps["webapp"] = """
-
 type: group
 short-summary: Manage web apps.
 """
 
 helps["webapp auth"] = """
-
     type: group
     short-summary: Manage webapp authentication and authorization
 """
 
 helps["webapp auth show"] = """
-
     type: command
     short-summary: Show the authentification settings for the webapp.
 """
 
 helps["webapp auth update"] = """
-
     type: command
     short-summary: Update the authentication settings for the webapp.
     examples:
@@ -444,37 +385,31 @@ helps["webapp auth update"] = """
 """
 
 helps["webapp browse"] = """
-
     type: command
     short-summary: Open a web app in a browser.
 """
 
 helps["webapp config"] = """
-
 type: group
 short-summary: Configure a web app.
 """
 
 helps["webapp config appsettings"] = """
-
 type: group
 short-summary: Configure web app settings.
 """
 
 helps["webapp config appsettings delete"] = """
-
 type: command
 short-summary: Delete web app settings.
 """
 
 helps["webapp config appsettings list"] = """
-
 type: command
 short-summary: Get the details of a web app's settings.
 """
 
 helps["webapp config appsettings set"] = """
-
 type: command
 short-summary: Set a web app's settings.
 examples:
@@ -484,61 +419,51 @@ examples:
 """
 
 helps["webapp config backup"] = """
-
     type: group
     short-summary: Manage backups for web apps.
 """
 
 helps["webapp config backup create"] = """
-
     type: command
     short-summary: Create a backup of a web app.
 """
 
 helps["webapp config backup list"] = """
-
     type: command
     short-summary: List backups of a web app.
 """
 
 helps["webapp config backup restore"] = """
-
     type: command
     short-summary: Restore a web app from a backup.
 """
 
 helps["webapp config backup show"] = """
-
     type: command
     short-summary: Show the backup schedule for a web app.
 """
 
 helps["webapp config backup update"] = """
-
     type: command
     short-summary: Configure a new backup schedule for a web app.
 """
 
 helps["webapp config connection-string"] = """
-
 type: group
 short-summary: Manage a web app's connection strings.
 """
 
 helps["webapp config connection-string delete"] = """
-
 type: command
 short-summary: Delete a web app's connection strings.
 """
 
 helps["webapp config connection-string list"] = """
-
 type: command
 short-summary: Get a web app's connection strings.
 """
 
 helps["webapp config connection-string set"] = """
-
 type: command
 short-summary: Update a web app's connection strings.
 examples:
@@ -549,85 +474,71 @@ examples:
 """
 
 helps["webapp config container"] = """
-
 type: group
 short-summary: Manage web app container settings.
 """
 
 helps["webapp config container delete"] = """
-
 type: command
 short-summary: Delete a web app container's settings.
 """
 
 helps["webapp config container set"] = """
-
 type: command
 short-summary: Set a web app container's settings.
 """
 
 helps["webapp config container show"] = """
-
 type: command
 short-summary: Get details of a web app container's settings.
 """
 
 helps["webapp config hostname"] = """
-
 type: group
 short-summary: Configure hostnames for a web app.
 """
 
 helps["webapp config hostname add"] = """
-
     type: command
     short-summary: Bind a hostname to a web app.
 """
 
 helps["webapp config hostname delete"] = """
-
     type: command
     short-summary: Unbind a hostname from a web app.
 """
 
 helps["webapp config hostname get-external-ip"] = """
-
     type: command
     short-summary: Get the external-facing IP address for a web app.
 """
 
 helps["webapp config hostname list"] = """
-
     type: command
     short-summary: List all hostname bindings for a web app.
 """
 
 helps["webapp config set"] = """
-
 type: command
 short-summary: Set a web app's configuration.
 """
 
 helps["webapp config show"] = """
-
 type: command
 short-summary: Get the details of a web app's configuration.
 """
 
 helps["webapp config snapshot"] = """
-
 type: group
 short-summary: Manage web app snapshots.
 """
 
 helps["webapp config snapshot list"] = """
-
 type: command
 short-summary: List the restorable snapshots for a web app.
 """
 
 helps["webapp config snapshot restore"] = """
-
 type: command
 short-summary: Restore a web app snapshot.
 examples:
@@ -640,49 +551,41 @@ examples:
 """
 
 helps["webapp config ssl"] = """
-
 type: group
 short-summary: Configure SSL certificates for web apps.
 """
 
 helps["webapp config ssl bind"] = """
-
 type: command
 short-summary: Bind an SSL certificate to a web app.
 """
 
 helps["webapp config ssl delete"] = """
-
 type: command
 short-summary: Delete an SSL certificate from a web app.
 """
 
 helps["webapp config ssl list"] = """
-
 type: command
 short-summary: List SSL certificates for a web app.
 """
 
 helps["webapp config ssl unbind"] = """
-
 type: command
 short-summary: Unbind an SSL certificate from a web app.
 """
 
 helps["webapp config ssl upload"] = """
-
 type: command
 short-summary: Upload an SSL certificate to a web app.
 """
 
 helps["webapp config storage-account"] = """
-
 type: group
 short-summary: Manage a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps["webapp config storage-account add"] = """
-
 type: command
 short-summary: Add an Azure storage account configuration to a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
@@ -698,19 +601,16 @@ examples:
 """
 
 helps["webapp config storage-account delete"] = """
-
 type: command
 short-summary: Delete a web app's Azure storage account configuration. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps["webapp config storage-account list"] = """
-
 type: command
 short-summary: Get a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
 """
 
 helps["webapp config storage-account update"] = """
-
 type: command
 short-summary: Update an existing Azure storage account configuration on a web app. (Linux Web Apps and Windows Containers Web Apps Only)
 examples:
@@ -722,13 +622,11 @@ examples:
 """
 
 helps["webapp cors"] = """
-
     type: group
     short-summary: Manage Cross-Origin Resource Sharing (CORS)
 """
 
 helps["webapp cors add"] = """
-
     type: command
     short-summary: Add allowed origins
     examples:
@@ -738,7 +636,6 @@ helps["webapp cors add"] = """
 """
 
 helps["webapp cors remove"] = """
-
     type: command
     short-summary: Remove allowed origins
     examples:
@@ -751,13 +648,11 @@ helps["webapp cors remove"] = """
 """
 
 helps["webapp cors show"] = """
-
     type: command
     short-summary: show allowed origins
 """
 
 helps["webapp create"] = """
-
     type: command
     short-summary: Create a web app.
     long-summary: The web app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
@@ -771,25 +666,21 @@ helps["webapp create"] = """
 """
 
 helps["webapp delete"] = """
-
     type: command
     short-summary: Delete a web app.
 """
 
 helps["webapp deleted"] = """
-
     type: group
     short-summary: Manage deleted web apps.
 """
 
 helps["webapp deleted list"] = """
-
     type: command
     short-summary: List web apps that have been deleted.
 """
 
 helps["webapp deleted restore"] = """
-
     type: command
     short-summary: Restore a deleted web app.
     long-summary: Restores the files and settings of a deleted web app to the specified web app.
@@ -803,67 +694,56 @@ helps["webapp deleted restore"] = """
 """
 
 helps["webapp deployment"] = """
-
 type: group
 short-summary: Manage web app deployments.
 """
 
 helps["webapp deployment container"] = """
-
 type: group
 short-summary: Manage container-based continuous deployment.
 """
 
 helps["webapp deployment container config"] = """
-
 type: command
 short-summary: Configure continuous deployment via containers.
 """
 
 helps["webapp deployment container show-cd-url"] = """
-
 type: command
 short-summary: Get the URL which can be used to configure webhooks for continuous deployment.
 """
 
 helps["webapp deployment list-publishing-profiles"] = """
-
 type: command
 short-summary: Get the details for available web app deployment profiles.
 """
 
 helps["webapp deployment slot"] = """
-
 type: group
 short-summary: Manage web app deployment slots.
 """
 
 helps["webapp deployment slot auto-swap"] = """
-
 type: command
 short-summary: Configure deployment slot auto swap.
 """
 
 helps["webapp deployment slot create"] = """
-
 type: command
 short-summary: Create a deployment slot.
 """
 
 helps["webapp deployment slot delete"] = """
-
 type: command
 short-summary: Delete a deployment slot.
 """
 
 helps["webapp deployment slot list"] = """
-
 type: command
 short-summary: List all deployment slots.
 """
 
 helps["webapp deployment slot swap"] = """
-
 type: command
 short-summary: Change deployment slots for a web app.
 examples:
@@ -874,19 +754,16 @@ examples:
 """
 
 helps["webapp deployment source"] = """
-
     type: group
     short-summary: Manage web app deployment via source control.
 """
 
 helps["webapp deployment source config"] = """
-
     type: command
     short-summary: Manage deployment from git or Mercurial repositories.
 """
 
 helps["webapp deployment source config-local-git"] = """
-
     type: command
     short-summary: Get a URL for a git repository endpoint to clone and push to for web app deployment.
     examples:
@@ -900,7 +777,6 @@ helps["webapp deployment source config-local-git"] = """
 """
 
 helps["webapp deployment source config-zip"] = """
-
     type: command
     short-summary: Perform deployment using the kudu zip push deployment for a webapp.
     long-summary: >
@@ -919,31 +795,26 @@ helps["webapp deployment source config-zip"] = """
 """
 
 helps["webapp deployment source delete"] = """
-
     type: command
     short-summary: Delete a source control deployment configuration.
 """
 
 helps["webapp deployment source show"] = """
-
     type: command
     short-summary: Get the details of a source control deployment configuration.
 """
 
 helps["webapp deployment source sync"] = """
-
     type: command
     short-summary: Synchronize from the repository. Only needed under manual integration mode.
 """
 
 helps["webapp deployment user"] = """
-
 type: group
 short-summary: Manage user credentials for deployment.
 """
 
 helps["webapp deployment user set"] = """
-
 type: command
 short-summary: Update deployment credentials.
 long-summary: All function and web apps in the subscription will be impacted since they share
@@ -955,13 +826,11 @@ examples:
 """
 
 helps["webapp identity"] = """
-
     type: group
     short-summary: manage webapp's managed service identity
 """
 
 helps["webapp identity assign"] = """
-
     type: command
     short-summary: assign or disable managed service identity to the webapp
     examples:
@@ -974,19 +843,16 @@ helps["webapp identity assign"] = """
 """
 
 helps["webapp identity remove"] = """
-
     type: command
     short-summary: Disable webapp's managed service identity
 """
 
 helps["webapp identity show"] = """
-
     type: command
     short-summary: display webapp's managed service identity
 """
 
 helps["webapp list"] = """
-
     type: command
     short-summary: List web apps.
     examples:
@@ -999,57 +865,48 @@ helps["webapp list"] = """
 """
 
 helps["webapp list-runtimes"] = """
-
     type: command
     short-summary: List available built-in stacks which can be used for web apps.
 """
 
 helps["webapp log"] = """
-
 type: group
 short-summary: Manage web app logs.
 """
 
 helps["webapp log config"] = """
-
 type: command
 short-summary: Configure logging for a web app.
 """
 
 helps["webapp log download"] = """
-
 type: command
 short-summary: Download a web app's log history as a zip file.
 long-summary: This command may not work with web apps running on Linux.
 """
 
 helps["webapp log show"] = """
-
 type: command
 short-summary: Get the details of a web app's logging configuration.
 """
 
 helps["webapp log tail"] = """
-
 type: command
 short-summary: Start live log tracing for a web app.
 long-summary: This command may not work with web apps running on Linux.
 """
 
 helps["webapp restart"] = """
-
     type: command
     short-summary: Restart a web app.
 """
 
 helps["webapp show"] = """
-
     type: command
     short-summary: Get the details of a web app.
 """
 
 helps["webapp ssh"] = """
-
     type: command
     short-summary: (Preview) SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.
     examples:
@@ -1059,43 +916,36 @@ helps["webapp ssh"] = """
 """
 
 helps["webapp start"] = """
-
     type: command
     short-summary: Start a web app.
 """
 
 helps["webapp stop"] = """
-
     type: command
     short-summary: Stop a web app.
 """
 
 helps["webapp traffic-routing"] = """
-
     type: group
     short-summary: Manage traffic routing for web apps.
 """
 
 helps["webapp traffic-routing clear"] = """
-
     type: command
     short-summary: Clear the routing rules and send all traffic to production.
 """
 
 helps["webapp traffic-routing set"] = """
-
     type: command
     short-summary: Configure routing traffic to deployment slots.
 """
 
 helps["webapp traffic-routing show"] = """
-
     type: command
     short-summary: Display the current distribution of traffic across slots.
 """
 
 helps["webapp up"] = """
-
     type: command
     short-summary: (Preview) Create and deploy existing local code to the webapp, by running the command from the folder where the code is present.
                    Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET,
@@ -1117,7 +967,6 @@ helps["webapp up"] = """
 """
 
 helps["webapp update"] = """
-
     type: command
     short-summary: Update a web app.
     examples:
@@ -1127,67 +976,56 @@ helps["webapp update"] = """
 """
 
 helps["webapp webjob"] = """
-
     type: group
     short-summary: Allows management operations for webjobs on a webapp.
 """
 
 helps["webapp webjob continuous"] = """
-
     type: group
     short-summary: Allows management operations of continuous webjobs on a webapp.
 """
 
 helps["webapp webjob continuous list"] = """
-
     type: command
     short-summary: List all continuous webjobs on a selected webapp.
 """
 
 helps["webapp webjob continuous remove"] = """
-
     type: command
     short-summary: Delete a specific continuous webjob.
 """
 
 helps["webapp webjob continuous start"] = """
-
     type: command
     short-summary: Start a specific continuous webjob on a selected webapp.
 """
 
 helps["webapp webjob continuous stop"] = """
-
     type: command
     short-summary: Stop a specific continuous webjob.
 """
 
 helps["webapp webjob triggered"] = """
-
     type: group
     short-summary: Allows management operations of triggered webjobs on a webapp.
 """
 
 helps["webapp webjob triggered list"] = """
-
     type: command
     short-summary: List all triggered webjobs hosted on a webapp.
 """
 
 helps["webapp webjob triggered log"] = """
-
     type: command
     short-summary: Get history of a specific triggered webjob hosted on a webapp.
 """
 
 helps["webapp webjob triggered remove"] = """
-
     type: command
     short-summary: Delete a specific triggered webjob hosted on a webapp.
 """
 
 helps["webapp webjob triggered run"] = """
-
     type: command
     short-summary: Run a specific triggered webjob hosted on a webapp.
 """

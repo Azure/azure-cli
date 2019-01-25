@@ -7,13 +7,11 @@
 from knack.help_files import helps
 
 helps["acr"] = """
-
     type: group
     short-summary: Manage private registries with Azure Container Registries.
-"""
+    """
 
 helps["acr build"] = """
-
     type: command
     short-summary: Queues a quick build, providing streaming logs for an Azure Container Registry.
     examples:
@@ -35,13 +33,11 @@ helps["acr build"] = """
 """
 
 helps["acr build-task"] = """
-
     type: group
     short-summary: Manage build definitions, which can be triggered by git commits or base image updates for OS & Framework Patching.
-"""
+    """
 
 helps["acr build-task create"] = """
-
     type: command
     short-summary: Creates a new build definition which can be triggered by git commits or base image updates for an Azure Container Registry.
     examples:
@@ -54,7 +50,6 @@ helps["acr build-task create"] = """
 """
 
 helps["acr build-task delete"] = """
-
     type: command
     short-summary: Delete a build task from an Azure Container Registry.
     examples:
@@ -64,7 +59,6 @@ helps["acr build-task delete"] = """
 """
 
 helps["acr build-task list"] = """
-
     type: command
     short-summary: List the build tasks for an Azure Container Registry.
     examples:
@@ -74,7 +68,6 @@ helps["acr build-task list"] = """
 """
 
 helps["acr build-task list-builds"] = """
-
     type: command
     short-summary: List all of the executed builds for an Azure Container Registry.
     examples:
@@ -93,7 +86,6 @@ helps["acr build-task list-builds"] = """
 """
 
 helps["acr build-task logs"] = """
-
     type: command
     short-summary: Show logs for a particular build. If no build-id is supplied, display the logs for the last created build.
     examples:
@@ -112,7 +104,6 @@ helps["acr build-task logs"] = """
 """
 
 helps["acr build-task run"] = """
-
     type: command
     short-summary: Trigger a build task that might otherwise be waiting for git commits or base image update triggers for an Azure Container Registry.
     examples:
@@ -122,7 +113,6 @@ helps["acr build-task run"] = """
 """
 
 helps["acr build-task show"] = """
-
     type: command
     short-summary: Get the properties of a specified build task for an Azure Container Registry.
     examples:
@@ -135,7 +125,6 @@ helps["acr build-task show"] = """
 """
 
 helps["acr build-task show-build"] = """
-
     type: command
     short-summary: Get the properties of a specified build for an Azure Container Registry.
     examples:
@@ -145,7 +134,6 @@ helps["acr build-task show-build"] = """
 """
 
 helps["acr build-task update"] = """
-
     type: command
     short-summary: Update a build task for an Azure Container Registry.
     examples:
@@ -155,7 +143,6 @@ helps["acr build-task update"] = """
 """
 
 helps["acr build-task update-build"] = """
-
     type: command
     short-summary: Patch the build properties of an Azure Container Registry.
     examples:
@@ -165,7 +152,6 @@ helps["acr build-task update-build"] = """
 """
 
 helps["acr check-name"] = """
-
     type: command
     short-summary: Checks if an Azure Container Registry name is valid and available for use.
     examples:
@@ -175,19 +161,16 @@ helps["acr check-name"] = """
 """
 
 helps["acr config"] = """
-
     type: group
     short-summary: Configure policies for Azure Container Registries.
-"""
+    """
 
 helps["acr config content-trust"] = """
-
     type: group
     short-summary: Manage content-trust policy for Azure Container Registries.
-"""
+    """
 
 helps["acr config content-trust show"] = """
-
     type: command
     short-summary: Show the configured content-trust policy for an Azure Container Registry.
     examples:
@@ -197,7 +180,6 @@ helps["acr config content-trust show"] = """
 """
 
 helps["acr config content-trust update"] = """
-
     type: command
     short-summary: Update content-trust policy for an Azure Container Registry.
     examples:
@@ -207,7 +189,6 @@ helps["acr config content-trust update"] = """
 """
 
 helps["acr create"] = """
-
     type: command
     short-summary: Creates an Azure Container Registry.
     examples:
@@ -220,13 +201,11 @@ helps["acr create"] = """
 """
 
 helps["acr credential"] = """
-
     type: group
     short-summary: Manage login credentials for Azure Container Registries.
-"""
+    """
 
 helps["acr credential renew"] = """
-
     type: command
     short-summary: Regenerate login credentials for an Azure Container Registry.
     examples:
@@ -236,7 +215,6 @@ helps["acr credential renew"] = """
 """
 
 helps["acr credential show"] = """
-
     type: command
     short-summary: Get the login credentials for an Azure Container Registry.
     examples:
@@ -252,7 +230,6 @@ helps["acr credential show"] = """
 """
 
 helps["acr delete"] = """
-
     type: command
     short-summary: Deletes an Azure Container Registry.
     examples:
@@ -262,13 +239,11 @@ helps["acr delete"] = """
 """
 
 helps["acr helm"] = """
-
     type: group
     short-summary: Manage helm charts for Azure Container Registries.
-"""
+    """
 
 helps["acr helm delete"] = """
-
     type: command
     short-summary: Delete a helm chart version in an Azure Container Registry.
     examples:
@@ -281,7 +256,6 @@ helps["acr helm delete"] = """
 """
 
 helps["acr helm list"] = """
-
     type: command
     short-summary: List all helm charts in an Azure Container Registry.
     examples:
@@ -291,7 +265,6 @@ helps["acr helm list"] = """
 """
 
 helps["acr helm push"] = """
-
     type: command
     short-summary: Push a helm chart package to an Azure Container Registry.
     examples:
@@ -304,13 +277,11 @@ helps["acr helm push"] = """
 """
 
 helps["acr helm repo"] = """
-
     type: group
     short-summary: Manage helm chart repositories for Azure Container Registries.
-"""
+    """
 
 helps["acr helm repo add"] = """
-
     type: command
     short-summary: Add a helm chart repository from an Azure Container Registry through the Helm CLI.
     long-summary: Helm must be installed on your machine.
@@ -321,7 +292,6 @@ helps["acr helm repo add"] = """
 """
 
 helps["acr helm show"] = """
-
     type: command
     short-summary: Describe a helm chart in an Azure Container Registry.
     examples:
@@ -334,7 +304,6 @@ helps["acr helm show"] = """
 """
 
 helps["acr import"] = """
-
     type: command
     short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
     examples:
@@ -350,7 +319,6 @@ helps["acr import"] = """
 """
 
 helps["acr list"] = """
-
     type: command
     short-summary: Lists all the container registries under the current subscription.
     examples:
@@ -363,7 +331,6 @@ helps["acr list"] = """
 """
 
 helps["acr login"] = """
-
     type: command
     short-summary: Log in to an Azure Container Registry through the Docker CLI.
     long-summary: Docker must be installed on your machine.
@@ -374,13 +341,11 @@ helps["acr login"] = """
 """
 
 helps["acr replication"] = """
-
     type: group
     short-summary: Manage geo-replicated regions of Azure Container Registries.
-"""
+    """
 
 helps["acr replication create"] = """
-
     type: command
     short-summary: Create a replicated region for an Azure Container Registry.
     examples:
@@ -390,7 +355,6 @@ helps["acr replication create"] = """
 """
 
 helps["acr replication delete"] = """
-
     type: command
     short-summary: Delete a replicated region from an Azure Container Registry.
     examples:
@@ -400,7 +364,6 @@ helps["acr replication delete"] = """
 """
 
 helps["acr replication list"] = """
-
     type: command
     short-summary: List all of the regions for a geo-replicated Azure Container Registry.
     examples:
@@ -410,7 +373,6 @@ helps["acr replication list"] = """
 """
 
 helps["acr replication show"] = """
-
     type: command
     short-summary: Get the details of a replicated region.
     examples:
@@ -420,7 +382,6 @@ helps["acr replication show"] = """
 """
 
 helps["acr replication update"] = """
-
     type: command
     short-summary: Updates a replication.
     examples:
@@ -430,13 +391,11 @@ helps["acr replication update"] = """
 """
 
 helps["acr repository"] = """
-
     type: group
     short-summary: Manage repositories (image names) for Azure Container Registries.
-"""
+    """
 
 helps["acr repository delete"] = """
-
     type: command
     short-summary: Delete a repository or image in an Azure Container Registry.
     long-summary: This command deletes all associated layer data that are not referenced by any other manifest in the container registry.
@@ -453,7 +412,6 @@ helps["acr repository delete"] = """
 """
 
 helps["acr repository list"] = """
-
     type: command
     short-summary: List repositories in an Azure Container Registry.
     examples:
@@ -463,7 +421,6 @@ helps["acr repository list"] = """
 """
 
 helps["acr repository show"] = """
-
     type: command
     short-summary: Get the attributes of a repository or image in an Azure Container Registry.
     examples:
@@ -479,7 +436,6 @@ helps["acr repository show"] = """
 """
 
 helps["acr repository show-manifests"] = """
-
     type: command
     short-summary: Show manifests of a repository in an Azure Container Registry.
     examples:
@@ -495,7 +451,6 @@ helps["acr repository show-manifests"] = """
 """
 
 helps["acr repository show-tags"] = """
-
     type: command
     short-summary: Show tags for a repository in an Azure Container Registry.
     examples:
@@ -511,7 +466,6 @@ helps["acr repository show-tags"] = """
 """
 
 helps["acr repository untag"] = """
-
     type: command
     short-summary: Untag an image in an Azure Container Registry.
     long-summary: This command does not delete the manifest referenced by the tag or any associated layer data.
@@ -522,7 +476,6 @@ helps["acr repository untag"] = """
 """
 
 helps["acr repository update"] = """
-
     type: command
     short-summary: Update the attributes of a repository or image in an Azure Container Registry.
     examples:
@@ -538,7 +491,6 @@ helps["acr repository update"] = """
 """
 
 helps["acr run"] = """
-
     type: command
     short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
     examples:
@@ -548,10 +500,9 @@ helps["acr run"] = """
         - name: Queue a remote git context with streaming logs.
           text: >
             az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
-"""
+    """
 
 helps["acr show"] = """
-
     type: command
     short-summary: Get the details of an Azure Container Registry.
     examples:
@@ -561,7 +512,6 @@ helps["acr show"] = """
 """
 
 helps["acr show-usage"] = """
-
     type: command
     short-summary: Get the storage usage for an Azure Container Registry.
     examples:
@@ -571,13 +521,11 @@ helps["acr show-usage"] = """
 """
 
 helps["acr task"] = """
-
     type: group
     short-summary: Manage a collection of steps for building, testing and OS & Framework patching container images using Azure Container Registries.
-"""
+    """
 
 helps["acr task cancel-run"] = """
-
     type: command
     short-summary: Cancel a specified run of an Azure Container Registry.
     examples:
@@ -587,7 +535,6 @@ helps["acr task cancel-run"] = """
 """
 
 helps["acr task create"] = """
-
     type: command
     short-summary: Creates a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
     examples:
@@ -606,7 +553,6 @@ helps["acr task create"] = """
 """
 
 helps["acr task delete"] = """
-
     type: command
     short-summary: Delete a task from an Azure Container Registry.
     examples:
@@ -616,7 +562,6 @@ helps["acr task delete"] = """
 """
 
 helps["acr task list"] = """
-
     type: command
     short-summary: List the tasks for an Azure Container Registry.
     examples:
@@ -626,7 +571,6 @@ helps["acr task list"] = """
 """
 
 helps["acr task list-runs"] = """
-
     type: command
     short-summary: List all of the executed runs for an Azure Container Registry, with the ability to filter by a specific Task.
     examples:
@@ -645,7 +589,6 @@ helps["acr task list-runs"] = """
 """
 
 helps["acr task logs"] = """
-
     type: command
     short-summary: Show logs for a particular run. If no run-id is supplied, show logs for the last created run.
     examples:
@@ -664,7 +607,6 @@ helps["acr task logs"] = """
 """
 
 helps["acr task run"] = """
-
     type: command
     short-summary: Manually trigger a task that might otherwise be waiting for git commits or base image update triggers.
     examples:
@@ -674,7 +616,6 @@ helps["acr task run"] = """
 """
 
 helps["acr task show"] = """
-
     type: command
     short-summary: Get the properties of a named task for an Azure Container Registry.
     examples:
@@ -688,7 +629,6 @@ helps["acr task show"] = """
 """
 
 helps["acr task show-run"] = """
-
     type: command
     short-summary: Get the properties of a specified run of an Azure Container Registry Task.
     examples:
@@ -698,7 +638,6 @@ helps["acr task show-run"] = """
 """
 
 helps["acr task update"] = """
-
     type: command
     short-summary: Update a task for an Azure Container Registry.
     examples:
@@ -708,7 +647,6 @@ helps["acr task update"] = """
 """
 
 helps["acr task update-run"] = """
-
     type: command
     short-summary: Patch the run properties of an Azure Container Registry Task.
     examples:
@@ -718,7 +656,6 @@ helps["acr task update-run"] = """
 """
 
 helps["acr update"] = """
-
     type: command
     short-summary: Update an Azure Container Registry.
     examples:
@@ -734,13 +671,11 @@ helps["acr update"] = """
 """
 
 helps["acr webhook"] = """
-
     type: group
     short-summary: Manage webhooks for Azure Container Registries.
-"""
+    """
 
 helps["acr webhook create"] = """
-
     type: command
     short-summary: Create a webhook for an Azure Container Registry.
     examples:
@@ -756,7 +691,6 @@ helps["acr webhook create"] = """
 """
 
 helps["acr webhook delete"] = """
-
     type: command
     short-summary: Delete a webhook from an Azure Container Registry.
     examples:
@@ -766,7 +700,6 @@ helps["acr webhook delete"] = """
 """
 
 helps["acr webhook get-config"] = """
-
     type: command
     short-summary: Get the service URI and custom headers for the webhook.
     examples:
@@ -776,7 +709,6 @@ helps["acr webhook get-config"] = """
 """
 
 helps["acr webhook list"] = """
-
     type: command
     short-summary: List all of the webhooks for an Azure Container Registry.
     examples:
@@ -786,7 +718,6 @@ helps["acr webhook list"] = """
 """
 
 helps["acr webhook list-events"] = """
-
     type: command
     short-summary: List recent events for a webhook.
     examples:
@@ -796,7 +727,6 @@ helps["acr webhook list-events"] = """
 """
 
 helps["acr webhook ping"] = """
-
     type: command
     short-summary: Trigger a ping event for a webhook.
     examples:
@@ -806,7 +736,6 @@ helps["acr webhook ping"] = """
 """
 
 helps["acr webhook show"] = """
-
     type: command
     short-summary: Get the details of a webhook.
     examples:
@@ -816,7 +745,6 @@ helps["acr webhook show"] = """
 """
 
 helps["acr webhook update"] = """
-
     type: command
     short-summary: Update a webhook.
     examples:

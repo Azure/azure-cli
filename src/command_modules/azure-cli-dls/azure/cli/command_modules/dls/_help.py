@@ -7,19 +7,16 @@
 from knack.help_files import helps
 
 helps["dls"] = """
-
     type: group
     short-summary: (PREVIEW) Manage Data Lake Store accounts and filesystems.
 """
 
 helps["dls account"] = """
-
     type: group
     short-summary: (PREVIEW) Manage Data Lake Store accounts.
 """
 
 helps["dls account create"] = """
-
     type: command
     short-summary: Creates a Data Lake Store account.
     parameters:
@@ -38,25 +35,21 @@ helps["dls account create"] = """
 """
 
 helps["dls account delete"] = """
-
     type: command
     short-summary: Delete a Data Lake Store account.
 """
 
 helps["dls account enable-key-vault"] = """
-
     type: command
     short-summary: Enable the use of Azure Key Vault for encryption of a Data Lake Store account.
 """
 
 helps["dls account firewall"] = """
-
     type: group
     short-summary: (PREVIEW) Manage Data Lake Store account firewall rules.
 """
 
 helps["dls account firewall create"] = """
-
     type: command
     short-summary: Creates a firewall rule in a Data Lake Store account.
     parameters:
@@ -72,43 +65,36 @@ helps["dls account firewall create"] = """
 """
 
 helps["dls account firewall delete"] = """
-
     type: command
     short-summary: Deletes a firewall rule in a Data Lake Store account.
 """
 
 helps["dls account firewall list"] = """
-
     type: command
     short-summary: Lists firewall rules in a Data Lake Store account.
 """
 
 helps["dls account firewall show"] = """
-
     type: command
     short-summary: Get the details of a firewall rule in a Data Lake Store account.
 """
 
 helps["dls account firewall update"] = """
-
     type: command
     short-summary: Updates a firewall rule in a Data Lake Store account.
 """
 
 helps["dls account list"] = """
-
     type: command
     short-summary: Lists available Data Lake Store accounts.
 """
 
 helps["dls account network-rule"] = """
-
     type: group
     short-summary: (PREVIEW) Manage Data Lake Store account virtual network rules.
 """
 
 helps["dls account network-rule create"] = """
-
     type: command
     short-summary: Creates a virtual network rule in a Data Lake Store account.
     parameters:
@@ -121,85 +107,71 @@ helps["dls account network-rule create"] = """
 """
 
 helps["dls account network-rule delete"] = """
-
     type: command
     short-summary: Deletes a virtual network rule in a Data Lake Store account.
 """
 
 helps["dls account network-rule list"] = """
-
     type: command
     short-summary: Lists virtual network rules in a Data Lake Store account.
 """
 
 helps["dls account network-rule show"] = """
-
     type: command
     short-summary: Get the details of a virtual network rule in a Data Lake Store account.
 """
 
 helps["dls account network-rule update"] = """
-
     type: command
     short-summary: Updates a virtual network rule in a Data Lake Store account.
 """
 
 helps["dls account show"] = """
-
     type: command
     short-summary: Get the details of a Data Lake Store account.
 """
 
 helps["dls account trusted-provider"] = """
-
     type: group
     short-summary: (PREVIEW) Manage Data Lake Store account trusted identity providers.
 """
 
 helps["dls account update"] = """
-
     type: command
     short-summary: Updates a Data Lake Store account.
 """
 
 helps["dls fs"] = """
-
     type: group
     short-summary: (PREVIEW) Manage a Data Lake Store filesystem.
 """
 
 helps["dls fs access"] = """
-
     type: group
     short-summary: Manage Data Lake Store filesystem access and permissions.
 """
 
 helps["dls fs access remove-all"] = """
-
     type: command
     short-summary: Remove the access control list for a file or folder.
 """
 
 helps["dls fs access remove-entry"] = """
-
     type: command
     short-summary: Remove entries for the access control list of a file or folder.
 """
 
 helps["dls fs access set"] = """
-
     type: command
     short-summary: Replace the existing access control list for a file or folder.
 """
 
 helps["dls fs access set-entry"] = """
-
     type: command
     short-summary: Update the access control list for a file or folder.
 """
 
 helps["dls fs access set-owner"] = """
-
     type: command
     short-summary: Set the owner information for a file or folder in a Data Lake Store account.
     parameters:
@@ -212,7 +184,6 @@ helps["dls fs access set-owner"] = """
 """
 
 helps["dls fs access set-permission"] = """
-
     type: command
     short-summary: Set the permissions for a file or folder in a Data Lake Store account.
     parameters:
@@ -225,13 +196,11 @@ helps["dls fs access set-permission"] = """
 """
 
 helps["dls fs access show"] = """
-
     type: command
     short-summary: Display the access control list (ACL).
 """
 
 helps["dls fs append"] = """
-
     type: command
     short-summary: Append content to a file in a Data Lake Store account.
     parameters:
@@ -241,7 +210,6 @@ helps["dls fs append"] = """
 """
 
 helps["dls fs create"] = """
-
     type: command
     short-summary: Creates a file or folder in a Data Lake Store account.
     parameters:
@@ -251,13 +219,11 @@ helps["dls fs create"] = """
 """
 
 helps["dls fs delete"] = """
-
     type: command
     short-summary: Delete a file or folder in a Data Lake Store account.
 """
 
 helps["dls fs download"] = """
-
     type: command
     short-summary: Download a file or folder from a Data Lake Store account to the local machine.
     parameters:
@@ -285,7 +251,6 @@ helps["dls fs download"] = """
 """
 
 helps["dls fs join"] = """
-
     type: command
     short-summary: Join files in a Data Lake Store account into one file.
     parameters:
@@ -298,13 +263,11 @@ helps["dls fs join"] = """
 """
 
 helps["dls fs list"] = """
-
     type: command
     short-summary: List the files and folders in a Data Lake Store account.
 """
 
 helps["dls fs move"] = """
-
     type: command
     short-summary: Move a file or folder in a Data Lake Store account.
     parameters:
@@ -317,7 +280,6 @@ helps["dls fs move"] = """
 """
 
 helps["dls fs preview"] = """
-
     type: command
     short-summary: Preview the content of a file in a Data Lake Store account.
     parameters:
@@ -331,31 +293,26 @@ helps["dls fs preview"] = """
 """
 
 helps["dls fs remove-expiry"] = """
-
     type: command
     short-summary: Remove the expiration time for a file.
 """
 
 helps["dls fs set-expiry"] = """
-
     type: command
     short-summary: Set the expiration time for a file.
 """
 
 helps["dls fs show"] = """
-
     type: command
     short-summary: Get file or folder information in a Data Lake Store account.
 """
 
 helps["dls fs test"] = """
-
     type: command
     short-summary: Test for the existence of a file or folder in a Data Lake Store account.
 """
 
 helps["dls fs upload"] = """
-
     type: command
     short-summary: Upload a file or folder to a Data Lake Store account.
     parameters:
@@ -380,4 +337,5 @@ helps["dls fs upload"] = """
           type: int
           short-summary: Size of a block, in bytes.
           long-summary: Within each chunk, a smaller block is written for each API call. A block cannot be bigger than a chunk and must be bigger than a buffer.
+
 """

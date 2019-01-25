@@ -7,19 +7,16 @@
 from knack.help_files import helps
 
 helps["iotcentral"] = """
-
     type: group
     short-summary: Manage IoT Central assets.
 """
 
 helps["iotcentral app"] = """
-
     type: group
     short-summary: Manage IoT Central applications.
 """
 
 helps["iotcentral app create"] = """
-
     type: command
     short-summary: Create an IoT Central application.
     long-summary: |
@@ -37,13 +34,11 @@ helps["iotcentral app create"] = """
 """
 
 helps["iotcentral app delete"] = """
-
     type: command
     short-summary: Delete an IoT Central application.
 """
 
 helps["iotcentral app list"] = """
-
     type: command
     short-summary: List IoT Central applications.
     examples:
@@ -56,7 +51,6 @@ helps["iotcentral app list"] = """
 """
 
 helps["iotcentral app show"] = """
-
     type: command
     short-summary: Get the details of an IoT Central application.
     examples:
@@ -66,7 +60,6 @@ helps["iotcentral app show"] = """
 """
 
 helps["iotcentral app update"] = """
-
     type: command
     short-summary: Update metadata for an IoT Central application.
 """
