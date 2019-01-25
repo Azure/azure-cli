@@ -43,7 +43,7 @@ helps['acr build-task create'] = """
     examples:
         - name: Create a build definition without git commits and base image updates.
           text: >
-            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --commit-trigger-enabled false
+            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --commit-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000
         - name: Create a build definition which updates on git commits and base image updates (--git-access-token must have permissions to create github webhooks).
           text: >
             az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --git-access-token 0000000000000000000000000000000000000000
@@ -130,7 +130,7 @@ helps['acr build-task show-build'] = """
     examples:
         - name:  Get the details of a build, displaying the results in a table.
           text: >
-            az acr build-task show-build -n MyBuildTask -r MyRegistry --build-id aab1 -o table
+            az acr build-task show-build -r MyRegistry --build-id aab1 -o table
 """
 
 helps['acr build-task update'] = """
@@ -687,7 +687,7 @@ helps['acr task update'] = """
     examples:
         - name: Update base image updates to trigger on all dependent images of a multi-stage dockerfile, and status of a task in an Azure Container Registry.
           text: >
-            az acr task update -n MyTask -r MyRegistry --base-image-trigger All --status Disabled
+            az acr task update -n MyTask -r MyRegistry --base-image-trigger-type All --status Disabled
 """
 
 helps['acr task update-run'] = """

@@ -201,7 +201,7 @@ helps['iot dps linked-hub delete'] = """
     examples:
         - name: Delete linked IoT hub 'MyLinkedHub' in an Azure IoT Hub device provisioning service
           text: >
-            az iot dps linked-hub delete --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
+            az iot dps linked-hub delete --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub
 """
 
 helps['iot dps linked-hub list'] = """
@@ -219,7 +219,7 @@ helps['iot dps linked-hub show'] = """
     examples:
         - name: Show details of linked IoT hub 'MyLinkedHub' in an Azure IoT Hub device provisioning service
           text: >
-            az iot dps linked-hub show --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
+            az iot dps linked-hub show --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub
 """
 
 helps['iot dps linked-hub update'] = """
@@ -550,7 +550,7 @@ helps['iot hub route show'] = """
     examples:
         - name: Get an route information from "MyIotHub" IoT Hub.
           text: >
-            az iot hub route show -g MyResourceGroup --hub-name MyIotHub --route-name [Route Name]
+            az iot hub route show -g MyResourceGroup --hub-name MyIotHub --route-name {routeName}
 """
 
 helps['iot hub route test'] = """
@@ -591,14 +591,14 @@ helps['iot hub routing-endpoint create'] = """
         - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
           text: >
             az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group [Resource Group]
-            --endpoint-subscription-id [SubscriptionId] --connection-string [Connection String]
+            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup}
+            --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
         - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
           text: >
-            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group [Resource Group]
-            --endpoint-subscription-id [SubscriptionId] --connection-string [Connection String]
-            --container-name [Container Name]
+            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \
+            --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group {ResourceGroup} \
+            --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \
+            --container-name {ContainerName}
 """
 
 helps['iot hub routing-endpoint delete'] = """
@@ -643,7 +643,7 @@ helps['iot hub routing-endpoint show'] = """
         - name: Get an endpoint information from "MyIotHub" IoT Hub.
           text: >
             az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub
-            --endpoint-name [Endpoint Name]
+            --endpoint-name {EndpointName}
 """
 
 helps['iot hub show'] = """
