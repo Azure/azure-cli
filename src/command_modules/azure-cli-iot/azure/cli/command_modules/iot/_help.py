@@ -276,7 +276,7 @@ helps["iot hub certificate create"] = """
     type: command
     short-summary: Create/upload an Azure IoT Hub certificate.
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: Uploads a CA certificate PEM file to an IoT hub.
           text: >
@@ -290,7 +290,7 @@ helps["iot hub certificate delete"] = """
     type: command
     short-summary: Deletes an Azure IoT Hub certificate.
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: Deletes MyCertificate
           text: >
@@ -302,7 +302,7 @@ helps["iot hub certificate generate-verification-code"] = """
     short-summary: Generates a verification code for an Azure IoT Hub certificate.
     long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this
                   verification code as the CN of a new certificate signed with the root certificates private key. For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: Generates a verification code for MyCertificate
           text: >
@@ -314,7 +314,7 @@ helps["iot hub certificate list"] = """
     type: command
     short-summary: Lists all certificates contained within an Azure IoT Hub
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: List all certificates in MyIotHub
           text: >
@@ -325,7 +325,7 @@ helps["iot hub certificate show"] = """
     type: command
     short-summary: Shows information about a particular Azure IoT Hub certificate.
     long-summary: For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: Show details about MyCertificate
           text: >
@@ -336,7 +336,7 @@ helps["iot hub certificate update"] = """
     type: command
     short-summary: Update an Azure IoT Hub certificate.
     long-summary: Uploads a new certificate to replace the existing certificate with the same name. For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: Updates a CA certificate in an IoT hub by uploading a new PEM file.
           text: >
@@ -353,7 +353,7 @@ helps["iot hub certificate verify"] = """
     short-summary: Verifies an Azure IoT Hub certificate.
     long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained
                   by calling generate-verification-code. This is the last step in the proof of possession process. For a detailed explanation of CA certificates in Azure IoT Hub,
-                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview 
+                      see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview
     examples:
         - name: Verifies ownership of the MyCertificate private key.
           text: >
