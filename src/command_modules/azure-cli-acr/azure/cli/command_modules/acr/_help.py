@@ -384,8 +384,6 @@ helps['acr network-rule'] = """
     short-summary: Manage network rules for Azure Container Registries.
 """
 
-
-
 helps["acr replication"] = """
     type: group
     short-summary: Manage geo-replicated regions of Azure Container Registries.
