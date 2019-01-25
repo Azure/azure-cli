@@ -786,6 +786,10 @@ def load_arguments(self, _):
         c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))
         c.argument('log_version', help='Version (revision) of the flow log.', type=int)
 
+    with self.argument_context('network watcher flow-log', arg_group='Traffic Analytics', min_api='2018-10-01') as c:
+        c.argument('traffic_analytics_interval', options_list='--interval', type=int, help='Interval in minutes at which to conduct flow analytics.')
+        c.argument('traffic_analytics_workspace', options_list='--workspace', help='Name or ID of a Log Analytics workspace.')
+
     for item in ['list', 'stop', 'delete', 'show', 'show-status']:
         with self.argument_context('network watcher packet-capture {}'.format(item)) as c:
             c.extra('location')

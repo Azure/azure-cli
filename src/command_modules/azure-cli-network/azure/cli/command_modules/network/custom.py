@@ -2751,22 +2751,35 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
 
 
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
-                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None):
+                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
+                         traffic_analytics_workspace=None, traffic_analytics_interval=None):
     from azure.cli.core.commands import LongRunningOperation
     config = LongRunningOperation(cmd.cli_ctx)(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
-    if enabled is not None:
-        config.enabled = enabled
-    if storage_account is not None:
-        config.storage_id = storage_account
+    _set_param(config, 'enabled', enabled or config.enabled)
+    _set_param(config, 'storage_id', storage_account or config.storage_id)
     if retention is not None:
-        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
-        config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
+        config.retention_policy = {
+            'days': retention,
+            'enabled': int(retention) > 0
+        }
     if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
         config.format = {
             'type': log_format,
             'version': log_version
         }
-    setattr(config, 'flow_analytics_configuration', None)
+    if cmd.supported_api_version(min_api='2018-10-01') and traffic_analytics_workspace:
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        config.flow_analytics_configuration = {
+            'network_watcher_flow_analytics_configuration': {
+                'enabled': True,
+                'workspace_id': workspace.properties['customerId'],
+                'workspace_region': workspace.location,
+                'workspace_resource_id': traffic_analytics_workspace,
+                'traffic_analytics_interval': traffic_analytics_interval,
+            }
+        }
+    print(config)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
