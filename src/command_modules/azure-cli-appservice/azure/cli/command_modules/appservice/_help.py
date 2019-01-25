@@ -494,7 +494,7 @@ helps['appservice list-locations'] = """
 
 helps['appservice plan update'] = """
     type: command
-    short-summary: Update an app service plan.
+    short-summary: Update an app service plan. See https://docs.microsoft.com/en-us/azure/app-service/app-service-plan-manage#move-an-app-to-another-app-service-plan to learn more
 """
 
 helps['appservice plan create'] = """
