@@ -98,7 +98,7 @@ def _get_authority_url(cli_ctx, tenant):
 
 def _create_scopes(cli_ctx, resource=None, is_service_principal=False):
     resource = resource or cli_ctx.cloud.endpoints.resource_manager
-    scope = resource.rstrip('/') + '//.default'
+    scope = resource.rstrip('/') + ('/.default' if 'vault.azure.net' in resource else '//.default')
     return [scope]
 
 
