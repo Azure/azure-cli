@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* Fixes regression where `--ids` could no longer be used with JSON output.
+
 2.0.56
 ++++++
 * auth: enable tenant level account for managed service identity
