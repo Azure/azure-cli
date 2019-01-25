@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* functionapp: fix app setting issues with Elastic Premium plans
+
 0.2.12
 ++++++
 * functionapp: add support for app insights on functionapp create
