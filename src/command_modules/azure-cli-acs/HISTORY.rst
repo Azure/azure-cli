@@ -3,7 +3,7 @@
 Release History
 ===============
 
-* Addon name case insenstive in "az aks enable-addons /disable-addons"
+* Addon name case insenstive in "az aks enable-addons /disable-addons: support case insensitive name"
 
 2.3.14
 ++++++
