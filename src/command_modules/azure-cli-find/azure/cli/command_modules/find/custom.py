@@ -23,7 +23,7 @@ EXTENSION_NAME = 'find'
 
 
 def process_query(cli_term):
-    print(random.choice(WAIT_MESSAGE))
+    print(random.choice(WAIT_MESSAGE), file=sys.stderr)
     response = call_aladdin_service(cli_term)
 
     if response.status_code != 200:
@@ -35,9 +35,9 @@ def process_query(cli_term):
         answer_list = json.loads(response.content)
         if (not answer_list or answer_list[0]['source'] == 'bing'):
             print("\nSorry I am not able to help with [" + cli_term + "]."
-                  "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".")
+                  "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
         else:
-            print("\nHere are the most common ways to use [" + cli_term + "]: \n")
+            print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
             num_results_to_show = min(3, len(answer_list))
             for i in range(num_results_to_show):
                 current_title = answer_list[i]['title'].strip()

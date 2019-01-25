@@ -12,9 +12,9 @@ helps['find'] = """
     examples:
         - name: Give me any Azure CLI command or group and I’ll show the most popular commands and parameters.
           text: |
-            az find 'az [group]'           : az find 'az storage'
-            az find 'az [group] [command]' : az find 'az monitor activity-log list'
+            az find 'az {group}'           : az find 'az storage'
+            az find 'az {group} {command}' : az find 'az monitor activity-log list'
         - name: You can also enter a search term, and I'll try to help find the best commands.
           text: |
-            az find '[query]' : az find 'arm template'
+            az find '{query}' : az find 'arm template'
 """

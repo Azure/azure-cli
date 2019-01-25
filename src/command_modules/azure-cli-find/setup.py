@@ -32,7 +32,6 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'whoosh',
     'colorama~=0.3.7'
 ]
 
