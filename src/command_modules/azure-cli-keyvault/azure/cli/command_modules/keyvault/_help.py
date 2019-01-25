@@ -83,7 +83,7 @@ helps['keyvault certificate import'] = """
 
             az keyvault create -g my-group -n vaultname
 
-            az keyvault certificate import --vault-name vaultname -n cert_name-f cert_file
+            az keyvault certificate import --vault-name vaultname -n cert_name -f cert_file
 
             secrets=$(az keyvault secret list-versions --vault-name vaultname \
               -n cert1 --query "[?attributes.enabled].id" -o tsv)

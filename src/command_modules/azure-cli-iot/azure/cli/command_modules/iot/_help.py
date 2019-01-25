@@ -228,7 +228,7 @@ helps['iot dps linked-hub update'] = """
     examples:
         - name: Update linked IoT hub 'MyLinkedHub.azure-devices.net' in an Azure IoT Hub device provisioning service
           text: >
-            az iot dps linked-hub update --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub.azure-devices.net
+            az iot dps linked-hub update --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub.azure-devices.net
             --allocation-weight 10 --apply-allocation-policy True
 """
 

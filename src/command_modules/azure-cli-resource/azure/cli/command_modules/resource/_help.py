@@ -322,7 +322,7 @@ helps['group deployment create'] = """
             az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
         - name: Create a deployment from a local template file, using parameters from a JSON string.
           text: |
-            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{ \\
                     "location": { \\
                         "value": "westus" \\
                     } \\
