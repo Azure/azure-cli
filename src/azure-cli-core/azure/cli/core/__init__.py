@@ -132,7 +132,8 @@ class MainCommandsLoader(CLICommandsLoader):
                 installed_command_modules = [modname for _, modname, _ in
                                              pkgutil.iter_modules(mods_ns_pkg.__path__)
                                              if modname not in BLACKLISTED_MODS]
-            except ImportError:
+            except ImportError as e:
+                logger.warning(e)
                 pass
             logger.debug('Installed command modules %s', installed_command_modules)
             cumulative_elapsed_time = 0

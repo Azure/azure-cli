@@ -19,8 +19,9 @@ from azure.cli.core._help import CliCommandHelpFile
 
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.commands import _load_command_loader
-from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
+from azure.cli.core.file_util import get_all_help
 
+logger = logging.getLogger(__name__)
 
 # Command loader module
 MOCKED_COMMAND_LOADER_MOD = "test_help_loaders"
@@ -46,8 +47,7 @@ def get_mocked_inspect_getfile(expected_arg, return_value):
 def mock_inspect_getmembers(object, predicate=None):
     import azure.cli.core.tests.test_help_loaders as possible_loaders
 
-    predicate_repr = repr(predicate)
-    if "_register_help_loaders" in predicate_repr and "is_loader_cls" in predicate_repr:
+    if "azure.cli.core._help_loaders" in repr(object) and "is_loader_cls" in repr(predicate):
         result = inspect_getmembers(object, predicate)
         result.extend(inspect_getmembers(possible_loaders, predicate))
         return list(set(result))
@@ -71,6 +71,40 @@ def _is_group(parser):
 def _get_parser_name(parser):
     # pylint:disable=protected-access
     return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog)[len('az '):]
+
+
+def create_invoker_and_load_cmds_and_args(cli_ctx):
+    from knack import events
+    from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
+
+    invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
+                                     parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+    cli_ctx.invocation = invoker
+    invoker.commands_loader.skip_applicability = True
+    invoker.commands_loader.load_command_table(None)
+
+    # Deal with failed import MainCommandsLoader.load_command_table._update_command_table_from_modules
+    # during tox test.
+    if not invoker.commands_loader.cmd_to_loader_map:
+        module_command_table, module_group_table = mock_load_command_loader(invoker.commands_loader, None,
+                                                                            MOCKED_COMMAND_LOADER_MOD, None)
+        for cmd in module_command_table.values():
+            cmd.command_source = MOCKED_COMMAND_LOADER_MOD
+        invoker.commands_loader.command_table.update(module_command_table)
+        invoker.commands_loader.command_group_table.update(module_group_table)
+
+    # turn off applicability check for all loaders
+    for loaders in invoker.commands_loader.cmd_to_loader_map.values():
+        for loader in loaders:
+            loader.skip_applicability = True
+
+    for command in invoker.commands_loader.command_table:
+        invoker.commands_loader.load_arguments(command)
+
+    register_global_subscription_argument(cli_ctx)
+    register_ids_argument(cli_ctx)  # global subscription must be registered first!
+    cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
+    invoker.parser.load_command_table(invoker.commands_loader)
 
 
 # TODO update this CLASS to properly load all help...                                                                       .
