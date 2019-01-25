@@ -226,7 +226,6 @@ def register_ids_argument(cli_ctx):
             command.add_argument('ids', '--ids', **id_kwargs)
 
     def parse_ids_arguments(_, command, args):
-
         namespace = args
         cmd = namespace._cmd  # pylint: disable=protected-access
 
@@ -273,6 +272,8 @@ def register_ids_argument(cli_ctx):
             except ValueError:
                 # supports piping of --ids to the command when using TSV. Requires use of --query
                 full_id_list = full_id_list + val.splitlines()
+        if full_id_list:
+            setattr(namespace, '_ids', full_id_list)
 
         for val in full_id_list:
             if not is_valid_resource_id(val):
