@@ -47,7 +47,12 @@ class MonitorTests(ScenarioTest):
             self.check('evaluationFrequency', '0:05:00'),
             self.check('length(criteria.allOf)', 2),
             self.check('length(criteria.allOf[0].dimensions)', 1),
-            self.check('length(criteria.allOf[1].dimensions)', 0)
+            self.check('length(criteria.allOf[1].dimensions)', 0),
+            self.check("contains(actions[0].actionGroupId, 'actionGroups/ag2')", True),
+            self.check('length(actions)', 1)
+        ])
+        self.cmd('monitor metrics alert update -g {rg} -n {alert} --enabled false', checks=[
+            self.check('enabled', False)
         ])
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 1))

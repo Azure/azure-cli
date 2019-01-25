@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.2.12
+++++++
+* functionapp: add support for app insights on functionapp create
+* functionapp: add support for app service plan creation (including Elastic Premium)
+
 0.2.11
 ++++++
 * webapp: az webapp config ssl upload, handling the scenario of uploading certificates on apps that are hosted on an ASE, where the ASE RG & App RG are different

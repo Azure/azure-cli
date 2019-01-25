@@ -94,7 +94,7 @@ helps["sf cluster certificate add"] = """
         - name: Add a certificate to a  cluster using a keyvault secret identifier.
           text: |
             az sf cluster certificate add -g group-name -n cluster1 \\
-                --secret-identifier 'https://{KeyVault}.vault.azure.net/secrets/{Secret}
+                --secret-identifier 'https://{KeyVault}.vault.azure.net/secrets/{Secret}'
         - name: Add a self-signed certificate to a cluster.
           text: >
              az sf cluster certificate add -g group-name -n cluster1 --certificate-subject-name test.com
@@ -167,7 +167,7 @@ helps["sf cluster durability update"] = """
     examples:
         - name: Change the cluster durability level to 'Silver'.
           text: >
-            az sf cluster durability update -g group-name -n cluster1 --durability-level Silver
+            az sf cluster durability update -g group-name -n cluster1 --durability-level Silver --node-type nt1
 
 """
 

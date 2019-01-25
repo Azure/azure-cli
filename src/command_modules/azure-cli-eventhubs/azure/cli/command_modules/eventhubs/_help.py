@@ -344,7 +344,7 @@ helps['eventhubs georecovery-alias authorization-rule list'] = """
     short-summary: List of Authorizationrule by Event Hubs Namespace
     examples:
         - name: List of Authorizationrule by Event Hubs Namespace
-          text: az eventhubs georecovery-alias authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
+          text: az eventhubs georecovery-alias authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias authorization-rule keys list'] = """
@@ -352,7 +352,7 @@ helps['eventhubs georecovery-alias authorization-rule keys list'] = """
     short-summary: Shows the keys and connection strings of Authorizationrule for the Event Hubs Namespace
     examples:
         - name: Shows the keys and connection strings of Authorizationrule for the namespace.
-          text: az eventhubs georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+          text: az eventhubs georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias break-pair'] = """

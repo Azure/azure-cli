@@ -13,6 +13,8 @@ try:
 except ImportError:
     from urlparse import urlparse, urlsplit  # pylint: disable=import-error
 
+MSI_LOCAL_ID = '[system]'
+
 
 def _validate_deployment_name(namespace):
     # If missing,try come out with a name associated with the template name
@@ -148,6 +150,27 @@ def validate_resource_lock(namespace):
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
+
+
+def validate_msi(namespace):
+    if namespace.assign_identity is not None:
+        identities = namespace.assign_identity or []
+        if any(identity != MSI_LOCAL_ID for identity in identities):
+            raise CLIError("usage error: 'User assigned identities are not supported "
+                           "with --assign-identity and policy assignments'")
+
+        if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
+            raise CLIError("usage error: '--role {}' is not applicable as the '--identity-scope' is not provided"
+                           .format(namespace.identity_role))
+
+        if namespace.identity_scope:
+            if identities and MSI_LOCAL_ID not in identities:
+                raise CLIError(
+                    "usage error: '--identity-scope'/'--role' is only applicable when assigning a system identity")
+
+    elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
+        raise CLIError(
+            'usage error: --assign-identity [--identity-scope SCOPE] [--role ROLE]')
 
 
 # pylint: disable=too-few-public-methods

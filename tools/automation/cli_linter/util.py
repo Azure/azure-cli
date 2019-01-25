@@ -2,15 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-
-import re
-import os
 import copy
-import inspect
-
-
-_LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
 
 
 def exclude_commands(command_loader, help_file_entries, module_exclusions=None, extensions=None):

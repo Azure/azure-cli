@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.3.1
++++++
+* Changed fix to update only properties that are changed on the same object
+*  Fixed #8021, binary data is encoded in base 64 when returned
 
 2.3.0
 +++++

@@ -478,6 +478,10 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             self.check('protocol', 'Http'),
             self.check('requestTimeout', 40)
         ])
+        # test that connection draining can be added if the object was null prior.
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --remove connectionDraining')
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --connection-draining-timeout 60')
+
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))

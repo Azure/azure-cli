@@ -26,12 +26,16 @@ If in doubt, ask!
 e.g. `foo-resource` instead of `fooresource`
 - All command names should contain a verb
 e.g. `account get-connection-string` instead of `account connection-string`
+- For commands which maintain child collections, the follow pairings are acceptable.
+  1. `CREATE`/`DELETE` (same as top level resources)
+  2. `ADD`/`REMOVE`
 - Avoid hyphenated command names when moving the commands into a subgroup would eliminate the need.
 e.g. `database show` and `database get` instead of `show-database` and `get-database`
 - If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information.
 e.g. `database list-sku-definitions` instead of `database sku-definitions list`
-- Avoid command subgroups that have no commands. This often happens at the first level of a command branch.
-e.g. `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).<details>
+- In general, avoid command subgroups that have no commands. This often happens at the first level of a command branch.
+e.g. `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).
+<details>
   <summary>Click for a full example</summary>
   <p>
   KeyVault has secrets, certificates, etc that exist within a vault. The existing (preferred) CLI structure looks like:	
@@ -74,6 +78,29 @@ e.g. `keyvault create` instead of `keyvault vault create` (where `keyvault` only
 </p>
 </details>
 
+## Argument Naming Conventions
+
+- Arguments with specific units:
+  1. In general, DO NOT put units in argument names. ALWAYS put the expected units in the help text. Example: `--duration-in-minutes` should simply be `--duration`. This prevents the need to add more arguments later if more units are supported.
+  2. Consider allowing a syntax that will let the user specify units. For example, even if the service requires a value in minutes, consider accepting 1h or 60m. It is fine to assume a default (i.e. 60 = 60 minutes).
+  3. It is acceptable to use a unit in the argument name when it is used like an enum. For example, `--start-day` is okay when it accepts MON, TUE, etc. `--start-hour` is okay when it indicates an hour of the day.
+- ID Arguments:
+  1. Arguments that end in `-id` should be GUIDs.
+  2. Arguments that expect ARM IDs should omit `-id` but call out that an ARM ID is allowed in the help text. These are often used as part of the "name or ID" convention (i.e: `--storage-account` can often accept a storage account name OR ARM ID).
+- Overloading Arguments:
+  1. Avoid having multiple arguments that simply represent different ways of getting the same thing. Instead, use a single descriptive name and overload it appropriately. For example, assume a command which can accept a parameter file through a URL or local path.
+
+**AVOID**
+```
+    --parameters-url   URL to a parameters file.
+    --parameters-path  Local path to a parameters fle.
+```
+
+**PREFERRED**
+```
+    --parameters   Local path or URL to a parameters file.`
+```
+
 ## Standard Command Types
 
 The following are standard names and behavioral descriptions for CRUD commands commonly found within the CLI. These standard command types MUST be followed for consistency with the rest of the CLI.
@@ -84,6 +111,8 @@ The following are standard names and behavioral descriptions for CRUD commands c
 - `SHOW` - command to show the properties of a resource, backed server-side by a GET request. All `show` commands should be registered using the `show_command` or `custom_show_command` helpers to ensure `404(Not Found)` is always returning an exit code of 3.
 - `LIST` - command to list instances of a resource, backed server-side by a GET request. When there are multiple "list-type" commands within an SDK to list resources at different levels (for example, listing resources in a subscription vice in a resource group) the functionality should be exposed by have a single list command with arguments to control the behavior. For example, if `--resource-group` is provided, the command will call `list_by_resource_group`; otherwise, it will call `list_by_subscription`.
 - `DELETE` - command to delete a resource, backed server-side by a DELETE request. Delete commands return nothing on success.
+- `WAIT` - command that polls a GET endpoint until a condition is reached. If any command within a command group or subgroup exposes
+  the `--no-wait` parameter, this command should be exposed.
 
 ## Non-standard Commands
 
