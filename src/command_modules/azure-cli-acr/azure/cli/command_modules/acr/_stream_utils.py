@@ -60,7 +60,9 @@ def stream_logs(client,
                      endpoint_suffix=endpoint_suffix),
                  container_name,
                  blob_name,
-                 raise_error_on_failure)
+                 raise_error_on_failure,
+                 run_id,
+                 registry_name)
 
 
 def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
@@ -69,7 +71,9 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
                  blob_service,
                  container_name,
                  blob_name,
-                 raise_error_on_failure):
+                 raise_error_on_failure,
+                 run_id,
+                 registry_name):
 
     if not no_format:
         colorama.init()
@@ -157,8 +161,12 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
             if curr_bytes:
                 print(curr_bytes.decode('utf-8', errors='ignore'))
 
-            logger.warning("Failed to find any new logs in %d seconds. Client will stop polling for additional logs.",
-                           consecutive_sleep_in_sec)
+            logger.warning("Failed to find any new logs in %d seconds. "
+                           "The CLI will stop polling for additional logs, but the run will continue its execution. "
+                           "Use az acr task logs -r %s --run-id %s to try and see additional logs.",
+                           consecutive_sleep_in_sec,
+                           registry_name,
+                           run_id)
             return
 
         # If no new data available but not complete, sleep before trying to process additional data.
