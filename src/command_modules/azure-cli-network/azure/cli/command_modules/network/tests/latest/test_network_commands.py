@@ -1699,8 +1699,12 @@ class NetworkVNetScenarioTest(ScenarioTest):
         # This test ensures you can pipe JSON output to --ids bash-style
         # ensures that a JSON string where each line is interpretted individually
         # is reassembled and treated as a single json string
-        split_json = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json()).split()
-        self.cmd('network vnet show --ids {}'.format(' '.join(split_json)),
+        json_obj = self.cmd('network vnet list -g {rg}').get_output_in_json()
+        for item in json_obj:
+            del item['etag']
+        split_json = json.dumps(json_obj, indent=4).split()
+        split_string = ' '.join(split_json).replace('{', '{{').replace('}', '}}').replace('"', '\\"')
+        self.cmd('network vnet show --ids {}'.format(split_string),
                  checks=self.check('length(@)', 2))
 
 
