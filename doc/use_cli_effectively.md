@@ -47,7 +47,7 @@
           az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | tr '\r\n' ' ' | { read ids ; az vm start --ids $ids ; }
 
 ## Async executions ##
-  This becomes handly for a few scenarios:
+  This becomes handy for a few scenarios:
   1. Clean up
 
           az group delete -n my_rg --no-wait
@@ -79,7 +79,7 @@
   1. If the argument value contains whitespace, you have to use quotes to wrap them.
   2. In Bash, both single and double quotes will be intepreted; while in windows command, only double quotes get handled which means single quotes will be part of values. So be careful on this difference.
   3. If your command only runs on Bash (or zsh), using single quotes has the benefit of preserve the content inside. Say, if you are dealing with argument vaules in json, then not having to escape the double quotes is a big relief.
-  4. If your command will run on windows command prompt, do use double quotes. If the value contains double quotes, make sure you escape it e.g. "i like to use \\" a lot". Please note, in Bash exported variable inside the double quote will be evaluated. If this is not what you want, again use \" to escape it like "\\$var"
+  4. If your command will run on windows command prompt, do use double quotes. If the value contains double quotes, make sure you escape it e.g. "i like to use \\" a lot". Please note, in Bash exported variable inside the double quote will be evaluated. If this is not what you want, again use \\ to escape it like "\\$var"
   5. A few CLI commands, including the generic updater, takes a list of values seperated by spaces, like `<key1>=<value1> <key2>=<value2>`. Since the key name and value can take arbitary string which might contain whitespaces, using quotes will be necessary. Do remember you need to wrap the pair, not individual key or value. So `"my name"=john` is wrong, and the right one would be `"my name=john"` e.g.,
 
          az webapp config appsettings set -g my_rg -n my_web --settings "client id=id1" "my name=john"
