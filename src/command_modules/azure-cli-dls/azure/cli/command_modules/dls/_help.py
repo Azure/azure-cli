@@ -170,10 +170,6 @@ short-summary: Replace the existing access control list for a file or folder.
 helps['dls fs access set-entry'] = """
 type: command
 short-summary: Update the access control list for a file or folder.
-examples:
--   name: Update the access control list for a file or folder.
-    text: az dls fs access set-entry --account {account} --path {path} --acl-spec [default:]user|group|other:[entity id or UPN]:r|-w|-x|-
-    crafted: true
 """
 
 helps['dls fs access set-owner'] = """
