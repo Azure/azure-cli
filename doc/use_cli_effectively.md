@@ -1,4 +1,4 @@
-# Tips to use Azure CLI effectively #
+# Tips of using Azure CLI effectively #
 
 ## Use the right output mode for your work (json, table, or tsv) ##
   - Use `json` (CLI's default) to give you the most comprehensive information. If you prefer less, use `--output` argument to override at individual command level, or use "az configure" for global level.
@@ -14,7 +14,6 @@
         export vm_ids=$(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)  
         az vm stop --ids $vm_ids
 		
-
 ## To pass values from one command to the other ##
    - If the value will be used more than once, assign it to a variable, e.g.
 	   
@@ -24,8 +23,8 @@
 
 		   az vm list --query "[?powerState=='VM running'].name" | grep my_vm
 
-
 	- For list type, 2 suggestions:
+
 	   If you need more controls on the result, use "for" loop:
 	   
 			#!/usr/bin/env bash
@@ -39,7 +38,6 @@
 				echo $vm stopped
 			done
 		
-
 	   Or, use `xargs` and optionally going parallel through `-P` flag for better performance
 
 		   az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | xargs -I {} -P 10 az vm start --ids "{}"
@@ -60,7 +58,6 @@
       	 az vm create -g my_rg -n vm2 --image centos --no-wait
 	       
       	 az vm wait --created --ids $(az vm list -g my_rg --query "[].id" -o tsv)
-	  
 
 ## Generic update command ##
    The hallmark is the `"--add", "--set", "--remove"` generic arguments. Being generic means it can do more things but at the cost of usabilities.
@@ -90,4 +87,3 @@
    - Last, use CLI's "@<fiile>" convention to load from a file so to by-pass shell's intepretion, e.g.
 
          az ad app create --display-name my-native --native-app --required-resource-accesses @manifest.json
-      
