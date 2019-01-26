@@ -75,7 +75,7 @@
          az vm update -g my_rg -n my_vm --add storageProfile.dataDisks @~/my_disk.json
 
 ## Single quote vs double quote ##
-  This becomes a topic becuase when the command shell(bash, zsh, windows command prompt, etc) parses the CLI command, it will interpret the quotes. To avoid the surprise, a few suggestions here:
+  This becomes a topic because when the command shell(bash, zsh, windows command prompt, etc) parses the CLI command, it will interpret the quotes. To avoid the surprise, a few suggestions here:
   1. If the argument value contains whitespace, you have to use quotes to wrap them.
   2. In Bash, both single and double quotes will be intepreted; while in windows command, only double quotes get handled which means single quotes will be part of values. So be careful on this difference.
   3. If your command only runs on Bash (or zsh), using single quotes has the benefit of preserve the content inside. Say, if you are dealing with argument vaules in json, then not having to escape the double quotes is a big relief.
