@@ -111,8 +111,11 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 |2   |Parser error; check input to command line.   |
 |3   |Missing ARM resource; used for existence check from `show` commands.   |
 
+
 #### More Samples and Snippets
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
+
+For how to use CLI effectively, check out [tips](./doc/use_cli_effectively.md).
 
 ## Reporting issues and feedback
 
