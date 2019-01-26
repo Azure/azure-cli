@@ -23,7 +23,7 @@
 
            az vm list --query "[?powerState=='VM running'].name" | grep my_vm
 
-    - For list type, 2 suggestions:
+   - For list type, 2 suggestions:
 
        If you need more controls on the result, use "for" loop:
        
@@ -64,16 +64,16 @@
     For common scenarios, CLI always provides custom commands to make your life easy, but leave the rest for you to explore through the generic updater. A few notes here to ease the pain:
 
    - You will need some patience to pull it through.
-    - Do check out whether or not the update command has the convinient arguments exposed for your scenario. If yes, use those.
-    - The property path used with the generic arguments are tied to the output of "show" command. For example, before you try out "az vm update", do invoke the "az vm show" command, read the output, and figure out the right path.
-    - Checking out working examples is the best way to get started. `az vm update -h` has the good ones.
-    - Do remember that generic arguments of `--set` and `--add` takes a list of key value pairs in the format of `<key1>=<value1> <key2>=<value2>`. You will need them to construct non trivial payload. If the input gets complex, using json string will be the best bet, e.g. to attach a new disk:
+   - Do check out whether or not the update command has the convinient arguments exposed for your scenario. If yes, use those.
+   - The property path used with the generic arguments are tied to the output of "show" command. For example, before you try out "az vm update", do invoke the "az vm show" command, read the output, and figure out the right path.
+   - Checking out working examples is the best way to get started. `az vm update -h` has the good ones.
+   - Do remember that generic arguments of `--set` and `--add` takes a list of key value pairs in the format of `<key1>=<value1> <key2>=<value2>`. You will need them to construct non trivial payload. If the input gets complex, using json string will be the best bet, e.g. to attach a new disk:
 
-          az vm update -g my_rg -n my_vm --add storageProfile.dataDisks "{\"createOption\": \"Attach\", \"managedDisk\": {\"id\": \"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/yg/providers/Microsoft.Compute/disks/yg-disk\"}, \"lun\": 1}"
+         az vm update -g my_rg -n my_vm --add storageProfile.dataDisks "{\"createOption\": \"Attach\", \"managedDisk\": {\"id\": \"/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/yg/providers/Microsoft.Compute/disks/yg-disk\"}, \"lun\": 1}"
 
-    - Of course, leverage CLI's `@<file>` convention, you can put the json string to a file and simplify the command
+   - Of course, leverage CLI's `@<file>` convention, you can put the json string to a file and simplify the command
 
-          az vm update -g my_rg -n my_vm --add storageProfile.dataDisks @~/my_disk.json
+         az vm update -g my_rg -n my_vm --add storageProfile.dataDisks @~/my_disk.json
 
 ## Single quote vs double quote ##
    This becomes a topic becuase when the command shell(bash, zsh, windows command prompt, etc) parses the CLI command, it will interpret the quotes. To avoid the surprise, a few suggestions here:
