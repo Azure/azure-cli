@@ -47,7 +47,7 @@
           az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | tr '\r\n' ' ' | { read ids ; az vm start --ids $ids ; }
 
 ## Async executions ##
-  This becomes handly when,
+  This becomes handly for a few scenarios:
   1. Clean up
 
           az group delete -n my_rg --no-wait
