@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import json
 import unittest
 import jmespath
 import mock
@@ -292,7 +293,7 @@ class WebappConfigureTest(ScenarioTest):
             .assert_with_checks(checks)
 
         # site appsettings testing
-        # update
+        # update through key value pairs
         self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, webapp_name)).assert_with_checks([
             JMESPathCheck("length([?name=='s1'])", 1),
             JMESPathCheck("length([?name=='s2'])", 1),
@@ -301,6 +302,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("length([?value=='bar'])", 1),
             JMESPathCheck("length([?value=='bar2'])", 1)
         ])
+
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name)).get_output_in_json()
         s2 = next((x for x in result if x['name'] == 's2'))
@@ -371,6 +373,75 @@ class WebappConfigureTest(ScenarioTest):
 
         # see deployment user; just make sure the command does return something
         self.assertTrue(self.cmd('webapp deployment user show').get_output_in_json()['type'])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_json')
+    def test_update_webapp_settings_thru_json(self, resource_group):
+        webapp_name = self.create_random_name('webapp-config-test', 40)
+        plan_name = self.create_random_name('webapp-config-plan', 40)
+
+        # update through a json file with key value pair
+        _, settings_file = tempfile.mkstemp()
+        with open(settings_file, 'w+') as file:
+            file.write(json.dumps({'s2': 'value2'}))
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2']]
+        output.sort(key=lambda s:s['name'])
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+
+        # output using the output of the set/list command
+        output.append({
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+        with open(settings_file, 'w') as file:
+            file.write(json.dumps(output))
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --settings "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s:s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+        # update site config
+        site_configs = {
+            "requestTracingEnabled": True,
+            "alwaysOn": True
+        }
+        with open(settings_file, 'w') as file:
+            file.write(json.dumps(site_configs))
+        self.cmd('webapp config set -g {} -n {} --generic-configurations "@{}"'.format(resource_group, webapp_name, settings_file)).assert_with_checks([
+            JMESPathCheck("requestTracingEnabled", True),
+            JMESPathCheck("alwaysOn", True),
+        ])        
 
 
 class WebappScaleTest(ScenarioTest):

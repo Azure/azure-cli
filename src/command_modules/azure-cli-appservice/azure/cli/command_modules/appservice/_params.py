@@ -212,6 +212,8 @@ def load_arguments(self, _):
             c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
             c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
             c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.", arg_type=get_enum_type(FTPS_STATE_TYPES))
+            c.argument('generic_configurations', nargs='+',
+                       help='provide site configuration list in a format of either "key=value" pair or "@<json_file>"')
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -252,7 +254,7 @@ def load_arguments(self, _):
     for scope in ['appsettings', 'connection-string']:
         with self.argument_context('webapp config ' + scope) as c:
             c.argument('settings', nargs='+', help="space-separated {} in a format of <name>=<value>".format(scope))
-            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of <name>=<value>".format(scope))
+            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of either <name>=<value> or @<json_file>".format(scope))
             c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
     with self.argument_context('webapp config connection-string') as c:
