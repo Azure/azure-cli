@@ -390,7 +390,7 @@ class WebappConfigureTest(ScenarioTest):
         output = self.cmd('webapp config appsettings set -g {} -n {} --settings s=value "@{}"'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2']]
-        output.sort(key=lambda s:s['name'])
+        output.sort(key=lambda s: s['name'])
         self.assertEqual(output[0], {
             'name': 's',
             'value': 'value',
@@ -414,7 +414,7 @@ class WebappConfigureTest(ScenarioTest):
         output = self.cmd('webapp config appsettings set -g {} -n {} --settings "@{}"'.format(
             resource_group, webapp_name, settings_file)).get_output_in_json()
         output = [s for s in output if s['name'] in ['s', 's2', 's3']]
-        output.sort(key=lambda s:s['name'])
+        output.sort(key=lambda s: s['name'])
 
         self.assertEqual(output[0], {
             'name': 's',
@@ -441,7 +441,7 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --generic-configurations "@{}"'.format(resource_group, webapp_name, settings_file)).assert_with_checks([
             JMESPathCheck("requestTracingEnabled", True),
             JMESPathCheck("alwaysOn", True),
-        ])        
+        ])
 
 
 class WebappScaleTest(ScenarioTest):
