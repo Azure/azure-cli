@@ -3,7 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
+import os
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class HDInsightClusterTests(ScenarioTest):
@@ -123,15 +128,6 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.applicationState', 'Running')
         ])
 
-        # delete the specific application
-        self.cmd('az hdinsight application delete -g {rg} -n {cluster} --application-name {app} --yes')
-
-        # list applications and validate it is gone.
-        self.cmd('az hdinsight application list -g {rg} -n {cluster}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 0)
-        ])
-
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -148,37 +144,42 @@ class HDInsightClusterTests(ScenarioTest):
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
-    def test_hdinsight_oms(self, storage_account_info):
+    def test_hdinsight_monitor(self, storage_account_info):
         self.kwargs.update({
-            'oms_workspace_id': '1d364e89-bb71-4503-aa3d-a23535aea7bd'
+            'ws': self.create_random_name('testws', 20),
+            'la_prop_path': os.path.join(TEST_DIR, 'loganalytics.json')
         })
+
+        ws_response = self.cmd('resource create -g {rg} -n {ws} '
+                               '--resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"') \
+            .get_output_in_json()
+        ws_customer_id = ws_response['properties']['customerId']
 
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._with_explicit_ssh_creds()
         )
 
-        # get OMS status
-        self.cmd('az hdinsight oms show -g {rg} -n {cluster}', checks=[
+        # get monitor status
+        self.cmd('az hdinsight monitor show -g {rg} -n {cluster}', checks=[
             self.check('clusterMonitoringEnabled', False),
             self.check('workspaceId', None)
         ])
 
-        # enable OMS
-        self.cmd(
-            'az hdinsight oms enable -g {rg} -n {cluster} --workspace-id {oms_workspace_id}')
+        # enable monitoring
+        self.cmd('az hdinsight monitor enable -g {rg} -n {cluster} --workspace {ws} --no-validation-timeout')
 
-        # get OMS status
-        self.cmd('az hdinsight oms show -g {rg} -n {cluster}', checks=[
+        # get monitor status
+        self.cmd('az hdinsight monitor show -g {rg} -n {cluster}', checks=[
             self.check('clusterMonitoringEnabled', True),
-            self.check('workspaceId', '{oms_workspace_id}')
+            self.check('workspaceId', ws_customer_id)
         ])
 
-        # disable OMS
-        self.cmd('az hdinsight oms disable -g {rg} -n {cluster}')
+        # disable monitor
+        self.cmd('az hdinsight monitor disable -g {rg} -n {cluster}')
 
-        # get OMS status
-        self.cmd('az hdinsight oms show -g {rg} -n {cluster}', checks=[
+        # get monitor status
+        self.cmd('az hdinsight monitor show -g {rg} -n {cluster}', checks=[
             self.check('clusterMonitoringEnabled', False),
             self.check('workspaceId', None)
         ])
@@ -292,7 +293,14 @@ class HDInsightClusterTests(ScenarioTest):
         })
 
         create_cluster_format = 'az hdinsight create -n {cluster} -g {rg} -l {loc} -p {http_password} -t {cluster_type} ' \
+                                + '--no-validation-timeout ' \
                                 + ' '.join(additional_create_arguments)
+
+        # Wait some time to improve robustness
+        if self.is_live or self.in_recording:
+            import time
+            time.sleep(60)
+
         self.cmd(create_cluster_format, checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.clusterState', 'Running'),

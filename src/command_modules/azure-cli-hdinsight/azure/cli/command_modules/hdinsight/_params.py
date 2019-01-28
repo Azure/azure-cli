@@ -3,14 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, get_resource_name_completion_list, \
-    get_generic_completion_list, get_three_state_flag
+from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, \
+    get_generic_completion_list, get_three_state_flag, get_resource_name_completion_list
 from ._validators import (validate_component_version,
                           validate_storage_account,
                           validate_msi,
                           validate_storage_msi,
                           validate_subnet,
-                          validate_domain_service)
+                          validate_domain_service,
+                          validate_workspace)
 
 # Cluster types may be added in the future. Therefore, this list can be used for completion, but not input validation.
 known_cluster_types = ["hadoop", "interactivehive", "hbase", "kafka", "storm", "spark", "rserver", "mlservices"]
@@ -21,7 +22,8 @@ known_role_types = ["headnode", "workernode", "zookeepernode", "edgenode"]
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
-    from ._completers import subnet_completion_list
+    from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
+        cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
     from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm
     node_size_type = CLIArgumentType(arg_group='Node',
@@ -36,6 +38,8 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
                    help='The name of the cluster.')
         c.argument('tags', tags_type)
+        c.argument('no_validation_timeout', arg_type=get_three_state_flag(),
+                   help='Do not report timeout error during argument validation phase.')
         c.argument('cluster_version', options_list=['--version', '-v'], arg_group='Cluster',
                    help='The HDInsight cluster version. See also: https://docs.microsoft.com/en-us/azure/'
                         'hdinsight/hdinsight-component-versioning#supported-hdinsight-versions')
@@ -62,7 +66,7 @@ def load_arguments(self, _):
         c.argument('http_username', options_list=['--http-user', '-u'], arg_group='HTTP',
                    help='HTTP username for the cluster.  Default: admin.')
         c.argument('http_password', options_list=['--http-password', '-p'], arg_group='HTTP',
-                   help='HTTP password for the cluster.')
+                   help='HTTP password for the cluster. Will prompt if not given.')
 
         # SSH
         c.argument('ssh_username', options_list=['--ssh-user', '-U'], arg_group='SSH',
@@ -89,7 +93,7 @@ def load_arguments(self, _):
 
         # Storage
         c.argument('storage_account', arg_group='Storage', validator=validate_storage_account,
-                   completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'),
+                   completer=get_resource_name_completion_list_under_subscription('Microsoft.Storage/storageAccounts'),
                    help='The name or ID of the storage account.')
         c.argument('storage_account_key', arg_group='Storage',
                    help='The storage account key. A key can be retrieved automatically '
@@ -100,13 +104,14 @@ def load_arguments(self, _):
         c.argument('storage_default_filesystem', arg_group='Storage',
                    help='The storage filesystem the cluster will use. (DFS only)')
         c.argument('storage_account_managed_identity', arg_group='Storage', validator=validate_storage_msi,
-                   completer=get_resource_name_completion_list('Microsoft.ManagedIdentity/userAssignedIdentities'),
+                   completer=get_resource_name_completion_list_under_subscription(
+                       'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help='User-assigned managed identity with access to the storage account filesystem. '
                         'Only required when storage account type is Azure Data Lake Storage Gen2.')
 
         # Network
         c.argument('vnet_name', arg_group='Network', validator=validate_subnet,
-                   completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'),
+                   completer=get_resource_name_completion_list_under_subscription('Microsoft.Network/virtualNetworks'),
                    help='The name of a virtual network.')
         c.argument('subnet', arg_group='Network',
                    completer=subnet_completion_list,
@@ -119,15 +124,18 @@ def load_arguments(self, _):
 
         # Domain Service
         c.argument('domain', arg_group='Domain Service', validator=validate_domain_service,
+                   completer=get_resource_name_completion_list_under_subscription('Microsoft.AAD/domainServices'),
                    help='The name or resource ID of the user\'s Azure Active Directory Domain Service. '
                         'Required only when create cluster with Enterprise Security Package.')
         c.argument('cluster_users_group_dns', arg_group='Domain Service', nargs='+',
+                   completer=cluster_user_group_completion_list,
                    help='A space-delimited list of Distinguished Names for cluster user groups. '
                         'Required only when create cluster with Enterprise Security Package. ')
         c.argument('cluster_admin_password', arg_group='Domain Service',
                    help='The domain admin password. '
                         'Required only when create cluster with Enterprise Security Package.')
         c.argument('cluster_admin_account', arg_group='Domain Service',
+                   completer=cluster_admin_account_completion_list,
                    help='The domain user account that will have admin privileges on the cluster. '
                         'Required only when create cluster with Enterprise Security Package.')
         c.argument('ldaps_urls', arg_group='Domain Service', nargs='+',
@@ -146,6 +154,8 @@ def load_arguments(self, _):
 
         # Managed Service Identity
         c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,
+                   completer=get_resource_name_completion_list_under_subscription(
+                       'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help="The name or ID of user assigned identity.")
 
     # application
@@ -178,7 +188,9 @@ def load_arguments(self, _):
         c.argument('script_name', options_list='--script-action-name', arg_group='Script Action',
                    help='The name of the script action.')
 
-    # OMS
-    with self.argument_context('hdinsight oms') as c:
-        c.argument('workspace_id', arg_group='OMS', help='The Operations Management Suite (OMS) workspace ID.')
-        c.argument('primary_key', arg_group='OMS', help='The Operations Management Suite (OMS) workspace key.')
+    # Monitoring
+    with self.argument_context('hdinsight monitor') as c:
+        c.argument('workspace', arg_group='Monitoring', validator=validate_workspace,
+                   completer=get_resource_name_completion_list_under_subscription(
+                       'Microsoft.OperationalInsights/workspaces'),
+                   help='The name or resource ID of Log Analytics workspace.')

@@ -23,13 +23,14 @@ helps['hdinsight create'] = """
               --storage-account MyStorageAccount
         - name: Create a cluster with Enterprise Security Package.
           text: |-
-              az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+              az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
               -p "HttpPassword1234!" \\
               --storage-account MyStorageAccount \\
               --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
               --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
               --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
-              --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com
+              --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
+              --cluster-users-group-dns MyGroup
         - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/en-us/azure/hdinsight/kafka/apache-kafka-byok.
           text: |-
              az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
@@ -93,14 +94,24 @@ helps['hdinsight application wait'] = """
     short-summary: Place the CLI in a waiting state until an operation is complete.
 """
 
-helps['hdinsight oms'] = """
+helps['hdinsight monitor'] = """
     type: group
-    short-summary: Manage HDInsight Operations Management Suite (OMS).
+    short-summary: Manage Azure Monitor logs integration on the HDInsight cluster.
 """
 
-helps['hdinsight oms enable'] = """
+helps['hdinsight monitor enable'] = """
     type: command
-    short-summary: Enables the Operations Management Suite (OMS) on the HDInsight cluster.
+    short-summary: Enables the Azure Monitor logs integration on the HDInsight cluster.
+"""
+
+helps['hdinsight monitor disable'] = """
+    type: command
+    short-summary: Disables the Azure Monitor logs integration on the HDInsight cluster.
+"""
+
+helps['hdinsight monitor show'] = """
+    type: command
+    short-summary: Gets the status of Azure Monitor logs integration on the HDInsight cluster.
 """
 
 helps['hdinsight script-action'] = """
