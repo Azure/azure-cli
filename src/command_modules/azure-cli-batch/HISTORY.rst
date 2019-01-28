@@ -3,6 +3,17 @@
 Release History
 ===============
 
+4.0.0
++++++
+* Updated to Batch SDK 6.0.0
+    * **[Breaking]** A new property `HttpUrl` replaces `BlobSource`. This can be any HTTP URL. Previously, this had to be an Azure Blob Storage URL.
+    * **[Breaking]** Removed `OSDisk` property from `VirtualMachineConfiguration`. This property is no longer supported.
+    * **[Breaking]** `Application` no longer has a `Packages` property, instead the packages can be retrieved via the new  `ApplicationPackage.List` API.
+    * **[Breaking]** `TargetOsVersion` is now `OsVersion`, and `CurrentOsVersion` is no longer supported on `CloudServiceConfiguration`.
+    * **[Breaking]** Removed support for the `upgrade_os` API
+    * See the HISTORY.rst for the `azure-batch <https://github.com/Azure/azure-sdk-for-python/blob/master/azure-batch/HISTORY.rst>`_. and `azure-mgmt-batch <https://github.com/Azure/azure-sdk-for-python/blob/master/azure-mgmt-batch/HISTORY.rst>`_. for further information on non-breaking changes related to this release.
+* Update validation logic to automatically include "https://" in all references of account_endpoint if not specified. This was already being done by `az batch login`.
+
 3.4.1
 +++++
 * Updated to Batch SDK 5.1.0.

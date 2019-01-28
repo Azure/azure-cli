@@ -60,7 +60,7 @@ def environment_setting_format(value):
 def application_package_reference_format(value):
     """Space-separated application IDs with optional version in 'id[#version]' format."""
     app_reference = value.split('#', 1)
-    package = {'application_id': app_reference[0]}
+    package = {'application_name': app_reference[0]}
     try:
         package['version'] = app_reference[1]
     except IndexError:  # No specified version - ignore
@@ -283,6 +283,11 @@ def validate_client_parameters(cmd, namespace):
         namespace.account_key = cmd.cli_ctx.config.get('batch', 'access_key', None)
     if not namespace.account_endpoint:
         namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
+
+    # Simple validation for account_endpoint
+    if not (namespace.account_endpoint.startswith('https://') or
+            namespace.account_endpoint.startswith('http://')):
+        namespace.account_endpoint = 'https://' + namespace.account_endpoint
 
     # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
