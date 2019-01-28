@@ -47,29 +47,29 @@ helps['webapp auth update'] = """
 
 helps['webapp identity assign'] = """
     type: command
-    short-summary: assign or disable managed service identity to the webapp
+    short-summary: assign or disable managed service identity to the web app
     examples:
         - name: assign local identity and assign a reader role to the current resource group.
           text: >
             az webapp identity assign -g MyResourceGroup -n MyUniqueApp --role reader --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/MyResourceGroup
-        - name: enable identity for the webapp.
+        - name: enable identity for the web app.
           text: >
             az webapp identity assign -g MyResourceGroup -n MyUniqueApp
 """
 
 helps['webapp identity'] = """
     type: group
-    short-summary: manage webapp's managed service identity
+    short-summary: manage web app's managed service identity
 """
 
 helps['webapp identity show'] = """
     type: command
-    short-summary: display webapp's managed service identity
+    short-summary: display web app's managed service identity
 """
 
 helps['webapp identity remove'] = """
     type: command
-    short-summary: Disable webapp's managed service identity
+    short-summary: Disable web app's managed service identity
 """
 
 helps['functionapp identity'] = helps['webapp identity'].replace('webapp', 'functionapp')
@@ -400,7 +400,7 @@ helps['webapp deployment source config-local-git'] = """
 
 helps['webapp deployment source config-zip'] = """
     type: command
-    short-summary: Perform deployment using the kudu zip push deployment for a webapp.
+    short-summary: Perform deployment using the kudu zip push deployment for a web app.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
         npm install or dotnet publish. This can be overridden by including a .deployment file in your
@@ -494,7 +494,7 @@ helps['appservice list-locations'] = """
 
 helps['appservice plan update'] = """
     type: command
-    short-summary: Update an app service plan.
+    short-summary: Update an app service plan. See https://docs.microsoft.com/en-us/azure/app-service/app-service-plan-manage#move-an-app-to-another-app-service-plan to learn more
 """
 
 helps['appservice plan create'] = """
@@ -586,22 +586,22 @@ helps['webapp config backup restore'] = """
 
 helps['webapp webjob'] = """
     type: group
-    short-summary: Allows management operations for webjobs on a webapp.
+    short-summary: Allows management operations for webjobs on a web app.
 """
 
 helps['webapp webjob continuous'] = """
     type: group
-    short-summary: Allows management operations of continuous webjobs on a webapp.
+    short-summary: Allows management operations of continuous webjobs on a web app.
 """
 
 helps['webapp webjob continuous list'] = """
     type: command
-    short-summary: List all continuous webjobs on a selected webapp.
+    short-summary: List all continuous webjobs on a selected web app.
 """
 
 helps['webapp webjob continuous start'] = """
     type: command
-    short-summary: Start a specific continuous webjob on a selected webapp.
+    short-summary: Start a specific continuous webjob on a selected web app.
 """
 
 helps['webapp webjob continuous stop'] = """
@@ -616,27 +616,27 @@ helps['webapp webjob continuous remove'] = """
 
 helps['webapp webjob triggered'] = """
     type: group
-    short-summary: Allows management operations of triggered webjobs on a webapp.
+    short-summary: Allows management operations of triggered webjobs on a web app.
 """
 
 helps['webapp webjob triggered list'] = """
     type: command
-    short-summary: List all triggered webjobs hosted on a webapp.
+    short-summary: List all triggered webjobs hosted on a web app.
 """
 
 helps['webapp webjob triggered run'] = """
     type: command
-    short-summary: Run a specific triggered webjob hosted on a webapp.
+    short-summary: Run a specific triggered webjob hosted on a web app.
 """
 
 helps['webapp webjob triggered remove'] = """
     type: command
-    short-summary: Delete a specific triggered webjob hosted on a webapp.
+    short-summary: Delete a specific triggered webjob hosted on a web app.
 """
 
 helps['webapp webjob triggered log'] = """
     type: command
-    short-summary: Get history of a specific triggered webjob hosted on a webapp.
+    short-summary: Get history of a specific triggered webjob hosted on a web app.
 """
 
 helps['webapp browse'] = """
@@ -661,17 +661,17 @@ helps['webapp ssh'] = """
     type: command
     short-summary: (Preview) SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.
     examples:
-        - name: ssh into a webapp
+        - name: ssh into a web app
           text: >
             az webapp ssh -n MyUniqueAppName -g MyResourceGroup
 """
 
 helps['webapp up'] = """
     type: command
-    short-summary: (Preview) Create and deploy existing local code to the webapp, by running the command from the folder where the code is present.
+    short-summary: (Preview) Create and deploy existing local code to the web app, by running the command from the folder where the code is present.
                    Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET,
                    staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps.
-                   If command is run from an empty folder, an empty windows webapp is created.
+                   If command is run from an empty folder, an empty windows web app is created.
     examples:
         - name: View the details of the app that will be created, without actually running the operation
           text: >
