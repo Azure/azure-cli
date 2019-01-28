@@ -72,6 +72,21 @@ helps['acs create'] = """
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
 """.format(sp_cache=ACS_SERVICE_PRINCIPAL_CACHE)
 
+helps['acs delete'] = """
+    type: command
+    short-summary: Delete a container service.
+"""
+
+helps['acs list'] = """
+    type: command
+    short-summary: List container services.
+"""
+
+helps['acs scale'] = """
+    type: command
+    short-summary: Change the private agent count of a container service.
+"""
+
 helps['acs dcos'] = """
     type: group
     short-summary: Commands to manage a DC/OS-orchestrated Azure Container Service.
