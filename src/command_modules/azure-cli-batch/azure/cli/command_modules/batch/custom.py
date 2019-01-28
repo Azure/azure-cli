@@ -137,9 +137,10 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
 def update_application(client,
                        resource_group_name, account_name, application_name, allow_updates=None,
                        display_name=None, default_version=None):
-    parameters = Application(allow_updates=allow_updates,
-                                             display_name=display_name,
-                                             default_version=default_version)
+    parameters = Application(
+        allow_updates=allow_updates,
+        display_name=display_name,
+        default_version=default_version)
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          application_name=application_name,

@@ -114,8 +114,8 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
             f.write('storage blob test sample file')
 
         # test create application with default set
-        self.cmd('batch application create -g {rg} -n {acc} --application-name {app} ').assert_with_checks([
-                     self.check('name', '{app}')])
+        self.cmd('batch application create -g {rg} -n {acc} --application-name {app} ').assert_with_checks(
+            [self.check('name', '{app}')])
 
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks([
             self.check('length(@)', 1),
