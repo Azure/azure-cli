@@ -2,6 +2,8 @@
 
 Release History
 ===============
+0.2.12
+++++++
 * webapp: add support for updating configurations through json
 * appservice plan: Updating help for appservice-plan-update command
 * functionapp: add support for app insights on functionapp create
