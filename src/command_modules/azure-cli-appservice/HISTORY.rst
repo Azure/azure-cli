@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.2.12
+++++++
+* appservice plan: Updating help for appservice-plan-update command
 * functionapp: add support for app insights on functionapp create
 
 0.2.11
