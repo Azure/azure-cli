@@ -2,7 +2,7 @@
 
 Release History
 ===============
-* vm list-skus: --all should be a flag instead of an argument requiring values
+* vm list-skus: Allow use of `--all` in place of `--all true`
 
 2.2.13
 ++++++
