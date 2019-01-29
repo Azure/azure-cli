@@ -115,5 +115,5 @@ class TestHelpLoader(HelpLoaderV1):
                     help_file_path = os.path.join(dir_name, file)
                     with open(help_file_path, "r") as f:
                         text = f.read()
-                        return _parse_json_from_string(text, help_file_path)
+                        return [_parse_json_from_string(text, help_file_path)]
         return None
