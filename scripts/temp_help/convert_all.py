@@ -52,6 +52,26 @@ def decomment_import_help(init_file, out_file):
     f_out.close()
     return updated
 
+def install_extension(ext_name):
+    command = "az extension add -n " + ext_name
+    completed = subprocess.run(command.split())
+    if completed.returncode == 0:
+        print("{} was successfully installed.".format(ext_name))
+        return True
+    else:
+        print("{} was not installed.".format(ext_name))
+        return False
+
+def uninstall_extension(ext_name):
+    command = "az extension remove -n " + ext_name
+    completed = subprocess.run(command.split())
+    if completed.returncode == 0:
+        print("{} was successfully uninstalled.".format(ext_name))
+        return True
+    else:
+        print("{} was not uninstalled.".format(ext_name))
+        return False
+
 if __name__ == "__main__":
     args = sys.argv[1:]
 
@@ -171,3 +191,29 @@ if __name__ == "__main__":
 
             print("Renamed {} foo.py files to _help.py.\n".format(py_count))
             print("There were {} failures to decomment import statements\n".format(failures))
+
+        elif args[0].lower() == "--add-extensions":
+            command = "az extension list-available --query [].name -o tsv"
+            completed = subprocess.run(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
+            if completed.returncode == 0:
+                num_installed = 0
+                extensions = completed.stdout.splitlines()
+                for ext in extensions:
+                    success = install_extension(ext)
+                    if success:
+                        num_installed += 1
+
+                print("Installed {} extensions".format(num_installed))
+
+        elif args[0].lower() == "--remove-extensions":
+            command = "az extension list --query [].name -o tsv"
+            completed = subprocess.run(command.split(), stdout=subprocess.PIPE, universal_newlines=True)
+            if completed.returncode == 0:
+                num_installed = 0
+                extensions = completed.stdout.splitlines()
+                for ext in extensions:
+                    success = uninstall_extension(ext)
+                    if success:
+                        num_installed += 1
+
+                print("Uninstalled {} extensions".format(num_installed))
