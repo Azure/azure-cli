@@ -188,7 +188,7 @@ jobs:
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -283,7 +283,7 @@ jobs:
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -305,7 +305,7 @@ jobs:
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -340,7 +340,7 @@ jobs:
   displayName: Build Ubuntu Xenial Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -370,7 +370,7 @@ jobs:
   displayName: Build Ubuntu Artful Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -400,7 +400,7 @@ jobs:
   displayName: Build Ubuntu Trusty Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -431,7 +431,7 @@ jobs:
   displayName: Build Ubuntu Bionic Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -462,7 +462,7 @@ jobs:
   displayName: Build Debian Wheezy Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -493,7 +493,7 @@ jobs:
   displayName: Build Debian Jessie Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -523,7 +523,7 @@ jobs:
   displayName: Build Debian Stretch Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -615,7 +615,7 @@ jobs:
   displayName: Build Ubuntu Cosmic
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
