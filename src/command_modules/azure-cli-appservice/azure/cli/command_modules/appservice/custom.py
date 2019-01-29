@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import subprocess
 import threading
 import time
 
@@ -20,6 +19,9 @@ import json
 import ssl
 import sys
 import OpenSSL.crypto
+
+from fabric import Connection
+
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -2253,11 +2255,11 @@ def _ping_scm_site(cmd, resource_group, name):
     requests.get(scm_url + '/api/settings', headers=authorization)
 
 
-def _check_for_ready_tunnel(tunnel_server):
-    return tunnel_server.is_port_set_to_default()
+def is_webapp_up(tunnel_server):
+    return tunnel_server.is_webapp_up()
 
 
-def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -2281,15 +2283,14 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
     tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
     _ping_scm_site(cmd, resource_group_name, name)
 
+    _wait_for_webapp(tunnel_server)
+
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
 
-    _wait_for_tunnel(tunnel_server, False)
-    logger.warning("SSH is available ( username: %s, password: %s )", ssh_user_name, ssh_user_password)
-
-    s = threading.Thread(target=_start_ssh,
-                         args=('localhost', tunnel_server.get_port(), ssh_user_name))
+    s = threading.Thread(target=_start_ssh_session,
+                         args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
     s.daemon = True
     s.start()
 
@@ -2297,25 +2298,50 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
         time.sleep(5)
 
 
-def _wait_for_tunnel(tunnel_server, print_warnings):
-    if not _check_for_ready_tunnel(tunnel_server):
-        if print_warnings:
-            logger.warning('Tunnel is not ready yet, please wait (may take up to 1 minute)')
-        while True:
-            time.sleep(1)
-            if print_warnings:
-                logger.warning('.')
-            if _check_for_ready_tunnel(tunnel_server):
-                break
+def _wait_for_webapp(tunnel_server):
+    tries = 0
+    while True:
+        if is_webapp_up(tunnel_server):
+            break
+        if tries == 0:
+            logger.warning('Connection is not ready yet, please wait')
+        if tries == 60:
+            raise CLIError("Timeout Error, Unable to establish a connection")
+        tries = tries + 1
+        logger.warning('.')
+        time.sleep(1)
 
 
 def _start_tunnel(tunnel_server):
-    _wait_for_tunnel(tunnel_server, True)
     tunnel_server.start_server()
 
 
-def _start_ssh(host_name, port, user_name):
-    subprocess.call("ssh -o StrictHostKeyChecking=no {}@{} -p {}".format(user_name, host_name, port), shell=True)
+def _start_ssh_session(hostname, port, username, password):
+    tries = 0
+    while True:
+        try:
+            c = Connection(host=hostname,
+                           port=port,
+                           user=username,
+                           # connect_timeout=60*10,
+                           connect_kwargs={"password": password})
+            break
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info(ex)
+            if tries == 0:
+                logger.warning('Connection is not ready yet, please wait')
+            if tries == 60:
+                raise CLIError("Timeout Error, Unable to establish a connection")
+            tries = tries + 1
+            logger.warning('.')
+            time.sleep(1)
+    try:
+        c.run('cat /etc/motd', pty=True)
+        c.run('source /etc/profile; /bin/ash', pty=True)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info(ex)
+    finally:
+        c.close()
 
 
 def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
@@ -2323,4 +2349,4 @@ def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=to
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
-        create_tunnel(cmd, resource_group_name, name, port=None, slot=slot)
+        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot)
