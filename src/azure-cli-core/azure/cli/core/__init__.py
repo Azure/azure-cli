@@ -134,7 +134,7 @@ class MainCommandsLoader(CLICommandsLoader):
                                              if modname not in BLACKLISTED_MODS]
             except ImportError as e:
                 logger.warning(e)
-                pass
+
             logger.debug('Installed command modules %s', installed_command_modules)
             cumulative_elapsed_time = 0
             for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:

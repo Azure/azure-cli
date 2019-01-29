@@ -53,7 +53,8 @@ class CLIPrintMixin(CLIHelp):
 
         links = help_file.links  # TODO: this needs to be updated to handle links obj not just link text
         if links:
-            link_text = "{} and {}".format(", ".join([link["url"] for link in links[0:-1]]), links[-1]["url"]) if len(links) > 1 else links[0]["url"]
+            link_text = "{} and {}".format(", ".join([link["url"] for link in links[0:-1]]),
+                                           links[-1]["url"]) if len(links) > 1 else links[0]["url"]
             link_text = "For more information, see: {}\n".format(link_text)
             _print_indent(link_text, 2, width=self.textwrap_width)
 
@@ -151,7 +152,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             versioned_loaders[cls_name] = loader
 
         if len(versioned_loaders) != len({ldr.version for ldr in versioned_loaders.values()}):
-            ldrs_str = " ".join("{}-version:{}".format(cls_name, ldr.version) for cls_name, ldr in versioned_loaders.items())
+            ldrs_str = " ".join("{}-version:{}".format(cls_name, ldr.version) for cls_name, ldr in versioned_loaders.items())  # pylint: disable=line-too-long
             raise CLIError("Two loaders have the same version. Loaders:\n\t{}".format(ldrs_str))
 
         self.versioned_loaders = versioned_loaders
@@ -206,8 +207,6 @@ class CliHelpFile(KnackHelpFile):
 
 
 class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
-    def __init__(self, help_ctx, delimiters, parser):
-        super(CliGroupHelpFile, self).__init__(help_ctx, delimiters, parser)
 
     def load(self, options):
         # forces class to use this load method even if KnackGroupHelpFile overrides CliHelpFile's method.
@@ -218,7 +217,6 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
     def __init__(self, help_ctx, delimiters, parser):
         super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
-        import argparse
         self.type = 'command'
         self.command_source = getattr(parser, 'command_source', None)
 

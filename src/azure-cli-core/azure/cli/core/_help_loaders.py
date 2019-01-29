@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import abc
 from knack.util import CLIError
 from knack.log import get_logger
-
 from azure.cli.core._help import (HelpExample, CliHelpFile)
-import abc
 
 logger = get_logger(__name__)
 
@@ -45,7 +44,7 @@ class BaseHelpLoader(ABC):
                                                                                         ldr_name, self.version)
             logger.info(msg)
         else:
-            logger.info("There is no applicable data for loader {}.".format(ldr_name))
+            logger.info("There is no applicable data for loader %s.", ldr_name)
 
         return is_applicable
 
@@ -146,7 +145,7 @@ class HelpLoaderV0(BaseHelpLoader):
         return 0
 
     def versioned_load(self, help_obj, parser):
-        super(CliHelpFile, help_obj).load(parser)
+        super(CliHelpFile, help_obj).load(parser)  # pylint:disable=bad-super-call
 
     def load_raw_data(self, help_obj, parser):
         pass
@@ -171,7 +170,7 @@ class HelpLoaderV1(BaseHelpLoader):
         return 1
 
     def load_raw_data(self, help_obj, parser):
-        prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
+        prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix  # pylint: disable=protected-access
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
         data_list = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
@@ -185,8 +184,8 @@ class HelpLoaderV1(BaseHelpLoader):
         def params_equal(param, param_dict):
             if param_dict['name'].startswith("--"):  # for optionals, help file name must be one of the  long options
                 return param_dict['name'] in param.name.split()
-            else:  # for positionals, help file must name must match param name shown when -h is run
-                return param_dict['name'] == param.name
+            # for positionals, help file must name must match param name shown when -h is run
+            return param_dict['name'] == param.name
 
         if help_obj.type == "command" and hasattr(help_obj, "parameters") and self._data.get("arguments"):
             loaded_params = []
@@ -199,14 +198,15 @@ class HelpLoaderV1(BaseHelpLoader):
 
     def load_help_examples(self, help_obj):
         if help_obj.type == "command" and self._data.get("examples"):
-            help_obj.examples = [HelpExample(**ex) for ex in self._data["examples"] if help_obj._should_include_example(ex)]
+            help_obj.examples = [HelpExample(**ex) for ex in self._data["examples"] if help_obj._should_include_example(ex)]  # pylint: disable=line-too-long, protected-access
 
     @staticmethod
     def _get_entry_data(cmd_name, data_list):
         for data in data_list:
             if data and data.get("content"):
                 try:
-                    entry_data = next(value for elem in data.get("content") for key, value in elem.items() if value.get("name") == cmd_name)
+                    entry_data = next(value for elem in data.get("content")
+                                      for key, value in elem.items() if value.get("name") == cmd_name)
                     entry_data["version"] = data['version']
                     return entry_data
                 except StopIteration:
