@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.4.1
+* Add explicit wait for streaming-endpoint and live-event commands
++++++
+
 0.4.0
 +++++
 * BREAKING CHANGE: asset group command `ams asset get-streaming-locators` renamed `ams asset list-streaming-locators`.
