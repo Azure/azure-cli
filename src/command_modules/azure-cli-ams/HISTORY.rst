@@ -3,8 +3,8 @@
 Release History
 ===============
 0.4.1
-* Add explicit wait for streaming-endpoint and live-event commands
 +++++
+* Add explicit wait for streaming-endpoint and live-event commands
 
 0.4.0
 +++++
