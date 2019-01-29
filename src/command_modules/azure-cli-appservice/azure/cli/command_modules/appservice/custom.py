@@ -42,8 +42,7 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import in_cloud_console
-from azure.cli.core.util import open_page_in_browser
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
 
 from .tunnel import TunnelServer
 
@@ -160,10 +159,27 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
-    for name_value in settings + slot_settings:
-        # split at the first '=', appsetting should not have '=' in the name
-        settings_name, value = name_value.split('=', 1)
-        app_settings.properties[settings_name] = value
+    result, slot_result = {}, {}
+    # pylint: disable=too-many-nested-blocks
+    for src, dest in [(settings, result), (slot_settings, slot_result)]:
+        for s in src:
+            try:
+                temp = shell_safe_json_parse(s)
+                if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
+                    for t in temp:
+                        if t.get('slotSetting', True):
+                            slot_result[t['name']] = t['value']
+                        else:
+                            result[t['name']] = t['value']
+                else:
+                    dest.update(temp)
+            except CLIError:
+                setting_name, value = s.split('=', 1)
+                dest[setting_name] = value
+
+    result.update(slot_result)
+    for setting_name, value in result.items():
+        app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
@@ -171,8 +187,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                          app_settings.properties, slot, client)
 
     app_settings_slot_cfg_names = []
-    if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+    if slot_result:
+        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
@@ -629,7 +645,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         min_tls_version=None,  # pylint: disable=unused-argument
                         http20_enabled=None,  # pylint: disable=unused-argument
                         app_command_line=None,  # pylint: disable=unused-argument
-                        ftps_state=None):  # pylint: disable=unused-argument
+                        ftps_state=None,  # pylint: disable=unused-argument
+                        generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
@@ -645,8 +662,20 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
     for arg in args[3:]:
-        if values.get(arg, None):
+        if arg != 'generic_configurations' and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+
+    generic_configurations = generic_configurations or []
+    result = {}
+    for s in generic_configurations:
+        try:
+            result.update(get_json_object(s))
+        except CLIError:
+            config_name, value = s.split('=', 1)
+            result[config_name] = value
+
+    for config_name, value in result.items():
+        setattr(configs, config_name, value)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
