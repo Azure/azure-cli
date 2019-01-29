@@ -4,7 +4,8 @@ Release History
 ===============
 0.4.1
 +++++
-* Add explicit wait for streaming-endpoint and live-event commands
+* ams streaming-endpoint [start | stop | create | update] : added 'wait' command
+* ams live-event [create | start | stop | reset] : added 'wait' command
 
 0.4.0
 +++++
