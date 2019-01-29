@@ -840,6 +840,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vnet_gateway_root_cert')
         g.custom_command('delete', 'delete_vnet_gateway_root_cert')
 
+    with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
+        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
+        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
+        g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
     # endregion
 
     # region VirtualNetworkGatewayConnections
