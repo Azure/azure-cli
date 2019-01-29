@@ -47,8 +47,6 @@ cmd /c az batch pool reset --help
 cmd /c az batch pool resize --help
 cmd /c az batch pool node-agent-skus --help
 cmd /c az batch pool node-agent-skus list --help
-cmd /c az batch pool os --help
-cmd /c az batch pool os upgrade --help
 cmd /c az batch pool usage-metrics --help
 cmd /c az batch pool usage-metrics list --help
 cmd /c az batch pool all-statistics --help
