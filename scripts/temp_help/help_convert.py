@@ -314,6 +314,7 @@ if __name__ == "__main__":
     #         test = True
     if args[0].lower() == "--delete":
         mod_names = get_all_mod_names()
+        mod_names.append("sqlvm")
         target_mods = ["{}.{}._help".format(PACKAGE_PREFIX, mod) for mod in mod_names]
         delete(target_mods)
         exit(0)

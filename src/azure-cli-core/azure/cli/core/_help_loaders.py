@@ -89,7 +89,7 @@ class BaseHelpLoader(ABC):
 
     # get the yaml help
     @staticmethod
-    def _get_yaml_help_for_nouns(nouns, cmd_loader_map_ref, cmd_group_table):
+    def _get_yaml_help_for_nouns(nouns, cmd_loader_map_ref):
         import inspect
         import os
 
@@ -110,35 +110,33 @@ class BaseHelpLoader(ABC):
 
         command_nouns = " ".join(nouns)
         # if command in map, get the loader. Path of loader is path of helpfile.
-        loader = cmd_loader_map_ref.get(command_nouns, [None])[0]
+        ldr_or_none = cmd_loader_map_ref.get(command_nouns, [None])[0]
+        if ldr_or_none:
+            loaders = {ldr_or_none}
+        else:
+            loaders = set()
 
-        # otherwise likely a group, try to find command loader through command group object.
-        if not loader:
-            for grp_name, grp_obj in cmd_group_table.items():
-                # Note, some groups such as 'az sf' do not have azcommandgroup objects ("with self.command_group()")
-                if grp_obj and grp_name == command_nouns:
-                    loader = grp_obj.command_loader
-                    break
-
-        # if couldn't find group object in cmd_group_table, try using command loader object through command prefix.
-        if not loader:
+        # otherwise likely a group, try to find all command loaders under group as the group help could be defined
+        # in either.
+        if not loaders:
             for cmd_name, cmd_ldr in cmd_loader_map_ref.items():
                 # if first word in loader name is the group, this is a command in the command group
                 if cmd_name.startswith(command_nouns + " "):
-                    loader = cmd_ldr[0]
-                    break
+                    loaders.add(cmd_ldr[0])
 
-        if loader:
-            loader_file_path = inspect.getfile(loader.__class__)
-            dir_name = os.path.dirname(loader_file_path)
-            files = os.listdir(dir_name)
-            for file in files:
-                if file.endswith("help.yaml") or file.endswith("help.yml"):
-                    help_file_path = os.path.join(dir_name, file)
-                    with open(help_file_path, "r") as f:
-                        text = f.read()
-                        return _parse_yaml_from_string(text, help_file_path)
-        return None
+        results = []
+        if loaders:
+            for loader in loaders:
+                loader_file_path = inspect.getfile(loader.__class__)
+                dir_name = os.path.dirname(loader_file_path)
+                files = os.listdir(dir_name)
+                for file in files:
+                    if file.endswith("help.yaml") or file.endswith("help.yml"):
+                        help_file_path = os.path.join(dir_name, file)
+                        with open(help_file_path, "r") as f:
+                            text = f.read()
+                            results.append(_parse_yaml_from_string(text, help_file_path))
+        return results
 
 
 class HelpLoaderV0(BaseHelpLoader):
@@ -176,12 +174,11 @@ class HelpLoaderV1(BaseHelpLoader):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
-        cmd_group_tbl = self.help_ctx.cli_ctx.invocation.commands_loader.command_group_table
-        all_data = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref, cmd_group_tbl)
-        self._data = self._get_entry_data(help_obj.command, all_data)
+        data_list = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
+        self._data = self._get_entry_data(help_obj.command, data_list)
 
     def load_help_body(self, help_obj):
-        help_obj.long_summary = "" # TEMPORARY TO MIMIC KNACK behavior
+        help_obj.long_summary = ""  # similar to knack...
         self._update_obj_from_data_dict(help_obj, self._data, self.body_attrs_to_keys)
 
     def load_help_parameters(self, help_obj):
@@ -205,12 +202,13 @@ class HelpLoaderV1(BaseHelpLoader):
             help_obj.examples = [HelpExample(**ex) for ex in self._data["examples"] if help_obj._should_include_example(ex)]
 
     @staticmethod
-    def _get_entry_data(cmd_name, data):
-        if data and data.get("content"):
-            try:
-                entry_data = next(value for elem in data.get("content") for key, value in elem.items() if value.get("name") == cmd_name)
-                entry_data["version"] = data['version']
-                return entry_data
-            except StopIteration:
-                pass
+    def _get_entry_data(cmd_name, data_list):
+        for data in data_list:
+            if data and data.get("content"):
+                try:
+                    entry_data = next(value for elem in data.get("content") for key, value in elem.items() if value.get("name") == cmd_name)
+                    entry_data["version"] = data['version']
+                    return entry_data
+                except StopIteration:
+                    continue
         return None

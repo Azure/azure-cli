@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
             if successes:
                 print("\n----------------------------------------------------------"
-                        "Successfuly converted {} help.py files to help.yaml files."
+                      "\nSuccessfuly converted {} help.py files to help.yaml files."
                       "\n----------------------------------------------------------".format(successes))
 
         elif args[0].lower() == "--extensions":
