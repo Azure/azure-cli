@@ -93,6 +93,14 @@ short-summary: Get the details of a web app's configuration.
 helps['webapp config set'] = """
 type: command
 short-summary: Set a web app's configuration.
+Examples:
+    - name: turn on "alwaysOn"
+      text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
+    - name: turn on "alwaysOn" through a json with content '{"alwaysOn", true}'
+      text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "{\"alwaysOn\": true}"
+
 """
 
 helps['webapp config appsettings'] = """
@@ -117,6 +125,9 @@ examples:
     - name: Set the default NodeJS version to 6.9.1 for a web app.
       text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings WEBSITE_NODE_DEFAULT_VERSION=6.9.1
+    - name: Set using both key-value pair and a json file with more settings.
+      text: >
+        az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
 """
 
 helps['webapp config storage-account'] = """
