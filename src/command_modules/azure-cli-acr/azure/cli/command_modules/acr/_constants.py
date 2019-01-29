@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.mgmt.containerregistry.v2018_09_01.models import SkuName
+from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture, Variant
 
 STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
 
@@ -19,3 +20,7 @@ TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 
 CLASSIC_REGISTRY_SKU = [SkuName.classic.value]
 MANAGED_REGISTRY_SKU = [SkuName.basic.value, SkuName.standard.value, SkuName.premium.value]
+
+VALID_OS = [item.value.title() for item in OS]
+VALID_ARCH = [item.value.title() for item in Architecture]
+VALID_VARIANT = [item.value for item in Variant]

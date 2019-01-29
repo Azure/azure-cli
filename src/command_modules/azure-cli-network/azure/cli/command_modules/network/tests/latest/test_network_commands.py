@@ -1113,10 +1113,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             self.cmd('network lb inbound-nat-pool create -g {{rg}} --lb-name {{lb}} -n rule{0} --protocol tcp --frontend-port-range-start {0}  --frontend-port-range-end {1} --backend-port {0}'.format(count, count + 999))
         self.cmd('network lb inbound-nat-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
-        self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --protocol udp --backend-port 50')
+        self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --protocol udp --backend-port 50 --floating-ip --idle-timeout 20')
         self.cmd('network lb inbound-nat-pool show -g {rg} --lb-name {lb} -n rule1000', checks=[
             self.check('protocol', 'Udp'),
-            self.check('backendPort', 50)
+            self.check('backendPort', 50),
+            self.check('enableFloatingIp', True),
+            self.check('idleTimeoutInMinutes', 20)
         ])
         # test generic update
         self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --set protocol=Tcp',
@@ -1690,9 +1692,21 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet show --ids {ids}',
                  checks=self.check('length(@)', 2))
 
-        # This test ensures you can pipe JSON output to --ids
+        # This test ensures you can pipe JSON output to --ids Windows-style
+        # ensures a single JSON string has its ids parsed out
         self.kwargs['json'] = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json())
         self.cmd('network vnet show --ids \'{json}\'',
+                 checks=self.check('length(@)', 2))
+
+        # This test ensures you can pipe JSON output to --ids bash-style
+        # ensures that a JSON string where each line is interpretted individually
+        # is reassembled and treated as a single json string
+        json_obj = self.cmd('network vnet list -g {rg}').get_output_in_json()
+        for item in json_obj:
+            del item['etag']
+        split_json = json.dumps(json_obj, indent=4).split()
+        split_string = ' '.join(split_json).replace('{', '{{').replace('}', '}}').replace('"', '\\"')
+        self.cmd('network vnet show --ids {}'.format(split_string),
                  checks=self.check('length(@)', 2))
 
 

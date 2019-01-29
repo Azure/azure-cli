@@ -1810,7 +1810,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None, enable_tcp_reset=None):
+        backend_port, frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1821,7 +1821,7 @@ def create_lb_inbound_nat_rule(
         name=item_name, protocol=protocol,
         frontend_port=frontend_port, backend_port=backend_port,
         frontend_ip_configuration=frontend_ip,
-        enable_floating_ip=floating_ip == 'true',
+        enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset)
     _upsert(lb, 'inbound_nat_rules', new_rule, 'name')
@@ -1836,9 +1836,6 @@ def set_lb_inbound_nat_rule(
         instance.frontend_ip_configuration = \
             _get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
-    if floating_ip is not None:
-        instance.enable_floating_ip = floating_ip == 'true'
-
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
 
@@ -1846,13 +1843,15 @@ def set_lb_inbound_nat_rule(
     _set_param(instance, 'frontend_port', frontend_port)
     _set_param(instance, 'backend_port', backend_port)
     _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
+    _set_param(instance, 'enable_floating_ip', floating_ip)
 
     return parent
 
 
 def create_lb_inbound_nat_pool(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
-        frontend_port_range_end, backend_port, frontend_ip_name=None, enable_tcp_reset=None):
+        frontend_port_range_end, backend_port, frontend_ip_name=None, enable_tcp_reset=None,
+        floating_ip=None, idle_timeout=None):
     InboundNatPool = cmd.get_models('InboundNatPool')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1867,7 +1866,9 @@ def create_lb_inbound_nat_pool(
         frontend_port_range_start=frontend_port_range_start,
         frontend_port_range_end=frontend_port_range_end,
         backend_port=backend_port,
-        enable_tcp_reset=enable_tcp_reset)
+        enable_tcp_reset=enable_tcp_reset,
+        enable_floating_ip=floating_ip,
+        idle_timeout_in_minutes=idle_timeout)
     _upsert(lb, 'inbound_nat_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_pools, item_name)
@@ -1876,11 +1877,13 @@ def create_lb_inbound_nat_pool(
 def set_lb_inbound_nat_pool(
         instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
-        frontend_ip_name=None, enable_tcp_reset=None):
+        frontend_ip_name=None, enable_tcp_reset=None, floating_ip=None, idle_timeout=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'frontend_port_range_start', frontend_port_range_start)
     _set_param(instance, 'frontend_port_range_end', frontend_port_range_end)
     _set_param(instance, 'backend_port', backend_port)
+    _set_param(instance, 'enable_floating_ip', floating_ip)
+    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
 
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset

@@ -16,11 +16,9 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.containerregistry.v2018_09_01.models import (
     DockerBuildRequest,
     PlatformProperties,
-    Architecture,
-    OS
 )
 
-from ._utils import validate_managed_registry, get_credentials
+from ._utils import validate_managed_registry, get_credentials, get_validate_platform
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
@@ -31,7 +29,7 @@ logger = get_logger(__name__)
 BUILD_NOT_SUPPORTED = 'Builds are only supported for managed registries.'
 
 
-def acr_build(cmd,
+def acr_build(cmd,  # pylint: disable=too-many-locals
               client,
               registry_name,
               source_location,
@@ -45,6 +43,7 @@ def acr_build(cmd,
               no_push=False,
               no_logs=False,
               os_type=OS.linux.value,
+              platform=None,
               auth_mode=None,
               credentials=[],
               target=None):
@@ -110,12 +109,17 @@ def acr_build(cmd,
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
+    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
+
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
         is_push_enabled=is_push_enabled,
         source_location=source_location,
         platform=PlatformProperties(
-            os=os_type, architecture=Architecture.amd64.value),
+            os=platform_os,
+            architecture=platform_arch,
+            variant=platform_variant
+        ),
         docker_file_path=docker_file_path,
         timeout=timeout,
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []),

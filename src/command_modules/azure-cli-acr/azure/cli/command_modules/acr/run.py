@@ -12,11 +12,10 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.containerregistry.v2018_09_01.models import (
     FileTaskRunRequest,
     PlatformProperties,
-    OS
 )
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry, get_credentials
+from ._utils import validate_managed_registry, get_credentials, get_validate_platform
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -39,6 +38,7 @@ def acr_run(cmd,
             timeout=None,
             resource_group_name=None,
             os_type=OS.linux.value,
+            platform=None,
             auth_mode=None,
             credentials=[]):
 
@@ -72,13 +72,19 @@ def acr_run(cmd,
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
+    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
+
     request = FileTaskRunRequest(
         task_file_path=file,
         values_file_path=values,
         values=(set_value if set_value else []) + (set_secret if set_secret else []),
         source_location=source_location,
         timeout=timeout,
-        platform=PlatformProperties(os=os_type),
+        platform=PlatformProperties(
+            os=platform_os,
+            architecture=platform_arch,
+            variant=platform_variant
+        ),
         credentials=get_credentials(
             auth_mode=auth_mode,
             credentials=credentials

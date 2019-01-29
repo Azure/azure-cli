@@ -91,6 +91,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
         c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType))
+        c.argument('platform', help="The platform of the resulting image in the format of 'os/arch/variant'. E.g. linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
         c.argument('credentials', options_list=['--credential'], help='The name of the target build stage.', action='append')

@@ -1751,6 +1751,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon == 'aciConnector':
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
+        # addon name is case insensitive
+        addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -1771,7 +1773,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
                 addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
-            elif addon == 'aciConnector' + os_type:
+            elif addon.lower() == ('aciConnector' + os_type).lower():
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
                                    'To change virtual-node configuration, run '

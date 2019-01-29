@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.2.11"
+VERSION = "0.2.12"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -38,6 +38,8 @@ DEPENDENCIES = [
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
     'urllib3[secure]>=1.18',
     'xmltodict',
+    'fabric>=2.4',
+    'cryptography<2.5',
     'pyOpenSSL',
     'six',
     'vsts-cd-manager<1.1.0',

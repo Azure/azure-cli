@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* `lb inbound-nat-pool create/update`: Add arguments `--idle-timeout`, `--floating-ip`.
+
 2.3.1
 ++++++
 * `express-route update`: Fix issue where `--bandwidth` argument was ignored.
