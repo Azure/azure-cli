@@ -277,3 +277,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_container_settings_functionapp')
         g.custom_command('delete', 'delete_container_settings')
         g.custom_show_command('show', 'show_container_settings_functionapp')
+
+    with self.command_group('functionapp devops-build') as g:
+        g.custom_command('create', 'create_devops_build')
