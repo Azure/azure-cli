@@ -15,7 +15,10 @@ from ._constants import (
     ACR_RESOURCE_PROVIDER,
     STORAGE_RESOURCE_TYPE,
     MANAGED_REGISTRY_SKU,
-    CLASSIC_REGISTRY_SKU
+    CLASSIC_REGISTRY_SKU,
+    VALID_OS,
+    VALID_ARCH,
+    VALID_VARIANT
 )
 from ._client_factory import (
     get_arm_service_client,
@@ -267,6 +270,51 @@ def validate_managed_registry(cli_ctx, registry_name, resource_group_name=None, 
         raise CLIError(message or "This operation is only supported for managed registries.")
 
     return registry, resource_group_name
+
+
+def get_validate_platform(os_type, platform):
+    """Gets and validates the Platform from both flags
+    :param str os_type: The name of OS passed by user in --os flag
+    :param str platform: The name of Platform passed by user in --platform flag
+    """
+    from azure.mgmt.containerregistry.v2018_09_01.models import OS, Architecture
+    # Defaults
+    platform_os = OS.linux.value
+    platform_arch = Architecture.amd64.value
+    platform_variant = None
+
+    if platform:
+        platform_split = platform.split('/')
+        platform_os = platform_split[0]
+        platform_arch = platform_split[1] if len(platform_split) > 1 else Architecture.amd64.value
+        platform_variant = platform_split[2] if len(platform_split) > 2 else None
+
+    if os_type and platform:
+        if os_type.lower() != platform_os.lower():
+            raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'.")
+    elif os_type:
+        platform_os = os_type
+
+    platform_os = platform_os.title()
+    platform_arch = platform_arch.title()
+
+    if platform_os not in VALID_OS:
+        raise CLIError(
+            "'{0}' is not a valid value for OS specified in --os or --platform. "
+            "Valid options are {1}.".format(platform_os, ','.join(VALID_OS))
+        )
+    if platform_arch not in VALID_ARCH:
+        raise CLIError(
+            "'{0}' is not a valid value for Architecture specified in --platform. "
+            "Valid options are {1}.".format(platform_arch, ','.join(VALID_ARCH))
+        )
+    if platform_variant and (platform_variant not in VALID_VARIANT):
+        raise CLIError(
+            "'{0}' is not a valid value for Variant specified in --platform. "
+            "Valid options are {1}.".format(platform_variant, ','.join(VALID_VARIANT))
+        )
+
+    return platform_os, platform_arch, platform_variant
 
 
 def validate_premium_registry(cli_ctx, registry_name, resource_group_name=None, message=None):
