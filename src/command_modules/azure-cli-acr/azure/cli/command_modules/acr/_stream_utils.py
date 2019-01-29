@@ -163,7 +163,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
 
             logger.warning("Failed to find any new logs in %d seconds. "
                            "The CLI will stop polling for additional logs, but the run will continue its execution. "
-                           "Use az acr task logs -r %s --run-id %s to try and see additional logs.",
+                           "Use 'az acr task logs -r %s --run-id %s' to try and see additional logs.",
                            consecutive_sleep_in_sec,
                            registry_name,
                            run_id)
