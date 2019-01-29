@@ -6,6 +6,7 @@ Release History
 ++++++
 * appservice plan: Updating help for appservice-plan-update command
 * functionapp: add support for app insights on functionapp create
+* webapp: bugfixes for webapp ssh
 
 0.2.11
 ++++++
