@@ -268,3 +268,12 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp plan') as g:
         g.custom_command('create', 'create_functionapp_app_service_plan')
+
+    with self.command_group('functionapp deployment container') as g:
+        g.custom_command('config', 'enable_cd')
+        g.custom_command('show-cd-url', 'show_container_cd_url')
+
+    with self.command_group('functionapp config container') as g:
+        g.custom_command('set', 'update_container_settings_functionapp')
+        g.custom_command('delete', 'delete_container_settings')
+        g.custom_show_command('show', 'show_container_settings_functionapp')

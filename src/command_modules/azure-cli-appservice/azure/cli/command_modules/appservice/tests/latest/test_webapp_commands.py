@@ -621,6 +621,71 @@ class WebappACRScenarioTest(ScenarioTest):
         ])
 
 
+class FunctionappACRScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    @StorageAccountPreparer()
+    def test_acr_integration_function_app(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
+        functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
+        runtime = 'node'
+        acr_registry_name = functionapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(resource_group, functionapp, storage_account, plan, runtime))
+        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        self.cmd('functionapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
+            resource_group, functionapp, acr_registry_name), checks=[
+                JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
+        ])
+        self.cmd('functionapp config container show -g {} -n {} '.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username']),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", creds['username'])
+        ])
+        self.cmd('functionapp config container delete -g {} -n {} '.format(resource_group, functionapp))
+        json_result = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).get_output_in_json()
+        all_settings = [setting['name'] for setting in json_result]
+        # Make sure the related settings are deleted
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_USERNAME', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_URL', all_settings)
+        self.assertNotIn('DOCKER_REGISTRY_SERVER_PASSWORD', all_settings)
+        self.assertIn('FUNCTIONS_WORKER_RUNTIME', all_settings)
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
+
+
+class FunctionappACRDeploymentScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    @StorageAccountPreparer()
+    def test_acr_deployment_function_app(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='acrtestplanfunction', length=24)
+        functionapp = self.create_random_name(prefix='functionappacrtest', length=24)
+        runtime = 'node'
+        acr_registry_name = functionapp
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(resource_group, functionapp, storage_account, plan, runtime))
+        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        self.cmd('functionapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
+            resource_group, functionapp, acr_registry_name), checks=[
+                JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
+        ])
+        result = self.cmd('functionapp deployment container config -g {} -n {} --enable-cd true'.format(resource_group,
+                                                                                                        functionapp)).get_output_in_json()
+        self.assertTrue(result['CI_CD_URL'].startswith('https://'))
+        self.assertTrue(result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
+        # verify that show-cd-url works the same way
+        show_result = self.cmd('functionapp deployment container show-cd-url -g {} -n {}'.format(resource_group,
+                                                                                                 functionapp)).get_output_in_json()
+        self.assertTrue(show_result['CI_CD_URL'].startswith('https://'))
+        self.assertTrue(show_result['CI_CD_URL'].endswith('.scm.azurewebsites.net/docker/hook'))
+
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
+
+
 class WebappGitScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_git(self, resource_group):
