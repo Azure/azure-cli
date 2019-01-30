@@ -2627,7 +2627,7 @@ class VMZoneScenarioTest(ScenarioTest):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
         except Exception as ex:
-            self.assertTrue('availablity zone is not yet supported' in str(ex))
+            self.assertTrue('availability zone is not yet supported' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
     @AllowLargeResponse(size_kb=8192)
