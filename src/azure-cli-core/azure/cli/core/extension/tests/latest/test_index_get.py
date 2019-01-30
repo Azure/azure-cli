@@ -68,12 +68,12 @@ class TestExtensionIndexGet(unittest.TestCase):
     def test_get_index_extensions(self):
         data = {'extensions': {}}
         with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, data)):
-                self.assertEqual(get_index_extensions(), {})
+            self.assertEqual(get_index_extensions(), {})
 
         obj = object()
         data = {'extensions': {'myext': obj}}
         with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, data)):
-                self.assertEqual(get_index_extensions().get('myext'), obj)
+            self.assertEqual(get_index_extensions().get('myext'), obj)
 
         with mock.patch('azure.cli.core.extension._index.logger.warning', autospec=True) as logger_mock:
             with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, {})):
