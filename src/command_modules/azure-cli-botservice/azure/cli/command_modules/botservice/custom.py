@@ -533,5 +533,5 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         # Instead of replacing "latest", which would could be in the bot name, we replace "deployments/latest"
         deployment_url = scm_url.replace('deployments/latest', 'deployments/%s' % deployment_id)
         logger.error('Deployment failed. To find out more information about this deployment, please visit %s.'
-                    % deployment_url)
+                     % deployment_url)
     return output
