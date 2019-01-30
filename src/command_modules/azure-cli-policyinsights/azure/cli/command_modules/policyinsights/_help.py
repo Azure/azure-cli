@@ -172,3 +172,51 @@ helps['policy state summarize'] = """
           text: >
               az policy state summarize --filter "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
 """
+helps['policy remediation'] = """
+    type: group
+    short-summary: Manage resource policy remediations.
+"""
+helps['policy remediation delete'] = """
+    type: command
+    short-summary: Delete a resource policy remediation.
+"""
+helps['policy remediation list'] = """
+    type: command
+    short-summary: List resource policy remediations.
+"""
+helps['policy remediation cancel'] = """
+    type: command
+    short-summary: Cancel a resource policy remediation.
+"""
+helps['policy remediation show'] = """
+    type: command
+    short-summary: Show a resource policy remediation.
+"""
+helps['policy remediation create'] = """
+    type: command
+    short-summary: Create a resource policy remediation.
+    examples:
+        - name: Create a remediation at resource group scope for a policy assignment
+          text: >
+              az policy remediation create -g myRg -n myRemediation --policy-assignment eeb18edc813c42d0ad5a9eab
+        - name: Create a remediation at resource group scope for a policy assignment using the policy assignment resource ID
+          text: >
+              az policy remediation create -g myRg -n myRemediation --policy-assignment "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa"
+        - name: Create a remediation at subscription scope for a policy set assignment
+          text: >
+              az policy remediation create -n myRemediation --policy-assignment eeb18edc813c42d0ad5a9eab --definition-reference-id auditVMPolicyReference
+        - name: Create a remediation at management group scope for specific resource locations
+          text: >
+              az policy remediation create -m myMg -n myRemediation --policy-assignment eeb18edc813c42d0ad5a9eab --location-filters eastus westeurope
+        - name: Create a remediation for a specific resource using the resource ID
+          text: >
+              az policy remediation create --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myRg/providers/Microsoft.Compute/virtualMachines/myVm" -n myRemediation --policy-assignment eeb18edc813c42d0ad5a9eab
+"""
+helps['policy remediation deployment'] = """
+    type: group
+    short-summary: Manage resource policy remediation deployments.
+"""
+helps['policy remediation deployment list'] = """
+    type: command
+    short-summary: Lists deployments for a resource policy remediation.
+"""
