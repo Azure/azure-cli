@@ -294,6 +294,133 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        valid_bot_name = bot_name.replace(".", "")
+        self.kwargs.update({
+            'valid_bot_name': valid_bot_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
+                 '-e https://testurl.com/api/messages',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{valid_bot_name}'),
+                     self.check('type', 'abs')
+                 })
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        valid_bot_name = bot_name.replace(".", "")
+        self.kwargs.update({
+            'valid_bot_name': valid_bot_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+        dir_path = os.path.join('.', self.kwargs.get('valid_bot_name'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{valid_bot_name}'),
+                     self.check('type', 'abs')
+                 })
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_not_create_registration_bot_without_endpoint(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        valid_bot_name = bot_name.replace(".", "")
+        self.kwargs.update({
+            'valid_bot_name': valid_bot_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_create_registration_bot_with_endpoint(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        valid_bot_name = bot_name.replace(".", "")
+        self.kwargs.update({
+            'valid_bot_name': valid_bot_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
+                 '-e https://testurl.com/api/messages',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{valid_bot_name}'),
+                     self.check('type', 'abs')
+                 })
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_create_v4_webapp_bot_should_succeed_with_ending_hyphen(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli', length=15) + '-'
+        valid_app_name = bot_name[:-1]
+        self.kwargs.update({
+            'valid_app_name': valid_app_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+
+        if os.path.exists(dir_path):
+            # Clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs'),
+                     self.check('endpoint', 'https://{valid_app_name}.azurewebsites.net/api/messages')
+                 ])
+
+        # Delete bot
+        self.cmd('az bot delete -g {rg} -n {valid_app_name}')
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v4_js_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),

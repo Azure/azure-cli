@@ -5,9 +5,7 @@
 
 import json
 import os
-import random
 import re
-import string
 import requests
 
 from knack.util import CLIError
@@ -129,12 +127,13 @@ class BotTemplateDeployer:
         create_new_storage = False
         if not storageAccountName:
             create_new_storage = True
+            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24])
+            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40])
 
-            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:10] +
-                                        ''.join(
-                                            random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
-            site_name = re.sub(r'[^a-z0-9]', '', resource_name[:15] +
-                               ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
+            # The name of Azure Web Sites cannot end with "-", e.g. "testname-.azurewbesites.net" is invalid.
+            # The valid name would be "testname.azurewebsites.net"
+            while site_name[-1] == '-':
+                site_name = site_name[:-1]
 
             logger.debug('Storage name not provided. If storage is to be created, name to be used is %s.',
                          storageAccountName)

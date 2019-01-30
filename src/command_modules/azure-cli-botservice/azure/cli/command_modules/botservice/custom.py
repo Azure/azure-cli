@@ -55,9 +55,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     :return:
     """
 
-    # If display name was not provided, just use the resource name
-    display_name = display_name or resource_name
-
     # Kind parameter validation
     kind = kind.lower()
 
@@ -65,6 +62,15 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
+
+    if resource_name.find(".") > -1:
+        logger.warn('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names and'
+                    ' will been removed.' % resource_name)
+        # Remove or replace invalid "." character
+        resource_name = resource_name.replace(".", "")
+
+    # If display name was not provided, just use the resource name
+    display_name = display_name or resource_name
 
     # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
     if kind == registration_kind:
