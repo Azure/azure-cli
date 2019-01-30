@@ -105,7 +105,7 @@ def add_helps(command_group, server_type):
                 examples:
                     - name: Delete a server.
                       text: az {0} server delete -g testgroup -n testsvr
-                """
+                """.format(command_group)
     helps['{} server show'.format(command_group)] = """
                 type: command
                 short-summary: Get the details of a server.
