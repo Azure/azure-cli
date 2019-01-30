@@ -315,9 +315,6 @@ class BotTests(ScenarioTest):
                      self.check('type', 'abs')
                  })
 
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
         bot_name = self.create_random_name(prefix='cli.', length=15)
@@ -344,9 +341,6 @@ class BotTests(ScenarioTest):
                      self.check('type', 'abs')
                  })
 
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_not_create_registration_bot_without_endpoint(self, resource_group):
         bot_name = self.create_random_name(prefix='cli.', length=15)
@@ -360,9 +354,9 @@ class BotTests(ScenarioTest):
 
         # Delete the bot if already exists
         self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
-
-        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}',
-                 expect_failure=True)
+        with self.assertRaisesRegexp(CLIError, 'Endpoint is required for creating a registration bot.'):
+            self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}',
+                     expect_failure=True)
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_create_registration_bot_with_endpoint(self, resource_group):
@@ -385,9 +379,6 @@ class BotTests(ScenarioTest):
                      self.check('id', '{valid_bot_name}'),
                      self.check('type', 'abs')
                  })
-
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_webapp_bot_should_succeed_with_ending_hyphen(self, resource_group):
@@ -416,9 +407,6 @@ class BotTests(ScenarioTest):
                      self.check('type', 'abs'),
                      self.check('endpoint', 'https://{valid_app_name}.azurewebsites.net/api/messages')
                  ])
-
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {valid_app_name}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v4_js_webapp_bot(self, resource_group):
