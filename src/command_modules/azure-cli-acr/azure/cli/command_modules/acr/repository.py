@@ -38,43 +38,46 @@ ORDERBY_PARAMS = {
     'time_asc': 'timeasc',
     'time_desc': 'timedesc'
 }
-MANIFEST_V2_HEADER = {
-    'Accept': 'application/vnd.docker.distribution.manifest.v2+json'
-}
 DEFAULT_PAGINATION = 100
 
 
-def _get_manifest_digest(login_server, repository, tag, username, password, retry_times=3, retry_interval=5):
-    url = 'https://{}/v2/{}/manifests/{}'.format(login_server, repository, tag)
-    headers = get_authorization_header(username, password)
-    headers.update(MANIFEST_V2_HEADER)
+def _get_repository_path(repository=None):
+    """Return the path for a repository, or list of repositories if repository is empty.
+    """
+    if repository:
+        return '/acr/v1/{}'.format(repository)
+    return '/acr/v1/_catalog'
 
-    for i in range(0, retry_times):
-        errorMessage = None
-        try:
-            response = requests.get(
-                url=url,
-                headers=headers,
-                verify=(not should_disable_connection_verify())
-            )
-            log_registry_response(response)
 
-            if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
-                return response.headers['Docker-Content-Digest']
-            elif response.status_code == 401:
-                raise CLIError(parse_error_message('Authentication required.', response))
-            elif response.status_code == 404:
-                raise CLIError(parse_error_message('The manifest does not exist.', response))
-            else:
-                raise Exception(parse_error_message('Could not get manifest digest.', response))
-        except CLIError:
-            raise
-        except Exception as e:  # pylint: disable=broad-except
-            errorMessage = str(e)
-            logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
-            time.sleep(retry_interval)
+def _get_tag_path(repository, tag=None):
+    """Return the path for a tag, or list of tags if tag is empty.
+    """
+    if tag:
+        return '/acr/v1/{}/_tags/{}'.format(repository, tag)
+    return '/acr/v1/{}/_tags'.format(repository)
 
-    raise CLIError(errorMessage)
+
+def _get_manifest_path(repository, manifest=None):
+    """Return the path for a manifest, or list of manifests if manifest is empty.
+    """
+    if manifest:
+        return '/acr/v1/{}/_manifests/{}'.format(repository, manifest)
+    return '/acr/v1/{}/_manifests'.format(repository)
+
+
+def _get_manifest_digest(login_server, repository, tag, username, password):
+    response = request_data_from_registry(
+        http_method='get',
+        login_server=login_server,
+        path=_get_tag_path(repository, tag),
+        username=username,
+        password=password,
+        result_index='tag')[0]
+
+    if 'digest' in response and response['digest']:
+        return response['digest']
+
+    raise CLIError("Could not get the manifest digest for image '{}:{}'.".format(repository, tag))
 
 
 def _obtain_data_from_registry(login_server,
@@ -137,14 +140,14 @@ def acr_repository_list(cmd,
                         password=None):
     is_managed_registry = True
     try:
-        validate_managed_registry(cmd.cli_ctx, registry_name)
+        validate_managed_registry(cmd, registry_name)
     except ResourceNotFound:
         pass
     except CLIError:
         is_managed_registry = False
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -152,7 +155,7 @@ def acr_repository_list(cmd,
 
     return _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/_catalog' if is_managed_registry else '/v2/_catalog',
+        path=_get_repository_path() if is_managed_registry else '/v2/_catalog',
         username=username,
         password=password,
         result_index='repositories',
@@ -171,14 +174,14 @@ def acr_repository_show_tags(cmd,
                              detail=False):
     is_managed_registry = True
     try:
-        validate_managed_registry(cmd.cli_ctx, registry_name)
+        validate_managed_registry(cmd, registry_name)
     except ResourceNotFound:
         pass
     except CLIError:
         is_managed_registry = False
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -199,7 +202,7 @@ def acr_repository_show_tags(cmd,
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/{}/_tags'.format(repository) if is_managed_registry else '/v2/{}/tags/list'.format(repository),
+        path=_get_tag_path(repository) if is_managed_registry else '/v2/{}/tags/list'.format(repository),
         username=username,
         password=password,
         result_index='tags',
@@ -224,12 +227,12 @@ def acr_repository_show_manifests(cmd,
                                   password=None,
                                   detail=False):
     try:
-        validate_managed_registry(cmd.cli_ctx, registry_name, None, SHOW_MANIFESTS_NOT_SUPPORTED)
+        validate_managed_registry(cmd, registry_name, None, SHOW_MANIFESTS_NOT_SUPPORTED)
     except ResourceNotFound:
         pass
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -239,7 +242,7 @@ def acr_repository_show_manifests(cmd,
 
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/{}/_manifests'.format(repository),
+        path=_get_manifest_path(repository),
         username=username,
         password=password,
         result_index='manifests',
@@ -266,7 +269,7 @@ def acr_repository_show(cmd,
                         username=None,
                         password=None):
     return _acr_repository_attributes_helper(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         http_method='get',
         json_payload=None,
@@ -310,7 +313,7 @@ def acr_repository_update(cmd,
         })
 
     return _acr_repository_attributes_helper(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         http_method='patch' if json_payload else 'get',
         json_payload=json_payload,
@@ -322,7 +325,7 @@ def acr_repository_update(cmd,
         password=password)
 
 
-def _acr_repository_attributes_helper(cli_ctx,
+def _acr_repository_attributes_helper(cmd,
                                       registry_name,
                                       http_method,
                                       json_payload,
@@ -334,7 +337,7 @@ def _acr_repository_attributes_helper(cli_ctx,
                                       password=None):
     _validate_parameters(repository, image)
     try:
-        validate_managed_registry(cli_ctx, registry_name, None, ATTRIBUTES_NOT_SUPPORTED)
+        validate_managed_registry(cmd, registry_name, None, ATTRIBUTES_NOT_SUPPORTED)
     except ResourceNotFound:
         pass
 
@@ -346,7 +349,7 @@ def _acr_repository_attributes_helper(cli_ctx,
         tag, manifest = None, None
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -355,13 +358,13 @@ def _acr_repository_attributes_helper(cli_ctx,
         permission=permission)
 
     if tag:
-        path = '/acr/v1/{}/_tags/{}'.format(repository, tag)
+        path = _get_tag_path(repository, tag)
         result_index = 'tag'
     elif manifest:
-        path = '/acr/v1/{}/_manifests/{}'.format(repository, manifest)
+        path = _get_manifest_path(repository, manifest)
         result_index = 'manifest'
     else:
-        path = '/acr/v1/{}'.format(repository)
+        path = _get_repository_path(repository)
         result_index = None
 
     # Non-GET request doesn't return the entity so there is always a GET reqeust
@@ -392,14 +395,14 @@ def acr_repository_untag(cmd,
                          username=None,
                          password=None):
     try:
-        validate_managed_registry(cmd.cli_ctx, registry_name, None, UNTAG_NOT_SUPPORTED)
+        validate_managed_registry(cmd, registry_name, None, UNTAG_NOT_SUPPORTED)
     except ResourceNotFound:
         pass
 
     repository, tag, _ = _parse_image_name(image)
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -410,7 +413,7 @@ def acr_repository_untag(cmd,
     return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
-        path='/v2/_acr/{}/tags/{}'.format(repository, tag),
+        path=_get_tag_path(repository, tag),
         username=username,
         password=password)[0]
 
@@ -419,8 +422,6 @@ def acr_repository_delete(cmd,
                           registry_name,
                           repository=None,
                           image=None,
-                          tag=None,
-                          manifest=None,
                           resource_group_name=None,  # pylint: disable=unused-argument
                           tenant_suffix=None,
                           username=None,
@@ -428,37 +429,20 @@ def acr_repository_delete(cmd,
                           yes=False):
     _validate_parameters(repository, image)
 
-    # Check if this is a legacy command. --manifest can be used as a flag so None is checked.
-    if repository and (tag or manifest is not None):
-        return _legacy_delete(cmd=cmd,
-                              registry_name=registry_name,
-                              repository=repository,
-                              tag=tag,
-                              manifest=manifest,
-                              tenant_suffix=tenant_suffix,
-                              username=username,
-                              password=password,
-                              yes=yes)
-
-    # At this point the specified command must not be a legacy command so we process it as a new command.
-    # If --tag/--manifest are specified with --repository, it's a legacy command handled above.
-    # If --tag/--manifest are specified with --image, error out here.
-    if tag:
-        raise CLIError("The parameter --tag is redundant and deprecated. Please use --image to delete an image.")
-    if manifest is not None:
-        raise CLIError("The parameter --manifest is redundant and deprecated. Please use --image to delete an image.")
-
     try:
-        validate_managed_registry(cmd.cli_ctx, registry_name, None, DELETE_NOT_SUPPORTED)
+        validate_managed_registry(cmd, registry_name, None, DELETE_NOT_SUPPORTED)
     except ResourceNotFound:
         pass
 
     if image:
-        # If --image is specified, repository/tag/manifest must be empty.
+        # If --image is specified, repository must be empty.
         repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+    else:
+        # This is a request on repository
+        tag, manifest = None, None
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -479,7 +463,7 @@ def acr_repository_delete(cmd,
     else:
         user_confirmation("Are you sure you want to delete the repository '{}' "
                           "and all images under it?".format(repository), yes)
-        path = '/v2/_acr/{}/repository'.format(repository)
+        path = _get_repository_path(repository)
 
     return request_data_from_registry(
         http_method='delete',
@@ -517,89 +501,6 @@ def _parse_image_name(image, allow_digest=False):
         raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
 
 
-def _legacy_delete(cmd,
-                   registry_name,
-                   repository,
-                   tag=None,
-                   manifest=None,
-                   tenant_suffix=None,
-                   username=None,
-                   password=None,
-                   yes=False):
-    try:
-        validate_managed_registry(cmd.cli_ctx, registry_name, None, DELETE_NOT_SUPPORTED)
-    except ResourceNotFound:
-        pass
-
-    login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
-        registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
-        username=username,
-        password=password,
-        repository=repository,
-        permission='*')
-
-    _INVALID = "Please specify either a tag name with --tag or a manifest digest with --manifest."
-
-    # If manifest is not specified
-    if manifest is None:
-        if not tag:
-            user_confirmation("Are you sure you want to delete the repository '{}' "
-                              "and all images under it?".format(repository), yes)
-            path = '/v2/_acr/{}/repository'.format(repository)
-        else:
-            logger.warning(
-                "This command is deprecated. The new command for this operation "
-                "is 'az acr repository untag --name %s --image %s:%s'.",
-                registry_name, repository, tag)
-            user_confirmation("Are you sure you want to delete the tag '{}:{}'?".format(repository, tag), yes)
-            path = '/v2/_acr/{}/tags/{}'.format(repository, tag)
-    # If --manifest is specified as a flag
-    elif not manifest:
-        # Raise if --tag is empty
-        if not tag:
-            raise CLIError(_INVALID)
-        logger.warning(
-            "This command is deprecated. The new command for this operation "
-            "is 'az acr repository delete --name %s --image %s:%s'.",
-            registry_name, repository, tag)
-        manifest = _delete_manifest_confirmation(
-            login_server=login_server,
-            username=username,
-            password=password,
-            repository=repository,
-            tag=tag,
-            manifest=manifest,
-            yes=yes)
-        path = '/v2/{}/manifests/{}'.format(repository, manifest)
-    # If --manifest is specified with a value
-    else:
-        # Raise if --tag is not empty
-        if tag:
-            raise CLIError(_INVALID)
-        logger.warning(
-            "This command is deprecated. The new command for this operation "
-            "is 'az acr repository delete --name %s --image %s@%s'.",
-            registry_name, repository, manifest)
-        manifest = _delete_manifest_confirmation(
-            login_server=login_server,
-            username=username,
-            password=password,
-            repository=repository,
-            tag=tag,
-            manifest=manifest,
-            yes=yes)
-        path = '/v2/{}/manifests/{}'.format(repository, manifest)
-
-    return request_data_from_registry(
-        http_method='delete',
-        login_server=login_server,
-        path=path,
-        username=username,
-        password=password)[0]
-
-
 def _delete_manifest_confirmation(login_server,
                                   username,
                                   password,
@@ -620,7 +521,7 @@ def _delete_manifest_confirmation(login_server,
 
     tags = _obtain_data_from_registry(
         login_server=login_server,
-        path='/acr/v1/{}/_tags'.format(repository),
+        path=_get_tag_path(repository),
         username=username,
         password=password,
         result_index='tags'
@@ -636,7 +537,7 @@ def _delete_manifest_confirmation(login_server,
     return manifest
 
 
-def get_image_digest(cli_ctx, registry_name, image):
+def get_image_digest(cmd, registry_name, image):
     repository, tag, manifest = _parse_image_name(image, allow_digest=True)
 
     if manifest:
@@ -644,7 +545,7 @@ def get_image_digest(cli_ctx, registry_name, image):
 
     # If we don't have manifest yet, try to get it from tag.
     login_server, username, password = get_access_credentials(
-        cli_ctx=cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         repository=repository,
         permission='pull')

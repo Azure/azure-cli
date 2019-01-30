@@ -25,7 +25,7 @@ from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
 
 from ._client_factory import cf_acr_registries
-from ._constants import MANAGED_REGISTRY_SKU
+from ._constants import get_managed_sku
 from ._utils import get_registry_by_name, ResourceNotFound
 
 
@@ -130,7 +130,7 @@ def _get_aad_token(cli_ctx,
     return loads(response.content.decode("utf-8"))["access_token"]
 
 
-def _get_credentials(cli_ctx,
+def _get_credentials(cmd,
                      registry_name,
                      tenant_suffix,
                      username,
@@ -153,6 +153,7 @@ def _get_credentials(cli_ctx,
     if not username and password:
         raise CLIError('Please also specify username if password is specified.')
 
+    cli_ctx = cmd.cli_ctx
     resource_not_found, registry = None, None
     try:
         registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
@@ -190,7 +191,7 @@ def _get_credentials(cli_ctx,
         return login_server, username, password
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
-    if not registry or registry.sku.name in MANAGED_REGISTRY_SKU:
+    if not registry or registry.sku.name in get_managed_sku(cmd):
         try:
             return login_server, EMPTY_GUID, _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
@@ -223,7 +224,7 @@ def _get_credentials(cli_ctx,
     return login_server, None, None
 
 
-def get_login_credentials(cli_ctx,
+def get_login_credentials(cmd,
                           registry_name,
                           tenant_suffix=None,
                           username=None,
@@ -233,7 +234,7 @@ def get_login_credentials(cli_ctx,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    return _get_credentials(cli_ctx,
+    return _get_credentials(cmd,
                             registry_name,
                             tenant_suffix,
                             username,
@@ -241,7 +242,7 @@ def get_login_credentials(cli_ctx,
                             only_refresh_token=True)
 
 
-def get_access_credentials(cli_ctx,
+def get_access_credentials(cmd,
                            registry_name,
                            tenant_suffix=None,
                            username=None,
@@ -257,7 +258,7 @@ def get_access_credentials(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    return _get_credentials(cli_ctx,
+    return _get_credentials(cmd,
                             registry_name,
                             tenant_suffix,
                             username,

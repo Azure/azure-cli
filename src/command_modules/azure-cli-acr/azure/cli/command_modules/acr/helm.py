@@ -21,7 +21,7 @@ def acr_helm_list(cmd,
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -47,7 +47,7 @@ def acr_helm_show(cmd,
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -82,7 +82,7 @@ def acr_helm_delete(cmd,
     user_confirmation("{}.\nAre you sure you want to continue?".format(message), yes)
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -113,7 +113,7 @@ def acr_helm_push(cmd,
         raise CLIError("Please run 'helm package {}' to generate a chart package first.".format(chart_package))
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -155,7 +155,7 @@ def acr_helm_repo_add(cmd,
     helm_command = _get_helm_command()
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,

@@ -15,7 +15,7 @@ def acr_config_content_trust_show(cmd,
                                   registry_name,
                                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
     return client.list_policies(resource_group_name, registry_name).trust_policy
 
 
@@ -25,7 +25,7 @@ def acr_config_content_trust_update(cmd,
                                     status=None,
                                     resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
 
     trust_policy = client.list_policies(resource_group_name, registry_name).trust_policy
 

@@ -9,10 +9,7 @@ import tempfile
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    FileTaskRunRequest,
-    PlatformProperties,
-)
+
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._utils import validate_managed_registry, get_validate_platform
@@ -41,7 +38,7 @@ def acr_run(cmd,
             platform=None):
 
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
@@ -70,8 +67,9 @@ def acr_run(cmd,
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
+    FileTaskRunRequest, PlatformProperties = cmd.get_models('FileTaskRunRequest', 'PlatformProperties')
     request = FileTaskRunRequest(
         task_file_path=file,
         values_file_path=values,

@@ -5,8 +5,6 @@
 
 from azure.cli.core.util import CLIError
 
-from azure.mgmt.containerregistry.v2018_09_01.models import ReplicationUpdateParameters
-
 from ._utils import (
     get_resource_group_name_by_registry_name,
     validate_premium_registry
@@ -18,7 +16,7 @@ REPLICATIONS_NOT_SUPPORTED = 'Replications are only supported for managed regist
 
 def acr_replication_list(cmd, client, registry_name, resource_group_name=None):
     _, resource_group_name = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
 
@@ -30,7 +28,7 @@ def acr_replication_create(cmd,
                            replication_name=None,
                            tags=None):
     registry, resource_group_name = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
 
     normalized_location = "".join(location.split()).lower()
     if registry.location == normalized_location:
@@ -55,7 +53,7 @@ def acr_replication_delete(cmd,
                            registry_name,
                            resource_group_name=None):
     _, resource_group_name = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, replication_name)
 
 
@@ -65,7 +63,7 @@ def acr_replication_show(cmd,
                          registry_name,
                          resource_group_name=None):
     _, resource_group_name = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, replication_name)
 
 
@@ -75,7 +73,10 @@ def acr_replication_update_custom(instance, tags=None):
     return instance
 
 
-def acr_replication_update_get():
+def acr_replication_update_get(cmd):
+    """Returns an empty ReplicationUpdateParameters object.
+    """
+    ReplicationUpdateParameters = cmd.get_models('ReplicationUpdateParameters')
     return ReplicationUpdateParameters()
 
 
