@@ -311,7 +311,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
             if not hasattr(temp, 'location_info'):
                 return
             if not temp or not [x for x in (temp.location_info or []) if x.zones]:
-                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
+                raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
 
