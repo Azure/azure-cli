@@ -42,7 +42,10 @@ def load_arguments(self, _):
 
     with self.argument_context('bot publish') as c:
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to upload bot code from.')
-        c.argument('proj_name', help='Name of the start up project file name. (E.g. EchoBotWithCounter.csproj)')
+        c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
+                                                                                   redirect='--proj-file-path',
+                                                                                   hide=True, expiration='2.1.0')],
+                   help='Path to the start up project file name. (E.g. "./EchoBotWithCounter.csproj")')
         c.argument('version', options_list=['-v', '--version'],
                    help='The Microsoft Bot Builder SDK version of the bot.')
 
@@ -53,7 +56,11 @@ def load_arguments(self, _):
         c.argument('bot_json', options_list=['--msbot'], help='Show the output as JSON compatible with a .bot file.', arg_type=get_three_state_flag())
 
     with self.argument_context('bot prepare-publish') as c:
-        c.argument('proj_name', help='Name of the start up project file name. Required only for C#.')
+        c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
+                                                                                   redirect='--proj-file-path',
+                                                                                   hide=True, expiration='2.1.0')],
+                   help='Path to the start up project file name. (E.g. "./EchoBotWithCounter.csproj") '
+                        'Required only for C#.')
         c.argument('sln_name', help='Name of the start up solution file name. Required only for C#.')
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to download deployment scripts to.')
         c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used '
