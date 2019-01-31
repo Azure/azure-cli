@@ -85,7 +85,9 @@ class AzCli(CLI):
         from azure.cli.core.util import get_az_version_string
         ver_string, updates_available = get_az_version_string()
         print(ver_string)
-        if updates_available:
+        if updates_available == -1:
+            logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
+        elif updates_available:
             logger.warning('You have %i updates available. Consider updating your CLI installation.', updates_available)
         else:
             print('Your CLI is up-to-date.')

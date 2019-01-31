@@ -71,26 +71,28 @@ def get_installed_cli_distributions():
     return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
 
 
-def _get_latest_from_pypi():
+def _update_latest_from_pypi(versions):
     from subprocess import check_output, STDOUT, CalledProcessError
 
-    cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir'.split()
-    logger.debug('Running: %s', cmd)
-    pypi_versions = {}
+    success = False
     try:
+        cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir'.split()
+        logger.debug('Running: %s', cmd)
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
+        success = True
         for line in log_output.splitlines():
             if not line.startswith(CLI_PACKAGE_NAME):
                 continue
             comps = line.split()
             mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
             version = comps[1].replace('(', '').replace(')', '')
-            pypi_versions[mod] = {
-                'pypi': version
-            }
+            try:
+                versions[mod]['pypi'] = version
+            except KeyError:
+                pass
     except CalledProcessError:
-        return {}
-    return pypi_versions
+        pass
+    return versions, success
 
 
 def get_az_version_string():
@@ -98,23 +100,18 @@ def get_az_version_string():
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
-
-    # get the versions from pypi
-    versions = _get_latest_from_pypi()
+    versions = {}
 
     # get locally installed versions
     for dist in get_installed_cli_distributions():
         if dist.key == CLI_PACKAGE_NAME:
-            versions[CLI_PACKAGE_NAME]['local'] = dist.version
+            versions[CLI_PACKAGE_NAME] = {'local': dist.version}
         elif dist.key.startswith(COMPONENT_PREFIX):
             comp_name = dist.key.replace(COMPONENT_PREFIX, '')
-            try:
-                versions[comp_name]['local'] = dist.version
-            except KeyError:
-                pass
+            versions[comp_name] = {'local': dist.version}
 
-    # trim out packages that are on pypi but not local
-    versions = {k: v for k, v in versions.items() if v.get('local', None)}
+    # get the versions from pypi
+    versions, success = _update_latest_from_pypi(versions)
     updates_available = 0
 
     def _print(val=''):
@@ -124,7 +121,7 @@ def get_az_version_string():
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         local = version_dict['local']
         pypi = version_dict.get('pypi', None)
-        if LooseVersion(pypi) > LooseVersion(local):
+        if pypi and LooseVersion(pypi) > LooseVersion(local):
             return name.ljust(20) + local.rjust(20) + ' *'
         return name.ljust(20) + local.rjust(20)
 
@@ -160,6 +157,11 @@ def get_az_version_string():
     _print('Legal docs and information: aka.ms/AzureCliLegal')
     _print()
     version_string = output.getvalue()
+
+    # if unable to query PyPI, use sentinel value to flag that
+    # we couldn't check for updates
+    if not success:
+        updates_available = -1
     return version_string, updates_available
 
 
