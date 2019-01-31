@@ -343,40 +343,34 @@ class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_not_create_registration_bot_without_endpoint(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli.', length=15)
-        valid_bot_name = bot_name.replace(".", "")
         self.kwargs.update({
-            'valid_bot_name': valid_bot_name,
-            'botname': bot_name,
+            'botname': self.create_random_name(prefix='cli', length=15),
             'app_id': str(uuid.uuid4()),
             'password': str(uuid.uuid4())
         })
 
         # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
         with self.assertRaisesRegexp(CLIError, 'Endpoint is required for creating a registration bot.'):
-            self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}',
-                     expect_failure=True)
+            self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_create_registration_bot_with_endpoint(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli.', length=15)
-        valid_bot_name = bot_name.replace(".", "")
         self.kwargs.update({
-            'valid_bot_name': valid_bot_name,
-            'botname': bot_name,
+            'botname': self.create_random_name(prefix='cli', length=15),
             'app_id': str(uuid.uuid4()),
             'password': str(uuid.uuid4())
         })
 
         # Delete the bot if already exists
-        self.cmd('az bot delete -g {rg} -n {valid_bot_name}')
+        self.cmd('az bot delete -g {rg} -n {botname}')
 
         self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
                  '-e https://testurl.com/api/messages',
                  checks={
                      self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{valid_bot_name}'),
+                     self.check('id', '{botname}'),
                      self.check('type', 'abs')
                  })
 

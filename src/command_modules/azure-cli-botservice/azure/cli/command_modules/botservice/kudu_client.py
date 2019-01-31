@@ -121,13 +121,12 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             HttpResponseValidator.check_response_status(response)
         except CLIError as e:
             if response.status_code == 500 and 'The request timed out.' in response.text:
-                self.__logger.warn('npm install is taking longer than expected and did not finish within the '
-                                   'Azure-specified timeout of 230 seconds.')
-                self.__logger.warn('The installation is likely still in progress. This is a known issue, please wait a '
-                                   'short while before messaging your bot. You can also visit Kudu to manually install '
-                                   'the npm dependencies. (https://github.com/projectkudu/kudu/wiki)')
-                self.__logger.warn('Your Kudu website for this bot is: %s' % self.__scm_url)
-                return
+                self.__logger.warning('npm install is taking longer than expected and did not finish within the '
+                                      'Azure-specified timeout of 230 seconds.')
+                self.__logger.warning('The installation is likely still in progress. This is a known issue, please wait'
+                                      ' a short while before messaging your bot. You can also visit Kudu to manually '
+                                      'install the npm dependencies. (https://github.com/projectkudu/kudu/wiki)')
+                self.__logger.warning('Your Kudu website for this bot is: %s' % self.__scm_url)
             else:
                 raise e
 

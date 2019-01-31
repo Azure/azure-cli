@@ -64,8 +64,8 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     function_kind = 'function'
 
     if resource_name.find(".") > -1:
-        logger.warn('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names and'
-                    ' will been removed.' % resource_name)
+        logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
+                       'and will been removed.', resource_name)
         # Remove or replace invalid "." character
         resource_name = resource_name.replace(".", "")
 
@@ -532,6 +532,6 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         deployment_id = output.get('id')
         # Instead of replacing "latest", which would could be in the bot name, we replace "deployments/latest"
         deployment_url = scm_url.replace('deployments/latest', 'deployments/%s' % deployment_id)
-        logger.error('Deployment failed. To find out more information about this deployment, please visit %s.'
-                     % deployment_url)
+        logger.error('Deployment failed. To find out more information about this deployment, please visit %s.',
+                     deployment_url)
     return output
