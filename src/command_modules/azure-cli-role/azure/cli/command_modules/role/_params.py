@@ -68,7 +68,8 @@ def load_arguments(self, _):
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('scopes', nargs='+')
         c.argument('role', completer=get_role_definition_name_completion_list)
-        c.argument('skip_assignment', arg_type=get_three_state_flag(), help='do not create default assignment')
+        c.argument('skip_assignment', arg_type=get_three_state_flag(),
+                   help='do not create the default assignment which lets the service principal access resources under current subscription')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
