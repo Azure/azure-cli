@@ -308,7 +308,7 @@ class AzCliCommandInvoker(CommandInvoker):
             cmd_copy = copy.copy(cmd)
             cmd_copy.cli_ctx = copy.copy(cmd.cli_ctx)
             cmd_copy.cli_ctx.data = copy.deepcopy(cmd.cli_ctx.data)
-            expanded_arg.cmd = cmd_copy
+            expanded_arg.cmd = expanded_arg._cmd = cmd_copy
 
             if hasattr(expanded_arg, '_subscription'):
                 cmd_copy.cli_ctx.data['subscription_id'] = expanded_arg._subscription  # pylint: disable=protected-access
