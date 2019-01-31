@@ -62,7 +62,7 @@ helps['acr run'] = """
         - name: Queue a remote git context with streaming logs.
           text: >
             az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
-        - name: Queue a remote git context with streaming logs and Build the image on Linux.
+        - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
           text: >
             az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
     """
