@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.4.1
++++++
+* ams streaming-endpoint [start | stop | create | update] : added 'wait' command
+* ams live-event [create | start | stop | reset] : added 'wait' command
+
 0.4.0
 +++++
 * BREAKING CHANGE: asset group command `ams asset get-streaming-locators` renamed `ams asset list-streaming-locators`.
