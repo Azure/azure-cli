@@ -121,7 +121,6 @@ class WheelExtension(Extension):
 
         for dist_info_dirname in info_dirs:
             parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
-            logger.error(parsed_dist_info_dir + " : " + dist_info_dirname)
             if parsed_dist_info_dir:
                 parsed_dist_info_dir = parsed_dist_info_dir.groupdict().get('name')
 
