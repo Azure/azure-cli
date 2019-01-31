@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.14
+++++++
+* Minor fixes
+
 2.2.13
 ++++++
 * `vm encryption enable`: now validates --disk encryption keyvault and that key encryption keyvault exists, in line with `vmss encryption enable`. Exposes --force. For more info: see issues #8111 and #8110
