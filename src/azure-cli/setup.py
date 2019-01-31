@@ -80,6 +80,7 @@ DEPENDENCIES = [
     'azure-cli-iot',
     'azure-cli-iotcentral',
     'azure-cli-keyvault',
+    'azure-cli-kusto',
     'azure-cli-lab',
     'azure-cli-maps',
     'azure-cli-monitor',
@@ -94,10 +95,12 @@ DEPENDENCIES = [
     'azure-cli-resource',
     'azure-cli-role',
     'azure-cli-search',
+    'azure-cli-security',
     'azure-cli-servicebus',
     'azure-cli-servicefabric',
     'azure-cli-signalr',
     'azure-cli-sql',
+    'azure-cli-sqlvirtualmachine',
     'azure-cli-storage',
     'azure-cli-vm'
 ]
