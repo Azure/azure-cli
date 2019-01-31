@@ -224,9 +224,9 @@ def add_helps(command_group, server_type):
                 short-summary: Create a {0} database.
                 examples:
                     - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb 
+                      text: az {1} db create -g testgroup -s testsvr -n testdb
                     - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}} 
+                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}}
                 """.format(server_type, command_group)
     helps['{} db delete'.format(command_group)] = """
                 type: command
