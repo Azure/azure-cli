@@ -257,7 +257,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_nics')
 
     with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
-        g.custom_command('invoke', 'run_command_invoke')
+        g.custom_command('invoke', 'vm_run_command_invoke')
         g.command('list', 'list')
         g.show_command('show', 'get')
 
@@ -332,6 +332,11 @@ def load_command_table(self, _):
         g.command('list', 'list_virtual_machine_scale_set_network_interfaces')
         g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
         g.show_command('show', 'get_virtual_machine_scale_set_network_interface')
+
+    with self.command_group('vmss run-command', compute_vm_run_sdk, min_api='2018-04-01') as g:
+        g.custom_command('invoke', 'vmss_run_command_invoke')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
 
     with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
         g.command('cancel', 'cancel')
