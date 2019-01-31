@@ -1074,7 +1074,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'caa':
                 record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
-                record_obj.update({'alias': record.cname})
+                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
                 record_obj.update({'preference': record.preference, 'host': record.exchange})
             elif record_type == 'ns':
