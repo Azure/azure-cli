@@ -1472,7 +1472,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
 
 # region VirtualMachines RunCommand
-def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, instance_id=None, scripts=None, parameters=None):  # pylint: disable=line-too-long
+def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
     RunCommandInput, RunCommandInputParameter = cmd.get_models('RunCommandInput', 'RunCommandInputParameter')
 
     # ensure helper is used properly.
@@ -2467,7 +2467,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
 # region VirtualMachineScaleSets RunCommand
 def vmss_run_command_invoke(cmd, resource_group_name, vmss_name, command_id, instance_id, scripts=None, parameters=None):  # pylint: disable=line-too-long
-    return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, instance_id, scripts, parameters)
+    return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, scripts, parameters, instance_id)
 # endregion
 
 
