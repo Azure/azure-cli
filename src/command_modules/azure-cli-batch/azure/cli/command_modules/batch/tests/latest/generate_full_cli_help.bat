@@ -22,6 +22,7 @@ cmd /c az batch application package --help
 cmd /c az batch application package create --help
 cmd /c az batch application package delete --help
 cmd /c az batch application package show --help
+cmd /c az batch application package list --help
 cmd /c az batch application package activate --help
 cmd /c az batch application summary --help
 cmd /c az batch application summary list --help

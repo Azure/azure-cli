@@ -5,12 +5,12 @@ Release History
 
 4.0.0
 +++++
-* Updated to Batch SDK 6.0.0
-    * **[Breaking]** A new property `HttpUrl` replaces `BlobSource`. This can be any HTTP URL. Previously, this had to be an Azure Blob Storage URL.
+* Updated to Batch SDK and Batch Management Plane SDK to 6.0.0
     * **[Breaking]** Removed `OSDisk` property from `VirtualMachineConfiguration`. This property is no longer supported.
-    * **[Breaking]** `Application` no longer has a `Packages` property, instead the packages can be retrieved via the new  `ApplicationPackage.List` API.
-    * **[Breaking]** `TargetOsVersion` is now `OsVersion`, and `CurrentOsVersion` is no longer supported on `CloudServiceConfiguration`.
-    * **[Breaking]** Removed support for the `upgrade_os` API
+    * **[Breaking]** Removed support for the 'az batch pool upgrade os'
+        * **[Breaking]** `TargetOsVersion` is now `OsVersion`, and `CurrentOsVersion` is no longer supported on `CloudServiceConfiguration`.
+    * **[Breaking]** `Application` no longer has a `Packages` property, instead the packages can be retrieved via the new  `az batch application package list`.
+    * **[Breaking]** On `az batch application` commands, `application_id` has been changed to `application_name`
     * See the HISTORY.rst for the `azure-batch <https://github.com/Azure/azure-sdk-for-python/blob/master/azure-batch/HISTORY.rst>`_. and `azure-mgmt-batch <https://github.com/Azure/azure-sdk-for-python/blob/master/azure-mgmt-batch/HISTORY.rst>`_. for further information on non-breaking changes related to this release.
 * Update validation logic to automatically include "https://" in all references of account_endpoint if not specified. This was already being done by `az batch login`.
 

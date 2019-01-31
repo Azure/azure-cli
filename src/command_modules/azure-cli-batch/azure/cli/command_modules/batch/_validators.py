@@ -288,7 +288,7 @@ def validate_client_parameters(cmd, namespace):
     if not (namespace.account_endpoint.startswith('https://') or
             namespace.account_endpoint.startswith('http://')):
         namespace.account_endpoint = 'https://' + namespace.account_endpoint
-
+    namespace.account_endpoint = namespace.account_endpoint.rstrip('/')
     # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
         if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
