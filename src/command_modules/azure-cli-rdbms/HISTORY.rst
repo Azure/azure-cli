@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.6
++++++
+* Improve help message and command parameters
+
 0.3.5
 +++++
 * Add mariadb vnet commands
