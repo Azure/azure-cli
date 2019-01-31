@@ -54,7 +54,7 @@ def add_helps(command_group, server_type):
                     - name: Geo-restore 'testsvr2' into a new server 'testsvrnew', where 'testsvrnew' is in a different resource group from 'testsvr2'.
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
                             -l westus2
                 """.format(command_group, server_type)
     helps['mysql server replica'] = """
