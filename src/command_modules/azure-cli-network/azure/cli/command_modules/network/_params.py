@@ -789,6 +789,7 @@ def load_arguments(self, _):
     with self.argument_context('network watcher flow-log', arg_group='Traffic Analytics', min_api='2018-10-01') as c:
         c.argument('traffic_analytics_interval', options_list='--interval', type=int, help='Interval in minutes at which to conduct flow analytics.')
         c.argument('traffic_analytics_workspace', options_list='--workspace', help='Name or ID of a Log Analytics workspace.')
+        c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. If supplying `--workspace`, defaults to true.')
 
     for item in ['list', 'stop', 'delete', 'show', 'show-status']:
         with self.argument_context('network watcher packet-capture {}'.format(item)) as c:
