@@ -264,20 +264,22 @@ jobs:
 
 
   - bash: |
-       echo == Remove pre-installed azure-cli ==
-       brew uninstall azure-cli
+      set -ev
 
-       echo == Install azure-cli.rb formula ==
-       brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+      echo == Remove pre-installed azure-cli ==
+      brew uninstall azure-cli
 
-       echo == Az Version ==
-       az --version
+      echo == Install azure-cli.rb formula ==
+      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
-       echo == Run Self-Test ==
-       az self-test
+      echo == Az Version ==
+      az --version
 
-       echo == Audit azure-cli.rb formula ==
-       brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+      echo == Run Self-Test ==
+      az self-test
+
+      echo == Audit azure-cli.rb formula ==
+      brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
     displayName: 'Bash Script'
 
