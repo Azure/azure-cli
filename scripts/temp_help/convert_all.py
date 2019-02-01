@@ -77,6 +77,13 @@ if __name__ == "__main__":
 
     if args:
         if args[0].lower() == "--core":
+            test = False
+            try:
+                if args[1].lower() == "--test":
+                    test = True
+            except IndexError:
+                pass
+
             subprocess.run(["python", "./help_convert.py", "--get-all-mods"])
 
             module_names = []
@@ -90,6 +97,8 @@ if __name__ == "__main__":
             with open(os.devnull, 'w') as devnull: # silence stdout by redirecting to devnull
                 for mod in module_names:
                     args = ["python", "./help_convert.py", mod]
+                    if test:
+                        args.append("--test")
                     completed_process = subprocess.run(args, stdout=devnull)
                     if completed_process.returncode == 0:
                         successes += 1
