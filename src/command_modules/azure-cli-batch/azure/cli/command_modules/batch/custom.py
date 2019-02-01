@@ -174,7 +174,7 @@ def _upload_package_blob(ctx, package_file, url):
 
 @transfer_doc(ApplicationPackageOperations.create)
 def create_application_package(cmd, client,
-                               resource_group_name, account_name, application_name, version,
+                               resource_group_name, account_name, application_name, version_name,
                                package_file):
     # create application if not exist
     mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
@@ -183,15 +183,15 @@ def create_application_package(cmd, client,
     except Exception:  # pylint:disable=broad-except
         mgmt_client.application.create(resource_group_name, account_name, application_name)
 
-    result = client.create(resource_group_name, account_name, application_name, version)
+    result = client.create(resource_group_name, account_name, application_name, version_name)
 
     # upload binary as application package
     logger.info('Uploading %s to storage blob %s...', package_file, result.storage_url)
     _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
-    client.activate(resource_group_name, account_name, application_name, version, "zip")
-    return client.get(resource_group_name, account_name, application_name, version)
+    client.activate(resource_group_name, account_name, application_name, version_name, "zip")
+    return client.get(resource_group_name, account_name, application_name, version_name)
 
 
 # Data plane custom commands

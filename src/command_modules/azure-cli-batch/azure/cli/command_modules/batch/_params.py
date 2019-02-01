@@ -72,7 +72,7 @@ def load_arguments(self, _):
     with self.argument_context('batch application package create') as c:
         c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
         c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
-        c.argument('version', options_list=('--version',), help="The version of the application.")
+        c.argument('version_name', options_list=('--version-name',), help="The version name of the application.")
 
     with self.argument_context('batch location quotas show') as c:
         c.argument('location_name', get_location_type(self.cli_ctx), help='The region from which to display the Batch service quotas.')
