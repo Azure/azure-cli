@@ -617,7 +617,7 @@ examples:
 helps['webapp config set'] = """
 type: command
 short-summary: Set a web app's configuration.
-Examples:
+examples:
   - name: turn on "alwaysOn"
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --always-on true
@@ -625,10 +625,6 @@ Examples:
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "{"alwaysOn": true}"
 
-examples:
-  - name: Set a web app's configuration. (crafted)
-    text: az webapp config set --name My --resource-group MyResourceGroup --always-on {always-on}
-    crafted: true
 """
 
 helps['webapp config show'] = """
