@@ -2285,8 +2285,15 @@ class NetworkWatcherScenarioTest(ScenarioTest):
 
         # test traffic-analytics features
         self.cmd('resource create -g {rg} -n {ws} --resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"')
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws}')
-
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws}', checks=[
+            self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True)
+        ])
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --traffic-analytics false', checks=[
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
+        ])
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace ""', checks=[
+            self.check('flowAnalyticsConfiguration', None)
+        ])
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')

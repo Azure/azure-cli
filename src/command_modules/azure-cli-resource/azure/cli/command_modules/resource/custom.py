@@ -1822,7 +1822,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         try:
             res = json.loads(properties)
         except json.decoder.JSONDecodeError as ex:
-            raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex)) 
+            raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
 
         if not is_full_object:
             if not location:
