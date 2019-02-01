@@ -2,8 +2,16 @@
 
 Release History
 ===============
+2.0.58
+++++++
 
 * Fixes regression where `--ids` could no longer be used with JSON output.
+
+2.0.57
+++++++
+* Hot fix for issue 8399_.
+
+.. _8399: https://github.com/Azure/azure-cli/issues/8399
 
 2.0.56
 ++++++

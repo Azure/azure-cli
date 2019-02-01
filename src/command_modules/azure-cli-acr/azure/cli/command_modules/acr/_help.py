@@ -62,6 +62,17 @@ helps['acr run'] = """
         - name: Queue a remote git context with streaming logs.
           text: >
             az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
+<<<<<<< HEAD
+<<<<<<< HEAD
+        - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
+=======
+        - name: Queue a remote git context with streaming logs and Build the image on Linux.
+>>>>>>> add more clarity to the message and update examples
+=======
+        - name: Queue a remote git context with streaming logs and Build the image on Linux.
+>>>>>>> 2af677c155a17c7c589cc7fe7f94a1dcd872ce24
+          text: >
+            az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
     """
 
 helps['acr helm'] = """
@@ -486,6 +497,9 @@ helps['acr task update'] = """
         - name: Update base image updates to trigger on all dependent images of a multi-stage dockerfile, and status of a task in an Azure Container Registry.
           text: >
             az acr task update -n MyTask -r MyRegistry --base-image-trigger-type All --status Disabled
+        - name: Update platform for the Build step of your Task to Windows (prev Linux).
+          text: >
+            az acr task update -n MyTask -r MyRegistry --platform Windows
 """
 
 helps['acr task list-runs'] = """

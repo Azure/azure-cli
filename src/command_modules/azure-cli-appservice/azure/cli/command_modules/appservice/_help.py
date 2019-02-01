@@ -1037,3 +1037,20 @@ helps['functionapp cors show'] = """
     type: command
     short-summary: show allowed origins
 """
+
+helps['functionapp plan'] = """
+    type: group
+    short-summary: Manage App Service Plans for an Azure Function
+"""
+
+helps['functionapp plan create'] = """
+    type: command
+    short-summary: Create an App Service Plan for an Azure Function
+    examples:
+        - name: Create a basic app service plan.
+          text: >
+            az functionapp plan create -g MyResourceGroup -n MyPlan --sku B1
+        - name: Create a standard app service plan with with four workers.
+          text: >
+            az functionapp plan create -g MyResourceGroup -n MyPlan --number-of-workers 4 --sku S1
+"""

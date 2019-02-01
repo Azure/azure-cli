@@ -265,3 +265,6 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
         g.custom_command('show', 'show_cors')
+
+    with self.command_group('functionapp plan') as g:
+        g.custom_command('create', 'create_functionapp_app_service_plan')
