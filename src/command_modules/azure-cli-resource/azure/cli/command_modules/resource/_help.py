@@ -351,6 +351,10 @@ parameters:
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+examples:
+  - name: Validate whether a template is syntactically correct. (crafted)
+    text: az group deployment validate --template-file azuredeploy.json --resource-group MyResourceGroup --parameters @myparameters.json
+    crafted: true
 """
 
 helps['group deployment wait'] = """
@@ -429,6 +433,10 @@ examples:
 helps['group update'] = """
 type: command
 short-summary: Update a resource group.
+examples:
+  - name: Update a resource group. (crafted)
+    text: az group update --set {set}
+    crafted: true
 """
 
 helps['group wait'] = """
@@ -1076,6 +1084,10 @@ examples:
 helps['resource update'] = """
 type: command
 short-summary: Update a resource.
+examples:
+  - name: Update a resource. (crafted)
+    text: az resource update --set {set} --api-version {api-version}
+    crafted: true
 """
 
 helps['resource wait'] = """

@@ -401,6 +401,10 @@ short-summary: Retrieve a job recurrence in a Data Lake Analytics account.
 helps['dla job show'] = """
 type: command
 short-summary: Get information for a Data Lake Analytics job.
+examples:
+  - name: Get information for a Data Lake Analytics job. (commonly used with --output)
+    text: 'az dla job show --job-identity {job-identity}  '
+    crafted: true
 """
 
 helps['dla job submit'] = """

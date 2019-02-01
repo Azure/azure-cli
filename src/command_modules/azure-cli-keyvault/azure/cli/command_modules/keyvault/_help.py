@@ -114,6 +114,10 @@ helps['keyvault create'] = """
 type: command
 short-summary: Create a key vault.
 long-summary: Default permissions are created for the current user or service principal unless the `--no-self-perms` flag is specified.
+examples:
+  - name: Create a key vault. (crafted)
+    text: az keyvault create --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['keyvault delete'] = """

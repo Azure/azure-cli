@@ -37,6 +37,10 @@ examples:
 helps['iotcentral app delete'] = """
 type: command
 short-summary: Delete an IoT Central application.
+examples:
+  - name: Delete an IoT Central application. (crafted)
+    text: az iotcentral app delete --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['iotcentral app list'] = """

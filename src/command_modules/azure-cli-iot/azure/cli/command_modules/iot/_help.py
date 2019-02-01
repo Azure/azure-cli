@@ -479,6 +479,10 @@ short-summary: List shared access policies of an IoT hub.
 helps['iot hub policy show'] = """
 type: command
 short-summary: Get the details of a shared access policy of an IoT hub.
+examples:
+  - name: Get the details of a shared access policy of an IoT hub. (commonly used with --query)
+    text: 'az iot hub policy show --hub-name MyHub  '
+    crafted: true
 """
 
 helps['iot hub route'] = """
@@ -634,6 +638,13 @@ examples:
 helps['iot hub show'] = """
 type: command
 short-summary: Get the details of an IoT hub.
+examples:
+  - name: Get the details of an IoT hub. (commonly used with --query)
+    text: 'az iot hub show  '
+    crafted: true
+  - name: Show the connection strings for an IoT hub. (crafted)
+    text: az iot hub show-connection-string --hub-name MyHub --policy-name service
+    crafted: true
 """
 
 helps['iot hub show-connection-string'] = """
@@ -657,6 +668,10 @@ examples:
 helps['iot hub show-quota-metrics'] = """
 type: command
 short-summary: Get the quota metrics for an IoT hub.
+examples:
+  - name: Get the quota metrics for an IoT hub. (commonly used with --query)
+    text: 'az iot hub show-quota-metrics  '
+    crafted: true
 """
 
 helps['iot hub show-stats'] = """

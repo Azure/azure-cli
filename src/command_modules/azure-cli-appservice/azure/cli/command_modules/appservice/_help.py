@@ -52,11 +52,19 @@ examples:
 helps['appservice plan show'] = """
 type: command
 short-summary: Get the app service plans for a resource group or a set of resource groups.
+examples:
+  - name: Get the app service plans for a resource group or a set of resource groups. (commonly used with --output)
+    text: 'az appservice plan show --name MyAppServicePlan --resource-group MyResourceGroup  '
+    crafted: true
 """
 
 helps['appservice plan update'] = """
 type: command
 short-summary: Update an app service plan. See https://docs.microsoft.com/en-us/azure/app-service/app-service-plan-manage#move-an-app-to-another-app-service-plan to learn more
+examples:
+  - name: Update an app service plan. (crafted)
+    text: az appservice plan update --name MyAppServicePlan --resource-group MyResourceGroup --sku S1
+    crafted: true
 """
 
 helps['functionapp'] = """
@@ -82,11 +90,19 @@ short-summary: Delete a function app's settings.
 helps['functionapp config appsettings list'] = """
 type: command
 short-summary: Show settings for a function app.
+examples:
+  - name: Show settings for a function app. (crafted)
+    text: az functionapp config appsettings list --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp config appsettings set'] = """
 type: command
 short-summary: Update a function app's settings.
+examples:
+  - name: Update a function app's settings. (crafted)
+    text: az functionapp config appsettings set --name My --resource-group MyResourceGroup --settings {settings}
+    crafted: true
 """
 
 helps['functionapp config hostname'] = """
@@ -132,6 +148,10 @@ short-summary: Configure SSL certificates.
 helps['functionapp config ssl bind'] = """
 type: command
 short-summary: Bind an SSL certificate to a function app.
+examples:
+  - name: Bind an SSL certificate to a function app. (crafted)
+    text: az functionapp config ssl bind --name My --ssl-type {ssl-type} --certificate-thumbprint {certificate-thumbprint} --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp config ssl delete'] = """
@@ -152,6 +172,10 @@ short-summary: Unbind an SSL certificate from a function app.
 helps['functionapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a function app.
+examples:
+  - name: Upload an SSL certificate to a function app. (commonly used with --output and --query)
+    text: 'az functionapp config ssl upload --name My --certificate-file {certificate-file}   --resource-group MyResourceGroup --certificate-password {certificate-password}  '
+    crafted: true
 """
 
 helps['functionapp cors'] = """
@@ -198,6 +222,10 @@ examples:
 helps['functionapp delete'] = """
 type: command
 short-summary: Delete a function app.
+examples:
+  - name: Delete a function app. (crafted)
+    text: az functionapp delete --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp deployment'] = """
@@ -218,6 +246,10 @@ short-summary: Manage function app deployment via source control.
 helps['functionapp deployment source config'] = """
 type: command
 short-summary: Manage deployment from git or Mercurial repositories.
+examples:
+  - name: Perform deployment using the kudu zip push deployment for a function app. (crafted)
+    text: az functionapp deployment source config-zip --name My --resource-group MyResourceGroup --src {zip file path location}
+    crafted: true
 """
 
 helps['functionapp deployment source config-local-git'] = """
@@ -264,6 +296,10 @@ short-summary: Get the details of a source control deployment configuration.
 helps['functionapp deployment source sync'] = """
 type: command
 short-summary: Synchronize from the repository. Only needed under manual integration mode.
+examples:
+  - name: Synchronize from the repository. Only needed under manual integration mode. (crafted)
+    text: az functionapp deployment source sync --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp deployment user'] = """
@@ -307,6 +343,10 @@ short-summary: Disable web app's managed service identity
 helps['functionapp identity show'] = """
 type: command
 short-summary: display web app's managed service identity
+examples:
+  - name: Display functionapp's managed service identity. (commonly used with --output and --query)
+    text: 'az functionapp identity show --name My --resource-group MyResourceGroup    '
+    crafted: true
 """
 
 helps['functionapp list'] = """
@@ -346,21 +386,37 @@ examples:
 helps['functionapp restart'] = """
 type: command
 short-summary: Restart a function app.
+examples:
+  - name: Restart a function app. (crafted)
+    text: az functionapp restart --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp show'] = """
 type: command
 short-summary: Get the details of a function app.
+examples:
+  - name: Get the details of a function app. (crafted)
+    text: az functionapp show --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp start'] = """
 type: command
 short-summary: Start a function app.
+examples:
+  - name: Start a function app. (crafted)
+    text: az functionapp start --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp stop'] = """
 type: command
 short-summary: Stop a function app.
+examples:
+  - name: Stop a function app. (crafted)
+    text: az functionapp stop --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp update'] = """
@@ -419,11 +475,19 @@ short-summary: Configure web app settings.
 helps['webapp config appsettings delete'] = """
 type: command
 short-summary: Delete web app settings.
+examples:
+  - name: Delete web app settings. (crafted)
+    text: az webapp config appsettings delete --name My --resource-group MyResourceGroup --setting-names {setting-names}
+    crafted: true
 """
 
 helps['webapp config appsettings list'] = """
 type: command
 short-summary: Get the details of a web app's settings.
+examples:
+  - name: Get the details of a web app's settings. (crafted)
+    text: az webapp config appsettings list --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config appsettings set'] = """
@@ -481,6 +545,10 @@ short-summary: Delete a web app's connection strings.
 helps['webapp config connection-string list'] = """
 type: command
 short-summary: Get a web app's connection strings.
+examples:
+  - name: Get a web app's connection strings. (crafted)
+    text: az webapp config connection-string list --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config connection-string set'] = """
@@ -506,6 +574,10 @@ short-summary: Delete a web app container's settings.
 helps['webapp config container set'] = """
 type: command
 short-summary: Set a web app container's settings.
+examples:
+  - name: Set a web app container's settings. (crafted)
+    text: az webapp config container set --name My --docker-custom-image-name MyDockerCustomImage --resource-group MyResourceGroup --docker-registry-server-user {docker-registry-server-user} --docker-registry-server-password {docker-registry-server-password} --docker-registry-server-url {docker-registry-server-url}
+    crafted: true
 """
 
 helps['webapp config container show'] = """
@@ -536,6 +608,10 @@ short-summary: Get the external-facing IP address for a web app.
 helps['webapp config hostname list'] = """
 type: command
 short-summary: List all hostname bindings for a web app.
+examples:
+  - name: List all hostname bindings for a web app. (crafted)
+    text: az webapp config hostname list --resource-group MyResourceGroup --webapp-name MyWebapp
+    crafted: true
 """
 
 helps['webapp config set'] = """
@@ -549,11 +625,19 @@ Examples:
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "{"alwaysOn": true}"
 
+examples:
+  - name: Set a web app's configuration. (crafted)
+    text: az webapp config set --name My --resource-group MyResourceGroup --always-on {always-on}
+    crafted: true
 """
 
 helps['webapp config show'] = """
 type: command
 short-summary: Get the details of a web app's configuration.
+examples:
+  - name: Get the details of a web app's configuration. (commonly used with --output and --query)
+    text: 'az webapp config show --name My --resource-group MyResourceGroup    '
+    crafted: true
 """
 
 helps['webapp config snapshot'] = """
@@ -586,11 +670,19 @@ short-summary: Configure SSL certificates for web apps.
 helps['webapp config ssl bind'] = """
 type: command
 short-summary: Bind an SSL certificate to a web app.
+examples:
+  - name: Bind an SSL certificate to a web app. (crafted)
+    text: az webapp config ssl bind --name My --ssl-type {ssl-type} --certificate-thumbprint {certificate-thumbprint} --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp config ssl delete'] = """
 type: command
 short-summary: Delete an SSL certificate from a web app.
+examples:
+  - name: Delete an SSL certificate from a web app. (crafted)
+    text: az webapp config ssl delete --resource-group MyResourceGroup --certificate-thumbprint {certificate-thumbprint}
+    crafted: true
 """
 
 helps['webapp config ssl list'] = """
@@ -606,6 +698,10 @@ short-summary: Unbind an SSL certificate from a web app.
 helps['webapp config ssl upload'] = """
 type: command
 short-summary: Upload an SSL certificate to a web app.
+examples:
+  - name: Upload an SSL certificate to a web app. (commonly used with --output and --query)
+    text: 'az webapp config ssl upload --name My --certificate-file {certificate-file}   --resource-group MyResourceGroup --certificate-password {certificate-password}  '
+    crafted: true
 """
 
 helps['webapp config storage-account'] = """
@@ -696,6 +792,10 @@ examples:
 helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.
+examples:
+  - name: Delete a web app. (crafted)
+    text: az webapp delete --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp deleted'] = """
@@ -734,6 +834,10 @@ short-summary: Manage container-based continuous deployment.
 helps['webapp deployment container config'] = """
 type: command
 short-summary: Configure continuous deployment via containers.
+examples:
+  - name: Configure continuous deployment via containers. (crafted)
+    text: az webapp deployment container config --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp deployment container show-cd-url'] = """
@@ -744,6 +848,10 @@ short-summary: Get the URL which can be used to configure webhooks for continuou
 helps['webapp deployment list-publishing-profiles'] = """
 type: command
 short-summary: Get the details for available web app deployment profiles.
+examples:
+  - name: Get the details for available web app deployment profiles. (commonly used with --output and --query)
+    text: 'az webapp deployment list-publishing-profiles --name My --resource-group MyResourceGroup    '
+    crafted: true
 """
 
 helps['webapp deployment slot'] = """
@@ -769,6 +877,10 @@ short-summary: Delete a deployment slot.
 helps['webapp deployment slot list'] = """
 type: command
 short-summary: List all deployment slots.
+examples:
+  - name: List all deployment slots. (crafted)
+    text: az webapp deployment slot list --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp deployment slot swap'] = """
@@ -789,6 +901,13 @@ short-summary: Manage web app deployment via source control.
 helps['webapp deployment source config'] = """
 type: command
 short-summary: Manage deployment from git or Mercurial repositories.
+examples:
+  - name: Get a URL for a git repository endpoint to clone and push to for web app deployment. (crafted)
+    text: az webapp deployment source config-local-git --name MyUniqueApp git remote add azure https://{deploy_user_name}@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git --resource-group MyResourceGroup
+    crafted: true
+  - name: Perform deployment using the kudu zip push deployment for a webapp. (crafted)
+    text: az webapp deployment source config-zip --name MyUniqueApp git remote add azure https://{deploy_user_name}@MyUniqueApp.scm.azurewebsites.net/MyUniqueApp.git --resource-group MyResourceGroup --src {zip file path location}
+    crafted: true
 """
 
 helps['webapp deployment source config-local-git'] = """
@@ -877,6 +996,10 @@ short-summary: Disable web app's managed service identity
 helps['webapp identity show'] = """
 type: command
 short-summary: display web app's managed service identity
+examples:
+  - name: Display webapp's managed service identity. (commonly used with --output and --query)
+    text: 'az webapp identity show --name My --resource-group MyResourceGroup    '
+    crafted: true
 """
 
 helps['webapp list'] = """
@@ -904,12 +1027,20 @@ short-summary: Manage web app logs.
 helps['webapp log config'] = """
 type: command
 short-summary: Configure logging for a web app.
+examples:
+  - name: Configure logging for a web app. (crafted)
+    text: az webapp log config --name My --resource-group MyResourceGroup --web-server-logging {web-server-logging}
+    crafted: true
 """
 
 helps['webapp log download'] = """
 type: command
 short-summary: Download a web app's log history as a zip file.
 long-summary: This command may not work with web apps running on Linux.
+examples:
+  - name: Download a web app's log history as a zip file. (crafted)
+    text: az webapp log download --log-file {log-file} --resource-group MyResourceGroup --slot Staging --name My
+    crafted: true
 """
 
 helps['webapp log show'] = """
@@ -926,11 +1057,19 @@ long-summary: This command may not work with web apps running on Linux.
 helps['webapp restart'] = """
 type: command
 short-summary: Restart a web app.
+examples:
+  - name: Restart a web app. (crafted)
+    text: az webapp restart --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp show'] = """
 type: command
 short-summary: Get the details of a web app.
+examples:
+  - name: Get the details of a web app. (crafted)
+    text: az webapp show --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp ssh'] = """
@@ -945,11 +1084,19 @@ examples:
 helps['webapp start'] = """
 type: command
 short-summary: Start a web app.
+examples:
+  - name: Start a web app. (crafted)
+    text: az webapp start --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp stop'] = """
 type: command
 short-summary: Stop a web app.
+examples:
+  - name: Stop a web app. (crafted)
+    text: az webapp stop --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp traffic-routing'] = """
@@ -1012,6 +1159,10 @@ short-summary: Allows management operations of continuous webjobs on a web app.
 helps['webapp webjob continuous list'] = """
 type: command
 short-summary: List all continuous webjobs on a selected web app.
+examples:
+  - name: List all continuous webjobs on a selected webapp. (crafted)
+    text: az webapp webjob continuous list --name My --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['webapp webjob continuous remove'] = """
