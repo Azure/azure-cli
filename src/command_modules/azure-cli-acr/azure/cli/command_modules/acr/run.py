@@ -37,7 +37,7 @@ def acr_run(cmd,
             no_wait=False,
             timeout=None,
             resource_group_name=None,
-            os_type=OS.linux.value,
+            os_type=None,
             platform=None,
             auth_mode=None,
             credentials=[]):
