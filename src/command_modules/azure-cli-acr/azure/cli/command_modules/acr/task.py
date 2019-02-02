@@ -32,7 +32,7 @@ from azure.mgmt.containerregistry.v2018_09_01.models import (
     AuthInfoUpdateParameters,
     SourceControlType,
 )
-from ._utils import validate_managed_registry, get_validate_platform
+from ._utils import validate_managed_registry, get_credentials, get_validate_platform
 from ._stream_utils import stream_logs
 from ._run_polling import get_run_with_polling
 
@@ -77,6 +77,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None,
+                    auth_mode=None,
+                    credentials=[],
                     target=None):
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
@@ -161,6 +163,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         trigger=TriggerProperties(
             source_triggers=source_triggers,
             base_image_trigger=base_image_trigger
+        ),
+        credentials=get_credentials(
+            auth_mode=auth_mode,
+            credentials=credentials
         )
     )
 
@@ -232,7 +238,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     set_value=None,
                     set_secret=None,
                     base_image_trigger_enabled=None,
-                    base_image_trigger_type=None):
+                    base_image_trigger_type=None,
+                    auth_mode=None,
+                    credentials=[],
+                    target=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
@@ -265,7 +274,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             docker_file_path=file,
             arguments=arguments,
             context_path=context_path,
-            context_access_token=git_access_token
+            context_access_token=git_access_token,
+            target=target
         )
     elif step:
         if isinstance(step, DockerBuildStep):
@@ -276,7 +286,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 docker_file_path=file,
                 arguments=arguments,
                 context_path=context_path,
-                context_access_token=git_access_token
+                context_access_token=git_access_token,
+                target=None
             )
 
         elif isinstance(step, FileTaskStep):
@@ -353,6 +364,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         trigger=TriggerUpdateParameters(
             source_triggers=source_trigger_update_params,
             base_image_trigger=base_image_trigger_update_params
+        ),
+        credentials=get_credentials(
+            auth_mode=auth_mode,
+            credentials=credentials
         )
     )
 

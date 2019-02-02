@@ -266,6 +266,8 @@ def get_credentials(auth_mode=SourceRegistryLoginMode.default, credentials=[]):
                 "Please provide the credentials in the form of "
                 "'registryName;username;password'. Incorrect credentials: '{}'".format(credential)
             )
+
+        # 'loginServer': { username: '', password: '' }
         customRegistries[cred_split[0]] = CustomRegistryCredentials(
             user_name=cred_split[1],
             password=cred_split[2]
