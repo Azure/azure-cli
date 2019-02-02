@@ -9,7 +9,6 @@ from mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
-# TODO: Directive not in latest release of sphinx, need to pip install sphinx==1.6.7 will need to update code to support latest version of sphinx.
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
 

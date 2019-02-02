@@ -51,7 +51,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_header(self, cli_name, help_file):
         super(CLIPrintMixin, self)._print_header(cli_name, help_file)
 
-        links = help_file.links  # TODO: this needs to be updated to handle links obj not just link text
+        links = help_file.links
         if links:
             link_text = "{} and {}".format(", ".join([link["url"] for link in links[0:-1]]),
                                            links[-1]["url"]) if len(links) > 1 else links[0]["url"]
@@ -293,12 +293,29 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         _data['text'] = _data.get('text', '')
         super(HelpExample, self).__init__(_data)
 
-        # new attributes in lieu of old attributes. TODO: SHOULD WE DELETE OLD ATTRS?? TO ENFORCE new ones?
-        self.short_summary = _data.get('summary', '') if _data.get('summary', '') else self.name
-        self.command = _data.get('command', '') if _data.get('command', '') else self.text
+        self.name = _data.get('summary', '') if _data.get('summary', '') else self.name
+        self.text = _data.get('command', '') if _data.get('command', '') else self.text
+
         self.long_summary = _data.get('description', '')
         self.min_profile = _data.get('min_profile', '')
         self.max_profile = _data.get('max_profile', '')
+
+    # alias old params with new
+    @property
+    def short_summary(self):
+        return self.name
+
+    @short_summary.setter
+    def short_summary(self, value):
+        self.name = value
+
+    @property
+    def command(self):
+        return self.text
+
+    @command.setter
+    def command(self, value):
+        self.text = value
 
 
 class HelpParameter(KnackHelpParameter):  # pylint: disable=too-many-instance-attributes
