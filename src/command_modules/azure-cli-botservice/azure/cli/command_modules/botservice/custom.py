@@ -55,9 +55,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     :return:
     """
 
-    # If display name was not provided, just use the resource name
-    display_name = display_name or resource_name
-
     # Kind parameter validation
     kind = kind.lower()
 
@@ -65,6 +62,15 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
+
+    if resource_name.find(".") > -1:
+        logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
+                       'and will been removed.', resource_name)
+        # Remove or replace invalid "." character
+        resource_name = resource_name.replace(".", "")
+
+    # If display name was not provided, just use the resource name
+    display_name = display_name or resource_name
 
     # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
     if kind == registration_kind:
@@ -340,7 +346,8 @@ def get_service_providers(client, name=None):
     return service_provider_response
 
 
-def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, proj_name, code_dir=None, version='v3'):  # pylint:disable=too-many-statements
+def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, proj_file_path, code_dir=None,  # pylint:disable=too-many-statements
+                    version='v3'):
     """Adds PostDeployScripts folder with necessary scripts to deploy v3 bot to Azure.
 
     This method is directly called via "bot prepare-publish"
@@ -350,7 +357,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     :param resource_group_name:
     :param resource_name:
     :param sln_name:
-    :param proj_name:
+    :param proj_file_path:
     :param code_dir:
     :param version:
     :return:
@@ -429,7 +436,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
                     break
                 if fileName == sln_name:
                     solution_path = os.path.relpath(os.path.join(root, fileName))
-                if fileName == proj_name:
+                if fileName == proj_file_path:
                     csproj_path = os.path.relpath(os.path.join(root, fileName))
 
         # Read deploy script contents
@@ -452,7 +459,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_name=None, version='v3'):
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3'):
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
@@ -462,7 +469,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     :param resource_group_name:
     :param resource_name:
     :param code_dir:
-    :param proj_name:
+    :param proj_file_path:
     :param version:
     :return:
     """
@@ -492,10 +499,10 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         if version == 'v4':
 
             logger.info('Detected SDK version v4. Running prepare publish in code directory %s and for project file %s'  # pylint:disable=logging-not-lazy
-                        % (code_dir, proj_name))
+                        % (code_dir, proj_file_path))
 
             # Automatically run prepare-publish in case of v4.
-            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_name)
+            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
                         code_dir)
@@ -518,6 +525,14 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         logger.info('Detected language javascript. Installing node dependencies in remote bot.')
         kudu_client.install_node_dependencies()
 
-    logger.info('Bot publish completed successfully.')
+    if output.get('active'):
+        logger.info('Deployment successful!')
 
+    if not output.get('active'):
+        scm_url = output.get('url')
+        deployment_id = output.get('id')
+        # Instead of replacing "latest", which would could be in the bot name, we replace "deployments/latest"
+        deployment_url = scm_url.replace('deployments/latest', 'deployments/%s' % deployment_id)
+        logger.error('Deployment failed. To find out more information about this deployment, please visit %s.',
+                     deployment_url)
     return output
