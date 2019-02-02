@@ -1475,12 +1475,6 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
     RunCommandInput, RunCommandInputParameter = cmd.get_models('RunCommandInput', 'RunCommandInputParameter')
 
-    # ensure helper is used properly.
-    if cmd.name.startswith("vmss ") and not instance_id:
-        raise CLIError("Internal Error: helper method called for vmss command without instance_id")
-    elif cmd.name.startswith("vm ") and instance_id:
-        raise CLIError("Internal Error: helper method called for vm command with instance_id")
-
     parameters = parameters or []
     run_command_input_parameters = []
     auto_arg_name_num = 0
