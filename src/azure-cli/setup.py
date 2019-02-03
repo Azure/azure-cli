@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.56"
+VERSION = "2.0.58"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -80,6 +80,7 @@ DEPENDENCIES = [
     'azure-cli-iot',
     'azure-cli-iotcentral',
     'azure-cli-keyvault',
+    'azure-cli-kusto',
     'azure-cli-lab',
     'azure-cli-maps',
     'azure-cli-monitor',
@@ -94,10 +95,12 @@ DEPENDENCIES = [
     'azure-cli-resource',
     'azure-cli-role',
     'azure-cli-search',
+    'azure-cli-security',
     'azure-cli-servicebus',
     'azure-cli-servicefabric',
     'azure-cli-signalr',
     'azure-cli-sql',
+    'azure-cli-sqlvirtualmachine',
     'azure-cli-storage',
     'azure-cli-vm'
 ]

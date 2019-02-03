@@ -309,22 +309,19 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             self.check('attributes.enabled', False)
         ])
 
-        # TODO add backup / restore validation back when service routing bug is fixed
-        # TODO https://msazure.visualstudio.com/One/_workitems/edit/2330038?src=alerts&src-action=cta
-        # TODO Secret Backup and Restore REST API calls fail with MethodNotAllowed on 7.0-preview
         # backup and then delete secret
-        # bak_file = 'backup.secret'
-        # self.kwargs['bak_file'] = bak_file
-        # self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
-        # self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
-        # self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+        bak_file = 'backup.secret'
+        self.kwargs['bak_file'] = bak_file
+        self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
+        self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
+        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
-        # restore key from backup
-        # self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}')
-        # self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
-        #          checks=self.check('length(@)', 2))
-        # if os.path.isfile(bak_file):
-        #     os.remove(bak_file)
+        # restore secret from backup
+        self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}')
+        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
+                 checks=self.check('length(@)', 2))
+        if os.path.isfile(bak_file):
+            os.remove(bak_file)
 
         # delete secret
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')

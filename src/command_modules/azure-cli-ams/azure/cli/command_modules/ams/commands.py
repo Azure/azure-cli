@@ -180,6 +180,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('scale', 'scale')
+        g.wait_command('wait')
 
     with self.command_group('ams streaming-endpoint akamai', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
         g.custom_command('add', 'add_akamai_access_control',
@@ -208,6 +209,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  setter_type=get_custom_sdk('live_event', get_live_events_client),
                                  custom_func_name='update_live_event',
                                  custom_func_type=get_custom_sdk('live_event', get_live_events_client))
+        g.wait_command('wait')
 
     with self.command_group('ams live-output', get_sdk('LiveOutputs', get_live_outputs_client)) as g:
         g.custom_command('create', 'create_live_output',

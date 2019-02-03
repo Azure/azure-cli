@@ -306,6 +306,8 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUMV2'
     elif tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
+    elif tier in ['EP1', 'EP2', 'EP3']:
+        return 'ElasticPremium'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -1878,6 +1880,20 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
+                                        number_of_workers=None, location=None, tags=None):
+    # This command merely shadows 'az appservice plan create' except with a few parameters
+    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
+                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+
+
+def is_plan_Elastic_Premium(plan_info):
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier == 'ElasticPremium'
+    return False
+
+
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, deployment_source_url=None,
@@ -1892,6 +1908,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -1961,7 +1978,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
-    if consumption_plan_location is None:
+    if consumption_plan_location is None and not is_plan_Elastic_Premium(plan_info):
         site_config.always_on = True
     else:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',

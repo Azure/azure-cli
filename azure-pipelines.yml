@@ -1,6 +1,9 @@
 resources:
 - repo: self
 
+trigger:
+  batch: true
+
 jobs:
 - job: ExtractMetadata
   displayName: Extract Metadata
@@ -188,7 +191,7 @@ jobs:
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -261,20 +264,22 @@ jobs:
 
 
   - bash: |
-       echo == Remove pre-installed azure-cli ==
-       brew uninstall azure-cli
+      set -ev
 
-       echo == Install azure-cli.rb formula ==
-       brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+      echo == Remove pre-installed azure-cli ==
+      brew uninstall azure-cli
 
-       echo == Az Version ==
-       az --version
+      echo == Install azure-cli.rb formula ==
+      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
-       echo == Run Self-Test ==
-       az self-test
+      echo == Az Version ==
+      az --version
 
-       echo == Audit azure-cli.rb formula ==
-       brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+      echo == Run Self-Test ==
+      az self-test
+
+      echo == Audit azure-cli.rb formula ==
+      brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
     displayName: 'Bash Script'
 
@@ -283,7 +288,7 @@ jobs:
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -305,7 +310,7 @@ jobs:
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -340,7 +345,7 @@ jobs:
   displayName: Build Ubuntu Xenial Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -370,7 +375,7 @@ jobs:
   displayName: Build Ubuntu Artful Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -400,7 +405,7 @@ jobs:
   displayName: Build Ubuntu Trusty Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -431,7 +436,7 @@ jobs:
   displayName: Build Ubuntu Bionic Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -462,7 +467,7 @@ jobs:
   displayName: Build Debian Wheezy Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -493,7 +498,7 @@ jobs:
   displayName: Build Debian Jessie Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -523,7 +528,7 @@ jobs:
   displayName: Build Debian Stretch Package
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -561,7 +566,7 @@ jobs:
    - BuildDebianJessie
    - BuildDebianStretch
    - BuildUbuntuCosmic
-  condition: succeededOrFailed()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -615,7 +620,7 @@ jobs:
   displayName: Build Ubuntu Cosmic
 
   dependsOn: BuildPythonWheel
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:

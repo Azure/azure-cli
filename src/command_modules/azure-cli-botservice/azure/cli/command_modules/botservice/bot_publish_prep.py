@@ -64,7 +64,7 @@ class BotPublishPrep:
                 logger.info('Detected bot language C#, Bot Builder version v4.')
 
                 if proj_file is None:
-                    raise CLIError('Expected --proj-file argument provided with the full path to the '
+                    raise CLIError('Expected --proj-file-path argument provided with the full path to the '
                                    'bot csproj file for csharp bot with Bot Builder SDK v4 project.')
                 with open('.deployment', 'w') as f:
                     f.write('[config]\n')
@@ -95,4 +95,4 @@ class BotPublishPrep:
             for file_name in files:
                 if proj_file == file_name.lower():
                     return os.path.relpath(os.path.join(root, file_name))
-        raise CLIError('project file not found. Please pass a valid --proj-file.')
+        raise CLIError('project file not found. Please pass a valid --proj-file-path.')
