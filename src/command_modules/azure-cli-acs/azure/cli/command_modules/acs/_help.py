@@ -285,11 +285,35 @@ helps['aks update-credentials'] = """
           short-summary: Reset service principal for a managed cluster.
         - name: --service-principal
           type: string
-          short-summary: Service principal used for authentication to Azure APIs.
+          short-summary: Service principal used for authentication to Azure APIs. This argument is required if
+                         `--reset-service-principal` is specified.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if
                          `--service-principal` is specified.
+       - name: --reset-aad
+          type: string
+          short-summary: Reset Azure Active Directory configuration for a managed cluster.
+       - name: --aad-server-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory server application. This argument is required if
+                         `--reset-aad` is specified.
+       - name: --aad-server-app-secret
+          type: string
+          short-summary: The secret of an Azure Active Directory server application.
+       - name: --aad-client-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory client application. This argument is required if
+                         `--reset-aad` is specified.
+       - name: --aad-tenant-id
+          type: string
+          short-summary: Tenant ID associated with Azure Active Directory.
+          
+     examples:
+        - name: Update an existing Kubernetes cluster with new service principal.
+          text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
+        - name: Update an existing Azure Active Directory Kubernetes cluster with new server app secret key.
+          text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-aad --aad-server-app-id MyExistingAADServerAppID --aad-server-app-secret MyNewAADServerAppSecret --aad-client-app-id MyExistingAADClientAppID --aad-tenant-id MyAADTenantID
 """
 
 helps['aks disable-addons'] = """

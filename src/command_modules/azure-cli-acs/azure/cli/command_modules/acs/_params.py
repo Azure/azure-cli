@@ -215,8 +215,13 @@ def load_arguments(self, _):
 
     with self.argument_context('aks update-credentials') as c:
         c.argument('reset_service_principal', action='store_true')
+        c.argument('reset_aad', action='store_true')
         c.argument('service_principal')
         c.argument('client_secret')
+        c.argument('aad_client_app_id')
+        c.argument('aad_server_app_id')
+        c.argument('aad_server_app_secret')
+        c.argument('aad_tenant_id')
 
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
