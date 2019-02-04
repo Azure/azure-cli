@@ -2,11 +2,8 @@
 
 Release History
 ===============
-0.1.5
-+++++
-* Minor fixes
 
-0.1.5
+0.1.6
 +++++
 * Improve UX around `az bot publish`
 * Add warning for timeouts when running `npm install` during `az bot publish`
@@ -16,6 +13,9 @@ Release History
 * Deprecate `--proj-name` argument for `--proj-file-path`
 * Update old `--proj-file` messages to instead use `--proj-file-path`
 
+0.1.5
++++++
+* Minor fixes
 
 0.1.4
 +++++
