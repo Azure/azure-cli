@@ -494,6 +494,15 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         raise CLIError('The path %s is not a valid directory. '
                        'Please supply a valid directory path containing your source code.' % code_dir)
 
+    # If a local web.config file for a Node.js bot exists, this means two things:
+    # 1. We don't need to download the necessary web.config and iisnode.yml files to deploy a Node.js bot on IIS.
+    # 2. We shouldn't delete their local web.config and issnode.yml.
+    iis_publish_info = {
+        'lang': 'Csharp' if not os.path.exists(os.path.join(code_dir, 'package.json')) else 'Node',
+        'has_web_config': True if os.path.exists(os.path.join(code_dir, 'web.config')) else False,
+        'has_iisnode_yml': True if os.path.exists(os.path.join(code_dir, 'iisnode.yml')) else False
+    }
+
     # Ensure that the directory contains appropriate post deploy scripts folder
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if version == 'v4':
@@ -502,7 +511,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                         % (code_dir, proj_file_path))
 
             # Automatically run prepare-publish in case of v4.
-            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path)
+            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, iis_publish_info)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
                         code_dir)
@@ -511,7 +520,6 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                            'prepared for deployment. Please run prepare-publish. For more information, run \'az bot '
                            'prepare-publish -h\'.')
 
-    logger.info('Creating upload zip file.')
     zip_filepath = BotPublishPrep.create_upload_zip(logger, code_dir, include_node_modules=False)
     logger.info('Zip file path created, at %s.', zip_filepath)
 
@@ -520,6 +528,27 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
+    # If the bot is a Node.js bot and did not initially have web.config, delete web.config and iisnode.yml.
+    if iis_publish_info['lang'] == 'Node':
+        if not iis_publish_info['has_web_config'] and os.path.exists(os.path.join(code_dir, 'web.config')):
+            os.remove(os.path.join(code_dir, 'web.config'))
+        if not iis_publish_info['has_iisnode_yml'] and os.path.exists(os.path.join(code_dir, 'iisnode.yml')):
+            os.remove(os.path.join(code_dir, 'iisnode.yml'))
+
+        if not iis_publish_info['has_iisnode_yml'] and not iis_publish_info['has_web_config']:
+            logger.info("web.config and iisnode.yml for Node.js bot were fetched from Azure for deployment using IIS. "
+                        "These files have now been removed from %s."
+                        "To see the two files used for your deployment, either visit your bot's Kudu site or download "
+                        "the files from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip"
+                        % code_dir)
+        elif not iis_publish_info['has_iisnode_yml']:
+            logger.info("iisnode.yml for Node.js bot was fetched from Azure for deployment using IIS. To see this file "
+                        "that was used for your deployment, either visit your bot's Kudu site or download the file "
+                        "from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip")
+        elif not iis_publish_info['has_web_config']:
+            logger.info("web.config for Node.js bot was fetched from Azure for deployment using IIS. To see this file "
+                        "that was used for your deployment, either visit your bot's Kudu site or download the file "
+                        "from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip")
 
     if os.path.exists(os.path.join('.', 'package.json')):
         logger.info('Detected language javascript. Installing node dependencies in remote bot.')
