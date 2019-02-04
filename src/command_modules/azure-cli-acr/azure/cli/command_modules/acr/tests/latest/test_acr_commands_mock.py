@@ -20,8 +20,7 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_show_manifests,
     acr_repository_show,
     acr_repository_delete,
-    acr_repository_untag,
-    MANIFEST_V2_HEADER
+    acr_repository_untag
 )
 from azure.cli.command_modules.acr.helm import (
     acr_helm_list,
@@ -256,17 +255,10 @@ class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_repository_delete(self, mock_requests_get, mock_requests_delete, mock_get_access_credentials, mock_get_registry_by_name):
+    def test_repository_delete(self, mock_requests_delete, mock_get_manifest_digest, mock_get_access_credentials, mock_get_registry_by_name):
         cmd = self._setup_cmd()
-
-        get_response = mock.MagicMock()
-        get_response.headers = {
-            'Docker-Content-Digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
-        }
-        get_response.status_code = 200
-        mock_requests_get.return_value = get_response
 
         delete_response = mock.MagicMock()
         delete_response.headers = {}
@@ -275,6 +267,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+        mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
 
         # Delete repository
         acr_repository_delete(cmd,
@@ -283,7 +276,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                               yes=True)
         mock_requests_delete.assert_called_with(
             method='delete',
-            url='https://testregistry.azurecr.io/v2/_acr/testrepository/repository',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository',
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
@@ -294,12 +287,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                               registry_name='testregistry',
                               image='testrepository:testtag',
                               yes=True)
-        expected_get_headers = get_authorization_header('username', 'password')
-        expected_get_headers.update(MANIFEST_V2_HEADER)
-        mock_requests_get.assert_called_with(
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
-            headers=expected_get_headers,
-            verify=mock.ANY)
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -327,7 +314,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                              image='testrepository:testtag')
         mock_requests_delete.assert_called_with(
             method='delete',
-            url='https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
