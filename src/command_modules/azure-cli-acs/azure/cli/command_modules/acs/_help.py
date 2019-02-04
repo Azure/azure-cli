@@ -308,7 +308,7 @@ helps['aks update-credentials'] = """
        - name: --aad-tenant-id
           type: string
           short-summary: Tenant ID associated with Azure Active Directory.
-          
+
      examples:
         - name: Update an existing Kubernetes cluster with new service principal.
           text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
