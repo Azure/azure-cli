@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
-import requests
 try:
     from urllib.parse import unquote
 except ImportError:
@@ -13,17 +11,8 @@ except ImportError:
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.util import should_disable_connection_verify
-
 from ._utils import validate_managed_registry, user_confirmation, ResourceNotFound
-from ._docker_utils import (
-    request_data_from_registry,
-    get_access_credentials,
-    get_authorization_header,
-    log_registry_response,
-    parse_error_message
-)
-
+from ._docker_utils import request_data_from_registry, get_access_credentials
 
 logger = get_logger(__name__)
 

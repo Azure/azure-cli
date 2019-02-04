@@ -26,8 +26,6 @@ from ._constants import (
 )
 from ._validators import (
     validate_headers,
-    validate_build_arg,
-    validate_secret_build_arg,
     validate_arg,
     validate_secret_arg,
     validate_set,

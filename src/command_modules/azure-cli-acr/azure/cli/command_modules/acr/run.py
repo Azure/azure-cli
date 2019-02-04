@@ -21,7 +21,7 @@ RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
 logger = get_logger(__name__)
 
 
-def acr_run(cmd,
+def acr_run(cmd,  # pylint: disable=too-many-locals
             client,
             registry_name,
             source_location,
