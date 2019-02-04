@@ -250,14 +250,6 @@ def load_arguments(self, _):
     with self.argument_context('vm nic show') as c:
         c.argument('nic', help='NIC name or ID.', validator=validate_vm_nic)
 
-    with self.argument_context('vm run-command') as c:
-        c.argument('command_id', completer=get_vm_run_command_completion_list,
-                   help="The command id. Use 'az vm run-command list' to get the list")
-
-    with self.argument_context('vm run-command invoke') as c:
-        c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
-        c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
-
     with self.argument_context('vm unmanaged-disk') as c:
         c.argument('new', action='store_true', help='Create a new disk.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
@@ -389,6 +381,15 @@ def load_arguments(self, _):
     for scope in ['vm', 'vmss']:
         with self.argument_context(scope) as c:
             c.argument('no_auto_upgrade', arg_type=get_three_state_flag(), help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
+
+        with self.argument_context('{} run-command'.format(scope)) as c:
+            c.argument('command_id', completer=get_vm_run_command_completion_list, help="The command id. Use 'az {} run-command list' to get the list".format(scope))
+            if scope == 'vmss':
+                c.argument('vmss_name', vmss_name_type)
+
+        with self.argument_context('{} run-command invoke'.format(scope)) as c:
+            c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
+            c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
