@@ -2,9 +2,6 @@
 
 Release History
 ===============
-0.1.5
-+++++
-* Minor fixes
 
 0.1.5
 +++++
@@ -17,7 +14,6 @@ Release History
 * Update old `--proj-file` messages to instead use `--proj-file-path`
 * `az bot publish` now removes fetched IIS Node.js deployment files if they did not already exist
   * The command does not remove any local IIS Node.js files if detected when command is initiated.
-
 
 0.1.4
 +++++
