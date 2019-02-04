@@ -1663,7 +1663,7 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                         client.reset_service_principal_profile,
                         resource_group_name,
                         name, service_principal, client_secret)
-    elif reset_aad:
+    if reset_aad:
         if aad_client_app_id is None or aad_server_app_id is None or aad_server_app_secret is None:
             raise CLIError('Please specify both --aad-client-app-id and ---aad-server-app-id and optionally '
                             '--aad-server-app-secret and --aad-tenant-id '
