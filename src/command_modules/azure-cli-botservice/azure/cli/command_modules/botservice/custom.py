@@ -494,9 +494,9 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         raise CLIError('The path %s is not a valid directory. '
                        'Please supply a valid directory path containing your source code.' % code_dir)
 
-    # If a local web.config file for a Node.js bot exists, this means two things:
-    # 1. We don't need to download the necessary web.config and iisnode.yml files to deploy a Node.js bot on IIS.
-    # 2. We shouldn't delete their local web.config and issnode.yml.
+    # If local IIS Node.js files exist, this means two things:
+    # 1. We may not need to download the necessary web.config and iisnode.yml files to deploy a Node.js bot on IIS.
+    # 2. We shouldn't delete their local web.config and issnode.yml files (if they exist).
     iis_publish_info = {
         'lang': 'Csharp' if not os.path.exists(os.path.join(code_dir, 'package.json')) else 'Node',
         'has_web_config': True if os.path.exists(os.path.join(code_dir, 'web.config')) else False,
