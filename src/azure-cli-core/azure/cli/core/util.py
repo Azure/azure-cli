@@ -141,9 +141,9 @@ def get_az_version_string():
         _print('Extensions:')
         for ext in extensions:
             if ext.ext_type == 'dev':
-                _print('{} ({}) [{}]'.format(ext.name, ext.version, ext.path))
+                _print(ext.name.ljust(20) + ext.version.rjust(20) + ' (dev) ' + ext.path)
             else:
-                _print('{} ({})'.format(ext.name, ext.version))
+                _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
     _print("Python location '{}'".format(sys.executable))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
