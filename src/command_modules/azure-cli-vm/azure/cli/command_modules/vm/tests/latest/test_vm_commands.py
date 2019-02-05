@@ -2020,9 +2020,9 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'vault': self.create_random_name('vmlinuxkv', 20)
         })
 
-        # TODO: Re-enable when issue #5155 is resolved.
-        # message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'', expect_failure=True)
+        message = 'Secret is missing vaultCertificates array or it is empty at index 0'
+        with self.assertRaisesRegexp(CLIError, message):
+            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
 
         vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
@@ -2054,10 +2054,10 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'vault': self.create_random_name('vmkeyvault', 20)
         })
 
-        # TODO: Re-enable when issue #5155 is resolved.
-        # message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
-        #           'vaultCertificate index 0'
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'', expect_failure=True)
+        message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
+                  'vaultCertificate index 0'
+        with self.assertRaisesRegexp(CLIError, message):
+            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'')
 
         vault_out = self.cmd(
             'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
@@ -2089,7 +2089,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
             'loc': 'westus',
             'vmss': 'vmss1-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': 'vmcreatelinuxsecret3334',
+            'vault': self.create_random_name('vmlinuxkv', 20),
             'secret': 'mysecret',
             'ssh_key': TEST_SSH_KEY_PUB
         })
