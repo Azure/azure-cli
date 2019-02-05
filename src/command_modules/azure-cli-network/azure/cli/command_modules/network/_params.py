@@ -645,12 +645,13 @@ def load_arguments(self, _):
         c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or "" to use a dynamic address.')
 
     with self.argument_context('network nic ip-config address-pool') as c:
-        c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('backend_address_pool', options_list=('--address-pool',), help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
+        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('application_gateway_name', options_list='--gateway-name', help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
+        c.argument('backend_address_pool', options_list='--address-pool', help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
 
     with self.argument_context('network nic ip-config inbound-nat-rule') as c:
-        c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('inbound_nat_rule', options_list=('--inbound-nat-rule',), help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
+        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('inbound_nat_rule', options_list='--inbound-nat-rule', help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
 
     for item in ['address-pool', 'inbound-nat-rule']:
         with self.argument_context('network nic ip-config {}'.format(item)) as c:

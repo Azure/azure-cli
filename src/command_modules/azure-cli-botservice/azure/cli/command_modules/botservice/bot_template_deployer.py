@@ -32,7 +32,7 @@ class BotTemplateDeployer:
     v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
 
     @staticmethod
-    def deploy_arm_template(cli_ctx, resource_group_name,
+    def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
         DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
