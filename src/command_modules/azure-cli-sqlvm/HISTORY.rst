@@ -7,3 +7,4 @@ Release History
 +++++
 
 * Preview release of module.
+* Deprecates the argument --boostrap-acc-pwd for typo.
