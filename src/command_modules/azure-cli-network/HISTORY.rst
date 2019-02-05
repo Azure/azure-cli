@@ -4,6 +4,7 @@ Release History
 ===============
 
 * `dns zone export`: Ensure exported CNAMEs are FQDNs.
+* `nic ip-config address-pool add/remove`: Add `--gateway-name` to support application gateway backend address pools.
 * `lb inbound-nat-pool create/update`: Add arguments `--idle-timeout`, `--floating-ip`.
 
 2.3.1
