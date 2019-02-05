@@ -12,6 +12,11 @@ helps['redis'] = """
     short-summary: Manage dedicated Redis caches for your Azure applications.
 """
 
+helps['redis create'] = """
+    type: command
+    short-summary: Create new Redis Cache instance.
+"""
+
 helps['redis export'] = """
     type: command
     short-summary: Export data stored in a Redis cache.
@@ -26,13 +31,6 @@ helps['redis list'] = """
     type: command
     short-summary: List Redis Caches.
     long-summary: Lists details about all caches within current Subscription or provided Resource Group.
-"""
-
-helps['redis import-method'] = """
-    type: command
-    short-summary: (DEPRECATED) Import data into Redis cache.
-    long-summary: |
-        WARNING: This command is deprecated. Use the `import` command instead.
 """
 
 helps['redis update'] = """
@@ -82,4 +80,5 @@ helps['redis server-link'] = """
 helps['redis server-link create'] = """
     type: command
     short-summary: Adds a server link to the Redis cache (requires Premium SKU).
+    long-summary: Usage example - az redis server-link create --name testCacheName --resource-group testResourceGroup --cache-to-link secondTestCacheName --replication-role Secondary
 """

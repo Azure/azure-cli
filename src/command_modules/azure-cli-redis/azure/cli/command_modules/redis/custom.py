@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from knack.log import get_logger
-from knack.util import CLIError
+from knack.util import CLIError, todict
 from azure.cli.command_modules.redis._client_factory import cf_redis
+from azure.cli.core.util import shell_safe_json_parse
 
 logger = get_logger(__name__)
 
@@ -56,6 +58,9 @@ def cli_redis_create(cmd, client,
     # pylint:disable=line-too-long
     if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
+    tenant_settings_in_json = {}
+    for item in tenant_settings:
+        tenant_settings_in_json.update(get_key_value_pair(item))
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
     # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
@@ -63,7 +68,7 @@ def cli_redis_create(cmd, client,
         location=location,
         redis_configuration=redis_configuration,
         enable_non_ssl_port=enable_non_ssl_port,
-        tenant_settings=tenant_settings,
+        tenant_settings=tenant_settings_in_json,
         shard_count=shard_count,
         minimum_tls_version=minimum_tls_version,
         subnet_id=subnet_id,
@@ -72,6 +77,13 @@ def cli_redis_create(cmd, client,
         tags=tags)
     return client.create(resource_group_name, name, params)
 
+
+def get_key_value_pair(string):
+    result = {}
+    if string:
+        kvp = string.split('=', 1)
+        result = {kvp[0]: kvp[1]} if len(kvp) > 1 else {string: ''}
+    return result
 
 # pylint: disable=unused-argument
 def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_to_link, replication_role):
