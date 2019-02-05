@@ -1665,8 +1665,8 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                            name, service_principal, client_secret)
     if aad_client_app_id is None or aad_server_app_id is None or aad_server_app_secret is None:
         raise CLIError('Please specify "--aad-client-app-id", "--aad-server-app-id" and '
-                        '--aad-server-app-secret" and optionally "--aad-tenant-id" '
-                        'when "--reset-aad" flag is on.')
+                       '--aad-server-app-secret" and optionally "--aad-tenant-id" '
+                       'when "--reset-aad" flag is on.')
     parameters = {
         'clientAppID': aad_client_app_id,
         'serverAppID': aad_server_app_id,
@@ -1674,9 +1674,9 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
         'tenantID': aad_tenant_id
     }
     return sdk_no_wait(no_wait,
-                        client.reset_aad_profile,
-                        resource_group_name,
-                        name, parameters)
+                       client.reset_aad_profile,
+                       resource_group_name,
+                       name, parameters)
 
 
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
