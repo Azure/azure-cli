@@ -180,8 +180,8 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         """
         self.__logger.info('Removing all files and folders from "site/wwwroot/" except for node_modules.')
         payload = {
-            'command': '(for /D % i in (.\*) do if not % ~nxi == node_modules rmdir /s /q % i) & & (for % i in (.\*) '
-                       'del % i)',
+            'command': '(for /D %i in (.\\*) do if not %~nxi == node_modules rmdir /s/q %i) && (for %i in (.\\*) '
+                       'del %i)',
             'dir': r'site\wwwroot'
         }
         headers = self.__get_application_json_headers()

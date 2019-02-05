@@ -142,6 +142,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
                     publish_cmd)
         return creation_results
 
+
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
     """Retrieves the bot's application's application settings. If called with '--msbot' flag, the operation outputs
     a collection of data that can be piped into a .bot file.
