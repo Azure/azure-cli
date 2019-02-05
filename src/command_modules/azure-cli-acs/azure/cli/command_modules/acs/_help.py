@@ -291,21 +291,21 @@ helps['aks update-credentials'] = """
           type: string
           short-summary: Secret associated with the service principal. This argument is required if
                          `--service-principal` is specified.
-       - name: --reset-aad
+        - name: --reset-aad
           type: string
           short-summary: Reset Azure Active Directory configuration for a managed cluster.
-       - name: --aad-server-app-id
+        - name: --aad-server-app-id
           type: string
           short-summary: The ID of an Azure Active Directory server application. This argument is required if
                          `--reset-aad` is specified.
-       - name: --aad-server-app-secret
+        - name: --aad-server-app-secret
           type: string
           short-summary: The secret of an Azure Active Directory server application.
-       - name: --aad-client-app-id
+        - name: --aad-client-app-id
           type: string
           short-summary: The ID of an Azure Active Directory client application. This argument is required if
                          `--reset-aad` is specified.
-       - name: --aad-tenant-id
+        - name: --aad-tenant-id
           type: string
           short-summary: Tenant ID associated with Azure Active Directory.
 
