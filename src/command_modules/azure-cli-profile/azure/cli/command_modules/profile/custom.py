@@ -92,7 +92,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     import requests
 
     # quick argument usage check
-    if any([password, service_principal, tenant, allow_no_subscriptions]) and identity:
+    if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
@@ -108,7 +108,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if identity:
         if in_cloud_console():
             return profile.find_subscriptions_in_cloud_console()
-        return profile.find_subscriptions_in_vm_with_msi(username)
+        return profile.find_subscriptions_in_vm_with_msi(username, allow_no_subscriptions)
     elif in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 

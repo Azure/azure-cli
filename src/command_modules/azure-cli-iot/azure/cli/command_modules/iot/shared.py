@@ -32,3 +32,12 @@ class RouteSourceType(Enum):
     TwinChangeEvents = 'twinchangeevents'
     DeviceLifecycleEvents = 'devicelifecycleevents'
     DeviceJobLifecycleEvents = 'devicejoblifecycleevents'
+
+
+# pylint: disable=too-few-public-methods
+class EncodingFormat(Enum):
+    """
+    Type of the encoding format for the container.
+    """
+    JSON = 'json'
+    AVRO = 'avro'

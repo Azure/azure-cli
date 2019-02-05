@@ -76,7 +76,7 @@ helps['ams account sp create'] = """
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
-            az ams account sp create -a myAmsAccount -g myRG -n mySpName -password mySecret --role Owner --xml
+            az ams account sp create -a myAmsAccount -g myRG -n mySpName --password mySecret --role Owner --xml
     """
 
 helps['ams account sp reset-credentials'] = """
@@ -144,7 +144,7 @@ helps['ams transform output add'] = """
             az ams transform output add -a myAmsAccount -n transformName -g myResourceGroup --preset \"C:\\MyPresets\\CustomPreset.json\"
         - name: Add an output with a VideoAnalyzer preset with es-ES as audio language and only with audio insights.
           text: >
-            az ams transform output add -a myAmsAccount -n transformName -g myResourceGroup --preset VideoAnalyzer --audio-language es-ES --audio-insights-only
+            az ams transform output add -a myAmsAccount -n transformName -g myResourceGroup --preset VideoAnalyzer --audio-language es-ES --insights-to-extract AudioInsightsOnly
     """
 
 helps['ams transform output remove'] = """
@@ -185,7 +185,7 @@ helps['ams asset list'] = """
             az ams asset list -a amsAccount -g resourceGroup --query [?starts_with(name,'Something')]
 """
 
-helps['ams asset get-streaming-locators'] = """
+helps['ams asset list-streaming-locators'] = """
     type: command
     short-summary: List streaming locators which are associated with this asset.
 """
@@ -369,7 +369,7 @@ helps['ams streaming-locator get-paths'] = """
     short-summary: List paths supported by a streaming locator.
 """
 
-helps['ams streaming-locator get-content-keys'] = """
+helps['ams streaming-locator list-content-keys'] = """
     type: command
     short-summary: List content keys used by a streaming locator.
 """
@@ -417,6 +417,14 @@ helps['ams streaming-endpoint list'] = """
 helps['ams streaming-endpoint create'] = """
     type: command
     short-summary: Create a streaming endpoint.
+"""
+
+helps['ams streaming-endpoint wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the streaming endpoint is met.
+    examples:
+        - name: Place the CLI in a waiting state until the streaming endpoint is created.
+          text: az ams streaming-endpoint wait -g MyResourceGroup -a MyAmsAccount -n MyStreamingEndpoint --created
 """
 
 helps['ams streaming-endpoint akamai'] = """
@@ -509,6 +517,14 @@ helps['ams live-event update'] = """
           text: >
             az ams live-event update -a amsAccount -g resourceGroup -n liveEventName --ips 1.2.3.4/22 5.6.7.8/30
 
+"""
+
+helps['ams live-event wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the live event is met.
+    examples:
+        - name: Place the CLI in a waiting state until the live event is created.
+          text: az ams live-event wait -g MyResourceGroup -a MyAmsAccount -n MyLiveEvent --created
 """
 
 helps['ams live-output'] = """

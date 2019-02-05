@@ -205,7 +205,7 @@ class ACSClient(object):
         :param local_port: Local port. If set to 0, random local port is selected
         :type local_port: Number
         """
-        if local_port is 0:
+        if local_port == 0:
             local_port = self.get_available_local_port()
 
         with SSHTunnelForwarder((self.host, self.port),

@@ -857,8 +857,10 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route get-stats --resource-group {rg} --name {er}',
                  checks=self.check('type(@)', 'object'))
 
-        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test',
-                 checks=self.check('tags.test', 'Test'))
+        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test --bandwidth 100', checks=[
+            self.check('tags.test', 'Test'),
+            self.check('serviceProviderProperties.bandwidthInMbps', 100)
+        ])
 
         self.cmd('network express-route update -g {rg} -n {er} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))
@@ -1111,10 +1113,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             self.cmd('network lb inbound-nat-pool create -g {{rg}} --lb-name {{lb}} -n rule{0} --protocol tcp --frontend-port-range-start {0}  --frontend-port-range-end {1} --backend-port {0}'.format(count, count + 999))
         self.cmd('network lb inbound-nat-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
-        self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --protocol udp --backend-port 50')
+        self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --protocol udp --backend-port 50 --floating-ip --idle-timeout 20')
         self.cmd('network lb inbound-nat-pool show -g {rg} --lb-name {lb} -n rule1000', checks=[
             self.check('protocol', 'Udp'),
-            self.check('backendPort', 50)
+            self.check('backendPort', 50),
+            self.check('enableFloatingIp', True),
+            self.check('idleTimeoutInMinutes', 20)
         ])
         # test generic update
         self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --set protocol=Tcp',
@@ -1437,6 +1441,64 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
                  checks=self.check("subnet.contains(id, '{subnet}')", True))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools')
+    def test_network_nic_lb_address_pools(self, resource_group):
+
+        self.kwargs.update({
+            'nic': 'nic1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'config': 'ipconfig1',
+            'lb': 'lb1',
+            'pool': 'pool1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name vnet1')
+
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {pool}')
+        self.kwargs['lb_pool_id'] = self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n {pool}').get_output_in_json()['id']
+
+        self.cmd('network nic ip-config address-pool add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('loadBalancerBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool add -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}',
+                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}',
+                 checks=self.check('loadBalancerBackendAddressPools', None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_ag_address_pools')
+    def test_network_nic_ag_address_pools(self, resource_group):
+
+        self.kwargs.update({
+            'nic': 'nic1',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'config': 'ipconfig1',
+            'ag': 'ag1',
+            'pool': 'pool1'
+        })
+
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1}  --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
+        self.kwargs['ag_pool_id'] = self.cmd('network application-gateway address-pool show -g {rg} --gateway-name {ag} -n {pool}').get_output_in_json()['id']
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet}')
+
+        self.cmd('network nic ip-config address-pool add -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('applicationGatewayBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool add -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}',
+                 checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}',
+                 checks=self.check('applicationGatewayBackendAddressPools', None))
+
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
 
@@ -1688,9 +1750,21 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet show --ids {ids}',
                  checks=self.check('length(@)', 2))
 
-        # This test ensures you can pipe JSON output to --ids
+        # This test ensures you can pipe JSON output to --ids Windows-style
+        # ensures a single JSON string has its ids parsed out
         self.kwargs['json'] = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json())
         self.cmd('network vnet show --ids \'{json}\'',
+                 checks=self.check('length(@)', 2))
+
+        # This test ensures you can pipe JSON output to --ids bash-style
+        # ensures that a JSON string where each line is interpretted individually
+        # is reassembled and treated as a single json string
+        json_obj = self.cmd('network vnet list -g {rg}').get_output_in_json()
+        for item in json_obj:
+            del item['etag']
+        split_json = json.dumps(json_obj, indent=4).split()
+        split_string = ' '.join(split_json).replace('{', '{{').replace('}', '}}').replace('"', '\\"')
+        self.cmd('network vnet show --ids {}'.format(split_string),
                  checks=self.check('length(@)', 2))
 
 
@@ -2167,11 +2241,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
     def _mock_thread_count():
         return 1
 
-    def _configure_network_watcher(self):
-        # ensure network watcher RG exists and is configured for our location
-        self.cmd('group create -g NetworkWatcherRg -l westcentralus')
-        self.cmd('network watcher configure -g NetworkWatcherRg --locations westcentralus --enabled')
-
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westcentralus')
     @AllowLargeResponse()
@@ -2184,7 +2253,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture': 'capture1',
             'private-ip': '10.0.0.9'
         })
-        self._configure_network_watcher()
+
         vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}').get_output_in_json()
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
@@ -2207,7 +2276,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'sa': storage_account
         })
 
-        self._configure_network_watcher()
         self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
@@ -2223,7 +2291,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm': 'vm1',
             'capture': 'capture1'
         })
-        self._configure_network_watcher()
+
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm}')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -2244,7 +2312,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'loc': resource_group_location,
             'sa': storage_account
         })
-        self._configure_network_watcher()
 
         # set up resource to troubleshoot
         self.cmd('storage container create -n troubleshooting --account-name {sa}')
@@ -2269,7 +2336,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vm3': 'vm3',
             'cm': 'cm1'
         })
-        self._configure_network_watcher()
 
         self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
         self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')

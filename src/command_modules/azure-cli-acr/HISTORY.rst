@@ -3,11 +3,21 @@
 Release History
 ===============
 
+2.2.0
++++++
+* BREAKING CHANGE: Remove 'acr build-task' command group.
+* BREAKING CHANGE: Remove --tag/--manifest from 'acr repository delete' command.
+
+2.1.13
+++++++
+* Add support for VNet/IP rules.
+* Add --platform parameter for `acr build`, `acr task create` and `acr task update` commands
+
 2.1.12
 ++++++
 * Allow force push a helm chart that doesn't exist.
 * Allow runtime operations without ARM requests.
-* Deprecating '--resource-group' parameter from 'az acr login', 'az acr repository', and 'az acr helm' commands.
+* Deprecating '--resource-group' and add '--suffix' parameter for 'az acr login', 'az acr repository', and 'az acr helm' commands.
 
 2.1.11
 ++++++

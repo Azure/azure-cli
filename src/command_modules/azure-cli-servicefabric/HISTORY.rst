@@ -2,6 +2,13 @@
 
 Release History
 ===============
+0.1.12
+++++++
+* Minor fixes
+
+0.1.11
+++++++
+* Updated dependencies.
 
 0.1.10
 ++++++

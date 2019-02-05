@@ -517,8 +517,8 @@ def load_arguments(self, _):
         c.argument('frontend_port_range_end', help='Port number')
         c.argument('backend_port', help='Port number')
         c.argument('frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
-        c.argument('floating_ip', help='Enable floating IP.', arg_type=get_enum_type(['true', 'false']))
-        c.argument('idle_timeout', help='Idle timeout in minutes.')
+        c.argument('floating_ip', help='Enable floating IP.', arg_type=get_three_state_flag())
+        c.argument('idle_timeout', help='Idle timeout in minutes.', type=int)
         c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(TransportProtocol))
         for item in ['backend_pool_name', 'backend_address_pool_name']:
             c.argument(item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
@@ -645,12 +645,13 @@ def load_arguments(self, _):
         c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or "" to use a dynamic address.')
 
     with self.argument_context('network nic ip-config address-pool') as c:
-        c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('backend_address_pool', options_list=('--address-pool',), help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
+        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('application_gateway_name', options_list='--gateway-name', help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
+        c.argument('backend_address_pool', options_list='--address-pool', help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
 
     with self.argument_context('network nic ip-config inbound-nat-rule') as c:
-        c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('inbound_nat_rule', options_list=('--inbound-nat-rule',), help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
+        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('inbound_nat_rule', options_list='--inbound-nat-rule', help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
 
     for item in ['address-pool', 'inbound-nat-rule']:
         with self.argument_context('network nic ip-config {}'.format(item)) as c:

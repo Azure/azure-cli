@@ -65,8 +65,7 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
         | xargs -r apk info --installed \
         | sort -u \
     )" \
- && apk add --virtual .rundeps $runDeps \
- && apk del .build-deps
+ && apk add --virtual .rundeps $runDeps
 
 WORKDIR /
 

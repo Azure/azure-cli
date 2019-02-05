@@ -3,6 +3,21 @@
 Release History
 ===============
 
+2.0.58
+++++++
+* `az --version` now displays a notification if you have packages that can be updated.
+* Fixes regression where `--ids` could no longer be used with JSON output.
+
+2.0.57
+++++++
+* Hot fix for issue 8399_.
+
+.. _8399: https://github.com/Azure/azure-cli/issues/8399
+
+2.0.56
+++++++
+* auth: enable tenant level account for managed service identity
+
 2.0.55
 ++++++
 * `--output`: Introduce 'none' as an output format option.

@@ -17,11 +17,13 @@ def acr_helm_list(cmd,
                   registry_name,
                   repository='repo',
                   resource_group_name=None,  # pylint: disable=unused-argument
+                  tenant_suffix=None,
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         artifact_repository=repository,
@@ -41,11 +43,13 @@ def acr_helm_show(cmd,
                   version=None,
                   repository='repo',
                   resource_group_name=None,  # pylint: disable=unused-argument
+                  tenant_suffix=None,
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         artifact_repository=repository,
@@ -65,6 +69,7 @@ def acr_helm_delete(cmd,
                     version=None,
                     repository='repo',
                     resource_group_name=None,  # pylint: disable=unused-argument
+                    tenant_suffix=None,
                     username=None,
                     password=None,
                     prov=False,
@@ -77,8 +82,9 @@ def acr_helm_delete(cmd,
     user_confirmation("{}.\nAre you sure you want to continue?".format(message), yes)
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         artifact_repository=repository,
@@ -98,6 +104,7 @@ def acr_helm_push(cmd,
                   repository='repo',
                   force=False,
                   resource_group_name=None,  # pylint: disable=unused-argument
+                  tenant_suffix=None,
                   username=None,
                   password=None):
     from os.path import isdir, basename
@@ -106,8 +113,9 @@ def acr_helm_push(cmd,
         raise CLIError("Please run 'helm package {}' to generate a chart package first.".format(chart_package))
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         artifact_repository=repository,
@@ -141,13 +149,15 @@ def acr_helm_repo_add(cmd,
                       registry_name,
                       repository='repo',
                       resource_group_name=None,  # pylint: disable=unused-argument
+                      tenant_suffix=None,
                       username=None,
                       password=None):
     helm_command = _get_helm_command()
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
         username=username,
         password=password,
         artifact_repository=repository,

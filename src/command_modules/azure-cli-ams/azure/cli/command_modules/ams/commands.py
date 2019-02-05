@@ -87,7 +87,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.command('get-streaming-locators', 'list_streaming_locators')
+        g.command('list-streaming-locators', 'list_streaming_locators')
         g.custom_command('get-encryption-key', 'get_encryption_key',
                          custom_command_type=get_custom_sdk('asset', get_assets_client))
         g.generic_update_command('update',
@@ -150,7 +150,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('get-paths', 'list_paths')
-        g.custom_command('get-content-keys', 'list_content_keys',
+        g.custom_command('list-content-keys', 'list_content_keys',
                          custom_command_type=get_custom_sdk('streaming_locator', get_streaming_locators_client))
 
     with self.command_group('ams streaming-policy', get_sdk('StreamingPolicies', get_streaming_policies_client)) as g:
@@ -180,6 +180,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('scale', 'scale')
+        g.wait_command('wait')
 
     with self.command_group('ams streaming-endpoint akamai', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
         g.custom_command('add', 'add_akamai_access_control',
@@ -208,6 +209,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                  setter_type=get_custom_sdk('live_event', get_live_events_client),
                                  custom_func_name='update_live_event',
                                  custom_func_type=get_custom_sdk('live_event', get_live_events_client))
+        g.wait_command('wait')
 
     with self.command_group('ams live-output', get_sdk('LiveOutputs', get_live_outputs_client)) as g:
         g.custom_command('create', 'create_live_output',

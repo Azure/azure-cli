@@ -21,7 +21,9 @@ from azure.mgmt.iothub.models import (IotHubSku,
                                       RoutingServiceBusTopicEndpointProperties,
                                       RoutingStorageContainerProperties,
                                       RouteProperties,
-                                      RoutingMessage)
+                                      RoutingMessage,
+                                      TestRouteInput,
+                                      TestAllRoutesInput)
 
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
@@ -33,7 +35,7 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from azure.cli.command_modules.iot.shared import EndpointType
+from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat
 
 from ._client_factory import resource_service_factory
 from ._utils import open_certificate
@@ -518,7 +520,7 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 
 def iot_hub_routing_endpoint_create(client, hub_name, endpoint_name, endpoint_type,
                                     endpoint_resource_group, endpoint_subscription_id,
-                                    connection_string, container_name=None,
+                                    connection_string, container_name=None, encoding=None,
                                     resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
@@ -558,7 +560,8 @@ def iot_hub_routing_endpoint_create(client, hub_name, endpoint_name, endpoint_ty
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
-                container_name=container_name
+                container_name=container_name,
+                encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value
             )
         )
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
@@ -675,10 +678,27 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
         app_properties=app_properties,
         system_properties=system_properties
     )
+
     if route_name:
         route = iot_hub_route_show(client, hub_name, route_name, resource_group_name)
-        return client.iot_hub_resource.test_route(hub_name, resource_group_name, route, route_message)
-    return client.iot_hub_resource.test_all_routes(hub_name, resource_group_name, source_type, route_message)
+        test_route_input = TestRouteInput(
+            message=route_message,
+            twin=None,
+            route=route
+        )
+        return client.iot_hub_resource.test_route(test_route_input, hub_name, resource_group_name)
+    test_all_routes_input = TestAllRoutesInput(
+        routing_source=source_type,
+        message=route_message,
+        twin=None
+    )
+    return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
+
+
+def iot_hub_devicestream_show(client, hub_name, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    return hub.properties.device_streams
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):

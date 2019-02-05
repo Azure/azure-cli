@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.2.1
++++++
+* `event-subscription create/update`: Added `--deadletter-endpoint` parameter.
+* 'event-subscription create/update`: Added storagequeue and hybridconnection as new values for the `--endpoint-type` parameter.
+* `event-subscription create`: Added `--max-delivery-attempts` and `--event-ttl` parameters to specify the retry policy for events.
+* `event-subscription create/update`: Added a warning message for manual handshake validation when Webhook as destination is used for an event subscription.
+* Added source-resource-id parameter for all event subscription related commands and mark all other source resource related parameters as deprecated.
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

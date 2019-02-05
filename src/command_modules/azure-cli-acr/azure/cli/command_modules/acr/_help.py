@@ -42,11 +42,6 @@ helps['acr replication'] = """
     short-summary: Manage geo-replicated regions of Azure Container Registries.
     """
 
-helps['acr build-task'] = """
-    type: group
-    short-summary: Manage build definitions, which can be triggered by git commits or base image updates for OS & Framework Patching.
-    """
-
 helps['acr task'] = """
     type: group
     short-summary: Manage a collection of steps for building, testing and OS & Framework patching container images using Azure Container Registries.
@@ -62,6 +57,9 @@ helps['acr run'] = """
         - name: Queue a remote git context with streaming logs.
           text: >
             az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f hello-world.yaml
+        - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
+          text: >
+            az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
     """
 
 helps['acr helm'] = """
@@ -72,6 +70,11 @@ helps['acr helm'] = """
 helps['acr helm repo'] = """
     type: group
     short-summary: Manage helm chart repositories for Azure Container Registries.
+    """
+
+helps['acr network-rule'] = """
+    type: group
+    short-summary: Manage network rules for Azure Container Registries.
     """
 
 helps['acr check-name'] = """
@@ -432,15 +435,15 @@ helps['acr task create'] = """
         - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers
           text: >
             az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false
-        - name: Create a Linux task using a private GitHub repository which builds the hello-world image without triggers
+        - name: Create a Linux task using a private GitHub repository which builds the hello-world image without triggers on Arm architecture (V7 variant)
           text: >
-            az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000
+            az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
         - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger
           text: >
             az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --git-access-token 0000000000000000000000000000000000000000
-        - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image.
+        - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
           text: >
-            az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --os Windows
+            az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
 """
 
 helps['acr task show'] = """
@@ -480,7 +483,10 @@ helps['acr task update'] = """
     examples:
         - name: Update base image updates to trigger on all dependent images of a multi-stage dockerfile, and status of a task in an Azure Container Registry.
           text: >
-            az acr task update -n MyTask -r MyRegistry --base-image-trigger All --status Disabled
+            az acr task update -n MyTask -r MyRegistry --base-image-trigger-type All --status Disabled
+        - name: Update platform for the Build step of your Task to Windows (prev Linux).
+          text: >
+            az acr task update -n MyTask -r MyRegistry --platform Windows
 """
 
 helps['acr task list-runs'] = """
@@ -571,123 +577,12 @@ helps['acr build'] = """
         - name: Queue a local context as a Linux build without pushing it to the registry.
           text: >
             az acr build -r MyRegistry .
-        - name: Queue a remote GitHub context as a Windows build, tag it, and push it to the registry.
+        - name: Queue a remote GitHub context as a Windows build and x86 architecture, tag it, and push it to the registry.
           text: >
-            az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --os Windows
-"""
-
-helps['acr build-task create'] = """
-    type: command
-    short-summary: Creates a new build definition which can be triggered by git commits or base image updates for an Azure Container Registry.
-    examples:
-        - name: Create a build definition without git commits and base image updates.
+            az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform Windows/x86
+        - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
           text: >
-            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --commit-trigger-enabled false
-        - name: Create a build definition which updates on git commits and base image updates (--git-access-token must have permissions to create github webhooks).
-          text: >
-            az acr build-task create -t hello-world:{{.Build.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git --git-access-token 0000000000000000000000000000000000000000
-"""
-
-helps['acr build-task show'] = """
-    type: command
-    short-summary: Get the properties of a specified build task for an Azure Container Registry.
-    examples:
-        - name: Get the details of a build task, displaying the results in a table.
-          text: >
-            az acr build-task show -n MyBuildTask -r MyRegistry -o table
-        - name: Get the details of a build task including secure properties.
-          text: >
-            az acr build-task show -n MyBuildTask -r MyRegistry --with-secure-properties
-"""
-
-helps['acr build-task list'] = """
-    type: command
-    short-summary: List the build tasks for an Azure Container Registry.
-    examples:
-        - name: List build tasks and show the results in a table.
-          text: >
-            az acr build-task list -r MyRegistry -o table
-"""
-
-helps['acr build-task delete'] = """
-    type: command
-    short-summary: Delete a build task from an Azure Container Registry.
-    examples:
-        - name: Delete a build task from an Azure Container Registry
-          text: >
-            az acr build-task delete -n MyBuildTask -r MyRegistry
-"""
-
-helps['acr build-task update'] = """
-    type: command
-    short-summary: Update a build task for an Azure Container Registry.
-    examples:
-        - name: Update the git access token for a build definition in an Azure Container Registry.
-          text: >
-            az acr build-task update -n MyBuildTask -r MyRegistry --git-access-token 0000000000000000000000000000000000000000
-"""
-
-helps['acr build-task list-builds'] = """
-    type: command
-    short-summary: List all of the executed builds for an Azure Container Registry.
-    examples:
-        - name: List builds for a build task and show the results in a table.
-          text: >
-            az acr build-task list-builds -n MyBuildTask -r MyRegistry -o table
-        - name: List all of the builds for a registry displaying the results in a table.
-          text: >
-            az acr build-task list-builds -r MyRegistry -o table
-        - name: List the last 10 successful builds for a registry displaying the results in a table.
-          text: >
-            az acr build-task list-builds -r MyRegistry --build-status Succeeded --top 10 -o table
-        - name: List all of the builds that built the image 'hello-world' for an Azure Container Registry, displaying the results in a table.
-          text: >
-            az acr build-task list-builds -r MyRegistry --image hello-world -o table
-"""
-
-helps['acr build-task show-build'] = """
-    type: command
-    short-summary: Get the properties of a specified build for an Azure Container Registry.
-    examples:
-        - name:  Get the details of a build, displaying the results in a table.
-          text: >
-            az acr build-task show-build -n MyBuildTask -r MyRegistry --build-id aab1 -o table
-"""
-
-helps['acr build-task run'] = """
-    type: command
-    short-summary: Trigger a build task that might otherwise be waiting for git commits or base image update triggers for an Azure Container Registry.
-    examples:
-        - name: Trigger a build task.
-          text: >
-            az acr build-task run -n MyBuildTask -r MyRegistry
-"""
-
-helps['acr build-task update-build'] = """
-    type: command
-    short-summary: Patch the build properties of an Azure Container Registry.
-    examples:
-        - name: Update an existing build to be archived.
-          text: >
-            az acr build-task update-build -r MyRegistry --build-id MyBuild --no-archive false
-"""
-
-helps['acr build-task logs'] = """
-    type: command
-    short-summary: Show logs for a particular build. If no build-id is supplied, display the logs for the last created build.
-    examples:
-        - name: Show logs for the last created build in the registry.
-          text: >
-            az acr build-task logs -r MyRegistry
-        - name: Show logs for the last created build in the registry, filtered by build task.
-          text: >
-            az acr build-task logs -r MyRegistry -n MyBuildTask
-        - name: Show logs for a particular build.
-          text: >
-            az acr build-task logs -r MyRegistry --build-id aa1b
-        - name: Show logs for the last created build in the registry that built the image 'hello-world'.
-          text: >
-            az acr build-task logs -r MyRegistry --image hello-world
+            az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
 """
 
 helps['acr import'] = """
@@ -758,4 +653,43 @@ helps['acr helm repo add'] = """
         - name: Add a helm chart repository from an Azure Container Registry to manage helm charts.
           text: >
             az acr helm repo add -n MyRegistry
+"""
+
+helps['acr network-rule list'] = """
+    type: command
+    short-summary: List network rules.
+    examples:
+        - name: List network rules for a registry.
+          text: >
+            az acr network-rule list -n MyRegistry
+"""
+
+helps['acr network-rule add'] = """
+    type: command
+    short-summary: Add a network rule.
+    examples:
+        - name: Add a rule to allow access for a subnet in the same resource group as the registry.
+          text: >
+            az acr network-rule add -n MyRegistry --vnet-name myvnet --subnet mysubnet
+        - name: Add a rule to allow access for a subnet in a different subscription or resource group.
+          text: >
+            az acr network-rule add -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+        - name: Add a rule to allow access for a specific IP address-range.
+          text: >
+            az acr network-rule add -n MyRegistry --ip-address 23.45.1.0/24
+"""
+
+helps['acr network-rule remove'] = """
+    type: command
+    short-summary: Remove a network rule.
+    examples:
+        - name: Remove a rule that allows access for a subnet in the same resource group as the registry.
+          text: >
+            az acr network-rule remove -n MyRegistry --vnet-name myvnet --subnet mysubnet
+        - name: Remove a rule that allows access for a subnet in a different subscription or resource group.
+          text: >
+            az acr network-rule remove -n MyRegistry --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet
+        - name: Remove a rule that allows access for a specific IP address-range.
+          text: >
+            az acr network-rule remove -n MyRegistry --ip-address 23.45.1.0/24
 """

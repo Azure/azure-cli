@@ -2627,7 +2627,7 @@ class VMZoneScenarioTest(ScenarioTest):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
         except Exception as ex:
-            self.assertTrue('availablity zone is not yet supported' in str(ex))
+            self.assertTrue('availability zone is not yet supported' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
     @AllowLargeResponse(size_kb=8192)
@@ -2765,6 +2765,51 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.kwargs.update({'vm': 'test-run-command-vm2'})
         self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!!')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
+
+
+class VMSSRunCommandScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command')
+    def test_vmss_run_command_e2e(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'vmss': 'test-run-command-vmss',
+            'loc': resource_group_location
+        })
+
+        # Test basic run-command commands
+        self.cmd('vmss run-command list -l {loc}')
+        self.cmd('vmss run-command show --command-id RunShellScript -l {loc}')
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1').get_output_in_json()
+
+        # get load balancer and allow trafic to scale sets.
+        lb = self.cmd('network lb list -g {rg}').get_output_in_json()[0]
+        self.kwargs.update({
+            'lb_name': lb['name'],
+            'lb_backend': lb['backendAddressPools'][0]['name'],
+            'lb_frontend': lb['frontendIpConfigurations'][0]['name'],
+            'lb_ip_id': lb['frontendIpConfigurations'][0]['publicIpAddress']['id']
+        })
+        self.cmd('az network lb rule create -g {rg} --name allowTrafficRule --lb-name {lb_name} --backend-pool-name {lb_backend} --frontend-ip-name {lb_frontend} --backend-port 80 --frontend-port 80 --protocol tcp')
+        public_ip = self.cmd('az network public-ip show --ids {lb_ip_id}').get_output_in_json()['ipAddress']
+        self.kwargs['instance_ids'] = " ".join(self.cmd('az vmss list-instances -n {vmss} -g {rg} --query "[].id"').get_output_in_json())
+
+        self.cmd('vmss run-command invoke --ids {instance_ids} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+
+        import requests
+        r = requests.get('http://' + public_ip)
+        self.assertTrue('Welcome to nginx' in str(r.content))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params')
+    def test_vmss_run_command_with_parameters(self, resource_group):
+        self.kwargs.update({'vmss': 'test-run-command-vmss2'})
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username clitest1')
+        self.kwargs['instance_ids'] = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
+
+        for id in self.kwargs['instance_ids']:
+            self.kwargs['id'] = id
+            self.cmd('vmss run-command invoke -g {rg} -n {vmss} --instance-id {id} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')

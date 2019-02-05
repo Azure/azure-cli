@@ -25,7 +25,7 @@ from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
 
 from ._client_factory import cf_acr_registries
-from ._constants import MANAGED_REGISTRY_SKU
+from ._constants import get_managed_sku
 from ._utils import get_registry_by_name, ResourceNotFound
 
 
@@ -35,6 +35,9 @@ logger = get_logger(__name__)
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
 ACCESS_TOKEN_PERMISSION = ['*', 'pull']
+
+AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
+ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
 
 
 def _get_aad_token(cli_ctx,
@@ -127,8 +130,9 @@ def _get_aad_token(cli_ctx,
     return loads(response.content.decode("utf-8"))["access_token"]
 
 
-def _get_credentials(cli_ctx,
+def _get_credentials(cmd,
                      registry_name,
+                     tenant_suffix,
                      username,
                      password,
                      only_refresh_token,
@@ -137,6 +141,7 @@ def _get_credentials(cli_ctx,
                      permission=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
+    :param str tenant_suffix: The registry login server tenant suffix
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -144,22 +149,34 @@ def _get_credentials(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
+    # Raise an error if password is specified but username isn't
+    if not username and password:
+        raise CLIError('Please also specify username if password is specified.')
+
+    cli_ctx = cmd.cli_ctx
+    resource_not_found, registry = None, None
     try:
         registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
         login_server = registry.login_server
+        if tenant_suffix:
+            logger.warning(
+                "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
+                login_server, tenant_suffix)
     except ResourceNotFound as e:
         # Try to use the pre-defined login server suffix to construct login server from registry name.
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
             raise
-        registry = None
-        login_server = '{}{}'.format(registry_name, login_server_suffix).lower()
         resource_not_found = str(e)
+        login_server = '{}{}{}'.format(
+            registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
 
     # Validate the login server is reachable
     try:
         requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     except RequestException:
+        if resource_not_found:
+            logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
         raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
                        "Please verify if the registry exists.")
 
@@ -174,47 +191,42 @@ def _get_credentials(cli_ctx,
         return login_server, username, password
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
-    if not password and (not registry or registry.sku.name in MANAGED_REGISTRY_SKU):
+    if not registry or registry.sku.name in get_managed_sku(cmd):
         try:
-            password = _get_aad_token(
+            return login_server, EMPTY_GUID, _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
-            return login_server, EMPTY_GUID, password
         except CLIError as e:
-            logger.warning("Unable to get AAD authorization tokens with message: %s", str(e))
+            logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    if not password:
-        error_message = "Unable to get admin user credentials with message"
-        if registry:
-            if registry.admin_user_enabled:
-                try:
-                    cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
-                    username = cred.username
-                    password = cred.passwords[0].value
-                    return login_server, username, password
-                except CLIError as e:
-                    logger.warning("%s: %s", error_message, str(e))
-            else:
-                logger.warning("%s: %s", error_message, "Admin user is disabled.")
+    if registry:
+        if registry.admin_user_enabled:
+            try:
+                cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
+                return login_server, cred.username, cred.passwords[0].value
+            except CLIError as e:
+                logger.warning("%s: %s", ADMIN_USER_BASE_ERROR_MESSAGE, str(e))
         else:
-            logger.warning("%s: %s", error_message, resource_not_found)
+            logger.warning("%s: %s", ADMIN_USER_BASE_ERROR_MESSAGE, "Admin user is disabled.")
+    else:
+        logger.warning("%s: %s", ADMIN_USER_BASE_ERROR_MESSAGE, resource_not_found)
 
     # 4. if we still don't have credentials, prompt the user
-    if not password:
-        try:
-            username = prompt('Username: ')
-            password = prompt_pass(msg='Password: ')
-            return login_server, username, password
-        except NoTTYException:
-            raise CLIError(
-                'Unable to authenticate using AAD or admin login credentials. ' +
-                'Please specify both username and password in non-interactive mode.')
+    try:
+        username = prompt('Username: ')
+        password = prompt_pass(msg='Password: ')
+        return login_server, username, password
+    except NoTTYException:
+        raise CLIError(
+            'Unable to authenticate using AAD or admin login credentials. ' +
+            'Please specify both username and password in non-interactive mode.')
 
     return login_server, None, None
 
 
-def get_login_credentials(cli_ctx,
+def get_login_credentials(cmd,
                           registry_name,
+                          tenant_suffix=None,
                           username=None,
                           password=None):
     """Try to get AAD authorization tokens or admin user credentials to log into a registry.
@@ -222,15 +234,17 @@ def get_login_credentials(cli_ctx,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    return _get_credentials(cli_ctx,
+    return _get_credentials(cmd,
                             registry_name,
+                            tenant_suffix,
                             username,
                             password,
                             only_refresh_token=True)
 
 
-def get_access_credentials(cli_ctx,
+def get_access_credentials(cmd,
                            registry_name,
+                           tenant_suffix=None,
                            username=None,
                            password=None,
                            repository=None,
@@ -244,8 +258,9 @@ def get_access_credentials(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    return _get_credentials(cli_ctx,
+    return _get_credentials(cmd,
                             registry_name,
+                            tenant_suffix,
                             username,
                             password,
                             only_refresh_token=False,

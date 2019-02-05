@@ -2,9 +2,26 @@
 
 Release History
 ===============
+* functionapp: add ability to create and configure functions using ACR containers
+
+0.2.13
+++++++
+* webapp: add support for updating configurations through json
+* appservice plan: Updating help for appservice-plan-update command
+* functionapp: add support for app insights on functionapp create
+* webapp: bugfixes for webapp ssh
+
+0.2.12
+++++++
+* functionapp: add support for app insights on functionapp create
+* functionapp: add support for app service plan creation (including Elastic Premium)
+* functionapp: fix app setting issues with Elastic Premium plans
+
 0.2.11
 ++++++
 * webapp: az webapp config ssl upload, handling the scenario of uploading certificates on apps that are hosted on an ASE, where the ASE RG & App RG are different
+* webapp: az webapp up --sku defaults to P1V1 if the os is linux
+* webapp, functionapp: webapp deployment source config-zip, fixed to show the right error message when a deployment fails 
 * webapp: add az webapp ssh
 
 0.2.10

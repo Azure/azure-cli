@@ -90,11 +90,6 @@ helps['network application-gateway stop'] = """
 helps['network application-gateway update'] = """
     type: command
     short-summary: Update an application gateway.
-    examples:
-        - name: Update an application gateway to use additional servers.
-          text: |
-            az network application-gateway update -g MyResourceGroup -n MyAppGateway \\
-                --capacity 3 --servers 10.0.0.4 10.0.0.5 10.0.0.6
 """
 
 helps['network application-gateway wait'] = """
@@ -779,7 +774,7 @@ helps['network application-gateway url-path-map update'] = """
         - name: Update a URL path map to use new default HTTP settings.
           text: |
             az network application-gateway url-path-map update -g MyResourceGroup --gateway-name MyAppGateway \\
-                -n MyUrlPathMap --http-settings MyNewHttpSettings --default-http-settings MyNewHttpSettings
+                -n MyUrlPathMap --default-http-settings MyNewHttpSettings
 """
 # endregion
 
@@ -874,17 +869,17 @@ helps['network application-gateway waf-config set'] = """
     examples:
         - name: Configure WAF on an application gateway in detection mode with default values
           text: |
-            az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
+            az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
                 --enabled true --firewall-mode Detection --rule-set-version 3.0
         - name: Disable rules for validation of request body parsing and SQL injection.
           text: |
-            az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
+            az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
                 --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
                 --disabled-rule-groups REQUEST-942-APPLICATION-ATTACK-SQLI \\
                 --disabled-rules 920130 920140
         - name: Configure WAF on an application gateway with exclusions.
           text: |
-            az network application-gateway waf-config set -g MyResourceGroup -n MyAppGateway \\
+            az network application-gateway waf-config set -g MyResourceGroup --gateway-name MyAppGateway \\
                 --enabled true --firewall-mode Detection --rule-set-version 3.0 \\
                 --exclusion "RequestHeaderNames StartsWith x-header" \\
                 --exclusion "RequestArgNames Equals IgnoreThis"
@@ -1545,7 +1540,7 @@ helps['network dns record-set srv add-record'] = """
         - name: Add an SRV record.
           text: |
             az network dns record-set srv add-record -g MyResourceGroup -z www.mysite.com \\
-                -n MyRecordSet -d another.site.com
+                -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
 """
 
 helps['network dns record-set srv create'] = """
@@ -1555,7 +1550,7 @@ helps['network dns record-set srv create'] = """
         - name: Create an empty SRV record set.
           text: |
             az network dns record-set srv create -g MyResourceGroup -z www.mysite.com \\
-                -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
+                -n MyRecordSet
 """
 
 helps['network dns record-set srv delete'] = """
@@ -1806,7 +1801,7 @@ helps['network express-route create'] = """
         - name: Create an ExpressRoute circuit.
           text: |
             az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley" \\
-                -g --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
+                -g MyResourceGroup --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
 """
 
 helps['network express-route delete'] = """
@@ -1887,7 +1882,7 @@ helps['network express-route wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the ExpressRoute is met.
     examples:
         - name: Pause executing next line of CLI script until the ExpressRoute circuit is successfully provisioned.
-          text: az network express-route wait -n MyCircuit --g MyResourceGroup --created
+          text: az network express-route wait -n MyCircuit -g MyResourceGroup --created
 """
 # endregion
 
@@ -1988,10 +1983,9 @@ helps['network express-route peering update'] = """
     examples:
         - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
           text: |
-            az network express-route peering update -g MyResourceGroup \\
-                --circuit-name MyCircuit --peering-type MicrosoftPeering --ip-version ipv6 \\
-                --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 \\
-                --advertised-public-prefixes 2002:db00::/126
+            az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit \\
+                --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 \\
+                --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
           min_profile: latest
 """
 
@@ -2170,11 +2164,11 @@ helps['network lb frontend-ip create'] = """
     short-summary: Create a frontend IP address.
     examples:
         - name: Create a frontend ip address for a public load balancer.
-          text: az network lb frontend-ip create -g MyResourceGroup -n MyFrontendIp --lb-name MyLb --public-ip-name MyFrontendIp
+          text: az network lb frontend-ip create -g MyResourceGroup -n MyFrontendIp --lb-name MyLb --public-ip-address MyFrontendIp
         - name: Create a frontend ip address for an internal load balancer.
           text: |
             az network lb frontend-ip create -g MyResourceGroup -n MyFrontendIp --lb-name MyLb \\
-                --private-ip-address 10.10.10.100 --subnet-name MySubnet --subnet-vnet-name MyVnet
+                --private-ip-address 10.10.10.100 --subnet MySubnet --vnet-name MyVnet
 """
 
 helps['network lb frontend-ip delete'] = """
@@ -2206,7 +2200,7 @@ helps['network lb frontend-ip update'] = """
     short-summary: Update a frontend IP address.
     examples:
         - name: Update the frontend IP address of a public load balancer.
-          text: az network lb frontend-ip update -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --public-ip-name MyNewPublicIp
+          text: az network lb frontend-ip update -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --public-ip-address MyNewPublicIp
         - name: Update the frontend IP address of an internal load balancer.
           text: az network lb frontend-ip update -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --private-ip-address 10.10.10.50
 """
@@ -2426,8 +2420,8 @@ helps['network lb rule create'] = """
             an address pool and port with the floating ip feature.
           text: |
             az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp \\
-                --frontend-ip-name MyFrontEndIp --backend-pool-name MyAddressPool --backend-port 80 \\
-                --floating-ip true
+                --frontend-ip-name MyFrontEndIp --backend-pool-name MyAddressPool  \\
+                --floating-ip true --frontend-port 80 --backend-port 80
         - name: >
             Create an HA ports load balancing rule that assigns a frontend IP and port to use all
             available backend IPs in a pool on the same port.
@@ -2583,7 +2577,7 @@ helps['network nic list'] = """
     examples:
         - name: List all NICs by internal DNS suffix.
           text: >
-            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=--query "[?dnsSettings.internalDomainNameSuffix==`<dns_suffix>`]"
+            az network nic list --query "[?dnsSettings.internalDomainNameSuffix=`{dnsSuffix}`]"
 """
 
 helps['network nic list-effective-nsg'] = """
@@ -2702,7 +2696,7 @@ helps['network nic ip-config address-pool add'] = """
         - name: Add an address pool to an IP configuration.
           text: |
             az network nic ip-config address-pool add -g MyResourceGroup --nic-name MyNic \\
-                -n MyIpConfig --address-poolMyAddressPool
+                -n MyIpConfig --address-pool MyAddressPool
 """
 
 helps['network nic ip-config address-pool remove'] = """
@@ -3046,7 +3040,7 @@ helps['network route-table route delete'] = """
     short-summary: Delete a route from a route table.
     examples:
         - name: Delete a route from a route table.
-          text: az network route-table route delete -g MyResourceGroup ---route-table-name MyRouteTable -n MyRoute
+          text: az network route-table route delete -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute
 """
 
 helps['network route-table route list'] = """
@@ -3054,7 +3048,7 @@ helps['network route-table route list'] = """
     short-summary: List routes in a route table.
     examples:
         - name: List routes in a route table.
-          text: az network route-table route list -g MyResourceGroup ---route-table-name MyRouteTable
+          text: az network route-table route list -g MyResourceGroup --route-table-name MyRouteTable
 """
 
 helps['network route-table route show'] = """
@@ -3062,7 +3056,7 @@ helps['network route-table route show'] = """
     short-summary: Get the details of a route in a route table.
     examples:
         - name: Get the details of a route in a route table.
-          text: az network route-table route show -g MyResourceGroup ---route-table-name MyRouteTable -n MyRoute -o table
+          text: az network route-table route show -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute -o table
 """
 
 helps['network route-table route update'] = """
@@ -3070,7 +3064,7 @@ helps['network route-table route update'] = """
     short-summary: Update a route in a route table.
     examples:
         - name: Update a route in a route table to change the next hop ip address.
-          text: az network route-table route update -g MyResourceGroup ---route-table-name MyRouteTable \\
+          text: az network route-table route update -g MyResourceGroup --route-table-name MyRouteTable \\
                     -n MyRoute --next-hop-ip-address 10.0.100.5
 """
 # endregion
@@ -3553,7 +3547,7 @@ helps['network vnet peering create'] = """
         - name: Create a peering connection between two virtual networks.
           text: |
             az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1 \\
-                --remote-vnet-id MyVnet2Id --allow-vnet-access
+                --remote-vnet MyVnet2Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
@@ -3618,7 +3612,7 @@ helps['network vpn-connection create'] = """
             Create a site-to-site connection between an Azure virtual network and an on-premises local network gateway.
           text: |
             az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway \\
-                -local-gateway2 MyLocalGateway --shared-key Abc123
+                --local-gateway2 MyLocalGateway --shared-key Abc123
 """
 
 helps['network vpn-connection delete'] = """
