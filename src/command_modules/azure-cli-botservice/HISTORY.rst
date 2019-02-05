@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.5
+0.1.6
 +++++
 * Improve UX around `az bot publish`
 * Add warning for timeouts when running `npm install` during `az bot publish`
@@ -17,6 +17,10 @@ Release History
 * Add `--keep-node-modules` to `az bot publish` to not delete node_modules folder on App Service
 * Add `"publishCommand"` key-value pair to output from `az bot create` when creating an Azure Function or Web App bot.
   * The value of `"publishCommand"` is an `az bot publish` command prepopulated with the required parameters to publish the newly created bot.
+
+0.1.5
++++++
+* Minor fixes
 
 0.1.4
 +++++

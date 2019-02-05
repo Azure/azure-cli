@@ -3,6 +3,7 @@
 Release History
 ===============
 
+* `dns zone export`: Ensure exported CNAMEs are FQDNs.
 * `lb inbound-nat-pool create/update`: Add arguments `--idle-timeout`, `--floating-ip`.
 
 2.3.1
