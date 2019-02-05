@@ -16,6 +16,8 @@ class MonitorTests(ScenarioTest):
         self.kwargs.update({
             'alert': 'alert1',
             'sa': storage_account,
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
             'ag1': 'ag1',
             'ag2': 'ag2',
             'webhooks': '{{test=banoodle}}',
@@ -60,6 +62,15 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert delete -g {rg} -n {alert}')
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
+
+        # test appservice plan with dimensions *
+        self.cmd('appservice plan create -g {rg} -n {plan}')
+        self.kwargs['app_id'] = self.cmd('webapp create -g {rg} -n {app} -p plan1').get_output_in_json()['id']
+        self.cmd('monitor metrics alert create -g {rg} -n {alert}2 --scopes {app_id} --action {ag1} --description "Test *" --condition "total Http4xx > 10 where Instance includes *"', checks=[
+            self.check('length(criteria.allOf)', 1),
+            self.check('length(criteria.allOf[0].dimensions)', 1),
+            self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
