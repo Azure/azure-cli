@@ -1990,8 +1990,12 @@ class AcceleratedNetworkingTest(ScenarioTest):
 
 
 class ApplicationSecurityGroup(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_asg_vm')
+    def test_vmss_asg(self, resource_group):
+        # TODO: add test for vm asg
+        pass
 
-    @ResourceGroupPreparer(name_prefix='cli_test_asg')
+    @ResourceGroupPreparer(name_prefix='cli_test_asg_vmss')
     def test_vmss_asg(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1',

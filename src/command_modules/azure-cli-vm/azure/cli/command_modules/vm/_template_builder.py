@@ -150,7 +150,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
     return nic
 
 
-def build_nsg_resource(_, name, location, tags, nsg_rule_type):
+def build_nsg_resource(_, name, location, tags, nsg_rule_type, support_asg):
 
     rule_name = 'rdp' if nsg_rule_type == 'rdp' else 'default-allow-ssh'
     rule_dest_port = '3389' if nsg_rule_type == 'rdp' else '22'
@@ -176,7 +176,7 @@ def build_nsg_resource(_, name, location, tags, nsg_rule_type):
     nsg = {
         'type': 'Microsoft.Network/networkSecurityGroups',
         'name': name,
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2017-09-01' if support_asg else '2015-06-15',
         'location': location,
         'tags': tags,
         'dependsOn': [],

@@ -558,7 +558,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
             nsg = nsg or '{}NSG'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
-            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type))
+            support_asg = True if application_security_groups else False
+            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type, support_asg))
 
         if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
@@ -1952,8 +1953,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
         if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
             nsg_name = '{}NSG'.format(vmss_name)
+            support_asg = True if application_security_groups else False
             master_template.add_resource(build_nsg_resource(
-                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh', support_asg))
             nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
             vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
