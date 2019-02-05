@@ -247,7 +247,13 @@ def get_credentials(cmd, auth_mode=None, credentials=None):
     :param str auth_mode: The login mode for the source registry
     :param [] credentials: The list of credentials
     """
-    Credentials, SourceRegistryCredentials, CustomRegistryCredentials, SourceRegistryLoginMode, SecretObject, SecretObjectType = cmd.get_models('Credentials', 'SourceRegistryCredentials', 'CustomRegistryCredentials', 'SourceRegistryLoginMode', 'SecretObject', 'SecretObjectType')
+    Credentials, SourceRegistryCredentials, CustomRegistryCredentials, SourceRegistryLoginMode, SecretObject, SecretObjectType = cmd.get_models('Credentials',
+                                                                                                                                                'SourceRegistryCredentials',
+                                                                                                                                                'CustomRegistryCredentials',
+                                                                                                                                                'SourceRegistryLoginMode',
+                                                                                                                                                'SecretObject',
+                                                                                                                                                'SecretObjectType'
+                                                                                                                                                )
 
     if auth_mode is None:
         auth_mode = SourceRegistryLoginMode.default
