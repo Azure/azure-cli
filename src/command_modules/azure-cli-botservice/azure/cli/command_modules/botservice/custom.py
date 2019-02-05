@@ -28,7 +28,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
+def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,  # pylint: disable=too-many-locals
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
            language='Csharp', version='v3'):
