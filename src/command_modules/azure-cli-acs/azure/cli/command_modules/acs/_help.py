@@ -300,7 +300,8 @@ helps['aks update-credentials'] = """
                          `--reset-aad` is specified.
         - name: --aad-server-app-secret
           type: string
-          short-summary: The secret of an Azure Active Directory server application.
+          short-summary: The secret of an Azure Active Directory server application. This argument is required if
+                         `--reset-aad` is specified.
         - name: --aad-client-app-id
           type: string
           short-summary: The ID of an Azure Active Directory client application. This argument is required if
