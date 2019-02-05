@@ -1323,11 +1323,27 @@ helps['vm run-command'] = """
 helps['vm run-command invoke'] = """
     type: command
     short-summary: Execute a specific run command on a vm.
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vm run-command list
     examples:
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
         - name: invoke command with parameters
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
+"""
+
+helps['vm run-command show'] = """
+    type: command
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vm run-command list
 """
 
 helps['vmss identity'] = """
@@ -1359,6 +1375,47 @@ helps['vmss identity remove'] = """
 helps['vmss identity show'] = """
     type: command
     short-summary: display VM scaleset's managed identity info.
+"""
+
+helps['vmss run-command'] = """
+    type: group
+    short-summary: Manage run commands on a Virtual Machine Scale Set.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
+"""
+
+helps['vmss run-command invoke'] = """
+    type: command
+    short-summary: Execute a specific run command on a Virtual Machine Scale Set instance.
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vmss run-command list
+        - name: --instance-id
+          short-summary: Scale set VM instance id.
+    examples:
+        - name: install nginx on a VMSS instance
+          text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\
+                    --instance-id 0 --scripts "sudo apt-get update && sudo apt-get install -y nginx"
+        - name: invoke a run-command with parameters on a VMSS instance
+          text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\
+                    --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
+        - name: 'invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
+          text: |
+            az vmss list-instances -n MyVMSS -g ova-test --query "[].id" --output tsv | \\
+            az vmss run-command invoke --scripts 'echo $1 $2' --parameters hello world  \\
+                --command-id RunShellScript --ids @-
+"""
+
+helps['vmss run-command show'] = """
+    type: command
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vmss run-command list
 """
 
 helps['disk'] = """

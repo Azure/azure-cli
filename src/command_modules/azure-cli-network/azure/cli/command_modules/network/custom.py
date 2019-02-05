@@ -1074,7 +1074,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'caa':
                 record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
-                record_obj.update({'alias': record.cname})
+                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
                 record_obj.update({'preference': record.preference, 'host': record.exchange})
             elif record_type == 'ns':
@@ -2024,7 +2024,7 @@ def create_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip='false', idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -2043,7 +2043,7 @@ def create_lb_rule(
                                            backend_address_pool_name),
         probe=_get_property(lb.probes, probe_name) if probe_name else None,
         load_distribution=load_distribution,
-        enable_floating_ip=floating_ip == 'true',
+        enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
@@ -2064,13 +2064,11 @@ def set_lb_rule(
     _set_param(instance, 'load_distribution', load_distribution)
     _set_param(instance, 'disable_outbound_snat', disable_outbound_snat)
     _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
+    _set_param(instance, 'enable_floating_ip', floating_ip)
 
     if frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
             _get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    if floating_ip is not None:
-        instance.enable_floating_ip = floating_ip == 'true'
 
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
@@ -2336,26 +2334,36 @@ def _get_nic_ip_config(nic, name):
 
 def add_nic_ip_config_address_pool(
         cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None):
+        load_balancer_name=None, application_gateway_name=None):
     BackendAddressPool = cmd.get_models('BackendAddressPool')
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
-    _upsert(ip_config, 'load_balancer_backend_address_pools',
-            BackendAddressPool(id=backend_address_pool),
-            'id')
+    if load_balancer_name:
+        _upsert(ip_config, 'load_balancer_backend_address_pools',
+                BackendAddressPool(id=backend_address_pool),
+                'id')
+    elif application_gateway_name:
+        _upsert(ip_config, 'application_gateway_backend_address_pools',
+                BackendAddressPool(id=backend_address_pool),
+                'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def remove_nic_ip_config_address_pool(
         cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None):
+        load_balancer_name=None, application_gateway_name=None):
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
-    keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
-    ip_config.load_balancer_backend_address_pools = keep_items
+    if load_balancer_name:
+        keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
+        ip_config.load_balancer_backend_address_pools = keep_items
+    elif application_gateway_name:
+        keep_items = [x for x in ip_config.application_gateway_backend_address_pools or [] if
+                      x.id != backend_address_pool]
+        ip_config.application_gateway_backend_address_pools = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
