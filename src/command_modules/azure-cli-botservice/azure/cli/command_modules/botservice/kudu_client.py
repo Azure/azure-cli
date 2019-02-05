@@ -127,6 +127,8 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
                                       ' a short while before messaging your bot. You can also visit Kudu to manually '
                                       'install the npm dependencies. (https://github.com/projectkudu/kudu/wiki)')
                 self.__logger.warning('Your Kudu website for this bot is: %s' % self.__scm_url)
+                self.__logger.warning('\nYou can also use `--keep-node-modules` in your `az bot publish` command to '
+                                      'not `npm install` the dependencies for the bot on Kudu.')
             else:
                 raise e
 
