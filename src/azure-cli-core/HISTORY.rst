@@ -2,9 +2,10 @@
 
 Release History
 ===============
+
 2.0.58
 ++++++
-
+* `az --version` now displays a notification if you have packages that can be updated.
 * Fixes regression where `--ids` could no longer be used with JSON output.
 
 2.0.57
