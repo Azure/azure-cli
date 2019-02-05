@@ -4,6 +4,7 @@ Release History
 ===============
 
 2.2.0
++++++
 * BREAKING CHANGE: Remove 'acr build-task' command group.
 * BREAKING CHANGE: Remove --tag/--manifest from 'acr repository delete' command.
 
