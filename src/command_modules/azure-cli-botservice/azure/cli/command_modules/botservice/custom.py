@@ -469,7 +469,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3'):
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',
+                keep_node_modules=None):
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
@@ -481,6 +482,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     :param code_dir:
     :param proj_file_path:
     :param version:
+    :param keep_node_modules:
     :return:
     """
     # Get the bot information and ensure it's not only a registration bot.
@@ -534,7 +536,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     logger.info('Zip file path created, at %s.', zip_filepath)
 
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot, logger)
-    output = kudu_client.publish(zip_filepath)
+    output = kudu_client.publish(zip_filepath, keep_node_modules, iis_publish_info['lang'])
 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
@@ -549,8 +551,8 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
             logger.info("web.config and iisnode.yml for Node.js bot were fetched from Azure for deployment using IIS. "
                         "These files have now been removed from %s."
                         "To see the two files used for your deployment, either visit your bot's Kudu site or download "
-                        "the files from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip"
-                        % code_dir)
+                        "the files from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip",
+                        code_dir)
         elif not iis_publish_info['has_iisnode_yml']:
             logger.info("iisnode.yml for Node.js bot was fetched from Azure for deployment using IIS. To see this file "
                         "that was used for your deployment, either visit your bot's Kudu site or download the file "
@@ -560,7 +562,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                         "that was used for your deployment, either visit your bot's Kudu site or download the file "
                         "from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip")
 
-    if os.path.exists(os.path.join('.', 'package.json')):
+    if os.path.exists(os.path.join('.', 'package.json')) and not keep_node_modules:
         logger.info('Detected language javascript. Installing node dependencies in remote bot.')
         kudu_client.install_node_dependencies()
 

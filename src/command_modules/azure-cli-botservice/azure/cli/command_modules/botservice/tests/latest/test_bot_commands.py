@@ -292,6 +292,45 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_keep_node_modules_should_not_empty_node_modules_or_install_dependencies(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs'),
+                     self.exists('publishCommand')
+                 })
+
+        # Talk to bot
+        self.__talk_to_bot('hi', 'You sent \'hi\'')
+
+        # Download the bot source
+        self.cmd('az bot download -g {rg} -n {botname}', checks=[
+            self.exists('downloadPath')
+        ])
+
+        # Publish it back
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} --keep-node-modules', checks=[
+            self.check('active', True)
+        ])
+        # Clean up the folder
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
         bot_name = self.create_random_name(prefix='cli.', length=15)
         self.kwargs.update({

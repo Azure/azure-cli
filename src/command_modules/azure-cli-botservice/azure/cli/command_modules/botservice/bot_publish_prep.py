@@ -101,9 +101,9 @@ class BotPublishPrep:
         if sys.version_info.major >= 3:
             import io
             return zipfile.ZipFile(io.BytesIO(response.content))
-        else:
-            import StringIO
-            return zipfile.ZipFile(StringIO.StringIO(response.content))
+        # If Python version is 2.X, use StringIO instead.
+        import StringIO  # pylint: disable=import-error
+        return zipfile.ZipFile(StringIO.StringIO(response.content))
 
     @staticmethod
     def __extract_specific_file_from_zip(logger, zip_file, web_config_exists, iisnode_yml_exists):
