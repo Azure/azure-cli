@@ -3547,7 +3547,7 @@ helps['network vnet peering create'] = """
         - name: Create a peering connection between two virtual networks.
           text: |
             az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1 \\
-                --remote-vnet-id MyVnet2Id --allow-vnet-access
+                --remote-vnet MyVnet2Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
