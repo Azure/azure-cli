@@ -45,7 +45,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               os_type=None,
               platform=None,
               auth_mode=None,
-              credentials=[],
+              credentials=None,
               target=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)

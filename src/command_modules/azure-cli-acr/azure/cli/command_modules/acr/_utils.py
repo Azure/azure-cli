@@ -243,7 +243,7 @@ def _parameters(registry_name,
     return parameters
 
 
-def get_credentials(auth_mode=None, credentials=[]):
+def get_credentials(auth_mode=None, credentials=None):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param [] credentials: The list of credentials
@@ -263,6 +263,9 @@ def get_credentials(auth_mode=None, credentials=[]):
     sourceRegistryCredentials = SourceRegistryCredentials(login_mode=auth_mode)
 
     customRegistries = {}
+    if credentials is None:
+        credentials = []
+
     for credential in credentials:
         cred_split = credential.split(';', 2)
         if len(cred_split) != 3:

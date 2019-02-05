@@ -24,7 +24,7 @@ RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
 logger = get_logger(__name__)
 
 
-def acr_run(cmd,
+def acr_run(cmd,  # pylint: disable=too-many-locals
             client,
             registry_name,
             source_location,
@@ -40,7 +40,7 @@ def acr_run(cmd,
             os_type=None,
             platform=None,
             auth_mode=None,
-            credentials=[]):
+            credentials=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
