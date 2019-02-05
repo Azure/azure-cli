@@ -13,6 +13,7 @@ from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.botservice.models import (
     Bot,
     BotProperties,
@@ -126,10 +127,19 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
-        return BotTemplateDeployer.create_app(
+        creation_results = BotTemplateDeployer.create_app(
             cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
             storageAccountName, location, sku_name, appInsightsLocation, language, version)
 
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        publish_cmd = "az bot publish --resource-group %s -n '%s' --subscription %s -v %s" % (
+            resource_group_name, resource_name, subscription_id, version)
+        if language == 'Csharp':
+            proj_file = '%s.csproj' % resource_name
+            publish_cmd += " --proj-file-path '%s'" % proj_file
+        creation_results['publishCommand'] = publish_cmd
+
+        return creation_results
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
     """Retrieves the bot's application's application settings. If called with '--msbot' flag, the operation outputs

@@ -140,7 +140,8 @@ class BotTests(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
             ])
 
         # Talk to bot
@@ -160,9 +161,6 @@ class BotTests(ScenarioTest):
 
         # Clean up the folder
         shutil.rmtree(dir_path)
-
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_webapp_bot(self, resource_group):
@@ -186,7 +184,8 @@ class BotTests(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
             ])
 
         # Talk to bot
@@ -230,7 +229,8 @@ class BotTests(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
-                self.check('type', 'abs')
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
             ])
 
         # We don't talk to the bot in this test because it takes a while for the node app to be responsive
@@ -250,9 +250,6 @@ class BotTests(ScenarioTest):
         ])
         # clean up the folder
         shutil.rmtree(dir_path)
-
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_create_v4_js_webapp_bot(self, resource_group):
@@ -274,7 +271,8 @@ class BotTests(ScenarioTest):
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
-                     self.check('type', 'abs')
+                     self.check('type', 'abs'),
+                     self.exists('publishCommand')
                  })
 
         # Download the bot source
@@ -418,9 +416,6 @@ class BotTests(ScenarioTest):
             self.check('type', 'abs')
         ])
 
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v3_js_webapp_bot(self, resource_group):
         self.kwargs.update({
@@ -450,9 +445,6 @@ class BotTests(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('type', 'abs')
         ])
-
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v4_csharp_webapp_bot(self, resource_group):
@@ -484,9 +476,6 @@ class BotTests(ScenarioTest):
             self.check('type', 'abs')
         ])
 
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {botname}')
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v3_csharp_webapp_bot(self, resource_group):
         self.kwargs.update({
@@ -516,9 +505,6 @@ class BotTests(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('type', 'abs')
         ])
-
-        # Delete bot
-        self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_publish_remove_node_iis_files_if_not_already_local(self, resource_group):
@@ -590,13 +576,10 @@ class BotTests(ScenarioTest):
                      '--code-dir .')
             raise AssertionError('should have thrown an error.')
         except CLIError:
-            self.cmd('az bot delete -g {rg} -n {botname}')
             pass
         except AssertionError:
-            self.cmd('az bot delete -g {rg} -n {botname}')
             raise AssertionError('should have thrown an error for registration-type bot.')
         except Exception as error:
-            self.cmd('az bot delete -g {rg} -n {botname}')
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
@@ -638,12 +621,10 @@ class BotTests(ScenarioTest):
             self.cmd('az bot prepare-publish -g {rg} -n {botname} --sln-name {sln_name} --proj-name {proj_name} -v v4')
             raise Exception("'az bot prepare-publish' should have failed with a --version argument of 'v4'")
         except CLIError as cli_error:
-            self.cmd('az bot delete -g {rg} -n {botname}')
             assert cli_error.__str__() == "'az bot prepare-publish' is only for v3 bots. Please use 'az bot publish' " \
                                           "to prepare and publish a v4 bot."
 
         except Exception as error:
-            self.cmd('az bot delete -g {rg} -n {botname}')
             raise error
 
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
