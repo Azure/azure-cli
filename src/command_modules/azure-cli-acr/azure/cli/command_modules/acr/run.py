@@ -84,6 +84,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             variant=platform_variant
         ),
         credentials=get_credentials(
+            cmd,
             auth_mode=auth_mode,
             credentials=credentials
         )

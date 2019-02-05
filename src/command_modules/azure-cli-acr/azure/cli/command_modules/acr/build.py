@@ -120,6 +120,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         timeout=timeout,
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
         credentials=get_credentials(
+            cmd,
             auth_mode=auth_mode,
             credentials=credentials
         ),

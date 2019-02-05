@@ -242,19 +242,12 @@ def _parameters(registry_name,
     return parameters
 
 
-def get_credentials(auth_mode=None, credentials=None):
+def get_credentials(cmd, auth_mode=None, credentials=None):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param [] credentials: The list of credentials
     """
-    from azure.mgmt.containerregistry.v2018_09_01.models import (
-        Credentials,
-        SourceRegistryCredentials,
-        CustomRegistryCredentials,
-        SourceRegistryLoginMode,
-        SecretObject,
-        SecretObjectType
-    )
+    Credentials, SourceRegistryCredentials, CustomRegistryCredentials, SourceRegistryLoginMode, SecretObject, SecretObjectType = cmd.get_models('Credentials', 'SourceRegistryCredentials', 'CustomRegistryCredentials', 'SourceRegistryLoginMode', 'SecretObject', 'SecretObjectType')
 
     if auth_mode is None:
         auth_mode = SourceRegistryLoginMode.default

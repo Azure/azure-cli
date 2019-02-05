@@ -165,6 +165,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             base_image_trigger=base_image_trigger
         ),
         credentials=get_credentials(
+            cmd,
             auth_mode=auth_mode,
             credentials=credentials
         )
@@ -366,6 +367,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             base_image_trigger=base_image_trigger_update_params
         ),
         credentials=get_credentials(
+            cmd,
             auth_mode=auth_mode,
             credentials=credentials
         )
