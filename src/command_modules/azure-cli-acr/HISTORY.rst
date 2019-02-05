@@ -6,7 +6,9 @@ Release History
 2.1.13
 ++++++
 * Add support for VNet/IP rules.
-* Add --platform parameter for `acr build`, `acr task create` and `acr task update` commands
+* Add '--platform' parameter for `acr build`, `acr task create` and `acr task update` commands.
+* Add '--target' parameter for `az acr build`, `az acr task create` and `az acr task update` commands.
+* Add '--auth_mode' and '--credential' parameter for `az acr build`, `az acr run`, `az acr task create`, and `az acr task update` commands.
 
 2.1.12
 ++++++
