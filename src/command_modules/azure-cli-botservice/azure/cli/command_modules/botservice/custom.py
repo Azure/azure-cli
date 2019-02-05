@@ -13,6 +13,7 @@ from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.botservice.models import (
     Bot,
     BotProperties,
@@ -27,7 +28,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,
+def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,  # pylint: disable=too-many-locals
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
            language='Csharp', version='v3'):
@@ -126,9 +127,20 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
-        return BotTemplateDeployer.create_app(
+        creation_results = BotTemplateDeployer.create_app(
             cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
             storageAccountName, location, sku_name, appInsightsLocation, language, version)
+
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        publish_cmd = "az bot publish --resource-group %s -n '%s' --subscription %s -v %s" % (
+            resource_group_name, resource_name, subscription_id, version)
+        if language == 'Csharp':
+            proj_file = '%s.csproj' % resource_name
+            publish_cmd += " --proj-file-path '%s'" % proj_file
+        creation_results['publishCommand'] = publish_cmd
+        logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
+                    publish_cmd)
+        return creation_results
 
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):
@@ -459,7 +471,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3'):
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',
+                keep_node_modules=None):
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
@@ -471,6 +484,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     :param code_dir:
     :param proj_file_path:
     :param version:
+    :param keep_node_modules:
     :return:
     """
     # Get the bot information and ensure it's not only a registration bot.
@@ -494,6 +508,15 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         raise CLIError('The path %s is not a valid directory. '
                        'Please supply a valid directory path containing your source code.' % code_dir)
 
+    # If local IIS Node.js files exist, this means two things:
+    # 1. We may not need to download the necessary web.config and iisnode.yml files to deploy a Node.js bot on IIS.
+    # 2. We shouldn't delete their local web.config and issnode.yml files (if they exist).
+    iis_publish_info = {
+        'lang': 'Csharp' if not os.path.exists(os.path.join(code_dir, 'package.json')) else 'Node',
+        'has_web_config': True if os.path.exists(os.path.join(code_dir, 'web.config')) else False,
+        'has_iisnode_yml': True if os.path.exists(os.path.join(code_dir, 'iisnode.yml')) else False
+    }
+
     # Ensure that the directory contains appropriate post deploy scripts folder
     if 'PostDeployScripts' not in os.listdir(code_dir):
         if version == 'v4':
@@ -502,7 +525,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                         % (code_dir, proj_file_path))
 
             # Automatically run prepare-publish in case of v4.
-            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path)
+            BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, iis_publish_info)
         else:
             logger.info('Detected SDK version v3. PostDeploymentScripts folder not found in directory provided: %s',
                         code_dir)
@@ -511,17 +534,37 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                            'prepared for deployment. Please run prepare-publish. For more information, run \'az bot '
                            'prepare-publish -h\'.')
 
-    logger.info('Creating upload zip file.')
     zip_filepath = BotPublishPrep.create_upload_zip(logger, code_dir, include_node_modules=False)
     logger.info('Zip file path created, at %s.', zip_filepath)
 
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot, logger)
-    output = kudu_client.publish(zip_filepath)
+    output = kudu_client.publish(zip_filepath, keep_node_modules, iis_publish_info['lang'])
 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
+    # If the bot is a Node.js bot and did not initially have web.config, delete web.config and iisnode.yml.
+    if iis_publish_info['lang'] == 'Node':
+        if not iis_publish_info['has_web_config'] and os.path.exists(os.path.join(code_dir, 'web.config')):
+            os.remove(os.path.join(code_dir, 'web.config'))
+        if not iis_publish_info['has_iisnode_yml'] and os.path.exists(os.path.join(code_dir, 'iisnode.yml')):
+            os.remove(os.path.join(code_dir, 'iisnode.yml'))
 
-    if os.path.exists(os.path.join('.', 'package.json')):
+        if not iis_publish_info['has_iisnode_yml'] and not iis_publish_info['has_web_config']:
+            logger.info("web.config and iisnode.yml for Node.js bot were fetched from Azure for deployment using IIS. "
+                        "These files have now been removed from %s."
+                        "To see the two files used for your deployment, either visit your bot's Kudu site or download "
+                        "the files from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip",
+                        code_dir)
+        elif not iis_publish_info['has_iisnode_yml']:
+            logger.info("iisnode.yml for Node.js bot was fetched from Azure for deployment using IIS. To see this file "
+                        "that was used for your deployment, either visit your bot's Kudu site or download the file "
+                        "from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip")
+        elif not iis_publish_info['has_web_config']:
+            logger.info("web.config for Node.js bot was fetched from Azure for deployment using IIS. To see this file "
+                        "that was used for your deployment, either visit your bot's Kudu site or download the file "
+                        "from https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip")
+
+    if os.path.exists(os.path.join('.', 'package.json')) and not keep_node_modules:
         logger.info('Detected language javascript. Installing node dependencies in remote bot.')
         kudu_client.install_node_dependencies()
 

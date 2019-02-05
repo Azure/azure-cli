@@ -48,6 +48,9 @@ def load_arguments(self, _):
                    help='Path to the start up project file name. (E.g. "./EchoBotWithCounter.csproj")')
         c.argument('version', options_list=['-v', '--version'],
                    help='The Microsoft Bot Builder SDK version of the bot.')
+        c.argument('keep_node_modules', help='Keep node_modules folder and do not run `npm install` on the App Service.'
+                                             ' This can greatly speed up publish commands for Node.js SDK bots.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('bot download') as c:
         c.argument('file_save_path', options_list=['--save-path'], help='The directory to download bot code to.')
