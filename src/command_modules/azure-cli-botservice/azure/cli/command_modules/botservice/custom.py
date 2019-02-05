@@ -138,7 +138,8 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             proj_file = '%s.csproj' % resource_name
             publish_cmd += " --proj-file-path '%s'" % proj_file
         creation_results['publishCommand'] = publish_cmd
-
+        logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
+                    publish_cmd)
         return creation_results
 
 def get_bot(cmd, client, resource_group_name, resource_name, bot_json=None):

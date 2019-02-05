@@ -14,6 +14,9 @@ Release History
 * Update old `--proj-file` messages to instead use `--proj-file-path`
 * `az bot publish` now removes fetched IIS Node.js deployment files if they did not already exist
   * The command does not remove any local IIS Node.js files if detected when command is initiated.
+* Add `--keep-node-modules` to `az bot publish` to not delete node_modules folder on App Service
+* Add `"publishCommand"` key-value pair to output from `az bot create` when creating an Azure Function or Web App bot.
+  * The value of `"publishCommand"` is an `az bot publish` command prepopulated with the required parameters to publish the newly created bot.
 
 0.1.4
 +++++
