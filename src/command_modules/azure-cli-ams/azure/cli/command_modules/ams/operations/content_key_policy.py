@@ -402,12 +402,10 @@ def _play_ready_configuration_factory(content):
         )
 
     def __get_license(lic):
-        import dateutil.parser
-        expiration_date = dateutil.parser.parse(lic.get('expirationDate'))
         return ContentKeyPolicyPlayReadyLicense(
             allow_test_devices=lic.get('allowTestDevices'),
             begin_date=lic.get('beginDate'),
-            expiration_date=expiration_date,
+            expiration_date=lic.get('expirationDate'),
             relative_begin_date=_coalesce_timedelta(lic.get('relativeBeginDate')),
             relative_expiration_date=_coalesce_timedelta(lic.get('relativeExpirationDate')),
             grace_period=_coalesce_timedelta(lic.get('gracePeriod')),
