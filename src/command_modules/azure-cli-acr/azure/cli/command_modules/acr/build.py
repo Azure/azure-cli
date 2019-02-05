@@ -110,7 +110,6 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
     platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
-
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
         is_push_enabled=is_push_enabled,
