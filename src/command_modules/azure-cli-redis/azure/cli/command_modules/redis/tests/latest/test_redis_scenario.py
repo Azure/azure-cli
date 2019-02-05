@@ -43,8 +43,8 @@ class RedisCacheTests(ScenarioTest):
             'location': location,
             'sku': premium_sku,
             'size': premium_size,
-            'tags': "{\\\"test\\\":\\\"tryingzones\\\"}",
-            'zones': "{\\\"1\\\",\\\"2\\\"}"
+            'tags': "test=tryingzones",
+            'zones': "1 2"
         }
 
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --tags {tags} --zones {zones}')
@@ -68,7 +68,7 @@ class RedisCacheTests(ScenarioTest):
             'sku': basic_sku,
             'size': basic_size,
             'tls_version': '1.2',
-            'tenant_settings': "{\\\"hello\\\":1}"
+            'tenant_settings': "hello=1"
         }
 
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --minimum-tls-version {tls_version}  --tenant-settings {tenant_settings}')

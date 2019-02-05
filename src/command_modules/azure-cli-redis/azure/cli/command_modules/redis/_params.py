@@ -10,10 +10,9 @@ import azure.cli.command_modules.redis._help  # pylint: disable=unused-import
 
 def load_arguments(self, _):
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
-    from azure.cli.core.util import shell_safe_json_parse
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
     from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes
-    from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type 
+    from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
 
     with self.argument_context('redis') as c:
