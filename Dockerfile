@@ -33,7 +33,7 @@ LABEL maintainer="Microsoft" \
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
-RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git \
+RUN apk add --no-cache bash bash-completion openssh ca-certificates jq curl openssl git \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev \
  && update-ca-certificates
 
@@ -58,6 +58,7 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     pip install --no-cache-dir $all_modules; \
     pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;' \
  && cat /azure-cli/az.completion > ~/.bashrc \
+ && echo "source /usr/share/bash-completion/bash_completion" >> ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \
         | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
@@ -72,5 +73,9 @@ WORKDIR /
 # Remove CLI source code from the final image and normalize line endings.
 RUN rm -rf ./azure-cli && \
     dos2unix /root/.bashrc /usr/local/bin/az
+
+# Install kubectl with bash-completion
+RUN az aks install-cli && \
+    kubectl completion bash > /usr/share/bash-completion/completions/kubectl
 
 CMD bash

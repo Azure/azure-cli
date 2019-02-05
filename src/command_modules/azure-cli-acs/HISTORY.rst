@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* configure kubectl bash-completion during "az aks install-cli"
+
 2.3.19
 ++++++
 * ignore listen-address argument to "az aks browse" if kubectl doesn't support it
