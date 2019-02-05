@@ -636,7 +636,7 @@ def process_lb_create_namespace(cmd, namespace):
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
             'incorrect usage: --subnet NAME --vnet-name NAME | '
-            '--subnet ID | --public-ip NAME_OR_ID')
+            '--subnet ID | --public-ip-address NAME_OR_ID')
 
     if namespace.subnet:
         # validation for an internal load balancer
