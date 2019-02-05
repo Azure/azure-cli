@@ -1984,6 +1984,7 @@ class AcceleratedNetworkingTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
+        # TODO: this relies on validation in _validate_vm_vmss_accelerated_networking to implicitly enable accelerated networking.
         self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
         self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
