@@ -215,6 +215,29 @@ def load_arguments(self, _):
             c.argument('generic_configurations', nargs='+',
                        help='provide site configuration list in a format of either "key=value" pair or "@<json_file>"')
 
+        with self.argument_context(scope + ' config container') as c:
+            c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
+                       help='the container registry server url')
+            c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
+                       help='the container custom image name and optionally the tag name')
+            c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
+                       help='the container registry server username')
+            c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
+                       help='the container registry server password')
+            c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'],
+                       help='enables platform storage (custom container only)',
+                       arg_type=get_three_state_flag(return_label=True))
+            c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type',
+                       arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+            c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'],
+                       help="config file for multicontainer apps")
+            c.argument('show_multicontainer_config', action='store_true',
+                       help='shows decoded config if a multicontainer config is set')
+
+        with self.argument_context(scope + ' deployment container config') as c:
+            c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
+                       arg_type=get_three_state_flag(return_label=True))
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
@@ -224,8 +247,6 @@ def load_arguments(self, _):
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-    with self.argument_context('webapp deployment container config') as c:
-        c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment', arg_type=get_enum_type(['true', 'false']))
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -272,16 +293,6 @@ def load_arguments(self, _):
         c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
     with self.argument_context('webapp config storage-account update') as c:
         c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
-
-    with self.argument_context('webapp config container') as c:
-        c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'], help='the container registry server url')
-        c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'], help='the container custom image name and optionally the tag name')
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'], help='the container registry server password')
-        c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag(return_label=True))
-        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type', arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
-        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="config file for multicontainer apps")
-        c.argument('show_multicontainer_config', action='store_true', help='shows decoded config if a multicontainer config is set')
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
