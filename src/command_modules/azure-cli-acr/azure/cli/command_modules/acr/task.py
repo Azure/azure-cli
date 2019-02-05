@@ -105,7 +105,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         )
 
     registry, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     source_control_type = SourceControlType.visual_studio_team_service.value
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
@@ -145,7 +145,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             name=base_image_trigger_name
         )
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
     task_create_parameters = Task(
         location=registry.location,
@@ -186,7 +186,7 @@ def acr_task_show(cmd,
                   with_secure_properties=False,
                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     if with_secure_properties:
         return client.get_details(resource_group_name, registry_name, task_name)
@@ -198,7 +198,7 @@ def acr_task_list(cmd,
                   registry_name,
                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
 
@@ -208,7 +208,7 @@ def acr_task_delete(cmd,
                     registry_name,
                     resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, task_name)
 
 
@@ -243,7 +243,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     credentials=None,
                     target=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
@@ -347,7 +347,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     platform_arch = None
     platform_variant = None
     if os_type or platform:
-        platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
+        platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
@@ -381,7 +381,7 @@ def acr_task_update_run(cmd,
                         no_archive=None,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     is_archive_enabled = not no_archive if no_archive is not None else None
 
@@ -401,7 +401,7 @@ def acr_task_run(cmd,
                  no_wait=False,
                  resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
@@ -437,7 +437,7 @@ def acr_task_show_run(cmd,
                       registry_name,
                       resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, run_id)
 
 
@@ -447,7 +447,7 @@ def acr_task_cancel_run(cmd,
                         registry_name,
                         resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.cancel(resource_group_name, registry_name, run_id)
 
 
@@ -460,7 +460,7 @@ def acr_task_list_runs(cmd,
                        image=None,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     filter_str = None
     filter_str = _add_run_filter(filter_str, 'TaskName', task_name, 'eq')
@@ -469,7 +469,7 @@ def acr_task_list_runs(cmd,
     if image:
         from .repository import get_image_digest
         try:
-            repository, _, manifest = get_image_digest(cmd.cli_ctx, registry_name, image)
+            repository, _, manifest = get_image_digest(cmd, registry_name, image)
             filter_str = _add_run_filter(
                 filter_str, 'OutputImageManifests', '{}@{}'.format(repository, manifest), 'contains')
         except CLIError as e:
@@ -501,7 +501,7 @@ def acr_task_logs(cmd,
                   image=None,
                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     if not run_id:
         # show logs for the last run

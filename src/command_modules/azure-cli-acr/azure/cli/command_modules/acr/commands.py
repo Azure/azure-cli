@@ -15,8 +15,6 @@ from ._format import (
     webhook_list_events_output_format,
     webhook_ping_output_format,
     replication_output_format,
-    build_task_output_format,
-    build_task_detail_output_format,
     build_output_format,
     task_output_format,
     run_output_format,
@@ -27,8 +25,6 @@ from ._client_factory import (
     cf_acr_registries,
     cf_acr_replications,
     cf_acr_webhooks,
-    cf_acr_build_tasks,
-    cf_acr_builds,
     cf_acr_tasks,
     cf_acr_runs
 )
@@ -91,12 +87,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         operations_tmpl='azure.cli.command_modules.acr.task#{}',
         table_transformer=task_output_format,
         client_factory=cf_acr_tasks
-    )
-
-    acr_build_task_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.acr.build_task#{}',
-        table_transformer=build_task_detail_output_format,
-        client_factory=cf_acr_build_tasks
     )
 
     acr_helm_util = CliCommandType(
@@ -171,26 +161,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr', acr_run_util) as g:
         g.command('run', 'acr_run', supports_no_wait=True)
-
-    # Deprecated (for backward compatibility).
-    with self.command_group('acr build-task',
-                            acr_build_task_util,
-                            deprecate_info=self.deprecate(redirect='acr task', hide=True)) as g:
-        g.command('create', 'acr_build_task_create')
-        g.show_command('show', 'acr_build_task_show')
-        g.command('list', 'acr_build_task_list', table_transformer=build_task_output_format)
-        g.command('delete', 'acr_build_task_delete')
-        g.command('update', 'acr_build_task_update')
-        g.command('run', 'acr_build_task_run', client_factory=cf_acr_builds,
-                  table_transformer=build_output_format)
-        g.command('list-builds', 'acr_build_task_list_builds', client_factory=cf_acr_builds,
-                  table_transformer=build_output_format)
-        g.command('show-build', 'acr_build_task_show_build', client_factory=cf_acr_builds,
-                  table_transformer=build_output_format)
-        g.command('update-build', 'acr_build_task_update_build', client_factory=cf_acr_builds,
-                  table_transformer=build_output_format)
-        g.command('logs', 'acr_build_task_logs', client_factory=cf_acr_builds,
-                  table_transformer=None)
 
     with self.command_group('acr task', acr_task_util) as g:
         g.command('create', 'acr_task_create')
