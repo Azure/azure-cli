@@ -2756,7 +2756,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
 
         self.cmd('vm run-command list -l {loc}')
         self.cmd('vm run-command show --command-id RunShellScript -l {loc}')
-        public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!!').get_output_in_json()['publicIpAddress']
+        public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys').get_output_in_json()['publicIpAddress']
 
         self.cmd('vm open-port -g {rg} -n {vm} --port 80')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
@@ -2768,7 +2768,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_w_params')
     def test_vm_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vm': 'test-run-command-vm2'})
-        self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!!')
+        self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!! --generate-ssh-keys')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
@@ -2785,7 +2785,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         self.cmd('vmss run-command list -l {loc}')
         self.cmd('vmss run-command show --command-id RunShellScript -l {loc}')
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1').get_output_in_json()
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1 --generate-ssh-keys').get_output_in_json()
 
         # get load balancer and allow trafic to scale sets.
         lb = self.cmd('network lb list -g {rg}').get_output_in_json()[0]
@@ -2809,7 +2809,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params')
     def test_vmss_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vmss': 'test-run-command-vmss2'})
-        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username clitest1')
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username clitest1 --generate-ssh-keys')
         self.kwargs['instance_ids'] = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
 
         for id in self.kwargs['instance_ids']:
