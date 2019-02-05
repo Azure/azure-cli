@@ -9,7 +9,6 @@ import colorama
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.containerregistry.v2018_02_01_preview.operations import BuildsOperations
 from azure.storage.blob import AppendBlobService
 from azure.common import AzureHttpError
 from ._azure_utils import get_blob_info
@@ -30,16 +29,10 @@ def stream_logs(client,
     error_msg = "Could not get logs for ID: {}".format(run_id)
 
     try:
-        if isinstance(client, BuildsOperations):
-            log_file_sas = client.get_log_link(
-                resource_group_name=resource_group_name,
-                registry_name=registry_name,
-                build_id=run_id).log_link
-        else:
-            log_file_sas = client.get_log_sas_url(
-                resource_group_name=resource_group_name,
-                registry_name=registry_name,
-                run_id=run_id).log_link
+        log_file_sas = client.get_log_sas_url(
+            resource_group_name=resource_group_name,
+            registry_name=registry_name,
+            run_id=run_id).log_link
     except (AttributeError, CloudError) as e:
         logger.debug("%s Exception: %s", error_msg, e)
         raise CLIError(error_msg)
