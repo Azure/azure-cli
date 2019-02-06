@@ -17,6 +17,7 @@ Release History
 * Add `--keep-node-modules` to `az bot publish` to not delete node_modules folder on App Service
 * Add `"publishCommand"` key-value pair to output from `az bot create` when creating an Azure Function or Web App bot.
   * The value of `"publishCommand"` is an `az bot publish` command prepopulated with the required parameters to publish the newly created bot.
+* Update `"WEBSITE_NODE_DEFAULT_VERSION"` in ARM template for v4 SDK bots to use 10.14.1 instead of 8.9.4
 
 0.1.5
 +++++
