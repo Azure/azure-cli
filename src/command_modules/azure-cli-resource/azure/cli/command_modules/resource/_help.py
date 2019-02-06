@@ -256,6 +256,10 @@ parameters:
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+examples:
+  - name: Validate whether a template is syntactically correct. (crafted)
+    text: az deployment validate --location westus2 --template-file {template-file}
+    crafted: true
 """
 
 helps['deployment wait'] = """
@@ -271,11 +275,19 @@ short-summary: Manage resource provider features.
 helps['feature list'] = """
 type: command
 short-summary: List preview features.
+examples:
+  - name: List preview features. (crafted)
+    text: az feature list --namespace {namespace}
+    crafted: true
 """
 
 helps['feature register'] = """
 type: command
 short-summary: register a preview feature.
+examples:
+  - name: register a preview feature. (crafted)
+    text: az feature register --name MyFeature --namespace {namespace}
+    crafted: true
 """
 
 helps['group'] = """
@@ -351,6 +363,10 @@ parameters:
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+examples:
+  - name: Validate whether a template is syntactically correct. (crafted)
+    text: az group deployment validate --parameters {parameters} --resource-group MyResourceGroup --template-file {template-file}
+    crafted: true
 """
 
 helps['group deployment wait'] = """
@@ -429,11 +445,19 @@ examples:
 helps['group update'] = """
 type: command
 short-summary: Update a resource group.
+examples:
+  - name: Update a resource group. (crafted)
+    text: az group update --resource-group MyResourceGroup --set {set}
+    crafted: true
 """
 
 helps['group wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the resource group is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of the resource group is met. (crafted)
+    text: az group wait --created  --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['lock'] = """
@@ -550,6 +574,10 @@ short-summary: Delete a managed application.
 helps['managedapp list'] = """
 type: command
 short-summary: List managed applications.
+examples:
+  - name: List managed applications. (commonly used with --output and --query)
+    text: az managedapp list     --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['policy'] = """
@@ -833,6 +861,10 @@ short-summary: Get an individual provider's operations.
 helps['provider register'] = """
 type: command
 short-summary: Register a provider.
+examples:
+  - name: Register a provider. (crafted)
+    text: az provider register --namespace {namespace}
+    crafted: true
 """
 
 helps['provider unregister'] = """
@@ -1076,6 +1108,10 @@ examples:
 helps['resource update'] = """
 type: command
 short-summary: Update a resource.
+examples:
+  - name: Update a resource. (crafted)
+    text: az resource update --api-version {api-version} --ids {ids} --set {set}
+    crafted: true
 """
 
 helps['resource wait'] = """
