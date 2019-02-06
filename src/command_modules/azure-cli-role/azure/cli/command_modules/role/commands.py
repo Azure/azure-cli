@@ -14,6 +14,7 @@ from ._client_factory import (_auth_client_factory, _graph_client_factory, _msi_
 
 from ._validators import process_msi_namespace
 
+
 def transform_definition_list(result):
     return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
                          ('Description', r['description'])]) for r in result]
