@@ -1663,7 +1663,8 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                            resource_group_name,
                            name, service_principal, client_secret)
     if not all([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
-        raise CLIError('usage error: --reset-aad --aad-client-app-id ID --aad-server-app-id ID --aad-server-app-secret SECRET [--aad-tenant-id ID]')
+        raise CLIError('usage error: --reset-aad --aad-client-app-id ID --aad-server-app-id ID '
+                       '--aad-server-app-secret SECRET [--aad-tenant-id ID]')
     parameters = {
         'clientAppID': aad_client_app_id,
         'serverAppID': aad_server_app_id,
