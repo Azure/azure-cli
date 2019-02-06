@@ -1510,6 +1510,7 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
 def _gen_guid():
     return uuid.uuid4()
 
+
 def list_user_assigned_identities(cmd, resource_group_name=None):
     from azure.cli.command_modules.role._client_factory import _msi_client_factory
     client = _msi_client_factory(cmd.cli_ctx)
