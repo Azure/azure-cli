@@ -213,16 +213,16 @@ def load_arguments(self, _):
         c.argument('os_type', get_enum_type(aci_connector_os_type),
                    help='The OS type of the connector')
 
-    with self.argument_context('aks update-credentials', arg_group='Service Principal') as c: 
-        c.argument('reset_service_principal', action='store_true') 
-        c.argument('service_principal') 
+    with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
+        c.argument('reset_service_principal', action='store_true')
+        c.argument('service_principal')
         c.argument('client_secret')
 
-    with self.argument_context('aks update-credentials', arg_group='AAD') as c: 
-        c.argument('reset_aad', action='store_true') 
-        c.argument('aad_client_app_id') 
-        c.argument('aad_server_app_id') 
-        c.argument('aad_server_app_secret') 
+    with self.argument_context('aks update-credentials', arg_group='AAD') as c:
+        c.argument('reset_aad', action='store_true')
+        c.argument('aad_client_app_id')
+        c.argument('aad_server_app_id')
+        c.argument('aad_server_app_secret')
         c.argument('aad_tenant_id')
 
     with self.argument_context('aks upgrade') as c:
