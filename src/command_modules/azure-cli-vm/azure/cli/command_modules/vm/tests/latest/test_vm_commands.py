@@ -1984,16 +1984,13 @@ class AcceleratedNetworkingTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1'
         })
-        # TODO: this relies on validation in _validate_vm_vmss_accelerated_networking to implicitly enable accelerated networking.
+        # Note: CLI turns sets accelerated_networking to true based on vm size and os image.
+        # See _validate_vm_vmss_accelerated_networking for more info.
         self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image ubuntults --admin-username clittester --generate-ssh-keys")
         self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
 
 class ApplicationSecurityGroup(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_asg_vm')
-    def test_vmss_asg(self, resource_group):
-        # TODO: add test for vm asg
-        pass
 
     @ResourceGroupPreparer(name_prefix='cli_test_asg_vmss')
     def test_vmss_asg(self, resource_group):
