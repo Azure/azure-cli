@@ -5,9 +5,9 @@
 
 import uuid
 from knack.util import CLIError
-from ._client_factory import _graph_client_factory
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
+from ._client_factory import _graph_client_factory
 
 
 VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id']

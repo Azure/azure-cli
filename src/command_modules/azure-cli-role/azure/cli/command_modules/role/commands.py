@@ -9,7 +9,7 @@ from collections import OrderedDict
 from azure.cli.core.profiles import PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (_auth_client_factory, _graph_client_factory, _msi_client_factory,
+from ._client_factory import (_auth_client_factory, _graph_client_factory,
                               _msi_user_identities_operations, _msi_operations_operations)
 
 from ._validators import process_msi_namespace
