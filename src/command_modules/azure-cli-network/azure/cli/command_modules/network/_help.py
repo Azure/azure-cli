@@ -1730,9 +1730,9 @@ helps['network dns zone export'] = """
     type: command
     short-summary: Export a DNS zone as a DNS zone file.
     examples:
-        - name: Export a DNS zone as a DNS zone file in tsv format.
+        - name: Export a DNS zone as a DNS zone file.
           text: >
-            az network dns zone export -g MyResourceGroup -n www.mysite.com -o mysite_com_zone.tsv
+            az network dns zone export -g MyResourceGroup -n www.mysite.com -f mysite_com_zone.txt
 """
 
 helps['network dns zone import'] = """
