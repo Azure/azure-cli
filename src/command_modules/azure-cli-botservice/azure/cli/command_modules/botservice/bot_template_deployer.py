@@ -32,7 +32,7 @@ class BotTemplateDeployer:
     v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
 
     @staticmethod
-    def deploy_arm_template(cli_ctx, resource_group_name,
+    def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
         DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -127,8 +127,8 @@ class BotTemplateDeployer:
         create_new_storage = False
         if not storageAccountName:
             create_new_storage = True
-            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24])
-            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40])
+            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24].lower())
+            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40].lower())
 
             # The name of Azure Web Sites cannot end with "-", e.g. "testname-.azurewbesites.net" is invalid.
             # The valid name would be "testname.azurewebsites.net"

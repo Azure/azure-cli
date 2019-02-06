@@ -2,10 +2,12 @@
 
 Release History
 ===============
+
 2.3.17
 ++++++
 * az aks enable-addons /disable-addons: support case insensitive name
-* Support Azure Active Directory updating operation using "az aks update-credentials --reset-aad"
+* support Azure Active Directory updating operation using "az aks update-credentials --reset-aad"
+* clarify that "--output" is ignored for "az aks get-credentials"
 
 2.3.16
 ++++++
