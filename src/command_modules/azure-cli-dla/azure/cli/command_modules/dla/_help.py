@@ -401,6 +401,10 @@ short-summary: Retrieve a job recurrence in a Data Lake Analytics account.
 helps['dla job show'] = """
 type: command
 short-summary: Get information for a Data Lake Analytics job.
+examples:
+  - name: Get information for a Data Lake Analytics job. (commonly used with --output)
+    text: az dla job show --account {account} --job-identity {job-identity}
+    crafted: true
 """
 
 helps['dla job submit'] = """
@@ -423,6 +427,10 @@ parameters:
     short-summary: The priority of the job.
     long-summary: Lower values increase the priority, with the lowest value being 1. This determines the order jobs are run in.
 
+examples:
+  - name: Submit a job to a Data Lake Analytics account. (commonly used with --output)
+    text: az dla job submit --account {account} --degree-of-parallelism {degree-of-parallelism} --job-name MyJob   --script {script}
+    crafted: true
 """
 
 helps['dla job wait'] = """

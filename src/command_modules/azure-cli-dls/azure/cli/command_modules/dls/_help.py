@@ -88,6 +88,10 @@ short-summary: Updates a firewall rule in a Data Lake Store account.
 helps['dls account list'] = """
 type: command
 short-summary: Lists available Data Lake Store accounts.
+examples:
+  - name: Lists available Data Lake Store accounts. (crafted)
+    text: az dls account list --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['dls account network-rule'] = """
@@ -170,6 +174,10 @@ short-summary: Replace the existing access control list for a file or folder.
 helps['dls fs access set-entry'] = """
 type: command
 short-summary: Update the access control list for a file or folder.
+examples:
+  - name: Update the access control list for a file or folder. (crafted)
+    text: az dls fs access set-entry --account {account} --acl-spec user:6360e05d-c381-4275-a932-5535806bb323:-w- --path {path}
+    crafted: true
 """
 
 helps['dls fs access set-owner'] = """
@@ -194,11 +202,19 @@ parameters:
 example:
   - name: Set full permissions for a user, read-execute permissions for a group, and execute permissions for all.
     text: az fs access set-permission --path /path/to/file.txt --permission 751
+examples:
+  - name: Set the permissions for a file or folder in a Data Lake Store account. (crafted)
+    text: az dls fs access set-permission --account {account} --path {path} --permission 777
+    crafted: true
 """
 
 helps['dls fs access show'] = """
 type: command
 short-summary: Display the access control list (ACL).
+examples:
+  - name: Display the access control list (ACL). (crafted)
+    text: az dls fs access show --account {account} --path {path}
+    crafted: true
 """
 
 helps['dls fs append'] = """
@@ -217,11 +233,19 @@ parameters:
   - name: --content
     type: string
     short-summary: 'Content for the file to contain upon creation.'
+examples:
+  - name: Creates a file or folder in a Data Lake Store account. (crafted)
+    text: az dls fs create --account {account} --folder  --path {path}
+    crafted: true
 """
 
 helps['dls fs delete'] = """
 type: command
 short-summary: Delete a file or folder in a Data Lake Store account.
+examples:
+  - name: Delete a file or folder in a Data Lake Store account. (crafted)
+    text: az dls fs delete --account {account} --path {path}
+    crafted: true
 """
 
 helps['dls fs download'] = """
@@ -249,6 +273,10 @@ parameters:
     type: int
     short-summary: Size of a block, in bytes.
     long-summary: Within each chunk, a smaller block is written for each API call. A block cannot be bigger than a chunk and must be bigger than a buffer.
+examples:
+  - name: Download a file or folder from a Data Lake Store account to the local machine. (crafted)
+    text: az dls fs download --account {account} --destination-path {destination-path} --source-path {source-path}
+    crafted: true
 """
 
 helps['dls fs join'] = """
@@ -266,6 +294,10 @@ parameters:
 helps['dls fs list'] = """
 type: command
 short-summary: List the files and folders in a Data Lake Store account.
+examples:
+  - name: List the files and folders in a Data Lake Store account. (crafted)
+    text: az dls fs list --account {account} --path {path}
+    crafted: true
 """
 
 helps['dls fs move'] = """
@@ -278,6 +310,10 @@ parameters:
   - name: --destination-path
     type: string
     short-summary: The destination path in the Data Lake Store account.
+examples:
+  - name: Move a file or folder in a Data Lake Store account. (crafted)
+    text: az dls fs move --account {account} --destination-path {destination-path} --source-path {source-path}
+    crafted: true
 """
 
 helps['dls fs preview'] = """
@@ -306,11 +342,19 @@ short-summary: Set the expiration time for a file.
 helps['dls fs show'] = """
 type: command
 short-summary: Get file or folder information in a Data Lake Store account.
+examples:
+  - name: Get file or folder information in a Data Lake Store account. (commonly used with --output)
+    text: az dls fs show --account {account}   --path {path}
+    crafted: true
 """
 
 helps['dls fs test'] = """
 type: command
 short-summary: Test for the existence of a file or folder in a Data Lake Store account.
+examples:
+  - name: Test for the existence of a file or folder in a Data Lake Store account. (crafted)
+    text: az dls fs test --account {account} --path {path}
+    crafted: true
 """
 
 helps['dls fs upload'] = """
@@ -339,4 +383,8 @@ parameters:
     short-summary: Size of a block, in bytes.
     long-summary: Within each chunk, a smaller block is written for each API call. A block cannot be bigger than a chunk and must be bigger than a buffer.
 
+examples:
+  - name: Upload a file or folder to a Data Lake Store account. (crafted)
+    text: az dls fs upload --account {account} --destination-path {destination-path} --overwrite  --source-path {source-path}
+    crafted: true
 """
