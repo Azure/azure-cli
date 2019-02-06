@@ -1539,21 +1539,6 @@ helps['image list'] = """
     short-summary: List custom VM images.
 """
 
-helps['identity'] = """
-    type: group
-    short-summary: Managed Service Identities
-"""
-
-helps['identity list'] = """
-    type: command
-    short-summary: List Managed Service Identities
-"""
-
-helps['identity list-operations'] = """
-    type: command
-    short-summary: Lists available operations for the Managed Identity provider
-"""
-
 helps['sig'] = """
     type: group
     short-summary: manage shared image gallery
