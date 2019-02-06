@@ -109,7 +109,7 @@ class TunnelServer(object):
         basic_auth_string = self.create_basic_auth()
         while True:
             self.client, _address = self.sock.accept()
-            self.client.settimeout(60 * 20)
+            self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '.scm.azurewebsites.net/AppServiceTunnel/Tunnel.ashx')
             basic_auth_header = 'Authorization: Basic {}'.format(basic_auth_string)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
@@ -125,7 +125,7 @@ class TunnelServer(object):
                                         class_=TunnelWebSocket,
                                         header=[basic_auth_header],
                                         sslopt={'cert_reqs': ssl.CERT_NONE},
-                                        timeout=60 * 20,
+                                        timeout=60 * 60,
                                         enable_multithread=True)
             logger.info('Websocket, connected status: %s', self.ws.connected)
             index = index + 1
