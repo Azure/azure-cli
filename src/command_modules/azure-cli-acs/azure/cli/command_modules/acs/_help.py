@@ -96,6 +96,10 @@ helps['acs kubernetes get-credentials'] = """
     type: command
     short-summary: Download and install credentials to access a cluster.  This command requires
                    the same private-key used to create the cluster.
+    parameters:
+        - name: --output -o
+          type: string
+          long-summary: Credentials are always in YAML format, so this argument is effectively ignored.
 """
 
 helps['acs list-locations'] = """
@@ -331,6 +335,9 @@ helps['aks get-credentials'] = """
         - name: --overwrite-existing
           type: bool
           short-summary: Overwrite any existing cluster entry with the same name.
+        - name: --output -o
+          type: string
+          long-summary: Credentials are always in YAML format, so this argument is effectively ignored.
 """
 
 helps['aks get-upgrades'] = """
