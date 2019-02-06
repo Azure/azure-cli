@@ -8,35 +8,28 @@ import time
 from msrest import Deserializer
 from msrest.polling import PollingMethod, LROPoller
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.containerregistry.v2018_09_01 import models
 
-FINISHED = frozenset([
-    models.RunStatus.succeeded.value,
-    models.RunStatus.failed.value,
-    models.RunStatus.canceled.value,
-    models.RunStatus.error.value,
-    models.RunStatus.timeout.value])
-
-SUCCEEDED = frozenset([models.RunStatus.succeeded.value])
-
-DESERIALIZER = Deserializer(
-    {k: v for k, v in models.__dict__.items() if isinstance(v, type)})
+from ._constants import get_acr_models, get_finished_run_status, get_succeeded_run_status
 
 
-def deserialize_run(response):
-    return DESERIALIZER('Run', response)
-
-
-def get_run_with_polling(client,
+def get_run_with_polling(cmd,
+                         client,
                          run_id,
                          registry_name,
                          resource_group_name):
+    deserializer = Deserializer(
+        {k: v for k, v in get_acr_models(cmd).__dict__.items() if isinstance(v, type)})
+
+    def deserialize_run(response):
+        return deserializer('Run', response)
+
     return LROPoller(
         client=client,
         initial_response=client.get(
             resource_group_name, registry_name, run_id, raw=True),
         deserialization_callback=deserialize_run,
         polling_method=RunPolling(
+            cmd=cmd,
             registry_name=registry_name,
             run_id=run_id
         ))
@@ -44,7 +37,8 @@ def get_run_with_polling(client,
 
 class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, registry_name, run_id, timeout=30):
+    def __init__(self, cmd, registry_name, run_id, timeout=30):
+        self._cmd = cmd
         self._registry_name = registry_name
         self._run_id = run_id
         self._timeout = timeout
@@ -68,7 +62,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
             time.sleep(self._timeout)
             self._update_status()
 
-        if self.operation_status not in SUCCEEDED:
+        if self.operation_status not in get_succeeded_run_status(self._cmd):
             from knack.util import CLIError
             raise CLIError("The run with ID '{}' finished with unsuccessful status '{}'. "
                            "Show run details by 'az acr task show-run -r {} --run-id {}'. "
@@ -85,15 +79,16 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_status
 
     def finished(self):
-        return self.operation_status in FINISHED
+        return self.operation_status in get_finished_run_status(self._cmd)
 
     def resource(self):
         return self.operation_result
 
     def _set_operation_status(self, response):
+        RunStatus = self._cmd.get_models('RunStatus')
         if response.status_code == 200:
             self.operation_result = self._deserialize(response)
-            self.operation_status = self.operation_result.status or models.RunStatus.queued.value
+            self.operation_status = self.operation_result.status or RunStatus.queued.value
             return
         raise CloudError(response)
 
