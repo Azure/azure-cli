@@ -23,6 +23,7 @@ from knack.log import get_logger
 
 from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
+from azure.cli.core._profile import AZ_LOGIN_MESSAGE
 
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
@@ -162,7 +163,9 @@ def _get_credentials(cmd,
             logger.warning(
                 "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
                 login_server, tenant_suffix)
-    except ResourceNotFound as e:
+    except (ResourceNotFound, CLIError) as e:
+        if not isinstance(e, ResourceNotFound) and AZ_LOGIN_MESSAGE not in str(e):
+            raise
         # Try to use the pre-defined login server suffix to construct login server from registry name.
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
@@ -379,6 +382,10 @@ def request_data_from_registry(http_method,
             elif response.status_code == 404:
                 raise RegistryException(
                     parse_error_message('The requested data does not exist.', response),
+                    response.status_code)
+            elif response.status_code == 405:
+                raise RegistryException(
+                    parse_error_message('This operation is not supported.', response),
                     response.status_code)
             elif response.status_code == 409:
                 raise RegistryException(

@@ -69,6 +69,8 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
+AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account"
+
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
@@ -467,7 +469,7 @@ class Profile(object):
     def get_subscription(self, subscription=None):  # take id or name
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
-            raise CLIError("Please run 'az login' to setup account.")
+            raise CLIError(AZ_LOGIN_MESSAGE)
 
         result = [x for x in subscriptions if (
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
