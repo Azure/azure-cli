@@ -1653,20 +1653,17 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
                            aad_client_app_id=None,
                            aad_tenant_id=None,
                            no_wait=False):
-    if reset_service_principal + reset_aad != 1:
-        raise CLIError('Please specify one of "--reset-service-principal" or "--reset-aad-profile".')
+    if bool(reset_service_principal) == bool(reset_aad):
+        raise CLIError('usage error: --reset-service-principal | --reset-aad-profile')
     if reset_service_principal:
         if service_principal is None or client_secret is None:
-            raise CLIError('Please specify "--service-principal" and "--client-secret" '
-                           'when "--reset-service-principal" flag is on.')
+            raise CLIError('usage error: --reset-service-principal --service-principal ID --client-secret SECRET')
         return sdk_no_wait(no_wait,
                            client.reset_service_principal_profile,
                            resource_group_name,
                            name, service_principal, client_secret)
-    if aad_client_app_id is None or aad_server_app_id is None or aad_server_app_secret is None:
-        raise CLIError('Please specify "--aad-client-app-id", "--aad-server-app-id" and '
-                       '--aad-server-app-secret" and optionally "--aad-tenant-id" '
-                       'when "--reset-aad" flag is on.')
+    if not all([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
+        raise CLIError('usage error: --reset-aad --aad-client-app-id ID --aad-server-app-id ID --aad-server-app-secret SECRET [--aad-tenant-id ID]')
     parameters = {
         'clientAppID': aad_client_app_id,
         'serverAppID': aad_server_app_id,
