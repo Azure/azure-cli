@@ -1511,7 +1511,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             docker_bridge_cidr=docker_bridge_address,
             network_policy=network_policy
         )
-
     addon_profiles = _handle_addons_args(
         cmd,
         enable_addons,
@@ -1646,18 +1645,36 @@ def aks_show(cmd, client, resource_group_name, name):
 
 def aks_update_credentials(cmd, client, resource_group_name, name,
                            reset_service_principal=False,
+                           reset_aad=False,
                            service_principal=None,
                            client_secret=None,
+                           aad_server_app_id=None,
+                           aad_server_app_secret=None,
+                           aad_client_app_id=None,
+                           aad_tenant_id=None,
                            no_wait=False):
-    if reset_service_principal != 1:
-        raise CLIError('Please specify "--reset-service-principal".')
-    if service_principal is None or client_secret is None:
-        raise CLIError('Please specify --service-principal and --client-secret '
-                       'when --reset-service-principal flag is on.')
+    if bool(reset_service_principal) == bool(reset_aad):
+        raise CLIError('usage error: --reset-service-principal | --reset-aad-profile')
+    if reset_service_principal:
+        if service_principal is None or client_secret is None:
+            raise CLIError('usage error: --reset-service-principal --service-principal ID --client-secret SECRET')
+        return sdk_no_wait(no_wait,
+                           client.reset_service_principal_profile,
+                           resource_group_name,
+                           name, service_principal, client_secret)
+    if not all([aad_client_app_id, aad_server_app_id, aad_server_app_secret]):
+        raise CLIError('usage error: --reset-aad --aad-client-app-id ID --aad-server-app-id ID '
+                       '--aad-server-app-secret SECRET [--aad-tenant-id ID]')
+    parameters = {
+        'clientAppID': aad_client_app_id,
+        'serverAppID': aad_server_app_id,
+        'serverAppSecret': aad_server_app_secret,
+        'tenantID': aad_tenant_id
+    }
     return sdk_no_wait(no_wait,
-                       client.reset_service_principal_profile,
+                       client.reset_aad_profile,
                        resource_group_name,
-                       name, service_principal, client_secret)
+                       name, parameters)
 
 
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
