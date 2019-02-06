@@ -691,19 +691,22 @@ helps['vm disk attach'] = """
 
 helps['vm encryption'] = """
     type: group
-    short-summary: Manage encryption of VM disks.
+    short-summary: Manage encryption of VM disks. For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
 """
 
 helps['vm encryption enable'] = """
     type: command
-    short-summary: Enable disk encryption on the OS disk and/or data disks.
-    parameters:
+    short-summary: Enable disk encryption on the OS disk and/or data disks. For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
         - name: --aad-client-id
           short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
         - name: --aad-client-secret
           short-summary: Client secret of the AAD app with permissions to write secrets to the key vault.
         - name: --aad-client-cert-thumbprint
           short-summary: Thumbprint of the AAD app certificate with permissions to write secrets to the key vault.
+    examples:
+        - name: encrypt a VM using a key vault in the same resource group
+          text: >
+            az vm encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault MyVault
 """
 
 helps['vm encryption disable'] = """
@@ -1053,16 +1056,16 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
 
 helps['vmss encryption'] = """
     type: group
-    short-summary: (PREVIEW) Manage encryption of VMSS.
+    short-summary: (PREVIEW) Manage encryption of VMSS. For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
 """
 
 helps['vmss encryption enable'] = """
     type: command
-    short-summary: Encrypt a VMSS with managed disks.
+    short-summary: Encrypt a VMSS with managed disks. For more information, see: For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
     examples:
         - name: encrypt a VM scale set using a key vault in the same resource group
           text: >
-            az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
+            az vmss encryption enable -g MyResourceGroup -n MyVmss --disk-encryption-keyvault MyVault
 """
 
 helps['vmss encryption disable'] = """
