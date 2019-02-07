@@ -1354,12 +1354,6 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def process_msi_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
-
-
 def process_gallery_image_version_namespace(cmd, namespace):
     TargetRegion = cmd.get_models('TargetRegion')
     if namespace.target_regions:

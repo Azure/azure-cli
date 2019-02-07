@@ -462,14 +462,6 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     vm = client.virtual_machines.get(resource_group_name, vm_name)
     return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
                                     vm.identity.user_assigned_identities)
-
-
-def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.vm._client_factory import msi_client_factory
-    client = msi_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
-    return client.user_assigned_identities.list_by_subscription()
 # endregion
 
 

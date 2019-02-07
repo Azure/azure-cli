@@ -2396,7 +2396,7 @@ def _start_ssh_session(hostname, port, username, password):
             time.sleep(1)
     try:
         c.run('cat /etc/motd', pty=True)
-        c.run('source /etc/profile; /bin/ash', pty=True)
+        c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
     finally:
