@@ -493,6 +493,9 @@ helps['acr task update'] = """
         - name: Update platform for the Build step of your Task to Windows (prev Linux).
           text: >
             az acr task update -n MyTask -r MyRegistry --platform Windows
+        - name: To remove a credential from a task, you can update the task by sending empty username and password for the Registry. For instance, to remove credentials for MyRegistry2, use the following command:
+          text: >
+            az acr task update -n hello-world -r MyRegistry --credential 'MyRegistry2.azurecr.io;;'
 """
 
 helps['acr task list-runs'] = """
