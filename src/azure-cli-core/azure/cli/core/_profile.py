@@ -306,7 +306,7 @@ class Profile(object):
                             raise
 
                 if not authenticated:
-                    raise CLIError('Invalid MSI Username')
+                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
 
         else:
             identity_type = MsiAccountTypes.system_assigned
