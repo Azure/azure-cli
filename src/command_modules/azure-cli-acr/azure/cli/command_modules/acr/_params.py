@@ -67,7 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('platform', help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
-        c.argument('credentials', options_list=['--credential'], help="The registry credential passed in the 'registryName;username;secret' format.", action='append')
+        c.argument('credentials', options_list=['--credential'], help="The registry credential passed in the 'registryName;username;password' format.", action='append')
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:

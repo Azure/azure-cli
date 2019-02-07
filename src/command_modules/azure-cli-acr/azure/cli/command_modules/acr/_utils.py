@@ -386,13 +386,17 @@ def get_custom_registry_credentials(cmd, auth_mode=None, credentials=None):
 
     customRegistries = {}
     if credentials is not None:
-        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models('CustomRegistryCredentials', 'SecretObject', 'SecretObjectType')
+        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
+            'CustomRegistryCredentials',
+            'SecretObject',
+            'SecretObjectType'
+        )
         for credential in credentials:
             cred_split = credential.split(';', 2)
             if len(cred_split) != 3:
                 raise CLIError(
                     "Please provide the credentials in the form of "
-                    "'registryName;username;secret'. Incorrect credentials: '{}'".format(credential)
+                    "'registryName;username;password'. Incorrect credentials: '{}'".format(credential)
                 )
 
             loginServer = cred_split[0].strip()
