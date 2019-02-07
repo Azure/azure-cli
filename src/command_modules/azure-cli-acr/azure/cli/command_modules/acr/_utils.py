@@ -242,49 +242,6 @@ def _parameters(registry_name,
     return parameters
 
 
-def get_credentials(cmd, auth_mode=None, credentials=None):
-    """Get the credential object from the input
-    :param str auth_mode: The login mode for the source registry
-    :param [] credentials: The list of credentials
-    """
-    # pylint: disable=line-too-long
-    Credentials, SourceRegistryCredentials, CustomRegistryCredentials, SourceRegistryLoginMode, SecretObject, SecretObjectType = cmd.get_models('Credentials', 'SourceRegistryCredentials', 'CustomRegistryCredentials', 'SourceRegistryLoginMode', 'SecretObject', 'SecretObjectType')
-
-    if auth_mode is None:
-        auth_mode = SourceRegistryLoginMode.default
-
-    sourceRegistryCredentials = SourceRegistryCredentials(login_mode=auth_mode)
-
-    customRegistries = {}
-    if credentials is None:
-        credentials = []
-
-    for credential in credentials:
-        cred_split = credential.split(';', 2)
-        if len(cred_split) != 3:
-            raise CLIError(
-                "Please provide the credentials in the form of "
-                "'registryName;username;secret'. Incorrect credentials: '{}'".format(credential)
-            )
-
-        # { 'loginServer': { username: <SecretObject>, password: <SecretObject> } }
-        customRegistries[cred_split[0]] = CustomRegistryCredentials(
-            user_name=SecretObject(
-                type=SecretObjectType.opaque,
-                value=cred_split[1]
-            ),
-            password=SecretObject(
-                type=SecretObjectType.opaque,
-                value=cred_split[2]
-            )
-        )
-
-    return Credentials(
-        source_registry=sourceRegistryCredentials,
-        custom_registries=customRegistries
-    )
-
-
 def random_storage_account_name(cli_ctx, registry_name):
     from datetime import datetime
 
@@ -415,6 +372,48 @@ def get_validate_platform(cmd, os_type, platform):
         )
 
     return platform_os, platform_arch, platform_variant
+
+
+def get_custom_registry_credentials(cmd, auth_mode=None, credentials=None):
+    """Get the credential object from the input
+    :param str auth_mode: The login mode for the source registry
+    :param [] credentials: The list of credentials
+    """
+    sourceRegistryCredentials = None
+    if auth_mode is not None:
+        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
+        sourceRegistryCredentials = SourceRegistryCredentials(login_mode=auth_mode)
+
+    customRegistries = {}
+    if credentials is not None:
+        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models('CustomRegistryCredentials', 'SecretObject', 'SecretObjectType')
+        for credential in credentials:
+            cred_split = credential.split(';', 2)
+            if len(cred_split) != 3:
+                raise CLIError(
+                    "Please provide the credentials in the form of "
+                    "'registryName;username;secret'. Incorrect credentials: '{}'".format(credential)
+                )
+
+            loginServer = cred_split[0].strip()
+            username = cred_split[1].strip()
+            password = cred_split[2].strip()
+            customRegistries[loginServer] = CustomRegistryCredentials(
+                user_name=SecretObject(
+                    type=SecretObjectType.opaque,
+                    value=username
+                ),
+                password=SecretObject(
+                    type=SecretObjectType.opaque,
+                    value=password
+                )
+            )
+
+    Credentials = cmd.get_models('Credentials')
+    return Credentials(
+        source_registry=sourceRegistryCredentials,
+        custom_registries=customRegistries
+    )
 
 
 class ResourceNotFound(CLIError):

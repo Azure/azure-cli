@@ -446,10 +446,10 @@ helps['acr task create'] = """
             az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
         - name: Create a task from a public GitHub repository which builds and pushes the image in the source registry (i.e. MyRegistry1) as per simpletask.yaml file in the repo.
           text: >
-            az acr task create -n hello-world -r MyRegistry1 -c https://github.com/shahzzzam/acr-build-helloworld-node.git -f simpletask.yaml --commit-trigger-enabled false --pull-request-trigger-enabled false
+            az acr task create -n hello-world -r MyRegistry1 -c https://github.com/Azure-Samples/acr-tasks.git -f simpletask.yaml --commit-trigger-enabled false --pull-request-trigger-enabled false
         - name: Create a task from a public GitHub repository which builds and pushes the image in 2 registries. One is the MyRegistry1 and the other one in this case is MyRegistry2 (per testtask.yaml file). Each of their credentials are passed using `--credential` flag. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
           text: >
-            az acr task create -n hello-world -r MyRegistry --auth-mode None -c https://github.com/shahzzzam/acr-build-helloworld-node.git -f testtask.yaml --values values.yaml --credential 'MyRegistry1.azurecr.io;registryUsername;registrySecret' --credential 'MyRegistry2.azurecr.io;registryUsername;registrySecret' --commit-trigger-enabled false --pull-request-trigger-enabled false
+            az acr task create -n hello-world -r MyRegistry --auth-mode None -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml --values values.yaml --credential 'MyRegistry1.azurecr.io;registryUsername;registrySecret' --credential 'MyRegistry2.azurecr.io;registryUsername;registrySecret' --commit-trigger-enabled false --pull-request-trigger-enabled false
 """
 
 helps['acr task show'] = """

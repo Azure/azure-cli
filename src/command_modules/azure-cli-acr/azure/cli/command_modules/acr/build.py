@@ -13,7 +13,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._utils import validate_managed_registry, get_credentials, get_validate_platform
+from ._utils import validate_managed_registry, get_custom_registry_credentials, get_validate_platform
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
@@ -119,7 +119,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         docker_file_path=docker_file_path,
         timeout=timeout,
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-        credentials=get_credentials(
+        credentials=get_custom_registry_credentials(
             cmd,
             auth_mode=auth_mode,
             credentials=credentials

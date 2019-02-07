@@ -12,7 +12,7 @@ from azure.cli.core.commands import LongRunningOperation
 
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry, get_credentials, get_validate_platform
+from ._utils import validate_managed_registry, get_custom_registry_credentials, get_validate_platform
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -83,7 +83,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             architecture=platform_arch,
             variant=platform_variant
         ),
-        credentials=get_credentials(
+        credentials=get_custom_registry_credentials(
             cmd,
             auth_mode=auth_mode,
             credentials=credentials

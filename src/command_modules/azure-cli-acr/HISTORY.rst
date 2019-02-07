@@ -8,7 +8,7 @@ Release History
 * BREAKING CHANGE: Remove 'acr build-task' command group.
 * BREAKING CHANGE: Remove --tag/--manifest from 'acr repository delete' command.
 * Add '--target' parameter for `az acr build`, `az acr task create` and `az acr task update` commands.
-* Add '--auth_mode' and '--credential' parameter for `az acr build`, `az acr run`, `az acr task create`, and `az acr task update` commands.
+* Add '--auth-mode' and '--credential' parameter for `az acr build`, `az acr run`, `az acr task create`, and `az acr task update` commands.
 
 2.1.13
 ++++++
