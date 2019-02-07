@@ -22,7 +22,6 @@ import OpenSSL.crypto
 
 from fabric import Connection
 
-
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
@@ -43,6 +42,10 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
+
+
+# pylint: disable=unused-import
+from azure_functions_devops_build.artifact.artifact_manager import ArtifactManager
 
 from .tunnel import TunnelServer
 

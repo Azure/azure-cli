@@ -1,0 +1,19 @@
+# Starter template for Azure functions build for
+trigger:
+- master
+pool:
+  vmImage: 'ubuntu-16.04'
+steps:
+{%- for dependency in dependencies %}
+{{ dependency|safe }}
+{%- endfor %}
+- task: ArchiveFiles@2
+  displayName: "Archive files"
+  inputs:
+    rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+    includeRootFolder: false
+    archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+    name: 'drop'

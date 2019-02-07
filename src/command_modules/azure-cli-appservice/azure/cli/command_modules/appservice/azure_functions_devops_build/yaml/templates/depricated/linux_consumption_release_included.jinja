@@ -1,0 +1,59 @@
+# Starter template for Azure functions build for {{language}} {{appType}}
+
+jobs:
+  # install dependencies and build then upload artifacts
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+    {%- for dependency in dependencies %}
+    {{ dependency|safe }}
+    {%- endfor %}
+    - task: ArchiveFiles@2
+      displayName: "Archive files"
+      inputs:
+        rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+        includeRootFolder: false
+        tarCompression: none
+        archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+        name: 'drop'
+
+  # download the artifact and deploy it only if the build job succeeded
+  # this needs to be a seperate job as the azure file copy is a windows only command
+  - job: Deploy
+    pool:
+      vmImage: 'VS2017-Win2016'
+    steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'drop'
+        downloadPath: '$(System.DefaultWorkingDirectory)'
+    - task: AzureFileCopy@2
+      inputs:
+        sourcePath: "drop/build$(Build.BuildId).zip"
+        azureConnectionType: 'ConnectedServiceNameARM'
+        azureSubscription: {{ subscription_name }}
+        destination: azureBlob
+        storage: {{ storage_name }}
+        containerName: 'azure-build'
+    - task: createsastoken@1
+      inputs:
+        ConnectedServiceName: {{ subscription_name }}
+        StorageAccountRM: {{ storage_name }}
+        SasTokenTimeOutInHours: 10000
+        Permission: 'r'
+        StorageContainerName: 'azure-build'
+    - task: AzureAppServiceSetAppSettings@2
+      inputs:
+        ConnectedServiceName: {{ subscription_name }}
+        WebAppName: {{ functionapp_name }}
+        ResourceGroupName: {{ functionapp_name }}
+        AppSettings: "WEBSITE_RUN_FROM_PACKAGE='$(storageUri)/build$(Build.BuildId).zip$(storageToken)'"
+
+    dependsOn: Build
+    condition: succeeded()

@@ -1,0 +1,32 @@
+# Starter template for Azure functions build for {{language}} {{appType}}
+
+trigger:
+- master
+
+pool:
+  vmImage: 'VS2017-Win2016'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+{%- for dependency in dependencies %}
+{{ dependency|safe }}
+{%- endfor %}
+- task: ArchiveFiles@2
+  displayName: "Archive files"
+  inputs:
+    rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+    includeRootFolder: false
+    archiveFile: "$(System.DefaultWorkingDirectory)/$(Build.BuildId).zip"
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)'
+    name: 'drop'
+
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    connectionType: 'AzureRM'
+    azureSubscription: {{ subscription_name }}
+    appType: 'functionApp'
+    webAppName: {{ functionapp_name }}
