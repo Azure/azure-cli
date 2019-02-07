@@ -69,7 +69,7 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
-AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account"
+AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
