@@ -85,16 +85,6 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
     # endregion
 
-    # region Identity
-    # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-    with self.argument_context('identity') as c:
-        c.argument('resource_name', arg_type=name_arg_type, id_part='name')
-
-    with self.argument_context('identity create') as c:
-        c.argument('location', get_location_type(self.cli_ctx))
-        c.argument('tags', tags_type)
-    # endregion
-
     # region Snapshots
     with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))

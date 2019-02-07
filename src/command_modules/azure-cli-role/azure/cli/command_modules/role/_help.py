@@ -390,3 +390,18 @@ helps['ad signed-in-user list-owned-objects'] = """
     type: command
     short-summary: Get the list of directory objects that are owned by the user
 """
+
+helps['identity'] = """
+    type: group
+    short-summary: Managed Service Identities
+"""
+
+helps['identity list'] = """
+    type: command
+    short-summary: List Managed Service Identities
+"""
+
+helps['identity list-operations'] = """
+    type: command
+    short-summary: Lists available operations for the Managed Identity provider
+"""
