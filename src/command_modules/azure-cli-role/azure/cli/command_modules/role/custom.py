@@ -1506,6 +1506,14 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
-# for injecting test seams to produce predicatable role assignment id for playback
+# for injecting test seems to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
+
+
+def list_user_assigned_identities(cmd, resource_group_name=None):
+    from azure.cli.command_modules.role._client_factory import _msi_client_factory
+    client = _msi_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
+    return client.user_assigned_identities.list_by_subscription()
