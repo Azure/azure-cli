@@ -127,8 +127,8 @@ class BotTemplateDeployer:
         create_new_storage = False
         if not storageAccountName:
             create_new_storage = True
-            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24])
-            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40])
+            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24].lower())
+            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40].lower())
 
             # The name of Azure Web Sites cannot end with "-", e.g. "testname-.azurewbesites.net" is invalid.
             # The valid name would be "testname.azurewebsites.net"

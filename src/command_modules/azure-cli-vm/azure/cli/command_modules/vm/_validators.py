@@ -1212,6 +1212,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
+
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
