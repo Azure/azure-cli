@@ -283,15 +283,31 @@ class Profile(object):
                 msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
+                authenticated = False
                 try:
                     msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
+                    authenticated = True
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        logger.info('failed to use MSI as user assigned client id')
                     else:
                         raise
+
+                if not authenticated:
+                    try:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        authenticated = True
+                    except HTTPError as ex:
+                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                            logger.info('failed to use MSI as user assigned resource id')
+                        else:
+                            raise
+
+                if not authenticated:
+                    raise CLIError('Invalid MSI Username')
+
         else:
             identity_type = MsiAccountTypes.system_assigned
             msi_creds = MSIAuthentication(resource=resource)
