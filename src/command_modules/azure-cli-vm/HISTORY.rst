@@ -2,8 +2,97 @@
 
 Release History
 ===============
+2.2.15
+++++++
+* vm list-skus: Allow use of `--all` in place of `--all true`
+* Add `vmss run-command [invoke / list / show]`
+* vmss encryption enable: Fixed bug where command fails if it was ran previously.
+
+2.2.14
+++++++
+* Minor fixes
+
+2.2.13
+++++++
+* `vm encryption enable`: now validates --disk encryption keyvault and that key encryption keyvault exists, in line with `vmss encryption enable`. Exposes --force. For more info: see issues #8111 and #8110
+
+2.2.12
+++++++
+* 'vm disk/unmanaged-disk' and 'vmss disk': parameter options are more consistent.
+* `vm/vmss create`: support cross tenant image referencing.
+* `vm diagnostics get-default-config --windows-os`: fix bug in windows os default config.
+* `vmss extension set`: expose `--provision-after-extensions`. It defines what extensions must be provisioned before the extension being set.
+* `sig image-version update`: expose --replica-count for setting the default replication count.
+
+2.2.11
+++++++
+* `disk create`: expose --os-type parameter.
+* `image create --source`: fixed bug where source os disk is mistaken for a VM with the same name, even if the full resource ID is provided.
+
+2.2.10
+++++++
+* `vm identity remove`: does not crash if the specified vm has no assigned managed service identities.
+
+2.2.9
+++++++
+* `vm extension show / wait`: deprecated --expand parameter.
+* `vm restart`: Added `--force` which redeploys unresponsive VMs.
+* `vm/vmss create`: `--authentication-type` now accepts/infers "all" to create a VM with both password and ssh authentication.
+* `image create`: Added `--os-disk-caching` parameter to set os disk caching for an image.
+
+2.2.8
+++++++
+* `vm/vmss create --storage-sku`: can now specify the storage account sku for managed os and data disks separately.
+* `sig image-version`: Version names now consistently specified by  `--image-version -e`. `--image-version-name` deprecated.
+* `vm/vmss create --ephemeral-os-disk`: exposed parameter to create a vm/vmss with a local os disk.
+* `snapshot create/update`: Added support for `--no-wait`.
+* `snapshot`: Added `wait` command.
+* `vm/vmss extension set --extension-instance-name`: can now specify the instance name of an extension.
+
+2.2.7
+++++++
+* `image create`: expose storage-sku argument for setting the image's default storage account type
+* `vm resize`: fix bug where `--no-wait` option causes command to crash
+* `vm encryption show`: table output format shows status
+* `vm secret format`: requires json/jsonc output. Warns user and defaults to json output if an undesired output format is selected.
+* `vm create --image`: improved validation of image argument
+
+2.2.6
+++++++
+* `vm/vmss create`: enforce disk caching mode be `None` for Lv/Lv2 series of machines
+* `vm create`: update supported size list supporting networking accelerator
+* `disk update`: expose strong typed arguments for ultrassd iops and mbps configs
+
+2.2.5
+++++++
+* Fix SDK issue that caused Homebrew installation to fail.
+
+2.2.4
+++++++
+* `az disk grant-access`: fix the empty "accessSas" field
+* `vmss create`: reserve large enough frontend port range to handle overprovisioning
+* `az sig`: fix update commands, support --no-wait on managing image versions
+* `vm list-ip-addresses`: now shows availability zone of public IP addresses.
+* `az vm\vmss disk attach`: default disk's lun to the first available spot
+
+2.2.3
+++++++
+* support shared image gallery through `az sig`.
+
+2.2.2
+++++++
+* `vm/vmss identity show`: exception handling to exit with code 3 upon a missing resource for consistency
+* `vm create`: deprecate `--storage-caching` option.
+
+2.2.1
+++++++
+* vm list-skus: add a few common filters to make the command easier to use 
+
 2.2.0
 ++++++
+* availability set: support list by subscription
+* vm/vmss: support StandardSSD_LRS
+* vm/vmss: support application security group on creating VM scale set
 * BREAKING CHANGE: `vm/vmss create`, `vm/vmss identity assign/remove` will output `user assigned identities`
                    in dictionary format
 * Consuming multi api azure.mgmt.authorization package for azure stack support

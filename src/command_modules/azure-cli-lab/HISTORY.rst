@@ -2,6 +2,25 @@
 
 Release History
 ===============
+0.1.5
++++++
+* Minor fixes
+
+0.1.4
++++++
+* Minor fixes
+
+0.1.3
++++++
+* Minor changes
+
+0.1.2
++++++
+* Minor changes
+
+0.1.1
++++++
+* Update azure-mgmt-devtestlabs dependency to 2.2.0
 
 0.1.0
 +++++

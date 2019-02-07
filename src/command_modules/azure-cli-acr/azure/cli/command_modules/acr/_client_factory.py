@@ -18,7 +18,7 @@ def get_storage_service_client(cli_ctx):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
-def get_acr_service_client(cli_ctx, api_version='2018-02-01-preview'):
+def get_acr_service_client(cli_ctx, api_version=None):
     """Returns the client for managing container registries. """
     from azure.mgmt.containerregistry import ContainerRegistryManagementClient
     return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient, api_version=api_version)
@@ -36,13 +36,9 @@ def cf_acr_webhooks(cli_ctx, *_):
     return get_acr_service_client(cli_ctx).webhooks
 
 
-def cf_acr_builds(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx).builds
+def cf_acr_tasks(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx).tasks
 
 
-def cf_acr_build_tasks(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx).build_tasks
-
-
-def cf_acr_build_steps(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx).build_steps
+def cf_acr_runs(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx).runs

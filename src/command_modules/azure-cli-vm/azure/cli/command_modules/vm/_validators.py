@@ -70,6 +70,7 @@ def validate_keyvault(cmd, namespace):
 
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
+    from azure.cli.core._output import (get_output_format, set_output_format)
 
     keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
     kv = namespace.keyvault
@@ -83,6 +84,15 @@ def process_vm_secret_format(cmd, namespace):
         if kv and not is_valid_resource_id(kv):
             raise keyvault_usage
 
+    warning_msg = "This command does not support the {} output format. Showing JSON format instead."
+    desired_formats = ["json", "jsonc"]
+
+    output_format = get_output_format(cmd.cli_ctx)
+    if output_format not in desired_formats:
+        warning_msg = warning_msg.format(output_format)
+        logger.warning(warning_msg)
+        set_output_format(cmd.cli_ctx, desired_formats[0])
+
 
 def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     """
@@ -91,10 +101,10 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.tools import parse_resource_id
-    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:
@@ -224,7 +234,7 @@ def _parse_image_argument(cmd, namespace):
         return 'urn'
 
     # 3 - unmanaged vhd based images?
-    if urlparse(namespace.image).scheme:
+    if urlparse(namespace.image).scheme and "://" in namespace.image:
         return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
@@ -246,7 +256,8 @@ def _parse_image_argument(cmd, namespace):
                                            'images', 'Microsoft.Compute')
         return 'image_id'
     except CloudError:
-        err = 'Invalid image "{}". Use a custom image name, id, or pick one from {}'
+        err = 'Invalid image "{}". Use a valid image URN, custom image name, custom image id, VHD blob URI, or ' \
+              'pick an image from {}.\nSee vm create -h for more information on specifying an image.'
         raise CLIError(err.format(namespace.image, [x['urnAlias'] for x in images]))
 
 
@@ -277,23 +288,16 @@ def _get_image_plan_info_if_exists(cmd, namespace):
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'
-    elif profile == StorageProfile.SAPirImage:
+    if profile == StorageProfile.SAPirImage:
         return 'create unmanaged OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.SASpecializedOSDisk:
+    if profile == StorageProfile.SASpecializedOSDisk:
         return 'attach to existing unmanaged OS disk'
-    elif profile == StorageProfile.ManagedCustomImage:
+    if profile == StorageProfile.ManagedCustomImage:
         return 'create managed OS disk from custom image'
-    elif profile == StorageProfile.ManagedPirImage:
+    if profile == StorageProfile.ManagedPirImage:
         return 'create managed OS disk from Azure Marketplace image'
-    elif profile == StorageProfile.ManagedSpecializedOSDisk:
+    if profile == StorageProfile.ManagedSpecializedOSDisk:
         return 'attach existing managed OS disk'
-
-
-def _validate_managed_disk_sku(sku):
-
-    allowed_skus = ['Premium_LRS', 'Standard_LRS']
-    if sku and sku.lower() not in [x.lower() for x in allowed_skus]:
-        raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
@@ -303,8 +307,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
         if zone_info:
             sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
             temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
+            # For Stack (compute - 2017-03-30), Resource_sku doesn't implement location_info property
+            if not hasattr(temp, 'location_info'):
+                return
             if not temp or not [x for x in (temp.location_info or []) if x.zones]:
-                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
+                raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
 
@@ -352,7 +359,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.ManagedCustomImage:
         required = ['image']
@@ -360,25 +366,23 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                      'storage_container_name', 'use_unmanaged_disk']
         if for_scale_set:
             forbidden.append('os_disk_name')
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         required = ['os_type', 'attach_os_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'storage_account', 'ephemeral_os_disk',
                      'storage_container_name', 'use_unmanaged_disk', 'storage_sku'] + auth_params
-        _validate_managed_disk_sku(namespace.storage_sku)
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
         required = ['image', 'use_unmanaged_disk']
-        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb', 'ephemeral_os_disk']
 
     elif namespace.storage_profile == StorageProfile.SACustomImage:
         required = ['image', 'os_type', 'use_unmanaged_disk']
-        forbidden = ['attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['attach_os_disk', 'data_disk_sizes_gb', 'ephemeral_os_disk']
 
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account', 'ephemeral_os_disk',
                      'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
 
     else:
@@ -397,22 +401,52 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     # set default storage SKU if not provided and using an image based OS
     if not namespace.storage_sku and namespace.storage_profile in [StorageProfile.SAPirImage, StorageProfile.SACustomImage]:  # pylint: disable=line-too-long
-        namespace.storage_sku = 'Standard_LRS' if for_scale_set else 'Premium_LRS'
+        namespace.storage_sku = ['Standard_LRS'] if for_scale_set else ['Premium_LRS']
 
-    # Now verify that the status of required and forbidden parameters
+    if namespace.ultra_ssd_enabled is None and namespace.storage_sku:
+        for sku in namespace.storage_sku:
+            if 'ultrassd_lrs' in sku.lower():
+                namespace.ultra_ssd_enabled = True
+
+    # Now verify the presence of required and absence of forbidden parameters
     validate_parameter_set(
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
-    image_data_disks = None
+    image_data_disks_num = 0
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
+        namespace.aux_subscriptions = [res['subscription']]
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        image_info = compute_client.images.get(res['resource_group'], res['name'])
+        if res['type'].lower() == 'images':
+            image_info = compute_client.images.get(res['resource_group'], res['name'])
+            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            image_data_disks_num = len(image_info.storage_profile.data_disks or [])
+
+        elif res['type'].lower() == 'galleries':
+            image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
+                                                           gallery_name=res['name'],
+                                                           gallery_image_name=res['child_name_1'])
+            namespace.os_type = image_info.os_type.value
+            gallery_image_version = res.get('child_name_2', '')
+            if gallery_image_version.lower() in ['latest', '']:
+                image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
+                    resource_group_name=res['resource_group'], gallery_name=res['name'],
+                    gallery_image_name=res['child_name_1'])
+                image_version_infos = [x for x in image_version_infos if not x.publishing_profile.exclude_from_latest]
+                if not image_version_infos:
+                    raise CLIError('There is no latest image version exists for "{}"'.format(namespace.image))
+                image_version_info = sorted(image_version_infos, key=lambda x: x.publishing_profile.published_date)[-1]
+            else:
+                image_version_info = compute_client.gallery_image_versions.get(
+                    resource_group_name=res['resource_group'], gallery_name=res['name'],
+                    gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
+            image_data_disks_num = len(image_version_info.storage_profile.data_disk_images or [])
+        else:
+            raise CLIError('usage error: unrecognized image informations "{}"'.format(namespace.image))
+
         # pylint: disable=no-member
-        namespace.os_type = image_info.storage_profile.os_disk.os_type.value
-        image_data_disks = image_info.storage_profile.data_disks
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID
@@ -429,12 +463,15 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
-    namespace.disk_info = normalize_disk_info(image_data_disks=image_data_disks,
+    vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
+    namespace.disk_info = normalize_disk_info(size=vm_size,
+                                              image_data_disks_num=image_data_disks_num,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
                                               os_disk_caching=namespace.os_caching,
-                                              data_disk_cachings=namespace.data_caching)
+                                              data_disk_cachings=namespace.data_caching,
+                                              ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None))
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -456,7 +493,12 @@ def _validate_vm_create_storage_account(cmd, namespace):
         storage_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_STORAGE).storage_accounts
 
         # find storage account in target resource group that matches the VM's location
-        sku_tier = 'Premium' if 'Premium' in namespace.storage_sku else 'Standard'
+        sku_tier = 'Standard'
+        for sku in namespace.storage_sku:
+            if 'Premium' in sku:
+                sku_tier = 'Premium'
+                break
+
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
              if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
@@ -500,6 +542,9 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     location = namespace.location
     nics = getattr(namespace, 'nics', None)
 
+    if vnet and '/' in vnet:
+        raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
+
     if not vnet and not subnet and not nics:
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
@@ -533,8 +578,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     if subnet:
         subnet_is_id = is_valid_resource_id(subnet)
         if (subnet_is_id and vnet) or (not subnet_is_id and not vnet):
-            raise CLIError("incorrect '--subnet' usage: --subnet SUBNET_ID | "
-                           "--subnet SUBNET_NAME --vnet-name VNET_NAME")
+            raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
         subnet_exists = \
             check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks')
@@ -592,7 +636,13 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                       'Standard_L16s_v2', 'Standard_L32s_v2', 'Standard_L64s_v2', 'Standard_L96s_v2', 'SQLGL',
                       'SQLGLCore', 'Standard_D4_v3', 'Standard_D4s_v3', 'Standard_D2_v2', 'Standard_DS2_v2',
                       'Standard_E4_v3', 'Standard_E4s_v3', 'Standard_F2', 'Standard_F2s', 'Standard_F4s_v2',
-                      'Standard_D11_v2', 'Standard_DS11_v2', 'AZAP_Performance_ComputeV17C']
+                      'Standard_D11_v2', 'Standard_DS11_v2', 'AZAP_Performance_ComputeV17C',
+                      'AZAP_Performance_ComputeV17C_DDA', 'Standard_PB6s', 'Standard_PB12s', 'Standard_PB24s',
+                      'Standard_L80s_v2', 'Standard_M8ms', 'Standard_M8-4ms', 'Standard_M8-2ms', 'Standard_M16ms',
+                      'Standard_M16-8ms', 'Standard_M16-4ms', 'Standard_M32ms', 'Standard_M32-8ms',
+                      'Standard_M32-16ms', 'Standard_M32ls', 'Standard_M32ts', 'Standard_M64ls', 'Standard_E64i_v3',
+                      'Standard_E64is_v3', 'Standard_E4-2s_v3', 'Standard_E8-4s_v3', 'Standard_E8-2s_v3',
+                      'Standard_E16-4s_v3', 'Standard_E16-8s_v3', 'Standard_E20s_v3', 'Standard_E20_v3']
         aval_sizes = [x.lower() for x in aval_sizes]
         if size not in aval_sizes:
             return
@@ -778,9 +828,13 @@ def _validate_vm_vmss_create_auth(namespace):
         raise CLIError("Unable to resolve OS type. Specify '--os-type' argument.")
 
     if not namespace.authentication_type:
-        # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
-        namespace.authentication_type = 'password' \
-            if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
+        # if both ssh key and password, infer that authentication_type is all.
+        if namespace.ssh_key_value and namespace.admin_password:
+            namespace.authentication_type = 'all'
+        else:
+            # apply default auth type (password for Windows, ssh for Linux) by examining the OS type
+            namespace.authentication_type = 'password' \
+                if (namespace.os_type.lower() == 'windows' or namespace.admin_password) else 'ssh'
 
     if namespace.os_type.lower() == 'windows' and namespace.authentication_type == 'ssh':
         raise CLIError('SSH not supported for Windows VMs.')
@@ -788,31 +842,44 @@ def _validate_vm_vmss_create_auth(namespace):
     # validate proper arguments supplied based on the authentication type
     if namespace.authentication_type == 'password':
         if namespace.ssh_key_value or namespace.ssh_dest_key_path:
-            raise ValueError(
-                "incorrect usage for authentication-type 'password': "
-                "[--admin-username USERNAME] --admin-password PASSWORD")
+            raise CLIError('SSH key cannot be used with password authentication type.')
 
-        from knack.prompting import prompt_pass, NoTTYException
-        try:
-            if not namespace.admin_password:
-                namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
-        except NoTTYException:
-            raise CLIError('Please specify password in non-interactive mode.')
+        # if password not given, attempt to prompt user for password.
+        if not namespace.admin_password:
+            _prompt_for_password(namespace)
 
         # validate password
-        _validate_admin_password(namespace.admin_password,
-                                 namespace.os_type)
+        _validate_admin_password(namespace.admin_password, namespace.os_type)
 
     elif namespace.authentication_type == 'ssh':
 
         if namespace.admin_password:
-            raise ValueError('Admin password cannot be used with SSH authentication type')
+            raise CLIError('Admin password cannot be used with SSH authentication type.')
 
         validate_ssh_key(namespace)
 
         if not namespace.ssh_dest_key_path:
-            namespace.ssh_dest_key_path = \
-                '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+            namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+
+    elif namespace.authentication_type == 'all':
+        if namespace.os_type.lower() == 'windows':
+            raise CLIError('SSH not supported for Windows VMs. Use password authentication.')
+
+        if not namespace.admin_password:
+            _prompt_for_password(namespace)
+        _validate_admin_password(namespace.admin_password, namespace.os_type)
+
+        validate_ssh_key(namespace)
+        if not namespace.ssh_dest_key_path:
+            namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
+
+
+def _prompt_for_password(namespace):
+    from knack.prompting import prompt_pass, NoTTYException
+    try:
+        namespace.admin_password = prompt_pass('Admin Password: ', confirm=True)
+    except NoTTYException:
+        raise CLIError('Please specify password in non-interactive mode.')
 
 
 def _validate_admin_username(username, os_type):
@@ -1132,6 +1199,7 @@ def process_vmss_create_namespace(cmd, namespace):
         else:
             namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
+    validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
@@ -1143,6 +1211,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
 
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
@@ -1189,20 +1260,27 @@ def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
+    source_from_vm = False
     try:
         # try capturing from VM, a most common scenario
         res_id = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
-        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-        vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+        if res['type'] == 'virtualMachines':
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
+            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            source_from_vm = True
+    except CloudError:
+        pass
+
+    if source_from_vm:
         # pylint: disable=no-member
         namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
-    except CloudError:
+    else:
         namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
         namespace.data_blob_uris = []
         namespace.data_disks = []
@@ -1275,8 +1353,28 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def process_msi_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
+def process_gallery_image_version_namespace(cmd, namespace):
+    TargetRegion = cmd.get_models('TargetRegion')
+    if namespace.target_regions:
+        regions_info = []
+        for t in namespace.target_regions:
+            parts = t.split('=', 1)
+            if len(parts) == 1:
+                regions_info.append(TargetRegion(name=parts[0]))
+            else:
+                try:
+                    replica_count = int(parts[1])
+                except ValueError:
+                    raise CLIError("usage error: {}'s replica count must be an integer".format(parts[0]))
+                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
+        namespace.target_regions = regions_info
 # endregion
+
+
+def process_vm_vmss_stop(cmd, namespace):  # pylint: disable=unused-argument
+    if "vmss" in cmd.name:
+        logger.warning("About to power off the VMSS instances...\nThey will continue to be billed. "
+                       "To deallocate VMSS instances, run: az vmss deallocate.")
+    else:
+        logger.warning("About to power off the specified VM...\nIt will continue to be billed. "
+                       "To deallocate a VM, run: az vm deallocate.")

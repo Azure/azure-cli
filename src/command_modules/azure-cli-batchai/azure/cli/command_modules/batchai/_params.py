@@ -4,10 +4,16 @@
 # --------------------------------------------------------------------------------------------
 from argcomplete import FilesCompleter
 from azure.cli.command_modules.batchai import custom
-from azure.cli.command_modules.vm._actions import get_vm_sizes
 from azure.cli.core.commands.parameters import (
     get_enum_type, get_one_of_subscription_locations, resource_group_name_type, get_location_type)
 from azure.cli.core.decorators import Completer
+
+
+def get_vm_sizes(cli_ctx, location):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    client_factory = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
+    return list(client_factory.virtual_machine_sizes.list(location))
 
 
 @Completer

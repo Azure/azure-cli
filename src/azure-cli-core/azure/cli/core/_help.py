@@ -9,7 +9,6 @@ from knack.help import (HelpExample,
                         HelpFile as KnackHelpFile,
                         CommandHelpFile as KnackCommandHelpFile,
                         CLIHelp,
-                        HelpParameter,
                         ArgumentGroupRegistry as KnackArgumentGroupRegistry)
 from knack.log import get_logger
 
@@ -80,9 +79,9 @@ class AzCliHelp(CLIHelp):
             if help_file.command_source.preview:
                 logger.warning(help_file.command_source.get_preview_warn_msg())
 
-    def print_detailed_help(self, cli_name, help_file):
+    def _print_detailed_help(self, cli_name, help_file):
         AzCliHelp._print_extensions_msg(help_file)
-        self._print_detailed_help(cli_name, help_file)
+        super(AzCliHelp, self)._print_detailed_help(cli_name, help_file)
 
 
 class CliHelpFile(KnackHelpFile):
@@ -101,21 +100,8 @@ class CliHelpFile(KnackHelpFile):
 
     # Needs to override base implementation
     def _load_from_data(self, data):
-        if not data:
-            return
-
-        if isinstance(data, str):
-            self.long_summary = data
-            return
-
-        if 'type' in data:
-            self.type = data['type']
-
-        if 'short-summary' in data:
-            self.short_summary = data['short-summary']
-
-        self.long_summary = data.get('long-summary')
-
+        super(CliHelpFile, self)._load_from_data(data)
+        self.examples = []  # clear examples set by knack
         if 'examples' in data:
             self.examples = []
             for d in data['examples']:
@@ -126,47 +112,8 @@ class CliHelpFile(KnackHelpFile):
 class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
     def __init__(self, help_ctx, delimiters, parser):
-        super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
-        import argparse
-        self.type = 'command'
         self.command_source = getattr(parser, 'command_source', None)
-
-        self.parameters = []
-
-        for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]:  # pylint: disable=protected-access
-            if action.option_strings:
-                self._add_parameter_help(action)
-            else:
-                # use metavar for positional parameters
-                param_kwargs = {
-                    'name_source': [action.metavar or action.dest],
-                    'deprecate_info': getattr(action, 'deprecate_info', None),
-                    'description': action.help,
-                    'choices': action.choices,
-                    'required': False,
-                    'default': None,
-                    'group_name': 'Positional'
-                }
-                self.parameters.append(HelpParameter(**param_kwargs))
-
-        help_param = next(p for p in self.parameters if p.name == '--help -h')
-        help_param.group_name = 'Global Arguments'
-
-    def _load_from_data(self, data):
-        super(CliCommandHelpFile, self)._load_from_data(data)
-
-        if isinstance(data, str) or not self.parameters or not data.get('parameters'):
-            return
-
-        loaded_params = []
-        loaded_param = {}
-        for param in self.parameters:
-            loaded_param = next((n for n in data['parameters'] if n['name'] == param.name), None)
-            if loaded_param:
-                param.update_from_data(loaded_param)
-            loaded_params.append(param)
-
-        self.parameters = loaded_params
+        super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
 
 
 class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-few-public-methods

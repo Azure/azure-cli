@@ -1,0 +1,69 @@
+{
+    "@odata.type": "#Microsoft.Media.StandardEncoderPreset",
+    "filters": {
+        "rotation": "Auto",
+        "overlays": [
+            {
+                "@odata.type": "#Microsoft.Media.VideoOverlay",
+                "opacity": 1.0,
+                "inputLabel": "videooverlay",
+                "audioGainLevel": 1.0
+            }
+        ]
+    },
+    "codecs": [
+        {
+            "@odata.type": "#Microsoft.Media.AacAudio",
+            "profile": "AacLc",
+            "channels": 2,
+            "samplingRate": 48000,
+            "bitrate": 128000
+        },
+        {
+            "@odata.type": "#Microsoft.Media.H264Video",
+            "sceneChangeDetection": false,
+            "complexity": "Balanced",
+            "layers": [
+                {
+                    "@odata.type": "#Microsoft.Media.H264Layer",
+                    "profile": "Auto",
+                    "level": "auto",
+                    "bufferWindow": "PT5S",
+                    "referenceFrames": 3,
+                    "entropyMode": "Cabac",
+                    "bitrate": 2000000,
+                    "maxBitrate": 2000000,
+                    "bFrames": 3,
+                    "slices": 0,
+                    "adaptiveBFrame": true,
+                    "width": "1280",
+                    "height": "720"
+                },
+                {
+                    "@odata.type": "#Microsoft.Media.H264Layer",
+                    "profile": "Auto",
+                    "level": "auto",
+                    "bufferWindow": "PT5S",
+                    "referenceFrames": 3,
+                    "entropyMode": "Cabac",
+                    "bitrate": 1000000,
+                    "maxBitrate": 1000000,
+                    "bFrames": 3,
+                    "slices": 0,
+                    "adaptiveBFrame": true,
+                    "width": "640",
+                    "height": "360"
+                }
+            ],
+            "keyFrameInterval": "PT2S",
+            "stretchMode": "AutoSize"
+        }
+    ],
+    "formats": [
+        {
+            "@odata.type": "#Microsoft.Media.Mp4Format",
+            "outputFiles": [],
+            "filenamePattern": "{Basename}_{Bitrate}{Extension}"
+        }
+    ]
+}

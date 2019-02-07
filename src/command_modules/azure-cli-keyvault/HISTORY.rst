@@ -2,6 +2,49 @@
 
 Release History
 ===============
+2.2.11
+++++++
+* keyvault secret backup: Fixes issue where some users received an 'unexpected_keyword' error when using --id.
+
+2.2.10
+++++++
+* Minor fixes
+
+2.2.9
++++++
+* Minor fixes
+
+2.2.8
++++++
+* Minor fixes
+
+2.2.7
++++++
+* bug fix: do not drop legit exceptions 
+
+2.2.6
++++++
+* Minor changes
+
+2.2.5
++++++
+* Minor changes
+
+2.2.4
++++++
+* Restrict keyvault storage commmands to the latest API profile
+
+2.2.3
++++++
+* Fixed Key Vault key import for RSA keys
+
+2.2.2
++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
+* support KV mgmt multi-api version
+* support KV data plane multi-api version
 
 2.2.1
 +++++
@@ -22,6 +65,9 @@ Release History
 
 2.0.24
 ++++++
+* adding commands for managing storage accounts and sas-definitions
+* adding commands for network-rules
+* adding id parameter to secret, key, and certificate operations
 * Minor fixes
 
 2.0.23

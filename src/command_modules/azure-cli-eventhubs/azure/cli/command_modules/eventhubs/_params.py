@@ -12,7 +12,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 # pylint: disable=line-too-long
 def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.eventhub.models.event_hub_management_client_enums import KeyType, AccessRights, SkuName
+    from azure.mgmt.eventhub.models import KeyType, AccessRights, SkuName
     from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
 
@@ -31,6 +31,8 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
+        c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
 
     with self.argument_context('eventhubs namespace create') as c:
         c.argument('tags', arg_type=tags_type)
@@ -76,7 +78,7 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs eventhub update', 'eventhubs eventhub create']:
         with self.argument_context(scope) as c:
             c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days')
-            c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub, allowed values are from 1 to 32 partitions.')
+            c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Status of Eventhub')
             c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture description is enabled.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')

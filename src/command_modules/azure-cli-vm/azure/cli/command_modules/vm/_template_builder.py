@@ -244,10 +244,10 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
-        image_reference=None, os_disk_name=None, custom_image_os_type=None,
-        storage_sku=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
+        image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
+        os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
-        disk_info=None, boot_diagnostics_storage_uri=None):
+        disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -266,7 +266,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 
         if ssh_key_value and ssh_key_path:
             os_profile['linuxConfiguration'] = {
-                'disablePasswordAuthentication': True,
+                'disablePasswordAuthentication': authentication_type == 'ssh',
                 'ssh': {
                     'publicKeys': [
                         {
@@ -322,7 +322,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': storage_sku}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 'imageReference': {
                     'publisher': os_publisher,
@@ -336,7 +336,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                     'createOption': 'fromImage',
                     'name': os_disk_name,
                     'caching': os_caching,
-                    'managedDisk': {'storageAccountType': storage_sku}
+                    'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
                 },
                 "imageReference": {
                     'id': image_reference
@@ -361,14 +361,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         if data_disks:
             profile['dataDisks'] = data_disks
 
+        if disk_info['os'].get('diffDiskSettings'):
+            profile['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
+
         return profile
 
-    vm_properties = {
-        'hardwareProfile': {'vmSize': size},
-        'networkProfile': {'networkInterfaces': nics}
-    }
-
-    vm_properties['storageProfile'] = _build_storage_profile()
+    vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
+                     'storageProfile': _build_storage_profile()}
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
@@ -386,6 +385,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
                 "storageUri": boot_diagnostics_storage_uri
             }
         }
+
+    if ultra_ssd_enabled is not None:
+        vm_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -520,8 +522,8 @@ def build_application_gateway_resource(_, name, location, tags, backend_pool_nam
 
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, nat_pool_name,
-                                 backend_port, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation, sku):
+                                 backend_port, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
+                                 private_ip_allocation, sku, instance_count, disable_overprovision):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -544,7 +546,9 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                     },
                     'protocol': 'tcp',
                     'frontendPortRangeStart': '50000',
-                    'frontendPortRangeEnd': '50119',
+                    # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+                    'frontendPortRangeEnd': str(max(50119,
+                                                    49999 + instance_count * (1 if disable_overprovision else 2))),
                     'backendPort': backend_port
                 }
             }
@@ -607,11 +611,12 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
-                        storage_sku, os_type, image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
-                        os_publisher=None, os_offer=None, os_sku=None, os_version=None,
+                        os_type, image=None, admin_password=None, ssh_key_value=None,
+                        ssh_key_path=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
-                        secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None):
+                        secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
+                        application_security_groups=None, ultra_ssd_enabled=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -645,9 +650,14 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             {'id': inbound_nat_pool_id}
         ]
 
+    if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
+                                                                 operation_group='virtual_machine_scale_sets'):
+        ip_configuration['properties']['applicationSecurityGroups'] = [{'id': x.id}
+                                                                       for x in application_security_groups]
     # Build storage profile
     storage_properties = {}
     os_caching = disk_info['os'].get('caching')
+
     if storage_profile in [StorageProfile.SACustomImage, StorageProfile.SAPirImage]:
         storage_properties['osDisk'] = {
             'name': os_disk_name,
@@ -668,8 +678,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
             'caching': os_caching,
-            'managedDisk': {'storageAccountType': storage_sku}
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')}
         }
+        if disk_info['os'].get('diffDiskSettings'):
+            storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
@@ -691,11 +703,13 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'computerNamePrefix': naming_prefix,
         'adminUsername': admin_username
     }
-    if authentication_type == 'password' and admin_password:
+
+    if admin_password:
         os_profile['adminPassword'] = "[parameters('adminPassword')]"
-    else:
+
+    if ssh_key_value and ssh_key_path:
         os_profile['linuxConfiguration'] = {
-            'disablePasswordAuthentication': True,
+            'disablePasswordAuthentication': authentication_type == 'ssh',
             'ssh': {
                 'publicKeys': [
                     {
@@ -764,6 +778,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
         vmss_properties['platformFaultDomainCount'] = platform_fault_domain_count
+
+    if ultra_ssd_enabled is not None:
+        vmss_properties['virtualMachineProfile']['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

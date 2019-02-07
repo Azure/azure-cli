@@ -1,29 +1,31 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-10-11T00:11:55Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.47]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_account000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001","name":"cli_test_cosmosdb_account000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001","name":"cli_test_cosmosdb_account000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-10-11T00:11:55Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 07 Feb 2018 07:40:32 GMT']
+      date: ['Thu, 11 Oct 2018 00:11:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
@@ -34,27 +36,29 @@ interactions:
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.47]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_account000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001","name":"cli_test_cosmosdb_account000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001","name":"cli_test_cosmosdb_account000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-10-11T00:11:55Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 07 Feb 2018 07:40:33 GMT']
+      date: ['Thu, 11 Oct 2018 00:11:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"databaseAccountOfferType": "Standard", "locations": [{"failoverPriority":
-      0, "locationName": "westus"}]}, "kind": "GlobalDocumentDB", "location": "westus"}'
+    body: '{"location": "westus", "kind": "GlobalDocumentDB", "properties": {"locations":
+      [{"locationName": "westus", "failoverPriority": 0}], "databaseAccountOfferType":
+      "Standard"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -62,30 +66,31 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['172']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002?api-version=2015-04-08
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002","name":"cli000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Initializing","ipRangeFilter":"","enableAutomaticFailover":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Initializing","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
         US","provisioningState":"Initializing","failoverPriority":0}],"readLocations":[{"id":"cli000002-westus","locationName":"West
         US","provisioningState":"Initializing","failoverPriority":0}],"failoverPolicies":[{"id":"cli000002-westus","locationName":"West
         US","failoverPriority":0}],"capabilities":[]}}'}
     headers:
       cache-control: ['no-store, no-cache']
-      content-length: ['1187']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km?api-version=2015-04-08']
+      content-length: ['1224']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:40:35 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:11:59 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: Ok}
 - request:
@@ -95,23 +100,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Dequeued","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:41:05 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:12:30 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -120,23 +126,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Dequeued","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:41:36 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:13:00 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -145,23 +152,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Dequeued","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:42:07 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:13:30 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -170,23 +178,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Dequeued","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:42:37 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:14:00 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -195,23 +204,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Dequeued","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:43:07 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:14:30 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -220,23 +230,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Dequeued","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:43:38 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:15:01 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -245,24 +256,155 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
+  response:
+    body: {string: '{"status":"Dequeued","error":{}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['32']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      content-type: [application/json]
+      date: ['Thu, 11 Oct 2018 00:15:30 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [cosmosdb create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
+  response:
+    body: {string: '{"status":"Dequeued","error":{}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['32']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      content-type: [application/json]
+      date: ['Thu, 11 Oct 2018 00:16:02 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [cosmosdb create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
+  response:
+    body: {string: '{"status":"Dequeued","error":{}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['32']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      content-type: [application/json]
+      date: ['Thu, 11 Oct 2018 00:16:32 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [cosmosdb create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
+  response:
+    body: {string: '{"status":"Dequeued","error":{}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['32']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      content-type: [application/json]
+      date: ['Thu, 11 Oct 2018 00:17:02 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [cosmosdb create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
+  response:
+    body: {string: '{"status":"Dequeued","error":{}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['32']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      content-type: [application/json]
+      date: ['Thu, 11 Oct 2018 00:17:32 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [cosmosdb create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08
   response:
     body: {string: '{"status":"Succeeded","error":{}}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['33']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/operationResults/2c589aed-d7f6-41b4-8009-65b2845aa391?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/operationResults/589fc4d1-9304-45f6-b021-028050421d2f?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:44:08 GMT']
+      date: ['Thu, 11 Oct 2018 00:18:03 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 200, message: Ok}
 - request:
     body: null
@@ -271,30 +413,30 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002?api-version=2015-04-08
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002","name":"cli000002","location":"West
-        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000002.documents.azure.com:443/","ipRangeFilter":"","enableAutomaticFailover":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
+        US","type":"Microsoft.DocumentDB/databaseAccounts","kind":"GlobalDocumentDB","tags":{},"properties":{"provisioningState":"Succeeded","documentEndpoint":"https://cli000002.documents.azure.com:443/","ipRangeFilter":"","enableAutomaticFailover":false,"enableMultipleWriteLocations":false,"isVirtualNetworkFilterEnabled":false,"virtualNetworkRules":[],"databaseAccountOfferType":"Standard","consistencyPolicy":{"defaultConsistencyLevel":"Session","maxIntervalInSeconds":5,"maxStalenessPrefix":100},"configurationOverrides":{},"writeLocations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0}],"readLocations":[{"id":"cli000002-westus","locationName":"West
         US","documentEndpoint":"https://cli000002-westus.documents.azure.com:443/","provisioningState":"Succeeded","failoverPriority":0}],"failoverPolicies":[{"id":"cli000002-westus","locationName":"West
         US","failoverPriority":0}],"capabilities":[]}}'}
     headers:
       cache-control: ['no-store, no-cache']
-      content-length: ['1477']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km?api-version=2015-04-08']
+      content-length: ['1514']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:44:08 GMT']
+      date: ['Thu, 11 Oct 2018 00:18:03 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 200, message: Ok}
 - request:
     body: null
@@ -304,25 +446,25 @@ interactions:
       CommandName: [cosmosdb list-keys]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/listKeys?api-version=2015-04-08
   response:
-    body: {string: '{"primaryMasterKey":"0O1imT56C10jEX3567TqtR1JZRfKtJzEYxTFEMnd20s1Fkn31A1VFZ4Ppo4ADRB0obJqgsfOHIDBKLxys1F8EA==","secondaryMasterKey":"9G3VGFGnBLcDpLygxIWAbqnFnLU1mg0A8a1LFcjmgftrTFgPWTY55HWGMmsE6MzAfWsw5u6ErBa5LCMfRcn3AA==","primaryReadonlyMasterKey":"AgK92QdiWAkA21yK7YHr06LejEEDthkDSiSjyfTISKnoUBBypJDR28wd9YoFa5al5duWMI7xX6zN7YX29wMbsA==","secondaryReadonlyMasterKey":"CS9W5rkkBTSMCQOk2k2PJ9PMVqwUPS0bhwcPo0TXoguI7Acyd5SITNdfzxsdCAdWbwx9eYGEzH4WvOE7EkwA7g=="}'}
+    body: {string: '{"primaryMasterKey":"VDymGsu2lyNwW0fVpP5E5Ra6ql0z8T1bmPEMbF9D6h7mzXjNTGCFporIE4DP7r6ibIMVVcR0f0ZNv7IZl6TYeQ==","secondaryMasterKey":"vqLRdRyjiavQ5WVgL7YfiBpQYjS6o3o0zPQO7AGQ4ovSdGf11bSzU8q6qKHYQTgb7fRDS5jdhgdf1hma0l7UFg==","primaryReadonlyMasterKey":"Dm32t2gs6dt67eoubTZY0EhO85kMZ9kW7KYGs4ZqbOcd5a5sElpO0k6COLRoNqwCZLjfXO0j9FK2y7wE35gpAw==","secondaryReadonlyMasterKey":"NF0Jh8jPafkHtCbysc81chJYv7jVQ2kJ0OYzTyaDIjFXoUNH9Iaql1dCdodpnuNAgeEpNbeps8dyfHUYI53cGQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['461']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:44:08 GMT']
+      date: ['Thu, 11 Oct 2018 00:18:04 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: Ok}
 - request:
@@ -334,8 +476,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['22']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey?api-version=2015-04-08
@@ -345,12 +487,13 @@ interactions:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:44:11 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/8b3f117c-d779-4488-a0b8-8dfa517282a7?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:18:07 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/505c1dbb-4911-4060-8e6b-7211d937790d?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
@@ -360,49 +503,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb regenerate-key]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/8b3f117c-d779-4488-a0b8-8dfa517282a7?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/505c1dbb-4911-4060-8e6b-7211d937790d?api-version=2015-04-08
   response:
-    body: {string: '{"status":"Dequeued","error":{}}'}
-    headers:
-      cache-control: ['no-store, no-cache']
-      content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/8b3f117c-d779-4488-a0b8-8dfa517282a7?api-version=2015-04-08']
-      content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:44:40 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/8b3f117c-d779-4488-a0b8-8dfa517282a7?api-version=2015-04-08']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cosmosdb regenerate-key]
-      Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/8b3f117c-d779-4488-a0b8-8dfa517282a7?api-version=2015-04-08
-  response:
-    body: {string: '{"primaryMasterKey":"5okFYozaDXFd63aZ91c5RAke8fMCwikojpTKG3nGEa7j4WjRTMFFiYamyvNexIpyOpHv3Luvmm6oo0Tqjhwe8g==","secondaryMasterKey":"9G3VGFGnBLcDpLygxIWAbqnFnLU1mg0A8a1LFcjmgftrTFgPWTY55HWGMmsE6MzAfWsw5u6ErBa5LCMfRcn3AA==","primaryReadonlyMasterKey":"AgK92QdiWAkA21yK7YHr06LejEEDthkDSiSjyfTISKnoUBBypJDR28wd9YoFa5al5duWMI7xX6zN7YX29wMbsA==","secondaryReadonlyMasterKey":"CS9W5rkkBTSMCQOk2k2PJ9PMVqwUPS0bhwcPo0TXoguI7Acyd5SITNdfzxsdCAdWbwx9eYGEzH4WvOE7EkwA7g=="}'}
+    body: {string: '{"primaryMasterKey":"44LQmTLtLcMTb2HIbfAGJk6zG7zQS6JG9cTHkeBOP1W7DGRanvOWLwDbXobGQRQCyh1shr6rbictPLHQKzhtUw==","secondaryMasterKey":"vqLRdRyjiavQ5WVgL7YfiBpQYjS6o3o0zPQO7AGQ4ovSdGf11bSzU8q6qKHYQTgb7fRDS5jdhgdf1hma0l7UFg==","primaryReadonlyMasterKey":"Dm32t2gs6dt67eoubTZY0EhO85kMZ9kW7KYGs4ZqbOcd5a5sElpO0k6COLRoNqwCZLjfXO0j9FK2y7wE35gpAw==","secondaryReadonlyMasterKey":"NF0Jh8jPafkHtCbysc81chJYv7jVQ2kJ0OYzTyaDIjFXoUNH9Iaql1dCdodpnuNAgeEpNbeps8dyfHUYI53cGQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['461']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/8b3f117c-d779-4488-a0b8-8dfa517282a7?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/regenerateKey/operationResults/505c1dbb-4911-4060-8e6b-7211d937790d?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:45:11 GMT']
+      date: ['Thu, 11 Oct 2018 00:18:38 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 200, message: Ok}
 - request:
     body: '{"keyKind": "primaryReadonly"}'
@@ -413,8 +532,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['30']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey?api-version=2015-04-08
@@ -424,12 +543,13 @@ interactions:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:45:14 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/749d49d8-104c-41b6-a5c1-ecb88974068d?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:18:40 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/7bd54baa-55c2-4d54-ac93-64939bdfa1c8?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
@@ -439,49 +559,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb regenerate-key]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/749d49d8-104c-41b6-a5c1-ecb88974068d?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/7bd54baa-55c2-4d54-ac93-64939bdfa1c8?api-version=2015-04-08
   response:
-    body: {string: '{"status":"Dequeued","error":{}}'}
-    headers:
-      cache-control: ['no-store, no-cache']
-      content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/749d49d8-104c-41b6-a5c1-ecb88974068d?api-version=2015-04-08']
-      content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:45:44 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/749d49d8-104c-41b6-a5c1-ecb88974068d?api-version=2015-04-08']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cosmosdb regenerate-key]
-      Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/749d49d8-104c-41b6-a5c1-ecb88974068d?api-version=2015-04-08
-  response:
-    body: {string: '{"primaryMasterKey":"5okFYozaDXFd63aZ91c5RAke8fMCwikojpTKG3nGEa7j4WjRTMFFiYamyvNexIpyOpHv3Luvmm6oo0Tqjhwe8g==","secondaryMasterKey":"9G3VGFGnBLcDpLygxIWAbqnFnLU1mg0A8a1LFcjmgftrTFgPWTY55HWGMmsE6MzAfWsw5u6ErBa5LCMfRcn3AA==","primaryReadonlyMasterKey":"NeDyjkCO4uzYWUXTERPlnmjOnpWtBcKwEPedIW7WNR7wHQEEvrZ9po3nI7gFfshWiNZHs6h7YdfwelfMOVSNQw==","secondaryReadonlyMasterKey":"CS9W5rkkBTSMCQOk2k2PJ9PMVqwUPS0bhwcPo0TXoguI7Acyd5SITNdfzxsdCAdWbwx9eYGEzH4WvOE7EkwA7g=="}'}
+    body: {string: '{"primaryMasterKey":"44LQmTLtLcMTb2HIbfAGJk6zG7zQS6JG9cTHkeBOP1W7DGRanvOWLwDbXobGQRQCyh1shr6rbictPLHQKzhtUw==","secondaryMasterKey":"vqLRdRyjiavQ5WVgL7YfiBpQYjS6o3o0zPQO7AGQ4ovSdGf11bSzU8q6qKHYQTgb7fRDS5jdhgdf1hma0l7UFg==","primaryReadonlyMasterKey":"Up7nYeb50D2Ol85VKZvd27HaMtzbLJdLX99KYcculXQ3bJWFs2LMe0YDx9jzzOykaSpBfr0Slyr21zjVnN9nFw==","secondaryReadonlyMasterKey":"NF0Jh8jPafkHtCbysc81chJYv7jVQ2kJ0OYzTyaDIjFXoUNH9Iaql1dCdodpnuNAgeEpNbeps8dyfHUYI53cGQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['461']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/749d49d8-104c-41b6-a5c1-ecb88974068d?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/regenerateKey/operationResults/7bd54baa-55c2-4d54-ac93-64939bdfa1c8?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:46:14 GMT']
+      date: ['Thu, 11 Oct 2018 00:19:10 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 200, message: Ok}
 - request:
     body: '{"keyKind": "secondary"}'
@@ -492,8 +588,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['24']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey?api-version=2015-04-08
@@ -503,13 +599,14 @@ interactions:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:46:17 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/9db8a153-3d28-4214-9220-454cee96008d?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:19:12 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/65241523-8ad8-4859-aa04-8a8498a25337?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -518,49 +615,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb regenerate-key]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/9db8a153-3d28-4214-9220-454cee96008d?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/65241523-8ad8-4859-aa04-8a8498a25337?api-version=2015-04-08
   response:
-    body: {string: '{"status":"Dequeued","error":{}}'}
-    headers:
-      cache-control: ['no-store, no-cache']
-      content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/9db8a153-3d28-4214-9220-454cee96008d?api-version=2015-04-08']
-      content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:46:47 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/9db8a153-3d28-4214-9220-454cee96008d?api-version=2015-04-08']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cosmosdb regenerate-key]
-      Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/9db8a153-3d28-4214-9220-454cee96008d?api-version=2015-04-08
-  response:
-    body: {string: '{"primaryMasterKey":"5okFYozaDXFd63aZ91c5RAke8fMCwikojpTKG3nGEa7j4WjRTMFFiYamyvNexIpyOpHv3Luvmm6oo0Tqjhwe8g==","secondaryMasterKey":"QgrWn4O2UBPOpE0DFbA5CqUVKiIzojDwi9S9bQI6dCnZB4mYvLj10wcicWBrwjS5uXiY61vvSJjEouI2I9kxUw==","primaryReadonlyMasterKey":"NeDyjkCO4uzYWUXTERPlnmjOnpWtBcKwEPedIW7WNR7wHQEEvrZ9po3nI7gFfshWiNZHs6h7YdfwelfMOVSNQw==","secondaryReadonlyMasterKey":"CS9W5rkkBTSMCQOk2k2PJ9PMVqwUPS0bhwcPo0TXoguI7Acyd5SITNdfzxsdCAdWbwx9eYGEzH4WvOE7EkwA7g=="}'}
+    body: {string: '{"primaryMasterKey":"44LQmTLtLcMTb2HIbfAGJk6zG7zQS6JG9cTHkeBOP1W7DGRanvOWLwDbXobGQRQCyh1shr6rbictPLHQKzhtUw==","secondaryMasterKey":"00a7B07G0ZXYf4z99hO9iTg3pf0Bni0VzTexv7nhrap2KErCKmZNJC6YMH9J31DDqbuL9K2nxWrpJqRcPNfWOA==","primaryReadonlyMasterKey":"Up7nYeb50D2Ol85VKZvd27HaMtzbLJdLX99KYcculXQ3bJWFs2LMe0YDx9jzzOykaSpBfr0Slyr21zjVnN9nFw==","secondaryReadonlyMasterKey":"NF0Jh8jPafkHtCbysc81chJYv7jVQ2kJ0OYzTyaDIjFXoUNH9Iaql1dCdodpnuNAgeEpNbeps8dyfHUYI53cGQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['461']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/9db8a153-3d28-4214-9220-454cee96008d?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/regenerateKey/operationResults/65241523-8ad8-4859-aa04-8a8498a25337?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:47:18 GMT']
+      date: ['Thu, 11 Oct 2018 00:19:43 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 200, message: Ok}
 - request:
     body: '{"keyKind": "secondaryReadonly"}'
@@ -571,8 +644,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['32']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey?api-version=2015-04-08
@@ -582,12 +655,13 @@ interactions:
       cache-control: ['no-store, no-cache']
       content-length: ['32']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:47:19 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/46bcb503-2dd4-47aa-a657-f8e29afdec90?api-version=2015-04-08']
+      date: ['Thu, 11 Oct 2018 00:19:45 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/b19d68e5-0213-43d1-b814-1e54aa177ba4?api-version=2015-04-08']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
@@ -597,49 +671,25 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb regenerate-key]
       Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/46bcb503-2dd4-47aa-a657-f8e29afdec90?api-version=2015-04-08
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/b19d68e5-0213-43d1-b814-1e54aa177ba4?api-version=2015-04-08
   response:
-    body: {string: '{"status":"Dequeued","error":{}}'}
-    headers:
-      cache-control: ['no-store, no-cache']
-      content-length: ['32']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/46bcb503-2dd4-47aa-a657-f8e29afdec90?api-version=2015-04-08']
-      content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:47:50 GMT']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/46bcb503-2dd4-47aa-a657-f8e29afdec90?api-version=2015-04-08']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-gatewayversion: [version=1.20.0.0]
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [cosmosdb regenerate-key]
-      Connection: [keep-alive]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/regenerateKey/operationResults/46bcb503-2dd4-47aa-a657-f8e29afdec90?api-version=2015-04-08
-  response:
-    body: {string: '{"primaryMasterKey":"5okFYozaDXFd63aZ91c5RAke8fMCwikojpTKG3nGEa7j4WjRTMFFiYamyvNexIpyOpHv3Luvmm6oo0Tqjhwe8g==","secondaryMasterKey":"QgrWn4O2UBPOpE0DFbA5CqUVKiIzojDwi9S9bQI6dCnZB4mYvLj10wcicWBrwjS5uXiY61vvSJjEouI2I9kxUw==","primaryReadonlyMasterKey":"NeDyjkCO4uzYWUXTERPlnmjOnpWtBcKwEPedIW7WNR7wHQEEvrZ9po3nI7gFfshWiNZHs6h7YdfwelfMOVSNQw==","secondaryReadonlyMasterKey":"VeGykmTjFOuEWkZVpcBJHdFNeFZ6JQjDFKHTUqZubbwPhAREwLzrygHR5HaM3GOYC9P1uBjX4S08fWCOjBFUGA=="}'}
+    body: {string: '{"primaryMasterKey":"44LQmTLtLcMTb2HIbfAGJk6zG7zQS6JG9cTHkeBOP1W7DGRanvOWLwDbXobGQRQCyh1shr6rbictPLHQKzhtUw==","secondaryMasterKey":"00a7B07G0ZXYf4z99hO9iTg3pf0Bni0VzTexv7nhrap2KErCKmZNJC6YMH9J31DDqbuL9K2nxWrpJqRcPNfWOA==","primaryReadonlyMasterKey":"Up7nYeb50D2Ol85VKZvd27HaMtzbLJdLX99KYcculXQ3bJWFs2LMe0YDx9jzzOykaSpBfr0Slyr21zjVnN9nFw==","secondaryReadonlyMasterKey":"4wt3IGiXb477qsFkSqmz0tjo39MJI7Ynu5TSl3mQ5mUPPefrelL74owtZ8HIRFfvvj3T0by3xitgSYodEIPwtQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['461']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/regenerateKey/operationResults/46bcb503-2dd4-47aa-a657-f8e29afdec90?api-version=2015-04-08']
+      content-location: ['https://management.documents.azure.com:450/subscriptions/5ccfb4a3-650b-4efd-afaf-0813c8197672/resourceGroups/cli_test_cosmosdb_accountf7cche3ips6dzsxhgaf4rnt2vgkmwyivvoxuhbrekv76a6fdcm/providers/Microsoft.DocumentDB/databaseAccounts/clirhiymmup6qwlqznuhmccbpgxfp4gw7ffjn52w/regenerateKey/operationResults/b19d68e5-0213-43d1-b814-1e54aa177ba4?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:48:20 GMT']
+      date: ['Thu, 11 Oct 2018 00:20:15 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
     status: {code: 200, message: Ok}
 - request:
     body: null
@@ -649,26 +699,26 @@ interactions:
       CommandName: [cosmosdb list-keys]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/listKeys?api-version=2015-04-08
   response:
-    body: {string: '{"primaryMasterKey":"5okFYozaDXFd63aZ91c5RAke8fMCwikojpTKG3nGEa7j4WjRTMFFiYamyvNexIpyOpHv3Luvmm6oo0Tqjhwe8g==","secondaryMasterKey":"QgrWn4O2UBPOpE0DFbA5CqUVKiIzojDwi9S9bQI6dCnZB4mYvLj10wcicWBrwjS5uXiY61vvSJjEouI2I9kxUw==","primaryReadonlyMasterKey":"NeDyjkCO4uzYWUXTERPlnmjOnpWtBcKwEPedIW7WNR7wHQEEvrZ9po3nI7gFfshWiNZHs6h7YdfwelfMOVSNQw==","secondaryReadonlyMasterKey":"VeGykmTjFOuEWkZVpcBJHdFNeFZ6JQjDFKHTUqZubbwPhAREwLzrygHR5HaM3GOYC9P1uBjX4S08fWCOjBFUGA=="}'}
+    body: {string: '{"primaryMasterKey":"44LQmTLtLcMTb2HIbfAGJk6zG7zQS6JG9cTHkeBOP1W7DGRanvOWLwDbXobGQRQCyh1shr6rbictPLHQKzhtUw==","secondaryMasterKey":"00a7B07G0ZXYf4z99hO9iTg3pf0Bni0VzTexv7nhrap2KErCKmZNJC6YMH9J31DDqbuL9K2nxWrpJqRcPNfWOA==","primaryReadonlyMasterKey":"Up7nYeb50D2Ol85VKZvd27HaMtzbLJdLX99KYcculXQ3bJWFs2LMe0YDx9jzzOykaSpBfr0Slyr21zjVnN9nFw==","secondaryReadonlyMasterKey":"4wt3IGiXb477qsFkSqmz0tjo39MJI7Ynu5TSl3mQ5mUPPefrelL74owtZ8HIRFfvvj3T0by3xitgSYodEIPwtQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['461']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:48:21 GMT']
+      date: ['Thu, 11 Oct 2018 00:20:17 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: Ok}
 - request:
     body: null
@@ -677,26 +727,27 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [cosmosdb list-read-only-keys]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 azure-mgmt-cosmosdb/0.3.1 Azure-SDK-For-Python AZURECLI/2.0.27]
+      Content-Length: ['0']
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 azure-mgmt-cosmosdb/0.5.0 Azure-SDK-For-Python AZURECLI/2.0.47]
       accept-language: [en-US]
-    method: GET
+    method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_cosmosdb_account000001/providers/Microsoft.DocumentDB/databaseAccounts/cli000002/readonlykeys?api-version=2015-04-08
   response:
-    body: {string: '{"primaryReadonlyMasterKey":"NeDyjkCO4uzYWUXTERPlnmjOnpWtBcKwEPedIW7WNR7wHQEEvrZ9po3nI7gFfshWiNZHs6h7YdfwelfMOVSNQw==","secondaryReadonlyMasterKey":"VeGykmTjFOuEWkZVpcBJHdFNeFZ6JQjDFKHTUqZubbwPhAREwLzrygHR5HaM3GOYC9P1uBjX4S08fWCOjBFUGA=="}'}
+    body: {string: '{"primaryReadonlyMasterKey":"Up7nYeb50D2Ol85VKZvd27HaMtzbLJdLX99KYcculXQ3bJWFs2LMe0YDx9jzzOykaSpBfr0Slyr21zjVnN9nFw==","secondaryReadonlyMasterKey":"4wt3IGiXb477qsFkSqmz0tjo39MJI7Ynu5TSl3mQ5mUPPefrelL74owtZ8HIRFfvvj3T0by3xitgSYodEIPwtQ=="}'}
     headers:
       cache-control: ['no-store, no-cache']
       content-length: ['239']
-      content-location: ['https://management.documents.azure.com:450/subscriptions/36dfc234-9a2d-4f33-be43-db6e321dbc2b/resourceGroups/cli_test_cosmosdb_accountrsxiibvp3j6u6dgrfqy6zapbfbd5xcjvmzwcu2nqhxjbwt4o44/providers/Microsoft.DocumentDB/databaseAccounts/cliikpuw4xtoz7t4tzmv4q2mv7j6lb5ltuol76km/readonlykeys?api-version=2015-04-08']
       content-type: [application/json]
-      date: ['Wed, 07 Feb 2018 07:48:21 GMT']
+      date: ['Thu, 11 Oct 2018 00:20:17 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-gatewayversion: [version=1.20.0.0]
+      x-content-type-options: [nosniff]
+      x-ms-gatewayversion: [version=2.1.0.0]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: Ok}
 - request:
     body: null
@@ -707,9 +758,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.9.1 msrest/0.4.6
-          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.27]
+      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) requests/2.19.1 msrest/0.5.5
+          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.47]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cosmosdb_account000001?api-version=2018-05-01
@@ -718,11 +769,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 07 Feb 2018 07:48:22 GMT']
+      date: ['Thu, 11 Oct 2018 00:20:18 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQ09TTU9TREI6NUZBQ0NPVU5UUlNYSUlCVlAzSjZVNkRHUnxENjA0NDY1MTE5RDA3QTMwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQ09TTU9TREI6NUZBQ0NPVU5URjdDQ0hFM0lQUzZEWlNYSHxGNEFBNjA1NTJGRTk5MkJELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
-. $(cd $(dirname $0); pwd)/artifacts.sh
+wd=`cd $(dirname $0); pwd`
+
+. $wd/artifacts.sh
 
 ls -la $share_folder/build
 
@@ -15,6 +17,9 @@ pip install $ALL_MODULES
 pip install "sphinx==1.6.7" -q
 echo "Installed."
 
-cd doc/sphinx; make xml
+cd doc/sphinx; python ./__main__.py
+
+python $wd/test_help_doc_arguments.py "./_build/xml/ind.xml"
 
 echo "OK."
+

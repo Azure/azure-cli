@@ -6,7 +6,7 @@
 from azure.cli.core.decorators import Completer
 from azure.cli.core.extension import get_extension_names
 
-from azure.cli.command_modules.extension.custom import get_index_extensions
+from azure.cli.core.extension.operations import get_index_extensions
 
 
 @Completer

@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-04-18T18:21:06Z"}}'
+      "date": "2019-01-07T22:08:39Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -9,55 +9,55 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.32]
+      ParameterSetName: [--location --name --tag]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-18T18:21:06Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-01-07T22:08:39Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 18:21:08 GMT']
+      date: ['Mon, 07 Jan 2019 22:08:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1179']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus",
-      "properties": {"supportsHttpsTrafficOnly": false}}'
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Length: ['125']
+      Content-Length: ['74']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-n -g -l --sku]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2018-07-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
       content-type: [text/plain; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 18:21:10 GMT']
+      date: ['Mon, 07 Jan 2019 22:08:41 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/8e685c7e-4f82-4741-ba27-f3d928795241?monitor=true&api-version=2017-10-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/3465ecb3-03f7-483d-af7a-388b908784ae?monitor=true&api-version=2018-07-01']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
           Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -66,19 +66,18 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [storage account create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.32]
-      accept-language: [en-US]
+      ParameterSetName: [-n -g -l --sku]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.53]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/8e685c7e-4f82-4741-ba27-f3d928795241?monitor=true&api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/3465ecb3-03f7-483d-af7a-388b908784ae?monitor=true&api-version=2018-07-01
   response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["479473dc-cfef-474c-ba12-cba2854af0f6"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-04-18T18:21:10.7657454Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-04-18T18:21:10.7657454Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-04-18T18:21:10.6876532Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-01-07T22:08:41.2114358Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-01-07T22:08:41.2114358Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-01-07T22:08:41.1020590Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1231']
+      content-length: ['1169']
       content-type: [application/json]
-      date: ['Wed, 18 Apr 2018 18:21:28 GMT']
+      date: ['Mon, 07 Jan 2019 22:08:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -96,19 +95,19 @@ interactions:
       CommandName: [storage account keys list]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-n -g --query -o]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2018-07-01
   response:
-    body: {string: '{"keys":[{"keyName":"key1","value":"KTss9rFLRl3gHX5plXk7D23LAbzlZ3mkVAUTG8JZCu/n/thve2C4ROvguOXS1YEFjTXrSp3h7TAdPSaruJuRCA==","permissions":"FULL"},{"keyName":"key2","value":"KdtiFyTsaBFawr5fmE4QMm3kHNAGDYtwvo9Lhx7lU7Gt3xmegXi6diQXsHlmKqYZd9o6VqF4yZR19FUTSZyuKQ==","permissions":"FULL"}]}'}
+    body: {string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['288']
       content-type: [application/json]
-      date: ['Wed, 18 Apr 2018 18:21:29 GMT']
+      date: ['Mon, 07 Jan 2019 22:08:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -117,10 +116,10 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1176']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"location": "westus2", "properties": {"storageAccounts": [{"id":
+    body: 'b''b\''{"location": "westus", "properties": {"storageAccounts": [{"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
       "type": "Primary"}]}}\'''''
     headers:
@@ -128,68 +127,66 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [ams account create]
       Connection: [keep-alive]
-      Content-Length: ['302']
+      Content-Length: ['301']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-n -g --storage-account -l]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-03-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\"\
-        ,\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West US 2\",\"\
-        tags\":null,\"properties\":{\r\n    \"mediaServiceId\":\"7e9058cd-5127-4d6b-828b-68fb7fca6d47\"\
-        ,\"storageAccounts\":[\r\n      {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
-        ,\"type\":\"Primary\"\r\n      }\r\n    ]\r\n  }\r\n}"}
+    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West
+        US\",\"properties\":{\r\n    \"mediaServiceId\":\"4c18e5aa-b956-48ff-87e4-acfb5d198fb3\",\"storageAccounts\":[\r\n
+        \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['677']
+      content-length: ['663']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Wed, 18 Apr 2018 18:21:35 GMT']
+      date: ['Mon, 07 Jan 2019 22:09:01 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
+      server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1181']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"properties": {"noEncryption": {"enabledProtocols": {"download": true,
-      "dash": false, "hls": false, "smoothStreaming": false}}}}'
+    body: '{"properties": {"noEncryption": {"enabledProtocols": {"download": false,
+      "dash": false, "hls": true, "smoothStreaming": false}}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams streaming policy create]
+      CommandName: [ams streaming-policy create]
       Connection: [keep-alive]
       Content-Length: ['129']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-a -n -g --no-encryption-protocols]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies/spn000004?api-version=2018-03-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies/spn000004?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"spn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/spn000004\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n    \"created\":\"2018-04-18T18:21:36.7811532Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":null,\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":{\r\n      \"enabledProtocols\":{\r\n        \"download\"\
-        :true,\"dash\":false,\"hls\":false,\"smoothStreaming\":false\r\n      }\r\n\
-        \    }\r\n  }\r\n}"}
+    body: {string: "{\r\n  \"name\":\"spn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/spn000004\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \   \"created\":\"2019-01-07T22:09:03.0288668Z\",\"noEncryption\":{\r\n      \"enabledProtocols\":{\r\n
+        \       \"download\":false,\"dash\":false,\"hls\":true,\"smoothStreaming\":false\r\n
+        \     }\r\n    }\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['634']
+      content-length: ['517']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Wed, 18 Apr 2018 18:21:36 GMT']
+      date: ['Mon, 07 Jan 2019 22:09:03 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1180']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -197,27 +194,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams streaming policy show]
+      CommandName: [ams streaming-policy show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-a -n -g]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies/spn000004?api-version=2018-03-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies/spn000004?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"spn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/spn000004\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n    \"created\":\"2018-04-18T18:21:36.7811532Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":null,\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":{\r\n      \"enabledProtocols\":{\r\n        \"download\"\
-        :true,\"dash\":false,\"hls\":false,\"smoothStreaming\":false\r\n      }\r\n\
-        \    }\r\n  }\r\n}"}
+    body: {string: "{\r\n  \"name\":\"spn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/spn000004\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \   \"created\":\"2019-01-07T22:09:03.0288668Z\",\"noEncryption\":{\r\n      \"enabledProtocols\":{\r\n
+        \       \"download\":false,\"dash\":false,\"hls\":true,\"smoothStreaming\":false\r\n
+        \     }\r\n    }\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['634']
+      content-length: ['517']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Wed, 18 Apr 2018 18:21:38 GMT']
+      date: ['Mon, 07 Jan 2019 22:09:03 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
@@ -233,106 +227,61 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams streaming policy list]
+      CommandName: [ams streaming-policy list]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-a -g]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies?api-version=2018-03-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"Predefined_ClearKey\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_ClearKey\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-03-19T06:06:06Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":{\r\n          \"enabledProtocols\":{\r\n   \
-        \         \"download\":false,\"dash\":true,\"hls\":true,\"smoothStreaming\"\
-        :true\r\n          },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\"\
-        :{\r\n            \"defaultKey\":{\r\n              \"label\":\"clearKeyDefault\"\
-        ,\"policyName\":null\r\n            },\"keyToTrackMappings\":[\r\n       \
-        \       \r\n            ]\r\n          },\"customLicenseAcquisitionUrlTemplate\"\
-        :null\r\n        },\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":null\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_ClearStreamingOnly\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_ClearStreamingOnly\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-03-19T06:06:06Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":null,\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n         \
-        \   \"download\":false,\"dash\":true,\"hls\":true,\"smoothStreaming\":true\r\
-        \n          }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_DownloadAndClearStreaming\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_DownloadAndClearStreaming\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-03-19T06:06:06Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":null,\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n         \
-        \   \"download\":true,\"dash\":true,\"hls\":true,\"smoothStreaming\":true\r\
-        \n          }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_DownloadOnly\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_DownloadOnly\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-03-19T06:06:06Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":null,\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n         \
-        \   \"download\":true,\"dash\":false,\"hls\":false,\"smoothStreaming\":false\r\
-        \n          }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_SecureStreaming\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_SecureStreaming\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-03-19T06:06:06Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":{\r\n          \"enabledProtocols\":{\r\n   \
-        \         \"download\":false,\"dash\":true,\"hls\":true,\"smoothStreaming\"\
-        :true\r\n          },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\"\
-        :{\r\n            \"defaultKey\":{\r\n              \"label\":\"clearKeyDefault\"\
-        ,\"policyName\":null\r\n            },\"keyToTrackMappings\":[\r\n       \
-        \       \r\n            ]\r\n          },\"customLicenseAcquisitionUrlTemplate\"\
-        :null\r\n        },\"commonEncryptionCenc\":{\r\n          \"enabledProtocols\"\
-        :{\r\n            \"download\":false,\"dash\":true,\"hls\":false,\"smoothStreaming\"\
-        :true\r\n          },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\"\
-        :{\r\n            \"defaultKey\":{\r\n              \"label\":\"cencKeyDefault\"\
-        ,\"policyName\":null\r\n            },\"keyToTrackMappings\":[\r\n       \
-        \       \r\n            ]\r\n          },\"drm\":{\r\n            \"playReady\"\
-        :{\r\n              \"customLicenseAcquisitionUrlTemplate\":null,\"playReadyCustomAttributes\"\
-        :null\r\n            },\"widevine\":{\r\n              \"customLicenseAcquisitionUrlTemplate\"\
-        :null\r\n            }\r\n          }\r\n        },\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":null\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_SecureStreamingWithFairPlay\"\
-        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_SecureStreamingWithFairPlay\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-03-19T06:06:06Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":{\r\n          \"enabledProtocols\":{\r\n   \
-        \         \"download\":false,\"dash\":true,\"hls\":true,\"smoothStreaming\"\
-        :true\r\n          },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\"\
-        :{\r\n            \"defaultKey\":{\r\n              \"label\":\"clearKeyDefault\"\
-        ,\"policyName\":null\r\n            },\"keyToTrackMappings\":[\r\n       \
-        \       \r\n            ]\r\n          },\"customLicenseAcquisitionUrlTemplate\"\
-        :null\r\n        },\"commonEncryptionCenc\":{\r\n          \"enabledProtocols\"\
-        :{\r\n            \"download\":false,\"dash\":true,\"hls\":false,\"smoothStreaming\"\
-        :true\r\n          },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\"\
-        :{\r\n            \"defaultKey\":{\r\n              \"label\":\"cencKeyDefault\"\
-        ,\"policyName\":null\r\n            },\"keyToTrackMappings\":[\r\n       \
-        \       \r\n            ]\r\n          },\"drm\":{\r\n            \"playReady\"\
-        :{\r\n              \"customLicenseAcquisitionUrlTemplate\":null,\"playReadyCustomAttributes\"\
-        :null\r\n            },\"widevine\":{\r\n              \"customLicenseAcquisitionUrlTemplate\"\
-        :null\r\n            }\r\n          }\r\n        },\"commonEncryptionCbcs\"\
-        :{\r\n          \"enabledProtocols\":{\r\n            \"download\":false,\"\
-        dash\":false,\"hls\":true,\"smoothStreaming\":false\r\n          },\"clearTracks\"\
-        :[\r\n            \r\n          ],\"contentKeys\":{\r\n            \"defaultKey\"\
-        :{\r\n              \"label\":\"cbcsKeyDefault\",\"policyName\":null\r\n \
-        \           },\"keyToTrackMappings\":[\r\n              \r\n            ]\r\
-        \n          },\"drm\":{\r\n            \"fairPlay\":{\r\n              \"\
-        customLicenseAcquisitionUrlTemplate\":null,\"allowPersistentLicense\":false\r\
-        \n            },\"playReady\":null,\"widevine\":null\r\n          }\r\n  \
-        \      },\"noEncryption\":null\r\n      }\r\n    },{\r\n      \"name\":\"\
-        spn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/spn000004\"\
-        ,\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\"\
-        :{\r\n        \"created\":\"2018-04-18T18:21:36.7811532Z\",\"defaultContentKeyPolicyName\"\
-        :null,\"envelopeEncryption\":null,\"commonEncryptionCenc\":null,\"commonEncryptionCbcs\"\
-        :null,\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n         \
-        \   \"download\":true,\"dash\":false,\"hls\":false,\"smoothStreaming\":false\r\
-        \n          }\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}"}
+    body: {string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"Predefined_ClearKey\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_ClearKey\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2018-03-19T06:06:06Z\",\"envelopeEncryption\":{\r\n
+        \         \"enabledProtocols\":{\r\n            \"download\":false,\"dash\":true,\"hls\":true,\"smoothStreaming\":true\r\n
+        \         },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\":{\r\n
+        \           \"defaultKey\":{\r\n              \"label\":\"clearKeyDefault\"\r\n
+        \           },\"keyToTrackMappings\":[\r\n              \r\n            ]\r\n
+        \         }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_ClearStreamingOnly\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_ClearStreamingOnly\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2018-03-19T06:06:06Z\",\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n
+        \           \"download\":false,\"dash\":true,\"hls\":true,\"smoothStreaming\":true\r\n
+        \         }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_DownloadAndClearStreaming\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_DownloadAndClearStreaming\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2018-03-19T06:06:06Z\",\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n
+        \           \"download\":true,\"dash\":true,\"hls\":true,\"smoothStreaming\":true\r\n
+        \         }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_DownloadOnly\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_DownloadOnly\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2018-03-19T06:06:06Z\",\"noEncryption\":{\r\n          \"enabledProtocols\":{\r\n
+        \           \"download\":true,\"dash\":false,\"hls\":false,\"smoothStreaming\":false\r\n
+        \         }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_MultiDrmCencStreaming\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_MultiDrmCencStreaming\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2018-03-19T06:06:06Z\",\"commonEncryptionCenc\":{\r\n
+        \         \"enabledProtocols\":{\r\n            \"download\":false,\"dash\":true,\"hls\":false,\"smoothStreaming\":true\r\n
+        \         },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\":{\r\n
+        \           \"defaultKey\":{\r\n              \"label\":\"cencKeyDefault\"\r\n
+        \           },\"keyToTrackMappings\":[\r\n              \r\n            ]\r\n
+        \         },\"drm\":{\r\n            \"playReady\":{\r\n              \r\n
+        \           },\"widevine\":{\r\n              \r\n            }\r\n          }\r\n
+        \       }\r\n      }\r\n    },{\r\n      \"name\":\"Predefined_MultiDrmStreaming\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/Predefined_MultiDrmStreaming\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2018-03-19T06:06:06Z\",\"commonEncryptionCenc\":{\r\n
+        \         \"enabledProtocols\":{\r\n            \"download\":false,\"dash\":true,\"hls\":false,\"smoothStreaming\":true\r\n
+        \         },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\":{\r\n
+        \           \"defaultKey\":{\r\n              \"label\":\"cencKeyDefault\"\r\n
+        \           },\"keyToTrackMappings\":[\r\n              \r\n            ]\r\n
+        \         },\"drm\":{\r\n            \"playReady\":{\r\n              \r\n
+        \           },\"widevine\":{\r\n              \r\n            }\r\n          }\r\n
+        \       },\"commonEncryptionCbcs\":{\r\n          \"enabledProtocols\":{\r\n
+        \           \"download\":false,\"dash\":false,\"hls\":true,\"smoothStreaming\":false\r\n
+        \         },\"clearTracks\":[\r\n            \r\n          ],\"contentKeys\":{\r\n
+        \           \"defaultKey\":{\r\n              \"label\":\"cbcsKeyDefault\"\r\n
+        \           },\"keyToTrackMappings\":[\r\n              \r\n            ]\r\n
+        \         },\"drm\":{\r\n            \"fairPlay\":{\r\n              \"allowPersistentLicense\":false\r\n
+        \           }\r\n          }\r\n        }\r\n      }\r\n    },{\r\n      \"name\":\"spn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingPolicies/spn000004\",\"type\":\"Microsoft.Media/mediaservices/streamingPolicies\",\"properties\":{\r\n
+        \       \"created\":\"2019-01-07T22:09:03.0288668Z\",\"noEncryption\":{\r\n
+        \         \"enabledProtocols\":{\r\n            \"download\":false,\"dash\":false,\"hls\":true,\"smoothStreaming\":false\r\n
+        \         }\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['7408']
+      content-length: ['5406']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Wed, 18 Apr 2018 18:21:38 GMT']
+      date: ['Mon, 07 Jan 2019 22:09:03 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
@@ -348,27 +297,27 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams streaming policy delete]
+      CommandName: [ams streaming-policy delete]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 azure-mgmt-media/0.3.0 Azure-SDK-For-Python AZURECLI/2.0.32]
+      ParameterSetName: [-n -a -g]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies/spn000004?api-version=2018-03-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingPolicies/spn000004?api-version=2018-07-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 18 Apr 2018 18:21:39 GMT']
+      date: ['Mon, 07 Jan 2019 22:09:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1176']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -380,9 +329,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.26 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.32]
+      ParameterSetName: [--name --yes --no-wait]
+      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
+          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.53]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
@@ -391,12 +340,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 18 Apr 2018 18:21:42 GMT']
+      date: ['Mon, 07 Jan 2019 22:09:05 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdSSERFT0xHS0JaRUtaR08yWDRJRUdXUUFHSEhVS0s3SUdJMnwwM0MwRTg5ODA1RjIwRjk0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDNFlPV1pDSlFEWDJGTkhUQTU2V0tKM1JGM0REU1U3SDU2TnxCQTlENkE5NzQ1REMwMkQzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
     status: {code: 202, message: Accepted}
 version: 1

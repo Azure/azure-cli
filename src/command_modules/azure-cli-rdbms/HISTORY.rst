@@ -2,6 +2,33 @@
 
 Release History
 ===============
+0.3.7
++++++
+* Improve help message and command parameters
+
+0.3.6
++++++
+* Minor fixes
+
+0.3.5
++++++
+* Add mariadb vnet commands
+
+0.3.4
++++++
+* Add mysql replica commands
+
+0.3.3
++++++
+* Minor fixes
+
+0.3.2
++++++
+* Add support for MariaDB service
+
+0.3.1
++++++
+* Minor fixes
 
 0.3.0
 +++++

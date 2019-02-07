@@ -19,11 +19,11 @@ import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
+
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
-
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
 
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -33,12 +33,14 @@ from azure.mgmt.resource.links.models import ResourceLinkProperties
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
     _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
+
+from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
 
@@ -56,6 +58,15 @@ def _process_parameters(template_param_defs, parameter_lists):
         if os.path.isfile(value):
             parsed = get_file_json(value, throw_on_empty=False)
             return parsed.get('parameters', parsed)
+        return None
+
+    def _try_load_uri(value):
+        if "://" in value:
+            try:
+                parsed = shell_safe_json_parse(_urlretrieve(value).decode('utf-8'))
+                return parsed.get('parameters', parsed)
+            except Exception:  # pylint: disable=broad-except
+                pass
         return None
 
     def _try_parse_key_value_object(template_param_defs, parameters, value):
@@ -93,7 +104,7 @@ def _process_parameters(template_param_defs, parameter_lists):
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item) or _try_parse_json_object(item)
+            param_obj = _try_load_file_object(item) or _try_parse_json_object(item) or _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
@@ -221,7 +232,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
                               no_wait=False):
@@ -262,7 +273,7 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def _deploy_arm_template_subscription_scope(cli_ctx,  # pylint: disable=too-many-arguments
+def _deploy_arm_template_subscription_scope(cli_ctx,
                                             template_file=None, template_uri=None,
                                             deployment_name=None, deployment_location=None,
                                             parameters=None, mode=None, validate_only=False,
@@ -351,17 +362,21 @@ def _get_auth_provider_latest_api_version(cli_ctx):
 
 def _update_provider(cli_ctx, namespace, registering, wait):
     import time
+    target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
     if registering:
-        rcf.providers.register(namespace)
+        r = rcf.providers.register(namespace)
     else:
-        rcf.providers.unregister(namespace)
+        r = rcf.providers.unregister(namespace)
+
+    if r.registration_state == target_state:
+        return
 
     if wait:
         while True:
             time.sleep(10)
             rp_info = rcf.providers.get(namespace)
-            if rp_info.registration_state == ('Registered' if registering else 'Unregistered'):
+            if rp_info.registration_state == target_state:
                 break
     else:
         action = 'Registering' if registering else 'Unregistering'
@@ -389,17 +404,36 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
             policy_def = _get_custom_or_builtin_policy(cmd, client, policy)
             policy_id = policy_def.id
         else:
-            policy_set_def = _get_custom_or_builtin_policy(cmd, client, policy_set_definition, True)
+            policy_set_def = _get_custom_or_builtin_policy(cmd, client, policy_set_definition, None, None, True)
             policy_id = policy_set_def.id
     return policy_id
 
 
-def _get_custom_or_builtin_policy(cmd, client, name, for_policy_set=False):
+def _parse_management_group_reference(name):
+    if name.lower().startswith('/providers/microsoft.management/managementgroups'):
+        parts = name.split('/')
+        if len(parts) >= 9:
+            return parts[4], parts[8]
+    return None, name
+
+
+def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
     from msrest.exceptions import HttpOperationError
     from msrestazure.azure_exceptions import CloudError
     ErrorResponseException = cmd.get_models('ErrorResponseException')
     policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
+
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            client.config.subscription_id = subscription_id
     try:
+        if cmd.supported_api_version(min_api='2018-03-01'):
+            if not management_group:
+                management_group, name = _parse_management_group_reference(name)
+            if management_group:
+                return policy_operations.get_at_management_group(name, management_group)
         return policy_operations.get(name)
     except (CloudError, HttpOperationError, ErrorResponseException) as ex:
         status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
@@ -579,7 +613,7 @@ def create_application(cmd, resource_group_name,
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
         else:
-            application.plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
+            application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
 
     applicationParameters = None
 
@@ -937,7 +971,10 @@ def list_provider_operations(cmd):
 
 
 def show_provider_operations(cmd, resource_provider_namespace):
+    version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
+    if version == '2015-07-01':
+        return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
     return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 
@@ -956,9 +993,9 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
         else:
             raise CLIError('Invalid id "{}", as it has no group or subscription field'.format(i))
 
-    if len(set([r['subscription'] for r in resources])) > 1:
+    if len({r['subscription'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same subscription')
-    if len(set([r['resource_group'] for r in resources])) > 1:
+    if len({r['resource_group'] for r in resources}) > 1:
         raise CLIError('All resources should be under the same group')
 
     rcf = _resource_client_factory(cmd.cli_ctx)
@@ -984,7 +1021,8 @@ def register_feature(client, resource_provider_namespace, feature_name):
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
-                             not_scopes=None):
+                             not_scopes=None, location=None, assign_identity=None,
+                             identity_scope=None, identity_role='Contributor'):
     """Creates a policy assignment
     :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
@@ -1023,9 +1061,32 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             policySku = policySku if sku.lower() == 'free' else PolicySku(name='A1', tier='Standard')
         assignment.sku = policySku
 
-    return policy_client.policy_assignments.create(scope,
-                                                   name or uuid.uuid4(),
-                                                   assignment)
+    if cmd.supported_api_version(min_api='2018-05-01'):
+        if location:
+            assignment.location = location
+        identity = None
+        if assign_identity is not None:
+            identity = _build_identities_info(cmd, assign_identity)
+        assignment.identity = identity
+
+    createdAssignment = policy_client.policy_assignments.create(scope, name or uuid.uuid4(), assignment)
+
+    # Create the identity's role assignment if requested
+    if assign_identity is not None and identity_scope:
+        from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
+        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
+
+    return createdAssignment
+
+
+def _build_identities_info(cmd, identities):
+    identities = identities or []
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    identity_type = ResourceIdentityType.none
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_type = ResourceIdentityType.system_assigned
+    ResourceIdentity = cmd.get_models('Identity')
+    return ResourceIdentity(type=identity_type)
 
 
 def delete_policy_assignment(cmd, name, resource_group_name=None, scope=None):
@@ -1079,8 +1140,47 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     return result
 
 
+def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+
+    def getter():
+        return policy_client.policy_assignments.get(scope, name)
+
+    def setter(policyAssignment):
+        policyAssignment.identity = _build_identities_info(cmd, [MSI_LOCAL_ID])
+        return policy_client.policy_assignments.create(scope, name, policyAssignment)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
+    updatedAssignment = _assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role, identity_scope)
+    return updatedAssignment.identity
+
+
+def show_identity(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+    return policy_client.policy_assignments.get(scope, name).identity
+
+
+def remove_identity(cmd, name, scope=None, resource_group_name=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    scope = _build_policy_scope(policy_client.config.subscription_id, resource_group_name, scope)
+    policyAssignment = policy_client.policy_assignments.get(scope, name)
+
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    ResourceIdentity = cmd.get_models('Identity')
+    policyAssignment.identity = ResourceIdentity(type=ResourceIdentityType.none)
+    policyAssignment = policy_client.policy_assignments.create(scope, name, policyAssignment)
+    return policyAssignment.identity
+
+
+def enforce_mutually_exclusive(subscription, management_group):
+    if subscription and management_group:
+        raise IncorrectUsageError('cannot provide both --subscription and --management-group')
+
+
 def create_policy_definition(cmd, name, rules=None, params=None, display_name=None, description=None, mode=None,
-                             metadata=None):
+                             metadata=None, subscription=None, management_group=None):
     rules = _load_file_string_or_uri(rules, 'rules')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -1092,10 +1192,19 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
         parameters.mode = mode
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
         parameters.metadata = metadata
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_definitions.create_or_update_at_management_group(name, parameters, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
+
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
-def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None):
+def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None,
+                                subscription=None, management_group=None):
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -1103,49 +1212,112 @@ def create_policy_setdefinition(cmd, name, definitions, params=None, display_nam
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(policy_definitions=definitions, parameters=params, description=description,
                                      display_name=display_name)
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_set_definitions.create_or_update_at_management_group(name, parameters, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
+
     return policy_client.policy_set_definitions.create_or_update(name, parameters)
 
 
-def get_policy_definition(cmd, policy_definition_name):
+def get_policy_definition(cmd, policy_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    return _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name)
+    return _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
 
 
-def get_policy_setdefinition(cmd, policy_set_definition_name):
+def get_policy_setdefinition(cmd, policy_set_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, True)
+    return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
 
 
-def update_policy_definition(instance, cmd, policy_definition_name, rules=None, params=None,
-                             display_name=None, description=None, metadata=None):
-    if rules:
-        if os.path.exists(rules):
-            rules = get_file_json(rules)
-        else:
-            rules = shell_safe_json_parse(rules)
-        instance.policy_rule = rules
+def list_policy_definition(cmd, subscription=None, management_group=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_definitions.list_by_management_group(management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
 
-    if params:
-        if os.path.exists(params):
-            params = get_file_json(params)
-        else:
-            params = shell_safe_json_parse(params)
-        instance.parameters = params
+    return policy_client.policy_definitions.list()
 
-    if display_name is not None:
-        instance.display_name = display_name
 
-    if description is not None:
-        instance.description = description
+def list_policy_setdefinition(cmd, subscription=None, management_group=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_set_definitions.list_by_management_group(management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
 
-    if metadata:
-        instance.metadata = metadata
+    return policy_client.policy_set_definitions.list()
 
-    return instance
+
+def delete_policy_definition(cmd, policy_definition_name, subscription=None, management_group=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_definitions.delete_at_management_group(policy_definition_name, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
+
+    return policy_client.policy_definitions.delete(policy_definition_name)
+
+
+def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription=None, management_group=None):
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_set_definitions.delete_at_management_group(policy_set_definition_name, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
+
+    return policy_client.policy_set_definitions.delete(policy_set_definition_name)
+
+
+def update_policy_definition(cmd, policy_definition_name, rules=None, params=None,
+                             display_name=None, description=None, metadata=None, mode=None,
+                             subscription=None, management_group=None):
+
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
+    # pylint: disable=line-too-long,no-member
+
+    PolicyDefinition = cmd.get_models('PolicyDefinition')
+    parameters = PolicyDefinition(
+        policy_rule=rules if rules is not None else definition.policy_rule,
+        parameters=params if params is not None else definition.parameters,
+        display_name=display_name if display_name is not None else definition.display_name,
+        description=description if description is not None else definition.description,
+        metadata=metadata if metadata is not None else definition.metadata)
+
+    if cmd.supported_api_version(min_api='2016-12-01'):
+        parameters.mode = mode
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_definitions.create_or_update_at_management_group(policy_definition_name, parameters, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
+
+    return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
 
 
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,
-                                display_name=None, description=None):
+                                display_name=None, description=None,
+                                subscription=None, management_group=None):
+
     if definitions:
         if os.path.exists(definitions):
             definitions = get_file_json(definitions)
@@ -1159,7 +1331,7 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
             params = shell_safe_json_parse(params)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, True)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(
@@ -1167,6 +1339,14 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
         description=description if description is not None else definition.description,
         display_name=display_name if display_name is not None else definition.display_name,
         parameters=params if params is not None else definition.parameters)
+    if cmd.supported_api_version(min_api='2018-03-01'):
+        enforce_mutually_exclusive(subscription, management_group)
+        if management_group:
+            return policy_client.policy_set_definitions.create_or_update_at_management_group(policy_set_definition_name, parameters, management_group)
+        if subscription:
+            subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
+            policy_client.config.subscription_id = subscription_id
+
     return policy_client.policy_set_definitions.create_or_update(policy_set_definition_name, parameters)
 
 
@@ -1190,7 +1370,7 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
     profile = Profile(cli_ctx=cli_ctx)
     subscriptions_list = profile.load_cached_subscriptions()
     for sub in subscriptions_list:
-        if sub['id'] == subscription or sub['name'] == subscription:
+        if subscription in (sub['id'], sub['name']):
             return sub['id']
     raise CLIError("Subscription not found in the current context.")
 
@@ -1549,10 +1729,9 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
         lock_list = list_locks(resource_group, resource_provider_namespace, parent_resource_path,
                                resource_type, resource_name)
         return next((lock for lock in lock_list if lock.name == lock_name), None)
-    else:
-        params = lock_client.management_locks.get_at_resource_level(
-            resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
-            resource_name, lock_name)
+    params = lock_client.management_locks.get_at_resource_level(
+        resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
+        resource_name, lock_name)
     _update_lock_parameters(params, level, notes)
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
@@ -1640,7 +1819,11 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         self.api_version = api_version
 
     def create_resource(self, properties, location, is_full_object):
-        res = json.loads(properties)
+        try:
+            res = json.loads(properties)
+        except json.decoder.JSONDecodeError as ex:
+            raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
+
         if not is_full_object:
             if not location:
                 if self.resource_id:
@@ -1807,10 +1990,9 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         if len(rt) == 1 and rt[0].api_versions:
             npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
             return npv[0] if npv else rt[0].api_versions[0]
-        else:
-            raise IncorrectUsageError(
-                'API version is required and could not be resolved for resource {}'
-                .format(resource_type))
+        raise IncorrectUsageError(
+            'API version is required and could not be resolved for resource {}'
+            .format(resource_type))
 
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):

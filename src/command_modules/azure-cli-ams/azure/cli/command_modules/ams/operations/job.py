@@ -7,24 +7,36 @@ from knack.util import CLIError
 
 
 def create_job(client, resource_group_name, account_name, transform_name, job_name,
-               output_asset_names, input_asset_name=None,
+               output_assets, input_asset_name=None,
+               label=None, correlation_data=None,
                description=None, priority=None, files=None, base_uri=None):
-    from azure.mgmt.media.models import (Job, JobInputAsset, JobInputHttp, JobOutputAsset)
+    from azure.mgmt.media.models import (Job, JobInputAsset, JobInputHttp)
 
     if input_asset_name:
-        job_input = JobInputAsset(asset_name=input_asset_name, files=files)
+        job_input = JobInputAsset(asset_name=input_asset_name, files=files, label=label)
     else:
         if base_uri is None and files is None:
             raise CLIError("Missing required arguments.\nEither --input-asset-name, "
                            "or both --files or --base-uri must be specified.")
         else:
-            job_input = JobInputHttp(files=files, base_uri=base_uri)
+            job_input = JobInputHttp(files=files, base_uri=base_uri, label=label)
 
-    job_outputs = list(map(lambda x: JobOutputAsset(asset_name=x), output_asset_names))
+    job_outputs = output_assets
 
-    job = Job(input=job_input, outputs=job_outputs, description=description, priority=priority)
+    job = Job(input=job_input, outputs=job_outputs, correlation_data=correlation_data,
+              description=description, priority=priority)
 
     return client.create(resource_group_name, account_name, transform_name, job_name, job)
+
+
+def update_job(instance, description=None, priority=None):
+    if description is not None:
+        instance.description = description
+
+    if priority is not None:
+        instance.priority = priority
+
+    return instance
 
 
 def cancel_job(client, resource_group_name, account_name,

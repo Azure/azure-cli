@@ -17,11 +17,26 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
-def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
+def create_share_url(client, share_name, unc=None, protocol=None):
+    url = client.make_file_url(share_name, None, '', protocol=protocol).rstrip('/')
+    if unc:
+        url = ':'.join(url.split(':')[1:])
+    return url
+
+
+def create_file_url(client, share_name, directory_name, file_name, protocol=None):
+    return client.make_file_url(
+        share_name, directory_name, file_name, protocol=protocol, sas_token=client.sas_token)
+
+
+def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None,
+                     num_results=None, marker=None):
     if cmd.supported_api_version(min_api='2017-04-17'):
-        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
+        generator = client.list_directories_and_files(
+            share_name, directory_name, timeout=timeout, num_results=num_results, marker=marker, snapshot=snapshot)
     else:
-        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout)
+        generator = client.list_directories_and_files(
+            share_name, directory_name, timeout=timeout, num_results=num_results, marker=marker)
 
     if exclude_dir:
         t_file_properties = cmd.get_models('file.models#FileProperties')
@@ -221,7 +236,8 @@ def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, t
             logger.warning('  - %s/%s', f[0], f[1])
         return []
 
-    return [delete_action(f) for f in source_files]
+    for f in source_files:
+        delete_action(f)
 
 
 def _create_file_and_directory_from_blob(file_service, blob_service, share, container, sas, blob_name,

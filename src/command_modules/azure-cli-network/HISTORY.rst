@@ -3,6 +3,98 @@
 Release History
 ===============
 
+* `dns zone export`: Ensure exported CNAMEs are FQDNs.
+* `nic ip-config address-pool add/remove`: Add `--gateway-name` to support application gateway backend address pools.
+* `network watcher flow-log configure`: Add arguments `--traffic-analytics`, `--workspace` to support traffic analytics through a Log Analytics workspace.
+* `lb inbound-nat-pool create/update`: Add arguments `--idle-timeout`, `--floating-ip`.
+
+2.3.1
+++++++
+* `express-route update`: Fix issue where `--bandwidth` argument was ignored.
+* `ddos-protection update`: Fix issue with set comprehension causing stack trace.
+
+2.3.0
++++++
+* `traffic-manager profile create/update`: Add support for `--custom-headers` and `--status-code-ranges`. Add support for new routing types: Subnet and Multivalue.
+* `traffic-manager endpoint create/update`: Add support for `--custom-headers` and `--subnets`.
+* `ddos-protection update`: Fix issue where supplying `--vnets ""` to remove vnets caused a strack trace.
+
+2.2.11
+++++++
+* `watcher flow-log configure`: Add support for `--format` and `--log-version`.
+* `dns zone update`: Finished issue where using "" to clear resolution and registration VNets didn't work.
+
+2.2.10
+++++++
+* `application-gateway waf-config set`: Added `--exclusion` argument to support WAF exclusions.
+
+2.2.9
++++++
+* `application-gateway`: Added `root-cert` subcommands to handle trusted root certifcates.
+* `application-gateway create/update`:
+   Added `--min-capacity` for configuring autoscale on v2 app gateways.
+   Added `--custom-error-pages` for configuring custom error pages.
+* `application-gateway create`: Added `--zones` for availability zone support.
+* `application-gateway waf-config set`: Added arguments `--file-upload-limit`, `--max-request-body-size` and `--request-body-check`.
+
+2.2.8
++++++
+* Deprecated `network interface-endpoint` command names in favor of `network private-endpoint`.
+* `express-route peering connection create`: Fix issue where `--peer-circuit` would not accept an ID.
+* `public-ip create`: Fix issue where `--ip-tags` did not work correctly.
+
+2.2.7
++++++
+* `nic create` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+* `nic ip-config create/update` - Add `--app-gateway-address-pools` and `--gateway-name` arguments to support adding application
+  gateway backend address pools to a NIC.
+
+
+2.2.6
++++++
+* Fix `network dns zone create`. Command succeeds even if the user has configured a default location. See #6052.
+* `network vnet peering create`: Deprecated `--remote-vnet-id`. Added --remote-vnet which accepts a name or ID.
+* `network vnet create`: Added support for multiple subnet prefixes with `--subnet-prefixes`.
+* `network vnet subnet create/update`: Added support for multiple subnet prefixes with `--address-prefixes`.
+* `network application-gateway create`: Fixed logic that prevented creating gateways with WAF_v2 or Standard_v2 SKU.
+* `network vnet subnet update`: Added `--service-endpoint-policy` convenience argument.
+
+2.2.5
++++++
+* Add `network public-ip prefix` commands to support public IP prefixes features.
+* Add `network service-endpoint` commands to support service endpoint policy features.
+* Add `network lb outbound-rule` commands to support creation of Standard Load Balancer outbound rules.
+* Add `--public-ip-prefix` to `network lb frontend-ip create/update` to support frontend IP configurations using public IP prefixes.
+* Add `--enable-tcp-reset` to `network lb rule/inbound-nat-rule/inbound-nat-pool create/update`.
+* Add `--disable-outbound-snat` to `network lb rule create/update`.
+* Allow `network watcher flow-log show/configure` to be used with classic NSGs.
+* Add `network watcher run-configuration-diagnostic` command.
+* Fix `network watcher test-connectivity` command and add `--method`, `--valid-status-codes` and `--headers` properties.
+* `network express-route create/update`: Add `--allow-global-reach` flag.
+* `network vnet subnet create/update`: Add support for `--delegation`.
+* Added `network vnet subnet list-available-delegations` command.
+* `network traffic-manager profile create/update`: Added support for `--interval`, `--timeout` and `--max-failures` for Monitor configuration.
+  Deprecated options `--monitor-path`, `--monitor-port` and `--monitor-protocol` in favor of `--path`, `--port`, `--protocol`.
+* `network lb frontend-ip create/update`: Fixed the logic for setting private IP allocation method. If a private IP address is provided, the
+  allocation will be static. If no private IP address is provided, or empty string is provided for private IP address, allocation is dynamic.
+* `dns record-set * create/update`: Add support for `--target-resource`.
+* Add `network interface-endpoint` commands to query interface endpoint objects.
+* Add `network profile show/list/delete` for partial management of network profiles.
+* Add `network express-route peering connection` commands to manage peering connections between ExpressRoutes.
+
+2.2.4
++++++
+* `network application-gateway ssl-policy predefined show`: exception handling to exit with code 3 upon a missing resource for consistency
+
+2.2.3
++++++
+* Minor fixes
+
+2.2.2
++++++
+* `dns`: Added dns support to 2017-03-09-profile for Azure Stack 
+
 2.2.1
 ++++++
 * Minor fixes

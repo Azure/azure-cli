@@ -21,7 +21,10 @@ from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_application, _try_x509_pem,
                                                    delete_service_principal_credential,
                                                    list_service_principal_credentials,
-                                                   update_application, _get_object_stubs)
+                                                   update_application,
+                                                   _get_object_stubs,
+                                                   list_service_principal_owners,
+                                                   list_application_owners)
 
 from knack.util import CLIError
 
@@ -133,6 +136,7 @@ class TestRoleMocked(unittest.TestCase):
         # assert
         self.assertEqual(result['password'], test_pwd)
         self.assertEqual(result['name'], 'http://' + name)
+        self.assertEqual(result['displayName'], name)
         self.assertEqual(result['appId'], test_app_id)
 
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
@@ -319,113 +323,62 @@ class TestRoleMocked(unittest.TestCase):
         self.assertEqual(instance.available_to_other_tenants, True)
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
-    def test_list_sp_pwd_creds(self, graph_client_mock):
-        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
-        test_app_object_id = '11111111-2222-3333-4444-666666666666'
-        graph_client_mock.return_value = graph_client = mock.MagicMock()
+    def test_list_sp_owner(self, graph_client_mock):
 
-        sp, sp_cred, app, app_cred = mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), mock.MagicMock()
-        sp.object_id, app.object_id = test_sp_object_id, test_app_object_id
-        sp_cred.key_id, app_cred.key_id = 'nice sp key', 'nice app key'
-        sp.service_principal_names = ['good-name']
+        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
+        test_sp_app_id = '11111111-2222-3333-4444-555555555555'
+        test_user_object_id = '11111111-2222-3333-4444-555555555555'
+
+        graph_client = mock.MagicMock()
+        graph_client_mock.return_value = graph_client
+
+        sp = mock.MagicMock()
+        sp.object_id, sp.app_id = test_sp_object_id, test_sp_app_id
+
+        user = mock.MagicMock()
+        user.object_id = test_user_object_id
 
         graph_client.service_principals.list.return_value = [sp]
-        graph_client.service_principals.get.return_value = sp
-        graph_client.service_principals.list_password_credentials.return_value = [sp_cred]
-
-        graph_client.applications.list_password_credentials.return_value = [app_cred]
-        graph_client.applications.list.return_value = [app]
+        graph_client.service_principals.list_owners.return_value = [user]
 
         # action
-        res = list_service_principal_credentials(mock.MagicMock(), 'nevermind')
+        res = list_service_principal_owners(mock.MagicMock(), test_sp_app_id)
 
         # assert
         graph_client.service_principals.list.assert_called_once()
-        graph_client.service_principals.get.assert_called_once()
-        graph_client.service_principals.list_password_credentials.assert_called_once()
-        graph_client.applications.list_password_credentials.assert_called_once()
-
-        self.assertTrue(2 == len(res))
-        self.assertTrue(set([x.key_id for x in res]) == set([sp_cred.key_id, app_cred.key_id]))
-
-    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
-    def test_list_sp_cert_creds(self, graph_client_mock):
-        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
-        graph_client_mock.return_value = graph_client = mock.MagicMock()
-
-        sp, sp_cred = mock.MagicMock(), mock.MagicMock()
-        sp.object_id = test_sp_object_id
-        sp_cred.key_id = 'nice sp key'
-        sp.service_principal_names = ['good-name']
-
-        graph_client.service_principals.list.return_value = [sp]
-        graph_client.service_principals.get.return_value = sp
-        graph_client.service_principals.list_key_credentials.return_value = [sp_cred]
-
-        graph_client.applications.list.return_value = []
-
-        # action
-        res = list_service_principal_credentials(mock.MagicMock(), 'nevermind', cert=True)
-
-        # assert
-        graph_client.service_principals.list.assert_called_once()
-        graph_client.service_principals.get.assert_called_once()
-        graph_client.service_principals.list_key_credentials.assert_called_once()
+        graph_client.service_principals.list_owners.assert_called_once()
 
         self.assertTrue(1 == len(res))
-        self.assertTrue(res[0].key_id == sp_cred.key_id)
+        self.assertTrue(test_user_object_id == res[0].object_id)
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
-    def test_delete_sp_pwd_creds(self, graph_client_mock):
-        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
-        test_app_object_id = '11111111-2222-3333-4444-666666666666'
-        graph_client_mock.return_value = graph_client = mock.MagicMock()
+    def test_role_list_app_owner(self, graph_client_mock):
 
-        sp, sp_cred, app, app_cred = mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), mock.MagicMock()
-        sp.object_id, app.object_id = test_sp_object_id, test_app_object_id
-        sp_cred.key_id, app_cred.key_id = 'nice sp key', 'nice app key'
-        sp.service_principal_names = ['good-name']
+        test_app_object_id = '11111111-2222-3333-4444-555555555555'
+        test_app_app_id = '11111111-2222-3333-4444-555555555555'
+        test_user_object_id = '11111111-2222-3333-4444-555555555555'
 
-        graph_client.service_principals.list.return_value = [sp]
-        graph_client.service_principals.get.return_value = sp
-        graph_client.service_principals.list_password_credentials.return_value = [sp_cred]
+        graph_client = mock.MagicMock()
+        graph_client_mock.return_value = graph_client
 
-        graph_client.applications.list_password_credentials.return_value = [app_cred]
+        app = mock.MagicMock()
+        app.object_id, app.app_id = test_app_object_id, test_app_app_id
+
+        user = mock.MagicMock()
+        user.object_id = test_user_object_id
+
         graph_client.applications.list.return_value = [app]
+        graph_client.applications.list_owners.return_value = [user]
 
         # action
-        delete_service_principal_credential(mock.MagicMock(), 'nevermind', 'nice app key')
+        res = list_application_owners(mock.MagicMock(), test_app_app_id)
 
         # assert
-        graph_client.service_principals.list.assert_called_once()
-        graph_client.service_principals.get.assert_called_once()
-        graph_client.service_principals.list_password_credentials.assert_called_once()
-        graph_client.applications.list_password_credentials.assert_called_once()
-        graph_client.applications.update_password_credentials.assert_called_once_with(test_app_object_id, [])
+        graph_client.applications.list.assert_called_once()
+        graph_client.applications.list_owners.assert_called_once()
 
-    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
-    def test_delete_sp_cert_creds(self, graph_client_mock):
-        test_sp_object_id = '11111111-2222-3333-4444-555555555555'
-        graph_client_mock.return_value = graph_client = mock.MagicMock()
-
-        sp, sp_cred = mock.MagicMock(), mock.MagicMock()
-        sp.object_id = test_sp_object_id
-        sp_cred.key_id = 'nice sp key'
-        sp.service_principal_names = ['good-name']
-
-        graph_client.service_principals.list.return_value = [sp]
-        graph_client.service_principals.get.return_value = sp
-        graph_client.service_principals.list_key_credentials.return_value = [sp_cred]
-
-        graph_client.applications.list.return_value = []
-
-        # action
-        delete_service_principal_credential(mock.MagicMock(), 'nevermind', sp_cred.key_id, cert=True)
-
-        # assert
-        graph_client.service_principals.list.assert_called_once()
-        graph_client.service_principals.list_key_credentials.assert_called_once()
-        graph_client.service_principals.update_key_credentials.assert_called_once_with(test_sp_object_id, [])
+        self.assertTrue(1 == len(res))
+        self.assertTrue(test_user_object_id == res[0].object_id)
 
     def test_get_object_stubs(self):
         graph_client = mock.MagicMock()

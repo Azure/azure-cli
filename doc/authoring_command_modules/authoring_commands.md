@@ -34,6 +34,8 @@ The document provides instructions and guidelines on how to author individual co
 
 [15. Preventing particular extensions from being loading](#extension-suppression)
 
+[16. Deprecating Commands and Arguments](#deprecating-commands-and-arguments)
+
 Authoring Commands
 =============================
 
@@ -69,7 +71,7 @@ Write your command as a simple function, specifying your arguments as the parame
 
 ***Parameter Naming Guidance***
 
-When choosing names, it is recommended that you look at similiar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
+When choosing names, it is recommended that you look at similar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
 
 Avoid using a parameter name called `name` as this is a very common alias in the CLI and will often create aliasing conflicts.
 
@@ -256,7 +258,7 @@ argument_context(self, scope, **kwargs):
 - `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`.
 
 ```Python
-with self.argument_context('my_param', ...) as c:  # applies to BOTH command1 and command2
+with self.argument_context('mypackage', ...) as c:  # applies to BOTH command1 and command2
 ```
 But
 ```Python
@@ -264,7 +266,7 @@ with self.argument_context('mypackage command1', ...) as c:  # applies to comman
 ```
 Like CSS rules, modifications are applied in order from generic to specific.
 ```Python
-with self.argument_context('my_param', ...) as c:  # applies to both command1 and command2
+with self.argument_context('mypackage', ...) as c:  # applies to both command1 and command2
   c.argument('my_param', ...)
 with self.argument_context('mypackage command1', ...) as c:  # applies to command1 but not command2
   c.argument('my_param', ...)
@@ -318,7 +320,7 @@ When writing commands for the Azure CLI, it is important to understand how keywo
 
 From the diagram you can see that any kwargs supplied when creating the `AzCommandsLoader` object are passed to and used as the baseline for any command groups or argument contexts that are later created. Any kwargs specified in the `command_group` calls serve as the baseline for any `command` or `custom_command` calls, and any kwargs passed to `argument_context` serve as the baseline for any calls to `argument`.
 
-While kwargs are inherited from higher levels on the diagram, they can be overriden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
+While kwargs are inherited from higher levels on the diagram, they can be overridden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
 
 Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
 
@@ -363,6 +365,7 @@ The follow special kwargs are supported by argument context and its helper metho
 - `validator` - See section on [Validators](#validators)
 - `completer` - See section on [Tab Completion](#tab-completion)
 - `id_part` - See section on [Supporting the IDs Parameter](#supporting-the-ids-parameter).
+- `arg_group` - Groups arguments within this context under a group name or add an argument to the group. This group name is shown in the help for the command. For example if `arg_group` is "Network", all applicable arguments will be grouped under the heading "Network Arguments" in the help text for the command.
 
 Additionally, the following `kwargs`, supported by argparse, are supported as well:
 - `nargs` - See https://docs.python.org/3/library/argparse.html#nargs
@@ -480,7 +483,7 @@ with self.argument_context('parent child') as c:
 Often times, the service needs references to supporting resources like storage accounts, key vault, etc. Typically, services require the ARM ID of these resources. The CLI pattern is to accept the ARM ID for this resource OR the name of the resource, assuming the resource is in the same subscription and resource group as the main resource.
 
 DO NOT:
-- Expose an ID parameter like `--storage-account-id`. 
+- Expose an ID parameter like `--storage-account-id`.
 - Add parameters like `--storage-account-resource-group` to indicate the resource group for the secondary resource. The user should supply the ARM ID in this instance.
 
 DO:
@@ -578,7 +581,7 @@ return setter(instance)  # update the instance and return the result
 
 `generic_update_command` was designed to simulate PATCH-like behavior for services that are backed only by a PUT API endpoint. For services that have actual PATCH-based update endpoints, the CLI's `update` command should still leverage `generic_update_command` in order to provide consistency among commands. The following guidelines should be helpful:
 
-- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default). 
+- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default).
 - You will HAVE TO supply `custom_func_name` and `custom_func_type`. Consider the following example:
 ```Python
 def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, complex_prop2=None):
@@ -589,7 +592,7 @@ def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, c
    parameters = FooUpdateParameters(
      prop1=prop1,
      prop2=prop2)
-     
+
    # (2) complex objects must also have PATCH-like behavior, and often services do not
    # correctly support this. You may need to fill these objects with the existing
    # values if they are not being updated
@@ -754,3 +757,51 @@ class MyCommandsLoader(AzCommandsLoader):
                                                                                        reason='These commands are now in the CLI.',
                                                                                        recommend_remove=True))
 ```
+
+## Deprecating Commands and Arguments
+
+The CLI has built-in support for deprecating the following: commands, command groups, arguments, option values. Deprecated items will appear with a warning in the help system or when invoked. The following keyword arugments are supported when deprecating an item:
+
+- `target`: The thing being deprecated. This is often not needed as in most cases the CLI can figure out what is being deprecated.
+- `redirect`: This is the alternative that should be used in lieu of the deprecated thing. If not provided, the item is expected to be removed in the future with no replacement.
+- `hide`: Hide the deprecated item from the help system, reducing discoverability, but still allow it to be used. Accepts either the boolean `True` to immediately hide the item or a core CLI version. If a version is supplied, the item will appear until the core CLI rolls to the specified value, after which it will be hidden.
+- `expiration`: Accepts a core CLI version at which the deprecated item will no longer function. This version will be communicated in all warning messages. 
+
+Deprecation of different command elements are usually accomplished using the `deprecate_info` kwarg in conjunction with a `deprecate` helper method.
+
+***Deprecate Command Group***
+```Python
+with self.command_group('test', test_sdk, deprecate_info=self.deprecate(redirect='new-test', hide=True)) as g:
+  g.show_command('show', 'get')
+  g.command('list', 'list')
+```
+
+This will deprecate the entire command group `test`. Note that call to `self.deprecate`, calling the deprecate helper method off of the command loader. The warning message for this would read: ```This command group has been deprecated and will be removed in a future release. Use `new-test` instead.```
+
+Additionally, since the command group is deprecated then, by extension, all of the commands within it are deprecated as well. They will not be marked as such, but will display a warning:
+
+```This command has been implicitly deprecated because command group `test` is deprecated and will be removed in a future release. Use `new-test` instead.```
+
+***Deprecate Command***
+```Python
+with self.command_group('test', test_sdk) as g:
+  g.command('show-parameters', 'get_params', deprecate_info=g.deprecate(redirect='test show', expiration='2.1.0'))
+```
+
+This will deprecate the command `test show-parameters`. Note that call to `g.deprecate`, calling the deprecate helper method off of the command group. The warning message for this would read: ```This command has been deprecated and will be removed in version 2.1.0. Use `test show` instead.```
+
+***Deprecate Argument***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('junk_flag', help='Something we no longer want to support.' deprecate_info=c.deprecate(expiration='2.1.0'))
+```
+
+This will deprecate the argument `--junk-flag` on `test show-parameters`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Argument `--junk-flag` has been deprecated and will be removed in version 2.1.0.```
+
+***Deprecate Argument Option***
+```Python
+with self.argument_context('test show-parameters') as c:
+  c.argument('resource', options_list=['--resource', c.deprecate(target='--resource-id', redirect='--target')])
+```
+
+This will deprecate the argument `--resource-id` option on `test show-parameters` in favor of `--resource`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Option `--resource-id` has been deprecated and will be removed in a future release. Use `--resource` instead.``` Here you must specify `target` in order to identify the deprecated option. When an option value is deprecated, it appears in help as two separate arguments, with the deprecation warning on the deprecated option. 

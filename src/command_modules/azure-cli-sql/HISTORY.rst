@@ -2,10 +2,38 @@
 
 Release History
 ===============
+2.1.8
++++++
+* Minor fixes
+
+2.1.7
++++++
+* Updating dependencies
+
+2.1.6
++++++
+* Support for custom collation on managed instance.
+
+2.1.5
++++++
+* Fixed az sql failover-group create and az sql failover-group update to work with Manual failover policy.
+
+2.1.4
++++++
+* Minor fixes
+
+2.1.3
++++++
+* Minor fixes
+
+2.1.2
+++++++
+* Minor fixes.
 
 2.1.1
 ++++++
 * Minor fixes.
+* Added az sql failover-group commands.
 
 2.1.0
 +++++

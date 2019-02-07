@@ -3,6 +3,59 @@
 Release History
 ===============
 
+0.3.13
+++++++
+* Adding 'az container start' command
+* Allow using decimal values for CPU during container creation
+
+0.3.12
+++++++
+* Updating dependencies
+
+0.3.11
+++++++
+* Updating dependencies
+
+0.3.10
+++++++
+* Minor fixes
+
+0.3.9
++++++
+* Minor fixes
+
+0.3.8
++++++
+* Show identity when exporting a container group to yaml
+
+0.3.7
++++++
+* Make 'Private' a valid type to pass to '--ip-address'
+* Allow using only subnet ID to setup a virtual network for the container group
+* Allow using vnet name or resource id to enable using vnets from different resource groups
+
+0.3.6
++++++
+* Add '--assign-identity' for adding a MSI identity to a container group
+* Add '--scope' to create a role assignment for the system assigned MSI identity
+* Show warning when creating a container group with an image without a long running process
+* Fix table output issues for 'list' and 'show' commands
+
+0.3.5
++++++
+* Minor changes
+
+0.3.4
++++++
+* Added ability to restart and stop a running container group
+* Add '--network-profile' for passing in a network profile
+* Add '--subnet', '--vnet_name', to allow creating container groups in a VNET
+* Update the table output to show the status of the container group
+
+0.3.3
++++++
+* Add '--secure-environment-variables' for passing secure environment variables to a container
+
 0.3.2
 +++++
 * Do not require '--log-analytics-workspace-key' for name or ID when in set subscription

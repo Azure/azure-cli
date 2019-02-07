@@ -22,23 +22,22 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: Create a server.
                 examples:
-                    - name: Create a {0} server with only required paramaters in North Europe.
-                      text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password
-                    - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
+                    - name: Create a {0} server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name GP_Gen4_2
+                            --sku-name GP_Gen5_2
                     - name: Create a {0} server with all paramaters set.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --sku-name B_Gen4_2 --ssl-enforcement Disabled \\
+                            --sku-name B_Gen5_1 --ssl-enforcement Disabled \\
+                            --backup-retention 10 --geo-redundant-backup Enabled
                             --storage-size 51200 --tags "key=value" --version {{server-version}}
                 """.format(server_type, command_group)
     helps['{} server restore'.format(command_group)] = """
                 type: command
                 short-summary: Restore a server from backup.
                 examples:
-                    - name: Restore 'testsvr' as 'testsvrnew'.
+                    - name: Restore 'testsvr' to a specific point-in-time as a new server 'testsvrnew'.
                       text: az {0} server restore -g testgroup -n testsvrnew --source-server testsvr --restore-point-in-time "2017-06-15T13:10:00Z"
-                    - name: Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group than the backup.
+                    - name: Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group from 'testsvr2'.
                       text: |
                         az {0} server restore -g testgroup -n testsvrnew \\
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
@@ -46,22 +45,53 @@ def add_helps(command_group, server_type):
                 """.format(command_group, server_type)
     helps['{} server georestore'.format(command_group)] = """
                 type: command
-                short-summary: Georestore a server from backup.
+                short-summary: Geo-restore a server from backup.
                 examples:
-                    - name: Georestore 'testsvr' as 'testsvrnew' where 'testsvrnew' is in same resource group as 'testsvr'.
+                    - name: Geo-restore 'testsvr' into a new server 'testsvrnew' located in West US 2.
                       text: az {0} server georestore -g testgroup -n testsvrnew --source-server testsvr -l westus2
-                    - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
+                    - name: Geo-restore 'testsvr' into a new server 'testsvrnew' located in West US 2 with sku GP_Gen5_2.
+                      text: az {0} server georestore -g testgroup -n testsvrnew --source-server testsvr -l westus2 --sku-name GP_Gen5_2
+                    - name: Geo-restore 'testsvr2' into a new server 'testsvrnew', where 'testsvrnew' is in a different resource group from 'testsvr2'.
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
-                            -l westus2 --sku-name GP_Gen5_2
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
+                            -l westus2
                 """.format(command_group, server_type)
+    helps['mysql server replica'] = """
+                type: group
+                short-summary: Manage read replicas.
+                """
+    helps['mysql server replica create'] = """
+                type: command
+                short-summary: Create a read replica for a server.
+                examples:
+                    - name: Create a read replica 'testreplsvr' for 'testsvr'.
+                      text: az mysql server replica create -n testreplsvr -g testgroup -s testsvr
+                    - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
+                      text: |
+                        az mysql server replica create -n testreplsvr -g testgroup \\
+                            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testsvr2"
+                """
+    helps['mysql server replica stop'] = """
+                type: command
+                short-summary: Stop replication to a read replica and make it a read/write server.
+                examples:
+                    - name: Stop replication to 'testreplsvr' and make it a read/write server.
+                      text: az mysql server replica stop -g testgroup -n testreplsvr
+                """
+    helps['mysql server replica list'] = """
+                type: command
+                short-summary: List all read replicas for a given server.
+                examples:
+                    - name: List all read replicas for master server 'testsvr'.
+                      text: az mysql server replica list -g testgroup -s testsvr
+                """
     helps['{} server update'.format(command_group)] = """
                 type: command
                 short-summary: Update a server.
                 examples:
                     - name: Update a server's sku.
-                      text: az {0} server update -g testgroup -n testsvrnew --sku-name GP_Gen4_4
+                      text: az {0} server update -g testgroup -n testsvrnew --sku-name GP_Gen5_4
                     - name: Update a server's tags.
                       text: az {0} server update -g testgroup -n testsvrnew --tags "k1=v1" "k2=v2"
                 """.format(command_group)
@@ -72,7 +102,10 @@ def add_helps(command_group, server_type):
     helps['{} server delete'.format(command_group)] = """
                 type: command
                 short-summary: Delete a server.
-                """
+                examples:
+                    - name: Delete a server.
+                      text: az {0} server delete -g testgroup -n testsvr
+                """.format(command_group)
     helps['{} server show'.format(command_group)] = """
                 type: command
                 short-summary: Get the details of a server.
@@ -94,17 +127,19 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: Create a new firewall rule for a server.
                 examples:
-                    - name: Create a firewall rule allowing all connections from all IP addresses.
-                      text: az {} server firewall-rule create -g testgroup -s testsvr -n allowall --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255
+                    - name: Create a firewall rule allowing connections from a specific IP address.
+                      text: az {0} server firewall-rule create -g testgroup -s testsvr -n allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
+                    - name: Create a firewall rule allowing connections from an IP address range.
+                      text: az {0} server firewall-rule create -g testgroup -s testsvr -n allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
                 """.format(command_group)
     helps['{} server firewall-rule update'.format(command_group)] = """
                 type: command
                 short-summary: Update a firewall rule.
                 examples:
                     - name: Update a firewall rule's start IP address.
-                      text: az {0} server firewall-rule update -g testgroup -s testsvr -n allowall --start-ip-address 0.0.0.1
+                      text: az {0} server firewall-rule update -g testgroup -s testsvr -n allowiprange --start-ip-address 107.46.14.1
                     - name: Update a firewall rule's start and end IP address.
-                      text: az {0} server firewall-rule update -g testgroup -s testsvr -n allowall --start-ip-address 0.0.0.1 --end-ip-address 255.255.255.254
+                      text: az {0} server firewall-rule update -g testgroup -s testsvr -n allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
                 """.format(command_group)
     helps['{} server firewall-rule delete'.format(command_group)] = """
                 type: command
@@ -118,6 +153,7 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: List all firewall rules for a server.
                 """
+
     helps['{} server vnet-rule'.format(command_group)] = """
                 type: group
                 short-summary: Manage a server's virtual network rules.
@@ -135,6 +171,7 @@ def add_helps(command_group, server_type):
                     - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
                       text: az {} server vnet-rule create -g testgroup -s testsvr -n vnetRuleName --subnet subnetName --vnet-name vnetName
                 """.format(server_type, command_group, command_group)
+
     helps['{} server configuration'.format(command_group)] = """
                 type: group
                 short-summary: Manage configuration values for a server.
@@ -214,5 +251,6 @@ def add_helps(command_group, server_type):
                 """.format(command_group)
 
 
+add_helps("mariadb", "MariaDB")
 add_helps("mysql", "MySQL")
 add_helps("postgres", "PostgreSQL")

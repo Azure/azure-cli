@@ -54,7 +54,7 @@ helps['storage file upload'] = """
     long-summary: Creates or updates an Azure file from a source path with automatic chunking and progress notifications.
     examples:
         - name: Upload to a local file to a share.
-          text: az storage file upload -s MyShare -source /path/to/file
+          text: az storage file upload -s MyShare --source /path/to/file
 """
 
 helps['storage blob show'] = """
@@ -100,6 +100,13 @@ helps['storage container create'] = """
           text: az storage container create -n MyStorageContainer --fail-on-exist
 """
 
+helps['storage container delete'] = """
+    type: command
+    short-summary: Marks the specified container for deletion.
+    long-summary: >
+        The container and any blobs contained within it are later deleted during garbage collection.
+"""
+
 helps['storage account list'] = """
     type: command
     short-summary: List storage accounts.
@@ -123,14 +130,6 @@ helps['storage account show'] = """
 helps['storage account show-usage'] = """
     type: command
     short-summary: Show the current count and limit of the storage accounts under the subscription.
-"""
-
-helps['storage blob list'] = """
-    type: command
-    short-summary: List storage blobs in a container.
-    examples:
-        - name: List all storage blobs in a container.
-          text: az storage blob list -c MyContainer
 """
 
 helps['storage account delete'] = """
@@ -198,16 +197,35 @@ helps['storage blob list'] = """
     parameters:
         - name: --include
           short-summary: 'Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.'
+    examples:
+        - name: List all storage blobs in a container whose names start with 'foo'; will match names such as 'foo', 'foobar', and 'foo/bar'
+          text: az storage blob list -c MyContainer --prefix foo
 """
 
 helps['storage blob copy'] = """
     type: group
-    short-summary: Manage blob copy operations.
+    short-summary: Manage blob copy operations. Use `az storage blob show` to check the status of the blobs.
 """
 
 helps['storage blob incremental-copy'] = """
     type: group
     short-summary: Manage blob incremental copy operations.
+"""
+
+helps['storage blob incremental-copy start'] = """
+    type: command
+    short-summary: Copies an incremental copy of a blob asynchronously.
+    long-summary: This operation returns a copy operation
+        properties object, including a copy ID you can use to check or abort the
+        copy operation. The Blob service copies blobs on a best-effort basis.
+        The source blob for an incremental copy operation must be a page blob.
+        Call get_blob_properties on the destination blob to check the status of the copy operation.
+        The final blob will be committed when the copy completes.
+    examples:
+        - name: Upload all files that end with .py unless blob exists and has been modified since given date.
+          text: az storage blob incremental-copy start --source-container MySourceContainer --source-blob MyBlob
+                --source-account-name MySourceAccount --source-account-key MySourceKey --source-snapshot MySnapshot
+                --destination-container MyDestinationContainer --destination-blob MyDestinationBlob
 """
 
 helps['storage blob lease'] = """
@@ -223,6 +241,11 @@ helps['storage blob metadata'] = """
 helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
+"""
+
+helps['storage blob service-properties update'] = """
+    type: command
+    short-summary: Update storage blob service properties.
 """
 
 helps['storage blob service-properties delete-policy'] = """
@@ -291,6 +314,9 @@ helps['storage blob upload-batch'] = """
           short-summary: The max length in bytes permitted for an append blob.
         - name: --lease-id
           short-summary: Required if the blob has an active lease
+    examples:
+        - name: Upload all files that end with .py unless blob exists and has been modified since given date.
+          text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
 """
 
 helps['storage blob download-batch'] = """
@@ -311,6 +337,9 @@ helps['storage blob download-batch'] = """
         - name: --dryrun
           type: bool
           short-summary: Show the summary of the operations to be taken instead of actually downloading the file(s).
+    examples:
+        - name: Download all blobs that end with .py
+          text: az storage blob download-batch -d . --pattern *.py -s MyContainer --account-name MyStorageAccount
 """
 
 helps['storage blob delete-batch'] = """
@@ -337,14 +366,23 @@ helps['storage blob delete-batch'] = """
           short-summary: An ETag value, or the wildcard character (*).
           long-summary: Specify this header to perform the operation only if the resource's ETag does not match the value specified.
                         Specify the wildcard character (*) to perform the operation only if the resource does not exist, and fail the operation if it does exist.
+    examples:
+        - name: Delete all blobs ending with ".py" in a container that have not been modified for 10 days.
+          text: |
+            date=`date -d "10 days ago" '+%Y-%m-%dT%H:%MZ'`
+            az storage blob delete-batch -s MyContainer --account-name MyStorageAccount --pattern *.py --if-unmodified-since $date
+"""
 
+helps['storage blob copy start'] = """
+    type: command
+    short-summary: Copies a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
 """
 
 helps['storage blob copy start-batch'] = """
     type: command
-    short-summary: Copy multiple blobs or files to a blob container.
+    short-summary: Copy multiple blobs or files to a blob container. Use `az storage blob show` to check the status of the blobs.
     parameters:
-        - name: --destination-container
+        - name: --destination-container -c
           type: string
           short-summary: The blob container where the selected source files or blobs will be copied to.
         - name: --pattern
@@ -402,6 +440,21 @@ helps['storage container metadata'] = """
 helps['storage container policy'] = """
     type: group
     short-summary: Manage container stored access policies.
+"""
+
+helps['storage container immutability-policy'] = """
+    type: group
+    short-summary: Manage container immutability policies.
+"""
+
+helps['storage container legal-hold'] = """
+    type: group
+    short-summary: Manage container legal holds.
+"""
+
+helps['storage container legal-hold show'] = """
+    type: command
+    short-summary: Get the legal hold properties of a container.
 """
 
 helps['storage cors'] = """
@@ -653,6 +706,8 @@ helps['storage logging update'] = """
           short-summary: 'The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.'
         - name: --retention
           short-summary: Number of days for which to retain logs. 0 to disable.
+        - name: --version
+          short-summary: Version of the logging schema.
 """
 
 helps['storage message'] = """
@@ -720,6 +775,11 @@ helps['storage share'] = """
     short-summary: Manage file shares.
 """
 
+helps['storage share url'] = """
+    type: command
+    short-summary: Create a URI to access a file share.
+"""
+
 helps['storage share exists'] = """
     type: command
     short-summary: Check for the existence of a file share.
@@ -738,6 +798,11 @@ helps['storage share metadata'] = """
 helps['storage share policy'] = """
     type: group
     short-summary: Manage shared access policies of a storage file share.
+"""
+
+helps['storage share create'] = """
+    type: command
+    short-summary: Creates a new share under the specified account.
 """
 
 helps['storage table'] = """
@@ -799,4 +864,61 @@ helps['storage account generate-sas'] = """
         - name: --account-name
           short-summary: 'Storage account name. Must be used in conjunction with either storage account key or a SAS
                          token. Environment Variable: AZURE_STORAGE_ACCOUNT'
+    examples:
+        - name: Generate a sas token for the account that is valid for queue and table services on Linux.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage account generate-sas --permissions cdlruwap --account-name MyStorageAccount --services qt --resource-types sco --expiry $end -otsv
+        - name: Generate a sas token for the account that is valid for queue and table services on MacOS.
+          text: |
+            end=`date -v+30M '+%Y-%m-%dT%H:%MZ'`
+            az storage account generate-sas --permissions cdlruwap --account-name MyStorageAccount --services qt --resource-types sco --expiry $end -otsv
+"""
+
+helps['storage container generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for blob container and use it to upload a blob.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            sas=`az storage container generate-sas -n MyContainer --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+            az storage blob upload -n MyBlob -c MyContainer --account-name MyStorageAccount -f file.txt --sas-token $sas
+"""
+
+helps['storage blob generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a blob with read-only permissions.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage blob generate-sas --account-name MyStorageAccount -c MyContainer -n MyBlob --permissions r --expiry $end --https-only
+"""
+
+helps['storage share generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a fileshare and use it to upload a file.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            sas=`az storage share generate-sas -n MyShare --account-name MyStorageAccount --https-only --permissions dlrw --expiry $end -otsv`
+            az storage file upload -s MyShare --account-name MyStorageAccount --source file.txt  --sas-token $sas
+"""
+
+helps['storage file generate-sas'] = """
+    type: command
+    examples:
+        - name: Generate a sas token for a file.
+          text: |
+            end=`date -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+            az storage file generate-sas -p path/file.txt -s MyShare --account-name MyStorageAccount --permissions rcdw --https-only --expiry $end
+"""
+
+helps['storage blob url'] = """
+    type: command
+    short-summary: Create the url to access a blob.
+"""
+
+helps['storage file url'] = """
+    type: command
+    short-summary: Create the url to access a file.
 """

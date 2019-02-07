@@ -55,7 +55,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'])
 
     with self.argument_context('lab secret') as c:
-        from azure.mgmt.devtestlabs.models.secret import Secret
+        from azure.mgmt.devtestlabs.models import Secret
 
         c.argument('name', options_list=['--name', '-n'])
         c.argument('secret', options_list=['--value'], type=lambda x: Secret(value=x))

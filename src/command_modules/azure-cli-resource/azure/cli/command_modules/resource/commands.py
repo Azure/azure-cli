@@ -8,7 +8,7 @@
 from collections import OrderedDict
 
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import handle_template_based_exception
 
@@ -173,6 +173,7 @@ def load_command_table(self, _):
         g.custom_command('invoke-action', 'invoke_resource_action')
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
+        g.wait_command('wait', getter_name='show_resource')
 
     with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
@@ -188,10 +189,11 @@ def load_command_table(self, _):
         g.custom_command('register', 'register_provider')
         g.custom_command('unregister', 'unregister_provider')
         g.custom_command('operation list', 'list_provider_operations')
-        g.custom_command('operation show', 'show_provider_operations')
+        g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=ResourceType.MGMT_RESOURCE_FEATURES) as g:
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
+                            min_api='2018-03-02-hybrid') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
@@ -238,17 +240,22 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
 
+    with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
+        g.custom_command('assign', 'set_identity')
+        g.custom_show_command('show', 'show_identity')
+        g.custom_command('remove', 'remove_identity')
+
     with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
-        g.command('delete', 'delete')
-        g.command('list', 'list')
+        g.custom_command('delete', 'delete_policy_definition')
+        g.custom_command('list', 'list_policy_definition')
         g.custom_show_command('show', 'get_policy_definition')
-        g.generic_update_command('update', custom_func_name='update_policy_definition', custom_func_type=resource_custom)
+        g.custom_command('update', 'update_policy_definition')
 
     with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')
-        g.command('delete', 'delete')
-        g.command('list', 'list')
+        g.custom_command('delete', 'delete_policy_setdefinition')
+        g.custom_command('list', 'list_policy_setdefinition')
         g.custom_show_command('show', 'get_policy_setdefinition')
         g.custom_command('update', 'update_policy_setdefinition')
 

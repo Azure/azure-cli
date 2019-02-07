@@ -23,15 +23,14 @@ CLASSIFIERS = [
 
 # Until https://gitlab.com/pycqa/flake8/issues/415 is resolved, pin version of pycodestyle
 DEPENDENCIES = [
-    'autopep8>=1.2.4',
-    'pylint>=1.7.1',
+    'pylint==1.9.2',
     'coverage>=4.2',
     'flake8==3.5.0',
     'pycodestyle==2.3.1',
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'requests',
-    'pyyaml>=3.13',
+    'pyyaml>=4.2b1',
     'knack',
     'six>=1.10.0',
     'tabulate>=0.7.7',

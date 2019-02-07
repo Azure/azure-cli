@@ -2,14 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-
-import re
-import os
-import inspect
-
-
-_LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
+import copy
 
 
 def exclude_commands(command_loader, help_file_entries, module_exclusions=None, extensions=None):
@@ -29,6 +22,12 @@ def _filter_mods(command_loader, help_file_entries, modules=None, extensions=Non
     command_modules_paths = get_command_modules_paths()
     filtered_module_names = {mod for mod, path in command_modules_paths if mod in modules}
 
+    # command tables and help entries must be copied to allow for seperate linter scope
+    command_table = command_loader.command_table.copy()
+    command_group_table = command_loader.command_group_table.copy()
+    command_loader = copy.copy(command_loader)
+    command_loader.command_table = command_table
+    command_loader.command_group_table = command_group_table
     help_file_entries = help_file_entries.copy()
 
     for command_name in list(command_loader.command_table.keys()):

@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import os
 from knack.log import get_logger
+from knack.util import CLIError
 
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
@@ -16,6 +17,16 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
+
+
+def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
+                     if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
+                     processed_resource_group=None, processed_account_name=None, mgmt_client=None):
+    if bypass_immutability_policy:
+        return mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
+    return client.delete_container(
+        container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
+        if_unmodified_since=if_unmodified_since, timeout=timeout)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
@@ -38,14 +49,44 @@ def set_delete_policy(client, enable=None, days_retained=None):
         policy.days = days_retained
 
     if policy.enabled and not policy.days:
-        from knack.util import CLIError
         raise CLIError("must specify days-retained")
 
     client.set_blob_service_properties(delete_retention_policy=policy)
     return client.get_blob_service_properties().delete_retention_policy
 
 
-def storage_blob_copy_batch(cmd, client, source_client, destination_container=None,
+def set_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
+                           static_website=None, index_document=None, error_document_404_path=None):
+    # update
+    kwargs = {}
+    if hasattr(parameters, 'delete_retention_policy'):
+        kwargs['delete_retention_policy'] = parameters.delete_retention_policy
+    if delete_retention is not None:
+        parameters.delete_retention_policy.enabled = delete_retention
+    if delete_retention_period is not None:
+        parameters.delete_retention_policy.days = delete_retention_period
+
+    if hasattr(parameters, 'static_website'):
+        kwargs['static_website'] = parameters.static_website
+    elif any(param is not None for param in [static_website, index_document, error_document_404_path]):
+        raise CLIError('Static websites are only supported for StorageV2 (general-purpose v2) accounts.')
+    if static_website is not None:
+        parameters.static_website.enabled = static_website
+    if index_document is not None:
+        parameters.static_website.index_document = index_document
+    if error_document_404_path is not None:
+        parameters.static_website.error_document_404_path = error_document_404_path
+
+    # checks
+    policy = kwargs.get('delete_retention_policy', None)
+    if policy and policy.enabled and not policy.days:
+        raise CLIError("must specify days-retained")
+
+    client.set_blob_service_properties(**kwargs)
+    return client.get_blob_service_properties()
+
+
+def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                             destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
@@ -54,7 +95,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
         logger = get_logger(__name__)
         logger.warning('copy files or blobs to blob container')
         logger.warning('    account %s', client.account_name)
-        logger.warning('  container %s', destination_container)
+        logger.warning('  container %s', container_name)
         logger.warning('     source %s', source_container or source_share)
         logger.warning('source type %s', 'blob' if source_container else 'file')
         logger.warning('    pattern %s', pattern)
@@ -65,7 +106,6 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
 
         # if the source client is None, recreate one from the destination client.
         source_client = source_client or create_blob_service_from_storage_client(cmd, client)
-
         if not source_sas:
             source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
                                                           source_container)
@@ -75,7 +115,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
             else:
-                return _copy_blob_to_blob_container(client, source_client, destination_container, destination_path,
+                return _copy_blob_to_blob_container(client, source_client, container_name, destination_path,
                                                     source_container, source_sas, blob_name)
 
         return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
@@ -98,7 +138,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
             if dryrun:
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                return _copy_file_to_blob_container(client, source_client, destination_container, destination_path,
+                return _copy_file_to_blob_container(client, source_client, container_name, destination_path,
                                                     source_share, source_sas, dir_name, file_name)
 
         return list(filter_none(action_file_copy(file) for file in collect_files(cmd,
@@ -130,7 +170,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         # remove starting path seperator and normalize
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
         if normalized_blob_name in blobs_to_download:
-            from knack.util import CLIError
             raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
                            'to select for a subset of blobs to download OR utilize the `storage blob download` '
                            'command instead to download individual blobs.'.format(normalized_blob_name))
@@ -200,6 +239,9 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             if include:
                 results.append(_create_return_result(dst, guessed_content_settings, result))
 
+        num_failures = len(source_files) - len(results)
+        if num_failures:
+            logger.warning('%s of %s files not uploaded due to "Failed Precondition"', num_failures, len(source_files))
     return results
 
 
@@ -320,10 +362,10 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         }
         return client.delete_blob(**delete_blob_args)
 
+    logger = get_logger(__name__)
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -333,7 +375,15 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             logger.warning('  - %s', blob)
         return []
 
-    return [result for include, result in (_delete_blob(blob) for blob in source_blobs) if include]
+    results = [result for include, result in (_delete_blob(blob) for blob in source_blobs) if include]
+    num_failures = len(source_blobs) - len(results)
+    if num_failures:
+        logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
+
+
+def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
+    return client.make_blob_url(
+        container_name, blob_name, protocol=protocol, snapshot=snapshot, sas_token=client.sas_token)
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,
@@ -346,7 +396,6 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
         blob_service.copy_blob(destination_container, destination_blob_name, source_blob_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException:
-        from knack.util import CLIError
         error_template = 'Failed to copy blob {} to container {}.'
         raise CLIError(error_template.format(source_blob_name, destination_container))
 
@@ -365,6 +414,5 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
         blob_service.copy_blob(destination_container, destination_blob_name, file_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException as ex:
-        from knack.util import CLIError
         error_template = 'Failed to copy file {} to container {}. {}'
         raise CLIError(error_template.format(source_file_name, destination_container, ex))

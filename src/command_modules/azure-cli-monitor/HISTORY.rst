@@ -2,6 +2,52 @@
 
 Release History
 ===============
+
+* `monitor metrics alert create/update`: Allow dimension value '*'.
+
+0.2.9
++++++
+* Make ID comparison case insensitive.
+
+0.2.8
++++++
+* Minor fixes
+
+0.2.7
++++++
+* `monitor metrics alert update`: Fix issue where `--add\remove-action` would not work in some cases.
+* `monitor metrics alert create/update`: Improve `--condition` support for special characters.
+
+0.2.6
++++++
+* `monitor metrics alert create/update`: `--condition` now supports metric names which include characters forward-slash (/) and period (.).
+
+0.2.5
++++++
+* `monitor activity-log list`:
+    Allow listing all events at the subscription level.
+    Added `--offset` parameter to more easily create time queries.
+    Improved validation for --start-time and --end-time to use wider range of ISO8601 formats and more user-friendly datetime formats.
+    Added `--namespace` as alias for deprecated option `--resource-provider`.
+    Deprecated `--filters` because no values other than those with strongly-typed options are supported by the service.
+* `monitor metrics list`:
+    Added `--offset` parameter to more easily create time queries.
+    Improved validation for --start-time and --end-time to use wider range of ISO8601 formats and more user-friendly datetime formats.
+* `monitor diagnostic-settings create`: Improve validation for arguments `--event-hub` and `--event-hub-rule`.
+
+0.2.4
++++++
+* Minor fixes
+
+0.2.3
++++++
+* Added `monitor metrics alert` commands for near-realtime metric alerts.
+* Deprecated `monitor alert` commands.
+
+0.2.2
++++++
+* Minor fixes
+
 0.2.1
 +++++
 * Minor fixes

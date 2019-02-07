@@ -11,20 +11,15 @@ from ._constants import certificate_help
 
 helps['iot'] = """
     type: group
-    short-summary: (PREVIEW) Manage Internet of Things (IoT) assets.
+    short-summary: Manage Internet of Things (IoT) assets.
     long-summary: Comprehensive IoT data-plane functionality is available
                   in the Azure IoT CLI Extension. For more info and install guide
                   go to https://github.com/Azure/azure-iot-cli-extension
 """
 
-helps['iot device'] = """
-    type: group
-    short-summary: (PREVIEW) Manage devices in your Azure IoT hub.
-"""
-
 helps['iot hub'] = """
     type: group
-    short-summary: (PREVIEW) Manage Azure IoT hubs.
+    short-summary: Manage Azure IoT hubs.
 """
 helps['iot dps'] = """
     type: group
@@ -160,7 +155,7 @@ helps['iot dps linked-hub update'] = """
     examples:
         - name: Update linked IoT hub 'MyLinkedHub.azure-devices.net' in an Azure IoT Hub device provisioning service
           text: >
-            az iot dps linked-hub update --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub.azure-devices.net
+            az iot dps linked-hub update --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub.azure-devices.net
             --allocation-weight 10 --apply-allocation-policy True
 """
 
@@ -179,7 +174,7 @@ helps['iot dps linked-hub show'] = """
     examples:
         - name: Show details of linked IoT hub 'MyLinkedHub' in an Azure IoT Hub device provisioning service
           text: >
-            az iot dps linked-hub show --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
+            az iot dps linked-hub show --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -188,7 +183,7 @@ helps['iot dps linked-hub delete'] = """
     examples:
         - name: Delete linked IoT hub 'MyLinkedHub' in an Azure IoT Hub device provisioning service
           text: >
-            az iot dps linked-hub delete --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
+            az iot dps linked-hub delete --dps-name MyDps --resource-group MyResourceGroup --linked-hub MyLinkedHub
 """
 
 helps['iot dps certificate'] = """
@@ -426,7 +421,7 @@ helps['iot hub delete'] = """
 
 helps['iot hub consumer-group'] = """
     type: group
-    short-summary: (PREVIEW) Manage the event hub consumer groups of an IoT hub.
+    short-summary: Manage the event hub consumer groups of an IoT hub.
 """
 
 helps['iot hub consumer-group create'] = """
@@ -458,7 +453,7 @@ helps['iot hub consumer-group delete'] = """
 
 helps['iot hub policy'] = """
     type: group
-    short-summary: (PREVIEW) Manage shared access policies of an IoT hub.
+    short-summary: Manage shared access policies of an IoT hub.
 """
 
 helps['iot hub policy list'] = """
@@ -492,7 +487,7 @@ helps['iot hub list-skus'] = """
 
 helps['iot hub job'] = """
     type: group
-    short-summary: (PREVIEW) Manage jobs in an IoT hub.
+    short-summary: Manage jobs in an IoT hub.
 """
 
 helps['iot hub job list'] = """
@@ -520,135 +515,170 @@ helps['iot hub show-stats'] = """
     short-summary: Get the statistics for an IoT hub.
 """
 
-helps['iot device create'] = """
-    type: command
-    short-summary: Register a device for an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity create' via the IoT Extension instead.
-    examples:
-        - name: Create a device authenticating with symmetric key.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice
-        - name: Create a device authenticating with an existing X.509 certificate.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --primary-thumbprint X.509_certificate_thumbprint
-        - name: Create a device authenticating with a self-signed X.509 certificate, which is put into to the current directory.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509
-        - name: Create a device authenticating with a self-signed X.509 certificate that is valid for 100 days.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --valid-days 100
-        - name: Create a device authenticating with a self-signed X.509 certificate, and write the certificate to /path/to/output.
-          text: >
-            az iot device create --hub-name MyIotHub --device-id MyDevice --x509 --output-dir /path/to/output
-"""
-
-helps['iot device show'] = """
-    type: command
-    short-summary: Get the details for a device in an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity show' via the IoT Extension instead.
-"""
-
-helps['iot device update'] = """
-    type: command
-    short-summary: Update the metadata of a device in an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity update' via the IoT Extension instead.
-    examples:
-        - name: Disable a device.
-          text: >
-            az iot device update --hub-name MyIotHub --device-id MyDevice --set status=disabled
-"""
-
-helps['iot device list'] = """
-    type: command
-    short-summary: List devices in an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity list' via the IoT Extension instead.
-"""
-
-helps['iot device delete'] = """
-    type: command
-    short-summary: Delete a device from an IoT hub.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity delete' via the IoT Extension instead.
-"""
-
-helps['iot device show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for devices in an IoT hub.
-    long-summary: This command is deprecating.
-                  Use 'az iot hub device-identity show-connection-string' via the IoT Extension instead.
-    examples:
-        - name: Show the connection string of a device in an IoT Hub using the primary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub --device-id MyDevice
-        - name: Show the connection string of a device in an IoT Hub using the secondary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub --device-id MyDevice --key secondary
-        - name: Show the connection strings of the default devices in an IoT Hub using primary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub
-        - name: Show the connection strings of the top 100 devices in an IoT Hub using primary key.
-          text: >
-            az iot device show-connection-string --hub-name MyIotHub --top 100
-"""
-
-helps['iot device message'] = """
+helps['iot hub routing-endpoint'] = """
     type: group
-    short-summary: (PREVIEW) Manage IoT device messaging.
+    short-summary: Manage custom endpoints of an IoT hub.
 """
 
-helps['iot device message send'] = """
+helps['iot hub routing-endpoint create'] = """
     type: command
-    short-summary: Send a device-to-cloud message.
-    long-summary: This command is deprecating. Use 'az iot device send-d2c-message' via the IoT Extension instead.
+    short-summary: Add an endpoint to your IoT Hub.
+    long-summary: Create a new custom endpoint in your IoT Hub.
     examples:
-        - name: Send a device-to-cloud message to an IoT hub with a default message.
+        - name: Add a new endpoint "E2" of type EventHub to "MyIotHub" IoT Hub.
           text: >
-            az iot device message send --hub-name MyIotHub --device-id MyDevice
-        - name: Send a device-to-cloud message to an IoT hub with a custom message.
-          text: >
-            az iot device message send --hub-name MyIotHub --device-id MyDevice --data "Custom Message"
+            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --endpoint-type eventhub --endpoint-resource-group {ResourceGroup}
+            --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString}
+        - name: Add a new endpoint "S1" of type AzureStorageContainer to "MyIotHub" IoT Hub.
+          text: |
+            az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub \\
+            --endpoint-name S1 --endpoint-type azurestoragecontainer --endpoint-resource-group "[Resource Group]" \\
+            --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
+            --container-name {ContainerName}
 """
 
-helps['iot device message receive'] = """
+helps['iot hub routing-endpoint list'] = """
     type: command
-    short-summary: Receive a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message receive' via the IoT Extension instead.
+    short-summary: Get information on all the endpoints for your IoT Hub.
+    long-summary: Get information on all endpoints in your IoT Hub.
+                  You can also specify which endpoint type you want to get informaiton on.
     examples:
-        - name: Receive a cloud-to-device message from an IoT hub with a default timeout.
+        - name: Get all the endpoints from "MyIotHub" IoT Hub.
           text: >
-            az iot device message receive --hub-name MyIotHub --device-id MyDevice
-        - name: Receive a cloud-to-device message from an IoT Hub with a timeout of 300 seconds.
+            az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
+        - name: Get all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
           text: >
-            az iot device message receive --hub-name MyIotHub --device-id MyDevice --lock-timeout 300
+            az iot hub routing-endpoint list -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-type eventhub
 """
 
-helps['iot device message complete'] = """
+helps['iot hub routing-endpoint show'] = """
     type: command
-    short-summary: Complete a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message complete' via the IoT Extension instead.
+    short-summary: Get information on mentioned endpoint for your IoT Hub.
+    long-summary: Get information on a specific endpoint in your IoT Hub
+    examples:
+        - name: Get an endpoint information from "MyIotHub" IoT Hub.
+          text: |
+            az iot hub routing-endpoint show --resource-group MyResourceGroup --hub-name MyIotHub \\
+            --endpoint-name {endpointName}
 """
 
-helps['iot device message reject'] = """
+helps['iot hub routing-endpoint delete'] = """
     type: command
-    short-summary: Reject a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message reject' via the IoT Extension instead.
+    short-summary: Delete all or mentioned endpoint for your IoT Hub.
+    long-summary: Delete an endpoint for your IoT Hub. We recommend that you delete
+                  any routes to the endpoint, before deleting the endpoint.
+    examples:
+        - name: Delete endpoint "E2" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2
+        - name: Delete all the endpoints of type "EventHub" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
+            --endpoint-type eventhub
+        - name: Delete all the endpoints from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub routing-endpoint delete --resource-group MyResourceGroup --hub-name MyIotHub
 """
 
-helps['iot device message abandon'] = """
-    type: command
-    short-summary: Abandon a cloud-to-device message.
-    long-summary: This command is deprecating. Use 'az iot device c2d-message abandon' via the IoT Extension instead.
+helps['iot hub route'] = """
+    type: group
+    short-summary: Manage routes of an IoT hub.
 """
 
-helps['iot device export'] = """
+helps['iot hub route create'] = """
     type: command
-    short-summary: Export all the device identities in the IoT hub identity registry to an Azure Storage blob container.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity export' via the IoT Extension instead.
-                  For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
+    short-summary: Create a route in IoT Hub.
+    long-summary: Create a route to send specific data source and condition to a desired endpoint.
+    examples:
+        - name: Create a new route "R1".
+          text: >
+            az iot hub route create -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --source-type DeviceMessages --route-name R1
+        - name: Create a new route "R1" with all parameters.
+          text: >
+            az iot hub route create -g MyResourceGroup --hub-name MyIotHub
+            --endpoint-name E2 --source-type DeviceMessages --route-name R1
+            --condition true --enabled true
 """
 
-helps['iot device import'] = """
+helps['iot hub route list'] = """
     type: command
-    short-summary: Import, update, or delete device identities in the IoT hub identity registry from a blob.
-    long-summary: This command is deprecating. Use 'az iot hub device-identity import' via the IoT Extension instead.
-                  For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
+    short-summary: Get all the routes in IoT Hub.
+    long-summary: Get information on all routes from an IoT Hub.
+    examples:
+        - name: Get all route from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub
+        - name: Get all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route list -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+"""
+
+helps['iot hub route show'] = """
+    type: command
+    short-summary: Get information about the route in IoT Hub.
+    long-summary: Get information on a specific route in your IoT Hub.
+    examples:
+        - name: Get an route information from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route show -g MyResourceGroup --hub-name MyIotHub --route-name {routeName}
+"""
+
+helps['iot hub route delete'] = """
+    type: command
+    short-summary: Delete all or mentioned route for your IoT Hub.
+    long-summary: Delete a route or all routes for your IoT Hub.
+    examples:
+        - name: Delete route "R1" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --route-name R1
+        - name: Delete all the routes of source type "DeviceMessages" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+        - name: Delete all the routes from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route delete -g MyResourceGroup --hub-name MyIotHub
+"""
+
+helps['iot hub route test'] = """
+    type: command
+    short-summary: Test all routes or mentioned route in IoT Hub.
+    long-summary: Test all existing routes or mentioned route in your IoT Hub.
+                  You can provide a sample message to test your routes.
+    examples:
+        - name: Test the route "R1" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route test -g MyResourceGroup --hub-name MyIotHub --route-name R1
+        - name: Test all the route of source type "DeviceMessages" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route test -g MyResourceGroup --hub-name MyIotHub --source-type DeviceMessages
+"""
+
+helps['iot hub route update'] = """
+    type: command
+    short-summary: Update a route in IoT Hub.
+    long-summary: Updates a route in IoT Hub. You can change the source, enpoint or query on the route.
+    examples:
+        - name: Update source type of route "R1" from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub route update -g MyResourceGroup --hub-name MyIotHub
+            --source-type DeviceMessages --route-name R1
+"""
+
+helps['iot hub devicestream'] = """
+    type: group
+    short-summary: Manage device streams of an IoT hub.
+"""
+
+helps['iot hub devicestream show'] = """
+    type: command
+    short-summary: Get IoT Hub's device streams endpoints.
+    long-summary: Get IoT Hub's device streams endpoints.
+    examples:
+        - name: Get all the device streams from "MyIotHub" IoT Hub.
+          text: >
+            az iot hub devicestream show -n MyIotHub
 """

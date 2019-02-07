@@ -2,6 +2,67 @@
 
 Release History
 ===============
+2.0.58
+++++++
+* TODO
+
+2.0.57
+++++++
+* Hot fix for issue 8399_.
+
+.. _8399: https://github.com/Azure/azure-cli/issues/8399
+
+2.0.56
+++++++
+* Minor fixes
+
+2.0.55
+++++++
+* Minor fixes
+
+2.0.54
+++++++
+* Minor fixes
+
+2.0.53
+++++++
+* Minor fixes
+
+2.0.52
+++++++
+* Minor fixes
+
+2.0.51
+++++++
+* Minor fixes
+
+2.0.50
+++++++
+* Minor fixes
+
+2.0.49
+++++++
+* Minor fixes
+
+2.0.48
+++++++
+* Fix Homebrew
+
+2.0.47
+++++++
+* Minor fixes
+
+2.0.46
+++++++
+* Minor fixes
+
+2.0.45
+++++++
+* Minor fixes
+
+2.0.44
+++++++
+* Minor fixes
 
 2.0.43
 ++++++

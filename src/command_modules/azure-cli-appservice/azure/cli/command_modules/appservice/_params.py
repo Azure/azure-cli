@@ -9,10 +9,13 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
-                                                get_three_state_flag, get_enum_type)
-from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
+                                                get_three_state_flag, get_enum_type, tags_type)
+from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
+
+from ._validators import validate_timeout_value
+
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -23,6 +26,10 @@ AUTH_TYPES = {
     'LoginWithTwitter': BuiltInAuthenticationProvider.twitter}
 
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
+FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
+OS_TYPES = ['Windows', 'Linux']
+LINUX_RUNTIMES = ['dotnet', 'node', 'python']
+WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
 
 # pylint: disable=too-many-statements
 
@@ -32,11 +39,11 @@ def load_arguments(self, _):
     # pylint: disable=line-too-long
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), P1V2(Premium V2 Small) etc',
-                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2']))
+    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
+                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                                           help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
+                                           help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -47,14 +54,14 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', configured_default='web', arg_type=name_arg_type,
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                   help="name of the web. You can configure the default using 'az configure --defaults web=<name>'")
+                   help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     with self.argument_context('appservice list-locations') as c:
-        c.argument('linux_workers_enabled', action='store_true', help='get regions which support hosting webapps on Linux workers')
+        c.argument('linux_workers_enabled', action='store_true', help='get regions which support hosting web apps on Linux workers')
         c.argument('sku', arg_type=sku_arg_type)
 
     with self.argument_context('appservice plan') as c:
@@ -67,13 +74,16 @@ def load_arguments(self, _):
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('is_linux', action='store_true', required=False, help='host webapp on Linux worker')
+        c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
+        c.argument('hyper_v', action='store_true', required=False, help='(Preview) host web app on Windows container')
+        c.argument('tags', arg_type=tags_type)
+
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
         c.ignore('allow_pending_state')
 
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new webapp')
+        c.argument('name', options_list=['--name', '-n'], help='name of the new web app')
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
@@ -86,7 +96,17 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type)
 
     with self.argument_context('webapp list-runtimes') as c:
-        c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
+        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
+
+    with self.argument_context('webapp deleted list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')
+
+    with self.argument_context('webapp deleted restore') as c:
+        c.argument('deleted_id', options_list=['--deleted-id'], help='Resource ID of the deleted web app')
+        c.argument('name', options_list=['--name', '-n'], help='name of the web app to restore the deleted content to')
+        c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
+        c.argument('restore_content_only', action='store_true', help='restore only deleted files without web app settings')
 
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
@@ -106,6 +126,13 @@ def load_arguments(self, _):
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
 
+    with self.argument_context('webapp webjob') as c:
+        c.argument('webjob_name', help='The name of the webjob', options_list=['--webjob-name', '-w'])
+    with self.argument_context('webapp webjob continuous list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+    with self.argument_context('webapp webjob triggered list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope + ' create') as c:
             c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:tag')
@@ -113,6 +140,8 @@ def load_arguments(self, _):
             c.argument('deployment_zip', options_list=['--deployment-zip', '-z'], help='perform deployment using zip file')
             c.argument('deployment_source_url', options_list=['--deployment-source-url', '-u'], help='Git repository URL to link with manual integration')
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'], help='the branch to deploy')
+            c.argument('tags', arg_type=tags_type)
+
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
         with self.argument_context(scope + ' config ssl upload') as c:
@@ -152,6 +181,7 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
+            c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
             c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -159,14 +189,64 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config hostname list') as c:
             c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
 
+        with self.argument_context(scope + ' cors') as c:
+            c.argument('allowed_origins', options_list=['--allowed-origins', '-a'], nargs='*', help='space separated origins that should be allowed to make cross-origin calls (for example: http://example.com:12345). To allow all, use "*" and remove all other origins from the list')
+
+        with self.argument_context(scope + ' config set') as c:
+            c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
+            c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
+            c.argument('always_on', help='ensure web app gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
+            c.argument('auto_heal_enabled', help='enable or disable auto heal', arg_type=get_three_state_flag(return_label=True))
+            c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'], help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
+            c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
+            c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
+            c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
+            c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
+            c.argument('windows_fx_version', help="(Preview) a docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
+            if scope == 'functionapp':
+                c.ignore('windows_fx_version')
+            c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
+            c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
+            c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+            c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+            c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
+            c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
+            c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.", arg_type=get_enum_type(FTPS_STATE_TYPES))
+            c.argument('generic_configurations', nargs='+',
+                       help='provide site configuration list in a format of either "key=value" pair or "@<json_file>"')
+
+        with self.argument_context(scope + ' config container') as c:
+            c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
+                       help='the container registry server url')
+            c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
+                       help='the container custom image name and optionally the tag name')
+            c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
+                       help='the container registry server username')
+            c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
+                       help='the container registry server password')
+            c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'],
+                       help='enables platform storage (custom container only)',
+                       arg_type=get_three_state_flag(return_label=True))
+            c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type',
+                       arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+            c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'],
+                       help="config file for multicontainer apps")
+            c.argument('show_multicontainer_config', action='store_true',
+                       help='shows decoded config if a multicontainer config is set')
+
+        with self.argument_context(scope + ' deployment container config') as c:
+            c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
+                       arg_type=get_three_state_flag(return_label=True))
+
     with self.argument_context('webapp config connection-string list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config storage-account list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-    with self.argument_context('webapp deployment container config') as c:
-        c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment', arg_type=get_enum_type(['true', 'false']))
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -175,7 +255,7 @@ def load_arguments(self, _):
         c.argument('disable', help='disable auto swap', action='store_true')
         c.argument('target_slot', help="target slot to swap, default to 'production'")
     with self.argument_context('webapp deployment slot create') as c:
-        c.argument('configuration_source', help="source slot to clone configurations from. Use webapp's name to refer to the production slot")
+        c.argument('configuration_source', help="source slot to clone configurations from. Use web app's name to refer to the production slot")
     with self.argument_context('webapp deployment slot swap') as c:
         c.argument('action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
@@ -195,60 +275,60 @@ def load_arguments(self, _):
     for scope in ['appsettings', 'connection-string']:
         with self.argument_context('webapp config ' + scope) as c:
             c.argument('settings', nargs='+', help="space-separated {} in a format of <name>=<value>".format(scope))
-            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of <name>=<value>".format(scope))
+            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of either <name>=<value> or @<json_file>".format(scope))
             c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
 
-    with self.argument_context('webapp config container') as c:
-        c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'], help='the container registry server url')
-        c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'], help='the container custom image name and optionally the tag name')
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'], help='the container registry server password')
-        c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag(return_label=True))
-        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type', arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
-        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="config file for multicontainer apps")
-        c.argument('show_multicontainer_config', action='store_true', help='shows decoded config if a multicontainer config is set')
-
-    with self.argument_context('webapp config set') as c:
-        c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
-        c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
-        c.argument('always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
-        c.argument('auto_heal_enabled', help='enable or disable auto heal', arg_type=get_three_state_flag(return_label=True))
-        c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'], help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
-        c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
-        c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
-        c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
-        c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.3\", \"NODE|6.6\", \"PHP|5.6\", \"DOTNETCORE|1.1.0\". See https://aka.ms/linux-stacks for more info.")
-        c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
-        c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
-        c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
-        c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
-        c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
-        c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
+    with self.argument_context('webapp config storage-account') as c:
+        c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
+        c.argument('storage_type', options_list=['--storage-type', '-t'], help='storage type', arg_type=get_enum_type(AzureStorageType))
+        c.argument('account_name', options_list=['--account-name', '-a'], help='storage account name')
+        c.argument('share_name', options_list=['--share-name', '--sn'], help='share name (Azure Files) or container name (Azure Blob Storage)')
+        c.argument('access_key', options_list=['--access-key', '-k'], help='storage account access key')
+        c.argument('mount_path', options_list=['--mount-path', '-m'], help='path to mount storage volume within web app')
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
+    with self.argument_context('webapp config storage-account add') as c:
+        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
+    with self.argument_context('webapp config storage-account update') as c:
+        c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
-        c.argument('webapp_name', help='The name of the webapp')
+        c.argument('webapp_name', help='The name of the web app')
         c.argument('db_name', help='Name of the database in the backup', arg_group='Database')
         c.argument('db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
         c.argument('db_type', help='Type of database in the backup', arg_group='Database', arg_type=get_enum_type(DatabaseType))
 
     with self.argument_context('webapp config backup create') as c:
-        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
+        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the web app name and a timestamp')
 
     with self.argument_context('webapp config backup update') as c:
-        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
+        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the web app name and a timestamp')
         c.argument('frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
         c.argument('keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], arg_type=get_three_state_flag(return_label=True))
         c.argument('retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
 
     with self.argument_context('webapp config backup restore') as c:
         c.argument('backup_name', help='Name of the backup to restore')
-        c.argument('target_name', help='The name to use for the restored webapp. If unspecified, will default to the name that was used when the backup was created')
-        c.argument('overwrite', help='Overwrite the source webapp, if --target-name is not specified', action='store_true')
+        c.argument('target_name', help='The name to use for the restored web app. If unspecified, will default to the name that was used when the backup was created')
+        c.argument('overwrite', help='Overwrite the source web app, if --target-name is not specified', action='store_true')
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
+
+    with self.argument_context('webapp config snapshot') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+
+    with self.argument_context('webapp config snapshot list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config snapshot restore') as c:
+        c.argument('time', help='Timestamp of the snapshot to restore.')
+        c.argument('restore_content_only', help='Restore the web app files without restoring the settings.')
+        c.argument('source_resource_group', help='Name of the resource group to retrieve snapshot from.')
+        c.argument('source_name', help='Name of the web app to retrieve snapshot from.')
+        c.argument('source_slot', help='Name of the web app slot to retrieve snapshot from.')
 
     with self.argument_context('webapp auth update') as c:
         c.argument('enabled', arg_type=get_three_state_flag(return_label=True))
@@ -275,6 +355,14 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
+    with self.argument_context('webapp up') as c:
+        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('sku', arg_type=sku_arg_type)
+        c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
+
+    with self.argument_context('webapp ssh') as c:
+        c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
+
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
@@ -289,8 +377,21 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
-    # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
+        c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
+        c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
+        c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
+        c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
+
+    # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")
+
+    with self.argument_context('functionapp plan') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name')
+        c.argument('sku', required=True, help='The SKU of the app service plan.')
+        c.argument('number_of_workers', help='The number of workers for the app service plan.')
+        c.argument('tags', arg_type=tags_type)

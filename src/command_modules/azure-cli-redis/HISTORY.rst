@@ -3,6 +3,24 @@
 Release History
 ===============
 
+0.4.0
+++++++
+* Added commands for managing firewall-rules (create, update, delete, show, list)
+* Added commands for managing server-link (create, delete, show, list)
+* Added commands for managing patch-schedule (create, update, delete, show)
+* `az redis create` : Support for Availability Zones and Minimum TLS Version
+* BREAKING CHANGE: Removed 'az redis update-settings' and 'az redis list-all' command
+* BREAKING CHANGE: Parameter for redis create: 'tenant settings' is not accepted in key[=value] format
+* Added warning message for deprecating 'az redis import-method' command.
+
+0.3.2
++++++
+* Minor fixes
+
+0.3.1
++++++
+* Minor fixes
+
 0.3.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

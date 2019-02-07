@@ -20,10 +20,7 @@ from azure.mgmt.sql.models import (
     ManagedInstance,
     Server,
     ServerAzureADAdministrator,
-    Sku
-)
-
-from azure.mgmt.sql.models.sql_management_client_enums import (
+    Sku,
     AuthenticationType,
     BlobAuditingPolicyState,
     CatalogCollationType,
@@ -51,7 +48,8 @@ from .custom import (
     ClientAuthenticationType,
     ClientType,
     DatabaseCapabilitiesAdditionalDetails,
-    ElasticPoolCapabilitiesAdditionalDetails
+    ElasticPoolCapabilitiesAdditionalDetails,
+    FailoverPolicyType
 )
 
 from ._validators import (
@@ -66,7 +64,7 @@ from ._validators import (
 #####
 
 
-class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
+class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
@@ -829,6 +827,32 @@ def load_arguments(self, _):
                    help='The unique name of the operation to cancel.')
 
     ###############################################
+    #             sql failover-group              #
+    ###############################################
+
+    with self.argument_context('sql failover-group') as c:
+        c.argument('failover_group_name', options_list=['--name', '-n'], help="The name of the Failover Group")
+        c.argument('server_name', arg_type=server_param_type)
+        c.argument('partner_server', help="The name of the partner server of a Failover Group")
+        c.argument('partner_resource_group', help="The name of the resource group of the partner server")
+        c.argument('failover_policy', help="The failover policy of the Failover Group",
+                   arg_type=get_enum_type(FailoverPolicyType))
+        c.argument('grace_period',
+                   help='Interval in hours before automatic failover is initiated '
+                        'if an outage occurs on the primary server. '
+                        'This indicates that Azure SQL Database will not initiate '
+                        'automatic failover before the grace period expires. '
+                        'Please note that failover operation with AllowDataLoss option '
+                        'might cause data loss due to the nature of asynchronous synchronization.')
+        c.argument('add_db', nargs='+',
+                   help='List of databases to add to Failover Group')
+        c.argument('remove_db', nargs='+',
+                   help='List of databases to remove from Failover Group')
+        c.argument('allow-data-loss',
+                   help='Complete the failover even if doing so may result in data loss. '
+                        'This will allow the failover to proceed even if a primary database is unavailable.')
+
+    ###############################################
     #                sql server                   #
     ###############################################
     with self.argument_context('sql server') as c:
@@ -1049,6 +1073,9 @@ def load_arguments(self, _):
                    options_list=['--capacity', '-c'],
                    help='The capacity of the managed instance in vcores.')
 
+        c.argument('collation',
+                   help='The collation of the managed instance.')
+
     with self.argument_context('sql mi create') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1058,7 +1085,8 @@ def load_arguments(self, _):
                 'license_type',
                 'virtual_network_subnet_id',
                 'vcores',
-                'storage_size_in_gb'
+                'storage_size_in_gb',
+                'collation'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object

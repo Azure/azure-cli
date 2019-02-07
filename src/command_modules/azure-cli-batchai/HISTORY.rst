@@ -2,6 +2,33 @@
 
 Release History
 ===============
+0.4.7
++++++
+* Minor fixes.
+
+0.4.6
++++++
+* Minor fixes.
+
+0.4.5
++++++
+* Minor fixes.
+
+0.4.4
++++++
+* Upgrade pinned dependency azure-storage-blob from 1.1.0 to 1.3.1
+
+0.4.3
++++++
+* Fix auto storage account creation failure in `az batchai cluster create` command
+
+0.4.2
++++++
+* Minor fixes
+
+0.4.1
++++++
+* Logger output for auto-storage account creation now specifies "resource *group*".
 
 0.4.0
 +++++

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import AzArgumentContext
+from azure.cli.core.commands import AzArgumentContext, CliCommandType
 
 from azure.cli.command_modules.monitor._help import helps  # pylint: disable=unused-import
 
@@ -25,16 +25,21 @@ class MonitorArgumentContext(AzArgumentContext):
         self.extra('parent', options_list='--{}-parent'.format(alias), arg_group=arg_group,
                    help="Target resource parent path, if applicable.")
         self.extra('resource_type', options_list='--{}-type'.format(alias), arg_group=arg_group,
-                   help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
+                   help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines')")
         self.extra('resource_group_name', options_list=['--resource-group', '-g'], arg_group=arg_group)
 
 
 class MonitorCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from azure.cli.command_modules.monitor._exception_handler import monitor_exception_handler
+        monitor_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
+            exception_handler=monitor_exception_handler)
         super(MonitorCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     min_profile='2017-03-10-profile',
-                                                    argument_context_cls=MonitorArgumentContext)
+                                                    argument_context_cls=MonitorArgumentContext,
+                                                    custom_command_type=monitor_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.monitor.commands import load_command_table

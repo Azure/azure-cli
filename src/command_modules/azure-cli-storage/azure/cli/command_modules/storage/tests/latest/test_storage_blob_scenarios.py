@@ -12,8 +12,8 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
 from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
-from azure.cli.command_modules.storage._client_factory import NO_CREDENTIALS_ERROR_MESSAGE
-from .storage_test_util import StorageScenarioMixin
+from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
+from ..storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -94,6 +94,13 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(
             [JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
              JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+
+        # check that blob properties can be set back to null
+        self.storage_cmd('storage blob update -n {} -c {} --content-type ""',
+                         account_info, blob_name, container)
+
+        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
+            .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType', None))
 
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))
@@ -372,6 +379,29 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(Exception):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
+
+    @ResourceGroupPreparer()
+    def test_storage_blob_update_service_properties(self, resource_group):
+        storage_account = self.create_random_name(prefix='account', length=24)
+
+        self.cmd('storage account create -n {} -g {} --kind StorageV2'.format(storage_account, resource_group))
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        self.storage_cmd('storage blob service-properties show', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False))
+
+        self.storage_cmd('storage blob service-properties update --static-website --index-document index.html '
+                         '--404-document error.html', account_info)
+
+        self.storage_cmd('storage blob service-properties update --delete-retention --delete-retention-period 1',
+                         account_info)
+
+        self.storage_cmd('storage blob service-properties show', account_info) \
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
+                                JMESPathCheck('staticWebsite.errorDocument_404Path', 'error.html'),
+                                JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
+                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
+                                JMESPathCheck('deleteRetentionPolicy.days', 1))
 
 
 if __name__ == '__main__':

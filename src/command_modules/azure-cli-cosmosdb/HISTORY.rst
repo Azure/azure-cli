@@ -3,6 +3,34 @@
 Release History
 ===============
 
+0.2.7
++++++
+* Added support for creating database with shared throughput
+
+0.2.6 
++++++ 
+* Added support for updating account from multi-master to single-master
+
+0.2.5
++++++
+* Use latest azure-mgmt-cosmosdb pypi package (0.5.2)
+
+0.2.4
++++++
+* Minor fixes.
+
+0.2.3
++++++
+* Minor fixes.
+
+0.2.2
++++++
+* `cosmosdb create`: Add `--enable-multiple-write-locations` support.
+
+0.2.1
++++++
+* Minor fixes
+
 0.2.0
 +++++
 * BREAKING CHANGE: 'show' commands log error message and fail with exit code of 3 upon a missing resource.

@@ -14,7 +14,7 @@ Azure CLI translates user inputs into Azure Python SDK calls which communicate w
 
 ### Nightly live test run
 
-The scenario tests are run in replayable mode in the Travis CI during pull request verification and branch merge. However, the tests will be run in live mode nightly in internal test infrastructure. See [Test Policies] for more details.
+The scenario tests are run in replayable mode in the Travis CI during pull request verification and branch merge. However, the tests will be run in live mode nightly in internal test infrastructure. See [Test Policies](#test-policies) for more details.
 
 The rationale behind the nightly live test:
 
@@ -129,7 +129,7 @@ Notes:
 
 1. The first argument in the `check` method is a JMESPath query. [JMESPath is a query language for JSON](http://jmespath.org/).
 2. If a command returns JSON, multiple JMESPath based checks can be added to the checks list to validate the result.
-3. In addition to the `check` method, there are other checks like `is_empty` which validate the output is `None`. The check mechanism is extensible. Any callable accepting a single `ExecutionResult` argument can act as a check.
+3. In addition to the `check` method, there are other checks like `is_empty` which validate the output is `None`. The check mechanism is extensible. Any callable accepting a single `ExecutionResult` argument can act as a check: see [checkers.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-testsdk/azure/cli/testsdk/checkers.py).
 
 ### Sample 4. Prepare a resource group for a test
 
@@ -301,3 +301,11 @@ Note: This document's source uses
 to make diffs and updates clearer.
 -->
 
+### Sample 9. Assert Specific Error Occurs
+
+``` Python
+with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name}')
+```
+
+The above syntax is the recommended way to test that a specific error occurs. You must pass the type of the error as well as a string used to match the error message. If the error is encountered, the text will be validated and, if matching, the command will be deemed a success (for testing purposes) and execution will continue. If the command does not yield the expected error, the test will fail.

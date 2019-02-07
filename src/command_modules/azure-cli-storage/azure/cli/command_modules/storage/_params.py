@@ -5,14 +5,16 @@
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type)
+from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
+                                                get_three_state_flag)
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
-                          validate_table_payload_format, validate_key, add_progress_callback,
+                          validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
-                          get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker)
+                          get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
+                          validate_storage_data_plane_list)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -59,6 +61,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     action='store_true', validator=add_progress_callback)
     socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
                                           type=int)
+    num_results_type = CLIArgumentType(
+        default=5000, help='Specifies the maximum number of results to return. Provide "*" to return all.',
+        validator=validate_storage_data_plane_list)
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
@@ -76,17 +81,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
     with self.argument_context('storage', arg_group='Precondition') as c:
-        c.argument('if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+        c.argument('if_modified_since',
+                   help='Commence only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
                    type=get_datetime_type(False))
         c.argument('if_unmodified_since',
-                   help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+                   help='Commence only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
                    type=get_datetime_type(False))
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'list', 'show', 'show-usage', 'update', 'keys']:
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule']:
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
+            c.argument('resource_group_name', required=False, validator=process_resource_group)
 
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
@@ -137,8 +144,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Default action to apply when no rule matches.')
 
     with self.argument_context('storage account show-connection-string') as c:
-        c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
+        c.argument('sas_token', help='The SAS token to be used in the connection-string.')
         c.argument('key_name', options_list=['--key'], help='The key to use.',
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
@@ -154,7 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account network-rule') as c:
         from ._validators import validate_subnet
-        c.argument('storage_account_name', acct_name_type, id_part=None)
+        c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
@@ -167,7 +174,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=('--account-name',))
+        c.argument('account_name', acct_name_type, options_list=['--account-name'])
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
@@ -182,6 +189,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 required=True)
         c.argument('log', validator=get_char_options_validator('rwd', 'log'))
         c.argument('retention', type=int)
+        c.argument('version', type=float)
 
     with self.argument_context('storage metrics show') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt')
@@ -201,10 +209,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
-        c.argument('num_results', type=int,
-                   help='Specifies the maximum number of blobs to return. Must be in range [1,5000]. '
-                        'If this parameter is not provided, all blobs will be returned.')
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+        c.argument('num_results', arg_type=num_results_type)
 
     with self.argument_context('storage blob generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -228,6 +233,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob url') as c:
         c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+        c.argument('snapshot', help='An string value that uniquely identifies the snapshot. The value of'
+                                    'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import blob_tier_validator
@@ -240,6 +247,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')
         c.argument('days_retained', type=int,
                    help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
+
+    with self.argument_context('storage blob service-properties update', min_api='2018-03-28') as c:
+        c.argument('delete_retention', arg_type=get_three_state_flag(), arg_group='Soft Delete',
+                   help='Enables soft-delete.')
+        c.argument('delete_retention_period', type=int, arg_group='Soft Delete',
+                   help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
+        c.argument('static_website', arg_group='Static Website', arg_type=get_three_state_flag(),
+                   help='Enables static-website.')
+        c.argument('index_document', help='Represents the name of the index document. This is commonly "index.html".',
+                   arg_group='Static Website')
+        c.argument('error_document_404_path', options_list=['--404-document'], arg_group='Static Website',
+                   help='Represents the path to the error document that should be shown when an error 404 is issued,'
+                        ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator
@@ -264,13 +284,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
-        from ._validators import process_blob_upload_batch_parameters
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group='Content Control')
         c.ignore('source_files', 'destination_container_name')
 
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_upload_batch_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', type=int,
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
@@ -290,11 +309,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
-
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.extra('no_progress', progress_type)
         c.extra('socket_timeout', socket_timeout_type)
         c.argument('max_connections', type=int,
@@ -305,10 +322,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
 
     with self.argument_context('storage blob delete-batch') as c:
-        from azure.cli.command_modules.storage._validators import process_blob_batch_source_parameters
-
         c.ignore('source_container_name')
-        c.argument('source', options_list=('--source', '-s'), validator=process_blob_batch_source_parameters)
+        c.argument('source', options_list=('--source', '-s'))
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
@@ -335,8 +350,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_source_uri_arguments(validator=validate_source_uri)
 
     with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
-        from azure.cli.command_modules.storage._validators import (get_source_file_or_blob_service_client,
-                                                                   process_blob_copy_batch_namespace)
+        from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client
 
         c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
 
@@ -346,7 +360,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
-        c.argument('prefix', validator=process_blob_copy_batch_namespace)
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
@@ -376,9 +389,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
+        c.argument('bypass_immutability_policy', action='store_true', help='Bypasses upcoming service behavior that '
+                   'will block a container from being deleted if it has a immutability-policy. Specifying this will '
+                   'ignore arguments aside from those used to identify the container ("--name", "--account-name").')
+        c.argument('lease_id', help="If specified, delete_container only succeeds if the container's lease is active "
+                                    "and matches this ID. Required if the container has an active lease.")
+        c.ignore('processed_resource_group')
+        c.ignore('processed_account_name')
+        c.ignore('mgmt_client')
 
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
+
+    with self.argument_context('storage container list') as c:
+        c.argument('num_results', arg_type=num_results_type)
 
     with self.argument_context('storage container set-permission') as c:
         c.ignore('signed_identifiers')
@@ -386,8 +410,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container lease') as c:
         c.argument('container_name', container_name_type)
 
-    with self.argument_context('storage container list') as c:
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+    with self.argument_context('storage container') as c:
+        c.argument('account_name', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage container immutability-policy') as c:
+        c.argument('immutability_period_since_creation_in_days', options_list='--period')
+        c.argument('container_name', container_name_type)
+
+    with self.argument_context('storage container legal-hold') as c:
+        c.argument('container_name', container_name_type)
+        c.argument('tags', nargs='+',
+                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -428,8 +462,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
+    with self.argument_context('storage share url') as c:
+        c.argument('unc', action='store_true', help='Output UNC network path.')
+        c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+
     with self.argument_context('storage share list') as c:
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+        c.argument('num_results', arg_type=num_results_type)
 
     with self.argument_context('storage share exists') as c:
         c.ignore('directory_name', 'file_name')
@@ -526,6 +564,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from .completers import dir_path_completer
         c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
                    completer=dir_path_completer)
+        c.argument('num_results', arg_type=num_results_type)
 
     with self.argument_context('storage file metadata show') as c:
         c.register_path_argument()

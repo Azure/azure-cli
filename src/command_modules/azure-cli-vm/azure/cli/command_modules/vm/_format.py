@@ -73,9 +73,6 @@ def transform_vm_list(vm_list):
 # flattern out important fields (single member arrays) to be displayed in the table output
 def transform_sku_for_table_output(skus):
     from collections import OrderedDict
-    from knack.log import get_logger
-    get_logger(__name__).warning('In a future release of CLI, "Size" and "Tier" columns will be removed.'
-                                 ' You can find the same information from the "Name" column')
     result = []
     for k in skus:
         order_dict = OrderedDict()
@@ -91,8 +88,6 @@ def transform_sku_for_table_output(skus):
             order_dict['capabilities'] = str(temp) if len(temp) > 1 else temp[0]
         else:
             order_dict['capabilities'] = 'None'
-        order_dict['tier'] = k['tier']
-        order_dict['size'] = k['size']
         if k['restrictions']:
             reasons = [x['reasonCode'] for x in k['restrictions']]
             order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]
@@ -119,3 +114,12 @@ def get_vmss_table_output_transformer(loader, for_list=True):
     transform = transform.replace('$zone$', 'Zones: (!zones && \' \') || join(\' \', zones), '
                                   if loader.supported_api_version(min_api='2017-03-30') else ' ')
     return transform if not for_list else '[].' + transform
+
+
+def transform_vm_encryption_show_table_output(result):
+    from collections import OrderedDict
+    if result.get("status", []):
+        status_dict = result["status"][0]
+        return OrderedDict([("status", status_dict.get("displayStatus", "N/A")),
+                            ("message", status_dict.get("message", "N/A"))])
+    return result

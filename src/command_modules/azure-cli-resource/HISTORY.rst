@@ -2,6 +2,40 @@
 
 Release History
 ===============
+2.1.9
++++++
+`group deployment create`: support uri based parameters file 
+* `policy assignment create/list/show`: support managed identity on policy assignments
+
+2.1.8
++++++
+* Minor fixes
+
+2.1.7
++++++
+* `policy assignment create/list/delete/show/update`: fix handling of scope parameter for management groups
+* add new command of `az resource wait`
+
+2.1.6
++++++
+* `policy definition/set-definition create/list/delete/show/update`: add support for management groups and subscriptions
+
+2.1.5
++++++
+* az policy definition/set-definition create/list/delete/show/update: add support for management groups and subscriptions
+
+2.1.4
++++++
+* `managedapp create --kind MarketPlace`: fixed bug causing instance creation of a Marketplace managed app to crash.
+* Restrict `feature` commands to supported profiles.
+
+2.1.3
++++++
+* `provider operation show`: exception handling to exit with code 3 upon a missing resource for consistency.
+
+2.1.2
++++++
+* Minor changes
 
 2.1.1
 +++++

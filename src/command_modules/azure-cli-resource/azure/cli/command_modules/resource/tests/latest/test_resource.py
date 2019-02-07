@@ -6,10 +6,12 @@
 import json
 import os
 import time
+import mock
 import unittest
 
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 
 
@@ -155,6 +157,53 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
 
+class ResourceGenericUpdate(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
+    def test_resource_id_scenario(self, resource_group):
+        self.kwargs.update({
+            'stor_1': self.create_random_name(prefix='stor1', length=10),
+            'stor_2': self.create_random_name(prefix='stor2', length=10)
+        })
+
+        # create storage accounts
+        self.cmd('az storage account create -g {rg} -n {stor_1}')
+        self.cmd('az storage account create -g {rg} -n {stor_2}')
+
+        # get ids
+        self.kwargs['stor_ids'] = " ".join(self.cmd('az storage account list -g {rg} --query "[].id"').get_output_in_json())
+
+        # update tags
+        self.cmd('az storage account update --ids {stor_ids} --set tags.isTag=True tags.isNotTag=False')
+
+        self.cmd('az storage account show --name {stor_1} -g {rg}', checks=[
+            self.check('tags.isTag', 'True'),
+            self.check('tags.isNotTag', 'False')
+        ])
+        self.cmd('az storage account show --name {stor_2} -g {rg}', checks=[
+            self.check('tags.isTag', 'True'),
+            self.check('tags.isNotTag', 'False')
+        ])
+
+        # delete tags.isTag
+        self.cmd('az storage account update --ids {stor_ids} --remove tags.isTag')
+
+        self.cmd('az storage account show --name {stor_1} -g {rg} --query "tags"', checks=[
+            self.check('isNotTag', 'False'),
+            self.check('isTag', None)
+        ])
+        self.cmd('az storage account show --name {stor_2} -g {rg} --query "tags"', checks=[
+            self.check('isNotTag', 'False'),
+            self.check('isTag', None)
+        ])
+
+        # delete tags.isNotTag
+        self.cmd('az storage account update --ids {stor_ids} --remove tags.isNotTag')
+
+        # check tags is empty.
+        self.cmd('az storage account show --name {stor_1} -g {rg} --query "tags"', checks=self.is_empty())
+        self.cmd('az storage account show --name {stor_2} -g {rg} --query "tags"', checks=self.is_empty())
+
+
 class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_create')
@@ -256,6 +305,53 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
+class SubscriptionLevelDeploymentTest(LiveScenarioTest):
+    def tearDown(self):
+        self.cmd('policy assignment delete -n location-lock')
+        self.cmd('policy definition delete -n policy2')
+
+    def test_subscription_level_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
+            # params-uri below is the raw file url of the subscription_level_parameters.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
+            'dn': self.create_random_name('azure-cli-sub-level-desubscription_level_parametersployment', 40)
+        })
+
+        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params_uri}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment list', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment show -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment export -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation list -n {dn}', checks=[
+            self.check('length([])', 4)
+        ])
+
+
 class DeploymentTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_lite')
@@ -279,12 +375,18 @@ class DeploymentTest(ScenarioTest):
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
+            # params-uri below is the raw file url of the test_params.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
             'dn': 'azure-cli-deployment'
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -306,41 +408,6 @@ class DeploymentTest(ScenarioTest):
         self.cmd('group deployment operation list -g {rg} -n {dn}', checks=[
             self.check('length([])', 2),
             self.check('[0].resourceGroup', '{rg}')
-        ])
-
-    def test_subscription_level_deployment(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
-            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
-            'dn': self.create_random_name('azure-cli-sub-level-deployment', 40)
-        })
-
-        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
-
-        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded'),
-        ])
-
-        self.cmd('deployment list', checks=[
-            self.check('[0].name', '{dn}'),
-        ])
-
-        self.cmd('deployment show -n {dn}', checks=[
-            self.check('name', '{dn}')
-        ])
-
-        self.cmd('deployment export -n {dn}', checks=[
-        ])
-
-        self.cmd('deployment operation list -n {dn}', checks=[
-            self.check('length([])', 4)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_lastsuccessful')
@@ -439,8 +506,7 @@ class DeploymentNoWaitTest(ScenarioTest):
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
 
-# TODO: convert back to ScenarioTest when #5740 is fixed.
-class DeploymentThruUriTest(LiveScenarioTest):
+class DeploymentThruUriTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
     def test_group_deployment_thru_uri(self, resource_group):
@@ -486,6 +552,7 @@ class ResourceMoveScenarioTest(ScenarioTest):
 
 class FeatureScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     def test_feature_list(self):
         self.cmd('feature list', checks=self.check("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1))
 
@@ -498,51 +565,21 @@ class FeatureScenarioTest(ScenarioTest):
 
 class PolicyScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_policy')
-    def test_resource_policy(self, resource_group):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
+    def cmdstring(self, basic, management_group=None, subscription=None):
+        cmd = basic
+        if (management_group):
+            cmd = cmd + ' --management-group {mg}'
+        if (subscription):
+            cmd = cmd + ' --subscription {sub}'
+        return cmd
 
-        self.kwargs.update({
-            'pn': self.create_random_name('azure-cli-test-policy', 30),
-            'pdn': self.create_random_name('test_policy', 20),
-            'desc': 'desc_for_test_policy_123',
-            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
-            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
-            'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
-            'mode': 'Indexed',
-            'metadata': {u'category': u'test'},
-            'updated_metadata': {u'category': u'test2'},
-        })
-
-        # create a policy
-        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', checks=[
-            self.check('name', '{pn}'),
-            self.check('displayName', '{pdn}'),
-            self.check('description', '{desc}'),
-            self.check('mode', '{mode}'),
-            self.check('metadata', '{metadata}')
-        ])
-
-        # update it
-        self.kwargs['desc'] = self.kwargs['desc'] + '_new'
-        self.cmd('policy definition update -n {pn} --description {desc} --metadata category=test2', checks=[
-            self.check('description', '{desc}'),
-            self.check('metadata', '{updated_metadata}')
-        ])
-
-        # list and show it
-        self.cmd('policy definition list',
-                 checks=self.check("length([?name=='{pn}'])", 1))
-        self.cmd('policy definition show -n {pn}', checks=[
-            self.check('name', '{pn}'),
-            self.check('displayName', '{pdn}')
-        ])
-
+    def applyPolicy(self):
         # create a policy assignment on a resource group
         self.kwargs.update({
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
             'padn': self.create_random_name('test_assignment', 20)
         })
+
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params {params}', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
@@ -559,6 +596,7 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
         self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
+
         self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params {params} --sku standard', checks=[
             self.check('name', '{pan}'),
             self.check('displayName', '{padn}'),
@@ -570,38 +608,118 @@ class PolicyScenarioTest(ScenarioTest):
         # create a policy assignment using a built in policy definition name
         self.kwargs['pan2'] = self.create_random_name('azurecli-test-policy-assignment2', 40)
         self.kwargs['bip'] = '06a78e20-9358-41c9-923c-fb736d382a4d'
+
         self.cmd('policy assignment create --policy {bip} -n {pan2} --display-name {padn} -g {rg}', checks=[
             self.check('name', '{pan2}'),
             self.check('displayName', '{padn}')
         ])
+
         self.cmd('policy assignment delete -n {pan2} -g {rg}')
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
-            self.cmd('policy assignment list',
-                     checks=self.check("length([?name=='{pan}'])", 0))
+            self.cmd('policy assignment list', checks=self.check("length([?name=='{pan}'])", 0))
         except jmespath.exceptions.JMESPathTypeError:  # ok if query fails on None result
             pass
 
         # but enable --show-all works
-        self.cmd('policy assignment list --disable-scope-strict-match',
-                 checks=self.check("length([?name=='{pan}'])", 1))
+        self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 1))
 
-        # delete the assignment
+        # delete the assignment and validate it's gone
         self.cmd('policy assignment delete -n {pan} -g {rg}')
-        self.cmd('policy assignment list --disable-scope-strict-match')
+        self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
+
+    def applyPolicyAtScope(self, scope, policyId):
+        # create a policy assignment at the given scope
+        self.kwargs.update({
+            'pol': policyId,
+            'pan': self.create_random_name('cli-test-polassg', 24),   # limit is 24 characters at MG scope
+            'padn': self.create_random_name('test_assignment', 20),
+            'scope': scope
+        })
+
+        self.cmd('policy assignment create --policy {pol} -n {pan} --display-name {padn} --params {params} --scope {scope}', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free')
+        ])
+
+        # delete the assignment and validate it's gone
+        self.cmd('policy assignment delete -n {pan} --scope {scope}')
+        self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
+
+    def resource_policy_operations(self, resource_group, management_group=None, subscription=None):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'desc': 'desc_for_test_policy_123',
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
+            'mode': 'Indexed',
+            'metadata': {u'category': u'test'},
+            'updated_metadata': {u'category': u'test2'},
+        })
+        if (management_group):
+            self.kwargs.update({'mg': management_group})
+        if (subscription):
+            self.kwargs.update({'sub': subscription})
+
+        # create a policy
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{pn}'),
+            self.check('displayName', '{pdn}'),
+            self.check('description', '{desc}'),
+            self.check('mode', '{mode}'),
+            self.check('metadata', '{metadata}')
+        ])
+
+        # update it
+        self.kwargs['desc'] = self.kwargs['desc'] + '_new'
+        self.kwargs['pdn'] = self.kwargs['pdn'] + '_new'
+
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('description', '{desc}'),
+            self.check('displayName', '{pdn}'),
+            self.check('metadata', '{updated_metadata}')
+        ])
+
+        # list and show it
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 1))
+
+        cmd = self.cmdstring('policy definition show -n {pn}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{pn}'),
+            self.check('displayName', '{pdn}')
+        ])
+
+        # apply assignments
+        if management_group:
+            scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+            policy = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(pn=self.kwargs['pn'], scope=scope)
+            self.applyPolicyAtScope(scope, policy)
+        elif subscription:
+            policy = '/subscriptions/{sub}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(sub=subscription, pn=self.kwargs['pn'])
+            self.applyPolicyAtScope('/subscriptions/{sub}'.format(sub=subscription), policy)
+        else:
+            self.applyPolicy()
 
         # delete the policy
-        self.cmd('policy definition delete -n {pn}')
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy definition list',
-                 checks=self.check("length([?name=='{pn}'])", 0))
 
-    # remove and re-record once issue #6008 is fixed
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_policy')
-    def test_resource_policyset(self, resource_group):
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+
+    def resource_policyset_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
@@ -615,16 +733,23 @@ class PolicyScenarioTest(ScenarioTest):
             'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
         })
+        if (management_group):
+            self.kwargs.update({'mg': management_group})
+        if (subscription):
+            self.kwargs.update({'sub': subscription})
 
         # create a policy
-        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}').get_output_in_json()
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+        policy = self.cmd(cmd).get_output_in_json()
 
         # create a policy set
         policyset = get_file_json(self.kwargs['psf'])
         policyset[0]['policyDefinitionId'] = policy['id']
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
-        self.cmd('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', checks=[
+
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', management_group, subscription)
+        self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
             self.check('description', '{ps_desc}')
@@ -632,51 +757,221 @@ class PolicyScenarioTest(ScenarioTest):
 
         # update it
         self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
-        self.cmd('policy set-definition update -n {psn} --description {ps_desc}',
-                 checks=self.check('description', '{ps_desc}'))
+        self.kwargs['psdn'] = self.kwargs['psdn'] + '_new'
+
+        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('description', '{ps_desc}'),
+            self.check('displayName', '{psdn}')
+        ])
 
         # list and show it
-        self.cmd('policy set-definition list',
-                 checks=self.check("length([?name=='{psn}'])", 1))
-        self.cmd('policy set-definition show -n {psn}', checks=[
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 1))
+
+        cmd = self.cmdstring('policy set-definition show -n {psn}', management_group, subscription)
+        self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}')
         ])
 
         # create a policy assignment on a resource group
-        self.kwargs.update({
-            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
-            'padn': self.create_random_name('test_assignment', 20)
-        })
-        self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} -g {rg}', checks=[
-            self.check('name', '{pan}'),
-            self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free'),
-        ])
+        if not management_group and not subscription:
+            self.kwargs.update({
+                'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+                'padn': self.create_random_name('test_assignment', 20)
+            })
 
-        # delete the assignment
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
-        self.cmd('policy assignment list --disable-scope-strict-match')
+            self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} -g {rg}', checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}'),
+                self.check('sku.name', 'A0'),
+                self.check('sku.tier', 'Free'),
+            ])
+
+            # delete the assignment and validate it's gone
+            self.cmd('policy assignment delete -n {pan} -g {rg}')
+            self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
-        self.cmd('policy set-definition delete -n {psn}')
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy set-definition list',
-                 checks=self.check("length([?name=='{psn}'])", 0))
+
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        self.cmd('policy definition delete -n {pn}')
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy definition list',
-                 checks=self.check("length([?name=='{pn}'])", 0))
 
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_default(self, resource_group):
+        self.resource_policy_operations(resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_identity')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_identity(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',
+            'sub': self.get_subscription_id(),
+            'location': resource_group_location
+        })
+
+        # create a policy assignment with managed identity using a built in policy definition
+        assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity', checks=[
+            self.check('name', '{pan}'),
+            self.check('location', '{location}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ]).get_output_in_json()['identity']
+
+        # ensure managed identity details are retrievable directly through 'policy assignment identity' commands
+        self.cmd('policy assignment identity show -n {pan} -g {rg}', checks=[
+            self.check('type', assignmentIdentity['type']),
+            self.check('principalId', assignmentIdentity['principalId']),
+            self.check('tenantId', assignmentIdentity['tenantId'])
+        ])
+
+        # remove the managed identity and ensure it is removed when retrieving the policy assignment
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'None')
+        ])
+
+        # add an identity using 'identity assign'
+        self.cmd('policy assignment identity assign -n {pan} -g {rg}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+            self.exists('tenantId')
+        ])
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId')
+        ])
+
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using --assign-identity
+        self.kwargs.update({
+            'idScope': '/subscriptions/{sub}/resourceGroups/{rg}'.format(**self.kwargs),
+            'idRole': 'Reader'
+        })
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('name', '{pan}'),
+                self.check('location', '{location}'),
+                self.check('identity.type', 'SystemAssigned'),
+                self.exists('identity.principalId'),
+                self.exists('identity.tenantId')
+            ]).get_output_in_json()['identity']
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+            self.check('type', 'None')
+        ])
+
+        # create a role assignment for the identity using 'identity assign'
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            assignmentIdentity = self.cmd('policy assignment identity assign -n {pan} -g {rg} --identity-scope {idScope} --role {idRole}', checks=[
+                self.check('type', 'SystemAssigned'),
+                self.exists('principalId'),
+                self.exists('tenantId')
+            ]).get_output_in_json()
+
+        self.kwargs['principalId'] = assignmentIdentity['principalId']
+        self.cmd('role assignment list --resource-group {rg} --role {idRole}', checks=[
+            self.check("length([?principalId == '{principalId}'])", 1),
+            self.check("[?principalId == '{principalId}'].roleDefinitionName | [0]", '{idRole}')
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
+    @AllowLargeResponse()
+    def test_resource_policy_management_group(self, resource_group):
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policy_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
+
+    @record_only()
+    @unittest.skip('mock doesnt work when the subscription comes from --scope')
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
+    @AllowLargeResponse()
+    def test_resource_policy_subscription_id(self, resource_group):
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+        else:
+            self.resource_policy_operations(resource_group, None, 'e8a0d3c2-c26a-4363-ba6b-f56ac74c5ae0')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyset')
+    @AllowLargeResponse()
+    def test_resource_policyset_default(self, resource_group):
+        self.resource_policyset_operations(resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
+    @AllowLargeResponse()
+    def test_resource_policyset_management_group(self, resource_group):
+        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
+        self.cmd('account management-group create -n ' + management_group_name)
+        try:
+            self.resource_policyset_operations(resource_group, management_group_name)
+        finally:
+            self.cmd('account management-group delete -n ' + management_group_name)
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
+    @AllowLargeResponse()
+    def test_resource_policyset_subscription_id(self, resource_group):
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
+                            return_value=MOCKED_SUBSCRIPTION_ID):
+                self.resource_policyset_operations(resource_group, None, '89aebce6-7c12-4e98-8b32-54b514921a15')
+        else:
+            self.resource_policyset_operations(resource_group, None, '89aebce6-7c12-4e98-8b32-54b514921a15')
+
+    @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
-        # This test actually does not work...
-        result = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
-        self.kwargs['pn'] = result['name']
-        self.cmd('policy definition show -n {pn}',
-                 checks=self.check('name', '{pn}'))
+        # get the list of builtins, then retrieve each via show and validate the results match
+        results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
+        for i, result in enumerate(results):
+            self.kwargs['pn'] = result['name']
+            self.kwargs['dn'] = result['displayName']
+            self.kwargs['desc'] = result['description']
+            self.kwargs['id'] = result['id']
+            self.cmd('policy definition show -n {pn}', checks=[
+                self.check('name', '{pn}'),
+                self.check('description', '{desc}'),
+                self.check('displayName', '{dn}'),
+                self.check('id', '{id}')
+            ])
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
@@ -688,7 +983,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'uri': 'https:\/\/testclinew.blob.core.windows.net\/files\/vivekMAD.zip',
+            'uri': 'https://testclinew.blob.core.windows.net/files/vivekMAD.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None'
         })
@@ -781,7 +1076,7 @@ class ManagedAppScenarioTest(LiveScenarioTest):
             'adn': 'testappdefname',
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
-            'uri': 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip',
+            'uri': 'https://wud.blob.core.windows.net/appliance/SingleStorageAccount.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None',
             'sub': self.get_subscription_id()
@@ -874,6 +1169,18 @@ class InvokeActionTest(ScenarioTest):
         self.kwargs['request_body'] = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",\\"overwriteVhds\\":\\"true\\"}'
 
         self.cmd('resource invoke-action --action capture --ids {vm_id} --request-body {request_body}')
+
+
+class GlobalIdsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_global_ids')
+    def test_global_ids(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+        self.kwargs['vnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet}').get_output_in_json()['newVNet']['id']
+        # command will fail if the other parameters were actually used
+        self.cmd('network vnet show --subscription fakesub --resource-group fakerg -n fakevnet --ids {vnet_id}')
 
 
 if __name__ == '__main__':

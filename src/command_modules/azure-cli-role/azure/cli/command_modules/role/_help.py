@@ -12,14 +12,11 @@ helps['ad sp create-for-rbac'] = """
     short-summary: Create a service principal and configure its access to Azure resources.
     parameters:
         - name: --name -n
-          short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
-        - name: --password -p
-          short-summary: The password used to log in.
-          long-summary: If not present and `--cert` is not specified, a random password will be generated.
+          short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
@@ -61,6 +58,8 @@ helps['ad sp create-for-rbac'] = """
 helps['ad sp credential'] = """
     type: group
     short-summary: manage a service principal's credentials.
+    long-summary: the credential update will be applied on the Application object the service principal is associated with.
+       In other words, you can accomplish the same thing using "az ad app credential"
 """
 
 helps['ad sp credential list'] = """
@@ -86,7 +85,7 @@ helps['ad sp credential reset'] = """
         - name: --cert
           short-summary: Certificate to use for credentials.
           long-summary: When using `--keyvault,` indicates the name of the cert to use or create.
-            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to
             load from a file. Do not include private key info.
         - name: --create-cert
           short-summary: Create a self-signed certificate to use for the credential.
@@ -108,6 +107,15 @@ helps['ad sp create'] = """
 helps['ad sp list'] = """
     type: command
     short-summary: List service principals.
+    long-summary: For low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
+"""
+helps['ad sp owner'] = """
+    type: group
+    short-summary: Manage service principal owners.
+"""
+helps['ad sp owner list'] = """
+    type: command
+    short-summary: List service principal owners.
 """
 helps['ad sp show'] = """
     type: command
@@ -124,6 +132,7 @@ helps['ad app delete'] = """
 helps['ad app list'] = """
     type: command
     short-summary: List applications.
+    long-summary: for low latency, by default, only the first 100 will be returned unless you provide filter arguments or use "--all"
 """
 helps['ad app show'] = """
     type: command
@@ -151,9 +160,78 @@ helps['ad app update'] = """
                 az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
 
 """
+helps['ad app owner'] = """
+    type: group
+    short-summary: Manage application owners.
+"""
+helps['ad app owner list'] = """
+    type: command
+    short-summary: List application owners.
+"""
+helps['ad app owner add'] = """
+    type: command
+    short-summary: add an application owner.
+"""
+helps['ad app owner remove'] = """
+    type: command
+    short-summary: remove an application owner.
+"""
+helps['ad app permission'] = """
+    type: group
+    short-summary: manage an application's OAuth2 permissions.
+"""
+helps['ad app permission grant'] = """
+    type: command
+    short-summary: Grant the app an API permission
+    examples:
+        - name: Grant a native application with permissions to access an existing API with TTL of 2 years
+          text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
+"""
+helps['ad app permission list'] = """
+    type: command
+    short-summary: List API permissions the application has requested
+    examples:
+        - name: List the OAuth2 permissions for an existing AAD app
+          text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
+"""
+helps['ad app permission add'] = """
+    type: command
+    short-summary: add an API permission
+    long-summary: invoking "az ad app permission grant" is needed to activate it
+    examples:
+        - name: add a Graph API permission of "Sign in and read user profile"
+          text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
+"""
+helps['ad app permission delete'] = """
+    type: command
+    short-summary: remove an API permission
+    examples:
+        - name: remove an AAD graph permission
+          text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
+"""
+helps['ad app credential'] = """
+    type: group
+    short-summary: manage an application's password or certificate credentials
+"""
+helps['ad app credential reset'] = """
+    type: command
+    short-summary: append or overwrite an application's password or certificate credentials
+"""
+helps['ad app credential list'] = """
+    type: command
+    short-summary: list an application's password or certificate credentials
+"""
+helps['ad app credential delete'] = """
+    type: command
+    short-summary: delete an application's password or certificate credentials
+"""
 helps['ad user list'] = """
     type: command
     short-summary: List Azure Active Directory users.
+"""
+helps['ad user get-member-groups'] = """
+    type: command
+    short-summary: Get groups of which the user is a member
 """
 helps['role'] = """
     type: group
@@ -198,28 +276,28 @@ helps['role definition create'] = """
     examples:
         - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
           text: |
-                az role definition create --role-definition '{
-                    "Name": "Contoso On-call",
-                    "Description": "Perform VM actions and read storage and network information."
-                    "Actions": [
-                        "Microsoft.Compute/*/read",
-                        "Microsoft.Compute/virtualMachines/start/action",
-                        "Microsoft.Compute/virtualMachines/restart/action",
-                        "Microsoft.Network/*/read",
-                        "Microsoft.Storage/*/read",
-                        "Microsoft.Authorization/*/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/read",
-                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                        "Microsoft.Insights/alertRules/*",
-                        "Microsoft.Support/*"
-                    ],
-                    "DataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
-                    ],
-                    "NotDataActions": [
-                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
-                    ],
-                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                az role definition create --role-definition '{ \\
+                    "Name": "Contoso On-call", \\
+                    "Description": "Perform VM actions and read storage and network information." \\
+                    "Actions": [ \\
+                        "Microsoft.Compute/*/read", \\
+                        "Microsoft.Compute/virtualMachines/start/action", \\
+                        "Microsoft.Compute/virtualMachines/restart/action", \\
+                        "Microsoft.Network/*/read", \\
+                        "Microsoft.Storage/*/read", \\
+                        "Microsoft.Authorization/*/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
+                        "Microsoft.Insights/alertRules/*", \\
+                        "Microsoft.Support/*" \\
+                    ], \\
+                    "DataActions": [ \\
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*" \\
+                    ], \\
+                    "NotDataActions": [ \\
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write" \\
+                    ], \\
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
                 }'
         - name: Create a role from a file containing a JSON description.
           text: >
@@ -280,6 +358,22 @@ helps['ad group member check'] = """
     type: command
     short-summary: Check if a member is in a group.
 """
+helps['ad group owner'] = """
+    type: group
+    short-summary: Manage Azure Active Directory group owners.
+"""
+helps['ad group owner list'] = """
+    type: command
+    short-summary: List group owners.
+"""
+helps['ad group owner add'] = """
+    type: command
+    short-summary: add a group owner.
+"""
+helps['ad group owner remove'] = """
+    type: command
+    short-summary: remove a group owner.
+"""
 helps['ad sp'] = """
     type: group
     short-summary: Manage Azure Active Directory service principals for automation authentication.
@@ -287,4 +381,27 @@ helps['ad sp'] = """
 helps['ad user'] = """
     type: group
     short-summary: Manage Azure Active Directory users and user authentication.
+"""
+helps['ad signed-in-user'] = """
+    type: group
+    short-summary: Show graph information about current signed-in user in CLI
+"""
+helps['ad signed-in-user list-owned-objects'] = """
+    type: command
+    short-summary: Get the list of directory objects that are owned by the user
+"""
+
+helps['identity'] = """
+    type: group
+    short-summary: Managed Service Identities
+"""
+
+helps['identity list'] = """
+    type: command
+    short-summary: List Managed Service Identities
+"""
+
+helps['identity list-operations'] = """
+    type: command
+    short-summary: Lists available operations for the Managed Identity provider
 """

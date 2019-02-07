@@ -7,7 +7,9 @@
 def _compute_client_factory(cli_ctx, **kwargs):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE, subscription_id=kwargs.get('subscription_id'))
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE,
+                                   subscription_id=kwargs.get('subscription_id'),
+                                   aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 
 def cf_ni(cli_ctx, _):
@@ -84,16 +86,13 @@ def cf_rolling_upgrade_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
 
 
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def msi_client_factory(cli_ctx, **_):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)
+def cf_galleries(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).galleries
 
 
-def cf_msi_user_identities_operations(cli_ctx, _):
-    return msi_client_factory(cli_ctx).user_assigned_identities
+def cf_gallery_images(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).gallery_images
 
 
-def cf_msi_operations_operations(cli_ctx, _):
-    return msi_client_factory(cli_ctx).operations
+def cf_gallery_image_versions(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).gallery_image_versions

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -242,16 +243,13 @@ def summarize_policy_states(
             policy_set_definition_name,
             query_options)
     elif resource:
-        if not is_valid_resource_id(resource):
-            if resource_type_parent:
-                resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
-                resource_type = "{}/{}".format(resource_type_parent, resource_type)
-            resource = resource_id(
-                subscription=subscription_id,
-                resource_group=resource_group_name,
-                namespace=namespace,
-                type=resource_type,
-                name=resource)
+        resource = _build_resource_id(
+            subscription_id,
+            resource,
+            resource_group_name,
+            namespace,
+            resource_type_parent,
+            resource_type)
         summary = client.summarize_for_resource(
             resource,
             query_options)
@@ -270,6 +268,248 @@ def summarize_policy_states(
             query_options)
 
     return summary.value[0]
+
+
+def get_policy_remediation(
+        cmd,
+        client,
+        remediation_name,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    return _execute_remediation_operation(
+        cmd,
+        client,
+        "get_at_resource",
+        management_group_name,
+        resource_group_name,
+        resource,
+        namespace,
+        resource_type_parent,
+        resource_type,
+        remediation_name)
+
+
+def list_policy_remediations(
+        cmd,
+        client,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    return _execute_remediation_operation(
+        cmd,
+        client,
+        "list_for_resource",
+        management_group_name,
+        resource_group_name,
+        resource,
+        namespace,
+        resource_type_parent,
+        resource_type)
+
+
+def delete_policy_remediation(
+        cmd,
+        client,
+        remediation_name,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    return _execute_remediation_operation(
+        cmd,
+        client,
+        "delete_at_resource",
+        management_group_name,
+        resource_group_name,
+        resource,
+        namespace,
+        resource_type_parent,
+        resource_type,
+        remediation_name)
+
+
+def cancel_policy_remediation(
+        cmd,
+        client,
+        remediation_name,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    return _execute_remediation_operation(
+        cmd,
+        client,
+        "cancel_at_resource",
+        management_group_name,
+        resource_group_name,
+        resource,
+        namespace,
+        resource_type_parent,
+        resource_type,
+        remediation_name)
+
+
+def list_policy_remediation_deployments(
+        cmd,
+        client,
+        remediation_name,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    return _execute_remediation_operation(
+        cmd,
+        client,
+        "list_deployments_at_resource",
+        management_group_name,
+        resource_group_name,
+        resource,
+        namespace,
+        resource_type_parent,
+        resource_type,
+        remediation_name)
+
+
+def create_policy_remediation(
+        cmd,
+        client,
+        remediation_name,
+        policy_assignment,
+        definition_reference_id=None,
+        location_filters=None,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_remediation_scope(
+        management_group_name,
+        subscription_id,
+        resource_group_name,
+        resource,
+        resource_type_parent,
+        resource_type,
+        namespace)
+
+    from azure.mgmt.policyinsights.models import Remediation
+    remediation = Remediation(policy_definition_reference_id=definition_reference_id)
+
+    # Get the full resource ID of the referenced policy assignment
+    if (not is_valid_resource_id(policy_assignment) and
+            not policy_assignment.lower().startswith("/providers/microsoft.management/managementgroups/")):
+        from ._client_factory import cf_policy
+        policy_assignment_client = cf_policy(cmd.cli_ctx).policy_assignments
+        policy_assignments = policy_assignment_client.list()
+        policy_assignment_ids = [p.id for p in policy_assignments if p.name.lower() == policy_assignment.lower()]
+        if not policy_assignment_ids:
+            raise CLIError("No policy assignment with the name '{}' found.".format(policy_assignment))
+        elif len(policy_assignment_ids) > 1:
+            raise CLIError("Multiple policy assignment with the name '{}' found. "
+                           "Specify the policy assignment ID.".format(policy_assignment))
+        policy_assignment = policy_assignment_ids[0]
+    remediation.policy_assignment_id = policy_assignment
+
+    # Ensure locations in the location filters are using their short name
+    if location_filters:
+        locations_list = []
+        for location_arg in location_filters:
+            locations_list.append(location_arg.replace(' ', ''))
+        from azure.mgmt.policyinsights.models import RemediationFilters
+        remediation.filters = RemediationFilters(locations=locations_list)
+
+    return client.create_or_update_at_resource(
+        resource_id=_remove_leading_and_trailing_slash(scope),
+        remediation_name=remediation_name,
+        parameters=remediation)
+
+
+def _execute_remediation_operation(
+        cmd,
+        client,
+        operation_name,
+        management_group_name=None,
+        resource_group_name=None,
+        resource=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None,
+        remediation_name=None):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    scope = _build_remediation_scope(
+        management_group_name,
+        subscription_id,
+        resource_group_name,
+        resource,
+        resource_type_parent,
+        resource_type,
+        namespace)
+
+    operation = getattr(client, operation_name)
+    if remediation_name is None:
+        return operation(resource_id=_remove_leading_and_trailing_slash(scope))
+    return operation(resource_id=_remove_leading_and_trailing_slash(scope), remediation_name=remediation_name)
+
+
+def _build_resource_id(
+        subscription_id,
+        resource,
+        resource_group_name=None,
+        namespace=None,
+        resource_type_parent=None,
+        resource_type=None):
+
+    if not is_valid_resource_id(resource):
+        if resource_type_parent:
+            resource_type_parent = _remove_leading_and_trailing_slash(resource_type_parent)
+            resource_type = "{}/{}".format(resource_type_parent, resource_type)
+
+        resource = resource_id(
+            subscription=subscription_id,
+            resource_group=resource_group_name,
+            namespace=namespace,
+            type=resource_type,
+            name=resource)
+
+    return resource
+
+
+def _build_remediation_scope(
+        management_group=None,
+        subscription=None,
+        resource_group_name=None,
+        resource=None,
+        resource_type_parent=None,
+        resource_type=None,
+        namespace=None):
+
+    if management_group:
+        return "/providers/Microsoft.Management/managementGroups/{}".format(management_group)
+    elif resource:
+        return _build_resource_id(subscription, resource, resource_group_name,
+                                  namespace, resource_type_parent, resource_type)
+    return resource_id(subscription=subscription, resource_group=resource_group_name)
 
 
 def _remove_leading_and_trailing_slash(s):

@@ -2,9 +2,82 @@
 
 Release History
 ===============
-2.1.1
+
+2.2.0
++++++
+* BREAKING CHANGE: Remove 'acr build-task' command group.
+* BREAKING CHANGE: Remove --tag/--manifest from 'acr repository delete' command.
+
+2.1.13
+++++++
+* Add support for VNet/IP rules.
+* Add --platform parameter for `acr build`, `acr task create` and `acr task update` commands
+
+2.1.12
+++++++
+* Allow force push a helm chart that doesn't exist.
+* Allow runtime operations without ARM requests.
+* Deprecating '--resource-group' and add '--suffix' parameter for 'az acr login', 'az acr repository', and 'az acr helm' commands.
+
+2.1.11
+++++++
+* Add support for image import from external Container Registries.
+* Condense the table layout for task list.
+* Add support for Azure DevOps URLs.
+
+2.1.10
+++++++
+* Minor fixes.
+
+2.1.9
++++++
+* Add context token to task step.
+* Add support for setting secrets in acr run to mirror acr task.
+* Better support of --top/--orderby in show-tags/show-manifests commands.
+
+2.1.8
++++++
+* Support commit and pull request git events for Task source trigger.
+* Use default Dockerfile if it's not specified in build command.
+
+2.1.7
++++++
+* Fix an ACR Build encoding issue in Python2.
+* Upgrade pinned dependency azure-storage-blob from 1.1.0 to 1.3.1
+
+2.1.6
++++++
+* Support similar table format as helm client.
+
+2.1.5
++++++
+* Add ACR Task commands.
+* Add quick run command.
+* Deprecate build-task command group.
+* Add helm command group to support managing helm charts with ACR.
+* Allow idempotent create for managed registry.
+* Add a no-format flag for displaying build logs
+
+2.1.4
++++++
+* Provide a workaround for runtime operations without ARM requests.
+* Exclude version control files (eg, .git, .gitignore) from uploaded tar by default in build command.
+* Minor fixes
+
+2.1.3
++++++
+* Add content-trust policy commands.
+* Fix a few issues to handle .dockerignore file properly in build command.
+* Minor fixes
+
+2.1.2
 +++++
 * Minor fixes
+
+2.1.1
++++++
+* Add --with-secure-properties flag in 'acr build-task show' command.
+* Add 'acr build-task update-build' command.
 
 2.1.0
 +++++
