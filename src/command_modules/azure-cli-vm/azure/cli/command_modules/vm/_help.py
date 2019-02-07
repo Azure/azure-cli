@@ -691,12 +691,15 @@ helps['vm disk attach'] = """
 
 helps['vm encryption'] = """
     type: group
-    short-summary: Manage encryption of VM disks. For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
+    short-summary: "Manage encryption of VM disks."
+    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vm encryption enable'] = """
     type: command
-    short-summary: Enable disk encryption on the OS disk and/or data disks. For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
+    short-summary: "Enable disk encryption on the OS disk and/or data disks."
+    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    parameters:
         - name: --aad-client-id
           short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
         - name: --aad-client-secret
@@ -1056,12 +1059,14 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
 
 helps['vmss encryption'] = """
     type: group
-    short-summary: (PREVIEW) Manage encryption of VMSS. For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
+    short-summary: "(PREVIEW) Manage encryption of VMSS."
+    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vmss encryption enable'] = """
     type: command
-    short-summary: Encrypt a VMSS with managed disks. For more information, see: For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
+    short-summary: "Encrypt a VMSS with managed disks."
+    long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
     examples:
         - name: encrypt a VM scale set using a key vault in the same resource group
           text: >
