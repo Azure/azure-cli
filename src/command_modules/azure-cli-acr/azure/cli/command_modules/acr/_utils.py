@@ -402,16 +402,22 @@ def get_custom_registry_credentials(cmd, auth_mode=None, credentials=None):
             login_server = cred_split[0].strip()
             username = cred_split[1].strip()
             password = cred_split[2].strip()
-            custom_registries[login_server] = CustomRegistryCredentials(
-                user_name=SecretObject(
-                    type=SecretObjectType.opaque,
-                    value=username
-                ),
-                password=SecretObject(
-                    type=SecretObjectType.opaque,
-                    value=password
+
+            # if empty username and password, then send a Null object to have it removed
+            custom_reg_credential = None
+            if username and password:
+                custom_reg_credential = CustomRegistryCredentials(
+                    user_name=SecretObject(
+                        type=SecretObjectType.opaque,
+                        value=username
+                    ),
+                    password=SecretObject(
+                        type=SecretObjectType.opaque,
+                        value=password
+                    )
                 )
-            )
+
+            custom_registries[login_server] = custom_reg_credential
 
     Credentials = cmd.get_models('Credentials')
     return Credentials(
