@@ -379,12 +379,12 @@ def get_custom_registry_credentials(cmd, auth_mode=None, credentials=None):
     :param str auth_mode: The login mode for the source registry
     :param [] credentials: The list of credentials
     """
-    sourceRegistryCredentials = None
+    source_registry_credentials = None
     if auth_mode is not None:
         SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
-        sourceRegistryCredentials = SourceRegistryCredentials(login_mode=auth_mode)
+        source_registry_credentials = SourceRegistryCredentials(login_mode=auth_mode)
 
-    customRegistries = {}
+    custom_registries = {}
     if credentials is not None:
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
@@ -399,10 +399,10 @@ def get_custom_registry_credentials(cmd, auth_mode=None, credentials=None):
                     "'registryName;username;password'. Incorrect credentials: '{}'".format(credential)
                 )
 
-            loginServer = cred_split[0].strip()
+            login_server = cred_split[0].strip()
             username = cred_split[1].strip()
             password = cred_split[2].strip()
-            customRegistries[loginServer] = CustomRegistryCredentials(
+            custom_registries[login_server] = CustomRegistryCredentials(
                 user_name=SecretObject(
                     type=SecretObjectType.opaque,
                     value=username
@@ -415,8 +415,8 @@ def get_custom_registry_credentials(cmd, auth_mode=None, credentials=None):
 
     Credentials = cmd.get_models('Credentials')
     return Credentials(
-        source_registry=sourceRegistryCredentials,
-        custom_registries=customRegistries
+        source_registry=source_registry_credentials,
+        custom_registries=custom_registries
     )
 
 
