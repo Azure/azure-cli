@@ -27,8 +27,8 @@ Development of extensions have been simplified by the public release of the azde
 
 1. In a new virtual environment, install the azdev tool with `pip install azdev`
 2. Setup your CLI and install your extension:
-  a. If you are only developing your extension run: `azdev setup -r <PATH> -e <NAME>` where PATH is the path to the local git folder your extension resides in and NAME is the name of your extension.
-  b. If you would like to develop for a CLI module and your extension, run the above, but include `-c [<CLI_PATH>]` where CLI_PATH is the path to your local Azure CLI repo. If omitted, the command will attempt to find the repo.
+  - If you are only developing your extension run: `azdev setup -r <PATH> -e <NAME>` where PATH is the path to the local git folder your extension resides in and NAME is the name of your extension.
+  - If you would like to develop for a CLI module and your extension, run the above, but include `-c [<CLI_PATH>]` where CLI_PATH is the path to your local Azure CLI repo. If omitted, the command will attempt to find the repo.
 
 Building
 --------
