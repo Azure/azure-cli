@@ -5,9 +5,8 @@
 
 from __future__ import print_function
 from knack.util import CLIError
-from knack.help import GroupHelpFile
 
-from azure.cli.core._help import CliCommandHelpFile
+from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
 
 
 def get_all_help(cli_ctx):
@@ -28,7 +27,7 @@ def get_all_help(cli_ctx):
     help_files = []
     for cmd, parser in zip(sub_parser_keys, sub_parser_values):
         try:
-            help_file = GroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) \
+            help_file = CliGroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) \
                 else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)

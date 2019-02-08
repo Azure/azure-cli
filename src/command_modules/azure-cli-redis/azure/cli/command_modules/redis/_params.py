@@ -5,7 +5,6 @@
 # pylint: disable=line-too-long
 
 from knack.arguments import CLIArgumentType
-import azure.cli.command_modules.redis._help  # pylint: disable=unused-import
 
 
 def load_arguments(self, _):
