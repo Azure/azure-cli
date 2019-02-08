@@ -272,6 +272,8 @@ class Profile(object):
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
+        # pylint: disable=too-many-statements
+
         import jwt
         from requests import HTTPError
         from msrestazure.azure_active_directory import MSIAuthentication
