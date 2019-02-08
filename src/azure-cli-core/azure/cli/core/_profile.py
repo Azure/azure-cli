@@ -290,7 +290,7 @@ class Profile(object):
                     authenticated = True
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        logger.info('failed to use MSI as user assigned client id')
+                        logger.info('Sniff: not an MSI client id')
                     else:
                         raise
 
@@ -301,7 +301,7 @@ class Profile(object):
                         authenticated = True
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                            logger.info('failed to use MSI as user assigned resource id')
+                            logger.info('Sniff: not an MSI object id')
                         else:
                             raise
 
