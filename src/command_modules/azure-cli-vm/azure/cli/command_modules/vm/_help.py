@@ -488,40 +488,6 @@ helps[boot_diagnostics_log] = """
 {0}
 """.format(vm_ids_example.format('Get diagnostics logs for all VMs in a resource group.', boot_diagnostics_log, ''))
 
-helps['acs'] = """
-    type: group
-    short-summary: Manage Azure Container Services.
-"""
-
-helps['acs create'] = """
-    type: command
-    short-summary: Create a container service.
-    examples:
-        - name: Create a Kubernetes container service and generate SSH keys to connect to it.
-          text: >
-            az acs create -g MyResourceGroup -n MyContainerService --orchestrator-type kubernetes --generate-ssh-keys
-"""
-
-helps['acs delete'] = """
-    type: command
-    short-summary: Delete a container service.
-"""
-
-helps['acs list'] = """
-    type: command
-    short-summary: List container services.
-"""
-
-helps['acs show'] = """
-    type: command
-    short-summary: Get the details for a container service.
-"""
-
-helps['acs scale'] = """
-    type: command
-    short-summary: Change the private agent count of a container service.
-"""
-
 helps['vm diagnostics'] = """
     type: group
     short-summary: Configure the Azure Virtual Machine diagnostics extension.
