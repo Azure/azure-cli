@@ -12,12 +12,19 @@ To override help for a given command:
 	1. Search code base for "account clear".
 	2. Search result: src/command_modules/azure-cli-**profile**/azure/cli/command_modules/**profile**/commands.py.
 	3. Result shows "account clear" is in the "profile" module.
-2. Using the module name, find the YAML help file which follows the path pattern:
-	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py
-	2.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/help.yaml
-	    - **Pure Yaml format. Coming Soon**
-	3.  If the file doesn't exist, it can be created.
+2. Using the module name, find the YAML help file which follows the path pattern.:
+	1.  src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/_help.py<br>
+	    **or** <br>
+	    src/command_modules/azure-cli-**[module name]**/azure/cli/command_modules/**[module name]**/help.yaml
+	2.  If the file doesn't exist, it can be created.
 3.  Find or create a help entry with the name of the command/group you want to document.  See example below.
+
+
+>  ###Notes: <br>
+>  1. If using **_help.py** files for help authoring, the command module's **\_\_init\_\_.py** file must import the **_help.py** file. i.e: <br>
+>    `import azure.cli.command_modules.examplemod._help` <br>
+>  2. The Help Authoring System now supports **help.yaml** files. Eventually, **_help.py** files will be replaced by **help.yaml**.
+
 
 ### Example YAML help file, _help.py ###
 
@@ -27,7 +34,7 @@ To override help for a given command:
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-from azure.cli.help_files import helps
+from knack.help_files import helps
 
 #pylint: disable=line-too-long
 
@@ -68,7 +75,7 @@ helps['account'] = """
 </pre>
 
 
-### (Coming Soon) Example YAML help file, help.yaml (Version 1) ###
+### Example YAML help file, help.yaml (Version 1) ###
 <pre>
 #---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -159,12 +166,13 @@ Command help starts with its raw SDK docstring text, if available.  Non-SDK comm
 
 Here are the layers of Project Az help, with each layer overriding the layer below it:
 
-| Help Display                             |
-|------------------------------------------|
-| YAML Authoring - help.yaml (coming soon) |
-| Code Specified - _help.py                |
-| Docstring                                |
-| SDK Text                                 |
+| Help Display                  |
+|-------------------------------|
+| YAML Authoring via *help.yaml*|
+| YAML Authoring via *_help.py* |
+| Code Specified                |
+| Docstring                     |
+| SDK Text                      |
 
 ## Page titles for command groups ##
 
