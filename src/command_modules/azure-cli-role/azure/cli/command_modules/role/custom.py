@@ -720,7 +720,7 @@ def _get_grant_permissions(graph_client, client_sp_object_id):
         if ex.status_code == 404:
             return []
         raise
-    return grant_info.additional_properties['value']
+    return grant_info
 
 
 def list_permissions(cmd, identifier):
@@ -743,8 +743,8 @@ def list_permissions(cmd, identifier):
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
         granted_times = 'N/A'
         if result:
-            granted_times = ', '.join([x['startTime'] for x in grant_permissions if
-                                       x['resourceId'] == result[0].object_id])
+            granted_times = ', '.join([x.start_time for x in grant_permissions if
+                                       x.resource_id == result[0].object_id])
         setattr(p, 'grantedTime', granted_times)
     return permissions
 
@@ -791,8 +791,8 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
 
     # ensure to remove the older grant
     grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id)
-    to_delete = [p['objectId'] for p in grant_permissions if p['clientId'] == client_sp_object_id and
-                 p['resourceId'] == associated_sp_object_id]
+    to_delete = [p.object_id for p in grant_permissions if p.client_id == client_sp_object_id and
+                 p.resource_id == associated_sp_object_id]
     for p in to_delete:
         graph_client.oauth2.delete(p)
 
