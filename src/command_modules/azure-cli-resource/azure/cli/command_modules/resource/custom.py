@@ -776,17 +776,17 @@ def _get_parsed_resource_ids(resource_ids):
         if not is_valid_resource_id(rid):
             raise CLIError('az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % rid)
 
-    return (parse_resource_id(rid) for rid in resource_ids)
+    return ({'resource_id': rid} for rid in resource_ids)
 
 
 def _get_rsrc_util_from_parsed_id(cli_ctx, parsed_id, api_version):
     return _ResourceUtils(cli_ctx,
-                          parsed_id['resource_group'],
-                          parsed_id['resource_namespace'],
-                          parsed_id['resource_parent'],
-                          parsed_id['resource_type'],
-                          parsed_id['resource_name'],
-                          None,
+                          parsed_id.get('resource_group', None),
+                          parsed_id.get('resource_namespace', None),
+                          parsed_id.get('resource_parent', None),
+                          parsed_id.get('resource_type', None),
+                          parsed_id.get('resource_name', None),
+                          parsed_id.get('resource_id', None),
                           api_version)
 
 

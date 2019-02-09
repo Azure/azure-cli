@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* `resource show/update/delete/tag/invoke-action`: Fix issue where cross-subscription IDs did not properly honor the subscription ID.
+
 2.1.9
 +++++
 `group deployment create`: support uri based parameters file 
