@@ -440,7 +440,7 @@ class TestActions(unittest.TestCase):
         np.size = 'Standard_f8'
         size_mock.number_of_cores, size_mock.name = 8, 'Standard_f8'
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'canonical', 'UbuntuServer', '18.04'
+        np.os_publisher, np.os_offer, np.os_sku = 'canonical', 'UbuntuServer', '14.04.5-LTS'
         _validate_vm_vmss_accelerated_networking(mock.MagicMock(), np)
         self.assertIsNone(np.accelerated_networking)
 
