@@ -268,10 +268,17 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
+def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, deployer=None, message=None, is_async=None):
+    print(is_async)
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
-    zip_url = scm_url + '/api/zipdeploy?isAsync=true'
+    zip_url = scm_url + '/api/zipdeploy'
+    params = {
+        'isAsync': is_async != 'false',
+        'deployer': deployer,
+        'message': message
+    }
+
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     import urllib3
@@ -284,9 +291,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
-        requests.post(zip_url, data=zip_content, headers=headers)
+        zip_deploy_response = requests.post(zip_url, data=zip_content, headers=headers, params=params)
     # check the status of async deployment
-    response = _check_zip_deployment_status(deployment_status_url, authorization, timeout)
+    check_zip_deployment_status_headers = authorization
+    check_zip_deployment_status_headers['Set-Cookie'] = zip_deploy_response.headers['Set-Cookie']
+    response = _check_zip_deployment_status(deployment_status_url, check_zip_deployment_status_headers, timeout)
     return response
 
 
@@ -2088,13 +2097,13 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
+def _check_zip_deployment_status(deployment_status_url, headers, timeout=None):
     import requests
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = requests.get(deployment_status_url, headers=authorization)
+        response = requests.get(deployment_status_url, headers=headers)
         res_dict = response.json()
         num_trials = num_trials + 1
         if res_dict.get('status', 0) == 3:
@@ -2292,6 +2301,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         logger.warning("Preparing to deploy %s contents to app."
                        "This operation can take a while to complete ...",
                        '' if is_skip_build else 'and build')
+        print("*********************")
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file afer deployment, handling exception if user removed the file manually
         try:
