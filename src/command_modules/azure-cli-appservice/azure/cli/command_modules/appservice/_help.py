@@ -924,6 +924,26 @@ helps['functionapp config set'] = """
     short-summary: Set the web app's configuration.
 """
 
+helps['functionapp config container'] = """
+type: group
+short-summary: Manage function app container settings.
+"""
+
+helps['functionapp config container show'] = """
+type: command
+short-summary: Get details of a function app container's settings.
+"""
+
+helps['functionapp config container set'] = """
+type: command
+short-summary: Set a function app container's settings.
+"""
+
+helps['functionapp config container delete'] = """
+type: command
+short-summary: Delete a function app container's settings.
+"""
+
 helps['functionapp deployment'] = """
     type: group
     short-summary: Manage function app deployments.
@@ -1007,6 +1027,21 @@ helps['functionapp deployment source config-zip'] = """
                  --src {zipFilePathLocation}
 """
 
+helps['functionapp deployment container'] = """
+type: group
+short-summary: Manage container-based continuous deployment.
+"""
+
+helps['functionapp deployment container config'] = """
+type: command
+short-summary: Configure continuous deployment via containers.
+"""
+
+helps['functionapp deployment container show-cd-url'] = """
+type: command
+short-summary: Get the URL which can be used to configure webhooks for continuous deployment.
+"""
+
 helps['functionapp cors'] = """
     type: group
     short-summary: Manage Cross-Origin Resource Sharing (CORS)
@@ -1053,4 +1088,14 @@ helps['functionapp plan create'] = """
         - name: Create a standard app service plan with with four workers.
           text: >
             az functionapp plan create -g MyResourceGroup -n MyPlan --number-of-workers 4 --sku S1
+"""
+
+helps['functionapp devops-build'] = """
+    type: group
+    short-summary: Functionapp specific integration with azure devops builds
+"""
+
+helps['functionapp devops-build create'] = """
+    type: command
+    short-summary: Create an Azure Devops build pipeline for a function app.
 """

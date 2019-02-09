@@ -113,12 +113,28 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             'command': 'npm install',
             'dir': r'site\wwwroot'
         }
-        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload),
-                                 headers=self.__get_application_json_headers())
-        HttpResponseValidator.check_response_status(response)
+        # npm install can take a very long time to complete. By default, Azure's load balancer will terminate
+        # connections after 230 seconds of no inbound or outbound packets. This timeout is not configurable.
+        try:
+            response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload),
+                                     headers=self.__get_application_json_headers())
+            HttpResponseValidator.check_response_status(response)
+        except CLIError as e:
+            if response.status_code == 500 and 'The request timed out.' in response.text:
+                self.__logger.warning('npm install is taking longer than expected and did not finish within the '
+                                      'Azure-specified timeout of 230 seconds.')
+                self.__logger.warning('The installation is likely still in progress. This is a known issue, please wait'
+                                      ' a short while before messaging your bot. You can also visit Kudu to manually '
+                                      'install the npm dependencies. (https://github.com/projectkudu/kudu/wiki)')
+                self.__logger.warning('Your Kudu website for this bot is: %s' % self.__scm_url)
+                self.__logger.warning('\nYou can also use `--keep-node-modules` in your `az bot publish` command to '
+                                      'not `npm install` the dependencies for the bot on Kudu.')
+            else:
+                raise e
+
         return response.json()
 
-    def publish(self, zip_file_path):
+    def publish(self, zip_file_path, keep_node_modules, detected_language):
         """Publishes zipped bot source code to Kudu.
 
         Performs the following steps:
@@ -142,7 +158,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
                                     data=zip_content)
             HttpResponseValidator.check_response_status(response)
 
-        return self.__enable_zip_deploy(zip_file_path)
+        return self.__enable_zip_deploy(zip_file_path, keep_node_modules, detected_language)
 
     def __empty_source_folder(self):
         """Remove the `clirepo/` folder from Kudu.
@@ -160,6 +176,21 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=headers)
         HttpResponseValidator.check_response_status(response)
 
+    def __empty_wwwroot_folder_except_for_node_modules(self):
+        """Empty site/wwwroot/ folder but retain node_modules folder.
+        :return:
+        """
+        self.__logger.info('Removing all files and folders from "site/wwwroot/" except for node_modules.')
+        payload = {
+            'command': '(for /D %i in (.\\*) do if not %~nxi == node_modules rmdir /s/q %i) && (for %i in (.\\*) '
+                       'del %i)',
+            'dir': r'site\wwwroot'
+        }
+        headers = self.__get_application_json_headers()
+        response = requests.post(self.__scm_url + '/api/command', data=json.dumps(payload), headers=headers)
+        HttpResponseValidator.check_response_status(response)
+        self.__logger.info('All files and folders successfully removed from "site/wwwroot/" except for node_modules.')
+
     def __empty_wwwroot_folder(self):
         """Empty the site/wwwroot/ folder from Kudu.
 
@@ -176,7 +207,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         HttpResponseValidator.check_response_status(response)
         self.__logger.info('"site/wwwroot/" successfully emptied.')
 
-    def __enable_zip_deploy(self, zip_file_path):
+    def __enable_zip_deploy(self, zip_file_path, keep_node_modules, detected_language):
         """Pushes local bot's source code in zip format to Kudu for deployment.
 
         This method deploys the zipped bot source code via Kudu's zipdeploy API. This API does not run any build
@@ -190,7 +221,11 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
 
         zip_url = self.__scm_url + '/api/zipdeploy'
         headers = self.__get_application_octet_stream_headers()
-        self.__empty_wwwroot_folder()
+        if not keep_node_modules or detected_language == 'Csharp':
+            self.__empty_source_folder()
+        else:
+            self.__empty_wwwroot_folder_except_for_node_modules()
+
         with open(os.path.realpath(os.path.expanduser(zip_file_path)), 'rb') as fs:
             zip_content = fs.read()
             self.__logger.info('Source code read, uploading to Kudu.')

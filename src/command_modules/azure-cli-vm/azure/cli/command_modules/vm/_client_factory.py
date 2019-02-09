@@ -96,18 +96,3 @@ def cf_gallery_images(cli_ctx, _):
 
 def cf_gallery_image_versions(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_image_versions
-
-
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def msi_client_factory(cli_ctx, **_):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient)
-
-
-def cf_msi_user_identities_operations(cli_ctx, _):
-    return msi_client_factory(cli_ctx).user_assigned_identities
-
-
-def cf_msi_operations_operations(cli_ctx, _):
-    return msi_client_factory(cli_ctx).operations

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 import zipfile
 import requests
 
@@ -51,7 +52,12 @@ class BotPublishPrep:
         return zip_filepath
 
     @staticmethod
-    def prepare_publish_v4(logger, code_dir, proj_file):
+    def prepare_publish_v4(logger, code_dir, proj_file, iis_info):
+        if iis_info['lang'] == 'Node' and iis_info['has_web_config'] and iis_info['has_iisnode_yml']:
+            logger.info("Necessary files for a Node.js deployment on IIS have been detected in the bot's folder. Not "
+                        "retrieving required files from Azure.")
+            return
+
         save_cwd = os.getcwd()
         os.chdir(code_dir)
 
@@ -59,12 +65,11 @@ class BotPublishPrep:
                     code_dir, proj_file or '')
 
         try:
-            if not os.path.exists(os.path.join('.', 'package.json')):
-
+            if iis_info['lang'] == 'Csharp':
                 logger.info('Detected bot language C#, Bot Builder version v4.')
 
                 if proj_file is None:
-                    raise CLIError('Expected --proj-file argument provided with the full path to the '
+                    raise CLIError('Expected --proj-file-path argument provided with the full path to the '
                                    'bot csproj file for csharp bot with Bot Builder SDK v4 project.')
                 with open('.deployment', 'w') as f:
                     f.write('[config]\n')
@@ -74,20 +79,45 @@ class BotPublishPrep:
                             .format(BotPublishPrep.__find_proj(proj_file)))
 
             else:
+                logger.info('Detected bot language Node, Bot Builder version v4. Fetching necessary deployment files '
+                            'for deploying on IIS.')
 
-                logger.info('Detected bot language Node, Bot Builder version v4.')
+                # Retrieve iisnode.yml and web.config and hold in memory, then extract required missing files.
+                node_iis_zip = BotPublishPrep.__retrieve_node_v4_publish_zip()
+                BotPublishPrep.__extract_specific_file_from_zip(logger,
+                                                                node_iis_zip,
+                                                                iis_info['has_web_config'],
+                                                                iis_info['has_iisnode_yml'])
 
-                # put iisnode.yml and web.config
-                response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
-                with open('temp.zip', 'wb') as f:
-                    f.write(response.content)
-
-                zip_ref = zipfile.ZipFile('temp.zip')
-                zip_ref.extractall()
-                zip_ref.close()
-                os.remove('temp.zip')
         finally:
             os.chdir(save_cwd)
+
+    @staticmethod
+    def __retrieve_node_v4_publish_zip():
+        """Retrieves required IIS Node.js v4 BotBuilder SDK deployment files from Azure.
+        :return: zipfile.ZipFile instance
+        """
+        response = requests.get('https://icscratch.blob.core.windows.net/bot-packages/node_v4_publish.zip')
+        if sys.version_info.major >= 3:
+            import io
+            return zipfile.ZipFile(io.BytesIO(response.content))
+        # If Python version is 2.X, use StringIO instead.
+        import StringIO  # pylint: disable=import-error
+        return zipfile.ZipFile(StringIO.StringIO(response.content))
+
+    @staticmethod
+    def __extract_specific_file_from_zip(logger, zip_file, web_config_exists, iisnode_yml_exists):
+        if not web_config_exists and not iisnode_yml_exists:
+            zip_file.extractall()
+            logger.info('"web.config" and "iisnode.yml" created in %s.' % os.getcwd())
+        elif not web_config_exists:
+            with open('web.config', 'wb') as w:
+                w.write(zip_file.read('web.config'))
+                logger.info('"web.config" created in %s.' % os.getcwd())
+        elif iisnode_yml_exists:
+            with open('iisnode.yml', 'wb') as i:
+                i.write(zip_file.read('iisnode.yml'))
+                logger.info('"iisnode.yml" created in %s.' % os.getcwd())
 
     @staticmethod
     def __find_proj(proj_file):
@@ -95,4 +125,4 @@ class BotPublishPrep:
             for file_name in files:
                 if proj_file == file_name.lower():
                     return os.path.relpath(os.path.join(root, file_name))
-        raise CLIError('project file not found. Please pass a valid --proj-file.')
+        raise CLIError('project file not found. Please pass a valid --proj-file-path.')

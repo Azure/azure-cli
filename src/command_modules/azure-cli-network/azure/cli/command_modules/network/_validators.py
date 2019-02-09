@@ -146,18 +146,34 @@ def validate_address_pool_id_list(cmd, namespace):
 
 
 def validate_address_pool_name_or_id(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
-    pool_name = namespace.backend_address_pool
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    address_pool = namespace.backend_address_pool
     lb_name = namespace.load_balancer_name
+    gateway_name = namespace.application_gateway_name
 
-    if is_valid_resource_id(pool_name):
-        if lb_name:
-            raise CLIError('Please omit --lb-name when specifying an address pool ID.')
+    usage_error = CLIError('usage error: --address-pool ID | --lb-name NAME --address-pool NAME '
+                           '| --gateway-name NAME --address-pool NAME')
+
+    if is_valid_resource_id(address_pool):
+        if lb_name or gateway_name:
+            raise usage_error
+        parts = parse_resource_id(address_pool)
+        if parts['type'] == 'loadBalancers':
+            namespace.load_balancer_name = parts['name']
+        elif parts['type'] == 'applicationGateways':
+            namespace.application_gateway_name = parts['name']
+        else:
+            raise usage_error
     else:
-        if not lb_name:
-            raise CLIError('Please specify --lb-name when specifying an address pool name.')
-        namespace.backend_address_pool = _generate_lb_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', pool_name)
+        if bool(lb_name) == bool(gateway_name):
+            raise usage_error
+
+        if lb_name:
+            namespace.backend_address_pool = _generate_lb_subproperty_id(
+                cmd.cli_ctx, namespace, 'backendAddressPools', address_pool)
+        elif gateway_name:
+            namespace.backend_address_pool = _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'backendAddressPools', address_pool)
 
 
 def validate_address_prefixes(namespace):
@@ -636,7 +652,7 @@ def process_lb_create_namespace(cmd, namespace):
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
             'incorrect usage: --subnet NAME --vnet-name NAME | '
-            '--subnet ID | --public-ip NAME_OR_ID')
+            '--subnet ID | --public-ip-address NAME_OR_ID')
 
     if namespace.subnet:
         # validation for an internal load balancer
@@ -1004,6 +1020,13 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
             namespace='Microsoft.Storage',
             type='storageAccounts',
             name=namespace.storage_account)
+    if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
+        namespace.traffic_analytics_workspace = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.OperationalInsights',
+            type='workspaces',
+            name=namespace.traffic_analytics_workspace)
 
     process_nw_flow_log_show_namespace(cmd, namespace)
 
