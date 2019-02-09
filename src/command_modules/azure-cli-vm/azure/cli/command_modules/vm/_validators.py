@@ -1212,6 +1212,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
+
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
@@ -1348,12 +1351,6 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
-
-
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def process_msi_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
 
 
 def process_gallery_image_version_namespace(cmd, namespace):

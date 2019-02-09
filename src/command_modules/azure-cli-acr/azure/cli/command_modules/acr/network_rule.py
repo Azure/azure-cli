@@ -5,12 +5,6 @@
 
 from knack.util import CLIError
 
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    VirtualNetworkRule,
-    IPRule,
-    RegistryUpdateParameters
-)
-
 from ._utils import validate_premium_registry
 
 
@@ -19,7 +13,7 @@ NETWORK_RULE_NOT_SUPPORTED = 'Network rules are only supported for managed regis
 
 def acr_network_rule_list(cmd, registry_name, resource_group_name=None):
     registry, _ = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
     rules = registry.network_rule_set
     delattr(rules, 'default_action')
     return rules
@@ -33,17 +27,20 @@ def acr_network_rule_add(cmd,
                          ip_address=None,
                          resource_group_name=None):
     registry, resource_group_name = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
     rules = registry.network_rule_set
 
     if subnet or vnet_name:
         rules.virtual_network_rules = rules.virtual_network_rules if rules.virtual_network_rules else []
-        subnet_id = validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+        subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+        VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
         rules.virtual_network_rules.append(VirtualNetworkRule(virtual_network_resource_id=subnet_id))
     if ip_address:
         rules.ip_rules = rules.ip_rules if rules.ip_rules else []
+        IPRule = cmd.get_models('IPRule')
         rules.ip_rules.append(IPRule(ip_address_or_range=ip_address))
 
+    RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, registry_name, parameters)
 
@@ -56,23 +53,24 @@ def acr_network_rule_remove(cmd,
                             ip_address=None,
                             resource_group_name=None):
     registry, resource_group_name = validate_premium_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
     rules = registry.network_rule_set
 
     if subnet or vnet_name:
         rules.virtual_network_rules = rules.virtual_network_rules if rules.virtual_network_rules else []
-        subnet_id = validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name).lower()
+        subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name).lower()
         rules.virtual_network_rules = [
             x for x in rules.virtual_network_rules if x.virtual_network_resource_id.lower() != subnet_id]
     if ip_address:
         rules.ip_rules = rules.ip_rules if rules.ip_rules else []
         rules.ip_rules = [x for x in rules.ip_rules if x.ip_address_or_range != ip_address]
 
+    RegistryUpdateParameters = cmd.get_models('RegistryUpdateParameters')
     parameters = RegistryUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, registry_name, parameters)
 
 
-def validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
+def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
     from msrestazure.tools import is_valid_resource_id
     subnet_is_id = is_valid_resource_id(subnet)
 

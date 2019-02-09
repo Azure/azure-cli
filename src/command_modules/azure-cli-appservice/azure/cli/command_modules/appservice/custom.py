@@ -845,6 +845,15 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
+def update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url=None,
+                                          docker_custom_image_name=None, docker_registry_server_user=None,
+                                          docker_registry_server_password=None, slot=None):
+    return update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
+                                     docker_custom_image_name, docker_registry_server_user, None,
+                                     docker_registry_server_password, multicontainer_config_type=None,
+                                     multicontainer_config_file=None, slot=slot)
+
+
 def _get_acr_cred(cli_ctx, registry_name):
     from azure.mgmt.containerregistry import ContainerRegistryManagementClient
     from azure.cli.core.commands.parameters import get_resources_in_subscription
@@ -875,6 +884,10 @@ def show_container_settings(cmd, resource_group_name, name, show_multicontainer_
     settings = get_app_settings(cmd, resource_group_name, name, slot)
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           show_multicontainer_config, slot))
+
+
+def show_container_settings_functionapp(cmd, resource_group_name, name, slot=None):
+    return show_container_settings(cmd, resource_group_name, name, show_multicontainer_config=None, slot=slot)
 
 
 def _filter_for_container_settings(cmd, resource_group_name, name, settings,
@@ -2383,7 +2396,7 @@ def _start_ssh_session(hostname, port, username, password):
             time.sleep(1)
     try:
         c.run('cat /etc/motd', pty=True)
-        c.run('source /etc/profile; /bin/ash', pty=True)
+        c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
     finally:
@@ -2396,3 +2409,13 @@ def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=to
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
         create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot)
+
+
+def create_devops_build(cmd, functionapp_name=None, organization_name=None, project_name=None,
+                        overwrite_yaml=None, use_local_settings=None, local_git=None):
+    from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
+    azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
+                                                                 organization_name, project_name,
+                                                                 overwrite_yaml, use_local_settings,
+                                                                 local_git)
+    return azure_devops_build_interactive.interactive_azure_devops_build()

@@ -488,40 +488,6 @@ helps[boot_diagnostics_log] = """
 {0}
 """.format(vm_ids_example.format('Get diagnostics logs for all VMs in a resource group.', boot_diagnostics_log, ''))
 
-helps['acs'] = """
-    type: group
-    short-summary: Manage Azure Container Services.
-"""
-
-helps['acs create'] = """
-    type: command
-    short-summary: Create a container service.
-    examples:
-        - name: Create a Kubernetes container service and generate SSH keys to connect to it.
-          text: >
-            az acs create -g MyResourceGroup -n MyContainerService --orchestrator-type kubernetes --generate-ssh-keys
-"""
-
-helps['acs delete'] = """
-    type: command
-    short-summary: Delete a container service.
-"""
-
-helps['acs list'] = """
-    type: command
-    short-summary: List container services.
-"""
-
-helps['acs show'] = """
-    type: command
-    short-summary: Get the details for a container service.
-"""
-
-helps['acs scale'] = """
-    type: command
-    short-summary: Change the private agent count of a container service.
-"""
-
 helps['vm diagnostics'] = """
     type: group
     short-summary: Configure the Azure Virtual Machine diagnostics extension.
@@ -691,12 +657,14 @@ helps['vm disk attach'] = """
 
 helps['vm encryption'] = """
     type: group
-    short-summary: Manage encryption of VM disks.
+    short-summary: "Manage encryption of VM disks."
+    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vm encryption enable'] = """
     type: command
-    short-summary: Enable disk encryption on the OS disk and/or data disks.
+    short-summary: "Enable disk encryption on the OS disk and/or data disks."
+    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
     parameters:
         - name: --aad-client-id
           short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -704,6 +672,10 @@ helps['vm encryption enable'] = """
           short-summary: Client secret of the AAD app with permissions to write secrets to the key vault.
         - name: --aad-client-cert-thumbprint
           short-summary: Thumbprint of the AAD app certificate with permissions to write secrets to the key vault.
+    examples:
+        - name: encrypt a VM using a key vault in the same resource group
+          text: >
+            az vm encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault MyVault
 """
 
 helps['vm encryption disable'] = """
@@ -1053,16 +1025,18 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
 
 helps['vmss encryption'] = """
     type: group
-    short-summary: (PREVIEW) Manage encryption of VMSS.
+    short-summary: "(PREVIEW) Manage encryption of VMSS."
+    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vmss encryption enable'] = """
     type: command
-    short-summary: Encrypt a VMSS with managed disks.
+    short-summary: "Encrypt a VMSS with managed disks."
+    long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
     examples:
         - name: encrypt a VM scale set using a key vault in the same resource group
           text: >
-            az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
+            az vmss encryption enable -g MyResourceGroup -n MyVmss --disk-encryption-keyvault MyVault
 """
 
 helps['vmss encryption disable'] = """
@@ -1323,11 +1297,27 @@ helps['vm run-command'] = """
 helps['vm run-command invoke'] = """
     type: command
     short-summary: Execute a specific run command on a vm.
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vm run-command list
     examples:
         - name: install nginx on a vm
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
         - name: invoke command with parameters
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
+"""
+
+helps['vm run-command show'] = """
+    type: command
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vm run-command list
 """
 
 helps['vmss identity'] = """
@@ -1359,6 +1349,47 @@ helps['vmss identity remove'] = """
 helps['vmss identity show'] = """
     type: command
     short-summary: display VM scaleset's managed identity info.
+"""
+
+helps['vmss run-command'] = """
+    type: group
+    short-summary: Manage run commands on a Virtual Machine Scale Set.
+    long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/virtual-machines/windows/run-command or https://docs.microsoft.com/en-us/azure/virtual-machines/linux/run-command.'
+"""
+
+helps['vmss run-command invoke'] = """
+    type: command
+    short-summary: Execute a specific run command on a Virtual Machine Scale Set instance.
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vmss run-command list
+        - name: --instance-id
+          short-summary: Scale set VM instance id.
+    examples:
+        - name: install nginx on a VMSS instance
+          text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\
+                    --instance-id 0 --scripts "sudo apt-get update && sudo apt-get install -y nginx"
+        - name: invoke a run-command with parameters on a VMSS instance
+          text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\
+                    --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
+        - name: 'invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
+          text: |
+            az vmss list-instances -n MyVMSS -g ova-test --query "[].id" --output tsv | \\
+            az vmss run-command invoke --scripts 'echo $1 $2' --parameters hello world  \\
+                --command-id RunShellScript --ids @-
+"""
+
+helps['vmss run-command show'] = """
+    type: command
+    parameters:
+        - name: --command-id
+          type: string
+          short-summary: The command id
+          populator-commands:
+          - az vmss run-command list
 """
 
 helps['disk'] = """
@@ -1480,21 +1511,6 @@ helps['image create'] = """
 helps['image list'] = """
     type: command
     short-summary: List custom VM images.
-"""
-
-helps['identity'] = """
-    type: group
-    short-summary: Managed Service Identities
-"""
-
-helps['identity list'] = """
-    type: command
-    short-summary: List Managed Service Identities
-"""
-
-helps['identity list-operations'] = """
-    type: command
-    short-summary: Lists available operations for the Managed Identity provider
 """
 
 helps['sig'] = """

@@ -13,11 +13,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    DockerBuildRequest,
-    PlatformProperties,
-)
-
 from ._utils import validate_managed_registry, get_validate_platform
 from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
@@ -43,9 +38,10 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_push=False,
               no_logs=False,
               os_type=None,
-              platform=None):
+              platform=None,
+              target=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
@@ -106,8 +102,9 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
+    DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
         is_push_enabled=is_push_enabled,
@@ -119,7 +116,9 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         ),
         docker_file_path=docker_file_path,
         timeout=timeout,
-        arguments=(arg if arg else []) + (secret_arg if secret_arg else []))
+        arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+        target=target
+    )
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,

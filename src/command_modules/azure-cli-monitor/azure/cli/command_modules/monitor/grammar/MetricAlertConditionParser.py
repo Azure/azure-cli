@@ -5,18 +5,17 @@
 
 # pylint: disable=all
 
-# Generated from MetricAlertCondition.g4 by ANTLR 4.7.2
+# Generated from MetricAlertCondition.g4 by ANTLR 4.7.1
 # encoding: utf-8
 from __future__ import print_function
 from antlr4 import *
 from io import StringIO
 import sys
 
-
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3")
-        buf.write(u"\25{\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write(u"\26{\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write(u"\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4")
         buf.write(u"\16\t\16\4\17\t\17\4\20\t\20\3\2\3\2\3\2\3\2\7\2%\n\2")
         buf.write(u"\f\2\16\2(\13\2\3\2\3\2\3\2\3\2\3\2\3\2\5\2\60\n\2\3")
@@ -27,33 +26,33 @@ def serializedATN():
         buf.write(u"\13\3\13\3\f\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3\17")
         buf.write(u"\3\17\3\17\3\17\7\17q\n\17\f\17\16\17t\13\17\3\20\6\20")
         buf.write(u"w\n\20\r\20\16\20x\3\20\2\2\21\2\4\6\b\n\f\16\20\22\24")
-        buf.write(u"\26\30\32\34\36\2\7\5\2\3\b\23\23\25\25\4\2\t\t\f\f\3")
-        buf.write(u"\2\r\16\4\2\t\t\17\17\7\2\3\3\n\n\21\21\23\23\25\25\2")
-        buf.write(u"s\2 \3\2\2\2\4@\3\2\2\2\6C\3\2\2\2\bF\3\2\2\2\nJ\3\2")
-        buf.write(u"\2\2\fM\3\2\2\2\16O\3\2\2\2\20R\3\2\2\2\22\\\3\2\2\2")
-        buf.write(u"\24`\3\2\2\2\26c\3\2\2\2\30f\3\2\2\2\32i\3\2\2\2\34l")
-        buf.write(u"\3\2\2\2\36v\3\2\2\2 &\5\4\3\2!\"\5\6\4\2\"#\7\3\2\2")
+        buf.write(u"\26\30\32\34\36\2\7\5\2\3\b\24\24\26\26\4\2\t\t\r\r\3")
+        buf.write(u"\2\16\17\4\2\t\t\20\20\7\2\3\3\n\13\22\22\24\24\26\26")
+        buf.write(u"\2s\2 \3\2\2\2\4@\3\2\2\2\6C\3\2\2\2\bF\3\2\2\2\nJ\3")
+        buf.write(u"\2\2\2\fM\3\2\2\2\16O\3\2\2\2\20R\3\2\2\2\22\\\3\2\2")
+        buf.write(u"\2\24`\3\2\2\2\26c\3\2\2\2\30f\3\2\2\2\32i\3\2\2\2\34")
+        buf.write(u"l\3\2\2\2\36v\3\2\2\2 &\5\4\3\2!\"\5\6\4\2\"#\7\3\2\2")
         buf.write(u"#%\3\2\2\2$!\3\2\2\2%(\3\2\2\2&$\3\2\2\2&\'\3\2\2\2\'")
-        buf.write(u"/\3\2\2\2(&\3\2\2\2)*\7\22\2\2*+\5\b\5\2+,\7\22\2\2,")
-        buf.write(u"-\7\23\2\2-\60\3\2\2\2.\60\5\b\5\2/)\3\2\2\2/.\3\2\2")
+        buf.write(u"/\3\2\2\2(&\3\2\2\2)*\7\23\2\2*+\5\b\5\2+,\7\23\2\2,")
+        buf.write(u"-\7\24\2\2-\60\3\2\2\2.\60\5\b\5\2/)\3\2\2\2/.\3\2\2")
         buf.write(u"\2\60\61\3\2\2\2\61\62\5\n\6\2\62\67\5\f\7\2\63\64\7")
-        buf.write(u"\23\2\2\64\66\5\20\t\2\65\63\3\2\2\2\669\3\2\2\2\67\65")
-        buf.write(u"\3\2\2\2\678\3\2\2\28=\3\2\2\29\67\3\2\2\2:<\7\24\2\2")
+        buf.write(u"\24\2\2\64\66\5\20\t\2\65\63\3\2\2\2\669\3\2\2\2\67\65")
+        buf.write(u"\3\2\2\2\678\3\2\2\28=\3\2\2\29\67\3\2\2\2:<\7\25\2\2")
         buf.write(u";:\3\2\2\2<?\3\2\2\2=;\3\2\2\2=>\3\2\2\2>\3\3\2\2\2?")
-        buf.write(u"=\3\2\2\2@A\7\25\2\2AB\7\23\2\2B\5\3\2\2\2CD\7\25\2\2")
+        buf.write(u"=\3\2\2\2@A\7\26\2\2AB\7\24\2\2B\5\3\2\2\2CD\7\26\2\2")
         buf.write(u"D\7\3\2\2\2EG\t\2\2\2FE\3\2\2\2GH\3\2\2\2HF\3\2\2\2H")
-        buf.write(u"I\3\2\2\2I\t\3\2\2\2JK\7\20\2\2KL\7\23\2\2L\13\3\2\2")
-        buf.write(u"\2MN\7\21\2\2N\r\3\2\2\2OP\7\13\2\2PQ\7\23\2\2Q\17\3")
-        buf.write(u"\2\2\2RS\5\16\b\2SY\5\22\n\2TU\5\24\13\2UV\5\22\n\2V")
-        buf.write(u"X\3\2\2\2WT\3\2\2\2X[\3\2\2\2YW\3\2\2\2YZ\3\2\2\2Z\21")
-        buf.write(u"\3\2\2\2[Y\3\2\2\2\\]\5\32\16\2]^\5\26\f\2^_\5\34\17")
-        buf.write(u"\2_\23\3\2\2\2`a\t\3\2\2ab\7\23\2\2b\25\3\2\2\2cd\t\4")
-        buf.write(u"\2\2de\7\23\2\2e\27\3\2\2\2fg\t\5\2\2gh\7\23\2\2h\31")
-        buf.write(u"\3\2\2\2ij\7\25\2\2jk\7\23\2\2k\33\3\2\2\2lr\5\36\20")
-        buf.write(u"\2mn\5\30\r\2no\5\36\20\2oq\3\2\2\2pm\3\2\2\2qt\3\2\2")
-        buf.write(u"\2rp\3\2\2\2rs\3\2\2\2s\35\3\2\2\2tr\3\2\2\2uw\t\6\2")
-        buf.write(u"\2vu\3\2\2\2wx\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\37\3\2\2")
-        buf.write(u"\2\n&/\67=HYrx")
+        buf.write(u"I\3\2\2\2I\t\3\2\2\2JK\7\21\2\2KL\7\24\2\2L\13\3\2\2")
+        buf.write(u"\2MN\7\22\2\2N\r\3\2\2\2OP\7\f\2\2PQ\7\24\2\2Q\17\3\2")
+        buf.write(u"\2\2RS\5\16\b\2SY\5\22\n\2TU\5\24\13\2UV\5\22\n\2VX\3")
+        buf.write(u"\2\2\2WT\3\2\2\2X[\3\2\2\2YW\3\2\2\2YZ\3\2\2\2Z\21\3")
+        buf.write(u"\2\2\2[Y\3\2\2\2\\]\5\32\16\2]^\5\26\f\2^_\5\34\17\2")
+        buf.write(u"_\23\3\2\2\2`a\t\3\2\2ab\7\24\2\2b\25\3\2\2\2cd\t\4\2")
+        buf.write(u"\2de\7\24\2\2e\27\3\2\2\2fg\t\5\2\2gh\7\24\2\2h\31\3")
+        buf.write(u"\2\2\2ij\7\26\2\2jk\7\24\2\2k\33\3\2\2\2lr\5\36\20\2")
+        buf.write(u"mn\5\30\r\2no\5\36\20\2oq\3\2\2\2pm\3\2\2\2qt\3\2\2\2")
+        buf.write(u"rp\3\2\2\2rs\3\2\2\2s\35\3\2\2\2tr\3\2\2\2uw\t\6\2\2")
+        buf.write(u"vu\3\2\2\2wx\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\37\3\2\2\2")
+        buf.write(u"\n&/\67=HYrx")
         return buf.getvalue()
 
 
@@ -68,13 +67,13 @@ class MetricAlertConditionParser ( Parser ):
     sharedContextCache = PredictionContextCache()
 
     literalNames = [ u"<INVALID>", u"'.'", u"'/'", u"'_'", u"'\\'", u"':'", 
-                     u"'%'", u"','", u"'-'" ]
+                     u"'%'", u"','", u"'-'", u"'*'" ]
 
     symbolicNames = [ u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
                       u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"WHERE", u"AND", u"INCLUDES", u"EXCLUDES", 
-                      u"OR", u"OPERATOR", u"NUMBER", u"QUOTE", u"WHITESPACE", 
-                      u"NEWLINE", u"WORD" ]
+                      u"<INVALID>", u"<INVALID>", u"WHERE", u"AND", u"INCLUDES", 
+                      u"EXCLUDES", u"OR", u"OPERATOR", u"NUMBER", u"QUOTE", 
+                      u"WHITESPACE", u"NEWLINE", u"WORD" ]
 
     RULE_expression = 0
     RULE_aggregation = 1
@@ -106,24 +105,24 @@ class MetricAlertConditionParser ( Parser ):
     T__5=6
     T__6=7
     T__7=8
-    WHERE=9
-    AND=10
-    INCLUDES=11
-    EXCLUDES=12
-    OR=13
-    OPERATOR=14
-    NUMBER=15
-    QUOTE=16
-    WHITESPACE=17
-    NEWLINE=18
-    WORD=19
+    T__8=9
+    WHERE=10
+    AND=11
+    INCLUDES=12
+    EXCLUDES=13
+    OR=14
+    OPERATOR=15
+    NUMBER=16
+    QUOTE=17
+    WHITESPACE=18
+    NEWLINE=19
+    WORD=20
 
     def __init__(self, input, output=sys.stdout):
         super(MetricAlertConditionParser, self).__init__(input, output=output)
-        self.checkVersion("4.7.2")
+        self.checkVersion("4.7.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
-
 
 
 
@@ -271,7 +270,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class AggregationContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -316,7 +314,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class NamespaceContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -355,7 +352,6 @@ class MetricAlertConditionParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class MetricContext(ParserRuleContext):
 
@@ -421,7 +417,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class OperatorContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -466,7 +461,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class ThresholdContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -505,7 +499,6 @@ class MetricAlertConditionParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class WhereContext(ParserRuleContext):
 
@@ -550,7 +543,6 @@ class MetricAlertConditionParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class DimensionsContext(ParserRuleContext):
 
@@ -621,7 +613,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class DimensionContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -674,7 +665,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Dim_separatorContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -724,7 +714,6 @@ class MetricAlertConditionParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Dim_operatorContext(ParserRuleContext):
 
@@ -779,7 +768,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Dim_val_separatorContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -830,7 +818,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Dim_nameContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -874,7 +861,6 @@ class MetricAlertConditionParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Dim_valuesContext(ParserRuleContext):
 
@@ -939,7 +925,6 @@ class MetricAlertConditionParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Dim_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent=None, invokingState=-1):
@@ -992,7 +977,7 @@ class MetricAlertConditionParser ( Parser ):
                 if _alt == 1:
                     self.state = 115
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)

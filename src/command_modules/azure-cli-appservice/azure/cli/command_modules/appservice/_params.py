@@ -30,6 +30,7 @@ FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
+EXISTING_GIT_OPTIONS = ['AddRemote', 'AddNewRepository', 'UseExisting']
 
 # pylint: disable=too-many-statements
 
@@ -215,6 +216,29 @@ def load_arguments(self, _):
             c.argument('generic_configurations', nargs='+',
                        help='provide site configuration list in a format of either "key=value" pair or "@<json_file>"')
 
+        with self.argument_context(scope + ' config container') as c:
+            c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
+                       help='the container registry server url')
+            c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
+                       help='the container custom image name and optionally the tag name')
+            c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
+                       help='the container registry server username')
+            c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
+                       help='the container registry server password')
+            c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'],
+                       help='enables platform storage (custom container only)',
+                       arg_type=get_three_state_flag(return_label=True))
+            c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type',
+                       arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
+            c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'],
+                       help="config file for multicontainer apps")
+            c.argument('show_multicontainer_config', action='store_true',
+                       help='shows decoded config if a multicontainer config is set')
+
+        with self.argument_context(scope + ' deployment container config') as c:
+            c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
+                       arg_type=get_three_state_flag(return_label=True))
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
@@ -224,8 +248,6 @@ def load_arguments(self, _):
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
-    with self.argument_context('webapp deployment container config') as c:
-        c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment', arg_type=get_enum_type(['true', 'false']))
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -272,16 +294,6 @@ def load_arguments(self, _):
         c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
     with self.argument_context('webapp config storage-account update') as c:
         c.argument('slot_setting', options_list=['--slot-setting'], help="slot setting")
-
-    with self.argument_context('webapp config container') as c:
-        c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'], help='the container registry server url')
-        c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'], help='the container custom image name and optionally the tag name')
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'], help='the container registry server password')
-        c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag(return_label=True))
-        c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help='config type', arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
-        c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="config file for multicontainer apps")
-        c.argument('show_multicontainer_config', action='store_true', help='shows decoded config if a multicontainer config is set')
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
@@ -384,3 +396,13 @@ def load_arguments(self, _):
         c.argument('sku', required=True, help='The SKU of the app service plan.')
         c.argument('number_of_workers', help='The number of workers for the app service plan.')
         c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('functionapp devops-build create') as c:
+        c.argument('functionapp_name', help="Name of the Azure Function App that you want to use", required=False)
+        c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
+        c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
+        c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('use_local_settings', help="Use your local settings in your functionapp settings?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('local_git', help="If you want have a local git repository in this folder, what should we do? Adding a remote will preserve your local repository and use a remote to reference the build repository. "
+                                     "Adding a new repository will remove your local git and create a new repostiory erase your current repository and create a new one. Use existing will attempt to use your local repository if it is an azure repository"
+                                     " otherwise it will fail", arg_type=get_enum_type(EXISTING_GIT_OPTIONS), required=False)

@@ -462,14 +462,6 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     vm = client.virtual_machines.get(resource_group_name, vm_name)
     return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
                                     vm.identity.user_assigned_identities)
-
-
-def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.vm._client_factory import msi_client_factory
-    client = msi_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
-    return client.user_assigned_identities.list_by_subscription()
 # endregion
 
 
@@ -1472,7 +1464,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
 
 # region VirtualMachines RunCommand
-def run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
+def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
     RunCommandInput, RunCommandInputParameter = cmd.get_models('RunCommandInput', 'RunCommandInputParameter')
 
     parameters = parameters or []
@@ -1491,9 +1483,21 @@ def run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=No
         run_command_input_parameters.append(RunCommandInputParameter(name=n, value=v))
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.run_command(resource_group_name, vm_name,
+
+    # if instance_id, this is a vmss instance
+    if instance_id:
+        return client.virtual_machine_scale_set_vms.run_command(resource_group_name, vm_vmss_name, instance_id,
+                                                                RunCommandInput(command_id=command_id, script=scripts,
+                                                                                parameters=run_command_input_parameters))  # pylint: disable=line-too-long
+    # otherwise this is a regular vm instance
+    return client.virtual_machines.run_command(resource_group_name, vm_vmss_name,
                                                RunCommandInput(command_id=command_id, script=scripts,
                                                                parameters=run_command_input_parameters))
+
+
+def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
+    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
+
 # endregion
 
 
@@ -2444,6 +2448,12 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, vmss_name, vmss)
+# endregion
+
+
+# region VirtualMachineScaleSets RunCommand
+def vmss_run_command_invoke(cmd, resource_group_name, vmss_name, command_id, instance_id, scripts=None, parameters=None):  # pylint: disable=line-too-long
+    return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, scripts, parameters, instance_id)
 # endregion
 
 
