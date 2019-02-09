@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Fix issue where in some instances using `--subscription NAME` would throw an exception.
+
 2.0.58
 ++++++
 * `az --version` now displays a notification if you have packages that can be updated.
