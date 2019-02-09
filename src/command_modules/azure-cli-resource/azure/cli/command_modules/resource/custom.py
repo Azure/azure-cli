@@ -1919,6 +1919,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         Formats Url if none provided and sends the POST request with the url and request-body.
         """
         from msrestazure.azure_operation import AzureOperationPoller
+
         query_parameters = {}
         serialize = self.rcf.resources._serialize  # pylint: disable=protected-access
         client = self.rcf.resources._client  # pylint: disable=protected-access
@@ -1926,20 +1927,26 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
             '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
 
-        url = client.format_url(
-            url,
-            resourceGroupName=serialize.url(
-                "resource_group_name", self.resource_group_name, 'str',
-                max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
-            resourceProviderNamespace=serialize.url(
-                "resource_provider_namespace", self.resource_provider_namespace, 'str'),
-            parentResourcePath=serialize.url(
-                "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
-            resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
-            resourceName=serialize.url("resource_name", self.resource_name, 'str'),
-            subscriptionId=serialize.url(
-                "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
-            action=serialize.url("action", action, 'str'))
+        if self.resource_id:
+            url = client.format_url(
+                '{resource_id}/{action}',
+                resource_id=self.resource_id,
+                action=serialize.url("action", action, 'str'))
+        else:
+            url = client.format_url(
+                url,
+                resourceGroupName=serialize.url(
+                    "resource_group_name", self.resource_group_name, 'str',
+                    max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+                resourceProviderNamespace=serialize.url(
+                    "resource_provider_namespace", self.resource_provider_namespace, 'str'),
+                parentResourcePath=serialize.url(
+                    "parent_resource_path", self.parent_resource_path, 'str', skip_quote=True),
+                resourceType=serialize.url("resource_type", self.resource_type, 'str', skip_quote=True),
+                resourceName=serialize.url("resource_name", self.resource_name, 'str'),
+                subscriptionId=serialize.url(
+                    "self.config.subscription_id", self.rcf.resources.config.subscription_id, 'str'),
+                action=serialize.url("action", action, 'str'))
 
         # Construct parameters
         query_parameters['api-version'] = serialize.query("api_version", self.api_version, 'str')
