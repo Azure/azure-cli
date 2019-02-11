@@ -424,7 +424,10 @@ helps['webapp deployment source config-zip'] = """
            text: >
              az webapp deployment source config-zip \\
                  -g {myRG} -n {myAppName} \\
-                 --src {zipFilePathLocation}
+                 --src {zipFilePathLocation} \\
+                 --deployer {deployerServiceName} \\
+                 --message {descriptionAboutDeployment}
+                 --is-async {EnableAsyncDeployment}
 """
 
 helps['webapp deployment source delete'] = """
@@ -1025,6 +1028,9 @@ helps['functionapp deployment source config-zip'] = """
              az functionapp deployment source config-zip \\
                  -g {myRG>} -n {myAppName} \\
                  --src {zipFilePathLocation}
+                 --deployer {deployerServiceName} \\
+                 --message {descriptionAboutDeployment}
+                 --is-async {EnableAsyncDeployment}
 """
 
 helps['functionapp deployment container'] = """
