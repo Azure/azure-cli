@@ -76,7 +76,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
-                    resource_group_name=None):
+                    resource_group_name=None,
+                    target=None):
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
@@ -97,7 +98,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             docker_file_path=file,
             arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
             context_path=context_path,
-            context_access_token=git_access_token
+            context_access_token=git_access_token,
+            target=target
         )
 
     registry, resource_group_name = validate_managed_registry(
@@ -230,7 +232,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     set_value=None,
                     set_secret=None,
                     base_image_trigger_enabled=None,
-                    base_image_trigger_type=None):
+                    base_image_trigger_type=None,
+                    target=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
@@ -263,7 +266,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             docker_file_path=file,
             arguments=arguments,
             context_path=context_path,
-            context_access_token=git_access_token
+            context_access_token=git_access_token,
+            target=target
         )
     elif step:
         if isinstance(step, DockerBuildStep):
@@ -274,7 +278,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 docker_file_path=file,
                 arguments=arguments,
                 context_path=context_path,
-                context_access_token=git_access_token
+                context_access_token=git_access_token,
+                target=target
             )
 
         elif isinstance(step, FileTaskStep):
