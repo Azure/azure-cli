@@ -269,7 +269,6 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None, deployer=None, message=None, is_async=None):
-    print(is_async)
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy'
