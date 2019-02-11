@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-set -ev
+set -e
 
-# install flake 8
-pip install -qqq flake8
+export AZDEV_CLI_REPO_PATH=$(pwd)
+export AZDEV_EXT_REPO_PATHS='_NONE_'
 
-echo "Run flake8."
-flake8 --statistics --config=./.flake8 
-
-# build packages
-. $(cd $(dirname $0); pwd)/artifacts.sh
-
+azdev style --pep8

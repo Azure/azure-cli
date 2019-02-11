@@ -1,26 +1,19 @@
 #!/usr/bin/env bash
 
-. $(cd $(dirname $0); pwd)/artifacts.sh
+set -e
 
-ls -la $share_folder/build
+export AZDEV_CLI_REPO_PATH=$(pwd)
+export AZDEV_EXT_REPO_PATHS='_NONE_'
 
-ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
-
-pip install -e ./tools
-[ -d privates ] && pip install -qqq privates/*.whl
-pip install $ALL_MODULES
-
-set -ev
+azdev setup -c $AZDEV_CLI_REPO_PATH
 
 output=$(az cloud list-profiles -otsv)
-
-azdev verify package $share_folder/build/
 
 for profile in $output; do
     echo
     echo "Verifying profile:" $profile
     az cloud update --profile $profile
-    azdev verify load-all
+    az self-test
     echo $profile "profile has been verified."
 done
 

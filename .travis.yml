@@ -11,7 +11,8 @@ addons:
       - libssl-dev
       - libffi-dev
       - python-dev
-install: pip install tox
+install: 
+  - pip install azdev -qq
 cache: pip
 jobs:
   include:
@@ -19,20 +20,16 @@ jobs:
       env: PURPOSE='Reject PRs to master'
       script: ./scripts/ci/reject_master_prs.sh
     - stage: precheck
-      env: PURPOSE='PEP8'
+      env: PURPOSE='PEP8 Check'
       script: ./scripts/ci/precheck_pep8.sh
       python: 3.6
     - stage: precheck
-      env: PURPOSE='Headers'
+      env: PURPOSE='License/History/DocMap'
       script: ./scripts/ci/precheck_header.sh
       python: 3.6
     - stage: precheck
       env: PURPOSE='Dependency Check'
       script: ./scripts/dependency/check.sh
-      python: 3.6
-    - stage: verify
-      env: PURPOSE='Lint Command Table and Help'
-      script: ./scripts/ci/verify_linter.sh
       python: 3.6
     - stage: unittest
       python: 3.6
@@ -43,39 +40,43 @@ jobs:
       env: TOXENV=py27
       script: ./scripts/ci/unittest.sh
     - stage: verify
-      env:
-      - PURPOSE='Automation'
-      - REDUCE_SDK='True'
-      script: ./scripts/ci/test_automation.sh
+      env: PURPOSE='Azure CLI Linter'
+      script: ./scripts/ci/verify_linter.sh
       python: 3.6
     - stage: verify
-      env: PURPOSE='Automation'
-      script: ./scripts/ci/test_automation.sh
+      env:
+      - PURPOSE='Test Suite (latest)'
+      - REDUCE_SDK='True'
+      script: ./scripts/ci/run_tests.sh
+      python: 3.6
+    - stage: verify
+      env: PURPOSE='Test Suite (latest)'
+      script: ./scripts/ci/run_tests.sh
       python: 2.7
     - stage: verify
       env:
-      - PURPOSE='Automation'
+      - PURPOSE='Test Suite (2017-03-09)'
       - REDUCE_SDK='True'
       - AZURE_CLI_TEST_TARGET_PROFILE='2017-03-09'
-      script: ./scripts/ci/test_automation.sh
+      script: ./scripts/ci/run_tests.sh
       python: 3.6
     - stage: verify
       env:
-      - PURPOSE='Automation'
+      - PURPOSE='Test Suite (2018-03-01)'
       - AZURE_CLI_TEST_TARGET_PROFILE='2018-03-01'
-      script: ./scripts/ci/test_automation.sh
+      script: ./scripts/ci/run_tests.sh
       python: 2.7
     - stage: verify
       script: ./scripts/ci/test_static.sh
-      env: PURPOSE='Static Check'
+      env: PURPOSE='Pylint Check'
+      python: 2.7
+    - stage: verify
+      script: ./scripts/ci/test_profile_integration.sh
+      env: PURPOSE='Profile Self-Test'
       python: 3.6
     - stage: verify
       script: ./scripts/ci/test_profile_integration.sh
-      env: PURPOSE='Integration for profiles'
-      python: 3.6
-    - stage: verify
-      script: ./scripts/ci/test_profile_integration.sh
-      env: PURPOSE='Integration for profiles'
+      env: PURPOSE='Profile Self-Test'
       python: 2.7
     - stage: verify
       script: ./scripts/ci/test_perf.sh
@@ -83,21 +84,21 @@ jobs:
       python: 3.6
     - stage: verify
       script: ./scripts/ci/test_ref_doc.sh
-      env: PURPOSE='RefDocVerify'
+      env: PURPOSE='Verify Ref Docs'
       python: 3.6
     - stage: verify
-      env: PURPOSE='Load extension commands'
+      env: PURPOSE='Load Extensions'
       script: ./scripts/ci/test_extensions.sh
       python: 3.6
     - stage: publish
       script: ./scripts/ci/publish.sh
       python: 3.6
-      env: PURPOSE='Nightly Edge Build'
+      env: PURPOSE='Edge Build'
       if: branch = dev and type = push
     - stage: publish
       script: ./scripts/ci/build_droid.sh
       python: 3.6
-      env: PURPOSE='Automation Docker'
+      env: PURPOSE='Docker Build'
       if: repo = Azure/azure-cli and type = push
 stages:
   - precheck
