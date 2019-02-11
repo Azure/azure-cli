@@ -1138,12 +1138,14 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         webapp_name = self.create_random_name('webapp-zipDeploy-test', 40)
         plan_name = self.create_random_name('webapp-zipDeploy-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
+        deployer = 'Azure-DevOps'
+        message = 'fixed reliabilty issue'
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}" --deployer {} --message "{}"'.format(resource_group, webapp_name, zip_file, deployer, message)).assert_with_checks([
             JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'Push-Deployer'),
-            JMESPathCheck('message', 'Created via a push deployment'),
+            JMESPathCheck('deployer', deployer),
+            JMESPathCheck('message', message),
             JMESPathCheck('complete', True)
         ])
 
