@@ -44,11 +44,11 @@ def acr_import(cmd,
 
     if ACR:
         source_registry_login_server = ACR.group()
-        source_image = source[len(source_registry_login_server)+1:]
+        source_image = source[len(source_registry_login_server) + 1:]
     else:
         slash = source.find('/')
         source_registry_login_server = source[:slash]
-        source_image = source[slash+1:]
+        source_image = source[slash + 1:]
 
     registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server, source_registry)
 
