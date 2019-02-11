@@ -272,6 +272,8 @@ class Profile(object):
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
+        # pylint: disable=too-many-statements
+
         import jwt
         from requests import HTTPError
         from msrestazure.azure_active_directory import MSIAuthentication
@@ -283,15 +285,31 @@ class Profile(object):
                 msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
+                authenticated = False
                 try:
                     msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
+                    authenticated = True
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        logger.info('Sniff: not an MSI client id')
                     else:
                         raise
+
+                if not authenticated:
+                    try:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        authenticated = True
+                    except HTTPError as ex:
+                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                            logger.info('Sniff: not an MSI object id')
+                        else:
+                            raise
+
+                if not authenticated:
+                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
+
         else:
             identity_type = MsiAccountTypes.system_assigned
             msi_creds = MSIAuthentication(resource=resource)
