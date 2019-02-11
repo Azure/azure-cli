@@ -208,6 +208,8 @@ def _get_new_yaml_dict(help_dict):
                     new_ex["summary"] = ex["name"]
                 if "text" in ex:
                     new_ex["command"] = ex["text"]
+                if "supported_profiles" in ex:
+                    new_ex["supported_profiles"] = ex["supported_profiles"]
                 if "min_profile" in ex:
                     new_ex["min_profile"] = ex["min_profile"]
                 if "max_profile" in ex:
