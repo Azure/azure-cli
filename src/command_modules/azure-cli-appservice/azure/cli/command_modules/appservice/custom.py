@@ -15,6 +15,7 @@ except ImportError:
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 from binascii import hexlify
 from os import urandom
+import ast
 import json
 import ssl
 import sys
@@ -40,11 +41,22 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
+from azure.mgmt.web.models import VnetInfo
+from azure.mgmt.web.models import SwiftVirtualNetwork
+from azure.mgmt.resource.resources.models import GenericResource
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.command_modules.network._client_factory import network_client_factory
+from azure.cli.command_modules.resource._client_factory import (
+    _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
+    _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
 
 from .tunnel import TunnelServer
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import in_cloud_console
+from azure.cli.core.util import open_page_in_browser
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
@@ -54,6 +66,13 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
                            get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
+
+from azure.cli.command_modules.relay._client_factory import namespaces_mgmt_client_factory, \
+    wcfrelays_mgmt_client_factory, hycos_mgmt_client_factory
+
+from azure.mgmt.web.models import HybridConnection
+from azure.mgmt.network.models import Subnet
+from azure.mgmt.relay.models import AccessRights
 
 logger = get_logger(__name__)
 
@@ -377,10 +396,10 @@ def list_webapp(cmd, resource_group_name=None):
     result = _list_app(cmd.cli_ctx, resource_group_name)
     return [r for r in result if 'function' not in r.kind]
 
-
 def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
-    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name, slot)
-    return sorted(result, key=lambda site: site.deleted_site_id)
+    client = network_client_factory(cmd.cli_ctx) #web_client_factory(cmd.cli_ctx)
+    #return list(client.web_apps.list_vnet_connections(resource_group_name, name))
+    return client.virtual_networks.list_all()
 
 
 def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
@@ -2157,6 +2176,174 @@ def remove_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=No
     if slot:
         return client.web_apps.delete_triggered_web_job(resource_group_name, name, webjob_name, slot)
     return client.web_apps.delete_triggered_web_job(resource_group_name, name, webjob_name)
+
+
+def list_hc(cmd, name, resource_group_name):
+    client = web_client_factory(cmd.cli_ctx)
+    listed_vals = client.web_apps.list_hybrid_connections(resource_group_name, name)
+    return listed_vals.additional_properties["value"]
+
+
+def set_hc(cmd, name, resource_group_name, namespace_name, hybrid_connection_name):
+    web_client = web_client_factory(cmd.cli_ctx)
+    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
+    
+    # calling the relay API to get information about the hybrid connection 
+    hy_co = hy_co_client.get(resource_group_name, namespace_name, hybrid_connection_name)
+    hy_co_location = hy_co.additional_properties["location"]
+    
+    # if the hybrid connection does not have a default sender authorization rule, create it 
+    hy_co_rules = hy_co_client.list_authorization_rules(resource_group_name, namespace_name, hybrid_connection_name)
+    has_default_sender_key = False 
+    for r in hy_co_rules:
+        if r.name == "defaultSender":
+            for z in r.rights:
+                if (z == z.send):
+                    has_default_sender_key = True
+
+    if not has_default_sender_key:
+        rights = [AccessRights.send]
+        hy_co_client.create_or_update_authorization_rule(resource_group_name, namespace_name, hybrid_connection_name, "defaultSender", rights)
+
+    hy_co_keys = hy_co_client.list_keys(resource_group_name, namespace_name, hybrid_connection_name, "defaultSender")
+    hy_co_info = hy_co.id
+    hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
+    hy_co_hostname = 0
+    for x in hy_co_metadata:
+        if x["key"] == "endpoint":
+            hy_co_hostname = x["value"]
+
+    hostname_parts = hy_co_hostname.split(":")
+    hostname = hostname_parts[0]
+    port = hostname_parts[1]
+    id_parameters = hy_co_info.split("/")
+    
+    # populate object with information about the hyrbid connection, and set it on webapp 
+    hc = {'name': hybrid_connection_name,
+          "type": hy_co.type,
+          "location": hy_co_location,
+          "properties": {"serviceBusNamespace": id_parameters[8],
+                         "relayName": hybrid_connection_name,
+                         "relayArmUri": hy_co_info,
+                         "hostName": hostname,
+                         "port": port,
+                         "sendKeyName": "defaultSender",
+                         "sendKeyValue": hy_co_keys.primary_key
+                        }
+          }
+
+    return web_client.web_apps.set_hybrid_connection(resource_group_name, name, namespace_name, hybrid_connection_name, hc)
+
+
+# set the key the app uses to connect with the hybrid connection 
+def set_hc_key(cmd, asp_name, resource_group_name, namespace_name, hybrid_connection_name, key_type):
+    web_client = web_client_factory(cmd.cli_ctx)
+    asp_hy_co = web_client.app_service_plans.get_hybrid_connection(resource_group_name, asp_name, namespace_name,
+                                                                   hybrid_connection_name)
+    arm_uri = asp_hy_co.relay_arm_uri
+    split_uri = arm_uri.split("resourceGroups/")
+    resource_group_strings = split_uri[1].split('/')
+    relay_resource_group = resource_group_strings[0]
+
+    hy_co_client = hycos_mgmt_client_factory(cmd.cli_ctx, cmd.cli_ctx)
+    # calling the relay function to obtain information about the hc in question
+    hy_co = hy_co_client.get(relay_resource_group, namespace_name, hybrid_connection_name)
+
+    # if the hybrid connection does not have a default sender authorization rule, create it 
+    hy_co_rules = hy_co_client.list_authorization_rules(relay_resource_group, namespace_name, hybrid_connection_name)
+    has_default_sender_key = False 
+    for r in hy_co_rules:
+        if r.name == "defaultSender":
+            for z in r.rights:
+                if (z == z.send):
+                    has_default_sender_key = True
+
+    if not has_default_sender_key:
+        rights = [AccessRights.send]
+        hy_co_client.create_or_update_authorization_rule(relay_resource_group, namespace_name, hybrid_connection_name, "defaultSender", rights)
+
+    hy_co_keys = hy_co_client.list_keys(relay_resource_group, namespace_name, hybrid_connection_name, "defaultSender")
+    hy_co_metadata = ast.literal_eval(hy_co.user_metadata)
+    hy_co_hostname = 0
+    for x in hy_co_metadata:
+        if x["key"] == "endpoint":
+            hy_co_hostname = x["value"]
+
+    hostname_parts = hy_co_hostname.split(":")
+    hostname = hostname_parts[0]
+    port = hostname_parts[1]
+
+    key = "empty"
+    if key_type.lower() == "primary":
+        key = hy_co_keys.primary_key
+    elif key_type.lower() == "secondary":
+        key = hy_co_keys.secondary_key
+    
+    if (key == "empty"):
+        return "Key type is invalid - must be primary or secondary"
+
+    apps = web_client.app_service_plans.list_web_apps_by_hybrid_connection(resource_group_name, asp_name,
+                                                                           namespace_name, hybrid_connection_name)
+    for x in apps:
+        app_info = ast.literal_eval(x)
+        app_name = app_info["name"]
+        app_id = app_info["id"]
+        id_split = app_id.split("/")
+        app_resource_group = id_split[4]
+        hc = HybridConnection(service_bus_namespace=namespace_name, relay_name=hybrid_connection_name,
+                              relay_arm_uri=arm_uri, hostname=hostname, port=port, send_key_name="defaultSender",
+                              send_key_value=key)
+        web_client.web_apps.update_hybrid_connection(app_resource_group, app_name, namespace_name,
+                                                     hybrid_connection_name, hc)
+
+    apps_mod = web_client.app_service_plans.list_web_apps_by_hybrid_connection(resource_group_name, asp_name,
+                                                                               namespace_name, hybrid_connection_name)
+
+    return apps_mod
+
+
+def delete_hc(cmd, resource_group_name, name, namespace_name, hybrid_connection_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.delete_hybrid_connection(resource_group_name, name, namespace_name, hybrid_connection_name)
+
+
+def list_vnet_int(cmd, name, resource_group_name):
+    client = web_client_factory(cmd.cli_ctx)
+    result = list(client.web_apps.list_vnet_connections(resource_group_name, name))
+    for x in result: 
+        longName = x.name
+        usIndex = longName.index('_')
+        shortName = longName[usIndex + 1:]
+        x.name = shortName
+        id = x.id
+        lastSlash = id.rindex('/')
+        shortId = id[:lastSlash] + '/' + shortName
+        x.id = shortId
+    return result 
+
+
+def set_vnet_int(cmd, name, resource_group_name, vnet_resource_group, vnet_name, subnet_name):
+    client = web_client_factory(cmd.cli_ctx)
+    vnet_client = network_client_factory(cmd.cli_ctx)
+    vnet_info = vnet_client.virtual_networks.get(vnet_resource_group, vnet_name)
+    getSwiftVnet = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
+    subnet_resource_id = vnet_info.id + "/subnets/" + subnet_name
+
+    swiftVnet = {"id":getSwiftVnet.id, 
+                 "name":getSwiftVnet.name,
+                 "type":getSwiftVnet.type,
+                 "location":vnet_info.location,
+                 "properties": {
+                     "subnetResourceId":subnet_resource_id,
+                     "swiftSupported":"true"
+                     }
+                 }
+    return client.web_apps.set_swift_virtual_network_connection(resource_group_name, name, swiftVnet)
+
+
+def remove_vnet_int(cmd, name, resource_group_name, vnet_name, subnet_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.delete_swift_virtual_network(resource_group_name, name)
 
 
 def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):

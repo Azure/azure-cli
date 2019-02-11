@@ -1268,5 +1268,65 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
         ])
 
 
+class WebappHybridConnectionBasicTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_appservice_hybridconnection(self, resource_group):
+        self.kwargs.update({
+            'user_metadata': '[{\"key\":\"endpoint\",\"value\":\"127.0.0.1:7888\"}]',
+            'plan': self.create_random_name(prefix='webapp-hc-plan', length=24),
+            'hyco_namespace': self.create_random_name(prefix='webapp-hc-ns', length=24), 
+            'hyco_name': self.create_random_name(prefix='webapp-hc-name', length=24),
+            'webapp_name': self.create_random_name(prefix='webapp-hc', length=24)
+            })
+        self.cmd('appservice plan create -g {rg} -n {plan}')
+        self.cmd('appservice plan list -g {rg}',checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', self.kwargs['plan'])
+            ])
+        self.cmd('webapp create -g {rg} -n {webapp_name} --plan {plan}', checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', self.kwargs['webapp_name'])
+        ])
+        self.cmd('webapp list -g {rg}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', self.kwargs['webapp_name'])
+        ])
+        self.cmd('webapp hybridconnection list -g {rg} -n {webapp_name}', checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+        self.cmd('relay namespace create --resource-group {rg} --name {hyco_namespace}')
+        self.cmd('relay hyco create --resource-group {rg} --namespace-name {hyco_namespace} --name {hyco_name} --user-metadata {user_metadata}')
+
+    @ResourceGroupPreparer()
+    def test_appservice_vnetintegration(self, resource_group):
+        self.kwargs.update({
+            'plan': self.create_random_name(prefix='webapp-vnet-plan', length=24),    
+            'webapp_name': self.create_random_name(prefix='webapp-vnet', length=24),
+            'vnet_name': self.create_random_name(prefix='vnet-name', length=24),
+            })
+        self.cmd('appservice plan create -g {rg} -n {plan}')
+        self.cmd('appservice plan list -g {rg}',checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', self.kwargs['plan'])
+            ])
+        self.cmd('webapp create -g {rg} -n {webapp_name} --plan {plan}', checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', self.kwargs['webapp_name'])
+        ])
+        self.cmd('webapp list -g {rg}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', self.kwargs['webapp_name'])
+        ])
+        self.cmd('webapp list -g {rg}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', self.kwargs['webapp_name'])
+        ])
+        self.cmd('network create_vnet -g {rg} -n {vnet_name}')
+        
+        self.cmd('webapp vnetintegration list -g {rg} -n {webapp_name}', checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

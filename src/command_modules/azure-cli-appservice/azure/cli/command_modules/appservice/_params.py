@@ -355,6 +355,29 @@ def load_arguments(self, _):
         c.argument('microsoft_account_client_id', arg_group='Microsoft', help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
+    
+    with self.argument_context('webapp hybridconnection list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('webapp hybridconnection set') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name')
+        c.argument('hybrid_connection_name')
+
+    with self.argument_context('webapp hybridconnection remove') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name')
+        c.argument('hybrid_connection_name')
+
+    with self.argument_context('appservice hybridconnection set-key') as c:
+        c.argument('asp_name')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name')
+        c.argument('hybrid_connection_name')
+        c.argument('key_type')
 
     with self.argument_context('webapp up') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -364,11 +387,30 @@ def load_arguments(self, _):
     with self.argument_context('webapp ssh') as c:
         c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
 
+    with self.argument_context('webapp vnetintegration list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('webapp vnetintegration set') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('vnet_resource_group')
+        c.argument('vnet_name')
+        c.argument('subnet_name')
+
+    with self.argument_context('webapp vnetintegration remove') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('vnet_name')
+        c.argument('subnet_name')
+        
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        
     with self.argument_context('functionapp create') as c:
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -384,8 +426,10 @@ def load_arguments(self, _):
         c.argument('app_insights', help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
 
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
+        
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)
+        
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")
 
