@@ -185,7 +185,7 @@ def load_arguments(self, _):
             c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
             c.argument('deployer', help='name of the deployer service')
             c.argument('message', help='custom message for deployment')
-            c.argument('is-async', help='enable asynschronous deployment. Default is true', arg_type=get_three_state_flag(return_label=True))
+            c.argument('is-async', help='enable asynchronous deployment. Default is true', arg_type=get_three_state_flag(return_label=True))
 
         with self.argument_context(scope + ' config appsettings list') as c:
             c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
