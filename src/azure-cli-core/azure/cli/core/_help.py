@@ -170,6 +170,7 @@ class CliHelpFile(KnackHelpFile):
         min_profile = ex.get('min_profile')
         max_profile = ex.get('max_profile')
 
+        # TODO: after CI passes without refdoc warnings remove this.
         if min_profile or max_profile:
             raise CLIError("An example has a min_profile or max_profile.\n{}, {}".
                            format(ex.get('name'), ex.get('text')))
@@ -178,6 +179,7 @@ class CliHelpFile(KnackHelpFile):
             supported_profiles = [profile.strip() for profile in supported_profiles.split(',')]
             return self.help_ctx.cli_ctx.cloud.profile in supported_profiles
 
+        # TODO: after CI passes without refdoc warnings remove this.
         if min_profile or max_profile:
             from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
             # yaml will load this as a datetime if it's a date, we need a string.
@@ -309,6 +311,8 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         self.long_summary = _data.get('description', '')
 
         self.supported_profiles = _data.get('supported_profiles', '')
+
+        # TODO: after CI passes without refdoc warnings remove this.
         self.min_profile = _data.get('min_profile', '')
         self.max_profile = _data.get('max_profile', '')
 

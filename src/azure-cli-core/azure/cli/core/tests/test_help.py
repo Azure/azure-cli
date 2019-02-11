@@ -191,8 +191,7 @@ class TestHelpLoads(unittest.TestCase):
             examples:
                 - name: Alpha Example
                   text: az test alpha --arg1 a --arg2 b --arg3 c
-                  min_profile: 2017-03-09-profile
-                  max_profile: latest
+                  supported_profiles: 2018-03-01-hybrid, latest
         """
 
     def set_help_yaml(self):
@@ -233,8 +232,7 @@ class TestHelpLoads(unittest.TestCase):
                 - summary: A simple example
                   description: More detail on the simple example.
                   command: az test alpha --arg1 apple --arg2 ball --arg3 cat
-                  min_profile: 2017-03-09-profile
-                  max_profile: latest
+                  supported_profiles: 2018-03-01-hybrid, latest
         """
         return self._create_new_temp_file(yaml_help, suffix="help.yaml")
 
@@ -306,8 +304,7 @@ class TestHelpLoads(unittest.TestCase):
                                     "summary": "A simple example from json",
                                     "description": "More detail on the simple example.",
                                     "command": "az test alpha --arg1 alpha --arg2 beta --arg3 chi",
-                                    "min_profile": "2018-03-01-hybrid",
-                                    "max_profile": "latest"
+                                    "supported_profiles": "2018-03-01-hybrid, latest"
                                 }
                             ]
                         }
@@ -364,8 +361,7 @@ class TestHelpLoads(unittest.TestCase):
 
         self.assertEqual(command_help_obj.examples[0].short_summary, "Alpha Example")
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 a --arg2 b --arg3 c")
-        self.assertEqual(command_help_obj.examples[0].min_profile, "2017-03-09-profile")
-        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+        self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
 
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
@@ -422,8 +418,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example")
         self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 apple --arg2 ball --arg3 cat")
-        self.assertEqual(command_help_obj.examples[0].min_profile, "2017-03-09-profile")
-        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+        self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
 
     @mock.patch('inspect.getmembers', side_effect=mock_inspect_getmembers)
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
@@ -480,8 +475,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example from json")
         self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 alpha --arg2 beta --arg3 chi")
-        self.assertEqual(command_help_obj.examples[0].min_profile, "2018-03-01-hybrid")
-        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+        self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
 
         # validate other parameters, which have help from help.py and help.yamls
         self.assertEqual(obj_param_dict["--arg1 -a"].short_summary, "A short summary.")
@@ -501,8 +495,52 @@ class TestHelpLoads(unittest.TestCase):
             f.write(data)
             return f.name
 
-    def _test_supported_profiles(self):
-        self.assertTrue(False)
+    def test_supported_profiles(self):
+        from azure.cli.core._help import CliHelpFile, HelpExample
+        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
+
+        cli_ctx = self.test_cli
+        cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
+                                                    parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+        mock_help_file = CliHelpFile(cli_ctx.invocation.help, "")
+        mock_help_file.help_ctx = cli_ctx.invocation.help
+        ex_dict = {
+            'summary': "Example to test supported_profiles",
+            'command': "Az foo bar",
+            'supported_profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest "
+        }
+
+        # example should be included in all profiles
+        for profile in AZURE_API_PROFILES.keys():
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+            self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+        # example should be included in all filtered profiles but not excluded profile
+        for excluded_profile in AZURE_API_PROFILES.keys():
+            filtered_profiles = [profile for profile in AZURE_API_PROFILES.keys() if profile != excluded_profile]
+            ex_dict['supported_profiles'] = ", ".join(filtered_profiles)
+
+            # excluded profile is not in supported_profiles list and example should be excluded
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = excluded_profile
+            self.assertFalse(mock_help_file._should_include_example(ex_dict))
+
+            # for other profiles example should show be included.
+            for profile in filtered_profiles:
+                mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+                self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+        # example should be included in the sole supported profile
+        for sole_profile in AZURE_API_PROFILES.keys():
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = sole_profile
+
+            # try different supported profiles settings in example and handle accordingly
+            for profile in AZURE_API_PROFILES.keys():
+                ex_dict['supported_profiles'] = " {} ".format(profile)
+                should_include_example = mock_help_file._should_include_example(ex_dict)
+                if profile == sole_profile:
+                    self.assertTrue(should_include_example)
+                else:
+                    self.assertFalse(should_include_example)
 
 
 if __name__ == '__main__':
