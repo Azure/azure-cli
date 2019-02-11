@@ -175,9 +175,8 @@ class CliHelpFile(KnackHelpFile):
                            format(ex.get('name'), ex.get('text')))
 
         if supported_profiles:
-            supported_profiles = supported_profiles.split(',')
+            supported_profiles = [profile.strip() for profile in supported_profiles.split(',')]
             return self.help_ctx.cli_ctx.cloud.profile in supported_profiles
-
 
         if min_profile or max_profile:
             from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE

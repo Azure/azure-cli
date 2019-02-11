@@ -501,6 +501,9 @@ class TestHelpLoads(unittest.TestCase):
             f.write(data)
             return f.name
 
+    def _test_supported_profiles(self):
+        self.assertTrue(False)
+
 
 if __name__ == '__main__':
     unittest.main()
