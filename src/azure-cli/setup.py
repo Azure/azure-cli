@@ -104,7 +104,7 @@ DEPENDENCIES = [
     'azure-cli-servicefabric==0.1.12',
     'azure-cli-signalr==1.0.0',
     'azure-cli-sql==2.1.9',
-    'azure-cli-sqlvirtualmachine==0.1.0',
+    'azure-cli-sqlvm==0.1.0',
     'azure-cli-storage==2.3.1',
     'azure-cli-telemetry==1.0.1',
     'azure-cli-vm==2.2.15'
