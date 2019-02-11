@@ -38,7 +38,8 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_push=False,
               no_logs=False,
               os_type=None,
-              platform=None):
+              platform=None,
+              target=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
@@ -115,7 +116,9 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         ),
         docker_file_path=docker_file_path,
         timeout=timeout,
-        arguments=(arg if arg else []) + (secret_arg if secret_arg else []))
+        arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+        target=target
+    )
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
