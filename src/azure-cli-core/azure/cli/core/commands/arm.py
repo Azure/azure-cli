@@ -375,8 +375,8 @@ def _get_client_factory(_, custom_command=False, **kwargs):
     return factory
 
 
-def get_arguments_loader(context, getter_op, cmd_args=None):
-    getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op), excluded_params=EXCLUDED_PARAMS))
+def get_arguments_loader(context, getter_op, cmd_args=None, operation_group=None):
+    getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op, operation_group), excluded_params=EXCLUDED_PARAMS))
     cmd_args = cmd_args or {}
     cmd_args.update(getter_args)
     cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
@@ -696,16 +696,16 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
     factory = _get_client_factory(name, custom_command=custom_command, **kwargs)
 
     def generic_show_arguments_loader():
-        cmd_args = get_arguments_loader(context, getter_op)
+        cmd_args = get_arguments_loader(context, getter_op, operation_group=kwargs.get('operation_group'))
         return [(k, v) for k, v in cmd_args.items()]
 
     def description_loader():
-        return extract_full_summary_from_signature(context.get_op_handler(getter_op))
+        return extract_full_summary_from_signature(context.get_op_handler(getter_op, operation_group=kwargs.get('operation_group')))
 
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
         context_copy = copy.copy(context)
-        getter_args = dict(extract_args_from_signature(context_copy.get_op_handler(getter_op),
+        getter_args = dict(extract_args_from_signature(context_copy.get_op_handler(getter_op, operation_group=kwargs.get('operation_group')),
                                                        excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
         context_copy.cli_ctx = cmd.cli_ctx
@@ -719,7 +719,7 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
         if client and (client_arg_name in getter_args):
             args[client_arg_name] = client
 
-        getter = context_copy.get_op_handler(getter_op)
+        getter = context_copy.get_op_handler(getter_op, operation_group=kwargs.get('operation_group'))
         try:
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except
