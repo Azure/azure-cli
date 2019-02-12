@@ -35,15 +35,7 @@ class BaseHelpLoader(ABC):
         pass
 
     def _data_is_applicable(self):
-        is_applicable = False
-        ldr_name = self.__class__
-        if self._data:
-            is_applicable = self.version == self._data.get('version')
-            if not is_applicable:
-                msg = "Data's version: {} does not match loader {}'s version: {}".format(self._data.get('version'),
-                                                                                         ldr_name, self.version)
-                logger.info(msg)
-        return is_applicable
+        return self._data and self.version == self._data.get('version')
 
     @abc.abstractmethod
     def load_raw_data(self, help_obj, parser):
