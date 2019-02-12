@@ -11,8 +11,8 @@ except ImportError:
 from knack.util import CLIError
 from knack.log import get_logger
 
-from ._utils import validate_managed_registry, user_confirmation, ResourceNotFound
-from ._docker_utils import request_data_from_registry, get_access_credentials
+from ._utils import user_confirmation
+from ._docker_utils import request_data_from_registry, get_access_credentials, RegistryException
 
 logger = get_logger(__name__)
 
@@ -127,14 +127,6 @@ def acr_repository_list(cmd,
                         tenant_suffix=None,
                         username=None,
                         password=None):
-    is_managed_registry = True
-    try:
-        validate_managed_registry(cmd, registry_name)
-    except ResourceNotFound:
-        pass
-    except CLIError:
-        is_managed_registry = False
-
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -144,7 +136,7 @@ def acr_repository_list(cmd,
 
     return _obtain_data_from_registry(
         login_server=login_server,
-        path=_get_repository_path() if is_managed_registry else '/v2/_catalog',
+        path='/v2/_catalog',
         username=username,
         password=password,
         result_index='repositories',
@@ -161,14 +153,6 @@ def acr_repository_show_tags(cmd,
                              username=None,
                              password=None,
                              detail=False):
-    is_managed_registry = True
-    try:
-        validate_managed_registry(cmd, registry_name)
-    except ResourceNotFound:
-        pass
-    except CLIError:
-        is_managed_registry = False
-
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -178,28 +162,34 @@ def acr_repository_show_tags(cmd,
         repository=repository,
         permission='pull')
 
-    if not is_managed_registry:
-        if detail:
-            detail = None
-            logger.warning("The specified --detail is ignored as it is only supported for managed registries.")
-        if top:
-            top = None
-            logger.warning("The specified --top is ignored as it is only supported for managed registries.")
-        if orderby:
-            orderby = None
-            logger.warning("The specified --orderby is ignored as it is only supported for managed registries.")
-
-    raw_result = _obtain_data_from_registry(
-        login_server=login_server,
-        path=_get_tag_path(repository) if is_managed_registry else '/v2/{}/tags/list'.format(repository),
-        username=username,
-        password=password,
-        result_index='tags',
-        top=top,
-        orderby=orderby)
+    try:
+        raw_result = _obtain_data_from_registry(
+            login_server=login_server,
+            path=_get_tag_path(repository),
+            username=username,
+            password=password,
+            result_index='tags',
+            top=top,
+            orderby=orderby)
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            if detail:
+                logger.warning("The specified --detail is ignored as it is only supported for managed registries.")
+            if top:
+                logger.warning("The specified --top is ignored as it is only supported for managed registries.")
+            if orderby:
+                logger.warning("The specified --orderby is ignored as it is only supported for managed registries.")
+            return _obtain_data_from_registry(
+                login_server=login_server,
+                path='/v2/{}/tags/list'.format(repository),
+                username=username,
+                password=password,
+                result_index='tags')
+        raise
 
     # For backward compatibility, convert the results to the old schema
-    if is_managed_registry and not detail:
+    if not detail:
         return [item['name'] for item in raw_result]
 
     return raw_result
@@ -215,11 +205,6 @@ def acr_repository_show_manifests(cmd,
                                   username=None,
                                   password=None,
                                   detail=False):
-    try:
-        validate_managed_registry(cmd, registry_name, None, SHOW_MANIFESTS_NOT_SUPPORTED)
-    except ResourceNotFound:
-        pass
-
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -229,14 +214,20 @@ def acr_repository_show_manifests(cmd,
         repository=repository,
         permission='pull')
 
-    raw_result = _obtain_data_from_registry(
-        login_server=login_server,
-        path=_get_manifest_path(repository),
-        username=username,
-        password=password,
-        result_index='manifests',
-        top=top,
-        orderby=orderby)
+    try:
+        raw_result = _obtain_data_from_registry(
+            login_server=login_server,
+            path=_get_manifest_path(repository),
+            username=username,
+            password=password,
+            result_index='manifests',
+            top=top,
+            orderby=orderby)
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            raise CLIError(SHOW_MANIFESTS_NOT_SUPPORTED)
+        raise
 
     # For backward compatibility, convert the results to the old schema
     if not detail:
@@ -325,10 +316,6 @@ def _acr_repository_attributes_helper(cmd,
                                       username=None,
                                       password=None):
     _validate_parameters(repository, image)
-    try:
-        validate_managed_registry(cmd, registry_name, None, ATTRIBUTES_NOT_SUPPORTED)
-    except ResourceNotFound:
-        pass
 
     if image:
         # If --image is specified, repository must be empty.
@@ -358,22 +345,34 @@ def _acr_repository_attributes_helper(cmd,
 
     # Non-GET request doesn't return the entity so there is always a GET reqeust
     if http_method != 'get':
-        request_data_from_registry(
-            http_method=http_method,
+        try:
+            request_data_from_registry(
+                http_method=http_method,
+                login_server=login_server,
+                path=path,
+                username=username,
+                password=password,
+                result_index=result_index,
+                json_payload=json_payload)
+        except RegistryException as e:
+            # Check for Classic registry
+            if e.status_code == 405:
+                raise CLIError(ATTRIBUTES_NOT_SUPPORTED)
+            raise
+
+    try:
+        return request_data_from_registry(
+            http_method='get',
             login_server=login_server,
             path=path,
             username=username,
             password=password,
-            result_index=result_index,
-            json_payload=json_payload)
-
-    return request_data_from_registry(
-        http_method='get',
-        login_server=login_server,
-        path=path,
-        username=username,
-        password=password,
-        result_index=result_index)[0]
+            result_index=result_index)[0]
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            raise CLIError(ATTRIBUTES_NOT_SUPPORTED)
+        raise
 
 
 def acr_repository_untag(cmd,
@@ -383,11 +382,6 @@ def acr_repository_untag(cmd,
                          tenant_suffix=None,
                          username=None,
                          password=None):
-    try:
-        validate_managed_registry(cmd, registry_name, None, UNTAG_NOT_SUPPORTED)
-    except ResourceNotFound:
-        pass
-
     repository, tag, _ = _parse_image_name(image)
 
     login_server, username, password = get_access_credentials(
@@ -399,12 +393,18 @@ def acr_repository_untag(cmd,
         repository=repository,
         permission='*')
 
-    return request_data_from_registry(
-        http_method='delete',
-        login_server=login_server,
-        path=_get_tag_path(repository, tag),
-        username=username,
-        password=password)[0]
+    try:
+        return request_data_from_registry(
+            http_method='delete',
+            login_server=login_server,
+            path=_get_tag_path(repository, tag),
+            username=username,
+            password=password)[0]
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            raise CLIError(UNTAG_NOT_SUPPORTED)
+        raise
 
 
 def acr_repository_delete(cmd,
@@ -417,11 +417,6 @@ def acr_repository_delete(cmd,
                           password=None,
                           yes=False):
     _validate_parameters(repository, image)
-
-    try:
-        validate_managed_registry(cmd, registry_name, None, DELETE_NOT_SUPPORTED)
-    except ResourceNotFound:
-        pass
 
     if image:
         # If --image is specified, repository must be empty.
@@ -454,12 +449,18 @@ def acr_repository_delete(cmd,
                           "and all images under it?".format(repository), yes)
         path = _get_repository_path(repository)
 
-    return request_data_from_registry(
-        http_method='delete',
-        login_server=login_server,
-        path=path,
-        username=username,
-        password=password)[0]
+    try:
+        return request_data_from_registry(
+            http_method='delete',
+            login_server=login_server,
+            path=path,
+            username=username,
+            password=password)[0]
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            raise CLIError(DELETE_NOT_SUPPORTED)
+        raise
 
 
 def _validate_parameters(repository, image):
@@ -498,23 +499,35 @@ def _delete_manifest_confirmation(login_server,
                                   manifest,
                                   yes):
     # Always query manifest if it is empty
-    manifest = manifest or _get_manifest_digest(
-        login_server=login_server,
-        repository=repository,
-        tag=tag,
-        username=username,
-        password=password)
+    try:
+        manifest = manifest or _get_manifest_digest(
+            login_server=login_server,
+            repository=repository,
+            tag=tag,
+            username=username,
+            password=password)
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            raise CLIError(DELETE_NOT_SUPPORTED)
+        raise
 
     if yes:
         return manifest
 
-    tags = _obtain_data_from_registry(
-        login_server=login_server,
-        path=_get_tag_path(repository),
-        username=username,
-        password=password,
-        result_index='tags'
-    )
+    try:
+        tags = _obtain_data_from_registry(
+            login_server=login_server,
+            path=_get_tag_path(repository),
+            username=username,
+            password=password,
+            result_index='tags'
+        )
+    except RegistryException as e:
+        # Check for Classic registry
+        if e.status_code == 405:
+            raise CLIError(DELETE_NOT_SUPPORTED)
+        raise
 
     filter_by_manifest = [x['name'] for x in tags if manifest == x['digest']]
     message = "This operation will delete the manifest '{}'".format(manifest)
