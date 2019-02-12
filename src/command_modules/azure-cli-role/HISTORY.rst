@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.4.0
++++++
+* `az identity` moved here from inside of the `azure-cli-vm` command_module.
+
 2.3.1
 +++++
 * Minor fixes

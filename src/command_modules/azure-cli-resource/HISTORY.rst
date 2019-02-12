@@ -2,15 +2,18 @@
 
 Release History
 ===============
-2.1.10
-++++++
 * `policy assignment create`: support uri based parameters file
 * `policy set-definition update`: support uri based parameters and definitions files
 * `policy definition update`: fix handling of parameters and rules files
+* `group deployment create`: support uri based parameters file
+
+2.1.10
+++++++
+* Minor fixes
 
 2.1.9
 +++++
-* `group deployment create`: support uri based parameters file 
+* `group deployment create`: support uri based parameters file
 * `policy assignment create/list/show`: support managed identity on policy assignments
 
 2.1.8
