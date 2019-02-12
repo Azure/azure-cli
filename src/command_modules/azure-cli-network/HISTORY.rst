@@ -2,6 +2,8 @@
 
 Release History
 ===============
+2.3.2
++++++
 
 * `dns zone export`: Ensure exported CNAMEs are FQDNs.
 * `nic ip-config address-pool add/remove`: Add `--gateway-name` to support application gateway backend address pools.
