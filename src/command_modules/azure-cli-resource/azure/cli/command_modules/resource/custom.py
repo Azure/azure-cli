@@ -445,7 +445,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
 def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
     if file_or_string_or_uri is None:
         if required:
-            raise CLIError('One of --{} or --{}-uri is required'.format(name, name))
+            raise CLIError('--{} is required'.format(name))
         return None
     url = urlparse(file_or_string_or_uri)
     if url.scheme == 'http' or url.scheme == 'https' or url.scheme == 'file':
@@ -1033,12 +1033,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     scope = _build_policy_scope(policy_client.config.subscription_id,
                                 resource_group_name, scope)
     policy_id = _resolve_policy_id(cmd, policy, policy_set_definition, policy_client)
-
-    if params:
-        if os.path.exists(params):
-            params = get_file_json(params)
-        else:
-            params = shell_safe_json_parse(params)
+    params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
     assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope)
@@ -1289,6 +1284,9 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
                              display_name=None, description=None, metadata=None, mode=None,
                              subscription=None, management_group=None):
 
+    rules = _load_file_string_or_uri(rules, 'rules', False)
+    params = _load_file_string_or_uri(params, 'params', False)
+
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
     # pylint: disable=line-too-long,no-member
@@ -1318,17 +1316,8 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
                                 display_name=None, description=None,
                                 subscription=None, management_group=None):
 
-    if definitions:
-        if os.path.exists(definitions):
-            definitions = get_file_json(definitions)
-        else:
-            definitions = shell_safe_json_parse(definitions)
-
-    if params:
-        if os.path.exists(params):
-            params = get_file_json(params)
-        else:
-            params = shell_safe_json_parse(params)
+    definitions = _load_file_string_or_uri(definitions, 'definitions', False)
+    params = _load_file_string_or_uri(params, 'params', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)

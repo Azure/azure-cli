@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* Minor fixes
 
 * Fix issue where in some instances using `--subscription NAME` would throw an exception.
 

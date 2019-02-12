@@ -69,6 +69,8 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
+_AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
@@ -272,6 +274,8 @@ class Profile(object):
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
+        # pylint: disable=too-many-statements
+
         import jwt
         from requests import HTTPError
         from msrestazure.azure_active_directory import MSIAuthentication
@@ -283,15 +287,31 @@ class Profile(object):
                 msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
+                authenticated = False
                 try:
                     msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
+                    authenticated = True
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        logger.info('Sniff: not an MSI client id')
                     else:
                         raise
+
+                if not authenticated:
+                    try:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        authenticated = True
+                    except HTTPError as ex:
+                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                            logger.info('Sniff: not an MSI object id')
+                        else:
+                            raise
+
+                if not authenticated:
+                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
+
         else:
             identity_type = MsiAccountTypes.system_assigned
             msi_creds = MSIAuthentication(resource=resource)
@@ -449,7 +469,7 @@ class Profile(object):
     def get_subscription(self, subscription=None):  # take id or name
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
-            raise CLIError("Please run 'az login' to setup account.")
+            raise CLIError(_AZ_LOGIN_MESSAGE)
 
         result = [x for x in subscriptions if (
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or

@@ -690,6 +690,19 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('metadata', '{updated_metadata}')
         ])
 
+        # update it with new parameters and a new rule
+        self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
+        self.kwargs['rf'] = os.path.join(curr_dir, 'sample_policy_rule_2.json').replace('\\', '\\\\')
+
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2 --params {pdf} --rules {rf}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('description', '{desc}'),
+            self.check('displayName', '{pdn}'),
+            self.check('metadata', '{updated_metadata}'),
+            self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
+            self.check('policyRule.then.effect', 'audit')
+        ])
+
         # list and show it
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 1))
@@ -794,6 +807,38 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)  # ensure the policy is gone when run live.
+
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
+
+        # create a parameterized policy set
+        self.kwargs['psf'] = os.path.join(curr_dir, 'sample_policy_set_parameterized.json').replace('\\', '\\\\')
+        policyset = get_file_json(self.kwargs['psf'])
+        policyset[0]['policyDefinitionId'] = policy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}'),
+            self.check('description', '{ps_desc}'),
+            self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
+            self.check('parameters.allowedLocations.type', 'Array')
+        ])
+
+        # update the parameters on the policy set
+        self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
+
+        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
+        ])
+
+        # delete the parameterized policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.
