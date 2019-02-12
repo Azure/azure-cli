@@ -55,8 +55,8 @@ def faulty_help_example_parameters_rule(linter, help_entry):
     violations = []
 
     for example in linter.get_help_entry_examples(help_entry):
-        max_profile = example.get('max_profile')
-        if max_profile and max_profile != 'latest':
+        supported_profiles = example.get('supported_profiles')
+        if supported_profiles and 'latest' not in supported_profiles:
             logger.warning("\n\tSKIPPING example: {}\n\tas its max profile is {}, instead of latest.".format(example['text'], example['max_profile']))
             continue
 
