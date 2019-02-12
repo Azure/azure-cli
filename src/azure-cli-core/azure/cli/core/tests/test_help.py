@@ -510,7 +510,13 @@ class TestHelpLoads(unittest.TestCase):
             'supported_profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest "
         }
 
-        # example should be included in all profiles
+        # example should be included in all profiles (explicit)
+        for profile in AZURE_API_PROFILES.keys():
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+            self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+        # example should be included in all profiles (implicit)
+        ex_dict.pop('supported_profiles')
         for profile in AZURE_API_PROFILES.keys():
             mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
             self.assertTrue(mock_help_file._should_include_example(ex_dict))
