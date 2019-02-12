@@ -199,19 +199,29 @@ def load_command_table(self, _):
     with self.command_group('webapp deleted') as g:
         g.custom_command('list', 'list_deleted_webapp')
         g.custom_command('restore', 'restore_deleted_webapp')
-    
-    with self.command_group('webapp hybridconnection') as g:
-        g.custom_command('list', 'list_hc')
-        g.custom_command('set', 'set_hc')
-        g.custom_command('remove', 'delete_hc')
 
-    with self.command_group('appservice hybridconnection') as g:
+    with self.command_group('webapp hybrid-connection') as g:
+        g.custom_command('list', 'webapp_list_hc')
+        g.custom_command('add', 'webapp_add_hc')
+        g.custom_command('remove', 'webapp_remove_hc')
+
+    with self.command_group('functionapp hybrid-connection') as g:
+        g.custom_command('list', 'functionapp_list_hc')
+        g.custom_command('add', 'functionapp_add_hc')
+        g.custom_command('remove', 'functionapp_remove_hc')
+
+    with self.command_group('appservice hybrid-connection') as g:
         g.custom_command('set-key', 'set_hc_key')
 
-    with self.command_group('webapp vnetintegration') as g:
-        g.custom_command('set', 'set_vnet_int')
-        g.custom_command('list', 'list_vnet_int')
-        g.custom_command('remove', 'remove_vnet_int')
+    with self.command_group('webapp vnet-integration') as g:
+        g.custom_command('add', 'webapp_add_vnet_int')
+        g.custom_command('list', 'webapp_list_vnet_int')
+        g.custom_command('remove', 'webapp_remove_vnet_int')
+
+    with self.command_group('functionapp vnet-integration') as g:
+        g.custom_command('add', 'functionapp_add_vnet_int')
+        g.custom_command('list', 'functionapp_list_vnet_int')
+        g.custom_command('remove', 'functionapp_remove_vnet_int')
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))

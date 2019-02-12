@@ -1100,70 +1100,259 @@ helps['functionapp devops-build create'] = """
     short-summary: Create an Azure Devops build pipeline for a function app.
 """
 
-helps['webapp hybridconnection list'] = """
+helps['functionapp hybrid-connection'] = """
+    type: group
+    short-summary: commands that list, add, or remove hybrid connections from a sepcific functionapp
+    examples:
+        - name: list the hybrid connections
+          text: >
+             az functionapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
+        - name: add a hybrid connection to the functionapp
+          text: >
+              az functionapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
+              --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+        - name: remove the hybrid connection from the functionapp
+          text: >
+              az functionapp hybrid-connection remove -g {myResourceGroup} -n {myAppName}
+              --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+"""
+
+helps['functionapp hybrid-connection list'] = """
+    type: command
+    short-summary: lists all the hybrid connections set on the specified functionapp
+    examples:
+        - name: list the hybrid connections
+          text: >
+              az functionapp  hybrid-connection list -g {myResourceGroup} -n {myAppName}
+"""
+
+helps['functionapp hybrid-connection add'] = """
+    type: command
+    short-summary: adds an existing hybrid connection to the specified functionapp
+    parameters:
+        - name: --hybrid-connection
+          type: string
+          short-summary: 'Hybrid connection name'
+        - name: --namespace
+          type: string
+          short-summary: 'Hybrid connection namespace'
+    examples:
+        - name: add a hybrid connection to the app
+          text: >
+            az functionapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
+            --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+"""
+
+helps['functionapp hybrid-connection remove'] = """
+    type: command
+    short-summary: disconnects the specified hybrid connection from the specified functionapp
+    parameters:
+        - name: --hybrid-connection
+          type: string
+          short-summary: 'Hybrid connection name'
+        - name: --namespace
+          type: string
+          short-summary: 'Hybrid connection namespace'
+    examples:
+        - name: remove the hybrid connection from the functionapp
+          text: >
+            az functionapp hybrid-connection remove -g {{myResourceGroup} -n {myAppName}
+            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+"""
+
+helps['webapp hybrid-connection'] = """
+    type: group
+    short-summary: commands that list, add, or remove hybrid connections from a sepcific app
+    examples:
+        - name: list the hybrid connections
+          text: >
+              az webapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
+        - name: add a hybrid connection to the app
+          text: >
+              az webapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
+              --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+        - name: remove the hybrid connection from the app
+          text: >
+              az webapp hybrid-connection remove -g {myResourceGroup} -n {myAppName}
+              --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+"""
+
+helps['webapp hybrid-connection list'] = """
     type: command
     short-summary: lists all the hybrid connections set on the specified app
     examples:
-        - name: list the hyrbid connections 
+        - name: list the hybrid connections
           text: >
-              az webapp hybridconnection list -g <myRG> -n <myAppName>
+              az webapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
 """
 
-helps['webapp hybridconnection set'] = """
+helps['webapp hybrid-connection add'] = """
     type: command
-    short-summary: sets an existing hybrid connection on the specified app 
+    short-summary: adds an existing hybrid connection to the specified app
+    parameters:
+        - name: --hybrid-connection
+          type: string
+          short-summary: 'Hybrid connection name'
+        - name: --namespace
+          type: string
+          short-summary: 'Hybrid connection namespace'
     examples:
-        - name: set a hybrid connection 
+        - name: add a hybrid connection to the app
           text: >
-            az webapp hybridconnection set -g <myRG> -n <myAppName> 
-            --namespace-name <hybridConnectionNamespace> --hybrid-connection-name <hybridConnectionName>
+            az webapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
+            --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
 """
 
-helps['webapp hybridconnection remove'] = """
+helps['webapp hybrid-connection remove'] = """
     type: command
-    short-summary: disconnects the specified hybrid connection from the specified app 
+    short-summary: disconnects the specified hybrid connection from the specified app
+    parameters:
+        - name: --hybrid-connection
+          type: string
+          short-summary: 'Hybrid connection name'
+        - name: --namespace
+          type: string
+          short-summary: 'Hybrid connection namespace'
     examples:
-        - name: list the hyrbid connections 
+        - name: remove the hybrid connection from the app
           text: >
-            az webapp hybridconnection remove -g <myRG> -n <myAppName> 
-            --namespace-name <hybridConnectionNamespace> --hybrid-connection-name <hybridConnectionName>
+            az webapp hybrid-connection remove -g {{myResourceGroup} -n {myAppName}
+            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
 """
 
-helps['appservice hybridconnection set-key'] = """
-    type: command
-    short-summary: specifies which key apps should use when connecting to a hybrid connection 
+helps['appservice hybrid-connection'] = """
+    type: group
+    short-summary: commands that interact with hybrid connections on an app service level - existing command sets which key each app uses to connect to the hybric connection
     examples:
-        - name: list the hyrbid connections 
+        - name: set the key the apps should use
           text: >
-            az webapp hybridconnection set-key --asp-name <hybridConnectionAppServicePlan>-g <appServicePlanResourceGroup> 
-            --namespace-name <hybridConnectionNamespace> --hybrid-connection-name <hybridConnectionName> 
-            --key-type <"primary" | "secondary">
+            az appservice hybrid-connection set-key --asp {hybridConnectionAppServicePlan} -g {appServicePlanResourceGroup}
+            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+            --key-type {"primary" | "secondary"}
 """
 
-helps['webapp vnetintegration list'] = """
+helps['appservice hybrid-connection set-key'] = """
     type: command
-    short-summary: lists all the virtual networks the specified app is connected to 
+    short-summary: specifies which key all the apps using a hybrid connection should use when connecting to it
+    parameters:
+        - name: --asp
+          type: string
+          short-summary: 'Appservice plan'
+        - name: --hybrid-connection
+          type: string
+          short-summary: 'Hybrid connection name'
+        - name: --namespace
+          type: string
+          short-summary: 'Hybrid connection namespace'
+        - name: --key-type
+          type: string
+          short-summary: 'Which key (primary or secondary) should be used'
     examples:
-        - name: list the hyrbid connections 
+        - name: set the key the apps should use
           text: >
-            az webapp vnetintegration list -g <myRG> -n <myAppName>
+            az appservice hybrid-connection set-key --asp {hybridConnectionAppServicePlan} -g {appServicePlanResourceGroup}
+            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+            --key-type {"primary" | "secondary"}
 """
 
-helps['webapp vnetintegration set'] = """
-    type: command
-    short-summary: sets an existing swift virtual network on the specified app 
+helps['webapp vnet-integration'] = """
+    type: group
+    short-summary: commands that list, add and remove a vnet-integration from an app
     examples:
-        - name: list the hyrbid connections 
+        - name: list the virtual network integrations
           text: >
-            az webapp vnetintegration list -g <myRG> -n <myAppName> --vnet-resource-group <vnetRG> --vnet-name <vnetName>
-            --subnet-name <subnetName>
+            az webapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+        - name: add a swift virtual network to an app
+          text: >
+            az webapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
+            --subnet {subnetName}
+        - name: remove a swift virtual network integration
+          text: >
+            az webapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
 """
 
-helps['webapp vnetintegration remove'] = """
+helps['webapp vnet-integration list'] = """
     type: command
-    short-summary: removes the specified swift virtual network from the specified app 
+    short-summary: lists all the virtual networks the specified app is connected to
     examples:
-        - name: list the hyrbid connections 
+        - name: list the virtual network integrations
           text: >
-            az webapp vnetintegration list -g <myRG> -n <myAppName>  --vnet-name <vnetName> --subnet-name <subnetName>
+            az webapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+"""
+
+helps['webapp vnet-integration add'] = """
+    type: command
+    short-summary: add an existing swift virtual network to the specified app
+    parameters:
+        - name: --vnet
+          type: string
+          short-summary: 'Vnet name'
+        - name: --subnet
+          type: string
+          short-summary: 'Subnet name'
+    examples:
+        - name: add a swift virtual network to an app
+          text: >
+            az webapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
+            --subnet {subnetName}
+"""
+
+helps['webapp vnet-integration remove'] = """
+    type: command
+    short-summary: removes the specified swift virtual network from the specified app
+    examples:
+        - name: remove a swift virtual network integration
+          text: >
+            az webapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
+"""
+
+helps['functionapp vnet-integration'] = """
+    type: group
+    short-summary: commands that list, add and remove a vnet-integration from an functionapp
+    examples:
+        - name: list the virtual network integrations
+          text: >
+            az functionapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+        - name: add a swift virtual network to an functionapp
+          text: >
+            az functionapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
+            --subnet {subnetName}
+        - name: remove a swift virtual network integration
+          text: >
+            az functionapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
+"""
+
+helps['functionapp vnet-integration list'] = """
+    type: command
+    short-summary: lists all the virtual networks the specified functionapp is connected to
+    examples:
+        - name: list the virtual network integrations
+          text: >
+            az functionapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+"""
+
+helps['functionapp vnet-integration add'] = """
+    type: command
+    short-summary: add an existing swift virtual network to the specified functionapp
+    parameters:
+        - name: --vnet
+          type: string
+          short-summary: 'Vnet name'
+        - name: --subnet
+          type: string
+          short-summary: 'Subnet name'
+    examples:
+        - name: add a swift virtual network to an functionapp
+          text: >
+            az functionapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
+            --subnet {subnetName}
+"""
+
+helps['functionapp vnet-integration remove'] = """
+    type: command
+    short-summary: removes the specified swift virtual network from the specified functionapp
+    examples:
+        - name: remove a swift virtual network integration
+          text: >
+            az functionapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
 """
