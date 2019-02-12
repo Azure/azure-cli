@@ -210,12 +210,6 @@ def _get_new_yaml_dict(help_dict):
                     new_ex["command"] = ex["text"]
                 if "supported_profiles" in ex:
                     new_ex["supported_profiles"] = ex["supported_profiles"]
-                # TODO: after CI passes without refdoc warnings remove this.
-                # TODO: assert that objects the same before and after help convert. # assert help text sphinx equal
-                if "min_profile" in ex:
-                    new_ex["min_profile"] = ex["min_profile"]
-                if "max_profile" in ex:
-                    new_ex["max_profile"] = ex["max_profile"]
                 elem_examples.append(new_ex)
             elem_content["examples"] = elem_examples
 
