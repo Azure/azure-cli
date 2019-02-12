@@ -39,13 +39,10 @@ class BaseHelpLoader(ABC):
         ldr_name = self.__class__
         if self._data:
             is_applicable = self.version == self._data.get('version')
-            msg = "Data's version matches loader {}'s version.".format(ldr_name) if is_applicable \
-                else "Data's version: {} does not match loader {}'s version: {}".format(self._data.get('version'),
-                                                                                        ldr_name, self.version)
-            logger.info(msg)
-        else:
-            logger.info("There is no applicable data for loader %s.", ldr_name)
-
+            if not is_applicable:
+                msg = "Data's version: {} does not match loader {}'s version: {}".format(self._data.get('version'),
+                                                                                         ldr_name, self.version)
+                logger.info(msg)
         return is_applicable
 
     @abc.abstractmethod
