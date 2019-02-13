@@ -2,9 +2,13 @@
 
 Release History
 ===============
-2.0.58
+2.0.59
 ++++++
 * TODO
+
+2.0.58
+++++++
+* Pinning versions of command modules for pip install.
 
 2.0.57
 ++++++
