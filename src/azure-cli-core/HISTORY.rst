@@ -4,8 +4,6 @@ Release History
 ===============
 2.0.59
 ++++++
-* Minor fixes
-
 * Fix issue where in some instances using `--subscription NAME` would throw an exception.
 
 2.0.58
