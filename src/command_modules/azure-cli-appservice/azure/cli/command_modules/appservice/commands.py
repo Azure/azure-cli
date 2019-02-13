@@ -213,6 +213,9 @@ def load_command_table(self, _):
     with self.command_group('appservice hybrid-connection') as g:
         g.custom_command('set-key', 'set_hc_key')
 
+    with self.command_group('appservice vnet-integration') as g:
+        g.custom_command('list', 'appservice_list_vnet')
+
     with self.command_group('webapp vnet-integration') as g:
         g.custom_command('add', 'webapp_add_vnet_int')
         g.custom_command('list', 'webapp_list_vnet_int')

@@ -373,7 +373,7 @@ def load_arguments(self, _):
         c.argument('hybrid_connection')
 
     with self.argument_context('functionapp hybrid-connection list') as c:
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, help='name of the function app')
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('functionapp hybrid-connection add') as c:
@@ -394,6 +394,10 @@ def load_arguments(self, _):
         c.argument('namespace')
         c.argument('hybrid_connection')
         c.argument('key-type')
+
+    with self.argument_context('appservice vnet-integration list') as c:
+        c.argument('asp')
+        c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('webapp up') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -419,7 +423,7 @@ def load_arguments(self, _):
         c.argument('vnet')
 
     with self.argument_context('functionapp vnet-integration list') as c:
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, help='name of the function app')
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('functionapp vnet-integration add') as c:

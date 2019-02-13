@@ -41,22 +41,17 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
-from azure.mgmt.web.models import VnetInfo
 from azure.mgmt.web.models import SwiftVirtualNetwork
-from azure.mgmt.resource.resources.models import GenericResource
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.cli.command_modules.resource._client_factory import (
-    _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
+from azure.mgmt.web.models import HybridConnection
+from azure.mgmt.network.models import Subnet
+from azure.mgmt.relay.models import AccessRights
 
 from .tunnel import TunnelServer
-from azure.cli.core.profiles import ResourceType
-from azure.cli.core.util import in_cloud_console
-from azure.cli.core.util import open_page_in_browser
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
@@ -67,12 +62,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
-from azure.cli.command_modules.relay._client_factory import namespaces_mgmt_client_factory, \
-    wcfrelays_mgmt_client_factory, hycos_mgmt_client_factory
-
-from azure.mgmt.web.models import HybridConnection
-from azure.mgmt.network.models import Subnet
-from azure.mgmt.relay.models import AccessRights
+from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory
 
 logger = get_logger(__name__)
 
@@ -398,8 +388,8 @@ def list_webapp(cmd, resource_group_name=None):
 
 
 def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
-    client = network_client_factory(cmd.cli_ctx)
-    return client.virtual_networks.list_all()
+    result = _list_deleted_app(cmd.cli_ctx, resource_group_name, name, slot)
+    return sorted(result, key=lambda site: site.deleted_site_id)
 
 
 def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
@@ -1297,7 +1287,6 @@ def list_snapshots(cmd, resource_group_name, name, slot=None):
 
 def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_content_only=False,  # pylint: disable=redefined-outer-name
                      source_resource_group=None, source_name=None, source_slot=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     recover_config = not restore_content_only
     if all([source_resource_group, source_name]):
@@ -2180,7 +2169,7 @@ def remove_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=No
 
 def webapp_list_hc(cmd, name, resource_group):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "app"):
+    if webapp.kind == "app":
         return list_hc(cmd, name, resource_group)
     else:
         print("not a webapp")
@@ -2188,7 +2177,7 @@ def webapp_list_hc(cmd, name, resource_group):
 
 def functionapp_list_hc(cmd, name, resource_group):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "functionapp"):
+    if webapp.kind == "functionapp":
         return list_hc(cmd, name, resource_group)
     else:
         print("not a functionapp")
@@ -2224,7 +2213,7 @@ def list_hc(cmd, name, resource_group):
 
 def webapp_add_hc(cmd, name, resource_group, namespace, hybrid_connection):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "app"):
+    if webapp.kind == "app":
         return add_hc(cmd, name, resource_group, namespace, hybrid_connection)
     else:
         print("not a webapp")
@@ -2232,7 +2221,7 @@ def webapp_add_hc(cmd, name, resource_group, namespace, hybrid_connection):
 
 def functionapp_add_hc(cmd, name, resource_group, namespace, hybrid_connection):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "functionapp"):
+    if webapp.kind == "functionapp":
         return add_hc(cmd, name, resource_group, namespace, hybrid_connection)
     else:
         print("not a functionapp")
@@ -2379,9 +2368,14 @@ def set_hc_key(cmd, asp, resource_group, namespace, hybrid_connection, key_type)
                                                                            namespace, hybrid_connection)
 
 
+def appservice_list_vnet(cmd, resource_group, asp):
+    web_client = web_client_factory(cmd.cli_ctx)
+    return web_client.app_service_plans.list_vnets(resource_group, asp)
+
+
 def webapp_remove_hc(cmd, resource_group, name, namespace, hybrid_connection):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "app"):
+    if webapp.kind == "app":
         return remove_hc(cmd, resource_group, name, namespace, hybrid_connection)
     else:
         print("not a webapp")
@@ -2389,7 +2383,7 @@ def webapp_remove_hc(cmd, resource_group, name, namespace, hybrid_connection):
 
 def functionapp_remove_hc(cmd, resource_group, name, namespace, hybrid_connection):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "functionapp"):
+    if webapp.kind == "functionapp":
         return remove_hc(cmd, resource_group, name, namespace, hybrid_connection)
     else:
         print("not a functionapp")
@@ -2402,7 +2396,7 @@ def remove_hc(cmd, resource_group, name, namespace, hybrid_connection):
 
 def webapp_list_vnet_int(cmd, name, resource_group):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "app"):
+    if webapp.kind == "app":
         return list_vnet_int(cmd, name, resource_group)
     else:
         print("not a webapp")
@@ -2410,7 +2404,7 @@ def webapp_list_vnet_int(cmd, name, resource_group):
 
 def functionapp_list_vnet_int(cmd, name, resource_group):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "functionapp"):
+    if webapp.kind == "functionapp":
         return list_vnet_int(cmd, name, resource_group)
     else:
         print("not a functionapp")
@@ -2454,7 +2448,7 @@ def list_vnet_int(cmd, name, resource_group):
 
 def webapp_add_vnet_int(cmd, name, resource_group, vnet, subnet):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "app"):
+    if webapp.kind == "app":
         return add_vnet_int(cmd, name, resource_group, vnet, subnet)
     else:
         print("not a webapp")
@@ -2462,7 +2456,7 @@ def webapp_add_vnet_int(cmd, name, resource_group, vnet, subnet):
 
 def functionapp_add_vnet_int(cmd, name, resource_group, vnet, subnet):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "functionapp"):
+    if webapp.kind == "functionapp":
         return add_vnet_int(cmd, name, resource_group, vnet, subnet)
     else:
         print("not a functionapp")
@@ -2516,7 +2510,7 @@ def add_vnet_int(cmd, name, resource_group, vnet, subnet):
 
 def webapp_remove_vnet_int(cmd, name, resource_group):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "app"):
+    if webapp.kind == "app":
         return remove_vnet_int(cmd, name, resource_group)
     else:
         print("not a webapp")
@@ -2524,7 +2518,7 @@ def webapp_remove_vnet_int(cmd, name, resource_group):
 
 def functionapp_remove_vnet_int(cmd, name, resource_group):
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'get', None)
-    if (webapp.kind == "functionapp"):
+    if webapp.kind == "functionapp":
         return remove_vnet_int(cmd, name, resource_group)
     else:
         print("not a functionapp")

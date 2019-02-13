@@ -1123,7 +1123,7 @@ helps['functionapp hybrid-connection list'] = """
     examples:
         - name: list the hybrid connections
           text: >
-              az functionapp  hybrid-connection list -g {myResourceGroup} -n {myAppName}
+              az functionapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
 """
 
 helps['functionapp hybrid-connection add'] = """
@@ -1253,6 +1253,24 @@ helps['appservice hybrid-connection set-key'] = """
             az appservice hybrid-connection set-key --asp {hybridConnectionAppServicePlan} -g {appServicePlanResourceGroup}
             --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
             --key-type {"primary" | "secondary"}
+"""
+
+helps['appservice vnet-integration'] = """
+    type: command
+    short-summary: commands that operate on virtual network integrations in a specified app service plan
+    examples:
+        - name: list the virtual network integrations
+          text: >
+            az appservice vnet-integration list -g {myResourceGroup} -n [myAspName]
+"""
+
+helps['appservice vnet-integration list'] = """
+    type: command
+    short-summary: lists all the virtual networks in a specified app service plan
+    examples:
+        - name: list the virtual network integrations
+          text: >
+            az appservice vnet-integration list -g {myResourceGroup} -n [MyAspName]
 """
 
 helps['webapp vnet-integration'] = """
