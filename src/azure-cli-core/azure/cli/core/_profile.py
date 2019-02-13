@@ -768,21 +768,11 @@ class SubscriptionFinder(object):
         return result
 
     def find_through_authorization_code_flow(self, tenant, resource, authority_url):
-        import random
-
-        state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
-
         # launch browser and get the code
-        results = _get_authorization_code(resource, authority_url, state)
+        results = _get_authorization_code(resource, authority_url)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
-
-        if not results.get('state'):
-            raise CLIError('Login failed')  # error detail is already displayed through previous steps
-
-        if results.get('state') != state:
-            raise CLIError('Unexpected OAuth state during login')
 
         # exchange the code for the token
         context = self._create_auth_context(tenant)
@@ -1081,8 +1071,10 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return  # this prevent http server from dumping messages to stdout
 
 
-def _get_authorization_code_worker(authority_url, resource, results, state):
+def _get_authorization_code_worker(authority_url, resource, results):
     import socket
+    import random
+
     reply_url = None
     for port in range(8400, 9000):
         try:
@@ -1096,10 +1088,12 @@ def _get_authorization_code_worker(authority_url, resource, results, state):
         logger.warning("Error: can't reserve a port for authentication reply url")
         return
 
+    request_state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
+
     # launch browser:
     url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
            '&redirect_uri={2}&state={3}&resource={4}&prompt=select_account')
-    url = url.format(authority_url, _CLIENT_ID, reply_url, state, resource)
+    url = url.format(authority_url, _CLIENT_ID, reply_url, request_state, resource)
     logger.info('Open browser with url: %s', url)
     succ = open_page_in_browser(url)
     if succ is False:
@@ -1130,23 +1124,22 @@ def _get_authorization_code_worker(authority_url, resource, results, state):
         return
 
     if 'state' in web_server.query_params:
-        state = web_server.query_params['state']
+        response_state = web_server.query_params['state'][0]
+        if response_state != request_state:
+            raise RuntimeError("mismatched OAuth state")
     else:
-        logger.warning('Authentication Error: Authorization state was not captured in query strings "%s"',
-                       web_server.query_params)
-        return
+        raise RuntimeError("missing OAuth state")
 
     results['code'] = code[0]
-    results['state'] = state[0]
     results['reply_url'] = reply_url
 
 
-def _get_authorization_code(resource, authority_url, state):
+def _get_authorization_code(resource, authority_url):
     import threading
     import time
     results = {}
     t = threading.Thread(target=_get_authorization_code_worker,
-                         args=(authority_url, resource, results, state))
+                         args=(authority_url, resource, results))
     t.daemon = True
     t.start()
     while True:
