@@ -1088,7 +1088,10 @@ def _get_authorization_code_worker(authority_url, resource, results):
         logger.warning("Error: can't reserve a port for authentication reply url")
         return
 
-    request_state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
+    try:
+        request_state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
+    except NotImplementedError:
+        request_state = 'code'
 
     # launch browser:
     url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
