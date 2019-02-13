@@ -158,8 +158,9 @@ class ResourceIDScenarioTest(ScenarioTest):
 
 
 class ResourceGenericUpdate(LiveScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
-    def test_resource_id_scenario(self, resource_group):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_generic_update')
+    def test_resource_generic_update(self, resource_group):
         self.kwargs.update({
             'stor_1': self.create_random_name(prefix='stor1', length=10),
             'stor_2': self.create_random_name(prefix='stor2', length=10)

@@ -327,6 +327,23 @@ def register_global_subscription_argument(cli_ctx):
     def add_subscription_parameter(_, **kwargs):
         from azure.cli.core._completers import get_subscription_id_list
 
+        class SubscriptionNameOrIdAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, value, option_string=None):
+                from azure.cli.core._profile import Profile
+                profile = Profile(cli_ctx=namespace._cmd.cli_ctx)  # pylint: disable=protected-access
+                subscriptions_list = profile.load_cached_subscriptions()
+                sub_id = None
+                for sub in subscriptions_list:
+                    match_val = value.lower()
+                    if sub['id'].lower() == match_val or sub['name'].lower() == match_val:
+                        sub_id = sub['id']
+                        break
+                if not sub_id:
+                    logger.warning("Subscription '%s' not recognized.", value)
+                    sub_id = value
+                namespace._subscription = sub_id  # pylint: disable=protected-access
+
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table
         subscription_kwargs = {
@@ -334,6 +351,7 @@ def register_global_subscription_argument(cli_ctx):
                     'using `az account set -s NAME_OR_ID`',
             'completer': get_subscription_id_list,
             'arg_group': 'Global',
+            'action': SubscriptionNameOrIdAction,
             'configured_default': 'subscription',
             'id_part': 'subscription'
         }
