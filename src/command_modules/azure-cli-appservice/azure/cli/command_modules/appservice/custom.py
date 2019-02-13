@@ -41,7 +41,6 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
-from azure.mgmt.web.models import SwiftVirtualNetwork
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -49,7 +48,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
 from azure.mgmt.web.models import HybridConnection
 from azure.mgmt.network.models import Subnet
-from azure.mgmt.relay.models import AccessRights
+from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory
 
 from .tunnel import TunnelServer
 
@@ -62,7 +61,6 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_lang_from_content)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
 
-from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory
 
 logger = get_logger(__name__)
 

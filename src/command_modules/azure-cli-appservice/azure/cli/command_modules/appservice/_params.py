@@ -373,17 +373,17 @@ def load_arguments(self, _):
         c.argument('hybrid_connection')
 
     with self.argument_context('functionapp hybrid-connection list') as c:
-        c.argument('name', arg_type=name_arg_type, help='name of the function app')
+        c.argument('name', id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('functionapp hybrid-connection add') as c:
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('namespace')
         c.argument('hybrid-connection')
 
     with self.argument_context('functionapp hybrid-connection remove') as c:
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('namespace')
         c.argument('hybrid_connection')
@@ -423,17 +423,17 @@ def load_arguments(self, _):
         c.argument('vnet')
 
     with self.argument_context('functionapp vnet-integration list') as c:
-        c.argument('name', arg_type=name_arg_type, help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('functionapp vnet-integration add') as c:
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('vnet')
         c.argument('subnet')
 
     with self.argument_context('functionapp vnet-integration remove') as c:
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('vnet')
 

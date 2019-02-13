@@ -1106,15 +1106,15 @@ helps['functionapp hybrid-connection'] = """
     examples:
         - name: list the hybrid connections
           text: >
-             az functionapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
+             az functionapp hybrid-connection list -g [myResourceGroup] -n [myAppName]
         - name: add a hybrid connection to the functionapp
           text: >
-              az functionapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
-              --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+              az functionapp hybrid-connection add -g [myResourceGroup] -n [myAppName]
+              --namespace [hybridConnectionNamespaceName] --hybrid-connection [hybridConnectionName]
         - name: remove the hybrid connection from the functionapp
           text: >
-              az functionapp hybrid-connection remove -g {myResourceGroup} -n {myAppName}
-              --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+              az functionapp hybrid-connection remove -g [myResourceGroup] -n [myAppName]
+              --namespace [hybridConnectionNamespace] --hybrid-connection [hybridConnectionName]
 """
 
 helps['functionapp hybrid-connection list'] = """
@@ -1123,7 +1123,7 @@ helps['functionapp hybrid-connection list'] = """
     examples:
         - name: list the hybrid connections
           text: >
-              az functionapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
+              az functionapp hybrid-connection list -g [myResourceGroup] -n [myAppName]
 """
 
 helps['functionapp hybrid-connection add'] = """
@@ -1139,8 +1139,8 @@ helps['functionapp hybrid-connection add'] = """
     examples:
         - name: add a hybrid connection to the app
           text: >
-            az functionapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
-            --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+            az functionapp hybrid-connection add -g [myResourceGroup] -n [myAppName]
+            --namespace [hybridConnectionNamespaceName] --hybrid-connection [hybridConnectionName]
 """
 
 helps['functionapp hybrid-connection remove'] = """
@@ -1156,8 +1156,8 @@ helps['functionapp hybrid-connection remove'] = """
     examples:
         - name: remove the hybrid connection from the functionapp
           text: >
-            az functionapp hybrid-connection remove -g {{myResourceGroup} -n {myAppName}
-            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+            az functionapp hybrid-connection remove -g [myResourceGroup] -n [myAppName]
+            --namespace [hybridConnectionNamespace] --hybrid-connection [hybridConnectionName]
 """
 
 helps['webapp hybrid-connection'] = """
@@ -1166,15 +1166,15 @@ helps['webapp hybrid-connection'] = """
     examples:
         - name: list the hybrid connections
           text: >
-              az webapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
+              az webapp hybrid-connection list -g [myResourceGroup} -n {myAppName]
         - name: add a hybrid connection to the app
           text: >
-              az webapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
-              --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+              az webapp hybrid-connection add -g [myResourceGroup] -n [myAppName]
+              --namespace [hybridConnectionNamespaceName] --hybrid-connection [hybridConnectionName]
         - name: remove the hybrid connection from the app
           text: >
-              az webapp hybrid-connection remove -g {myResourceGroup} -n {myAppName}
-              --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+              az webapp hybrid-connection remove -g [myResourceGroup] -n [myAppName]
+              --namespace [hybridConnectionNamespace] --hybrid-connection [hybridConnectionName]
 """
 
 helps['webapp hybrid-connection list'] = """
@@ -1183,7 +1183,7 @@ helps['webapp hybrid-connection list'] = """
     examples:
         - name: list the hybrid connections
           text: >
-              az webapp hybrid-connection list -g {myResourceGroup} -n {myAppName}
+              az webapp hybrid-connection list -g [myResourceGroup} -n {myAppName]
 """
 
 helps['webapp hybrid-connection add'] = """
@@ -1199,8 +1199,8 @@ helps['webapp hybrid-connection add'] = """
     examples:
         - name: add a hybrid connection to the app
           text: >
-            az webapp hybrid-connection add -g {myResourceGroup} -n {myAppName}
-            --namespace {hybridConnectionNamespaceName} --hybrid-connection {hybridConnectionName}
+            az webapp hybrid-connection add -g [myResourceGroup] -n [myAppName]
+            --namespace [hybridConnectionNamespaceName] --hybrid-connection [hybridConnectionName]
 """
 
 helps['webapp hybrid-connection remove'] = """
@@ -1216,8 +1216,8 @@ helps['webapp hybrid-connection remove'] = """
     examples:
         - name: remove the hybrid connection from the app
           text: >
-            az webapp hybrid-connection remove -g {{myResourceGroup} -n {myAppName}
-            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
+            az webapp hybrid-connection remove -g [myResourceGroup] -n [myAppName]
+            --namespace [hybridConnectionNamespace] --hybrid-connection [hybridConnectionName]
 """
 
 helps['appservice hybrid-connection'] = """
@@ -1226,9 +1226,9 @@ helps['appservice hybrid-connection'] = """
     examples:
         - name: set the key the apps should use
           text: >
-            az appservice hybrid-connection set-key --asp {hybridConnectionAppServicePlan} -g {appServicePlanResourceGroup}
-            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
-            --key-type {"primary" | "secondary"}
+            az appservice hybrid-connection set-key --asp [hybridConnectionAppServicePlan] -g [appServicePlanResourceGroup]
+            --namespace [hybridConnectionNamespace] --hybrid-connection [hybridConnectionName]
+            --key-type ["primary" | "secondary"]
 """
 
 helps['appservice hybrid-connection set-key'] = """
@@ -1250,27 +1250,31 @@ helps['appservice hybrid-connection set-key'] = """
     examples:
         - name: set the key the apps should use
           text: >
-            az appservice hybrid-connection set-key --asp {hybridConnectionAppServicePlan} -g {appServicePlanResourceGroup}
-            --namespace {hybridConnectionNamespace} --hybrid-connection {hybridConnectionName}
-            --key-type {"primary" | "secondary"}
+            az appservice hybrid-connection set-key --asp [hybridConnectionAppServicePlan] -g [appServicePlanResourceGroup]
+            --namespace [hybridConnectionNamespace] --hybrid-connection [hybridConnectionName]
+            --key-type ["primary" | "secondary"]
 """
 
 helps['appservice vnet-integration'] = """
-    type: command
+    type: group
     short-summary: commands that operate on virtual network integrations in a specified app service plan
     examples:
         - name: list the virtual network integrations
           text: >
-            az appservice vnet-integration list -g {myResourceGroup} -n [myAspName]
+            az appservice vnet-integration list -g [myResourceGroup] --asp [myAspName]
 """
 
 helps['appservice vnet-integration list'] = """
     type: command
     short-summary: lists all the virtual networks in a specified app service plan
+    parameters:
+        - name: --asp
+          type: string
+          short-summary: 'Appservice plan'
     examples:
         - name: list the virtual network integrations
           text: >
-            az appservice vnet-integration list -g {myResourceGroup} -n [MyAspName]
+            az appservice vnet-integration list -g [myResourceGroup] --asp [MyAspName]
 """
 
 helps['webapp vnet-integration'] = """
@@ -1279,14 +1283,14 @@ helps['webapp vnet-integration'] = """
     examples:
         - name: list the virtual network integrations
           text: >
-            az webapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+            az webapp vnet-integration list -g [myResourceGroup] -n [myAppName]
         - name: add a swift virtual network to an app
           text: >
-            az webapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
-            --subnet {subnetName}
+            az webapp vnet-integration add -g [myResourceGroup] -n [myAppName] --vnet [vnetResourceID]
+            --subnet [subnetName]
         - name: remove a swift virtual network integration
           text: >
-            az webapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
+            az webapp vnet-integration remove -g [myResourceGroup] -n [myAppName]
 """
 
 helps['webapp vnet-integration list'] = """
@@ -1295,7 +1299,7 @@ helps['webapp vnet-integration list'] = """
     examples:
         - name: list the virtual network integrations
           text: >
-            az webapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+            az webapp vnet-integration list -g [myResourceGroup] -n [myAppName]
 """
 
 helps['webapp vnet-integration add'] = """
@@ -1311,8 +1315,8 @@ helps['webapp vnet-integration add'] = """
     examples:
         - name: add a swift virtual network to an app
           text: >
-            az webapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
-            --subnet {subnetName}
+            az webapp vnet-integration add -g [myResourceGroup] -n [myAppName] --vnet [vnetResourceID]
+            --subnet [subnetName]
 """
 
 helps['webapp vnet-integration remove'] = """
@@ -1321,7 +1325,7 @@ helps['webapp vnet-integration remove'] = """
     examples:
         - name: remove a swift virtual network integration
           text: >
-            az webapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
+            az webapp vnet-integration remove -g [myResourceGroup] -n [myAppName]
 """
 
 helps['functionapp vnet-integration'] = """
@@ -1330,14 +1334,14 @@ helps['functionapp vnet-integration'] = """
     examples:
         - name: list the virtual network integrations
           text: >
-            az functionapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+            az functionapp vnet-integration list -g [myResourceGroup] -n [myAppName]
         - name: add a swift virtual network to an functionapp
           text: >
-            az functionapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
-            --subnet {subnetName}
+            az functionapp vnet-integration add -g [myResourceGroup] -n [myAppName] --vnet [vnetResourceID]
+            --subnet [subnetName]
         - name: remove a swift virtual network integration
           text: >
-            az functionapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
+            az functionapp vnet-integration remove -g [myResourceGroup] -n [myAppName]
 """
 
 helps['functionapp vnet-integration list'] = """
@@ -1346,7 +1350,7 @@ helps['functionapp vnet-integration list'] = """
     examples:
         - name: list the virtual network integrations
           text: >
-            az functionapp vnet-integration list -g {myResourceGroup} -n {myAppName}
+            az functionapp vnet-integration list -g [myResourceGroup] -n [myAppName]
 """
 
 helps['functionapp vnet-integration add'] = """
@@ -1362,8 +1366,8 @@ helps['functionapp vnet-integration add'] = """
     examples:
         - name: add a swift virtual network to an functionapp
           text: >
-            az functionapp vnet-integration add -g {myResourceGroup} -n {myAppName} --vnet {vnetResourceID}
-            --subnet {subnetName}
+            az functionapp vnet-integration add -g [myResourceGroup] -n [myAppName] --vnet [vnetResourceID]
+            --subnet [subnetName]
 """
 
 helps['functionapp vnet-integration remove'] = """
@@ -1372,5 +1376,5 @@ helps['functionapp vnet-integration remove'] = """
     examples:
         - name: remove a swift virtual network integration
           text: >
-            az functionapp vnet-integration remove -g {myResourceGroup} -n {myAppName}
+            az functionapp vnet-integration remove -g [myResourceGroup] -n [myAppName]
 """
