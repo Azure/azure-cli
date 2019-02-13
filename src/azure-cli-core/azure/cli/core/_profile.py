@@ -11,6 +11,7 @@ import json
 import os
 import os.path
 import re
+import string
 from copy import deepcopy
 from enum import Enum
 from six.moves import BaseHTTPServer
@@ -767,12 +768,21 @@ class SubscriptionFinder(object):
         return result
 
     def find_through_authorization_code_flow(self, tenant, resource, authority_url):
+        import random
+
+        state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
 
         # launch browser and get the code
-        results = _get_authorization_code(resource, authority_url)
+        results = _get_authorization_code(resource, authority_url, state)
 
         if not results.get('code'):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
+
+        if not results.get('state'):
+            raise CLIError('Login failed') # error detail is already displayed through previous steps
+
+        if results.get('state') != state:
+            raise CLIError('Unexpected OAuth state during login')
 
         # exchange the code for the token
         context = self._create_auth_context(tenant)
@@ -1071,7 +1081,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return  # this prevent http server from dumping messages to stdout
 
 
-def _get_authorization_code_worker(authority_url, resource, results):
+def _get_authorization_code_worker(authority_url, resource, results, state):
     import socket
     reply_url = None
     for port in range(8400, 9000):
@@ -1089,7 +1099,7 @@ def _get_authorization_code_worker(authority_url, resource, results):
     # launch browser:
     url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
            '&redirect_uri={2}&state={3}&resource={4}&prompt=select_account')
-    url = url.format(authority_url, _CLIENT_ID, reply_url, 'code', resource)
+    url = url.format(authority_url, _CLIENT_ID, reply_url, state, resource)
     logger.info('Open browser with url: %s', url)
     succ = open_page_in_browser(url)
     if succ is False:
@@ -1118,16 +1128,25 @@ def _get_authorization_code_worker(authority_url, resource, results):
         logger.warning('Authentication Error: Authorization code was not captured in query strings "%s"',
                        web_server.query_params)
         return
+
+    if 'state' in web_server.query_params:
+        state = web_server.query_params['state']
+    else:
+        logger.warning('Authentication Error: Authorization state was not captured in query strings "%s"',
+                       web_server.query_params)
+        return
+
     results['code'] = code[0]
+    results['state'] = state[0]
     results['reply_url'] = reply_url
 
 
-def _get_authorization_code(resource, authority_url):
+def _get_authorization_code(resource, authority_url, state):
     import threading
     import time
     results = {}
     t = threading.Thread(target=_get_authorization_code_worker,
-                         args=(authority_url, resource, results))
+                         args=(authority_url, resource, results, state))
     t.daemon = True
     t.start()
     while True:
