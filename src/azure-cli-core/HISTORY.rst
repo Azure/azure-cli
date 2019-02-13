@@ -4,9 +4,8 @@ Release History
 ===============
 2.0.59
 ++++++
-* Minor fixes
-
 * Fix issue where in some instances using `--subscription NAME` would throw an exception.
+* Using a random OAuth state for each login request.
 
 2.0.58
 ++++++
