@@ -1520,7 +1520,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         workspace_resource_id
     )
     if 'omsagent' in addon_profiles:
-        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
+        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])       
 
     aad_profile = None
     if any([aad_client_app_id, aad_server_app_id, aad_server_app_secret, aad_tenant_id]):
@@ -1589,12 +1589,24 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
                       subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
-
+    service_principal_client_id = instance.service_principal_profile.client_id
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
+        from msrestazure.tools import resource_id
+        cluster_resource_id = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group_name,
+                namespace='Microsoft.ContainerService', type='managedClusters',
+                name=name
+        )
+        if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
+                                    service_principal_client_id, scope=cluster_resource_id):
+            logger.warning('Could not create a role assignment for Monitoring addon. '
+                           'Are you an Owner on this subscription?')
+        
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
