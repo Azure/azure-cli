@@ -779,7 +779,7 @@ class SubscriptionFinder(object):
             raise CLIError('Login failed')  # error detail is already displayed through previous steps
 
         if not results.get('state'):
-            raise CLIError('Login failed') # error detail is already displayed through previous steps
+            raise CLIError('Login failed')  # error detail is already displayed through previous steps
 
         if results.get('state') != state:
             raise CLIError('Unexpected OAuth state during login')
