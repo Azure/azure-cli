@@ -1494,7 +1494,8 @@ def lists_match(l1, l2):
 # region ExpressRoutes
 def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
                          service_provider_name, location=None, tags=None, no_wait=False,
-                         sku_family=None, sku_tier=None, allow_global_reach=None, express_route_port=None):
+                         sku_family=None, sku_tier=None, allow_global_reach=None, express_route_port=None,
+                         allow_classic_operations=None):
     ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties, SubResource = \
         cmd.get_models(
             'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties'
@@ -1509,23 +1510,33 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
             bandwidth_in_mbps=bandwidth_in_mbps if not express_route_port else None),
         sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family),
         allow_global_reach=allow_global_reach,
-        express_route_port=SubResource(id=express_route_port) if express_route_port else None,
         bandwidth_in_gbps=(int(bandwidth_in_mbps) / 1000) if express_route_port else None
     )
-    if express_route_port:
+    if cmd.supported_api_version(min_api='2010-07-01') and allow_classic_operations is not None:
+        circuit.allow_classic_operations = allow_classic_operations
+    if cmd.supported_api_version(min_api='2018-08-01') and express_route_port:
+        circuit.express_route_port = SubResource(id=express_route_port)
         circuit.service_provider_properties = None
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, circuit_name, circuit)
 
 
 def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
-                         allow_global_reach=None, express_route_port=None):
+                         allow_global_reach=None, express_route_port=None,
+                         allow_classic_operations=None):
 
-    if peering_location is not None:
-        instance.service_provider_properties.peering_location = peering_location
+    with UpdateContext(instance) as c:
+        c.set_param('allow_classic_operations', allow_classic_operations)
+        c.set_param('tags', tags)
+        c.set_param('allow_global_reach', allow_global_reach)
 
-    if service_provider_name is not None:
-        instance.service_provider_properties.service_provider_name = service_provider_name
+    with UpdateContext(instance.sku) as c:
+        c.set_param('family', sku_family)
+        c.set_param('tier', sku_tier)
+
+    with UpdateContext(instance.service_provider_properties) as c:
+        c.set_param('peering_location', peering_location)
+        c.set_param('service_provider_name', service_provider_name)
 
     if express_route_port is not None:
         SubResource = cmd.get_models('SubResource')
@@ -1537,18 +1548,6 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
             instance.service_provider_properties.bandwith_in_mbps = float(bandwidth_in_mbps)
         else:
             instance.bandwidth_in_gbps = (float(bandwidth_in_mbps) / 1000)
-
-    if sku_family is not None:
-        instance.sku.family = sku_family
-
-    if sku_tier is not None:
-        instance.sku.tier = sku_tier
-
-    if tags is not None:
-        instance.tags = tags
-
-    if allow_global_reach is not None:
-        instance.allow_global_reach = allow_global_reach
 
     return instance
 
