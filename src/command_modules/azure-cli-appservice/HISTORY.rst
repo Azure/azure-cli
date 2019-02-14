@@ -2,6 +2,11 @@
 
 Release History
 ===============
+<<<<<<< HEAD
+=======
+* functionapp: az functionapp devops-build, new command created
+
+>>>>>>> a413f216c0a7e792b4e5c78d0a1acb65753b5d29
 0.2.13
 ++++++
 * functionapp: add ability to create and configure functions using ACR containers

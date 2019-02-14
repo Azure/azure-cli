@@ -2,9 +2,17 @@
 
 Release History
 ===============
+
 2.1.10
 ++++++
+<<<<<<< HEAD
 * Minor fixes
+=======
+* `policy assignment create`: support uri based parameters file
+* `policy set-definition update`: support uri based parameters and definitions files
+* `policy definition update`: fix handling of parameters and rules files
+* `resource show/update/delete/tag/invoke-action`: Fix issue where cross-subscription IDs did not properly honor the subscription ID.
+>>>>>>> a413f216c0a7e792b4e5c78d0a1acb65753b5d29
 
 2.1.9
 +++++
