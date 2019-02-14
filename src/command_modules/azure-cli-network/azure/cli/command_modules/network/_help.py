@@ -1799,9 +1799,9 @@ helps['network express-route create'] = """
           - az network express-route list-service-providers
     examples:
         - name: Create an ExpressRoute circuit.
-          text: |
-            az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley" \\
-                -g MyResourceGroup --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
+          text: >
+            az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley"
+            -g MyResourceGroup --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
 """
 
 helps['network express-route delete'] = """
@@ -3607,12 +3607,26 @@ helps['network vpn-connection create'] = """
     type: command
     short-summary: Create a VPN connection.
     long-summary: The VPN Gateway and Local Network Gateway must be provisioned before creating the connection between them.
+    parameters:
+      - name: --vnet-gateway1
+        short-summary: Name or ID of the source virtual network gateway.
+      - name: --vnet-gateway2
+        short-summary: Name or ID of the destination virtual network gateway to connect to using a 'Vnet2Vnet' connection.
+      - name: --local-gateway2
+        short-summary: Name or ID of the destination local network gateway to connect to using an 'IPSec' connection.
+      - name: --express-route-circuit2
+        short-summary: Name or ID of the destination ExpressRoute to connect to using an 'ExpressRoute' connection.
+      - name: --authorization-key
+        short-summary: The authorization key for the VPN connection.
+      - name: --enable-bgp
+        short-summary: Enable BGP for this VPN connection.
+      - name: --validate
+        short-summary: Display and validate the ARM template but do not create any resources.
     examples:
         - name: >
             Create a site-to-site connection between an Azure virtual network and an on-premises local network gateway.
-          text: |
-            az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway \\
-                --local-gateway2 MyLocalGateway --shared-key Abc123
+          text: >
+            az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway --local-gateway2 MyLocalGateway --shared-key Abc123
 """
 
 helps['network vpn-connection delete'] = """
