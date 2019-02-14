@@ -1597,7 +1597,7 @@ def create_express_route_peering(
         cmd, client, resource_group_name, circuit_name, peering_type, peer_asn, vlan_id,
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
-        route_filter=None):
+        route_filter=None, legacy_mode=None):
     (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
         cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
 
@@ -1619,6 +1619,8 @@ def create_express_route_peering(
             routing_registry_name=routing_registry_name)
     if cmd.supported_api_version(min_api='2016-12-01') and route_filter:
         peering.route_filter = RouteFilter(id=route_filter)
+    if cmd.supported_api_version(min_api='2017-10-01') and legacy_mode is not None:
+        peering.microsoft_peering_config.legacy_mode = legacy_mode
 
     return client.create_or_update(resource_group_name, circuit_name, peering_type, peering)
 
@@ -1627,24 +1629,16 @@ def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, sec
                                    route_filter, advertised_public_prefixes, customer_asn, routing_registry_name):
     if config:
         # update scenario
-        if primary_peer_address_prefix:
-            config.primary_peer_address_prefix = primary_peer_address_prefix
-
-        if secondary_peer_address_prefix:
-            config.secondary_peer_address_prefix = secondary_peer_address_prefix
+        with UpdateContext(config) as c:
+            c.set_param('primary_peer_address_prefix', primary_peer_address_prefix)
+            c.set_param('secondary_peer_address_prefix', secondary_peer_address_prefix)
+            c.set_param('advertised_public_prefixes', advertised_public_prefixes)
+            c.set_param('customer_asn', customer_asn)
+            c.set_param('routing_registry_name', routing_registry_name)
 
         if route_filter:
             RouteFilter = cmd.get_models('RouteFilter')
             config.route_filter = RouteFilter(id=route_filter)
-
-        if advertised_public_prefixes:
-            config.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
-
-        if customer_asn:
-            config.microsoft_peering_config.customer_asn = customer_asn
-
-        if routing_registry_name:
-            config.microsoft_peering_config.routing_registry_name = routing_registry_name
     else:
         # create scenario
 
@@ -1664,17 +1658,14 @@ def _create_or_update_ipv6_peering(cmd, config, primary_peer_address_prefix, sec
 def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_address_prefix=None,
                                  secondary_peer_address_prefix=None, vlan_id=None, shared_key=None,
                                  advertised_public_prefixes=None, customer_asn=None,
-                                 routing_registry_name=None, route_filter=None, ip_version='IPv4'):
+                                 routing_registry_name=None, route_filter=None, ip_version='IPv4',
+                                 legacy_mode=None):
 
     # update settings common to all peering types
-    if peer_asn is not None:
-        instance.peer_asn = peer_asn
-
-    if vlan_id is not None:
-        instance.vlan_id = vlan_id
-
-    if shared_key is not None:
-        instance.shared_key = shared_key
+    with UpdateContext(instance) as c:
+        c.set_param('peer_asn', peer_asn)
+        c.set_param('vlan_id', vlan_id)
+        c.set_param('shared_key', shared_key)
 
     if ip_version == 'IPv6':
         # update is the only way to add IPv6 peering options
@@ -1685,29 +1676,23 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
                                                                       routing_registry_name)
     else:
         # IPv4 Microsoft Peering (or non-Microsoft Peering)
-        if primary_peer_address_prefix is not None:
-            instance.primary_peer_address_prefix = primary_peer_address_prefix
-
-        if secondary_peer_address_prefix is not None:
-            instance.secondary_peer_address_prefix = secondary_peer_address_prefix
+        with UpdateContext(instance) as c:
+            c.set_param('primary_peer_address_prefix', primary_peer_address_prefix)
+            c.set_param('secondary_peer_address_prefix', secondary_peer_address_prefix)
 
         if route_filter is not None:
             RouteFilter = cmd.get_models('RouteFilter')
             instance.route_filter = RouteFilter(id=route_filter)
 
         try:
-            if advertised_public_prefixes is not None:
-                instance.microsoft_peering_config.advertised_public_prefixes = advertised_public_prefixes
-
-            if customer_asn is not None:
-                instance.microsoft_peering_config.customer_asn = customer_asn
-
-            if routing_registry_name is not None:
-                instance.microsoft_peering_config.routing_registry_name = routing_registry_name
+            with UpdateContext(instance.microsoft_peering_config) as c:
+                c.set_param('advertised_public_prefixes', advertised_public_prefixes)
+                c.set_param('customer_asn', customer_asn)
+                c.set_param('routing_registry_name', routing_registry_name)
+                c.set_param('legacy_mode', legacy_mode)
         except AttributeError:
-            raise CLIError('--advertised-public-prefixes, --customer-asn and --routing-registry-name are only '
-                           'applicable for Microsoft Peering.')
-
+            raise CLIError('--advertised-public-prefixes, --customer-asn, --routing-registry-name and '
+                           '--legacy-mode are only applicable for Microsoft Peering.')
     return instance
 # endregion
 
@@ -3865,12 +3850,13 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
                           express_route_gateway_bypass=None):
     ncf = network_client_factory(cmd.cli_ctx)
 
-    _set_param(instance, 'routing_weight', routing_weight)
-    _set_param(instance, 'shared_key', shared_key)
-    _set_param(instance, 'tags', tags)
-    _set_param(instance, 'enable_bgp', enable_bgp)
-    _set_param(instance, 'express_route_gateway_bypass', express_route_gateway_bypass)
-    _set_param(instance, 'use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
+    with UpdateContext(instance) as c:
+        c.set_param('routing_weight', routing_weight)
+        c.set_param('shared_key', shared_key)
+        c.set_param('tags', tags)
+        c.set_param('enable_bgp', enable_bgp)
+        c.set_param('express_route_gateway_bypass', express_route_gateway_bypass)
+        c.set_param('use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
 
     # TODO: Remove these when issue #1615 is fixed
     gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
