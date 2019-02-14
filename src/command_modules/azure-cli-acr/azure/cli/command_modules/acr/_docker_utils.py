@@ -175,13 +175,15 @@ def _get_credentials(cmd,
             registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
 
     # Validate the login server is reachable
+    challenge = 'https://' + login_server + '/v2/'
     try:
-        requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+        requests.get(challenge, verify=(not should_disable_connection_verify()))
     except RequestException:
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
-        raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
-                       "Please verify if the registry exists.")
+        raise CLIError("Could not connect to the registry login server '{}'. ".format(login_server) +
+                       "Please verify that the registry exists and " +
+                       "the URL '{}' is reachable from your environment.".format(challenge))
 
     # 1. if username was specified, verify that password was also specified
     if username:
