@@ -3,9 +3,15 @@
 Release History
 ===============
 
+2.2.0
++++++
+* BREAKING CHANGE: Remove 'acr build-task' command group.
+* BREAKING CHANGE: Remove --tag/--manifest from 'acr repository delete' command.
+
 2.1.13
 ++++++
 * Add support for VNet/IP rules.
+* Add --platform parameter for `acr build`, `acr task create` and `acr task update` commands
 
 2.1.12
 ++++++

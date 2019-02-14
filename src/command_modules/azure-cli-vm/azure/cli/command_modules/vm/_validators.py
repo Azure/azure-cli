@@ -311,7 +311,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
             if not hasattr(temp, 'location_info'):
                 return
             if not temp or not [x for x in (temp.location_info or []) if x.zones]:
-                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
+                raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
 
@@ -1212,6 +1212,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
+
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
@@ -1348,12 +1351,6 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
-
-
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def process_msi_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
 
 
 def process_gallery_image_version_namespace(cmd, namespace):

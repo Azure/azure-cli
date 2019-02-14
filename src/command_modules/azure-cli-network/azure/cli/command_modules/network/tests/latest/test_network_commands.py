@@ -1113,10 +1113,12 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             self.cmd('network lb inbound-nat-pool create -g {{rg}} --lb-name {{lb}} -n rule{0} --protocol tcp --frontend-port-range-start {0}  --frontend-port-range-end {1} --backend-port {0}'.format(count, count + 999))
         self.cmd('network lb inbound-nat-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
-        self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --protocol udp --backend-port 50')
+        self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --protocol udp --backend-port 50 --floating-ip --idle-timeout 20')
         self.cmd('network lb inbound-nat-pool show -g {rg} --lb-name {lb} -n rule1000', checks=[
             self.check('protocol', 'Udp'),
-            self.check('backendPort', 50)
+            self.check('backendPort', 50),
+            self.check('enableFloatingIp', True),
+            self.check('idleTimeoutInMinutes', 20)
         ])
         # test generic update
         self.cmd('network lb inbound-nat-pool update -g {rg} --lb-name {lb} -n rule1000 --set protocol=Tcp',
@@ -1439,6 +1441,64 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
                  checks=self.check("subnet.contains(id, '{subnet}')", True))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools')
+    def test_network_nic_lb_address_pools(self, resource_group):
+
+        self.kwargs.update({
+            'nic': 'nic1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'config': 'ipconfig1',
+            'lb': 'lb1',
+            'pool': 'pool1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name vnet1')
+
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {pool}')
+        self.kwargs['lb_pool_id'] = self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n {pool}').get_output_in_json()['id']
+
+        self.cmd('network nic ip-config address-pool add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('loadBalancerBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool add -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}',
+                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}',
+                 checks=self.check('loadBalancerBackendAddressPools', None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_ag_address_pools')
+    def test_network_nic_ag_address_pools(self, resource_group):
+
+        self.kwargs.update({
+            'nic': 'nic1',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'config': 'ipconfig1',
+            'ag': 'ag1',
+            'pool': 'pool1'
+        })
+
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1}  --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
+        self.kwargs['ag_pool_id'] = self.cmd('network application-gateway address-pool show -g {rg} --gateway-name {ag} -n {pool}').get_output_in_json()['id']
+
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet}')
+
+        self.cmd('network nic ip-config address-pool add -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
+                 checks=self.check('applicationGatewayBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool add -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}',
+                 checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}',
+                 checks=self.check('applicationGatewayBackendAddressPools', None))
+
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
 
@@ -1690,9 +1750,21 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet show --ids {ids}',
                  checks=self.check('length(@)', 2))
 
-        # This test ensures you can pipe JSON output to --ids
+        # This test ensures you can pipe JSON output to --ids Windows-style
+        # ensures a single JSON string has its ids parsed out
         self.kwargs['json'] = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json())
         self.cmd('network vnet show --ids \'{json}\'',
+                 checks=self.check('length(@)', 2))
+
+        # This test ensures you can pipe JSON output to --ids bash-style
+        # ensures that a JSON string where each line is interpretted individually
+        # is reassembled and treated as a single json string
+        json_obj = self.cmd('network vnet list -g {rg}').get_output_in_json()
+        for item in json_obj:
+            del item['etag']
+        split_json = json.dumps(json_obj, indent=4).split()
+        split_string = ' '.join(split_json).replace('{', '{{').replace('}', '}}').replace('"', '\\"')
+        self.cmd('network vnet show --ids {}'.format(split_string),
                  checks=self.check('length(@)', 2))
 
 
@@ -2194,20 +2266,35 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westcentralus')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='eastus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='eastus')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
             'loc': resource_group_location,
             'nsg': 'nsg1',
-            'sa': storage_account
+            'sa': storage_account,
+            'ws': self.create_random_name('testws', 20),
+            'la_prop_path': os.path.join(TEST_DIR, 'loganalytics.json')
         })
 
         self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
         self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}')
+
+        # test traffic-analytics features
+        self.cmd('resource create -g {rg} -n {ws} --resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"')
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws}', checks=[
+            self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
+            self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
+        ])
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --traffic-analytics false', checks=[
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
+        ])
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace ""', checks=[
+            self.check('flowAnalyticsConfiguration', None)
+        ])
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')

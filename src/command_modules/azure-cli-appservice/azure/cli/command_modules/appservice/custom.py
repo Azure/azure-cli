@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-import subprocess
 import threading
 import time
 
@@ -20,6 +19,9 @@ import json
 import ssl
 import sys
 import OpenSSL.crypto
+
+from fabric import Connection
+
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -40,8 +42,7 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import in_cloud_console
-from azure.cli.core.util import open_page_in_browser
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
 
 from .tunnel import TunnelServer
 
@@ -158,10 +159,27 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
 
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
-    for name_value in settings + slot_settings:
-        # split at the first '=', appsetting should not have '=' in the name
-        settings_name, value = name_value.split('=', 1)
-        app_settings.properties[settings_name] = value
+    result, slot_result = {}, {}
+    # pylint: disable=too-many-nested-blocks
+    for src, dest in [(settings, result), (slot_settings, slot_result)]:
+        for s in src:
+            try:
+                temp = shell_safe_json_parse(s)
+                if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
+                    for t in temp:
+                        if t.get('slotSetting', True):
+                            slot_result[t['name']] = t['value']
+                        else:
+                            result[t['name']] = t['value']
+                else:
+                    dest.update(temp)
+            except CLIError:
+                setting_name, value = s.split('=', 1)
+                dest[setting_name] = value
+
+    result.update(slot_result)
+    for setting_name, value in result.items():
+        app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
@@ -169,8 +187,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                          app_settings.properties, slot, client)
 
     app_settings_slot_cfg_names = []
-    if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+    if slot_result:
+        new_slot_setting_names = slot_result.keys()
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
         slot_cfg_names.app_setting_names += new_slot_setting_names
@@ -288,6 +306,8 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUMV2'
     elif tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
+    elif tier in ['EP1', 'EP2', 'EP3']:
+        return 'ElasticPremium'
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
@@ -627,7 +647,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         min_tls_version=None,  # pylint: disable=unused-argument
                         http20_enabled=None,  # pylint: disable=unused-argument
                         app_command_line=None,  # pylint: disable=unused-argument
-                        ftps_state=None):  # pylint: disable=unused-argument
+                        ftps_state=None,  # pylint: disable=unused-argument
+                        generic_configurations=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if linux_fx_version:
         if linux_fx_version.strip().lower().startswith('docker|'):
@@ -643,8 +664,20 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
     for arg in args[3:]:
-        if values.get(arg, None):
+        if arg != 'generic_configurations' and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+
+    generic_configurations = generic_configurations or []
+    result = {}
+    for s in generic_configurations:
+        try:
+            result.update(get_json_object(s))
+        except CLIError:
+            config_name, value = s.split('=', 1)
+            result[config_name] = value
+
+    for config_name, value in result.items():
+        setattr(configs, config_name, value)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -812,6 +845,15 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
+def update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url=None,
+                                          docker_custom_image_name=None, docker_registry_server_user=None,
+                                          docker_registry_server_password=None, slot=None):
+    return update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
+                                     docker_custom_image_name, docker_registry_server_user, None,
+                                     docker_registry_server_password, multicontainer_config_type=None,
+                                     multicontainer_config_file=None, slot=slot)
+
+
 def _get_acr_cred(cli_ctx, registry_name):
     from azure.mgmt.containerregistry import ContainerRegistryManagementClient
     from azure.cli.core.commands.parameters import get_resources_in_subscription
@@ -842,6 +884,10 @@ def show_container_settings(cmd, resource_group_name, name, show_multicontainer_
     settings = get_app_settings(cmd, resource_group_name, name, slot)
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           show_multicontainer_config, slot))
+
+
+def show_container_settings_functionapp(cmd, resource_group_name, name, slot=None):
+    return show_container_settings(cmd, resource_group_name, name, show_multicontainer_config=None, slot=slot)
 
 
 def _filter_for_container_settings(cmd, resource_group_name, name, settings,
@@ -1847,6 +1893,20 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
+                                        number_of_workers=None, location=None, tags=None):
+    # This command merely shadows 'az appservice plan create' except with a few parameters
+    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
+                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+
+
+def is_plan_Elastic_Premium(plan_info):
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier == 'ElasticPremium'
+    return False
+
+
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
                     app_insights=None, app_insights_key=None, deployment_source_url=None,
@@ -1861,6 +1921,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
@@ -1930,7 +1991,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
-    if consumption_plan_location is None:
+    if consumption_plan_location is None and not is_plan_Elastic_Premium(plan_info):
         site_config.always_on = True
     else:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
@@ -2253,11 +2314,11 @@ def _ping_scm_site(cmd, resource_group, name):
     requests.get(scm_url + '/api/settings', headers=authorization)
 
 
-def _check_for_ready_tunnel(tunnel_server):
-    return tunnel_server.is_port_set_to_default()
+def is_webapp_up(tunnel_server):
+    return tunnel_server.is_webapp_up()
 
 
-def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -2281,15 +2342,14 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
     tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
     _ping_scm_site(cmd, resource_group_name, name)
 
+    _wait_for_webapp(tunnel_server)
+
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
 
-    _wait_for_tunnel(tunnel_server, False)
-    logger.warning("SSH is available ( username: %s, password: %s )", ssh_user_name, ssh_user_password)
-
-    s = threading.Thread(target=_start_ssh,
-                         args=('localhost', tunnel_server.get_port(), ssh_user_name))
+    s = threading.Thread(target=_start_ssh_session,
+                         args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
     s.daemon = True
     s.start()
 
@@ -2297,25 +2357,50 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None):
         time.sleep(5)
 
 
-def _wait_for_tunnel(tunnel_server, print_warnings):
-    if not _check_for_ready_tunnel(tunnel_server):
-        if print_warnings:
-            logger.warning('Tunnel is not ready yet, please wait (may take up to 1 minute)')
-        while True:
-            time.sleep(1)
-            if print_warnings:
-                logger.warning('.')
-            if _check_for_ready_tunnel(tunnel_server):
-                break
+def _wait_for_webapp(tunnel_server):
+    tries = 0
+    while True:
+        if is_webapp_up(tunnel_server):
+            break
+        if tries == 0:
+            logger.warning('Connection is not ready yet, please wait')
+        if tries == 60:
+            raise CLIError("Timeout Error, Unable to establish a connection")
+        tries = tries + 1
+        logger.warning('.')
+        time.sleep(1)
 
 
 def _start_tunnel(tunnel_server):
-    _wait_for_tunnel(tunnel_server, True)
     tunnel_server.start_server()
 
 
-def _start_ssh(host_name, port, user_name):
-    subprocess.call("ssh -o StrictHostKeyChecking=no {}@{} -p {}".format(user_name, host_name, port), shell=True)
+def _start_ssh_session(hostname, port, username, password):
+    tries = 0
+    while True:
+        try:
+            c = Connection(host=hostname,
+                           port=port,
+                           user=username,
+                           # connect_timeout=60*10,
+                           connect_kwargs={"password": password})
+            break
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info(ex)
+            if tries == 0:
+                logger.warning('Connection is not ready yet, please wait')
+            if tries == 60:
+                raise CLIError("Timeout Error, Unable to establish a connection")
+            tries = tries + 1
+            logger.warning('.')
+            time.sleep(1)
+    try:
+        c.run('cat /etc/motd', pty=True)
+        c.run('source /etc/profile; exec $SHELL -l', pty=True)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info(ex)
+    finally:
+        c.close()
 
 
 def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
@@ -2323,4 +2408,4 @@ def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=to
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
-        create_tunnel(cmd, resource_group_name, name, port=None, slot=slot)
+        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot)

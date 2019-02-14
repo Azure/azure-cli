@@ -1819,7 +1819,11 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         self.api_version = api_version
 
     def create_resource(self, properties, location, is_full_object):
-        res = json.loads(properties)
+        try:
+            res = json.loads(properties)
+        except json.decoder.JSONDecodeError as ex:
+            raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
+
         if not is_full_object:
             if not location:
                 if self.resource_id:

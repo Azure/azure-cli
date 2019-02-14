@@ -5,12 +5,7 @@
 
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    ImportImageParameters,
-    ImportSourceCredentials,
-    ImportSource,
-    ImportMode
-)
+
 from ._utils import (
     validate_managed_registry,
     get_registry_from_name_or_login_server
@@ -38,7 +33,7 @@ def acr_import(cmd,
                force=False):
 
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
 
     if not source:
         raise CLIError(INVALID_SOURCE_IMAGE)
@@ -46,6 +41,8 @@ def acr_import(cmd,
 
     slash = source.find('/')
 
+    ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
+        'ImportImageParameters', 'ImportSource', 'ImportMode')
     if slash < 0:
         if not source_registry:
             from knack.prompting import prompt, NoTTYException
@@ -74,6 +71,7 @@ def acr_import(cmd,
                                   source_image=source_image)
         else:
             if source_registry_password:
+                ImportSourceCredentials = cmd.get_models('ImportSourceCredentials')
                 if source_registry_username:
                     source = ImportSource(registry_uri=source_registry_login_server,
                                           source_image=source_image,

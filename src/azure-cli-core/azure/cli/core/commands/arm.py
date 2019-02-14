@@ -258,6 +258,31 @@ def register_ids_argument(cli_ctx):
         for arg in combined_args:
             setattr(namespace, arg.name, IterateValue())
 
+        def assemble_json(ids):
+            lcount = 0
+            lind = None
+            for i, line in enumerate(ids):
+                if line == '[':
+                    if lcount == 0:
+                        lind = i
+                    lcount += 1
+                elif line == ']':
+                    lcount -= 1
+                    # final closed set of matching brackets
+                    if lcount == 0:
+                        left = lind
+                        right = i + 1
+                        l_comp = ids[:left]
+                        m_comp = [''.join(ids[left:right])]
+                        r_comp = ids[right:]
+                        ids = l_comp + m_comp + r_comp
+                        return assemble_json(ids)
+            # base case--no more merging required
+            return ids
+
+        # reassemble JSON strings from bash
+        ids = assemble_json(ids)
+
         # expand the IDs into the relevant fields
         full_id_list = []
         for val in ids:

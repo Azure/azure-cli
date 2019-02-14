@@ -301,3 +301,11 @@ Note: This document's source uses
 to make diffs and updates clearer.
 -->
 
+### Sample 9. Assert Specific Error Occurs
+
+``` Python
+with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+            self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name}')
+```
+
+The above syntax is the recommended way to test that a specific error occurs. You must pass the type of the error as well as a string used to match the error message. If the error is encountered, the text will be validated and, if matching, the command will be deemed a success (for testing purposes) and execution will continue. If the command does not yield the expected error, the test will fail.

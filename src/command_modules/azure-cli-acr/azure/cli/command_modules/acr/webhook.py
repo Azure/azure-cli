@@ -5,11 +5,6 @@
 
 from azure.cli.core.util import CLIError
 
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    WebhookCreateParameters,
-    WebhookUpdateParameters
-)
-
 from ._utils import (
     get_resource_group_name_by_registry_name,
     validate_managed_registry
@@ -21,7 +16,7 @@ WEBHOOKS_NOT_SUPPORTED = 'Webhooks are only supported for managed registries.'
 
 def acr_webhook_list(cmd, client, registry_name, resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
 
@@ -38,10 +33,11 @@ def acr_webhook_create(cmd,
                        scope=None,
                        tags=None):
     registry, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
 
     from msrest.exceptions import ValidationError
     try:
+        WebhookCreateParameters = cmd.get_models('WebhookCreateParameters')
         return client.create(
             resource_group_name,
             registry_name,
@@ -66,7 +62,7 @@ def acr_webhook_delete(cmd,
                        registry_name,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, webhook_name)
 
 
@@ -76,7 +72,7 @@ def acr_webhook_show(cmd,
                      registry_name,
                      resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, webhook_name)
 
 
@@ -108,9 +104,10 @@ def acr_webhook_update_custom(instance,
     return instance
 
 
-def acr_webhook_update_get(client):  # pylint: disable=unused-argument
+def acr_webhook_update_get(cmd):
     """Returns an empty WebhookUpdateParameters object.
     """
+    WebhookUpdateParameters = cmd.get_models('WebhookUpdateParameters')
     return WebhookUpdateParameters()
 
 
@@ -131,7 +128,7 @@ def acr_webhook_get_config(cmd,
                            registry_name,
                            resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
     return client.get_callback_config(resource_group_name, registry_name, webhook_name)
 
 
@@ -141,7 +138,7 @@ def acr_webhook_list_events(cmd,
                             registry_name,
                             resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
     return client.list_events(resource_group_name, registry_name, webhook_name)
 
 
@@ -151,5 +148,5 @@ def acr_webhook_ping(cmd,
                      registry_name,
                      resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
     return client.ping(resource_group_name, registry_name, webhook_name)

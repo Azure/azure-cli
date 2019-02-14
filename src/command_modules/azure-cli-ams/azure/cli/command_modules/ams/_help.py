@@ -419,6 +419,14 @@ helps['ams streaming-endpoint create'] = """
     short-summary: Create a streaming endpoint.
 """
 
+helps['ams streaming-endpoint wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the streaming endpoint is met.
+    examples:
+        - name: Place the CLI in a waiting state until the streaming endpoint is created.
+          text: az ams streaming-endpoint wait -g MyResourceGroup -a MyAmsAccount -n MyStreamingEndpoint --created
+"""
+
 helps['ams streaming-endpoint akamai'] = """
     type: group
     short-summary: Manage AkamaiAccessControl objects to be used on streaming endpoints.
@@ -509,6 +517,14 @@ helps['ams live-event update'] = """
           text: >
             az ams live-event update -a amsAccount -g resourceGroup -n liveEventName --ips 1.2.3.4/22 5.6.7.8/30
 
+"""
+
+helps['ams live-event wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the live event is met.
+    examples:
+        - name: Place the CLI in a waiting state until the live event is created.
+          text: az ams live-event wait -g MyResourceGroup -a MyAmsAccount -n MyLiveEvent --created
 """
 
 helps['ams live-output'] = """

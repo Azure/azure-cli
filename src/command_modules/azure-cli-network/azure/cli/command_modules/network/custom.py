@@ -1074,7 +1074,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'caa':
                 record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
-                record_obj.update({'alias': record.cname})
+                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
                 record_obj.update({'preference': record.preference, 'host': record.exchange})
             elif record_type == 'ns':
@@ -1810,7 +1810,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        backend_port, frontend_ip_name=None, floating_ip="false", idle_timeout=None, enable_tcp_reset=None):
+        backend_port, frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1821,7 +1821,7 @@ def create_lb_inbound_nat_rule(
         name=item_name, protocol=protocol,
         frontend_port=frontend_port, backend_port=backend_port,
         frontend_ip_configuration=frontend_ip,
-        enable_floating_ip=floating_ip == 'true',
+        enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset)
     _upsert(lb, 'inbound_nat_rules', new_rule, 'name')
@@ -1836,9 +1836,6 @@ def set_lb_inbound_nat_rule(
         instance.frontend_ip_configuration = \
             _get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
-    if floating_ip is not None:
-        instance.enable_floating_ip = floating_ip == 'true'
-
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
 
@@ -1846,13 +1843,15 @@ def set_lb_inbound_nat_rule(
     _set_param(instance, 'frontend_port', frontend_port)
     _set_param(instance, 'backend_port', backend_port)
     _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
+    _set_param(instance, 'enable_floating_ip', floating_ip)
 
     return parent
 
 
 def create_lb_inbound_nat_pool(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
-        frontend_port_range_end, backend_port, frontend_ip_name=None, enable_tcp_reset=None):
+        frontend_port_range_end, backend_port, frontend_ip_name=None, enable_tcp_reset=None,
+        floating_ip=None, idle_timeout=None):
     InboundNatPool = cmd.get_models('InboundNatPool')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -1867,7 +1866,9 @@ def create_lb_inbound_nat_pool(
         frontend_port_range_start=frontend_port_range_start,
         frontend_port_range_end=frontend_port_range_end,
         backend_port=backend_port,
-        enable_tcp_reset=enable_tcp_reset)
+        enable_tcp_reset=enable_tcp_reset,
+        enable_floating_ip=floating_ip,
+        idle_timeout_in_minutes=idle_timeout)
     _upsert(lb, 'inbound_nat_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
     return _get_property(poller.result().inbound_nat_pools, item_name)
@@ -1876,11 +1877,13 @@ def create_lb_inbound_nat_pool(
 def set_lb_inbound_nat_pool(
         instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
-        frontend_ip_name=None, enable_tcp_reset=None):
+        frontend_ip_name=None, enable_tcp_reset=None, floating_ip=None, idle_timeout=None):
     _set_param(instance, 'protocol', protocol)
     _set_param(instance, 'frontend_port_range_start', frontend_port_range_start)
     _set_param(instance, 'frontend_port_range_end', frontend_port_range_end)
     _set_param(instance, 'backend_port', backend_port)
+    _set_param(instance, 'enable_floating_ip', floating_ip)
+    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
 
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
@@ -2021,7 +2024,7 @@ def create_lb_rule(
         cmd, resource_group_name, load_balancer_name, item_name,
         protocol, frontend_port, backend_port, frontend_ip_name=None,
         backend_address_pool_name=None, probe_name=None, load_distribution='default',
-        floating_ip='false', idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None, disable_outbound_snat=None):
     LoadBalancingRule = cmd.get_models('LoadBalancingRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
@@ -2040,7 +2043,7 @@ def create_lb_rule(
                                            backend_address_pool_name),
         probe=_get_property(lb.probes, probe_name) if probe_name else None,
         load_distribution=load_distribution,
-        enable_floating_ip=floating_ip == 'true',
+        enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
@@ -2061,13 +2064,11 @@ def set_lb_rule(
     _set_param(instance, 'load_distribution', load_distribution)
     _set_param(instance, 'disable_outbound_snat', disable_outbound_snat)
     _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
+    _set_param(instance, 'enable_floating_ip', floating_ip)
 
     if frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
             _get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    if floating_ip is not None:
-        instance.enable_floating_ip = floating_ip == 'true'
 
     if backend_address_pool_name is not None:
         instance.backend_address_pool = \
@@ -2333,26 +2334,36 @@ def _get_nic_ip_config(nic, name):
 
 def add_nic_ip_config_address_pool(
         cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None):
+        load_balancer_name=None, application_gateway_name=None):
     BackendAddressPool = cmd.get_models('BackendAddressPool')
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
-    _upsert(ip_config, 'load_balancer_backend_address_pools',
-            BackendAddressPool(id=backend_address_pool),
-            'id')
+    if load_balancer_name:
+        _upsert(ip_config, 'load_balancer_backend_address_pools',
+                BackendAddressPool(id=backend_address_pool),
+                'id')
+    elif application_gateway_name:
+        _upsert(ip_config, 'application_gateway_backend_address_pools',
+                BackendAddressPool(id=backend_address_pool),
+                'id')
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
 
 def remove_nic_ip_config_address_pool(
         cmd, resource_group_name, network_interface_name, ip_config_name, backend_address_pool,
-        load_balancer_name=None):
+        load_balancer_name=None, application_gateway_name=None):
     client = network_client_factory(cmd.cli_ctx).network_interfaces
     nic = client.get(resource_group_name, network_interface_name)
     ip_config = _get_nic_ip_config(nic, ip_config_name)
-    keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
-    ip_config.load_balancer_backend_address_pools = keep_items
+    if load_balancer_name:
+        keep_items = [x for x in ip_config.load_balancer_backend_address_pools or [] if x.id != backend_address_pool]
+        ip_config.load_balancer_backend_address_pools = keep_items
+    elif application_gateway_name:
+        keep_items = [x for x in ip_config.application_gateway_backend_address_pools or [] if
+                      x.id != backend_address_pool]
+        ip_config.application_gateway_backend_address_pools = keep_items
     poller = client.create_or_update(resource_group_name, network_interface_name, nic)
     return _get_property(poller.result().ip_configurations, ip_config_name)
 
@@ -2740,22 +2751,73 @@ def create_nw_packet_capture(cmd, client, resource_group_name, capture_name, vm,
 
 
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
-                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None):
+                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
+                         traffic_analytics_workspace=None, traffic_analytics_interval=None,
+                         traffic_analytics_enabled=None):
     from azure.cli.core.commands import LongRunningOperation
     config = LongRunningOperation(cmd.cli_ctx)(client.get_flow_log_status(watcher_rg, watcher_name, nsg))
-    if enabled is not None:
-        config.enabled = enabled
-    if storage_account is not None:
-        config.storage_id = storage_account
+
+    try:
+        if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
+            config.flow_analytics_configuration = None
+    except AttributeError:
+        pass
+
+    _set_param(config, 'enabled', enabled if enabled is not None else config.enabled)
+    _set_param(config, 'storage_id', storage_account or config.storage_id)
     if retention is not None:
-        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
-        config.retention_policy = RetentionPolicyParameters(days=retention, enabled=int(retention) > 0)
+        config.retention_policy = {
+            'days': retention,
+            'enabled': int(retention) > 0
+        }
     if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
         config.format = {
             'type': log_format,
             'version': log_version
         }
-    setattr(config, 'flow_analytics_configuration', None)
+    if cmd.supported_api_version(min_api='2018-10-01') and \
+            any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
+
+        workspace = None
+        if traffic_analytics_workspace:
+            from azure.cli.core.commands.arm import get_arm_resource_by_id
+            workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+
+        if not config.flow_analytics_configuration:
+            # must create whole object
+            if not workspace:
+                raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
+                               '[--enabled {true|false}]')
+            # if not all([workspace, traffic_analytics_interval]):
+                # raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
+                #               '--interval INT [--enabled {true|false}]')
+            if traffic_analytics_enabled is None:
+                traffic_analytics_enabled = True
+            config.flow_analytics_configuration = {
+                'network_watcher_flow_analytics_configuration': {
+                    'enabled': traffic_analytics_enabled,
+                    'workspace_id': workspace.properties['customerId'],
+                    'workspace_region': workspace.location,
+                    'workspace_resource_id': traffic_analytics_workspace,
+                    # 'traffic_analytics_interval': traffic_analytics_interval,
+                }
+            }
+        else:
+            # update object
+            _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
+                       'enabled', traffic_analytics_enabled)
+            # _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
+            #           'traffic_analytics_interval', traffic_analytics_interval)
+            if traffic_analytics_workspace == "":
+                config.flow_analytics_configuration = None
+            elif workspace:
+                _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
+                           'workspace_id', workspace.properties['customerId'])
+                _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
+                           'workspace_region', workspace.location)
+                _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
+                           'workspace_resource_id', traffic_analytics_workspace)
+
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 

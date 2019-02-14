@@ -5,9 +5,7 @@
 
 import json
 import os
-import random
 import re
-import string
 import requests
 
 from knack.util import CLIError
@@ -34,7 +32,7 @@ class BotTemplateDeployer:
     v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
 
     @staticmethod
-    def deploy_arm_template(cli_ctx, resource_group_name,
+    def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
         DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -57,11 +55,11 @@ class BotTemplateDeployer:
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
 
-        smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(smc.deployments.create_or_update(
-            resource_group_name,
-            deployment_name,
-            properties, raw=False))
+        resource_management_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(
+            resource_management_client.deployments.create_or_update(resource_group_name,
+                                                                    deployment_name,
+                                                                    properties, raw=False))
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
@@ -129,12 +127,13 @@ class BotTemplateDeployer:
         create_new_storage = False
         if not storageAccountName:
             create_new_storage = True
+            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24].lower())
+            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40].lower())
 
-            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:10] +
-                                        ''.join(
-                                            random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
-            site_name = re.sub(r'[^a-z0-9]', '', resource_name[:15] +
-                               ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
+            # The name of Azure Web Sites cannot end with "-", e.g. "testname-.azurewbesites.net" is invalid.
+            # The valid name would be "testname.azurewebsites.net"
+            while site_name[-1] == '-':
+                site_name = site_name[:-1]
 
             logger.debug('Storage name not provided. If storage is to be created, name to be used is %s.',
                          storageAccountName)
@@ -177,8 +176,7 @@ class BotTemplateDeployer:
 
             logger.debug('Detected V4 bot. Adding bot encryption key to Azure parameters.')
 
-            bot_encryption_key = BotTemplateDeployer.get_bot_file_encryption_key()
-            paramsdict['botFileEncryptionKey'] = bot_encryption_key
+            paramsdict['botFileEncryptionKey'] = BotTemplateDeployer.get_bot_file_encryption_key()
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
         # Get and deploy ARM template
