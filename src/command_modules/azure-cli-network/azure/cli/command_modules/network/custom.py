@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.network._client_factory import network_client_factory
-from azure.cli.command_modules.network._util import _get_property, _set_param
+from azure.cli.command_modules.network._util import _get_property, UpdateContext
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
@@ -1494,9 +1494,11 @@ def lists_match(l1, l2):
 # region ExpressRoutes
 def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mbps, peering_location,
                          service_provider_name, location=None, tags=None, no_wait=False,
-                         sku_family=None, sku_tier=None, allow_global_reach=None):
-    ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties = cmd.get_models(
-        'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties')
+                         sku_family=None, sku_tier=None, allow_global_reach=None, express_route_port=None):
+    ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties, SubResource = \
+        cmd.get_models(
+            'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties'
+            'SubResource')
     client = network_client_factory(cmd.cli_ctx).express_route_circuits
     sku_name = '{}_{}'.format(sku_tier, sku_family)
     circuit = ExpressRouteCircuit(
@@ -1504,25 +1506,37 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
         service_provider_properties=ExpressRouteCircuitServiceProviderProperties(
             service_provider_name=service_provider_name,
             peering_location=peering_location,
-            bandwidth_in_mbps=bandwidth_in_mbps),
+            bandwidth_in_mbps=bandwidth_in_mbps if not express_route_port else None),
         sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family),
-        allow_global_reach=allow_global_reach
+        allow_global_reach=allow_global_reach,
+        express_route_port=SubResource(id=express_route_port) if express_route_port else None,
+        bandwidth_in_gbps=(int(bandwidth_in_mbps) / 1000) if express_route_port else None
     )
+    if express_route_port:
+        circuit.service_provider_properties = None
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, circuit_name, circuit)
 
 
-def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
+def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location=None,
                          service_provider_name=None, sku_family=None, sku_tier=None, tags=None,
-                         allow_global_reach=None):
-
-    if bandwidth_in_mbps is not None:
-        instance.service_provider_properties.bandwidth_in_mbps = bandwidth_in_mbps
+                         allow_global_reach=None, express_route_port=None):
 
     if peering_location is not None:
         instance.service_provider_properties.peering_location = peering_location
 
     if service_provider_name is not None:
         instance.service_provider_properties.service_provider_name = service_provider_name
+
+    if express_route_port is not None:
+        SubResource = cmd.get_models('SubResource')
+        instance.express_route_port = SubResource(id=express_route_port)
+        instance.service_provider_properties = None
+
+    if bandwidth_in_mbps is not None:
+        if not instance.express_route_port:
+            instance.service_provider_properties.bandwith_in_mbps = float(bandwidth_in_mbps)
+        else:
+            instance.bandwidth_in_gbps = (float(bandwidth_in_mbps) / 1000)
 
     if sku_family is not None:
         instance.sku.family = sku_family
@@ -1539,8 +1553,8 @@ def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None
     return instance
 
 
-def create_express_route_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
-                                    peer_circuit, address_prefix, authorization_key=None):
+def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
+                                            peer_circuit, address_prefix, authorization_key=None):
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
     ExpressRouteCircuitConnection, SubResource = cmd.get_models('ExpressRouteCircuitConnection', 'SubResource')
     source_circuit = resource_id(
@@ -1699,6 +1713,111 @@ def update_express_route_peering(cmd, instance, peer_asn=None, primary_peer_addr
 # endregion
 
 
+# region ExpressRoute Connection
+# pylint: disable=unused-argument
+def create_express_route_connection(cmd, resource_group_name, express_route_gateway_name, connection_name,
+                                    peering, circuit_name=None, authorization_key=None, routing_weight=None):
+    ExpressRouteConnection, SubResource = cmd.get_models('ExpressRouteConnection', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).express_route_connections
+    connection = ExpressRouteConnection(
+        name=connection_name,
+        express_route_circuit_peering=SubResource(id=peering) if peering else None,
+        authorization_key=authorization_key,
+        routing_weight=routing_weight
+    )
+    return client.create_or_update(resource_group_name, express_route_gateway_name, connection_name, connection)
+
+
+# pylint: disable=unused-argument
+def update_express_route_connection(instance, cmd, circuit_name=None, peering=None, authorization_key=None,
+                                    routing_weight=None):
+    SubResource = cmd.get_models('SubResource')
+    if peering is not None:
+        instance.express_route_connection_id = SubResource(id=peering)
+    if authorization_key is not None:
+        instance.authorization_key = authorization_key
+    if routing_weight is not None:
+        instance.routing_weight = routing_weight
+    return instance
+# endregion
+
+
+# region ExpressRoute Gateways
+def create_express_route_gateway(cmd, resource_group_name, express_route_gateway_name, location=None, tags=None,
+                                 min_val=2, max_val=None, virtual_hub=None):
+    ExpressRouteGateway, SubResource = cmd.get_models('ExpressRouteGateway', 'SubResource')
+    client = network_client_factory(cmd.cli_ctx).express_route_gateways
+    gateway = ExpressRouteGateway(
+        location=location,
+        tags=tags,
+        virtual_hub=SubResource(id=virtual_hub) if virtual_hub else None
+    )
+    if min or max:
+        gateway.auto_scale_configuration = {'bounds': {'min': min_val, 'max': max_val}}
+    return client.create_or_update(resource_group_name, express_route_gateway_name, gateway)
+
+
+def update_express_route_gateway(instance, cmd, tags=None, min_val=None, max_val=None):
+
+    def _ensure_autoscale():
+        if not instance.auto_scale_configuration:
+            ExpressRouteGatewayPropertiesAutoScaleConfiguration, \
+                ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds = cmd.get_models(
+                    'ExpressRouteGatewayPropertiesAutoScaleConfiguration',
+                    'ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds')
+            instance.auto_scale_configuration = ExpressRouteGatewayPropertiesAutoScaleConfiguration(
+                bounds=ExpressRouteGatewayPropertiesAutoScaleConfigurationBounds(min=min, max=max))
+
+    if tags is not None:
+        instance.tags = tags
+    if min is not None:
+        _ensure_autoscale()
+        instance.auto_scale_configuration.bounds.min = min_val
+    if max is not None:
+        _ensure_autoscale()
+        instance.auto_scale_configuration.bounds.max = max_val
+    return instance
+
+
+def list_express_route_gateways(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).express_route_gateways
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_subscription()
+# endregion
+
+
+# region ExpressRoute ports
+def create_express_route_port(cmd, resource_group_name, express_route_port_name, location=None, tags=None,
+                              peering_location=None, bandwidth_in_gbps=None, encapsulation=None):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    ExpressRoutePort = cmd.get_models('ExpressRoutePort')
+    if bandwidth_in_gbps is not None:
+        bandwidth_in_gbps = int(bandwidth_in_gbps)
+    port = ExpressRoutePort(
+        location=location,
+        tags=tags,
+        peering_location=peering_location,
+        bandwidth_in_gbps=bandwidth_in_gbps,
+        encapsulation=encapsulation
+    )
+    return client.create_or_update(resource_group_name, express_route_port_name, port)
+
+
+def update_express_route_port(instance, tags=None):
+    with UpdateContext(instance) as c:
+        c.update_param('tags', tags, True)
+    return instance
+
+
+def list_express_route_ports(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+# endregion
+
+
 # region PrivateEndpoints
 def create_private_endpoint(cmd, resource_group_name, interface_endpoint_name, subnet, location=None, tags=None,
                             fqdn=None, endpoint_service=None, nics=None):
@@ -1839,11 +1958,12 @@ def set_lb_inbound_nat_rule(
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
 
-    _set_param(instance, 'protocol', protocol)
-    _set_param(instance, 'frontend_port', frontend_port)
-    _set_param(instance, 'backend_port', backend_port)
-    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
-    _set_param(instance, 'enable_floating_ip', floating_ip)
+    with UpdateContext(instance) as c:
+        c.set_param('protocol', protocol)
+        c.set_param('frontend_port', frontend_port)
+        c.set_param('backend_port', backend_port)
+        c.set_param('idle_timeout_in_minutes', idle_timeout)
+        c.set_param('enable_floating_ip', floating_ip)
 
     return parent
 
@@ -1878,12 +1998,13 @@ def set_lb_inbound_nat_pool(
         instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
         frontend_ip_name=None, enable_tcp_reset=None, floating_ip=None, idle_timeout=None):
-    _set_param(instance, 'protocol', protocol)
-    _set_param(instance, 'frontend_port_range_start', frontend_port_range_start)
-    _set_param(instance, 'frontend_port_range_end', frontend_port_range_end)
-    _set_param(instance, 'backend_port', backend_port)
-    _set_param(instance, 'enable_floating_ip', floating_ip)
-    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
+    with UpdateContext(instance) as c:
+        c.set_param('protocol', protocol)
+        c.set_param('frontend_port_range_start', frontend_port_range_start)
+        c.set_param('frontend_port_range_end', frontend_port_range_end)
+        c.set_param('backend_port', backend_port)
+        c.set_param('enable_floating_ip', floating_ip)
+        c.set_param('idle_timeout_in_minutes', idle_timeout)
 
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
@@ -1984,15 +2105,15 @@ def set_lb_outbound_rule(instance, cmd, parent, item_name, protocol=None, outbou
                          idle_timeout=None, frontend_ip_configurations=None, enable_tcp_reset=None,
                          backend_address_pool=None):
     SubResource = cmd.get_models('SubResource')
-    _set_param(instance, 'protocol', protocol)
-    _set_param(instance, 'allocated_outbound_ports', outbound_ports)
-    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
-    _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
-    _set_param(instance, 'backend_address_pool', SubResource(id=backend_address_pool)
-               if backend_address_pool else None)
-    _set_param(instance, 'frontend_ip_configurations',
-               [SubResource(id=x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
-
+    with UpdateContext(instance) as c:
+        c.set_param('protocol', protocol)
+        c.set_param('allocated_outbound_ports', outbound_ports)
+        c.set_param('idle_timeout_in_minutes', idle_timeout)
+        c.set_param('enable_tcp_reset', enable_tcp_reset)
+        c.set_param('backend_address_pool', SubResource(id=backend_address_pool)
+                    if backend_address_pool else None)
+        c.set_param('frontend_ip_configurations',
+                    [SubResource(id=x) for x in frontend_ip_configurations] if frontend_ip_configurations else None)
     return parent
 
 
@@ -2011,12 +2132,12 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
 
 def set_lb_probe(instance, parent, item_name, protocol=None, port=None,
                  path=None, interval=None, threshold=None):
-    _set_param(instance, 'protocol', protocol)
-    _set_param(instance, 'port', port)
-    _set_param(instance, 'request_path', path)
-    _set_param(instance, 'interval_in_seconds', interval)
-    _set_param(instance, 'number_of_probes', threshold)
-
+    with UpdateContext(instance) as c:
+        c.set_param('protocol', protocol)
+        c.set_param('port', port)
+        c.set_param('request_path', path)
+        c.set_param('interval_in_seconds', interval)
+        c.set_param('number_of_probes', threshold)
     return parent
 
 
@@ -2057,14 +2178,15 @@ def set_lb_rule(
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
         disable_outbound_snat=None):
-    _set_param(instance, 'protocol', protocol)
-    _set_param(instance, 'frontend_port', frontend_port)
-    _set_param(instance, 'backend_port', backend_port)
-    _set_param(instance, 'idle_timeout_in_minutes', idle_timeout)
-    _set_param(instance, 'load_distribution', load_distribution)
-    _set_param(instance, 'disable_outbound_snat', disable_outbound_snat)
-    _set_param(instance, 'enable_tcp_reset', enable_tcp_reset)
-    _set_param(instance, 'enable_floating_ip', floating_ip)
+    with UpdateContext(instance) as c:
+        c.set_param('protocol', protocol)
+        c.set_param('frontend_port', frontend_port)
+        c.set_param('backend_port', backend_port)
+        c.set_param('idle_timeout_in_minutes', idle_timeout)
+        c.set_param('load_distribution', load_distribution)
+        c.set_param('disable_outbound_snat', disable_outbound_snat)
+        c.set_param('enable_tcp_reset', enable_tcp_reset)
+        c.set_param('enable_floating_ip', floating_ip)
 
     if frontend_ip_name is not None:
         instance.frontend_ip_configuration = \
@@ -2763,8 +2885,9 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     except AttributeError:
         pass
 
-    _set_param(config, 'enabled', enabled if enabled is not None else config.enabled)
-    _set_param(config, 'storage_id', storage_account or config.storage_id)
+    with UpdateContext(config) as c:
+        c.set_param('enabled', enabled if enabled is not None else config.enabled)
+        c.set_param('storage_id', storage_account or config.storage_id)
     if retention is not None:
         config.retention_policy = {
             'days': retention,
@@ -2803,21 +2926,16 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                 }
             }
         else:
-            # update object
-            _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
-                       'enabled', traffic_analytics_enabled)
-            # _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
-            #           'traffic_analytics_interval', traffic_analytics_interval)
-            if traffic_analytics_workspace == "":
-                config.flow_analytics_configuration = None
-            elif workspace:
-                _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
-                           'workspace_id', workspace.properties['customerId'])
-                _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
-                           'workspace_region', workspace.location)
-                _set_param(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration,
-                           'workspace_resource_id', traffic_analytics_workspace)
-
+            with UpdateContext(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+                # update object
+                c.set_param('enabled', traffic_analytics_enabled)
+                # c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+                if traffic_analytics_workspace == "":
+                    config.flow_analytics_configuration = None
+                elif workspace:
+                    c.set_param('workspace_id', workspace.properties['customerId'])
+                    c.set_param('workspace_region', workspace.location)
+                    c.set_param('workspace_resource_id', traffic_analytics_workspace)
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 

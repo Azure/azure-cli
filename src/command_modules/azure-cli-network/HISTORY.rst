@@ -4,6 +4,9 @@ Release History
 ===============
 
 * `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
+* `express-route`: Port command groups from `express-route` extensions.
+* `express-route`: Added `express-route gateway` and `express-route port` command groups.
+* `express-route create/update`: Added `--express-route-port` argument.
 
 2.3.2
 +++++

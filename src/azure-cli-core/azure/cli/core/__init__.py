@@ -227,9 +227,12 @@ class MainCommandsLoader(CLICommandsLoader):
         def _get_extension_suppressions(mod_loaders):
             res = []
             for m in mod_loaders:
-                sup = getattr(m, 'suppress_extension', None)
-                if sup and isinstance(sup, ModExtensionSuppress):
-                    res.append(sup)
+                suppressions = getattr(m, 'suppress_extension', None)
+                if suppressions:
+                    suppressions = suppressions if isinstance(suppressions, list) else [suppressions]
+                    for sup in suppressions:
+                        if isinstance(sup, ModExtensionSuppress):
+                            res.append(sup)
             return res
 
         _update_command_table_from_modules(args)
@@ -307,6 +310,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                excluded_command_handler_args=EXCLUDED_PARAMS)
         self.min_profile = min_profile
         self.max_profile = max_profile
+        self.suppress_extension = None
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None
