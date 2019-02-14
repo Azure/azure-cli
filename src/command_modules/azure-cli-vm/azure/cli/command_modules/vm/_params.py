@@ -49,6 +49,7 @@ def load_arguments(self, _):
                                      id_part='name')
 
     extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
+    image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -136,6 +137,19 @@ def load_arguments(self, _):
         c.argument('os_disk_caching', arg_type=get_enum_type(CachingTypes), help="Storage caching type for the image's OS disk.")
         c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
+    # endregion
+
+    # region Image Templates
+    with self.argument_context('image template') as c:
+        c.argument('location', get_location_type(self.cli_ctx), help="Location. Values from: `az account list-locations`. If no configured location, defaults to the location of the resource group. You can configure the default location using `az configure --defaults location=<location>`.")
+        c.argument('scripts', nargs='+', help="Space-separated list of scripts to customize the image with. Each script must be a publicly accessible URL or a path to an existing file. If a file path is given, the script will be uploaded to a storage account.")
+        c.argument('source', options_list="--image-source", help="The image to customize. Must be a valid platform image URN, platform image alias, or Red Hat ISO image URI. Values from: ...")
+        c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
+        c.argument('checksum', help="The SHA256 checksum of the Red Hat ISO image")
+        c.argument('managed_image_destinations', nargs='+', help='Managed image distribution information. Space-separated list of key-value pairs. E.g "image_1=westus2 image_2=westus". Each key is the name or resource ID of the managed image to be created. Each value is the location of the image.')
+        c.argument('shared_image_destinations', nargs='+', help='Shared image gallery (sig) distribution information. Space-separated list of key-value pairs. E.g "my_gallery_1/image_def_1=eastus,westus  my_gallery_2/image_def_2=uksouth,canadaeast,francesouth." '
+                                                                'Each key is the sig image definition ID or sig gallery name and sig image definition delimited by a "/". Each value is a comma-delimited list of replica locations.')
+        c.ignore('destinations_lists', 'scripts_list', 'source_dict')
     # endregion
 
     # region AvailabilitySets
