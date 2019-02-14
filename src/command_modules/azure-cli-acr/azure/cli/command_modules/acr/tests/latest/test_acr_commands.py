@@ -271,7 +271,7 @@ class AcrCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @record_only()
     def test_acr_image_import(self, resource_group):
-        '''There are nine test cases in the function.
+        '''There are nine test cases.
         Case 1: Import image from a registry in a different subscription from the current one
         Case 2: Import image from one registry to another where both registries belong to the same subscription
         Case 3: Import image to the target registry and keep the repository:tag the same as that in the source
@@ -286,15 +286,9 @@ class AcrCommandsTests(ScenarioTest):
         source_registry_name = self.create_random_name("sourceregistrysamesub", 40)
         registry_name = self.create_random_name("targetregistry", 20)
         token = self.cmd('account get-access-token').get_output_in_json()['accessToken']
-        service_principal_username = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPusername/0f20a7a4ade54fd7bc6305de3da7e99f').get_output_in_json()['value']
-        service_principal_password = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPpassword/a961338d18e34e8fa41b570f7fd67cba').get_output_in_json()['value']
+        service_principal_username = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPusername').get_output_in_json()['value']
+        service_principal_password = self.cmd('keyvault secret show --id https://imageimport.vault.azure.net/secrets/SPpassword').get_output_in_json()['value']
 
-        '''
-        To be able to run the tests, we are assuming the following resources before the test:
-        Current active cloud account and subscription.
-        Two source registries, one in the subscription other than the current one and another in the subscription the same as the current one.
-        Two source images each of which stays in a different source registries mentioned above.
-        '''
         self.kwargs.update({
             'resource_id': '/subscriptions/dfb63c8c-7c89-4ef8-af13-75c1d873c895/resourcegroups/resourcegroupdiffsub/providers/Microsoft.ContainerRegistry/registries/sourceregistrydiffsub',
             'resource_imageV1': 'sourceregistrydiffsub.azurecr.io/microsoft:azure-cli-1',
