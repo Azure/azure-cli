@@ -48,7 +48,7 @@ def acr_import(cmd,
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
             else:
                 raise CLIError(SOURCE_REGISTRY_NOT_FOUND)
-    else: 
+    else:
         slash = source_image.find('/')
         if slash > 0:
             registry_uri = source_image[:slash]
