@@ -1579,7 +1579,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     for _ in range(0, max_retry):
         try:
             return _create_or_update_no_wait(no_wait, cmd.cli_ctx, client,
-                                             resource_group_name, name,
+                                             resource_group_name, name, 
                                              mc, service_principal_profile.client_id, monitoring)
         except CloudError as ex:
             retry_exception = ex
