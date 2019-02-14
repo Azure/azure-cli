@@ -310,7 +310,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                excluded_command_handler_args=EXCLUDED_PARAMS)
         self.min_profile = min_profile
         self.max_profile = max_profile
-        self.suppress_extension = None
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None

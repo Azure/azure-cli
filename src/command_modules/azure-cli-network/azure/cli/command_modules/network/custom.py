@@ -1498,7 +1498,7 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
                          allow_classic_operations=None):
     ExpressRouteCircuit, ExpressRouteCircuitSku, ExpressRouteCircuitServiceProviderProperties, SubResource = \
         cmd.get_models(
-            'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties'
+            'ExpressRouteCircuit', 'ExpressRouteCircuitSku', 'ExpressRouteCircuitServiceProviderProperties',
             'SubResource')
     client = network_client_factory(cmd.cli_ctx).express_route_circuits
     sku_name = '{}_{}'.format(sku_tier, sku_family)
