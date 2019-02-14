@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.1
++++++
+* Fix redundant sources in image import.
+
 2.2.0
 +++++
 * BREAKING CHANGE: Remove 'acr build-task' command group.
