@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 
 class AzureSkuName(Enum):
-
+    # TODO: use AzureSkuName from Kusto python module in the new kusto python version
     d13_v2 = "D13_v2"
     d14_v2 = "D14_v2"
     l8 = "L8"

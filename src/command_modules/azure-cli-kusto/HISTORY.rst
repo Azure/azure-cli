@@ -3,10 +3,10 @@
 Release History
 ===============
 
-1.0.0
+0.2.0
 +++++
 
-* GA release.
+* Changed hot_cache_period and soft_delete_period types for database to ISO8601 duration format.
 
 
 0.1.0

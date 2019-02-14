@@ -67,7 +67,7 @@ class AzureKustoClusterTests(ScenarioTest):
 
         self.cmd('az kusto cluster stop -n {name} -g {rg}')
 
-        # Verify that the state is stop ped
+        # Verify that the state is stopped
         self.cmd('az kusto cluster show -n {name} -g {rg}',
                  checks=[self.check('name', '{name}'),
                          self.check('sku.name', '{sku}'),
