@@ -47,7 +47,6 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
 from azure.mgmt.web.models import HybridConnection
-from azure.mgmt.network.models import Subnet
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory
 
