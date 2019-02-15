@@ -50,13 +50,12 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
         # validate region code:
         valid_region = False
         for region in self.list_regions().value:
-            if region.regionCode == regionCode:
+            if region.name == regionCode:
                 valid_region = True
         if not valid_region:
-            error_message = {}
-            error_message['message'] = "not a valid region code - run 'az functionapp devops-build organization' regions to find a valid regionCode"  # pylint: disable=line-too-long
-            error_message['valid'] = False
-            return error_message
+            validation.message = "not a valid region code - run 'az functionapp devops-build organization' regions to find a valid regionCode"  # pylint: disable=line-too-long
+            validation.valid = False
+            return validation
 
         new_organization = organization_manager.create_organization(regionCode, organization_name)
         new_organization.valid = True
