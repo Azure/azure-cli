@@ -3,6 +3,7 @@
 Release History
 ===============
 * vm create: --accelerated-networking is now implicitly enabled for Ubuntu 18.0. It can still be explicitly disabled by setting the option to "false".
+* vm create: Added --computer-name for setting vm hostname.  
 
 2.2.15
 ++++++
