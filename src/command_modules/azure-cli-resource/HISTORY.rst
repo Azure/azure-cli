@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* `deployment create`: Fix issue where type field was case-sensitive.
+
 2.1.10
 ++++++
 * `policy assignment create`: support uri based parameters file
