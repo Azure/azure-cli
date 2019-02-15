@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.59
 ++++++
-* TODO
+* Fix for issue 7910.
 
 2.0.58
 ++++++

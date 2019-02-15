@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.13
+++++++
+* Fix for issue 7910.
+
 0.1.12
 ++++++
 * Minor fixes
