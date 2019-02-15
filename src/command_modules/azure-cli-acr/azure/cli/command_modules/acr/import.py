@@ -11,7 +11,8 @@ from ._utils import (
     get_registry_from_name_or_login_server
 )
 
-SOURCE_REGISTRY_NOT_FOUND = "The source registry can not be found. Please specify the source container registry name, login server or resource ID and try again."
+SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found. Please specify the source " \
+                            "container registry name, login server or resource ID and try again."
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 INVALID_SOURCE_IMAGE = "Please specify source image in the format '[registry.azurecr.io/]repository[:tag]' or " \
                        "'[registry.azurecr.io/]repository@digest'"
