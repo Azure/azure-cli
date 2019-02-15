@@ -139,7 +139,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
     no_tty = False
     for param_name in prompt_list:
         param = missing_parameters[param_name]
-        param_type = param.get('type', 'string')
+        param_type = param.get('type', 'string').lower()
         description = 'Missing description'
         metadata = param.get('metadata', None)
         if metadata is not None:
