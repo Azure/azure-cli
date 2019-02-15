@@ -1075,6 +1075,7 @@ def load_arguments(self, _):
         c.argument('connection_name', help='Connection name.')
         c.argument('routing_weight', type=int, help='Connection routing weight')
         c.argument('use_policy_based_traffic_selectors', min_api='2017-03-01', help='Enable policy-based traffic selectors.', arg_type=get_three_state_flag())
+        c.argument('express_route_gateway_bypass', min_api='2018-07-01', arg_type=get_three_state_flag(), help='Bypass ExpressRoute gateway for data forwarding.')
 
     with self.argument_context('network vpn-connection create') as c:
         c.argument('connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')

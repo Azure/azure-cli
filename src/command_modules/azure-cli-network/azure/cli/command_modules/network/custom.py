@@ -3704,20 +3704,8 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
                           authorization_key=None, enable_bgp=False, routing_weight=10,
                           connection_type=None, shared_key=None,
-                          use_policy_based_traffic_selectors=False):
-    """
-    :param str vnet_gateway1: Name or ID of the source virtual network gateway.
-    :param str vnet_gateway2: Name or ID of the destination virtual network gateway to connect to
-        using a 'Vnet2Vnet' connection.
-    :param str local_gateway2: Name or ID of the destination local network gateway to connect to
-        using an 'IPSec' connection.
-    :param str express_route_circuit2: Name or ID of the destination ExpressRoute to connect to
-        using an 'ExpressRoute' connection.
-    :param str authorization_key: The authorization key for the VPN connection.
-    :param bool enable_bgp: Enable BGP for this VPN connection.
-    :param bool no_wait: Do not wait for the long-running operation to finish.
-    :param bool validate: Display and validate the ARM template but do not create any resources.
-    """
+                          use_policy_based_traffic_selectors=False,
+                          express_route_gateway_bypass=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
@@ -3732,7 +3720,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         cmd, connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
         connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
-        use_policy_based_traffic_selectors)
+        use_policy_based_traffic_selectors, express_route_gateway_bypass)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
     if shared_key:
@@ -3756,23 +3744,16 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None, use_policy_based_traffic_selectors=None):
+                          enable_bgp=None, use_policy_based_traffic_selectors=None,
+                          express_route_gateway_bypass=None):
     ncf = network_client_factory(cmd.cli_ctx)
 
-    if routing_weight is not None:
-        instance.routing_weight = routing_weight
-
-    if shared_key is not None:
-        instance.shared_key = shared_key
-
-    if tags is not None:
-        instance.tags = tags
-
-    if enable_bgp is not None:
-        instance.enable_bgp = enable_bgp
-
-    if use_policy_based_traffic_selectors is not None:
-        instance.use_policy_based_traffic_selectors = use_policy_based_traffic_selectors
+    _set_param(instance, 'routing_weight', routing_weight)
+    _set_param(instance, 'shared_key', shared_key)
+    _set_param(instance, 'tags', tags)
+    _set_param(instance, 'enable_bgp', enable_bgp)
+    _set_param(instance, 'express_route_gateway_bypass', express_route_gateway_bypass)
+    _set_param(instance, 'use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
 
     # TODO: Remove these when issue #1615 is fixed
     gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)

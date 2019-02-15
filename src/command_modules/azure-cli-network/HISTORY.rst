@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
+
 2.3.2
 +++++
 
