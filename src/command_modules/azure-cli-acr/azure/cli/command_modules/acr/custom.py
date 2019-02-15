@@ -297,7 +297,6 @@ def _check_wincred(login_server):
                 os.makedirs(docker_directory)
             except OSError as e:
                 logger.debug("Could not create docker directory '%s'. Exception: %s", docker_directory, str(e))
-                pass
             with open(config_path, 'w') as output_file:
                 json.dump(content, output_file, indent=4)
                 output_file.close()

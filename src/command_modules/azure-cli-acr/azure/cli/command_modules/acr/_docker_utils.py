@@ -131,7 +131,7 @@ def _get_aad_token(cli_ctx,
     return loads(response.content.decode("utf-8"))["access_token"]
 
 
-def _get_credentials(cmd,
+def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      registry_name,
                      tenant_suffix,
                      username,
@@ -164,14 +164,14 @@ def _get_credentials(cmd,
                 "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
                 login_server, tenant_suffix)
     except (ResourceNotFound, CLIError) as e:
-        logger.debug("Could not get registry from service. Exception: %s", str(e))
-        if not isinstance(e, ResourceNotFound) and _AZ_LOGIN_MESSAGE not in str(e):
+        resource_not_found = str(e)
+        logger.debug("Could not get registry from service. Exception: %s", resource_not_found)
+        if not isinstance(e, ResourceNotFound) and _AZ_LOGIN_MESSAGE not in resource_not_found:
             raise
         # Try to use the pre-defined login server suffix to construct login server from registry name.
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
             raise
-        resource_not_found = str(e)
         login_server = '{}{}{}'.format(
             registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
 
