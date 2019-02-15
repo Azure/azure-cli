@@ -377,7 +377,7 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
 
     try:
         with open(file, 'r') as f:
-            cg_defintion = yaml.load(f)
+            cg_defintion = yaml.safe_load(f)
     except FileNotFoundError:
         raise CLIError("No such file or directory: " + file)
     except yaml.YAMLError as e:
