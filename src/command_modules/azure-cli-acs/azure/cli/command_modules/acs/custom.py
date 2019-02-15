@@ -1504,11 +1504,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     network_profile = None
     if any([pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
         if not network_plugin:
-            logger.warning('Please explicitly specify network plugin type')
-            return
+            raise CLIError('Please explicitly specify the network plugin type')
         if pod_cidr and network_plugin == "azure":
-            logger.warning('Please use kubenet as a network plugin when pod_cidr is specified')
-            return
+            raise CLIError('Please use kubenet as the network plugin type when pod_cidr is specified')
         network_profile = ContainerServiceNetworkProfile(
             network_plugin=network_plugin,
             pod_cidr=pod_cidr,
