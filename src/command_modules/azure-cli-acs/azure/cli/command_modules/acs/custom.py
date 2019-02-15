@@ -1562,8 +1562,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                  client.create_or_update,
                                  resource_group_name=resource_group_name,
                                  resource_name=name, parameters=mc)
-        # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
-        # mdm metrics supported only in azure public cloud so add the  role assignment only in this cloud
+            # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
+            # mdm metrics supported only in azure public cloud so add the  role assignment only in this cloud
             cloud_name = cmd.cli_ctx.cloud.name
             if cloud_name.lower() == 'azurecloud' and monitoring:
                 from msrestazure.tools import resource_id
@@ -1616,7 +1616,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
         cloud_name = cmd.cli_ctx.cloud.name
-    # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
+        # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
         if cloud_name.lower() == 'azurecloud':
             from msrestazure.tools import resource_id
             cluster_resource_id = resource_id(
