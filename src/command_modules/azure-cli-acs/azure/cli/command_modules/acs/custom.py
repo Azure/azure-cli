@@ -1563,7 +1563,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                  resource_group_name=resource_group_name,
                                  resource_name=name, parameters=mc)
         # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
-            if monitoring:
+        # mdm metrics supported only in azure public cloud so add the  role assignment only in this cloud
+            cloud_name = cmd.cli_ctx.cloud.name
+            if cloud_name.lower() == 'azurecloud' and monitoring:
                 from msrestazure.tools import resource_id
                 cluster_resource_id = resource_id(
                     subscription=subscription_id,
@@ -1613,17 +1615,20 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
-        from msrestazure.tools import resource_id
-        cluster_resource_id = resource_id(
-            subscription=subscription_id,
-            resource_group=resource_group_name,
-            namespace='Microsoft.ContainerService', type='managedClusters',
-            name=name
-        )
-        if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
-                                    service_principal_client_id, scope=cluster_resource_id):
-            logger.warning('Could not create a role assignment for Monitoring addon. '
-                           'Are you an Owner on this subscription?')
+        cloud_name = cmd.cli_ctx.cloud.name
+    # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
+        if cloud_name.lower() == 'azurecloud':
+            from msrestazure.tools import resource_id
+            cluster_resource_id = resource_id(
+                subscription=subscription_id,
+                resource_group=resource_group_name,
+                namespace='Microsoft.ContainerService', type='managedClusters',
+                name=name
+            )
+            if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
+                                        service_principal_client_id, scope=cluster_resource_id):
+                logger.warning('Could not create a role assignment for Monitoring addon. '
+                               'Are you an Owner on this subscription?')
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
