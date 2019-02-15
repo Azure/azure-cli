@@ -227,9 +227,12 @@ class MainCommandsLoader(CLICommandsLoader):
         def _get_extension_suppressions(mod_loaders):
             res = []
             for m in mod_loaders:
-                sup = getattr(m, 'suppress_extension', None)
-                if sup and isinstance(sup, ModExtensionSuppress):
-                    res.append(sup)
+                suppressions = getattr(m, 'suppress_extension', None)
+                if suppressions:
+                    suppressions = suppressions if isinstance(suppressions, list) else [suppressions]
+                    for sup in suppressions:
+                        if isinstance(sup, ModExtensionSuppress):
+                            res.append(sup)
             return res
 
         _update_command_table_from_modules(args)
