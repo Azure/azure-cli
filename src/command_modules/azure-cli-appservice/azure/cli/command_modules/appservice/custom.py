@@ -1389,6 +1389,12 @@ def set_deployment_user(cmd, user_name, password=None):
     user.publishing_password = password
     return client.update_publishing_user(user)
 
+def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
+    content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                      'list_publishing_credentials', slot)
+    
+    return content.result()
+
 
 def list_publish_profiles(cmd, resource_group_name, name, slot=None):
     import xmltodict

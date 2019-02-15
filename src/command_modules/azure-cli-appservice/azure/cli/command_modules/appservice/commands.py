@@ -183,6 +183,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+        g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
 
     with self.command_group('webapp deployment user', webclient_sdk) as g:
         g.show_command('show', 'get_publishing_user')
@@ -260,6 +261,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+        g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
 
     with self.command_group('functionapp cors') as g:
         g.custom_command('add', 'add_cors')
