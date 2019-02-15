@@ -935,6 +935,7 @@ def load_service_principals(config_path):
     except:  # pylint: disable=bare-except
         return None
 
+
 def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, parameters, validate, no_wait,
                        subscription_id=None):
     from azure.mgmt.resource.resources import ResourceManagementClient
@@ -1557,22 +1558,24 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-           result = sdk_no_wait(no_wait, client.create_or_update,
-                               resource_group_name=resource_group_name, resource_name=name, parameters=mc)
-           # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
-           if monitoring:
-            from msrestazure.tools import resource_id
-            cluster_resource_id = resource_id(
+            result = sdk_no_wait(no_wait,
+                                 client.create_or_update,
+                                 resource_group_name=resource_group_name,
+                                 resource_name=name, parameters=mc)
+        # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
+            if monitoring:
+                from msrestazure.tools import resource_id
+                cluster_resource_id = resource_id(
                     subscription=subscription_id,
                     resource_group=resource_group_name,
                     namespace='Microsoft.ContainerService', type='managedClusters',
                     name=name
-                )  
-            if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
+                )
+                if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
                                             service_principal_profile.client_id, scope=cluster_resource_id):
                     logger.warning('Could not create a role assignment for monitoring addon. '
-                                'Are you an Owner on this subscription?')
-           return result
+                                   'Are you an Owner on this subscription?')
+            return result
         except CloudError as ex:
             retry_exception = ex
             if 'not found in Active Directory tenant' in ex.message:
@@ -1926,9 +1929,10 @@ def _get_or_add_extension(extension_name, extension_module, update=False):
 
 
 def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
+    # mapping for azure public cloud
     # log analytics workspaces cannot be created in WCUS region due to capacity limits
     # so mapped to EUS per discussion with log analytics team
-    AzureLocationToOmsRegionCodeMap = {
+    AzureCloudLocationToOmsRegionCodeMap = {
         "eastus": "EUS",
         "westeurope": "WEU",
         "southeastasia": "SEA",
@@ -1941,7 +1945,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "centralindia": "CIN",
         "eastus2euap": "EAP"
     }
-    AzureRegionToOmsRegionMap = {
+    AzureCloudRegionToOmsRegionMap = {
         "australiaeast": "australiasoutheast",
         "australiasoutheast": "australiasoutheast",
         "brazilsouth": "eastus",
@@ -1972,18 +1976,44 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "francesouth": "westeurope"
     }
 
+    # mapping for azure china cloud
+    # currently log analytics supported only China East 2 region
+    AzureChinaLocationToOmsRegionCodeMap = {
+        "chinaeast": "EAST2",
+        "chinaeast2": "EAST2",
+        "chinanorth": "EAST2",
+        "chinanorth2": "EAST2"
+    }
+    AzureChinaRegionToOmsRegionMap = {
+        "chinaeast": "chinaeast2",
+        "chinaeast2": "chinaeast2",
+        "chinanorth": "chinaeast2",
+        "chinanorth2": "chinaeast2"
+    }
+
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     default_region_name = "eastus"
     default_region_code = "EUS"
 
-    workspace_region = AzureRegionToOmsRegionMap[
-        rg_location] if AzureRegionToOmsRegionMap[rg_location] else default_region_name
-    workspace_region_code = AzureLocationToOmsRegionCodeMap[
-        workspace_region] if AzureLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+    cloud_name = cmd.cli_ctx.cloud.name
+
+    if cloud_name.lower() == 'azurecloud':
+        workspace_region = AzureCloudRegionToOmsRegionMap[
+            rg_location] if AzureCloudRegionToOmsRegionMap[rg_location] else default_region_name
+        workspace_region_code = AzureCloudLocationToOmsRegionCodeMap[
+            workspace_region] if AzureCloudLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+    elif cloud_name.lower() == 'azurechinacloud':
+        default_region_name = "chinaeast2"
+        default_region_code = "EAST2"
+        workspace_region = AzureChinaRegionToOmsRegionMap[
+            rg_location] if AzureChinaRegionToOmsRegionMap[rg_location] else default_region_name
+        workspace_region_code = AzureChinaLocationToOmsRegionCodeMap[
+            workspace_region] if AzureChinaLocationToOmsRegionCodeMap[workspace_region] else default_region_code
+    else:
+        logger.error("AKS Monitoring addon not supported in cloud : %s", cloud_name)
 
     default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
     default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(subscription_id, workspace_region_code)
-
     default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
         '/workspaces/{2}'.format(subscription_id, default_workspace_resource_group, default_workspace_name)
     resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
