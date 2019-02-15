@@ -1079,7 +1079,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
-            self.check('osProfile.computerName', '{vm_2}'), # piggy-backing check that computername is defaults to vm name here.
+            self.check('osProfile.computerName', '{vm_2}'),  # piggy-backing check that --computer-name defaults to --name here.
         ])
 
 
