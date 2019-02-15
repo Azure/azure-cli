@@ -236,7 +236,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         merge_kubernetes_configurations(existing.name, addition.name, False)
 
         with open(existing.name, 'r') as stream:
-            merged = yaml.load(stream)
+            merged = yaml.safe_load(stream)
         self.assertEqual(len(merged['clusters']), 2)
         self.assertEqual(merged['clusters'], [obj1['clusters'][0], obj2['clusters'][0]])
         self.assertEqual(len(merged['contexts']), 2)
@@ -328,7 +328,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         merge_kubernetes_configurations(existing.name, addition.name, False)
 
         with open(existing.name, 'r') as stream:
-            merged = yaml.load(stream)
+            merged = yaml.safe_load(stream)
         self.assertEqual(len(merged['clusters']), 1)
         self.assertEqual([c['cluster'] for c in merged['clusters']],
                          [{'certificate-authority-data': 'certificateauthoritydata1',
@@ -410,7 +410,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         merge_kubernetes_configurations(existing.name, addition.name, False)
 
         with open(existing.name, 'r') as stream:
-            merged = yaml.load(stream)
+            merged = yaml.safe_load(stream)
         self.assertEqual(len(merged['clusters']), 1)
         self.assertEqual(merged['clusters'], [obj2['clusters'][0]])
         self.assertEqual(len(merged['contexts']), 2)
@@ -521,7 +521,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.addCleanup(os.remove, addition.name)
 
         with open(existing.name, 'r') as stream:
-            merged = yaml.load(stream)
+            merged = yaml.safe_load(stream)
         self.addCleanup(os.remove, existing.name)
 
         self.assertEqual(len(merged['clusters']), 2)

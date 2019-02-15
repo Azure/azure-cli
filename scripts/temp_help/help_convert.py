@@ -175,7 +175,7 @@ def _get_new_yaml_dict(help_dict):
     content = result['content']
 
     for command_or_group, yaml_text in help_dict.items():
-        help_dict = yaml.load(yaml_text)
+        help_dict = yaml.safe_load(yaml_text)
 
         type = help_dict["type"]
 

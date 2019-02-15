@@ -47,7 +47,7 @@ def build_command_table(cli_ctx):
         data[command] = com_descip
 
     for command in helps:
-        diction_help = yaml.load(helps[command])
+        diction_help = yaml.safe_load(helps[command])
         if command not in data:
             data[command] = {
                 'short-summary': diction_help.get(

@@ -89,7 +89,7 @@ class BaseHelpLoader(ABC):
             pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
 
             try:
-                data = yaml.load(text)
+                data = yaml.safe_load(text)
                 if not data:
                     raise CLIError("Error: Help file {} is empty".format(pretty_file_path))
                 return data
