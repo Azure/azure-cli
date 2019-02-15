@@ -164,6 +164,7 @@ def _get_credentials(cmd,
                 "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
                 login_server, tenant_suffix)
     except (ResourceNotFound, CLIError) as e:
+        logger.debug("Could not get registry from service. Exception: %s", str(e))
         if not isinstance(e, ResourceNotFound) and _AZ_LOGIN_MESSAGE not in str(e):
             raise
         # Try to use the pre-defined login server suffix to construct login server from registry name.
@@ -178,7 +179,8 @@ def _get_credentials(cmd,
     challenge = 'https://' + login_server + '/v2/'
     try:
         requests.get(challenge, verify=(not should_disable_connection_verify()))
-    except RequestException:
+    except RequestException as e:
+        logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
         raise CLIError("Could not connect to the registry login server '{}'. ".format(login_server) +
@@ -286,7 +288,8 @@ def get_login_server_suffix(cli_ctx):
     """Get the Azure Container Registry login server suffix in the current cloud."""
     try:
         return cli_ctx.cloud.suffixes.acr_login_server_endpoint
-    except CloudSuffixNotSetException:
+    except CloudSuffixNotSetException as e:
+        logger.debug("Could not get login server endpoint suffix. Exception: %s", str(e))
         # Ignore the error if the suffix is not set, the caller should then try to get login server from server.
         return None
 
@@ -372,8 +375,8 @@ def request_data_from_registry(http_method,
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
-                except ValueError:
-                    logger.debug('Response is empty or is not a valid json.')
+                except ValueError as e:
+                    logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
                 return result, None
             elif response.status_code == 204:
                 return None, None
