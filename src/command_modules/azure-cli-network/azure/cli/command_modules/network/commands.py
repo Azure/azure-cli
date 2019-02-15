@@ -276,6 +276,9 @@ def load_command_table(self, _):
         g.command('start', 'start')
         g.command('stop', 'stop')
         g.command('show-backend-health', 'backend_health', min_api='2016-09-01')
+        g.command('list-server-variables', 'list_available_server_variables', min_api='2018-11-01')
+        g.command('list-request-headers', 'list_available_request_headers', min_api='2018-11-01')
+        g.command('list-response-headers', 'list_available_response_headers', min_api='2018-11-01')
         g.generic_update_command('update', supports_no_wait=True, custom_func_name='update_application_gateway')
         g.wait_command('wait')
 

@@ -4,6 +4,7 @@ Release History
 ===============
 
 * `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
+* `application-gateway`: Added commands `list-server-variables`, `list-request-headers` and `list-response-headers`.
 
 2.3.2
 +++++
