@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer
+from knack.util import CLIError
 
 
 class CosmosDBTests(ScenarioTest):
@@ -191,3 +192,22 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb database list -n {acc} -g {rg}')
         self.cmd('az cosmosdb database list -n {acc} --key {primary_master_key}')
         self.cmd('az cosmosdb database list --url-connection {url} --key {primary_master_key}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_create_virtual_network(self, resource_group):
+        
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'vnet': self.create_random_name(prefix='cli', length=40),
+            'sub': self.create_random_name(prefix='cli', length=40)
+        })
+
+        vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"] + "=true"
+        })
+
+        cdb_acct = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rules {subnet_id}').get_output_in_json()
+
+        assert cdb_acct["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]

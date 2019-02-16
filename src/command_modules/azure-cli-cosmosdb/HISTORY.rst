@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.8
++++++
+* Added support for setting "ignoreMissingVNetServiceEndpoint" on virtual network rule
+
 0.2.7
 +++++
 * Added support for creating database with shared throughput
