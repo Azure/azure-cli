@@ -195,7 +195,7 @@ class CosmosDBTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_create_virtual_network(self, resource_group):
-        
+
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=40),
             'vnet': self.create_random_name(prefix='cli', length=40),
