@@ -6,7 +6,7 @@ Release History
 
 0.2.14
 ++++++
-* webapp, functionapp: az webapp/function deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
+* webapp, functionapp: az webapp/functionapp deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
 
 0.2.13
 ++++++
