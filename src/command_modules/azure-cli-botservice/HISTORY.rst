@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.7
++++++
+* Add "SCM_DO_BUILD_DURING_DEPLOYMENT" to ARM template's Application Settings for v4 Web App Bots
+* Remove single quotes from `az bot publish` command output at end of `az bot create`
+
 0.1.6
 +++++
 * Improve UX around `az bot publish`

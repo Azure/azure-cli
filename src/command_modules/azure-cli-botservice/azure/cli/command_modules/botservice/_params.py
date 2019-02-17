@@ -51,6 +51,8 @@ def load_arguments(self, _):
         c.argument('keep_node_modules', help='Keep node_modules folder and do not run `npm install` on the App Service.'
                                              ' This can greatly speed up publish commands for Node.js SDK bots.',
                    arg_type=get_three_state_flag())
+        c.argument('timeout', options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the '
+                                                                     'status of deployment.')
 
     with self.argument_context('bot download') as c:
         c.argument('file_save_path', options_list=['--save-path'], help='The directory to download bot code to.')
