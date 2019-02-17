@@ -1014,7 +1014,17 @@ def _handle_merge(existing, addition, key, replace):
                     if replace or i == j:
                         existing[key].remove(j)
                     else:
-                        raise CLIError('A different object named {} already exists in {}'.format(i['name'], key))
+                        from knack.prompting import prompt_y_n, NoTTYException
+                        message = 'A different object named {} already exists in your kubeconfig file.\nOverwrite?'.format(i['name'])
+                        overwrite = False
+                        try:
+                            overwrite = prompt_y_n(message)
+                        except NoTTYException:
+                            pass
+                        if overwrite:
+                            existing[key].remove(j)
+                        else:
+                            raise CLIError('A different object named {} already exists in {} in your kubeconfig file.'.format(i['name'], key))
             existing[key].append(i)
 
 
