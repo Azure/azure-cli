@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.7
++++++
+* Suppress latest `botservice (0.4.3)` extension, this functionality has been rolled into the core CLI
+
 0.1.6
 +++++
 * Improve UX around `az bot publish`
