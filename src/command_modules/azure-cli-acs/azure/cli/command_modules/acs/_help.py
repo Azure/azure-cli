@@ -160,7 +160,10 @@ helps['aks browse'] = """
           long-summary: Add this argument when launching a web browser manually, or for automated testing.
         - name: --listen-port
           short-summary: The listening port for the dashboard.
-          long-sumarry: Add this argument when the default listening port is used by another process or unavailable.
+          long-summary: Add this argument when the default listening port is used by another process or unavailable.
+        - name: --listen-address
+          short-summary: The listening address for the dashboard.
+          long-summary: Add this argument to listen on a specific IP address.
 """
 
 helps['aks create'] = """
