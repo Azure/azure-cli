@@ -1078,6 +1078,7 @@ def load_arguments(self, _):
         c.argument('cert_name', help='Root certificate name', options_list=['--name', '-n'])
         c.argument('gateway_name', help='Virtual network gateway name')
         c.argument('gateway_type', vnet_gateway_type)
+        c.argument('gateway_default_site', help='Name or ID of a local network gateway representing a local network site with default routes.')
         c.argument('sku', vnet_gateway_sku_type)
         c.argument('vpn_type', vnet_gateway_routing_type)
         c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')

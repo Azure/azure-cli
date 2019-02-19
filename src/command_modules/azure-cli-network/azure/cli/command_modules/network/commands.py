@@ -37,7 +37,8 @@ from azure.cli.command_modules.network._format import (
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg)
+    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
+    transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -824,9 +825,9 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('reset', 'reset')
-        g.command('list-bgp-peer-status', 'get_bgp_peer_status')
-        g.command('list-advertised-routes', 'get_advertised_routes')
-        g.command('list-learned-routes', 'get_learned_routes')
+        g.command('list-bgp-peer-status', 'get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
+        g.command('list-advertised-routes', 'get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
+        g.command('list-learned-routes', 'get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
