@@ -14,9 +14,9 @@ Provide a brief description of the feature or work requested. A link to conceptu
 What is the minimum API version of your service required to implement your feature?
 
 **Swagger Link**
-Provide a link to the location of your feature(s) in the rest API specs repo. This should be on the master branch
+Provide a link to the location of your feature(s) in the REST API specs repo. This should be on the master branch
 of the REST API specs repo.
 
 **Target Date**
-If you have a target date for release of this feature, please provide it. While we can't guarantee these dates,
-it will help up prioritize your request against other requests.
+If you have a target date for release of this feature/work, please provide it. While we can't guarantee these dates,
+it will help us prioritize your request against other requests.
