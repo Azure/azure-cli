@@ -43,7 +43,7 @@ def validate_capabilities(ns):
 
 
 def validate_virtual_network_rules(ns):
-    """ Extracts multiple space-separated virtual network rules 
+    """ Extracts multiple space-separated virtual network rules
     in vnetId[=ignoreMissingVNetServiceEndpoint] format"""
     from azure.mgmt.cosmosdb.models import VirtualNetworkRule
     if ns.virtual_network_rules is not None:
