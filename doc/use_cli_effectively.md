@@ -43,9 +43,9 @@ Note: for less distraction, Bash scripts are used inline. Windows batch or Power
 
            az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | xargs -I {} -P 10 az vm start --ids "{}"
 
-       Less known, but CLI also has built-in support on processing "--ids" in parallel to achieve the same effect of xargs
+       Less known, but CLI also has built-in support on processing "--ids" in parallel to achieve the same effect of xargs(note, `@-` is used to get values from pipe)
 
-           az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | tr '\n' ' ' | { read ids ; az vm start --ids $ids ; }
+           az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | az vm start --ids @-
 
 ## Async executions ##
   This becomes handy for a few scenarios:
