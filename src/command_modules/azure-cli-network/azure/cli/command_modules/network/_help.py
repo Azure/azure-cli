@@ -3982,7 +3982,7 @@ helps['network vnet-gateway ipsec-policy add'] = """
 
 helps['network vnet-gateway ipsec-policy clear'] = """
     type: command
-    short-summary: Delete all IPsec policies on a virtual network gateway .
+    short-summary: Delete all IPsec policies on a virtual network gateway.
     examples:
         - name: Remove all previously specified IPsec policies from a gateway.
           text: az network vnet-gateway ipsec-policy clear -g MyResourceGroup --gateway-name MyConnection
@@ -3990,7 +3990,7 @@ helps['network vnet-gateway ipsec-policy clear'] = """
 
 helps['network vnet-gateway ipsec-policy list'] = """
     type: command
-    short-summary: List IPSec policies associated with a virtual network gateway .
+    short-summary: List IPSec policies associated with a virtual network gateway.
     examples:
         - name: List the IPsec policies set on a gateway.
           text: az network vnet-gateway ipsec-policy list -g MyResourceGroup --gateway-name MyConnection

@@ -3635,16 +3635,19 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
             instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = []
         instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
 
-    _set_param(instance.vpn_client_configuration, 'vpn_client_protocols', client_protocol)
-    _set_param(instance.vpn_client_configuration, 'radius_server_address', radius_server)
-    _set_param(instance.vpn_client_configuration, 'radius_server_secret', radius_secret)
+    with UpdateContext(instance.vpn_client_configuration) as c:
+        c.set_param('vpn_client_protocols', client_protocol)
+        c.set_param('radius_server_address', radius_server)
+        c.set_param('radius_server_secret', radius_secret)
 
-    _set_param(instance.sku, 'name', sku)
-    _set_param(instance.sku, 'tier', sku)
+    with UpdateContext(instance.sku) as c:
+        c.set_param('name', sku)
+        c.set_param('tier', sku)
 
-    _set_param(instance, 'gateway_default_site', SubResource(id=gateway_default_site) if gateway_default_site else None)
-    _set_param(instance, 'vpn_type', vpn_type)
-    _set_param(instance, 'tags', tags)
+    with UpdateContext(instance) as c:
+        c.set_param('gateway_default_site', SubResource(id=gateway_default_site) if gateway_default_site else None)
+        c.set_param('vpn_type', vpn_type)
+        c.set_param('tags', tags)
 
     subnet_id = '{}/subnets/GatewaySubnet'.format(virtual_network) if virtual_network else \
         instance.ip_configurations[0].subnet.id
@@ -3871,11 +3874,58 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
     return instance
 # endregion
 
-# virtual_network_gateway_connections.ipsec_policies
-# virtual_network_gateways.vpn_client_configuration.vpn_client_ipsec_policies
 
 # region IPSec Policy Commands
-def add_vpn_conn_ipsec_policy(cmd, parent, resource_group_name, connection_name,
+def add_vnet_gateway_ipsec_policy(cmd, resource_group_name, gateway_name,
+                                  sa_life_time_seconds, sa_data_size_kilobytes,
+                                  ipsec_encryption, ipsec_integrity,
+                                  ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+    IpsecPolicy = cmd.get_models('IpsecPolicy')
+    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
+                             sa_data_size_kilobytes=sa_data_size_kilobytes,
+                             ipsec_encryption=ipsec_encryption,
+                             ipsec_integrity=ipsec_integrity,
+                             ike_encryption=ike_encryption,
+                             ike_integrity=ike_integrity,
+                             dh_group=dh_group,
+                             pfs_group=pfs_group)
+
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    try:
+        if gateway.vpn_client_configuration.vpn_client_ipsec_policies:
+            gateway.vpn_client_configuration.vpn_client_ipsec_policies.append(new_policy)
+        else:
+            gateway.vpn_client_configuration.vpn_client_ipsec_policies = [new_policy]
+    except AttributeError:
+        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+
+
+def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    try:
+        gateway.vpn_client_configuration.vpn_client_ipsec_policies = None
+    except AttributeError:
+        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+    if no_wait:
+        return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+
+    from azure.cli.core.commands import LongRunningOperation
+    poller = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+    return LongRunningOperation(cmd.cli_ctx)(poller).vpn_client_configuration.vpn_client_ipsec_policies
+
+
+def list_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    try:
+        return ncf.get(resource_group_name, gateway_name).vpn_client_configuration.vpn_client_ipsec_policies
+    except AttributeError:
+        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+
+
+def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
                               sa_life_time_seconds, sa_data_size_kilobytes,
                               ipsec_encryption, ipsec_integrity,
                               ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
@@ -3898,7 +3948,7 @@ def add_vpn_conn_ipsec_policy(cmd, parent, resource_group_name, connection_name,
     return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
 
 
-def clear_vpn_conn_ipsec_policies(cmd, parent, resource_group_name, parent_name, no_wait=False):
+def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     conn = ncf.get(resource_group_name, connection_name)
     conn.ipsec_policies = None
@@ -3911,48 +3961,7 @@ def clear_vpn_conn_ipsec_policies(cmd, parent, resource_group_name, parent_name,
     return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
 
 
-def list_vpn_conn_ipsec_policies(cmd, parent, resource_group_name, parent_name):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    return ncf.get(resource_group_name, connection_name).ipsec_policies
-
-
-def add_vpn_conn_ipsec_policy(cmd, parent, resource_group_name, connection_name,
-                              sa_life_time_seconds, sa_data_size_kilobytes,
-                              ipsec_encryption, ipsec_integrity,
-                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
-    IpsecPolicy = cmd.get_models('IpsecPolicy')
-    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
-                             sa_data_size_kilobytes=sa_data_size_kilobytes,
-                             ipsec_encryption=ipsec_encryption,
-                             ipsec_integrity=ipsec_integrity,
-                             ike_encryption=ike_encryption,
-                             ike_integrity=ike_integrity,
-                             dh_group=dh_group,
-                             pfs_group=pfs_group)
-
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    conn = ncf.get(resource_group_name, connection_name)
-    if conn.ipsec_policies:
-        conn.ipsec_policies.append(new_policy)
-    else:
-        conn.ipsec_policies = [new_policy]
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
-
-
-def clear_vpn_conn_ipsec_policies(cmd, parent, resource_group_name, parent_name, no_wait=False):
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    conn = ncf.get(resource_group_name, connection_name)
-    conn.ipsec_policies = None
-    conn.use_policy_based_traffic_selectors = False
-    if no_wait:
-        return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
-
-    from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
-    return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
-
-
-def list_vpn_conn_ipsec_policies(cmd, parent, resource_group_name, parent_name):
+def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
     ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     return ncf.get(resource_group_name, connection_name).ipsec_policies
 # endregion
