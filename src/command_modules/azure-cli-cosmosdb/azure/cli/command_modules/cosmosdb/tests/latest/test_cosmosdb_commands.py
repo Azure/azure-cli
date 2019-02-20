@@ -208,7 +208,7 @@ class CosmosDBTests(ScenarioTest):
             'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
         })
 
-        cdb_acct = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
 
         vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
 
