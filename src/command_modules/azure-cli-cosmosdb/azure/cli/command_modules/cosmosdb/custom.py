@@ -258,8 +258,8 @@ def cli_cosmosdb_network_rule_add(cmd,
     rule_already_exists = False
     for rule in existing.virtual_network_rules:
         virtual_network_rules.append(
-                VirtualNetworkRule(id=rule.id,
-                                   ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+            VirtualNetworkRule(id=rule.id,
+                               ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
         if rule.id == subnet:
             rule_already_exists = True
             logger.warning("The rule exists and will be overwritten")
