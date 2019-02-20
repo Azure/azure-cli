@@ -53,7 +53,7 @@ COMMAND_LOADER_CLS = TestCommandLoader
 
 
 # test Help Loader, loads from help.json
-class TestHelpLoader(HelpLoaderV1):
+class DummyHelpLoader(HelpLoaderV1):
     # This loader has different keys in the data object. Except for "arguments" and "examples".
     core_attrs_to_keys = [("short_summary", "short"), ("long_summary", "long")]
     body_attrs_to_keys = core_attrs_to_keys + [("links", "hyper-links")]
