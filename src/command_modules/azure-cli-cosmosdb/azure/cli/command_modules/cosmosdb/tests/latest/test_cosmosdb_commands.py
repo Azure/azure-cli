@@ -153,8 +153,7 @@ class CosmosDBTests(ScenarioTest):
         account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         assert len(account2['writeLocations']) == 1
         assert len(account2['readLocations']) == 2
-        print(account2['writeLocations'][0]['failoverPriority'])
-        print(account2['writeLocations'][0]['locationName'])
+
         assert account2['writeLocations'][0]['failoverPriority'] == 0
         assert account2['writeLocations'][0]['locationName'] == "West US"
         assert account2['readLocations'][0]['locationName'] == "East US" or account2['readLocations'][1]['locationName'] == "East US"
@@ -194,7 +193,30 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb database list --url-connection {url} --key {primary_master_key}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
-    def test_create_virtual_network(self, resource_group):
+    def test_cosmosdb_network_rule_list(self, resource_group):
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'vnet': self.create_random_name(prefix='cli', length=40),
+            'sub': self.create_random_name(prefix='cli', length=40)
+        })
+
+        vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
+        self.cmd('az network vnet subnet update -g {rg} --vnet-name {vnet} -n {sub} --service-endpoints Microsoft.AzureCosmosDB')
+
+        self.kwargs.update({
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
+        })
+
+        cdb_acct = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
+
+        vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
+
+        assert len(vnet_rules) == 1
+        assert vnet_rules[0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_rule_add(self, resource_group):
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=40),
@@ -205,9 +227,46 @@ class CosmosDBTests(ScenarioTest):
         vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
 
         self.kwargs.update({
-            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"] + "=true"
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
         })
 
-        cdb_acct = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rules {subnet_id}').get_output_in_json()
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
 
-        assert cdb_acct["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
+        with self.assertRaisesRegexp(CLIError, "Provide either the subnet ID or the VNET and subnet name"):
+            self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
+
+        vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+
+        assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
+        assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
+
+        with self.assertRaisesRegexp(CLIError, "This rule already exists for the Cosmos DB account"):
+            self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_rule_remove(self, resource_group):
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'vnet': self.create_random_name(prefix='cli', length=40),
+            'sub': self.create_random_name(prefix='cli', length=40)
+        })
+
+        vnet_output = self.cmd('az network vnet create --name {vnet} --resource-group {rg} --subnet-name {sub}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
+
+        vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {subnet_id} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+
+        assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
+        assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
+
+        self.cmd('az cosmosdb network-rule remove -n {acc} -g {rg} --subnet {subnet_id}')
+
+        vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
+
+        assert len(vnet_rules) == 0
