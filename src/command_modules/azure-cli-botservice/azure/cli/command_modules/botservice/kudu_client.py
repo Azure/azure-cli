@@ -21,6 +21,7 @@ except ImportError:
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 
 class KuduClient:  # pylint:disable=too-many-instance-attributes
@@ -130,6 +131,13 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
                 self.__logger.warning('Your Kudu website for this bot is: %s' % self.__scm_url)
                 self.__logger.warning('\nYou can also use `--keep-node-modules` in your `az bot publish` command to '
                                       'not `npm install` the dependencies for the bot on Kudu.')
+                subscription_id = get_subscription_id(self.__cmd.cli_ctx)
+                self.__logger.warning('Alternatively, you can configure your Application Settings for the App Service '
+                                      'to build during zipdeploy by using the following command:\n  az webapp config '
+                                      'appsettings set -n %s -g %s --subscription %s --settings '
+                                      'SCM_DO_BUILD_DURING_DEPLOYMENT=true' %
+                                      (self.bot_site_name, self.__resource_group_name, subscription_id))
+
             else:
                 raise e
 
