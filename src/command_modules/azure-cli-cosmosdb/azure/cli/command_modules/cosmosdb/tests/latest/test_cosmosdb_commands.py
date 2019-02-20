@@ -232,7 +232,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
 
-        with self.assertRaisesRegexp(CLIError, "Provide either the subnet ID or the VNET and subnet name"):
+        with self.assertRaisesRegexp(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
             self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
 
         vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
@@ -240,8 +240,8 @@ class CosmosDBTests(ScenarioTest):
         assert vnet_rule["virtualNetworkRules"][0]["id"] == vnet_output["newVNet"]["subnets"][0]["id"]
         assert vnet_rule["virtualNetworkRules"][0]["ignoreMissingVnetServiceEndpoint"]
 
-        with self.assertRaisesRegexp(CLIError, "This rule already exists for the Cosmos DB account"):
-            self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint')
+        existing_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
+        assert len(existing_rule["virtualNetworkRules"]) == 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_cosmosdb_network_rule_remove(self, resource_group):

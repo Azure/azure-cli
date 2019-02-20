@@ -5,7 +5,7 @@ Release History
 
 0.2.8
 +++++
-* Added support for setting "ignoreMissingVNetServiceEndpoint" on virtual network rule
+* Introduce `network-rule` subgroup with commands `add`, `remove`, and `list` for managing VNET rules of a Cosmos DB account
 
 0.2.7
 +++++

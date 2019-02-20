@@ -233,7 +233,7 @@ def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if not is_valid_resource_id(subnet):
         if virtual_network is None:
-            raise CLIError("Provide either the subnet ID or the VNET and subnet name")
+            raise CLIError("usage error: --subnet ID | --subnet NAME --vnet-name NAME")
         subnet = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=resource_group_name,
@@ -257,17 +257,12 @@ def cli_cosmosdb_network_rule_add(cmd,
     virtual_network_rules = []
     rule_already_exists = False
     for rule in existing.virtual_network_rules:
-        if rule.id != subnet:
-            virtual_network_rules.append(
+        virtual_network_rules.append(
                 VirtualNetworkRule(id=rule.id,
                                    ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
-        else:
-            if rule.ignore_missing_vnet_service_endpoint == ignore_missing_vnet_service_endpoint:
-                raise CLIError("This rule already exists for the Cosmos DB account")
+        if rule.id == subnet:
             rule_already_exists = True
-            virtual_network_rules.append(
-                VirtualNetworkRule(id=rule.id,
-                                   ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
+            logger.warning("The rule exists and will be overwritten")
 
     if not rule_already_exists:
         virtual_network_rules.append(
@@ -318,7 +313,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
         else:
             rule_removed = True
     if not rule_removed:
-        raise CLIError("This rule does not exist for the Cosmos DB account")
+        raise logger.warning("This rule does not exist for the Cosmos DB account")
 
     locations = []
     for loc in existing.read_locations:
