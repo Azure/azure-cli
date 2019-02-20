@@ -1424,6 +1424,7 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
             raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
+# pylint: disable=too-many-statements
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
                location=None,
