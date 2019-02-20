@@ -65,10 +65,10 @@ class TestBatchValidators(unittest.TestCase):
         self.assertEqual(ref, {'application_name': 'app_1'})
 
         ref = _validators.application_package_reference_format("app#1")
-        self.assertEqual(ref, {'application_name': 'app', 'version': '1'})
+        self.assertEqual(ref, {'application_name': 'app', 'version_name': '1'})
 
         ref = _validators.application_package_reference_format("app#1#RC")
-        self.assertEqual(ref, {'application_name': 'app', 'version': '1#RC'})
+        self.assertEqual(ref, {'application_name': 'app', 'version_name': '1#RC'})
 
     def test_batch_certificate_reference_format(self):
         cert = _validators.certificate_reference_format("thumbprint_lkjsahakjg")
