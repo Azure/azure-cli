@@ -852,27 +852,27 @@ def patch_application(cmd, identifier, parameters):
 
 
 def _build_application_accesses(required_resource_accesses):
-    required_accesses = None
+    if not required_resource_accesses:
+        return None
+    required_accesses = []
     if isinstance(required_resource_accesses, dict):
         logger.info('Getting "requiredResourceAccess" from a full manifest')
         required_resource_accesses = required_resource_accesses.get('requiredResourceAccess', [])
     for x in required_resource_accesses:
         accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
-        if required_accesses is None:
-            required_accesses = []
         required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
                                                         resource_access=accesses))
     return required_accesses
 
 
 def _build_app_roles(app_roles):
-    result = None
+    if not app_roles:
+        return None
+    result = []
     if isinstance(app_roles, dict):
         logger.info('Getting "appRoles" from a full manifest')
         app_roles = app_roles.get('appRoles', [])
     for x in app_roles:
-        if result is None:
-            result = []
         role = AppRole(id=x.get('id', None) or _gen_guid(), allowed_member_types=x.get('allowedMemberTypes', None),
                        description=x.get('description', None), display_name=x.get('displayName', None),
                        is_enabled=x.get('isEnabled', None), value=x.get('value', None))
