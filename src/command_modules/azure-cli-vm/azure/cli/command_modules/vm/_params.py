@@ -485,9 +485,9 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('volume_type', help='Type of volume that the encryption operation is performed on', arg_type=get_enum_type(['DATA', 'OS', 'ALL']))
             c.argument('force', action='store_true', help='continue by ignoring client side validation errors')
-            c.argument('disk_encryption_keyvault', help='The key vault where the generated encryption key will be placed.')
+            c.argument('disk_encryption_keyvault', help='Name or ID of the key vault where the generated encryption key will be placed.')
             c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
-            c.argument('key_encryption_keyvault', help='The key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
+            c.argument('key_encryption_keyvault', help='Name or ID of the key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
 
     for scope in ['vm extension', 'vmss extension']:
         with self.argument_context(scope) as c:
@@ -518,7 +518,11 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm update', 'vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
-            c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+            license_msg = "Specifies that the Windows image or disk was licensed on-premises. " \
+                          "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
+                          "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
+                          "For more information see the Azure Windows VM online docs."
+            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
