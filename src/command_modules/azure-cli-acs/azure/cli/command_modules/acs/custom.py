@@ -1999,7 +1999,8 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
     default_region_name = "eastus"
     default_region_code = "EUS"
-
+    workspace_region = default_region_name
+    workspace_region_code = default_region_code
     cloud_name = cmd.cli_ctx.cloud.name
 
     if cloud_name.lower() == 'azurecloud':
