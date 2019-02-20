@@ -313,7 +313,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
         else:
             rule_removed = True
     if not rule_removed:
-        raise logger.warning("This rule does not exist for the Cosmos DB account")
+        raise CLIError("This rule does not exist for the Cosmos DB account")
 
     locations = []
     for loc in existing.read_locations:
