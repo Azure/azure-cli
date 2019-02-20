@@ -38,7 +38,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
                                    DeletedAppRestoreRequest, DefaultErrorResponseException,
-                                   SnapshotRestoreRequest, SnapshotRecoverySource)
+                                   SnapshotRestoreRequest, SnapshotRecoverySource, HybridConnection)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -2262,8 +2262,8 @@ def add_hc(cmd, name, resource_group, namespace, hybrid_connection):
     id_parameters = hy_co_info.split("/")
 
     # populate object with information from the hyrbid connection, and set it
-    # on webapp
-    hc = {
+    """   # on webapp
+        hc = {
         "name": hybrid_connection,
         "type": hy_co.type,
         "location": hy_co_location,
@@ -2276,9 +2276,18 @@ def add_hc(cmd, name, resource_group, namespace, hybrid_connection):
             "sendKeyName": "defaultSender",
             "sendKeyValue": hy_co_keys.primary_key
         }
-    }
+        }
 
-    return_hc = web_client.web_apps.set_hybrid_connection(resource_group, name, namespace, hybrid_connection, hc)
+    """
+    hc = HybridConnection(service_bus_namespace=id_parameters[8], 
+                        relay_name=hybrid_connection, 
+                        relay_arm_uri=-hy_co_info,
+                        hostname=hostname, 
+                        port=port, 
+                        send_key_name="defaultSender",
+                        send_key_value=hy_co_keys.primary_key, 
+                        service_bus_suffix=".servicebus.windows.net")
+    return_hc = web_client.web_apps.create_or_update_hybrid_connection(resource_group, name, namespace, hybrid_connection, hc)
 
     # reformats hybrid connection, to prune unnecessary fields
     resourceGroup = return_hc.id.split("/")
