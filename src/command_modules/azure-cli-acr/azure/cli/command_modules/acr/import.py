@@ -15,7 +15,7 @@ SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found. " \
                             "Please provide a valid address or credentials and try again."
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 SOURCE_NOT_FOUND = "Source cannot be found. " \
-                       "Please provide a valid image and source registry or a fully qualified source."
+                   "Please provide a valid image and source registry or a fully qualified source."
 
 
 def acr_import(cmd,
