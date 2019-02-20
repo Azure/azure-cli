@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* `az ad app create/update`: support app roles
+
 2.4.0
 +++++
 * `az identity` moved here from inside of the `azure-cli-vm` command_module.
