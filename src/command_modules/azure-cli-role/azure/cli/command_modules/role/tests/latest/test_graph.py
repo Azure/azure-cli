@@ -95,7 +95,18 @@ class ApplicationSetScenarioTest(ScenarioTest):
         name = self.create_random_name(prefix='cli-graph', length=14)
         self.kwargs.update({
             'app': 'http://' + name,
-            'name': name
+            'name': name,
+            'app_roles': json.dumps([
+                {
+                    "allowedMemberTypes": [
+                        "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
+                }
+            ])
         })
 
         # crerate app through general option
@@ -120,6 +131,11 @@ class ApplicationSetScenarioTest(ScenarioTest):
         self.cmd('ad app update --id {app} --set oauth2AllowUrlPathMatching=true')
         self.cmd('ad app show --id {app}',
                  checks=self.check('oauth2AllowUrlPathMatching', True))
+
+        # update app_roles
+        self.cmd("ad app update --id {app} --app-roles '{app_roles}'")
+        self.cmd('ad app show --id {app}',
+                 checks=self.check('length(appRoles)', 1))
 
         # delete app
         self.cmd('ad app delete --id {app}')
