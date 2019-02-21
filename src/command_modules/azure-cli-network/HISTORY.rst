@@ -2,6 +2,20 @@
 
 Release History
 ===============
+
+* `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
+* `express-route`: Port command groups from `express-route` extensions.
+* `express-route`: Added `express-route gateway` and `express-route port` command groups.
+* `express-route peering create/update`: Added argument `--legacy-mode`.
+* `express-route create/update`: Added argument `--allow-classic-operations` and `--express-route-port`.
+
+2.3.2
++++++
+* `dns zone export`: Ensure exported CNAMEs are FQDNs.
+* `nic ip-config address-pool add/remove`: Add `--gateway-name` to support application gateway backend address pools.
+* `network watcher flow-log configure`: Add arguments `--traffic-analytics`, `--workspace` to support traffic analytics through a Log Analytics workspace.
+* `lb inbound-nat-pool create/update`: Add arguments `--idle-timeout`, `--floating-ip`.
+
 2.3.1
 ++++++
 * `express-route update`: Fix issue where `--bandwidth` argument was ignored.

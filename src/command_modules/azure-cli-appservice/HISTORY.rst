@@ -2,7 +2,21 @@
 
 Release History
 ===============
+* functionapp: az functionapp devops-build, new command created
+
+0.2.13
+++++++
+* functionapp: add ability to create and configure functions using ACR containers
+* webapp: add support for updating configurations through json
+* appservice plan: Updating help for appservice-plan-update command
 * functionapp: add support for app insights on functionapp create
+* webapp: bugfixes for webapp ssh
+
+0.2.12
+++++++
+* functionapp: add support for app insights on functionapp create
+* functionapp: add support for app service plan creation (including Elastic Premium)
+* functionapp: fix app setting issues with Elastic Premium plans
 
 0.2.11
 ++++++

@@ -7,7 +7,7 @@
 
 from knack.arguments import CLIArgumentType
 
-from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag, get_location_type, tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
@@ -44,6 +44,8 @@ def load_arguments(self, _):
         c.argument('oauth2_allow_implicit_flow', arg_type=get_three_state_flag(), help='whether to allow implicit grant flow for OAuth2')
         c.argument('required_resource_accesses', type=validate_file_or_dict,
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
+        c.argument('app_roles', type=validate_file_or_dict,
+                   help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
         c.argument('credential_description', help="the description of the password")
 
@@ -68,7 +70,8 @@ def load_arguments(self, _):
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('scopes', nargs='+')
         c.argument('role', completer=get_role_definition_name_completion_list)
-        c.argument('skip_assignment', arg_type=get_three_state_flag(), help='do not create default assignment')
+        c.argument('skip_assignment', arg_type=get_three_state_flag(),
+                   help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
@@ -170,3 +173,10 @@ def load_arguments(self, _):
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='custom roles only(vs. build-in ones)')
         c.argument('role_definition', help="json formatted content which defines the new role.")
         c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list, help="the role's name")
+
+    with self.argument_context('identity') as c:
+        c.argument('resource_name', arg_type=name_arg_type, id_part='name')
+
+    with self.argument_context('identity create') as c:
+        c.argument('location', get_location_type(self.cli_ctx))
+        c.argument('tags', tags_type)

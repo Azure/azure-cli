@@ -257,7 +257,8 @@ def validate_vault_id(entity_type):
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             setattr(ns, entity_type + '_name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            setattr(ns, entity_type + '_version', ident.version)
+            if hasattr(ns, entity_type + '_version'):
+                setattr(ns, entity_type + '_version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
 

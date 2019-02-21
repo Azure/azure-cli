@@ -3,19 +3,61 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.containerregistry.v2018_09_01.models import SkuName
-
 STORAGE_RESOURCE_TYPE = 'Microsoft.Storage/storageAccounts'
 
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
 REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
 WEBHOOK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/webhooks'
 REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
-BUILD_TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/buildTasks'
-BUILD_STEP_RESOURCE_TYPE = BUILD_TASK_RESOURCE_TYPE + '/steps'
 
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 
-CLASSIC_REGISTRY_SKU = [SkuName.classic.value]
-MANAGED_REGISTRY_SKU = [SkuName.basic.value, SkuName.standard.value, SkuName.premium.value]
+
+def get_classic_sku(cmd):
+    SkuName = cmd.get_models('SkuName')
+    return [SkuName.classic.value]
+
+
+def get_managed_sku(cmd):
+    SkuName = cmd.get_models('SkuName')
+    return [SkuName.basic.value, SkuName.standard.value, SkuName.premium.value]
+
+
+def get_premium_sku(cmd):
+    SkuName = cmd.get_models('SkuName')
+    return [SkuName.premium.value]
+
+
+def get_valid_os(cmd):
+    OS = cmd.get_models('OS')
+    return [item.value.lower() for item in OS]
+
+
+def get_valid_architecture(cmd):
+    Architecture = cmd.get_models('Architecture')
+    return [item.value.lower() for item in Architecture]
+
+
+def get_valid_variant(cmd):
+    Variant = cmd.get_models('Variant')
+    return [item.value.lower() for item in Variant]
+
+
+def get_finished_run_status(cmd):
+    RunStatus = cmd.get_models('RunStatus')
+    return [RunStatus.succeeded.value,
+            RunStatus.failed.value,
+            RunStatus.canceled.value,
+            RunStatus.error.value,
+            RunStatus.timeout.value]
+
+
+def get_succeeded_run_status(cmd):
+    RunStatus = cmd.get_models('RunStatus')
+    return [RunStatus.succeeded.value]
+
+
+def get_acr_models(cmd):
+    from azure.cli.core.profiles import ResourceType, get_sdk
+    return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models')

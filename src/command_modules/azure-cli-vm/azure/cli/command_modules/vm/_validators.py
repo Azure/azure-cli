@@ -311,7 +311,7 @@ def _validate_location(cmd, namespace, zone_info, size_info):
             if not hasattr(temp, 'location_info'):
                 return
             if not temp or not [x for x in (temp.location_info or []) if x.zones]:
-                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
+                raise CLIError("{}'s location can't be used to create the VM/VMSS because availability zone is not yet "
                                "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
                                "used to find such locations".format(namespace.resource_group_name))
 
@@ -661,13 +661,14 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                 return
 
         # VMs need to be a supported image in the marketplace
-        # Ubuntu 16.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
+        # Ubuntu 16.04 | 18.04, SLES 12 SP3, RHEL 7.4, CentOS 7.4, CoreOS Linux, Debian "Stretch" with backports kernel
         # Oracle Linux 7.4, Windows Server 2016, Windows Server 2012R2
         publisher, offer, sku = namespace.os_publisher, namespace.os_offer, namespace.os_sku
         if not publisher:
             return
         publisher, offer, sku = publisher.lower(), offer.lower(), sku.lower()
-        distros = [('canonical', 'UbuntuServer', '^16.04'), ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
+        distros = [('canonical', 'UbuntuServer', '^16.04|^18.04'),
+                   ('suse', 'sles', '^12-sp3'), ('redhat', 'rhel', '^7.4'),
                    ('openlogic', 'centos', '^7.4'), ('coreos', 'coreos', None), ('credativ', 'debian', '-backports'),
                    ('oracle', 'oracle-linux', '^7.4'), ('MicrosoftWindowsServer', 'WindowsServer', '^2016'),
                    ('MicrosoftWindowsServer', 'WindowsServer', '^2012-R2')]
@@ -1212,6 +1213,9 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
 
+    if namespace.secrets:
+        _validate_secrets(namespace.secrets, namespace.os_type)
+
     if namespace.license_type and namespace.os_type.lower() != 'windows':
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
@@ -1348,12 +1352,6 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
-
-
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-def process_msi_namespace(cmd, namespace):
-    get_default_location_from_resource_group(cmd, namespace)
-    validate_tags(namespace)
 
 
 def process_gallery_image_version_namespace(cmd, namespace):

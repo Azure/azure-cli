@@ -2,6 +2,8 @@
 
 Release History
 ===============
+2.1.3
++++++
 * az login: enable tenant level account for managed service identity
 
 2.1.2

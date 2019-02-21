@@ -11,9 +11,11 @@ from azure.cli.command_modules.resource._completers import (
 
 from ._validators import validate_resource
 
+from ._completers import get_policy_remediation_completion_list
+
 
 def load_arguments(self, _):
-    for scope in ['state', 'event']:
+    for scope in ['state', 'event', 'remediation']:
         with self.argument_context('policy {}'.format(scope)) as c:
             c.argument(
                 'management_group_name',
@@ -38,12 +40,15 @@ def load_arguments(self, _):
                 'resource_type_parent',
                 options_list=['--parent'],
                 arg_group='Resource ID',
-                help='The parent path (Ex: ''resA/myA/resB/myB'').')
+                help='The parent path (Ex: ''resourceTypeA/nameA/resourceTypeB/nameB'').')
             c.argument(
                 'resource_type',
                 completer=get_resource_types_completion_list,
                 arg_group='Resource ID',
-                help='Resource type (Ex: ''resC'').')
+                help='Resource type (Ex: ''resourceTypeC'').')
+
+    for scope in ['state', 'event']:
+        with self.argument_context('policy {}'.format(scope)) as c:
             c.argument(
                 'policy_set_definition_name',
                 options_list=['--policy-set-definition', '-s'],
@@ -108,3 +113,23 @@ def load_arguments(self, _):
 
     with self.argument_context('policy state summarize') as c:
         c.ignore('all_results', 'order_by_clause', 'select_clause', 'apply_clause')
+
+    with self.argument_context('policy remediation') as c:
+        c.argument('remediation_name', options_list=['--name', '-n'],
+                   completer=get_policy_remediation_completion_list, help='Name of the remediation.')
+
+    with self.argument_context('policy remediation create') as c:
+        c.argument(
+            'location_filters',
+            options_list='--location-filters',
+            nargs='+',
+            help='Space separated list of resource locations that should be remediated (Ex: ''centralus westeurope'').')  # pylint: disable=line-too-long
+        c.argument(
+            'policy_assignment',
+            options_list=['--policy-assignment', '-a'],
+            completer=get_policy_assignment_completion_list,
+            help='Name or resource ID of the policy assignment.')
+        c.argument(
+            'definition_reference_id',
+            options_list=['--definition-reference-id'],
+            help='Policy definition reference ID inside the policy set definition. Only required when the policy assignment is assigning a policy set definition.')  # pylint: disable=line-too-long

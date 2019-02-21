@@ -226,7 +226,6 @@ def register_ids_argument(cli_ctx):
             command.add_argument('ids', '--ids', **id_kwargs)
 
     def parse_ids_arguments(_, command, args):
-
         namespace = args
         cmd = namespace._cmd  # pylint: disable=protected-access
 
@@ -259,6 +258,31 @@ def register_ids_argument(cli_ctx):
         for arg in combined_args:
             setattr(namespace, arg.name, IterateValue())
 
+        def assemble_json(ids):
+            lcount = 0
+            lind = None
+            for i, line in enumerate(ids):
+                if line == '[':
+                    if lcount == 0:
+                        lind = i
+                    lcount += 1
+                elif line == ']':
+                    lcount -= 1
+                    # final closed set of matching brackets
+                    if lcount == 0:
+                        left = lind
+                        right = i + 1
+                        l_comp = ids[:left]
+                        m_comp = [''.join(ids[left:right])]
+                        r_comp = ids[right:]
+                        ids = l_comp + m_comp + r_comp
+                        return assemble_json(ids)
+            # base case--no more merging required
+            return ids
+
+        # reassemble JSON strings from bash
+        ids = assemble_json(ids)
+
         # expand the IDs into the relevant fields
         full_id_list = []
         for val in ids:
@@ -273,6 +297,8 @@ def register_ids_argument(cli_ctx):
             except ValueError:
                 # supports piping of --ids to the command when using TSV. Requires use of --query
                 full_id_list = full_id_list + val.splitlines()
+        if full_id_list:
+            setattr(namespace, '_ids', full_id_list)
 
         for val in full_id_list:
             if not is_valid_resource_id(val):
@@ -301,6 +327,23 @@ def register_global_subscription_argument(cli_ctx):
     def add_subscription_parameter(_, **kwargs):
         from azure.cli.core._completers import get_subscription_id_list
 
+        class SubscriptionNameOrIdAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, value, option_string=None):
+                from azure.cli.core._profile import Profile
+                profile = Profile(cli_ctx=namespace._cmd.cli_ctx)  # pylint: disable=protected-access
+                subscriptions_list = profile.load_cached_subscriptions()
+                sub_id = None
+                for sub in subscriptions_list:
+                    match_val = value.lower()
+                    if sub['id'].lower() == match_val or sub['name'].lower() == match_val:
+                        sub_id = sub['id']
+                        break
+                if not sub_id:
+                    logger.warning("Subscription '%s' not recognized.", value)
+                    sub_id = value
+                namespace._subscription = sub_id  # pylint: disable=protected-access
+
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table
         subscription_kwargs = {
@@ -308,6 +351,7 @@ def register_global_subscription_argument(cli_ctx):
                     'using `az account set -s NAME_OR_ID`',
             'completer': get_subscription_id_list,
             'arg_group': 'Global',
+            'action': SubscriptionNameOrIdAction,
             'configured_default': 'subscription',
             'id_part': 'subscription'
         }

@@ -2,6 +2,13 @@
 
 Release History
 ===============
+0.3.7
++++++
+* Improve help message and command parameters
+
+0.3.6
++++++
+* Minor fixes
 
 0.3.5
 +++++

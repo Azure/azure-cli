@@ -2,6 +2,19 @@
 
 Release History
 ===============
+* vm create: --accelerated-networking is now implicitly enabled for Ubuntu 18.0. It can still be explicitly disabled by setting the option to "false".
+
+2.2.15
+++++++
+* vm list-skus: Allow use of `--all` in place of `--all true`
+* Add `vmss run-command [invoke / list / show]`
+* vmss encryption enable: Fixed bug where command fails if it was ran previously.
+* Moving `az identity` command tree to `azure-cli-role`.
+
+2.2.14
+++++++
+* Minor fixes
+
 2.2.13
 ++++++
 * `vm encryption enable`: now validates --disk encryption keyvault and that key encryption keyvault exists, in line with `vmss encryption enable`. Exposes --force. For more info: see issues #8111 and #8110

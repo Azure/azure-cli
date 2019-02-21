@@ -72,6 +72,21 @@ helps['acs create'] = """
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
 """.format(sp_cache=ACS_SERVICE_PRINCIPAL_CACHE)
 
+helps['acs delete'] = """
+    type: command
+    short-summary: Delete a container service.
+"""
+
+helps['acs list'] = """
+    type: command
+    short-summary: List container services.
+"""
+
+helps['acs scale'] = """
+    type: command
+    short-summary: Change the private agent count of a container service.
+"""
+
 helps['acs dcos'] = """
     type: group
     short-summary: Commands to manage a DC/OS-orchestrated Azure Container Service.
@@ -96,6 +111,10 @@ helps['acs kubernetes get-credentials'] = """
     type: command
     short-summary: Download and install credentials to access a cluster.  This command requires
                    the same private-key used to create the cluster.
+    parameters:
+        - name: --output -o
+          type: string
+          long-summary: Credentials are always in YAML format, so this argument is effectively ignored.
 """
 
 helps['acs list-locations'] = """
@@ -141,7 +160,10 @@ helps['aks browse'] = """
           long-summary: Add this argument when launching a web browser manually, or for automated testing.
         - name: --listen-port
           short-summary: The listening port for the dashboard.
-          long-sumarry: Add this argument when the default listening port is used by another process or unavailable.
+          long-summary: Add this argument when the default listening port is used by another process or unavailable.
+        - name: --listen-address
+          short-summary: The listening address for the dashboard.
+          long-summary: Add this argument to listen on a specific IP address.
 """
 
 helps['aks create'] = """
@@ -285,11 +307,36 @@ helps['aks update-credentials'] = """
           short-summary: Reset service principal for a managed cluster.
         - name: --service-principal
           type: string
-          short-summary: Service principal used for authentication to Azure APIs.
+          short-summary: Service principal used for authentication to Azure APIs. This argument is required if
+                         `--reset-service-principal` is specified.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if
                          `--service-principal` is specified.
+        - name: --reset-aad
+          type: string
+          short-summary: Reset Azure Active Directory configuration for a managed cluster.
+        - name: --aad-server-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory server application. This argument is required if
+                         `--reset-aad` is specified.
+        - name: --aad-server-app-secret
+          type: string
+          short-summary: The secret of an Azure Active Directory server application. This argument is required if
+                         `--reset-aad` is specified.
+        - name: --aad-client-app-id
+          type: string
+          short-summary: The ID of an Azure Active Directory client application. This argument is required if
+                         `--reset-aad` is specified.
+        - name: --aad-tenant-id
+          type: string
+          short-summary: Tenant ID associated with Azure Active Directory.
+
+    examples:
+        - name: Update an existing Kubernetes cluster with new service principal.
+          text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
+        - name: Update an existing Azure Active Directory Kubernetes cluster with new server app secret key.
+          text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-aad --aad-server-app-id MyExistingAADServerAppID --aad-server-app-secret MyNewAADServerAppSecret --aad-client-app-id MyExistingAADClientAppID --aad-tenant-id MyAADTenantID
 """
 
 helps['aks disable-addons'] = """
@@ -331,6 +378,9 @@ helps['aks get-credentials'] = """
         - name: --overwrite-existing
           type: bool
           short-summary: Overwrite any existing cluster entry with the same name.
+        - name: --output -o
+          type: string
+          long-summary: Credentials are always in YAML format, so this argument is effectively ignored.
 """
 
 helps['aks get-upgrades'] = """

@@ -501,9 +501,15 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
                                           force_update_tag=uuid.uuid4())
-    if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
-    vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+    exts = [ext]
+
+    # remove any old ade extensions set by this command and add the new one.
+    vmss_ext_profile = vmss.virtual_machine_profile.extension_profile
+    if vmss_ext_profile and vmss_ext_profile.extensions:
+        exts.extend(old_ext for old_ext in vmss.virtual_machine_profile.extension_profile.extensions
+                    if old_ext.type != ext.type or old_ext.name != ext.name)
+    vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=exts)
+
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, True)

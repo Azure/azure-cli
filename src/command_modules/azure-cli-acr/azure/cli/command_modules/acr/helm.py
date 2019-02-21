@@ -21,7 +21,7 @@ def acr_helm_list(cmd,
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -47,7 +47,7 @@ def acr_helm_show(cmd,
                   username=None,
                   password=None):
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -82,7 +82,7 @@ def acr_helm_delete(cmd,
     user_confirmation("{}.\nAre you sure you want to continue?".format(message), yes)
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -113,7 +113,7 @@ def acr_helm_push(cmd,
         raise CLIError("Please run 'helm package {}' to generate a chart package first.".format(chart_package))
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -155,7 +155,7 @@ def acr_helm_repo_add(cmd,
     helm_command = _get_helm_command()
 
     login_server, username, password = get_access_credentials(
-        cli_ctx=cmd.cli_ctx,
+        cmd=cmd,
         registry_name=registry_name,
         tenant_suffix=tenant_suffix,
         username=username,
@@ -178,13 +178,15 @@ def _get_helm_command():
     try:
         p = Popen([helm_command, "--help"], stdout=PIPE, stderr=PIPE)
         _, stderr = p.communicate()
-    except OSError:
+    except OSError as e:
+        logger.debug("Could not run '%s' command. Exception: %s", helm_command, str(e))
         # The executable may not be discoverable in WSL so retry *.exe once
         try:
             helm_command = 'helm.exe'
             p = Popen([helm_command, "--help"], stdout=PIPE, stderr=PIPE)
             _, stderr = p.communicate()
-        except OSError:
+        except OSError as inner:
+            logger.debug("Could not run '%s' command. Exception: %s", helm_command, str(inner))
             raise CLIError(helm_not_installed)
 
     if stderr:

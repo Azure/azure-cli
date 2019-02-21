@@ -111,8 +111,8 @@ helps['sql vm add-to-group'] = """
     examples:
         - name: Add SQL virtual machine to a group.
           text: >
-            az sql vm add-to-group -n sqlvm -g myresourcegroup --sqlvm-group sqlvmgroup --boostrap-acc-pwd
-            {boostrappassword} --operator-acc-pwd {operatorpassword} --service-acc-pwd {servicepassword}
+            az sql vm add-to-group -n sqlvm -g myresourcegroup --sqlvm-group sqlvmgroup --bootstrap-acc-pwd
+            {bootstrappassword} --operator-acc-pwd {operatorpassword} --service-acc-pwd {servicepassword}
     """
 helps['sql vm remove-from-group'] = """
     type: command
@@ -128,5 +128,5 @@ helps['sql vm group ag-listener update'] = """
     examples:
         - name: Replace the SQL virtual machines that were in the availability group.
           text: >
-            az sql vm group ag-listener update --sqlvms sqlvm3 sqlvm4 --group-name mygroup
+            az sql vm group ag-listener update -n aglistenertest -g myresourcegroup --sqlvms sqlvm3 sqlvm4 --group-name mygroup
     """

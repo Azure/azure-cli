@@ -2,13 +2,24 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from enum import Enum
 from knack.log import get_logger
 from azure.mgmt.resource import ResourceManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.kusto._validators import round_hot_cache_to_days, round_soft_delete_to_days
 from azure.cli.core.util import sdk_no_wait
 
 logger = get_logger(__name__)
+
+
+class AzureSkuName(Enum):
+    # TODO: use AzureSkuName from Kusto python module in the new kusto python version
+    d13_v2 = "D13_v2"
+    d14_v2 = "D14_v2"
+    l8 = "L8"
+    l16 = "L16"
+    d11_v2 = "D11_v2"
+    d12_v2 = "D12_v2"
+    l4 = "L4"
 
 
 def cluster_create(cmd,
@@ -106,7 +117,7 @@ def database_create(cmd,
                     resource_group_name,
                     cluster_name,
                     database_name,
-                    soft_delete_period,
+                    soft_delete_period=None,
                     hot_cache_period=None,
                     custom_headers=None,
                     raw=False,
@@ -125,12 +136,9 @@ def database_create(cmd,
     else:
         location = _cluster.location
 
-    soft_delete_period_in_days = round_soft_delete_to_days(soft_delete_period)
-    hot_cache_period_in_days = round_hot_cache_to_days(hot_cache_period)
-
     _database = Database(location=location,
-                         soft_delete_period_in_days=soft_delete_period_in_days,
-                         hot_cache_period_in_days=hot_cache_period_in_days)
+                         soft_delete_period=soft_delete_period,
+                         hot_cache_period=hot_cache_period)
 
     return sdk_no_wait(no_wait,
                        _client.create_or_update,
@@ -157,11 +165,8 @@ def update_kusto_cluster(instance, sku=None, capacity=None):
 
 def update_kusto_database(instance, soft_delete_period, hot_cache_period=None):
 
-    soft_delete_period_in_days = round_soft_delete_to_days(soft_delete_period)
-    hot_cache_period_in_days = round_hot_cache_to_days(hot_cache_period)
-
-    instance.soft_delete_period_in_days = soft_delete_period_in_days
-    instance.hot_cache_period_in_days = hot_cache_period_in_days
+    instance.soft_delete_period = soft_delete_period
+    instance.hot_cache_period = hot_cache_period
 
     return instance
 

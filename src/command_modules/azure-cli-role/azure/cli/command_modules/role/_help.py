@@ -155,6 +155,19 @@ helps['ad app update'] = """
                         }
                    ]
                 }]
+        - name: declare an application role
+          text: |
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --app-roles @manifest.json
+                ("manifest.json" contains the following conten)
+                [{
+                    "allowedMemberTypes": [
+                      "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
+                }]
         - name: update an application's group membership claims to "All"
           text: >
                 az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
@@ -341,6 +354,19 @@ helps['ad app create'] = """
                         }
                    ]
                 }]
+        - name: Create an application with a role
+          text: |
+                az ad app create --id e042ec79-34cd-498f-9d9f-123456781234 --display-name mytestapp --identifier-uris https://mytestapp.websites.net --app-roles @manifest.json
+                ("manifest.json" contains the following conten)
+                [{
+                    "allowedMemberTypes": [
+                      "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
+                }]
 """
 helps['ad group'] = """
     type: group
@@ -389,4 +415,19 @@ helps['ad signed-in-user'] = """
 helps['ad signed-in-user list-owned-objects'] = """
     type: command
     short-summary: Get the list of directory objects that are owned by the user
+"""
+
+helps['identity'] = """
+    type: group
+    short-summary: Managed Service Identities
+"""
+
+helps['identity list'] = """
+    type: command
+    short-summary: List Managed Service Identities
+"""
+
+helps['identity list-operations'] = """
+    type: command
+    short-summary: Lists available operations for the Managed Identity provider
 """

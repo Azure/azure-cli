@@ -23,9 +23,10 @@ from knack.log import get_logger
 
 from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
+from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
 
 from ._client_factory import cf_acr_registries
-from ._constants import MANAGED_REGISTRY_SKU
+from ._constants import get_managed_sku
 from ._utils import get_registry_by_name, ResourceNotFound
 
 
@@ -130,7 +131,7 @@ def _get_aad_token(cli_ctx,
     return loads(response.content.decode("utf-8"))["access_token"]
 
 
-def _get_credentials(cli_ctx,
+def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      registry_name,
                      tenant_suffix,
                      username,
@@ -153,6 +154,7 @@ def _get_credentials(cli_ctx,
     if not username and password:
         raise CLIError('Please also specify username if password is specified.')
 
+    cli_ctx = cmd.cli_ctx
     resource_not_found, registry = None, None
     try:
         registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
@@ -161,23 +163,29 @@ def _get_credentials(cli_ctx,
             logger.warning(
                 "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
                 login_server, tenant_suffix)
-    except ResourceNotFound as e:
+    except (ResourceNotFound, CLIError) as e:
+        resource_not_found = str(e)
+        logger.debug("Could not get registry from service. Exception: %s", resource_not_found)
+        if not isinstance(e, ResourceNotFound) and _AZ_LOGIN_MESSAGE not in resource_not_found:
+            raise
         # Try to use the pre-defined login server suffix to construct login server from registry name.
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
             raise
-        resource_not_found = str(e)
         login_server = '{}{}{}'.format(
             registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
 
     # Validate the login server is reachable
+    challenge = 'https://' + login_server + '/v2/'
     try:
-        requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
-    except RequestException:
+        requests.get(challenge, verify=(not should_disable_connection_verify()))
+    except RequestException as e:
+        logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
-        raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
-                       "Please verify if the registry exists.")
+        raise CLIError("Could not connect to the registry login server '{}'. ".format(login_server) +
+                       "Please verify that the registry exists and " +
+                       "the URL '{}' is reachable from your environment.".format(challenge))
 
     # 1. if username was specified, verify that password was also specified
     if username:
@@ -190,7 +198,7 @@ def _get_credentials(cli_ctx,
         return login_server, username, password
 
     # 2. if we don't yet have credentials, attempt to get a refresh token
-    if not registry or registry.sku.name in MANAGED_REGISTRY_SKU:
+    if not registry or registry.sku.name in get_managed_sku(cmd):
         try:
             return login_server, EMPTY_GUID, _get_aad_token(
                 cli_ctx, login_server, only_refresh_token, repository, artifact_repository, permission)
@@ -223,7 +231,7 @@ def _get_credentials(cli_ctx,
     return login_server, None, None
 
 
-def get_login_credentials(cli_ctx,
+def get_login_credentials(cmd,
                           registry_name,
                           tenant_suffix=None,
                           username=None,
@@ -233,7 +241,7 @@ def get_login_credentials(cli_ctx,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    return _get_credentials(cli_ctx,
+    return _get_credentials(cmd,
                             registry_name,
                             tenant_suffix,
                             username,
@@ -241,7 +249,7 @@ def get_login_credentials(cli_ctx,
                             only_refresh_token=True)
 
 
-def get_access_credentials(cli_ctx,
+def get_access_credentials(cmd,
                            registry_name,
                            tenant_suffix=None,
                            username=None,
@@ -257,7 +265,7 @@ def get_access_credentials(cli_ctx,
     :param str artifact_repository: Artifact repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    return _get_credentials(cli_ctx,
+    return _get_credentials(cmd,
                             registry_name,
                             tenant_suffix,
                             username,
@@ -280,7 +288,8 @@ def get_login_server_suffix(cli_ctx):
     """Get the Azure Container Registry login server suffix in the current cloud."""
     try:
         return cli_ctx.cloud.suffixes.acr_login_server_endpoint
-    except CloudSuffixNotSetException:
+    except CloudSuffixNotSetException as e:
+        logger.debug("Could not get login server endpoint suffix. Exception: %s", str(e))
         # Ignore the error if the suffix is not set, the caller should then try to get login server from server.
         return None
 
@@ -366,8 +375,8 @@ def request_data_from_registry(http_method,
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
-                except ValueError:
-                    logger.debug('Response is empty or is not a valid json.')
+                except ValueError as e:
+                    logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
                 return result, None
             elif response.status_code == 204:
                 return None, None
@@ -378,6 +387,10 @@ def request_data_from_registry(http_method,
             elif response.status_code == 404:
                 raise RegistryException(
                     parse_error_message('The requested data does not exist.', response),
+                    response.status_code)
+            elif response.status_code == 405:
+                raise RegistryException(
+                    parse_error_message('This operation is not supported.', response),
                     response.status_code)
             elif response.status_code == 409:
                 raise RegistryException(

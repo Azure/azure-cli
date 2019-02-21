@@ -2,6 +2,13 @@
 
 Release History
 ===============
+0.2.10
+++++++
+* `monitor metrics alert create/update`: Allow dimension value '*'.
+
+0.2.9
++++++
+* Make ID comparison case insensitive.
 
 0.2.8
 +++++

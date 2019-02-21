@@ -3,12 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
+
 import argparse
 import base64
 import socket
 import os
 
 from knack.util import CLIError
+from knack.log import get_logger
 
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
@@ -17,8 +20,8 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
 
-# PARAMETER VALIDATORS
-# pylint: disable=too-many-lines
+
+logger = get_logger(__name__)
 
 
 def get_asg_validator(loader, dest):
@@ -146,18 +149,34 @@ def validate_address_pool_id_list(cmd, namespace):
 
 
 def validate_address_pool_name_or_id(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
-    pool_name = namespace.backend_address_pool
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    address_pool = namespace.backend_address_pool
     lb_name = namespace.load_balancer_name
+    gateway_name = namespace.application_gateway_name
 
-    if is_valid_resource_id(pool_name):
-        if lb_name:
-            raise CLIError('Please omit --lb-name when specifying an address pool ID.')
+    usage_error = CLIError('usage error: --address-pool ID | --lb-name NAME --address-pool NAME '
+                           '| --gateway-name NAME --address-pool NAME')
+
+    if is_valid_resource_id(address_pool):
+        if lb_name or gateway_name:
+            raise usage_error
+        parts = parse_resource_id(address_pool)
+        if parts['type'] == 'loadBalancers':
+            namespace.load_balancer_name = parts['name']
+        elif parts['type'] == 'applicationGateways':
+            namespace.application_gateway_name = parts['name']
+        else:
+            raise usage_error
     else:
-        if not lb_name:
-            raise CLIError('Please specify --lb-name when specifying an address pool name.')
-        namespace.backend_address_pool = _generate_lb_subproperty_id(
-            cmd.cli_ctx, namespace, 'backendAddressPools', pool_name)
+        if bool(lb_name) == bool(gateway_name):
+            raise usage_error
+
+        if lb_name:
+            namespace.backend_address_pool = _generate_lb_subproperty_id(
+                cmd.cli_ctx, namespace, 'backendAddressPools', address_pool)
+        elif gateway_name:
+            namespace.backend_address_pool = _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'backendAddressPools', address_pool)
 
 
 def validate_address_prefixes(namespace):
@@ -231,6 +250,93 @@ def validate_dns_record_type(namespace):
             else:
                 namespace.record_set_type = token
             return
+
+
+def validate_express_route_peering(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    circuit = namespace.circuit_name
+    peering = namespace.peering
+
+    if not circuit and not peering:
+        return
+
+    usage_error = CLIError('usage error: --peering ID | --peering NAME --circuit-name CIRCUIT')
+    if not is_valid_resource_id(peering):
+        namespace.peering = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='expressRouteCircuits',
+            name=circuit,
+            child_type_1='peerings',
+            child_name_1=peering
+        )
+    elif circuit:
+        raise usage_error
+
+
+def validate_express_route_port(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.express_route_port and not is_valid_resource_id(namespace.express_route_port):
+        namespace.express_route_port = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='expressRoutePorts',
+            name=namespace.express_route_port
+        )
+
+
+def validate_virtual_hub(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.virtual_hub and not is_valid_resource_id(namespace.virtual_hub):
+        namespace.virtual_hub = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualHubs',
+            name=namespace.virtual_hub
+        )
+
+
+def bandwidth_validator_factory(mbps=True):
+    def validator(namespace):
+        return validate_circuit_bandwidth(namespace, mbps=mbps)
+    return validator
+
+
+def validate_circuit_bandwidth(namespace, mbps=True):
+    # use gbps if mbps is False
+    unit = 'mbps' if mbps else 'gbps'
+    bandwidth = None
+    bandwidth = getattr(namespace, 'bandwidth_in_{}'.format(unit), None)
+    if bandwidth is None:
+        return
+
+    if len(bandwidth) == 1:
+        bandwidth_comps = bandwidth[0].split(' ')
+    else:
+        bandwidth_comps = bandwidth
+
+    usage_error = CLIError('usage error: --bandwidth INT {Mbps,Gbps}')
+    if len(bandwidth_comps) == 1:
+        logger.warning('interpretting --bandwidth as %s. Consider being explicit: Mbps, Gbps', unit)
+        setattr(namespace, 'bandwidth_in_{}'.format(unit), float(bandwidth_comps[0]))
+        return
+    if len(bandwidth_comps) > 2:
+        raise usage_error
+
+    if float(bandwidth_comps[0]) and bandwidth_comps[1].lower() in ['mbps', 'gbps']:
+        input_unit = bandwidth_comps[1].lower()
+        if input_unit == unit:
+            converted_bandwidth = float(bandwidth_comps[0])
+        elif input_unit == 'gbps':
+            converted_bandwidth = float(bandwidth_comps[0]) * 1000
+        else:
+            converted_bandwidth = float(bandwidth_comps[0]) / 1000
+        setattr(namespace, 'bandwidth_in_{}'.format(unit), converted_bandwidth)
+    else:
+        raise usage_error
 
 
 def validate_er_peer_circuit(cmd, namespace):
@@ -636,7 +742,7 @@ def process_lb_create_namespace(cmd, namespace):
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
             'incorrect usage: --subnet NAME --vnet-name NAME | '
-            '--subnet ID | --public-ip NAME_OR_ID')
+            '--subnet ID | --public-ip-address NAME_OR_ID')
 
     if namespace.subnet:
         # validation for an internal load balancer
@@ -1004,6 +1110,13 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
             namespace='Microsoft.Storage',
             type='storageAccounts',
             name=namespace.storage_account)
+    if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
+        namespace.traffic_analytics_workspace = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.OperationalInsights',
+            type='workspaces',
+            name=namespace.traffic_analytics_workspace)
 
     process_nw_flow_log_show_namespace(cmd, namespace)
 

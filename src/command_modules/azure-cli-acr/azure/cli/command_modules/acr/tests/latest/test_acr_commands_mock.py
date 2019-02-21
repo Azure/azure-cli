@@ -20,8 +20,7 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_show_manifests,
     acr_repository_show,
     acr_repository_delete,
-    acr_repository_untag,
-    MANIFEST_V2_HEADER
+    acr_repository_untag
 )
 from azure.cli.command_modules.acr.helm import (
     acr_helm_list,
@@ -49,22 +48,18 @@ TEST_REPOSITORY = 'testrepository'
 
 class AcrMockCommandsTests(unittest.TestCase):
 
-    @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    def test_repository_list(self, mock_requests_get, mock_get_access_credentials, mock_get_registry_by_name):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-        encoded_repositories = json.dumps({'repositories': ['testrepo1', 'testrepo2']}).encode()
+    def test_repository_list(self, mock_requests_get, mock_get_access_credentials):
+        cmd = self._setup_cmd()
 
         response = mock.MagicMock()
         response.headers = {}
         response.status_code = 200
-        response.content = encoded_repositories
+        response.content = json.dumps({'repositories': ['testrepo1', 'testrepo2']}).encode()
         mock_requests_get.return_value = response
 
-        # List repositories using Basic auth on a classic registry
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Classic')), 'testrg'
+        # List repositories using Basic auth
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         acr_repository_list(cmd, 'testregistry')
         mock_requests_get.assert_called_with(
@@ -78,13 +73,12 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-        # List repositories using Bearer auth on a managed registry
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
+        # List repositories using Bearer auth
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
         acr_repository_list(cmd, 'testregistry', top=10)
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/acr/v1/_catalog',
+            url='https://testregistry.azurecr.io/v2/_catalog',
             headers=get_authorization_header(EMPTY_GUID, 'password'),
             params={
                 'n': 10,
@@ -93,12 +87,11 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    def test_repository_show_tags(self, mock_requests_get, mock_get_access_credentials, mock_get_registry_by_name):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
+    def test_repository_show_tags(self, mock_requests_get, mock_get_access_credentials):
+        cmd = self._setup_cmd()
+
         encoded_tags = json.dumps({'tags': ['testtag1', 'testtag2']}).encode()
         encoded_tags_detail = json.dumps({'tags': [
             {
@@ -114,8 +107,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         response.headers = {}
         response.status_code = 200
 
-        # Show tags using Basic auth on a classic registry
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Classic')), 'testrg'
+        # Show tags using Basic auth
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         response.content = encoded_tags
         mock_requests_get.return_value = response
@@ -123,7 +115,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         acr_repository_show_tags(cmd, 'testregistry', 'testrepository')
         mock_requests_get.assert_called_with(
             method='get',
-            url='https://testregistry.azurecr.io/v2/testrepository/tags/list',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags',
             headers=get_authorization_header('username', 'password'),
             params={
                 'n': 100,
@@ -132,8 +124,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-        # Show tags using Bearer auth on a managed registry
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
+        # Show tags using Bearer auth
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
         response.content = encoded_tags_detail
         mock_requests_get.return_value = response
@@ -150,13 +141,15 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    def test_repository_show_manifests(self, mock_requests_get, mock_get_access_credentials, mock_get_registry_by_name):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-        encoded_manifests = json.dumps({'manifests': [
+    def test_repository_show_manifests(self, mock_requests_get, mock_get_access_credentials):
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({'manifests': [
             {
                 'digest': 'sha256:b972dda797ef258a7ea5738eb2109778c2bac6a99d1033e6c9f9bdb4fbd196e7',
                 'tags': ['testtag1', 'testtag2']
@@ -165,15 +158,9 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
                 'tags': ['testtag3']
             }]}).encode()
-
-        response = mock.MagicMock()
-        response.headers = {}
-        response.status_code = 200
-        response.content = encoded_manifests
         mock_requests_get.return_value = response
 
         # Show manifests using Basic auth without detail
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
 
         acr_repository_show_manifests(cmd, 'testregistry', 'testrepository')
@@ -189,7 +176,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             verify=mock.ANY)
 
         # Show manifests using Bearer auth with detail
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
         acr_repository_show_manifests(cmd, 'testregistry', 'testrepository', top=10, orderby='time_desc', detail=True)
@@ -204,24 +190,20 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    def test_repository_show(self, mock_requests_get, mock_get_access_credentials, mock_get_registry_by_name):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-        encoded_manifests = json.dumps({
-            'registry': 'testregistry.azurecr.io',
-            'imageName': 'testrepository'
-        }).encode()
+    def test_repository_show(self, mock_requests_get, mock_get_access_credentials):
+        cmd = self._setup_cmd()
 
         response = mock.MagicMock()
         response.headers = {}
         response.status_code = 200
-        response.content = encoded_manifests
+        response.content = json.dumps({
+            'registry': 'testregistry.azurecr.io',
+            'imageName': 'testrepository'
+        }).encode()
         mock_requests_get.return_value = response
 
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
 
         # Show attributes for a repository
@@ -260,28 +242,19 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-    @mock.patch('azure.cli.command_modules.acr._utils.get_registry_by_name', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    @mock.patch('requests.get', autospec=True)
-    def test_repository_delete(self, mock_requests_get, mock_requests_delete, mock_get_access_credentials, mock_get_registry_by_name):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-
-        get_response = mock.MagicMock()
-        get_response.headers = {
-            'Docker-Content-Digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
-        }
-        get_response.status_code = 200
-        mock_requests_get.return_value = get_response
+    def test_repository_delete(self, mock_requests_delete, mock_get_manifest_digest, mock_get_access_credentials):
+        cmd = self._setup_cmd()
 
         delete_response = mock.MagicMock()
         delete_response.headers = {}
         delete_response.status_code = 200
         mock_requests_delete.return_value = delete_response
 
-        mock_get_registry_by_name.return_value = Registry(location='westus', sku=Sku(name='Standard')), 'testrg'
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+        mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
 
         # Delete repository
         acr_repository_delete(cmd,
@@ -290,7 +263,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                               yes=True)
         mock_requests_delete.assert_called_with(
             method='delete',
-            url='https://testregistry.azurecr.io/v2/_acr/testrepository/repository',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository',
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
@@ -301,12 +274,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                               registry_name='testregistry',
                               image='testrepository:testtag',
                               yes=True)
-        expected_get_headers = get_authorization_header('username', 'password')
-        expected_get_headers.update(MANIFEST_V2_HEADER)
-        mock_requests_get.assert_called_with(
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
-            headers=expected_get_headers,
-            verify=mock.ANY)
         mock_requests_delete.assert_called_with(
             method='delete',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -334,43 +301,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                              image='testrepository:testtag')
         mock_requests_delete.assert_called_with(
             method='delete',
-            url='https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
-            headers=get_authorization_header('username', 'password'),
-            params=None,
-            json=None,
-            verify=mock.ANY)
-
-        # Delete tag (deprecating)
-        acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', yes=True)
-        mock_requests_delete.assert_called_with(
-            method='delete',
-            url='https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
-            headers=get_authorization_header('username', 'password'),
-            params=None,
-            json=None,
-            verify=mock.ANY)
-
-        # Delete manifest with tag (deprecating)
-        acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', manifest='', yes=True)
-        expected_get_headers = get_authorization_header('username', 'password')
-        expected_get_headers.update(MANIFEST_V2_HEADER)
-        mock_requests_get.assert_called_with(
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
-            headers=expected_get_headers,
-            verify=mock.ANY)
-        mock_requests_delete.assert_called_with(
-            method='delete',
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=get_authorization_header('username', 'password'),
-            params=None,
-            json=None,
-            verify=mock.ANY)
-
-        # Delete manifest with digest (deprecating)
-        acr_repository_delete(cmd, 'testregistry', 'testrepository', manifest='sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7', yes=True)
-        mock_requests_delete.assert_called_with(
-            method='delete',
-            url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
@@ -427,8 +358,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    tenant_suffix=test_tenant_suffix)
 
     def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
+        cmd = self._setup_cmd()
 
         if registry_exists:
             registry = Registry(location='westus', sku=Sku(name='Standard'))
@@ -441,15 +371,15 @@ class AcrMockCommandsTests(unittest.TestCase):
         self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, login_server)
 
         # Test get refresh token
-        get_login_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix)
+        get_login_credentials(cmd, registry_name, tenant_suffix=tenant_suffix)
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
-        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission='*')
+        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission='*')
         self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:*'.format(TEST_REPOSITORY))
 
         # Test get access token for artifact image repository
-        get_access_credentials(cmd.cli_ctx, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission='*')
+        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission='*')
         self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:*'.format(TEST_REPOSITORY))
 
     def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server):
@@ -501,9 +431,12 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_helm_list(self, mock_requests_get, mock_get_access_credentials):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-        encoded_charts = json.dumps({
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({
             'mychart1': [
                 {
                     'name': 'mychart1',
@@ -520,11 +453,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                     'version': '2.1.0'
                 }
             ]}).encode()
-
-        response = mock.MagicMock()
-        response.headers = {}
-        response.status_code = 200
-        response.content = encoded_charts
         mock_requests_get.return_value = response
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
@@ -540,9 +468,12 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_helm_show(self, mock_requests_get, mock_get_access_credentials):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-        encoded_charts = json.dumps({
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({
             'mychart1': [
                 {
                     'name': 'mychart1',
@@ -553,11 +484,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                     'version': '0.1.2'
                 }
             ]}).encode()
-
-        response = mock.MagicMock()
-        response.headers = {}
-        response.status_code = 200
-        response.content = encoded_charts
         mock_requests_get.return_value = response
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
@@ -585,8 +511,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_helm_delete(self, mock_requests_get, mock_get_access_credentials):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
+        cmd = self._setup_cmd()
 
         response = mock.MagicMock()
         response.headers = {}
@@ -618,8 +543,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_helm_push(self, mock_requests_get, mock_get_access_credentials):
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
+        cmd = self._setup_cmd()
 
         response = mock.MagicMock()
         response.headers = {}
@@ -665,3 +589,14 @@ class AcrMockCommandsTests(unittest.TestCase):
                 params=None,
                 data=mock_open.return_value.__enter__.return_value,
                 verify=mock.ANY)
+
+    def _setup_cmd(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        mock_sku = mock.MagicMock()
+        mock_sku.classic.value = 'Classic'
+        mock_sku.basic.value = 'Basic'
+        mock_sku.standard.value = 'Standard'
+        mock_sku.premium.value = 'Premium'
+        cmd.get_models.return_value = mock_sku
+        return cmd

@@ -13,15 +13,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    DockerBuildRequest,
-    PlatformProperties,
-    Architecture,
-    OS
-)
-
-from ._utils import validate_managed_registry
-from ._run_polling import get_run_with_polling
+from ._utils import validate_managed_registry, get_validate_platform
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -31,7 +23,7 @@ logger = get_logger(__name__)
 BUILD_NOT_SUPPORTED = 'Builds are only supported for managed registries.'
 
 
-def acr_build(cmd,
+def acr_build(cmd,  # pylint: disable=too-many-locals
               client,
               registry_name,
               source_location,
@@ -44,9 +36,11 @@ def acr_build(cmd,
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type=OS.linux.value):
+              os_type=None,
+              platform=None,
+              target=None):
     _, resource_group_name = validate_managed_registry(
-        cmd.cli_ctx, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
@@ -107,15 +101,23 @@ def acr_build(cmd,
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+
+    DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
     docker_build_request = DockerBuildRequest(
         image_names=image_names,
         is_push_enabled=is_push_enabled,
         source_location=source_location,
         platform=PlatformProperties(
-            os=os_type, architecture=Architecture.amd64.value),
+            os=platform_os,
+            architecture=platform_arch,
+            variant=platform_variant
+        ),
         docker_file_path=docker_file_path,
         timeout=timeout,
-        arguments=(arg if arg else []) + (secret_arg if secret_arg else []))
+        arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+        target=target
+    )
 
     queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
@@ -127,7 +129,8 @@ def acr_build(cmd,
     logger.warning("Waiting for agent...")
 
     if no_logs:
-        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
+        from ._run_polling import get_run_with_polling
+        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
 

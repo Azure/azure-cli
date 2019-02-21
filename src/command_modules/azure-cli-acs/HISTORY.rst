@@ -3,13 +3,28 @@
 Release History
 ===============
 
-2.3.14
+* add listen-address option to "az aks port-forward"
+
+2.3.17
+++++++
+* az aks enable-addons /disable-addons: support case insensitive name
+* support Azure Active Directory updating operation using "az aks update-credentials --reset-aad"
+* clarify that "--output" is ignored for "az aks get-credentials"
+
+2.3.16
+++++++
+* Minor fixes
+
+2.3.15
 ++++++
 * Add Virtual Nodes Preview
 * Add Managed OpenShift commands
+* Support Service Principal updating operation using "az aks update-credentials --reset-service-principal"
+
+2.3.14
+++++++
 * Minor fixes
 * Add support for new ACI regions
-* Support Service Principal updating operation using "az aks update-credentials --reset-service-principal"
 
 2.3.13
 ++++++

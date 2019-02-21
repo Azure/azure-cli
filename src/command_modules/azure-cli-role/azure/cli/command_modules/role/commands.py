@@ -9,7 +9,10 @@ from collections import OrderedDict
 from azure.cli.core.profiles import PROFILE_TYPE
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import (_auth_client_factory, _graph_client_factory)
+from ._client_factory import (_auth_client_factory, _graph_client_factory,
+                              _msi_user_identities_operations, _msi_operations_operations)
+
+from ._validators import process_msi_namespace
 
 
 def transform_definition_list(result):
@@ -94,18 +97,23 @@ def get_graph_client_groups(cli_ctx, _):
 def load_command_table(self, _):
 
     role_users_sdk = CliCommandType(
-        operations_tmpl='azure.graphrbac.operations.users_operations#UsersOperations.{}',
+        operations_tmpl='azure.graphrbac.operations#UsersOperations.{}',
         client_factory=get_graph_client_users
     )
 
     role_group_sdk = CliCommandType(
-        operations_tmpl='azure.graphrbac.operations.groups_operations#GroupsOperations.{}',
+        operations_tmpl='azure.graphrbac.operations#GroupsOperations.{}',
         client_factory=get_graph_client_groups
     )
 
     signed_in_users_sdk = CliCommandType(
-        operations_tmpl='azure.graphrbac.operations.signed_in_user_operations#SignedInUserOperations.{}',
+        operations_tmpl='azure.graphrbac.operations#SignedInUserOperations.{}',
         client_factory=get_graph_client_signed_in_users
+    )
+
+    identity_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.msi.operations.user_assigned_identities_operations#UserAssignedIdentitiesOperations.{}',
+        client_factory=_msi_user_identities_operations
     )
 
     role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
@@ -189,3 +197,10 @@ def load_command_table(self, _):
         g.command('add', 'add_member')
         g.command('remove', 'remove_member')
         g.custom_command('check', 'check_group_membership', client_factory=get_graph_client_groups)
+
+    with self.command_group('identity', identity_sdk, min_api='2017-12-01') as g:
+        g.command('create', 'create_or_update', validator=process_msi_namespace)
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_user_assigned_identities')
+        g.command('list-operations', 'list', operations_tmpl='azure.mgmt.msi.operations.operations#Operations.{}', client_factory=_msi_operations_operations)
