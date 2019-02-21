@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* `container start/restart`: Added `--no-wait` argument.
+
 0.3.13
 ++++++
 * Adding 'az container start' command
