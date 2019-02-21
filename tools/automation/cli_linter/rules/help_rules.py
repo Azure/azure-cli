@@ -133,9 +133,14 @@ def _extract_commands_from_example(example_text):
 
 
 def _process_command_args(command_args):
+
+    def _is_special_arg(arg):
+        is_special = (arg.startswith("$(") and arg.endswith(")")) or (arg.startswith("`") and arg.endswith("`"))
+        return is_special
+
     result_args = []
     new_commands = []
-    unwanted_chars = "$()`"
+    unwanted_chars = "$()`"  # to detect variable interpolation / command substitution
     control_operators = ["&&","||"]
 
     for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
@@ -148,9 +153,11 @@ def _process_command_args(command_args):
                 new_commands.append(maybe_new_command[idx:])  # remaining command is in fact a new command / commands.
             break
 
-        arg = arg.strip(unwanted_chars)
-        if arg.startswith("az "):  # store any new commands
-            new_commands.append(arg)
+        if _is_special_arg(arg): # if this arg executes another command, it could be a cli command.
+            stripped = arg.strip(unwanted_chars)
+            if stripped.startswith("az "):  # store any new commands
+                new_commands.append(stripped)
+
         result_args.append(arg)
 
     return result_args, new_commands
