@@ -138,7 +138,6 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-
     worker = MultiAPIAdaptor(cli_ctx)
     return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope)
 
