@@ -119,6 +119,11 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
                            scope=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
+
+    existing = list_role_assignments(cmd, assignee, role, resource_group_name, scope)
+    if any(existing):
+        return existing[0]
+
     return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
                                    resolve_assignee=(not assignee_object_id))
 
@@ -133,6 +138,7 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
+
     worker = MultiAPIAdaptor(cli_ctx)
     return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope)
 
