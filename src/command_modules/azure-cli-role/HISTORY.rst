@@ -2,6 +2,8 @@
 
 Release History
 ===============
+2.4.1
++++++
 * `az ad app create/update`: support app roles
 
 2.4.0

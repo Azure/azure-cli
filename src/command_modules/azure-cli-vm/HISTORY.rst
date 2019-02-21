@@ -2,7 +2,9 @@
 
 Release History
 ===============
-* vm create: --accelerated-networking is now implicitly enabled for Ubuntu 18.0. It can still be explicitly disabled by setting the option to "false".
+2.2.16
+++++++
+* vm create: Fixed issue where --accelerated-networking was not enabled by default for Ubuntu 18.0.
 
 2.2.15
 ++++++
