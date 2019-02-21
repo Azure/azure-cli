@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.1.11
+++++++
 * `deployment create`: Fix issue where type field was case-sensitive.
 
 2.1.10
