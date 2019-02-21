@@ -676,7 +676,7 @@ class Profile(object):
                     result['clientCertificate'] = sp_auth.certificate_file
                 result['subscriptionId'] = account[_SUBSCRIPTION_ID]
             else:
-                raise CLIError('SDK Auth file is only applicable on service principals')
+                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
 
         result[_TENANT_ID] = account[_TENANT_ID]
         endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
