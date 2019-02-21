@@ -81,7 +81,7 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 1)])
+            [self.check('accountQuota', 3)])
 
 
 class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -114,45 +114,39 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
             f.write('storage blob test sample file')
 
         # test create application with default set
-        self.cmd('batch application create -g {rg} -n {acc} --application-id {app} '
-                 '--allow-updates').assert_with_checks([
-                     self.check('id', '{app}'),
-                     self.check('allowUpdates', True)])
+        self.cmd('batch application create -g {rg} -n {acc} --application-name {app} ').assert_with_checks(
+            [self.check('name', '{app}')])
 
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks([
             self.check('length(@)', 1),
-            self.check('[0].id', '{app}')])
+            self.check('[0].name', '{app}')])
 
-        self.cmd('batch application package create -g {rg} -n {acc} --application-id {app}'
+        self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --package-file "{app_f}"').assert_with_checks([
-                     self.check('id', '{app}'),
+                     self.check('name', '{app}'),
                      self.check('storageUrl != null', True),
-                     self.check('version', '{app_p}'),
                      self.check('state', 'Active')])
 
-        self.cmd('batch application package activate -g {rg} -n {acc} --application-id {app}'
+        self.cmd('batch application package activate -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --format zip')
 
         self.cmd('batch application package show -g {rg} -n {acc} '
-                 '--application-id {app} --version {app_p}').assert_with_checks([
-                     self.check('id', '{app}'),
+                 '--application-name {app} --version {app_p}').assert_with_checks([
+                     self.check('name', '{app}'),
                      self.check('format', 'zip'),
-                     self.check('version', '{app_p}'),
                      self.check('state', 'Active')])
 
-        self.cmd('batch application set -g {rg} -n {acc} --application-id {app} '
+        self.cmd('batch application set -g {rg} -n {acc} --application-name {app} '
                  '--default-version {app_p}')
 
-        self.cmd('batch application show -g {rg} -n {acc} --application-id {app}').assert_with_checks([
-            self.check('id', '{app}'),
-            self.check('defaultVersion', '{app_p}'),
-            self.check('packages[0].format', 'zip'),
-            self.check('packages[0].state', 'Active')])
+        self.cmd('batch application show -g {rg} -n {acc} --application-name {app}').assert_with_checks([
+            self.check('name', '{app}'),
+            self.check('defaultVersion', '{app_p}')])
 
         # test batch applcation delete
-        self.cmd('batch application package delete -g {rg} -n {acc} --application-id {app} '
+        self.cmd('batch application package delete -g {rg} -n {acc} --application-name {app} '
                  '--version {app_p} --yes')
-        self.cmd('batch application delete -g {rg} -n {acc} --application-id {app} --yes')
+        self.cmd('batch application delete -g {rg} -n {acc} --application-name {app} --yes')
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks(self.is_empty())
         self.cmd('storage account delete -g {rg} -n {str_n} --yes')
 
