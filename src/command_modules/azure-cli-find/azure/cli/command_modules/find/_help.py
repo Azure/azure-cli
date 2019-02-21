@@ -12,7 +12,7 @@ helps['find'] = """
     examples:
         - name: Give me any Azure CLI group and I’ll show the most popular commands within the group.
           text: |
-            az find 'az storage'           
+            az find 'az storage'
         - name: Give me any Azure CLI command and I’ll show the most popular parameters and subcommands.
           text: |
             az find 'az monitor activity-log list'
