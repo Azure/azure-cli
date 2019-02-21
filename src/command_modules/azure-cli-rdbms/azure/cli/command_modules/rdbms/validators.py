@@ -40,6 +40,7 @@ def password_validator(ns):
         except NoTTYException:
             raise CLIError('Please specify password in non-interactive mode.')
 
+
 def retention_validator(ns):
     if ns.backup_retention_days:
         val = ns.backup_retention_days
@@ -48,6 +49,7 @@ def retention_validator(ns):
         else:
             raise CLIError('incorrect usage: --backup_retention. Range is 7 to 35 days.')
 
+
 def retention_validator2(ns):
     if ns.backup_retention:
         val = ns.backup_retention
@@ -55,7 +57,8 @@ def retention_validator2(ns):
             pass
         else:
             raise CLIError('incorrect usage: --backup_retention. Range is 7 to 35 days.')
-            
+
+
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
