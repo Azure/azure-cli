@@ -11,7 +11,6 @@ class CosmosDbCommandGroup(AzCommandGroup):
     def _create_cosmosdb_command(self, name, method_name=None, command_type_name=None, **kwargs):
         """Registers an Azure CLI Cosmos DB Data Plane command. These commands always include the
         parameters which can be used to obtain a cosmosdb client."""
-
         merged_kwargs = self._flatten_kwargs(kwargs, command_type_name)
         if 'exception_handler' not in merged_kwargs:
             from ._exception_handler import generic_exception_handler
