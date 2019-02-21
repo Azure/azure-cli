@@ -16,6 +16,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.cosmosdb.operations.database_accounts_operations#DatabaseAccountsOperations.{}',
         client_factory=cf_db_accounts)
 
+    cosmosdb_custom_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.cosmosdb.custom#{}',
+        client_factory=cf_db_accounts
+    )
+
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get')
         g.command('list-keys', 'list_keys')
@@ -28,6 +33,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_create')
         g.custom_command('update', 'cli_cosmosdb_update')
         g.custom_command('list', 'cli_cosmosdb_list')
+
+    # virtual network rules
+    with self.command_group('cosmosdb network-rule', cosmosdb_custom_sdk, client_factory=cf_db_accounts) as g:
+        g.custom_command('list', 'cli_cosmosdb_network_rule_list')
+        g.custom_command('add', 'cli_cosmosdb_network_rule_add')
+        g.custom_command('remove', 'cli_cosmosdb_network_rule_remove')
 
     # # database operations
     with self.command_group('cosmosdb database') as g:
