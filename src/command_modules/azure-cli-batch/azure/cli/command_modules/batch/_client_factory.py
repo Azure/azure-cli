@@ -86,6 +86,7 @@ def batch_data_service_factory(cli_ctx, kwargs):
         credentials, _, _ = profile.get_login_credentials(resource=resource)
     else:
         credentials = batchauth.SharedKeyCredentials(account_name, account_key)
-    if not account_endpoint.startswith('https://'):
+    if not (account_endpoint.startswith('https://') or
+            account_endpoint.startswith('http://')):
         account_endpoint = 'https://' + account_endpoint
-    return batch.BatchServiceClient(credentials, base_url=account_endpoint)
+    return batch.BatchServiceClient(credentials, batch_url=account_endpoint.rstrip('/'))
