@@ -77,7 +77,7 @@ def call_aladdin_service(query):
     context = {
         'session_id': telemetry_core._session._get_base_properties()['Reserved.SessionId'],  # pylint: disable=protected-access
         'subscription_id': telemetry_core._get_azure_subscription_id(),  # pylint: disable=protected-access
-        'client_request_id': telemetry_core._session.application.data['headers']['x-ms-client-request-id'],  # pylint: disable=protected-access
+        'client_request_id': telemetry_core._session.application.data['headers']['x-ms-client-request-id'] if telemetry_core._session.application else '',  # pylint: disable=protected-access
         'installation_id': telemetry_core._get_installation_id()  # pylint: disable=protected-access
     }
 
