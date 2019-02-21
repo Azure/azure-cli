@@ -22,6 +22,11 @@ helps['cosmosdb collection'] = """
     short-summary: Manage Azure Cosmos DB collections.
 """
 
+helps['cosmosdb network-rule'] = """
+    type: group
+    short-summary: Manage Azure Comsos DB network rules.
+"""
+
 helps['cosmosdb check-name-exists'] = """
     type: command
     short-summary: Checks if an Azure Cosmos DB account name exists.
