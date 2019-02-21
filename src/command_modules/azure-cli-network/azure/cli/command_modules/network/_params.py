@@ -1078,6 +1078,7 @@ def load_arguments(self, _):
         c.argument('cert_name', help='Root certificate name', options_list=['--name', '-n'])
         c.argument('gateway_name', help='Virtual network gateway name')
         c.argument('gateway_type', vnet_gateway_type)
+        c.argument('gateway_default_site', help='Name or ID of a local network gateway representing a local network site with default routes.')
         c.argument('sku', vnet_gateway_sku_type)
         c.argument('vpn_type', vnet_gateway_routing_type)
         c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
@@ -1149,12 +1150,13 @@ def load_arguments(self, _):
         'ipsec_integrity': 'IpsecIntegrity',
         'pfs_group': 'PfsGroup'
     }
-    with self.argument_context('network vpn-connection ipsec-policy') as c:
-        for dest, model_name in param_map.items():
-            model = self.get_models(model_name)
-            c.argument(dest, arg_type=get_enum_type(model))
-        c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
-        c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+    for scope in ['vpn-connection', 'vnet-gateway']:
+        with self.argument_context('network {} ipsec-policy'.format(scope)) as c:
+            for dest, model_name in param_map.items():
+                model = self.get_models(model_name)
+                c.argument(dest, arg_type=get_enum_type(model))
+            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
+            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
     # endregion
 
     # region Remove --ids from listsaz

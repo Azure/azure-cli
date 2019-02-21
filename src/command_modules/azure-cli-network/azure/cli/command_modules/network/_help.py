@@ -3962,6 +3962,40 @@ helps['network vnet-gateway wait'] = """
 """
 # endregion
 
+# region VNet Gateway IPSec Policy
+helps['network vnet-gateway ipsec-policy'] = """
+    type: group
+    short-summary: Manage virtual network gateway IPSec policies.
+"""
+
+helps['network vnet-gateway ipsec-policy add'] = """
+    type: command
+    short-summary: Add a virtual network gateway IPSec policy.
+    long-summary: Set all IPsec policies of a virtual network gateway. If you want to set any IPsec policy, you must set them all.
+    examples:
+        - name: Add specified IPsec policies to a gateway instead of relying on defaults.
+          text: |
+            az network vnet-gateway ipsec-policy add -g MyResourceGroup --gateway-name MyGateway \\
+                --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
+                --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+"""
+
+helps['network vnet-gateway ipsec-policy clear'] = """
+    type: command
+    short-summary: Delete all IPsec policies on a virtual network gateway.
+    examples:
+        - name: Remove all previously specified IPsec policies from a gateway.
+          text: az network vnet-gateway ipsec-policy clear -g MyResourceGroup --gateway-name MyConnection
+"""
+
+helps['network vnet-gateway ipsec-policy list'] = """
+    type: command
+    short-summary: List IPSec policies associated with a virtual network gateway.
+    examples:
+        - name: List the IPsec policies set on a gateway.
+          text: az network vnet-gateway ipsec-policy list -g MyResourceGroup --gateway-name MyConnection
+"""
+
 # region VNet Gateway VPN Client
 helps['network vnet-gateway vpn-client'] = """
     type: group

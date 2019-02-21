@@ -405,6 +405,17 @@ def validate_frontend_ip_configs(cmd, namespace):
         namespace.frontend_ip_configurations = config_ids
 
 
+def validate_local_gateway(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.gateway_default_site and not is_valid_resource_id(namespace.gateway_default_site):
+        namespace.gateway_default_site = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            name=namespace.gateway_default_site,
+            namespace='Microsoft.Network',
+            type='localNetworkGateways')
+
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -919,6 +930,8 @@ def process_vnet_gateway_create_namespace(cmd, namespace):
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '
                        'public IPs to create an active-active gateway.')
+
+    validate_local_gateway(cmd, ns)
 
     enable_bgp = any([ns.asn, ns.bgp_peering_address, ns.peer_weight])
     if enable_bgp and not ns.asn:
