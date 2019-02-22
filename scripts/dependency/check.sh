@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ev
 
 cd `cd $(dirname $0); cd ../..; pwd`
 
