@@ -1,22 +1,45 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
-export AZDEV_CLI_REPO_PATH=$(pwd)
-export AZDEV_EXT_REPO_PATHS='_NONE_'
+. $(cd $(dirname $0); pwd)/artifacts.sh
 
-azdev setup -c $AZDEV_CLI_REPO_PATH
+ls -la $share_folder/build
 
+ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
+
+##############################################
+# Define colored output func
+function title {
+    LGREEN='\033[1;32m'
+    CLEAR='\033[0m'
+
+    echo -e ${LGREEN}$1${CLEAR}
+}
+
+title 'Install azdev'
+pip install -qqq -e ./tools
+
+title 'Install code coverage tools'
 pip install -qqq coverage codecov
+
+title 'Install private packages (optional)'
+[ -d privates ] && pip install -qqq privates/*.whl
+
+title 'Install products'
+pip install -qqq $ALL_MODULES
+
+title 'Installed packages'
+pip freeze
 
 if [ "$REDUCE_SDK" == "True" ]
 then
-    echo 'azure.mgmt file counts'
+    title 'azure.mgmt file counts'
     (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
 
     python $(cd $(dirname $0); cd ..; pwd)/sdk_process/patch_models.py
 
-    echo 'azure.mgmt file counts after reduce'
+    title 'azure.mgmt file counts after reduce'
     (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
 fi
 
@@ -33,4 +56,5 @@ fi
 az -v
 az -h
 
-azdev test --profile $target_profile
+title 'Running tests'
+python -m automation test --ci --profile $target_profile
