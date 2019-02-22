@@ -10,17 +10,17 @@ from ._exception_handler import policy_insights_exception_handler
 
 def load_command_table(self, _):
     policy_events_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.policyinsights.operations.policy_events_operations#PolicyEventsOperations.{}',
+        operations_tmpl='azure.mgmt.policyinsights.operations#PolicyEventsOperations.{}',
         exception_handler=policy_insights_exception_handler
     )
 
     policy_states_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.policyinsights.operations.policy_states_operations#PolicyStatesOperations.{}',
+        operations_tmpl='azure.mgmt.policyinsights.operations#PolicyStatesOperations.{}',
         exception_handler=policy_insights_exception_handler
     )
 
     policy_remediations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.policyinsights.operations.remediations_operations#RemediationsOperations.{}',
+        operations_tmpl='azure.mgmt.policyinsights.operations#RemediationsOperations.{}',
         exception_handler=policy_insights_exception_handler
     )
 
