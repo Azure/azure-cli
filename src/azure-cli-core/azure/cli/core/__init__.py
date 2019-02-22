@@ -484,16 +484,12 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
+        operation_group = self.command_table[self.command_name].command_kwargs.get('operation_group')
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation.startswith(rt.import_prefix + ".operations."):
-                subs = operation[len(rt.import_prefix + ".operations."):]
-                operation_group = subs[:subs.index('_operations')]
-                operation = operation.replace(
-                    rt.import_prefix,
-                    get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt, operation_group=operation_group))
-            elif operation.startswith(rt.import_prefix):
+            if operation.startswith(rt.import_prefix):
                 operation = operation.replace(rt.import_prefix,
-                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt))
+                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
+                                                                     operation_group=operation_group))
 
         try:
             mod_to_import, attr_path = operation.split('#')
