@@ -436,7 +436,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             from azure.cli.core.util import get_arg_list, augment_no_wait_handler_args
             from azure.cli.core.commands.client_factory import resolve_client_arg_name
 
-            op = handler or self.get_op_handler(operation)
+            op = handler or self.get_op_handler(operation, operation_group=kwargs.get('operation_group'))
             op_args = get_arg_list(op)
             cmd = command_args.get('cmd') if 'cmd' in op_args else command_args.pop('cmd')
 
@@ -452,13 +452,13 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             return op(**command_args)
 
         def default_arguments_loader():
-            op = handler or self.get_op_handler(operation)
+            op = handler or self.get_op_handler(operation, operation_group=kwargs.get('operation_group'))
             self._apply_doc_string(op, kwargs)
             cmd_args = list(extract_args_from_signature(op, excluded_params=self.excluded_command_handler_args))
             return cmd_args
 
         def default_description_loader():
-            op = handler or self.get_op_handler(operation)
+            op = handler or self.get_op_handler(operation, operation_group=kwargs.get('operation_group'))
             self._apply_doc_string(op, kwargs)
             return extract_full_summary_from_signature(op)
 
@@ -474,7 +474,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
                                                         handler or default_command_handler,
                                                         **kwargs)
 
-    def get_op_handler(self, operation):
+    def get_op_handler(self, operation, operation_group=None):
         """ Import and load the operation handler """
         # Patch the unversioned sdk path to include the appropriate API version for the
         # resource type in question.
@@ -484,8 +484,9 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        operation_group = (self.command_table[self.command_name].command_kwargs.get('operation_group')
-                           if self.command_name else None)
+        if not operation_group:
+            operation_group = (self.command_table[self.command_name].command_kwargs.get('operation_group')
+                               if self.command_name else None)
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
             if operation.startswith(rt.import_prefix):
                 operation = operation.replace(rt.import_prefix,
