@@ -71,7 +71,7 @@ DEPENDENCIES = [
     'pyyaml>=4.2b1',
     'requests>=2.20.0',
     'six',
-    'tabulate>=0.7.7,<=0.8.2',
+    'tabulate>=0.7.7',
     'wheel==0.30.0',
     'azure-mgmt-resource==2.1.0'
 ]
