@@ -417,8 +417,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             custom_function_op))
 
     def set_arguments_loader():
-        return dict(extract_args_from_signature(context.get_op_handler(setter_op, operation_group=kwargs.get('operation_group')),
-                                                excluded_params=EXCLUDED_PARAMS))
+        return dict(extract_args_from_signature(context.get_op_handler(
+            setter_op, operation_group=kwargs.get('operation_group')), excluded_params=EXCLUDED_PARAMS))
 
     def function_arguments_loader():
         if not custom_function_op:
@@ -642,8 +642,8 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
         import time
 
         context_copy = copy.copy(context)
-        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op, operation_group=kwargs.get('operation_group')),
-                                                       excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(
+            getter_op, operation_group=kwargs.get('operation_group')), excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
         context_copy.cli_ctx = cmd.cli_ctx
         operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
@@ -726,8 +726,9 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
         context_copy = copy.copy(context)
-        getter_args = dict(extract_args_from_signature(context_copy.get_op_handler(getter_op, operation_group=kwargs.get('operation_group')),
-                                                       excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
+        getter_args = dict(extract_args_from_signature(
+            context_copy.get_op_handler(getter_op, operation_group=kwargs.get('operation_group')),
+            excluded_params=EXCLUDED_NON_CLIENT_PARAMS))
         cmd = args.get('cmd') if 'cmd' in getter_args else args.pop('cmd')
         context_copy.cli_ctx = cmd.cli_ctx
         operations_tmpl = _get_operations_tmpl(cmd, custom_command=custom_command)
