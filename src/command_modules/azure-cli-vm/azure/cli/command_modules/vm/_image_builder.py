@@ -5,6 +5,7 @@
 import re
 import os
 from enum import Enum
+from azure.cli.core.commands import LongRunningOperation
 
 try:
     from urllib.parse import urlparse
@@ -17,6 +18,9 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
+from knack.log import get_logger
+logger = get_logger(__name__)
+
 
 class _SourceType(Enum):
     PLATFORM_IMAGE = "PlatformImage"
@@ -26,8 +30,17 @@ class _DestType(Enum):
     MANAGED_IMAGE = 1
     SHARED_IMAGE_GALLERY = 2
 
-from knack.log import get_logger
-logger = get_logger(__name__)
+# region Client Factories
+
+def image_builder_client_factory(cli_ctx, _):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.imagebuilder import ImageBuilderClient
+    return get_mgmt_service_client(cli_ctx, ImageBuilderClient)
+
+def cf_img_bldr_image_templates(cli_ctx, _):
+    return image_builder_client_factory(cli_ctx, _).virtual_machine_image_template
+
+# endregion
 
 def _parse_script(script_str):
     script = {"script": script_str}
@@ -95,13 +108,12 @@ def _validate_location(location, location_names, location_display_names):
         location = next((l for l in location_display_names if l.lower() == location.lower()), location)
 
     if location.lower() not in [l.lower() for l in location_names]:
-        raise CLIError("Location {} is not a valid subscription name. Use one from `az account list-locations`.")
+        raise CLIError("Location {} is not a valid subscription location. Use one from `az account list-locations`.".format(location))
 
     return location
 
 def process_image_template_create_namespace(cmd, namespace):
     from azure.cli.core.commands.parameters import get_subscription_locations
-    subscription_locations = get_subscription_locations(cmd.cli_ctx)
 
     source = None
     scripts = []
@@ -116,10 +128,9 @@ def process_image_template_create_namespace(cmd, namespace):
 
 
     # Validate and parse destination and locations
-    if not any([namespace.managed_image_destinations, namespace.shared_image_destinations]):
-        raise CLIError("Must supply at least one managed image or shared image destination.")
 
     destinations = []
+    subscription_locations = get_subscription_locations(cmd.cli_ctx)
     location_names = [l.name for l in subscription_locations]
     location_display_names = [l.display_name for l in subscription_locations]
 
@@ -131,7 +142,7 @@ def process_image_template_create_namespace(cmd, namespace):
 
     if namespace.shared_image_destinations:
         for dest in namespace.shared_image_destinations:
-            id, locations = _parse_managed_image_destination(cmd, namespace.resource_group_name, dest)
+            id, locations = _parse_shared_image_destination(cmd, namespace.resource_group_name, dest)
             locations = [_validate_location(l, location_names, location_display_names) for l in locations]
             destinations.append((_DestType.SHARED_IMAGE_GALLERY, id, locations))
 
@@ -180,6 +191,55 @@ def process_image_template_create_namespace(cmd, namespace):
     namespace.scripts_list = scripts
     namespace.destinations_lists = destinations
 
+def process_img_tmpl_output_add_namespace(cmd, namespace):
+    from azure.cli.core.commands.parameters import get_subscription_locations
+    from azure.cli.core.commands.validators import get_default_location_from_resource_group
+
+    outputs = [namespace.managed_image, namespace.gallery_image_definition]
+    if not any(outputs) or all(outputs):
+        raise CLIError("Usage error: must supply only one managed image or shared image destination.")
+
+    if namespace.managed_image:
+        if not is_valid_resource_id(namespace.managed_image):
+            namespace.managed_image = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute', type='images',
+                name=namespace.managed_image
+            )
+
+    if namespace.gallery_image_definition:
+        if not is_valid_resource_id(namespace.gallery_image_definition):
+            if not namespace.gallery_name:
+                raise CLIError("Usage error: gallery image definition is a name and not an ID..")
+
+            namespace.gallery_image_definition = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute',
+                type='galleries', name=namespace.gallery_name,
+                child_type_1='images', child_name_1=namespace.gallery_image_definition
+            )
+
+    subscription_locations = get_subscription_locations(cmd.cli_ctx)
+    location_names = [l.name for l in subscription_locations]
+    location_display_names = [l.display_name for l in subscription_locations]
+
+    if namespace.managed_image_location:
+        namespace.managed_image_location = _validate_location(namespace.managed_image_location, location_names, location_display_names)
+    elif namespace.managed_image:
+        namespace.managed_image_location = get_default_location_from_resource_group(cmd, namespace)
+
+    if namespace.gallery_replication_regions:
+        processed_regions = []
+        for loc in namespace.gallery_replication_regions:
+            processed_regions.append(_validate_location(loc, location_names, location_display_names))
+        namespace.gallery_replication_regions = processed_regions
+    elif namespace.gallery_image_definition:
+        namespace.managed_image_location = get_default_location_from_resource_group(cmd, namespace)
+
+
+# region Custom Commands
+
 def create_image_template(client, resource_group_name, image_template_name, source, scripts,
                           checksum=None, location=None, no_wait=False,
                           managed_image_destinations=None, shared_image_destinations=None,
@@ -213,11 +273,11 @@ def create_image_template(client, resource_group_name, image_template_name, sour
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations, location=location)
     return sdk_no_wait(no_wait, client.virtual_machine_image_template.create_or_update, image_template, resource_group_name, image_template_name)
 
-def list_image_templates(*args, **kwargs):
-    pass
 
-def get_image_template(*args, **kwargs):
-    pass
+def list_image_templates(client, resource_group_name=None):
+    if resource_group_name:
+        return client.virtual_machine_image_template.list_by_resource_group(resource_group_name)
+    return client.virtual_machine_image_template.list()
 
 
 def build_image_template(client, resource_group_name, image_template_name, no_wait=False):
@@ -225,19 +285,71 @@ def build_image_template(client, resource_group_name, image_template_name, no_wa
     header = {'Content-Type' : 'application/json'}
     return sdk_no_wait(no_wait, client.virtual_machine_image_template.run, resource_group_name, image_template_name, custom_headers=header)
 
+
 def show_build_output(client, resource_group_name, image_template_name, output_name=None):
     if output_name:
         return client.virtual_machine_image_template.get_run_output(resource_group_name, image_template_name, output_name)
     return client.virtual_machine_image_template.get_run_outputs(resource_group_name, image_template_name)
 
-# region Client Factories
+# TODO: add when new whl file generated. support tags for create and here.
+def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None,
+                        gallery_image_definition=None, gallery_replication_regions=None,
+                        managed_image=None, managed_image_location=None, output_name=None):
+    from azure.mgmt.imagebuilder.models import ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor
+    existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+    if managed_image:
+        parsed = parse_resource_id(managed_image)
+        distributor = ImageTemplateManagedImageDistributor(run_output_name=output_name or parsed['name'],
+                                                               image_id=managed_image, location=managed_image_location)
+    elif gallery_image_definition:
+        parsed = parse_resource_id(gallery_image_definition)
+        distributor = ImageTemplateSharedImageDistributor(run_output_name=output_name or parsed['child_name_1'],
+                                                               gallery_image_id=gallery_image_definition, replication_regions=gallery_replication_regions)
 
-def image_builder_client_factory(cli_ctx, _):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.imagebuilder import ImageBuilderClient
-    return get_mgmt_service_client(cli_ctx, ImageBuilderClient)
+    if existing_image_template.distribute is None:
+        existing_image_template.distribute = []
+    else:
+        for existing_distributor in existing_image_template.distribute:
+            if existing_distributor.run_output_name.lower() == distributor.run_output_name.lower():
+                raise CLIError("Output with output name {} already exists in image template {}.".format(distributor.run_output_name.lower(), image_template_name))
 
-def cf_img_bldr_image_templates(cli_ctx, _):
-    return image_builder_client_factory(cli_ctx, _).virtual_machine_image_template
+    existing_image_template.distribute.append(distributor)
+    # Work around of not having update method. delete then create.
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template)
+
+def remove_template_output(cmd, client, resource_group_name, image_template_name, output_name):
+    existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+
+    if not existing_image_template.distribute:
+        raise CLIError("No outputs to remove.")
+
+    new_distribute = []
+    for existing_distributor in existing_image_template.distribute:
+        if existing_distributor.run_output_name.lower() == output_name.lower():
+            continue
+        new_distribute.append(new_distribute)
+
+    if len(new_distribute) == len(existing_image_template.distribute):
+        raise CLIError("Output with output name {} not in image template distribute list.".format(output_name))
+
+    existing_image_template.distribute = new_distribute
+
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template)
+
+
+def clear_template_output(cmd, client, resource_group_name, image_template_name):
+    existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+
+    if not existing_image_template.distribute:
+        raise CLIError("No outputs to remove.")
+
+    existing_image_template.distribute = []
+
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template)
+
+
+def _update_image_template(cmd, client, resource_group_name, image_template_name, existing_template):
+    LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.delete(resource_group_name, image_template_name))
+    return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.create_or_update(existing_template, resource_group_name, image_template_name))
 
 # endregion

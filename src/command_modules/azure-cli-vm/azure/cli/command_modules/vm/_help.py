@@ -1952,3 +1952,65 @@ helps['ppg update'] = """
 type: command
 short-summary: Update a proximity placement group
 """
+
+helps['image-builder'] = """
+    type: group
+    short-summary: Manage and build image builder templates. 
+"""
+
+helps['image-builder output'] = """
+    type: group
+    short-summary: Manage image builder template output distributors. 
+    long-summary: A customized image can be distributed as a managed image or a shared image in a shared image gallery (SIG). 
+"""
+
+helps['image-builder template'] = """
+    type: group
+    short-summary: Manage image builder templates.
+"""
+
+
+helps['image-builder output add'] = """
+    type: command
+    short-summary: Add an image builder output distributor.
+"""
+
+helps['image-builder output remove'] = """
+    type: command
+    short-summary: Remove an image builder output distributor. 
+"""
+
+helps['image-builder output clear'] = """
+    type: command
+    short-summary: Clear all image builder output distributors. 
+"""
+
+helps['image-builder run'] = """
+    type: command
+    short-summary: Build an image builder template. 
+"""
+
+helps['image-builder show'] = """
+    type: command
+    short-summary: Show an image builder template's run outputs.
+"""
+
+helps['image-builder template create'] = """
+    type: command
+    short-summary: Create an image builder template.
+    parameters:
+    - name: --image-source
+      populator-commands:
+      - az vm image list
+      - az vm image show
+"""
+
+helps['image-builder template list'] = """
+    type: command
+    short-summary: List image builder template.
+"""
+
+helps['image-builder template delete'] = """
+    type: command
+    short-summary: Delete image builder template.
+"""
