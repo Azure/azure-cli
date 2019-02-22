@@ -16,6 +16,8 @@ SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found. " \
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 SOURCE_NOT_FOUND = "Source cannot be found. " \
                    "Please provide a valid image and source registry or a fully qualified source."
+LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid" \
+                         "because it violates the naming policy."
 
 
 def acr_import(cmd,
@@ -53,19 +55,23 @@ def acr_import(cmd,
         slash = source_image.find('/')
         if slash > 0:
             registry_uri = source_image[:slash]
-            source_image = source_image[slash + 1:]
-            if source_registry_password:
-                ImportSourceCredentials = cmd.get_models('ImportSourceCredentials')
-                source = ImportSource(registry_uri=registry_uri,
-                                      source_image=source_image,
-                                      credentials=ImportSourceCredentials(password=source_registry_password,
-                                                                          username=source_registry_username))
-            else:
-                registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
-                if registry:
-                    source = ImportSource(resource_id=registry.id, source_image=source_image)
+            dot = registry_uri.find('.')
+            if dot > 0:
+                source_image = source_image[slash + 1:]
+                if source_registry_password:
+                    ImportSourceCredentials = cmd.get_models('ImportSourceCredentials')
+                    source = ImportSource(registry_uri=registry_uri,
+                                          source_image=source_image,
+                                          credentials=ImportSourceCredentials(password=source_registry_password,
+                                                                              username=source_registry_username))
                 else:
-                    source = ImportSource(registry_uri=registry_uri, source_image=source_image)
+                    registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
+                    if registry:
+                        source = ImportSource(resource_id=registry.id, source_image=source_image)
+                    else:
+                        source = ImportSource(registry_uri=registry_uri, source_image=source_image)
+            else:
+                raise CLIError(LOGIN_SERVER_NOT_VALID)
         else:
             raise CLIError(SOURCE_NOT_FOUND)
 
