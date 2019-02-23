@@ -18,6 +18,10 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
+import copy
+from msrest.exceptions import ClientException, ValidationError
+from azure.mgmt.imagebuilder.models import ImageTemplate
+
 from knack.log import get_logger
 logger = get_logger(__name__)
 
@@ -43,9 +47,13 @@ def cf_img_bldr_image_templates(cli_ctx, _):
 # endregion
 
 def _parse_script(script_str):
-    script = {"script": script_str}
+    script_name = script_str
+    script = {"script": script_str, "name": script_name}
     if urlparse(script_str).scheme and "://" in script_str:
         logger.info("{} appears to be a url.".format(script_str))
+        if "/" in script_str:
+            _, script_name = script_str.rsplit(sep="/", maxsplit=1)
+            script["name"] = script_name
         script["is_url"] = True
     else:
         logger.info("{} does not look like a url. Assuming it is a file.".format(script_str))
@@ -55,25 +63,31 @@ def _parse_script(script_str):
         raise CLIError("Script file found, however, uploading to a storage account is not yet supported on the CLI.")
     return script
 
+def _no_white_space_or_err(words):
+    for char in words:
+        if char.isspace():
+            raise CLIError("Error: White space in {}".format(words))
 
 def _parse_managed_image_destination(cmd, rg, destination):
 
     if any([not destination, "=" not in destination]):
         raise CLIError("Invalid Format: the given image destination {} must be a string that contains the '=' delimiter.".format(destination))
 
-    id, location = destination.rsplit(sep="=", maxsplit=1)
-    if not id or not location:
+    rid, location = destination.rsplit(sep="=", maxsplit=1)
+    if not rid or not location:
         raise CLIError("Invalid Format: destination {} should have format 'destination=location'.".format(destination))
 
-    if not is_valid_resource_id(id):
-        id = resource_id(
+    _no_white_space_or_err(rid)
+
+    if not is_valid_resource_id(rid):
+        rid = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=rg,
             namespace='Microsoft.Compute', type='images',
-            name=id
+            name=rid
         )
 
-    return id, location
+    return rid, location
 
 
 def _parse_shared_image_destination(cmd, rg, destination):
@@ -81,25 +95,27 @@ def _parse_shared_image_destination(cmd, rg, destination):
     if any([not destination, "=" not in destination]):
         raise CLIError("Invalid Format: the given image destination {} must be a string that contains the '=' delimiter.".format(destination))
 
-    id, location = destination.rsplit(sep="=", maxsplit=1)
+    rid, location = destination.rsplit(sep="=", maxsplit=1)
 
-    if not id or not location:
+    if not rid or not location:
         raise CLIError("Invalid Format: destination {} should have format 'destination=location'.".format(destination))
 
-    if not is_valid_resource_id(id):
-        if "/" not in id:
-            raise CLIError("Invalid Format: {} must have a shared image gallery name and definition. They must be delimited by a '/'.".format(id))
+    _no_white_space_or_err(rid)
+
+    if not is_valid_resource_id(rid):
+        if "/" not in rid:
+            raise CLIError("Invalid Format: {} must have a shared image gallery name and definition. They must be delimited by a '/'.".format(rid))
 
         sig_name, sig_def = destination.rsplit(sep="/", maxsplit=1)
 
-        id = resource_id(
+        rid = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=rg,
             namespace='Microsoft.Compute',
             type='galleries', name=sig_name,
             child_type_1='images', child_name_1=sig_def
         )
 
-    return (id, destination.split(","))
+    return (rid, destination.split(","))
 
 def _validate_location(location, location_names, location_display_names):
 
@@ -226,16 +242,16 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
     if namespace.managed_image_location:
         namespace.managed_image_location = _validate_location(namespace.managed_image_location, location_names, location_display_names)
-    elif namespace.managed_image:
-        namespace.managed_image_location = get_default_location_from_resource_group(cmd, namespace)
 
     if namespace.gallery_replication_regions:
         processed_regions = []
         for loc in namespace.gallery_replication_regions:
             processed_regions.append(_validate_location(loc, location_names, location_display_names))
         namespace.gallery_replication_regions = processed_regions
-    elif namespace.gallery_image_definition:
-        namespace.managed_image_location = get_default_location_from_resource_group(cmd, namespace)
+
+
+    if not any([namespace.managed_image, namespace.gallery_image_definition]) and hasattr(namespace, 'location'):
+        get_default_location_from_resource_group(cmd, namespace) # store location in namespace.location for use in custom method.
 
 
 # region Custom Commands
@@ -292,19 +308,21 @@ def show_build_output(client, resource_group_name, image_template_name, output_n
     return client.virtual_machine_image_template.get_run_outputs(resource_group_name, image_template_name)
 
 # TODO: add when new whl file generated. support tags for create and here.
-def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None,
+def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
                         managed_image=None, managed_image_location=None, output_name=None):
     from azure.mgmt.imagebuilder.models import ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor
     existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+    old_template_copy = copy.deepcopy(existing_image_template)
+
     if managed_image:
         parsed = parse_resource_id(managed_image)
         distributor = ImageTemplateManagedImageDistributor(run_output_name=output_name or parsed['name'],
-                                                               image_id=managed_image, location=managed_image_location)
+                                                               image_id=managed_image, location=managed_image_location or location)
     elif gallery_image_definition:
         parsed = parse_resource_id(gallery_image_definition)
         distributor = ImageTemplateSharedImageDistributor(run_output_name=output_name or parsed['child_name_1'],
-                                                               gallery_image_id=gallery_image_definition, replication_regions=gallery_replication_regions)
+                                                               gallery_image_id=gallery_image_definition, replication_regions=gallery_replication_regions or [location])
 
     if existing_image_template.distribute is None:
         existing_image_template.distribute = []
@@ -315,10 +333,11 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
 
     existing_image_template.distribute.append(distributor)
     # Work around of not having update method. delete then create.
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template)
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
 
 def remove_template_output(cmd, client, resource_group_name, image_template_name, output_name):
     existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+    old_template_copy = copy.deepcopy(existing_image_template)
 
     if not existing_image_template.distribute:
         raise CLIError("No outputs to remove.")
@@ -334,22 +353,31 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
     existing_image_template.distribute = new_distribute
 
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template)
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
 
 
 def clear_template_output(cmd, client, resource_group_name, image_template_name):
     existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+
+    old_template_copy = copy.deepcopy(existing_image_template)
 
     if not existing_image_template.distribute:
         raise CLIError("No outputs to remove.")
 
     existing_image_template.distribute = []
 
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template)
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
 
 
-def _update_image_template(cmd, client, resource_group_name, image_template_name, existing_template):
+
+def _update_image_template(cmd, client, resource_group_name, image_template_name, new_template, old_template):
     LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.delete(resource_group_name, image_template_name))
-    return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.create_or_update(existing_template, resource_group_name, image_template_name))
+    try:
+        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.create_or_update(new_template, resource_group_name, image_template_name))
+    except (ClientException) as e:
+        logger.warning("Failed to create updated template.\nError: %s.\nRe-creating old template", e)
+        old_template.distribute = old_template.distribute or []
+        old_template.customize = old_template.customize or []
+        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.create_or_update(old_template, resource_group_name, image_template_name))
 
 # endregion

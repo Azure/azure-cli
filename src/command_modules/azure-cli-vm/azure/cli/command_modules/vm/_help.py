@@ -1982,7 +1982,7 @@ helps['image-builder output remove'] = """
 
 helps['image-builder output clear'] = """
     type: command
-    short-summary: Clear all image builder output distributors. 
+    short-summary: Remove all image builder output distributors. 
 """
 
 helps['image-builder run'] = """
@@ -2007,10 +2007,20 @@ helps['image-builder template create'] = """
 
 helps['image-builder template list'] = """
     type: command
-    short-summary: List image builder template.
+    short-summary: List image builder templates.
 """
 
 helps['image-builder template delete'] = """
     type: command
     short-summary: Delete image builder template.
+"""
+
+helps['image-builder template show'] = """
+    type: command
+    short-summary: Show an image builder template.
+"""
+
+helps['image-builder template wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the image builder template is met.
 """
