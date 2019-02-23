@@ -53,7 +53,6 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'futures',
     'adal>=1.2.0',
     'argcomplete>=1.8.0',
     'azure-cli-telemetry',
@@ -104,6 +103,7 @@ setup(
     extras_require={
         ":python_version<'3.4'": ['enum34'],
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
+        ':python_version<"3.0"': ['futures'],
         ":python_version<'3.0'": ['antlr4-python2-runtime'],
         ":python_version>='3.0'": ['antlr4-python3-runtime']
     },
