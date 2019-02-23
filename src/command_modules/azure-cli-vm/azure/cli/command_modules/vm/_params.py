@@ -143,7 +143,7 @@ def load_arguments(self, _):
     with self.argument_context('image-builder') as c:
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('scripts', nargs='+', help="Space-separated list of scripts to customize the image with. Each script must be a publicly accessible URL or a path to an existing file. If a file path is given, the script will be uploaded to a storage account.")
-        c.argument('source', options_list="--image-source", help="The image to customize. Must be a valid platform image URN, platform image alias, or Red Hat ISO image URI.")
+        c.argument('source', options_list="--image-source", help="The base image to customize. Must be a valid platform image URN, platform image alias, or Red Hat ISO image URI.")
         c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
         c.argument('checksum', help="The SHA256 checksum of the Red Hat ISO image")
         c.argument('managed_image_destinations', nargs='+', help='Managed image distribution information. Space-separated list of key-value pairs. E.g "image_1=westus2 image_2=westus". Each key is the name or resource ID of the managed image to be created. Each value is the location of the image.')
@@ -161,6 +161,7 @@ def load_arguments(self, _):
 
     with self.argument_context('image-builder output add') as c:
         c.argument('output_name', help="Name of the image builder run output. Defaults to the name of the managed image or sig image definition.")
+        c.ignore('location')
 
     # endregion
 
