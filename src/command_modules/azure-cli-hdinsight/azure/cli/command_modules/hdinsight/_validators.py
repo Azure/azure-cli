@@ -69,6 +69,22 @@ def validate_msi(cmd, namespace):
             )
 
 
+# Validate managed identity to access storage account v2.
+def validate_storage_msi(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+
+    if namespace.storage_account_managed_identity is not None:
+        if not is_valid_resource_id(namespace.storage_account_managed_identity):
+            namespace.storage_account_managed_identity = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.ManagedIdentity',
+                type='userAssignedIdentities',
+                name=namespace.storage_account_managed_identity
+            )
+
+
 # Validate domain service.
 def validate_domain_service(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
