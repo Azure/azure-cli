@@ -1735,8 +1735,8 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
 
     if instance.kubernetes_version == kubernetes_version:
         if instance.provisioning_state == "Succeeded":
-            logger.warning("Your cluster is already on version %s and in a non-failed cluster state. No operations "
-                           "will occur on same version upgrades when cluster is in non-failure state.",
+            logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
+                           "will occur when upgrading to the same version if the cluster is not in a failed state.",
                            instance.kubernetes_version)
         elif instance.provisioning_state == "Failed":
             logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
