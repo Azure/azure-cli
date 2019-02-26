@@ -1231,3 +1231,13 @@ helps['webapp webjob triggered run'] = """
 type: command
 short-summary: Run a specific triggered webjob hosted on a web app.
 """
+
+helps['functionapp devops-build'] = """
+    type: group
+    short-summary: Functionapp specific integration with azure devops builds
+"""
+
+helps['functionapp devops-build create'] = """
+    type: command
+    short-summary: Create an Azure Devops build pipeline for a function app.
+"""

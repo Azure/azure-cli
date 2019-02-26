@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.58"
+__version__ = "2.0.59"
 
 import os
 import sys
@@ -132,8 +132,9 @@ class MainCommandsLoader(CLICommandsLoader):
                 installed_command_modules = [modname for _, modname, _ in
                                              pkgutil.iter_modules(mods_ns_pkg.__path__)
                                              if modname not in BLACKLISTED_MODS]
-            except ImportError:
-                pass
+            except ImportError as e:
+                logger.warning(e)
+
             logger.debug('Installed command modules %s', installed_command_modules)
             cumulative_elapsed_time = 0
             for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
@@ -226,9 +227,12 @@ class MainCommandsLoader(CLICommandsLoader):
         def _get_extension_suppressions(mod_loaders):
             res = []
             for m in mod_loaders:
-                sup = getattr(m, 'suppress_extension', None)
-                if sup and isinstance(sup, ModExtensionSuppress):
-                    res.append(sup)
+                suppressions = getattr(m, 'suppress_extension', None)
+                if suppressions:
+                    suppressions = suppressions if isinstance(suppressions, list) else [suppressions]
+                    for sup in suppressions:
+                        if isinstance(sup, ModExtensionSuppress):
+                            res.append(sup)
             return res
 
         _update_command_table_from_modules(args)

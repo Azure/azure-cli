@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.16
+++++++
+* vm create: Fixed issue where --accelerated-networking was not enabled by default for Ubuntu 18.0.
+
 2.2.15
 ++++++
 * vm list-skus: Allow use of `--all` in place of `--all true`

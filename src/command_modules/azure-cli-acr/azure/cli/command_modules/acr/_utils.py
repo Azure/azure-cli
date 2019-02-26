@@ -45,7 +45,8 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
             subscription = profile.get_subscription(cli_ctx.data['subscription_id'])
             raise ResourceNotFound(
                 "{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
-        except (KeyError, TypeError):
+        except (KeyError, TypeError) as e:
+            logger.debug("Could not get the current subscription. Exception: %s", str(e))
             raise ResourceNotFound("{} in the current subscription.".format(message))
 
     elif len(elements) == 1:

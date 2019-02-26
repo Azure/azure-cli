@@ -158,8 +158,9 @@ class ResourceIDScenarioTest(ScenarioTest):
 
 
 class ResourceGenericUpdate(LiveScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
-    def test_resource_id_scenario(self, resource_group):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_generic_update')
+    def test_resource_generic_update(self, resource_group):
         self.kwargs.update({
             'stor_1': self.create_random_name(prefix='stor1', length=10),
             'stor_2': self.create_random_name(prefix='stor2', length=10)
@@ -661,8 +662,8 @@ class PolicyScenarioTest(ScenarioTest):
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
             'mode': 'Indexed',
-            'metadata': {u'category': u'test'},
-            'updated_metadata': {u'category': u'test2'},
+            'metadata': 'test',
+            'updated_metadata': 'test2',
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
@@ -670,24 +671,37 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
             self.check('description', '{desc}'),
             self.check('mode', '{mode}'),
-            self.check('metadata', '{metadata}')
+            self.check('metadata.category', '{metadata}')
         ])
 
         # update it
         self.kwargs['desc'] = self.kwargs['desc'] + '_new'
         self.kwargs['pdn'] = self.kwargs['pdn'] + '_new'
 
-        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2', management_group, subscription)
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
-            self.check('metadata', '{updated_metadata}')
+            self.check('metadata.category', '{updated_metadata}')
+        ])
+
+        # update it with new parameters and a new rule
+        self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
+        self.kwargs['rf'] = os.path.join(curr_dir, 'sample_policy_rule_2.json').replace('\\', '\\\\')
+
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2 --params {pdf} --rules {rf}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('description', '{desc}'),
+            self.check('displayName', '{pdn}'),
+            self.check('metadata.category', '{updated_metadata}'),
+            self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
+            self.check('policyRule.then.effect', 'audit')
         ])
 
         # list and show it
@@ -794,6 +808,38 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)  # ensure the policy is gone when run live.
+
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
+
+        # create a parameterized policy set
+        self.kwargs['psf'] = os.path.join(curr_dir, 'sample_policy_set_parameterized.json').replace('\\', '\\\\')
+        policyset = get_file_json(self.kwargs['psf'])
+        policyset[0]['policyDefinitionId'] = policy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}'),
+            self.check('description', '{ps_desc}'),
+            self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
+            self.check('parameters.allowedLocations.type', 'Array')
+        ])
+
+        # update the parameters on the policy set
+        self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
+
+        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
+        ])
+
+        # delete the parameterized policy set
         cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
         time.sleep(10)  # ensure the policy is gone when run live.

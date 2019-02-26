@@ -207,11 +207,6 @@ helps['batch pool'] = """
     short-summary: Manage Batch pools.
 """
 
-helps['batch pool os'] = """
-    type: group
-    short-summary: Manage the operating system of Batch pools.
-"""
-
 helps['batch pool autoscale'] = """
     type: group
     short-summary: Manage automatic scaling of Batch pools.

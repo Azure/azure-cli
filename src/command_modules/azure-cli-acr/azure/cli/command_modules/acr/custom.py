@@ -233,17 +233,21 @@ def _get_docker_command():
     try:
         p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
         _, stderr = p.communicate()
-    except OSError:
+    except OSError as e:
+        logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
         # The executable may not be discoverable in WSL so retry *.exe once
         try:
             docker_command = 'docker.exe'
             p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
             _, stderr = p.communicate()
-        except OSError:
+        except OSError as inner:
+            logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(inner))
             raise CLIError(docker_not_installed)
-        except CalledProcessError:
+        except CalledProcessError as inner:
+            logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(inner))
             raise CLIError(docker_not_available)
-    except CalledProcessError:
+    except CalledProcessError as e:
+        logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
         raise CLIError(docker_not_available)
 
     if stderr:
@@ -291,8 +295,8 @@ def _check_wincred(login_server):
             }
             try:
                 os.makedirs(docker_directory)
-            except OSError:
-                pass
+            except OSError as e:
+                logger.debug("Could not create docker directory '%s'. Exception: %s", docker_directory, str(e))
             with open(config_path, 'w') as output_file:
                 json.dump(content, output_file, indent=4)
                 output_file.close()

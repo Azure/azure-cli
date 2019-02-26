@@ -23,7 +23,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_interface_endpoints, cf_network_profiles,
-    cf_express_route_circuit_connections)
+    cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
+    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -36,7 +37,8 @@ from azure.cli.command_modules.network._format import (
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg)
+    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
+    transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -104,6 +106,36 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.{}',
         client_factory=cf_express_route_circuits,
         min_api='2016-09-01'
+    )
+
+    network_er_connection_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.express_route_connections_operations#ExpressRouteConnectionsOperations.{}',
+        client_factory=cf_express_route_connections,
+        min_api='2018-08-01'
+    )
+
+    network_er_gateway_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.express_route_gateways_operations#ExpressRouteGatewaysOperations.{}',
+        client_factory=cf_express_route_gateways,
+        min_api='2018-08-01'
+    )
+
+    network_er_ports_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.express_route_ports_operations#ExpressRoutePortsOperations.{}',
+        client_factory=cf_express_route_ports,
+        min_api='2018-08-01'
+    )
+
+    network_er_port_locations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.express_route_ports_locations_operations#ExpressRoutePortsLocationsOperations.{}',
+        client_factory=cf_express_route_port_locations,
+        min_api='2018-08-01'
+    )
+
+    network_er_links_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.express_route_links_operations#ExpressRouteLinksOperations.{}',
+        client_factory=cf_express_route_links,
+        min_api='2018-08-01'
     )
 
     network_erca_sdk = CliCommandType(
@@ -435,6 +467,20 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
 
+    with self.command_group('network express-route gateway', network_er_gateway_sdk) as g:
+        g.custom_command('create', 'create_express_route_gateway')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_express_route_gateways')
+        g.show_command('show', 'get')
+        g.generic_update_command('update', custom_func_name='update_express_route_gateway', setter_arg_name='put_express_route_gateway_parameters')
+
+    with self.command_group('network express-route gateway connection', network_er_connection_sdk) as g:
+        g.custom_command('create', 'create_express_route_connection')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.generic_update_command('update', custom_func_name='update_express_route_connection', setter_arg_name='put_express_route_connection_parameters')
+
     with self.command_group('network express-route peering', network_er_peering_sdk) as g:
         g.custom_command('create', 'create_express_route_peering', client_factory=cf_express_route_circuit_peerings)
         g.command('delete', 'delete')
@@ -443,8 +489,23 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
 
     with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
-        g.custom_command('create', 'create_express_route_connection')
+        g.custom_command('create', 'create_express_route_peering_connection')
         g.command('delete', 'delete')
+        g.show_command('show')
+
+    with self.command_group('network express-route port', network_er_ports_sdk) as g:
+        g.custom_command('create', 'create_express_route_port')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_express_route_ports')
+        g.show_command('show')
+        g.generic_update_command('update', custom_func_name='update_express_route_port')
+
+    with self.command_group('network express-route port link', network_er_links_sdk) as g:
+        g.command('list', 'list')
+        g.show_command('show')
+
+    with self.command_group('network express-route port location', network_er_port_locations_sdk) as g:
+        g.command('list', 'list')
         g.show_command('show')
     # endregion
 
@@ -628,7 +689,7 @@ def load_command_table(self, _):
     # endregion
 
     # region PublicIPAddresses
-    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
     with self.command_group('network public-ip', network_public_ip_sdk) as g:
@@ -764,9 +825,9 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('reset', 'reset')
-        g.command('list-bgp-peer-status', 'get_bgp_peer_status')
-        g.command('list-advertised-routes', 'get_advertised_routes')
-        g.command('list-learned-routes', 'get_learned_routes')
+        g.command('list-bgp-peer-status', 'get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
+        g.command('list-advertised-routes', 'get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
+        g.command('list-learned-routes', 'get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
@@ -780,6 +841,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vnet_gateway_root_cert')
         g.custom_command('delete', 'delete_vnet_gateway_root_cert')
 
+    with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
+        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
+        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
+        g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
     # endregion
 
     # region VirtualNetworkGatewayConnections

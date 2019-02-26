@@ -42,3 +42,22 @@ def get_valid_architecture(cmd):
 def get_valid_variant(cmd):
     Variant = cmd.get_models('Variant')
     return [item.value.lower() for item in Variant]
+
+
+def get_finished_run_status(cmd):
+    RunStatus = cmd.get_models('RunStatus')
+    return [RunStatus.succeeded.value,
+            RunStatus.failed.value,
+            RunStatus.canceled.value,
+            RunStatus.error.value,
+            RunStatus.timeout.value]
+
+
+def get_succeeded_run_status(cmd):
+    RunStatus = cmd.get_models('RunStatus')
+    return [RunStatus.succeeded.value]
+
+
+def get_acr_models(cmd):
+    from azure.cli.core.profiles import ResourceType, get_sdk
+    return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models')

@@ -83,7 +83,7 @@ helps['kusto database create'] = """
     examples:
        - name: create a Kusto Database.
          text: |-
-           az kusto database create --cluster-name myclustername -g myrgname -n mydbname  --soft-delete-period 365:00:00:00 --hot-cache-period 31:00:00:00
+           az kusto database create --cluster-name myclustername -g myrgname -n mydbname  --soft-delete-period P365D --hot-cache-period P31D
 """
 
 
@@ -93,7 +93,7 @@ helps['kusto database update'] = """
     examples:
       - name: create a Kusto Database.
         text: |-
-          az kusto database update --cluster-name myclustername -g myrgname -n mydbname  --soft-delete-period 3650:00:00:00 --hot-cache-period 30:00:00:00
+          az kusto database update --cluster-name myclustername -g myrgname -n mydbname  --soft-delete-period P365D --hot-cache-period P30D
 """
 
 helps['kusto database delete'] = """

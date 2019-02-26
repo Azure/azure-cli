@@ -57,6 +57,26 @@ def cf_express_route_service_providers(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_service_providers
 
 
+def cf_express_route_connections(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_connections
+
+
+def cf_express_route_gateways(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_gateways
+
+
+def cf_express_route_ports(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_ports
+
+
+def cf_express_route_port_locations(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_ports_locations
+
+
+def cf_express_route_links(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_links
+
+
 def cf_interface_endpoints(cli_ctx, _):
     return network_client_factory(cli_ctx).interface_endpoints
 

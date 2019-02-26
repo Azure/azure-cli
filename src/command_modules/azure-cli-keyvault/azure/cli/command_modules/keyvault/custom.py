@@ -21,7 +21,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 
 
 from azure.cli.core import telemetry
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType
 
 from ._validators import secret_text_encoding_values
 
@@ -216,12 +216,8 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
 
 def _create_network_rule_set(cmd, bypass=None, default_action=None):
     NetworkRuleSet = cmd.get_models('NetworkRuleSet', resource_type=ResourceType.MGMT_KEYVAULT)
-    NetworkRuleBypassOptions = get_sdk(cmd.cli_ctx,
-                                       ResourceType.MGMT_KEYVAULT,
-                                       'models.key_vault_management_client_enums#NetworkRuleBypassOptions')
-    NetworkRuleAction = get_sdk(cmd.cli_ctx,
-                                ResourceType.MGMT_KEYVAULT,
-                                'models.key_vault_management_client_enums#NetworkRuleAction')
+    NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions', resource_type=ResourceType.MGMT_KEYVAULT)
+    NetworkRuleAction = cmd.get_models('NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
 
     return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
                           default_action=default_action or NetworkRuleAction.allow.value)
