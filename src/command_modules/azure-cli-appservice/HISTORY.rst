@@ -4,6 +4,7 @@ Release History
 ===============
 
 * Remove erroneous print statement for `az webapp auth update`
+* functionapp: fix setting the correct image for runtime in Linux App Service plans
 
 0.2.14
 ++++++
