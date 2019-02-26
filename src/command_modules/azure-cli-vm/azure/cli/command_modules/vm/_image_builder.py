@@ -106,7 +106,7 @@ def _parse_shared_image_destination(cmd, rg, destination):
         if "/" not in rid:
             raise CLIError("Invalid Format: {} must have a shared image gallery name and definition. They must be delimited by a '/'.".format(rid))
 
-        sig_name, sig_def = destination.rsplit(sep="/", maxsplit=1)
+        sig_name, sig_def = rid.rsplit(sep="/", maxsplit=1)
 
         rid = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=rg,
@@ -115,7 +115,7 @@ def _parse_shared_image_destination(cmd, rg, destination):
             child_type_1='images', child_name_1=sig_def
         )
 
-    return (rid, destination.split(","))
+    return (rid, location.split(","))
 
 def _validate_location(location, location_names, location_display_names):
 
@@ -250,7 +250,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
         namespace.gallery_replication_regions = processed_regions
 
 
-    if not any([namespace.managed_image, namespace.gallery_image_definition]) and hasattr(namespace, 'location'):
+    if not any([namespace.managed_image_location, namespace.gallery_replication_regions]) and hasattr(namespace, 'location'):
         get_default_location_from_resource_group(cmd, namespace) # store location in namespace.location for use in custom method.
 
 
