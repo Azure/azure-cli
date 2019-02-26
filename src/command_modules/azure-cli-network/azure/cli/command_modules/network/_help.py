@@ -1799,9 +1799,9 @@ helps['network express-route create'] = """
           - az network express-route list-service-providers
     examples:
         - name: Create an ExpressRoute circuit.
-          text: |
-            az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley" \\
-                -g MyResourceGroup --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
+          text: >
+            az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley"
+            -g MyResourceGroup --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
 """
 
 helps['network express-route delete'] = """
@@ -1932,6 +1932,87 @@ helps['network express-route auth show'] = """
 """
 # endregion
 
+# region Express Route Gateway
+helps['network express-route gateway'] = """
+    type: group
+    short-summary: Manage ExpressRoute gateways.
+"""
+
+helps['network express-route gateway create'] = """
+    type: command
+    short-summary: Create an ExpressRoute gateway.
+"""
+
+helps['network express-route gateway delete'] = """
+    type: command
+    short-summary: Delete an ExpressRoute gateway.
+"""
+
+helps['network express-route gateway list'] = """
+    type: command
+    short-summary: List ExpressRoute gateways.
+"""
+
+helps['network express-route gateway show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute gateway.
+"""
+
+helps['network express-route gateway update'] = """
+    type: command
+    short-summary: Update settings of an ExpressRoute gateway.
+"""
+# endregion
+
+# region Express Route gateway connection
+helps['network express-route gateway connection'] = """
+    type: group
+    short-summary: Manage ExpressRoute gateway connections.
+"""
+
+helps['network express-route gateway connection create'] = """
+    type: command
+    short-summary: Create an ExpressRoute gateway connection.
+"""
+
+helps['network express-route gateway connection delete'] = """
+    type: command
+    short-summary: Delete an ExpressRoute gateway connection.
+"""
+
+helps['network express-route gateway connection list'] = """
+    type: command
+    short-summary: List ExpressRoute gateway connections.
+"""
+
+helps['network express-route gateway connection show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute gateway connection.
+"""
+
+helps['network express-route gateway connection update'] = """
+    type: command
+    short-summary: Update an ExpressRoute gateway connection.
+"""
+# endregion
+
+# region Express Route Link
+helps['network express-route port link'] = """
+    type: group
+    short-summary: View ExpressRoute links.
+"""
+
+helps['network express-route port link list'] = """
+    type: command
+    short-summary: List ExpressRoute links.
+"""
+
+helps['network express-route port link show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute link.
+"""
+# endregion
+
 # region Express Route peering
 helps['network express-route peering'] = """
     type: group
@@ -2013,6 +2094,55 @@ helps['network express-route peering connection delete'] = """
 helps['network express-route peering connection show'] = """
     type: command
     short-summary: Get the details of an ExpressRoute circuit connection.
+"""
+# endregion
+
+# region Express Route Port
+helps['network express-route port'] = """
+    type: group
+    short-summary: Manage ExpressRoute ports.
+"""
+
+helps['network express-route port create'] = """
+    type: command
+    short-summary: Create an ExpressRoute port.
+"""
+
+helps['network express-route port delete'] = """
+    type: command
+    short-summary: Delete an ExpressRoute port.
+"""
+
+helps['network express-route port list'] = """
+    type: command
+    short-summary: List ExpressRoute ports.
+"""
+
+helps['network express-route port show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute port.
+"""
+
+helps['network express-route port update'] = """
+    type: command
+    short-summary: Update settings of an ExpressRoute port.
+"""
+# endregion
+
+# region Express Route Port Locations
+helps['network express-route port location'] = """
+    type: group
+    short-summary: View ExpressRoute port location information.
+"""
+
+helps['network express-route port location list'] = """
+    type: command
+    short-summary: List ExpressRoute port locations.
+"""
+
+helps['network express-route port location show'] = """
+    type: command
+    short-summary: Get the details of an ExpressRoute port location.
 """
 # endregion
 
@@ -3607,12 +3737,26 @@ helps['network vpn-connection create'] = """
     type: command
     short-summary: Create a VPN connection.
     long-summary: The VPN Gateway and Local Network Gateway must be provisioned before creating the connection between them.
+    parameters:
+      - name: --vnet-gateway1
+        short-summary: Name or ID of the source virtual network gateway.
+      - name: --vnet-gateway2
+        short-summary: Name or ID of the destination virtual network gateway to connect to using a 'Vnet2Vnet' connection.
+      - name: --local-gateway2
+        short-summary: Name or ID of the destination local network gateway to connect to using an 'IPSec' connection.
+      - name: --express-route-circuit2
+        short-summary: Name or ID of the destination ExpressRoute to connect to using an 'ExpressRoute' connection.
+      - name: --authorization-key
+        short-summary: The authorization key for the VPN connection.
+      - name: --enable-bgp
+        short-summary: Enable BGP for this VPN connection.
+      - name: --validate
+        short-summary: Display and validate the ARM template but do not create any resources.
     examples:
         - name: >
             Create a site-to-site connection between an Azure virtual network and an on-premises local network gateway.
-          text: |
-            az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway \\
-                --local-gateway2 MyLocalGateway --shared-key Abc123
+          text: >
+            az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway --local-gateway2 MyLocalGateway --shared-key Abc123
 """
 
 helps['network vpn-connection delete'] = """
@@ -3817,6 +3961,40 @@ helps['network vnet-gateway wait'] = """
           text: az network vnet-gateway wait -g MyResourceGroup -n MyVnetGateway --created
 """
 # endregion
+
+# region VNet Gateway IPSec Policy
+helps['network vnet-gateway ipsec-policy'] = """
+    type: group
+    short-summary: Manage virtual network gateway IPSec policies.
+"""
+
+helps['network vnet-gateway ipsec-policy add'] = """
+    type: command
+    short-summary: Add a virtual network gateway IPSec policy.
+    long-summary: Set all IPsec policies of a virtual network gateway. If you want to set any IPsec policy, you must set them all.
+    examples:
+        - name: Add specified IPsec policies to a gateway instead of relying on defaults.
+          text: |
+            az network vnet-gateway ipsec-policy add -g MyResourceGroup --gateway-name MyGateway \\
+                --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
+                --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+"""
+
+helps['network vnet-gateway ipsec-policy clear'] = """
+    type: command
+    short-summary: Delete all IPsec policies on a virtual network gateway.
+    examples:
+        - name: Remove all previously specified IPsec policies from a gateway.
+          text: az network vnet-gateway ipsec-policy clear -g MyResourceGroup --gateway-name MyConnection
+"""
+
+helps['network vnet-gateway ipsec-policy list'] = """
+    type: command
+    short-summary: List IPSec policies associated with a virtual network gateway.
+    examples:
+        - name: List the IPsec policies set on a gateway.
+          text: az network vnet-gateway ipsec-policy list -g MyResourceGroup --gateway-name MyConnection
+"""
 
 # region VNet Gateway VPN Client
 helps['network vnet-gateway vpn-client'] = """

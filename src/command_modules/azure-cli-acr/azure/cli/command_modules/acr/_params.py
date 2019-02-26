@@ -65,6 +65,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType), deprecate_info=c.deprecate(redirect='platform', hide=True))
         c.argument('platform', help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
+        c.argument('target', help='The name of the target build stage.')
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:

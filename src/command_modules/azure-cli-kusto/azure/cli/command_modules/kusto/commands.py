@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.command_modules.kusto._client_factory import cf_cluster, cf_database
-from azure.cli.command_modules.kusto._validators import validate_cluster_args, validate_database_args
+from azure.cli.command_modules.kusto._validators import validate_cluster_args
 
 
 def load_command_table(self, _):
@@ -35,9 +35,9 @@ def load_command_table(self, _):
     with self.command_group('kusto database',
                             database_operations,
                             client_factory=cf_database) as g:
-        g.custom_command('create', 'database_create', supports_no_wait=True, validator=validate_database_args)
+        g.custom_command('create', 'database_create', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='update_kusto_database', validator=validate_database_args, supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_kusto_database', supports_no_wait=True)
         g.command('list', 'list_by_cluster')
         g.show_command('show', 'get')
         g.wait_command('wait')

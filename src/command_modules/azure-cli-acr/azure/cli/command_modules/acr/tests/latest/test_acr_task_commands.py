@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
-class AcrTaskCommandsTests(ScenarioTest):
+# converted to live test until #8588 is resolved
+class AcrTaskCommandsTests(LiveScenarioTest):
 
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):

@@ -94,10 +94,10 @@ class AzureKustoDatabaseTests (ScenarioTest):
             'cluster_name': self.create_random_name(prefix='test', length=20),
             'database_name': self.create_random_name(prefix='testdb', length=20),
             'location': "Central US",
-            'soft_delete_period': '10:00:00:00',
-            'hot_cache_period': '5:00:00:00',
-            'soft_delete_period_in_days': 10,
-            'hot_cache_period_in_days': 5
+            'soft_delete_period': 'P10D',
+            'hot_cache_period': 'P5D',
+            'soft_delete_period_display': '10 days, 0:00:00',
+            'hot_cache_period_display': '5 days, 0:00:00'
         })
 
         # Create cluster
@@ -108,21 +108,21 @@ class AzureKustoDatabaseTests (ScenarioTest):
         # Create database
         self.cmd('az kusto database create --cluster-name {cluster_name} -g {rg} -n {database_name}  --soft-delete-period {soft_delete_period} --hot-cache-period {hot_cache_period}',
                  checks=[self.check('name', '{cluster_name}/{database_name}'),
-                         self.check('softDeletePeriodInDays', '{soft_delete_period_in_days}'),
-                         self.check('hotCachePeriodInDays', '{hot_cache_period_in_days}')])
+                         self.check('softDeletePeriod', '{soft_delete_period_display}'),
+                         self.check('hotCachePeriod', '{hot_cache_period_display}')])
 
         # Update database
         self.kwargs.update({
-            'soft_delete_period': '20:00:00:00',
-            'hot_cache_period': '10:00:00:00',
-            'soft_delete_period_in_days': 20,
-            'hot_cache_period_in_days': 10
+            'soft_delete_period': 'P20D',
+            'hot_cache_period': 'P10D',
+            'soft_delete_period_display': '20 days, 0:00:00',
+            'hot_cache_period_display': '10 days, 0:00:00'
         })
 
         self.cmd('az kusto database update --cluster-name {cluster_name} -g {rg} -n {database_name}  --soft-delete-period {soft_delete_period} --hot-cache-period {hot_cache_period}',
                  checks=[self.check('name', '{cluster_name}/{database_name}'),
-                         self.check('softDeletePeriodInDays', '{soft_delete_period_in_days}'),
-                         self.check('hotCachePeriodInDays', '{hot_cache_period_in_days}')])
+                         self.check('softDeletePeriod', '{soft_delete_period_display}'),
+                         self.check('hotCachePeriod', '{hot_cache_period_display}')])
 
         # Delete database
         self.cmd('az kusto database delete --cluster-name {cluster_name} -g {rg} -n {database_name} -y')
