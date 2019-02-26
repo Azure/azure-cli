@@ -97,7 +97,6 @@ DEPENDENCIES = [
     'azure-cli-relay',
     'azure-cli-reservations',
     'azure-cli-resource',
-    'azure-cli-role',
     'azure-cli-search',
     'azure-cli-security',
     'azure-cli-servicebus',
@@ -107,7 +106,12 @@ DEPENDENCIES = [
     'azure-cli-sqlvm',
     'azure-cli-storage',
     'azure-cli-telemetry',
-    'azure-cli-vm'
+    'azure-cli-vm',
+    'azure-graphrbac~=0.53.0',
+    'azure-keyvault~=1.1.0',
+    'azure-mgmt-authorization~=0.50.0',
+    'azure-mgmt-monitor~=0.5.2',
+    'pytz'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -134,6 +138,7 @@ setup(
     packages=[
         'azure',
         'azure.cli',
+        'azure.cli.command_modules.role'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

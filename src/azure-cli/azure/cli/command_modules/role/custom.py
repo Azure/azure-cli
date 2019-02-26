@@ -1549,7 +1549,7 @@ def _gen_guid():
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.role._client_factory import _msi_client_factory
+    from azure.cli.command_modules.role import _msi_client_factory
     client = _msi_client_factory(cmd.cli_ctx)
     if resource_group_name:
         return client.user_assigned_identities.list_by_resource_group(resource_group_name)

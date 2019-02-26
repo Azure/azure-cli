@@ -11,20 +11,18 @@ import mock
 
 from azure.cli.core.mock import DummyCli
 
-from azure.mgmt.authorization.models import RoleDefinition, RoleAssignmentCreateParameters
+from azure.mgmt.authorization.models import RoleDefinition
 from azure.graphrbac.models import (Application, ServicePrincipal, GraphErrorException,
-                                    ApplicationUpdateParameters, GetObjectsParameters)
+                                    ApplicationUpdateParameters)
 from azure.cli.command_modules.role.custom import (create_role_definition,
-                                                   update_role_definition,
-                                                   create_service_principal_for_rbac,
-                                                   reset_service_principal_credential,
-                                                   update_application, _try_x509_pem,
-                                                   delete_service_principal_credential,
-                                                   list_service_principal_credentials,
-                                                   update_application,
-                                                   _get_object_stubs,
-                                                   list_service_principal_owners,
-                                                   list_application_owners)
+                                               update_role_definition,
+                                               create_service_principal_for_rbac,
+                                               reset_service_principal_credential,
+                                               _try_x509_pem,
+                                               update_application,
+                                               _get_object_stubs,
+                                               list_service_principal_owners,
+                                               list_application_owners)
 
 from knack.util import CLIError
 
