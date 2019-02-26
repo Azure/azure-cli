@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.3.18
+++++++
 * add listen-address option to "az aks port-forward"
 
 2.3.17
