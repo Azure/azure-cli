@@ -138,7 +138,8 @@ setup(
     packages=[
         'azure',
         'azure.cli',
-        'azure.cli.command_modules.role'
+        'azure.cli.command_modules.profile',
+        'azure.cli.command_modules.role',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
