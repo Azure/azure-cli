@@ -4,9 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import abc
+import yaml
+import os
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core._help import (HelpExample, CliHelpFile)
+
 
 logger = get_logger(__name__)
 
@@ -127,29 +130,17 @@ class YamlLoaderMixin(object): # pylint:disable=too-few-public-methods
         return results
 
     @staticmethod
-    def _load_yaml_content(file_names_list, file_content_dict):
-        import os
+    def _parse_yaml_from_string(text, help_file_path):
+        dir_name, base_name = os.path.split(help_file_path)
+        pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
 
-        def _parse_yaml_from_string(text, help_file_path):
-            import yaml
+        if not text:
+            raise CLIError("No content passed for {}.".format(pretty_file_path))
 
-            dir_name, base_name = os.path.split(help_file_path)
-            pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
-
-            if not text:
-                raise CLIError("No content passed for {}.".format(pretty_file_path))
-
-            try:
-                return yaml.load(text)
-            except yaml.YAMLError as e:
-                raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
-
-        results = []
-        for file_name in file_names_list:
-            content = file_content_dict.get(file_name, '')
-            results.append(_parse_yaml_from_string(content, file_name))
-
-        return results
+        try:
+            return yaml.load(text)
+        except yaml.YAMLError as e:
+            raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
 
 
 class HelpLoaderV0(BaseHelpLoader):
@@ -190,13 +181,19 @@ class HelpLoaderV1(BaseHelpLoader, YamlLoaderMixin):
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
         return self._get_yaml_help_files_list(nouns, cmd_loader_map_ref)
 
+    def update_file_contents(self, file_contents):
+        for file_name in file_contents:
+            if file_name not in self._file_content_dict:
+                data_dict = {file_name: self._parse_yaml_from_string(file_contents[file_name], file_name)}
+                self._file_content_dict.update(data_dict)
+
     def load_entry_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix  # pylint: disable=protected-access
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
 
         files_list = self._get_yaml_help_files_list(command_nouns, cmd_loader_map_ref)
-        data_list = self._load_yaml_content(files_list, self._file_content_dict)
+        data_list = [self._file_content_dict[name] for name in files_list]
 
         self._entry_data = self._get_entry_data(help_obj.command, data_list)
 
