@@ -52,6 +52,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    # Command module dependencies
     'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-advisor',
@@ -107,6 +108,9 @@ DEPENDENCIES = [
     'azure-cli-storage',
     'azure-cli-telemetry',
     'azure-cli-vm',
+
+    # External Dependencies
+    'applicationinsights~=0.11.7',
     'azure-graphrbac~=0.53.0',
     'azure-keyvault~=1.1.0',
     'azure-mgmt-authorization~=0.50.0',
@@ -141,6 +145,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules.extension',
+        'azure.cli.command_modules.feedback',
         'azure.cli.command_modules.profile',
         'azure.cli.command_modules.role',
     ],
