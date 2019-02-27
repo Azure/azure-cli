@@ -44,12 +44,18 @@ def get_extensions_paths(include_prefix=False):
 
 
 def get_command_modules_paths(include_prefix=False):
-    glob_pattern = os.path.normcase('/src/command_modules/{}*/setup.py'.format(COMMAND_MODULE_PREFIX))
-    for path in glob.glob(get_repo_root() + glob_pattern):
+    independent_package_pattern = os.path.normcase('/src/command_modules/{}*/setup.py'.format(COMMAND_MODULE_PREFIX))
+    for path in glob.glob(get_repo_root() + independent_package_pattern):
         folder = os.path.dirname(path)
         name = os.path.basename(folder)
         if not include_prefix:
             name = name[len(COMMAND_MODULE_PREFIX):]
+        yield name, folder
+
+    azure_cli_package_pattern = os.path.normcase('/src/azure-cli/azure/cli/command_modules/*/__init__.py')
+    for path in glob.glob(get_repo_root() + azure_cli_package_pattern):
+        folder = os.path.dirname(path)
+        name = os.path.basename(folder)
         yield name, folder
 
 
