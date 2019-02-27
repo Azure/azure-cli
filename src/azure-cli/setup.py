@@ -111,7 +111,9 @@ DEPENDENCIES = [
     'azure-keyvault~=1.1.0',
     'azure-mgmt-authorization~=0.50.0',
     'azure-mgmt-monitor~=0.5.2',
-    'pytz'
+    'pip',
+    'pytz',
+    'wheel~=0.30.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -138,6 +140,7 @@ setup(
     packages=[
         'azure',
         'azure.cli',
+        'azure.cli.command_modules.extension',
         'azure.cli.command_modules.profile',
         'azure.cli.command_modules.role',
     ],
