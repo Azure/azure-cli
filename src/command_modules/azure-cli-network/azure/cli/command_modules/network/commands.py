@@ -58,7 +58,7 @@ def load_command_table(self, _):
 
     # region Command Types
     network_ag_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
         client_factory=cf_application_gateways
     )
 
@@ -68,143 +68,143 @@ def load_command_table(self, _):
     )
 
     network_asg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.application_security_groups_operations#ApplicationSecurityGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ApplicationSecurityGroupsOperations.{}',
         client_factory=cf_application_security_groups
     )
 
     network_ddos_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.ddos_protection_plans_operations#DdosProtectionPlansOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#DdosProtectionPlansOperations.{}',
         client_factory=cf_ddos_protection_plans
     )
 
     network_dns_zone_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations.zones_operations#ZonesOperations.{}',
+        operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
         client_factory=cf_dns_mgmt_zones,
         resource_type=ResourceType.MGMT_NETWORK_DNS
     )
 
     network_dns_record_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations.record_sets_operations#RecordSetsOperations.{}',
+        operations_tmpl='azure.mgmt.dns.operations#RecordSetsOperations.{}',
         client_factory=cf_dns_mgmt_record_sets,
         resource_type=ResourceType.MGMT_NETWORK_DNS
     )
 
     network_dns_reference_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations.dns_resource_reference_operations#DnsResourceReferenceOperations.{}',
+        operations_tmpl='azure.mgmt.dns.operations#DnsResourceReferenceOperations.{}',
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
     )
 
     network_endpoint_service_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.available_endpoint_services_operations#AvailableEndpointServicesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#AvailableEndpointServicesOperations.{}',
         client_factory=cf_endpoint_services,
         min_api='2017-06-01'
     )
 
     network_er_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_circuits_operations#ExpressRouteCircuitsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitsOperations.{}',
         client_factory=cf_express_route_circuits,
         min_api='2016-09-01'
     )
 
     network_er_connection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_connections_operations#ExpressRouteConnectionsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteConnectionsOperations.{}',
         client_factory=cf_express_route_connections,
         min_api='2018-08-01'
     )
 
     network_er_gateway_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_gateways_operations#ExpressRouteGatewaysOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteGatewaysOperations.{}',
         client_factory=cf_express_route_gateways,
         min_api='2018-08-01'
     )
 
     network_er_ports_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_ports_operations#ExpressRoutePortsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsOperations.{}',
         client_factory=cf_express_route_ports,
         min_api='2018-08-01'
     )
 
     network_er_port_locations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_ports_locations_operations#ExpressRoutePortsLocationsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsLocationsOperations.{}',
         client_factory=cf_express_route_port_locations,
         min_api='2018-08-01'
     )
 
     network_er_links_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_links_operations#ExpressRouteLinksOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteLinksOperations.{}',
         client_factory=cf_express_route_links,
         min_api='2018-08-01'
     )
 
     network_erca_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_circuit_authorizations_operations#ExpressRouteCircuitAuthorizationsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitAuthorizationsOperations.{}',
         client_factory=cf_express_route_circuit_authorizations,
         min_api='2016-09-01'
     )
 
     network_erconn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_circuit_connections_operations#ExpressRouteCircuitConnectionsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitConnectionsOperations.{}',
         client_factory=cf_express_route_circuit_connections,
         min_api='2018-07-01'
     )
 
     network_ersp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_service_providers_operations#ExpressRouteServiceProvidersOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteServiceProvidersOperations.{}',
         client_factory=cf_express_route_service_providers,
         min_api='2016-09-01'
     )
 
     network_er_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.express_route_circuit_peerings_operations#ExpressRouteCircuitPeeringsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitPeeringsOperations.{}',
         client_factory=cf_express_route_circuit_peerings
     )
 
     network_private_endpoint_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.interface_endpoints_operations#InterfaceEndpointsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#InterfaceEndpointsOperations.{}',
         client_factory=cf_interface_endpoints,
         min_api='2018-08-01'
     )
 
     network_lb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.load_balancers_operations#LoadBalancersOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
         client_factory=cf_load_balancers
     )
 
     network_lgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.local_network_gateways_operations#LocalNetworkGatewaysOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#LocalNetworkGatewaysOperations.{}',
         client_factory=cf_local_network_gateways
     )
 
     network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_network_interfaces
     )
 
     network_profile_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_profiles_operations#NetworkProfilesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#NetworkProfilesOperations.{}',
         client_factory=cf_network_profiles,
         min_api='2018-08-01'
     )
 
     network_nsg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_security_groups_operations#NetworkSecurityGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
         client_factory=cf_network_security_groups
     )
 
     network_nsg_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.security_rules_operations#SecurityRulesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#SecurityRulesOperations.{}',
         client_factory=cf_security_rules
     )
 
     network_public_ip_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.public_ip_addresses_operations#PublicIPAddressesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#PublicIPAddressesOperations.{}',
         client_factory=cf_public_ip_addresses
     )
 
     network_public_ip_prefix_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.public_ip_prefixes_operations#PublicIPPrefixesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#PublicIPPrefixesOperations.{}',
         client_factory=cf_public_ip_prefixes,
         min_api='2018-07-01'
     )
@@ -222,68 +222,68 @@ def load_command_table(self, _):
     )
 
     network_rt_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.route_tables_operations#RouteTablesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#RouteTablesOperations.{}',
         client_factory=cf_route_tables
     )
 
     network_subnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.subnets_operations#SubnetsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
         client_factory=cf_subnets
     )
 
     network_tmp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.trafficmanager.operations.profiles_operations#ProfilesOperations.{}',
+        operations_tmpl='azure.mgmt.trafficmanager.operations#ProfilesOperations.{}',
         client_factory=cf_traffic_manager_mgmt_profiles
     )
 
     network_tme_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.trafficmanager.operations.endpoints_operations#EndpointsOperations.{}',
+        operations_tmpl='azure.mgmt.trafficmanager.operations#EndpointsOperations.{}',
         client_factory=cf_traffic_manager_mgmt_endpoints
     )
 
     network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.virtual_network_gateways_operations#VirtualNetworkGatewaysOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
         client_factory=cf_virtual_network_gateways
     )
 
     network_vnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.virtual_networks_operations#VirtualNetworksOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#VirtualNetworksOperations.{}',
         client_factory=cf_virtual_networks
     )
 
     network_vnet_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.virtual_network_peerings_operations#VirtualNetworkPeeringsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkPeeringsOperations.{}',
         client_factory=cf_virtual_network_peerings
     )
 
     network_vpn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.virtual_network_gateway_connections_operations#VirtualNetworkGatewayConnectionsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewayConnectionsOperations.{}',
         client_factory=cf_virtual_network_gateway_connections
     )
 
     network_watcher_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_watchers_operations#NetworkWatchersOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#NetworkWatchersOperations.{}',
         client_factory=cf_network_watcher
     )
 
     network_watcher_cm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.connection_monitors_operations#ConnectionMonitorsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
         client_factory=cf_connection_monitor
     )
 
     network_watcher_pc_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.packet_captures_operations#PacketCapturesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
         client_factory=cf_packet_capture
     )
 
     network_sepd_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.service_endpoint_policy_definitions_operations#ServiceEndpointPolicyDefinitionsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ServiceEndpointPolicyDefinitionsOperations.{}',
         client_factory=cf_service_endpoint_policy_definitions,
         min_api='2018-07-01'
     )
 
     network_sepp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.service_endpoint_policies_operations#ServiceEndpointPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#ServiceEndpointPoliciesOperations.{}',
         client_factory=cf_service_endpoint_policies,
         min_api='2018-07-01'
     )
@@ -736,7 +736,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_route_table')
 
     network_rtr_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.routes_operations#RoutesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#RoutesOperations.{}',
         client_factory=cf_routes
     )
     with self.command_group('network route-table route', network_rtr_sdk) as g:
