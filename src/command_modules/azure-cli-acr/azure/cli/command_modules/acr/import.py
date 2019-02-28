@@ -40,7 +40,7 @@ def acr_import(cmd,
         cmd, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
 
     if not source:
-        raiseCLIError(SOURCE_NOT_FOUND)
+        raise CLIError(SOURCE_NOT_FOUND)
     source_image = source
 
     ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
