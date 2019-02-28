@@ -2,11 +2,10 @@
 
 Release History
 ===============
-cloud set: fix a bogus error about subscription not found 
 
 2.0.60
 ++++++
-* Minor fixes.
+cloud set: fix a bogus error about subscription not found 
 
 2.0.59
 ++++++
