@@ -34,27 +34,27 @@ from azure.cli.core.commands import CliCommandType
 custom_path = 'azure.cli.command_modules.batchai.custom#{}'
 
 batchai_workspace_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.batchai.operations.workspaces_operations#WorkspacesOperations.{}',
+    operations_tmpl='azure.mgmt.batchai.operations#WorkspacesOperations.{}',
     client_factory=workspace_client_factory)
 
 batchai_cluster_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.batchai.operations.clusters_operations#ClustersOperations.{}',
+    operations_tmpl='azure.mgmt.batchai.operations#ClustersOperations.{}',
     client_factory=cluster_client_factory)
 
 batchai_experiment_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.batchai.operations.experiments_operations#ExperimentsOperations.{}',
+    operations_tmpl='azure.mgmt.batchai.operations#ExperimentsOperations.{}',
     client_factory=workspace_client_factory)
 
 batchai_job_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.batchai.operations.jobs_operations#JobsOperations.{}',
+    operations_tmpl='azure.mgmt.batchai.operations#JobsOperations.{}',
     client_factory=job_client_factory)
 
 batchai_server_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.batchai.operations.file_servers_operations#FileServersOperations.{}',
+    operations_tmpl='azure.mgmt.batchai.operations#FileServersOperations.{}',
     client_factory=file_server_client_factory)
 
 batchai_usage_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.batchai.operations.usages_operations#UsagesOperations.{}',
+    operations_tmpl='azure.mgmt.batchai.operations#UsagesOperations.{}',
     client_factory=usage_client_factory)
 
 

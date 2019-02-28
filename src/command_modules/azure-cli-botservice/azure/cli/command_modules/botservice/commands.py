@@ -14,19 +14,19 @@ from azure.cli.command_modules.botservice._exception_handler import bot_exceptio
 
 def load_command_table(self, _):
     botOperations_commandType = CliCommandType(
-        operations_tmpl='azure.mgmt.botservice.operations.bots_operations#BotsOperations.{}',
+        operations_tmpl='azure.mgmt.botservice.operations#BotsOperations.{}',
         client_factory=get_botservice_management_client,
         exception_handler=bot_exception_handler
     )
 
     botServices_commandType = CliCommandType(
-        operations_tmpl='azure.mgmt.botservice.operations.bots_operations#BotsOperations.{}',
+        operations_tmpl='azure.mgmt.botservice.operations#BotsOperations.{}',
         client_factory=get_botOperations_client,
         exception_handler=bot_exception_handler
     )
 
     botConnections_commandType = CliCommandType(
-        operations_tmpl='azure.mgmt.botservice.operations.bot_connection_operations#BotConnectionOperations.{}',
+        operations_tmpl='azure.mgmt.botservice.operations#BotConnectionOperations.{}',
         client_factory=get_botConnections_client,
         exception_handler=bot_exception_handler
     )
@@ -44,7 +44,7 @@ def load_command_table(self, _):
     )
 
     updateBotService_commandType = CliCommandType(
-        operations_tmpl='azure.mgmt.botservice.operations.bots_operations#BotsOperations.{}',
+        operations_tmpl='azure.mgmt.botservice.operations#BotsOperations.{}',
         client_factory=get_botOperations_client,
         exception_handler=bot_exception_handler
     )

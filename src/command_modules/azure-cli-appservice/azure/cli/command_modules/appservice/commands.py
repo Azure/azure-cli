@@ -62,11 +62,11 @@ def load_command_table(self, _):
         client_factory=cf_web_client
     )
     appservice_plan_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.{}',
+        operations_tmpl='azure.mgmt.web.operations#AppServicePlansOperations.{}',
         client_factory=cf_plans
     )
     webapp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.{}',
+        operations_tmpl='azure.mgmt.web.operations#WebAppsOperations.{}',
         client_factory=cf_webapps
     )
     appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')

@@ -20,9 +20,14 @@ class NetworkCommandsLoader(AzCommandsLoader):
         super(NetworkCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_NETWORK,
                                                     custom_command_type=network_custom,
-                                                    suppress_extension=ModExtensionSuppress(__name__, 'dns', '0.0.2',
-                                                                                            reason='These commands are now in the CLI.',
-                                                                                            recommend_remove=True))
+                                                    suppress_extension=[
+                                                        ModExtensionSuppress(__name__, 'dns', '0.0.2',
+                                                                             reason='These commands are now in the CLI.',
+                                                                             recommend_remove=True),
+                                                        ModExtensionSuppress(__name__, 'express-route', '0.1.3',
+                                                                             reason='These commands are now in the CLI.',
+                                                                             recommend_remove=True)
+                                                    ])
 
     def load_command_table(self, args):
         from azure.cli.command_modules.network.commands import load_command_table

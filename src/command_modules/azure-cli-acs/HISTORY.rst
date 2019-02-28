@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.18
+++++++
+* add listen-address option to "az aks port-forward"
+
 2.3.17
 ++++++
 * az aks enable-addons /disable-addons: support case insensitive name

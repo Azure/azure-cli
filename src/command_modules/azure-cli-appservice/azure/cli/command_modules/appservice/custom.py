@@ -479,7 +479,6 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
 
     for arg in args[2:]:
-        print(arg, values[arg])
         if values.get(arg, None):
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 

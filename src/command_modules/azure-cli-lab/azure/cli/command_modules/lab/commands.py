@@ -24,59 +24,59 @@ from ._format import (transform_artifact_source_list, transform_artifact_source,
 def load_command_table(self, _):
 
     virtual_machine_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.virtual_machines_operations#VirtualMachinesOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#VirtualMachinesOperations.{}',
         client_factory=get_devtestlabs_virtual_machine_operation
     )
 
     lab_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.labs_operations#LabsOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#LabsOperations.{}',
         client_factory=get_devtestlabs_lab_operation
     )
 
     custom_image_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.custom_images_operations#CustomImagesOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#CustomImagesOperations.{}',
         client_factory=get_devtestlabs_custom_image_operation
     )
 
     gallery_image_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.gallery_images_operations#GalleryImagesOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#GalleryImagesOperations.{}',
         client_factory=get_devtestlabs_gallery_image_operation
     )
 
     artifact_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.artifacts_operations#ArtifactsOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#ArtifactsOperations.{}',
         client_factory=get_devtestlabs_artifact_operation
     )
 
     artifact_source_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.artifact_sources_operations#ArtifactSourcesOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#ArtifactSourcesOperations.{}',
         client_factory=get_devtestlabs_artifact_source_operation
     )
 
     virtual_network_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.virtual_networks_operations#VirtualNetworksOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#VirtualNetworksOperations.{}',
         client_factory=get_devtestlabs_virtual_network_operation
     )
 
     formula_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.formulas_operations#FormulasOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#FormulasOperations.{}',
         client_factory=get_devtestlabs_formula_operation
     )
 
     secret_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.secrets_operations#SecretsOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#SecretsOperations.{}',
         client_factory=get_devtestlabs_secret_operation,
         validator=validate_user_name
     )
 
     environment_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.environments_operations#EnvironmentsOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#EnvironmentsOperations.{}',
         client_factory=get_devtestlabs_environment_operation,
         validator=validate_user_name
     )
 
     arm_template_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.arm_templates_operations#ArmTemplatesOperations.{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations#ArmTemplatesOperations.{}',
         client_factory=get_devtestlabs_arm_template_operation
     )
 

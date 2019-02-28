@@ -23,6 +23,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                    storage_account=None, storage_account_key=None,
                    storage_default_container=None, storage_default_filesystem=None,
+                   storage_account_managed_identity=None,
                    vnet_name=None, subnet=None,
                    domain=None, ldaps_urls=None,
                    cluster_admin_account=None, cluster_admin_password=None,
@@ -99,13 +100,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Retrieve primary blob service endpoint
+    is_wasb = not storage_account_managed_identity
     storage_account_endpoint = None
     if storage_account:
-        dfs = True if storage_default_filesystem else False
-        storage_account_endpoint = get_storage_account_endpoint(cmd, storage_account, dfs)
+        storage_account_endpoint = get_storage_account_endpoint(cmd, storage_account, is_wasb)
 
     # Attempt to infer the storage account key from the endpoint
-    if not storage_account_key and storage_account:
+    if not storage_account_key and storage_account and is_wasb:
         from .util import get_key_for_storage_account
         logger.info('Storage account key not specified. Attempting to retrieve key...')
         key = get_key_for_storage_account(cmd, storage_account)
@@ -115,16 +116,20 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
-    if not storage_default_container and storage_account_endpoint \
-       and _is_wasb_endpoint(storage_account_endpoint):
+    if not storage_default_container and is_wasb:
         storage_default_container = cluster_name
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
+    elif not storage_default_filesystem and not is_wasb:
+        storage_default_filesystem = cluster_name
+        logger.warning('Default ADLS file system not specified, using "%s".', storage_default_filesystem)
 
     # Validate storage info parameters
-    if not _all_or_none(storage_account, storage_account_key,
-                        (storage_default_container or storage_default_filesystem)):
+    if is_wasb and not _all_or_none(storage_account, storage_account_key, storage_default_container):
         raise CLIError('If storage details are specified, the storage account, storage account key, '
-                       'and either the default container or default filesystem must be specified.')
+                       'and the default container must be specified.')
+    elif not is_wasb and not _all_or_none(storage_account, storage_default_filesystem):
+        raise CLIError('If storage details are specified, the storage account, '
+                       'and the default filesystem must be specified.')
 
     # Validate disk encryption parameters
     if not _all_or_none(encryption_vault_uri, encryption_key_name, encryption_key_version):
@@ -202,6 +207,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                 key=storage_account_key,
                 container=storage_default_container,
                 file_system=storage_default_filesystem,
+                resource_id=None if is_wasb else storage_account,
+                msi_resource_id=storage_account_managed_identity,
                 is_default=True
             )
         )
@@ -218,7 +225,14 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             for s in additional_storage_accounts
         ]
 
-    cluster_identity = assign_identity and build_identities_info([assign_identity])
+    assign_identities = []
+    if assign_identity:
+        assign_identities.append(assign_identity)
+
+    if storage_account_managed_identity:
+        assign_identities.append(storage_account_managed_identity)
+
+    cluster_identity = build_identities_info(assign_identities) if assign_identities else None
 
     domain_name = domain and parse_domain_name(domain)
     if not ldaps_urls and domain_name:
@@ -306,10 +320,6 @@ def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     return rg.location
-
-
-def _is_wasb_endpoint(storage_endpoint):
-    return '.blob.' in storage_endpoint
 
 
 # pylint: disable=unused-argument
