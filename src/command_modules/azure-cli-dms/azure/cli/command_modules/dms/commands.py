@@ -25,25 +25,25 @@ def dms_api_exception_handler(ex):
 def load_command_table(self, _):
 
     dms_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.datamigration.operations.services_operations#ServicesOperations.{}',
+        operations_tmpl='azure.mgmt.datamigration.operations#ServicesOperations.{}',
         client_factory=dms_client_factory,
         exception_handler=dms_api_exception_handler
     )
 
     dms_skus_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.datamigration.operations.resource_skus_operations#ResourceSkusOperations.{}',
+        operations_tmpl='azure.mgmt.datamigration.operations#ResourceSkusOperations.{}',
         client_factory=dms_client_factory,
         exception_handler=dms_api_exception_handler
     )
 
     dms_projects_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.datamigration.operations.projects_operations#ProjectsOperations.{}',
+        operations_tmpl='azure.mgmt.datamigration.operations#ProjectsOperations.{}',
         client_factory=dms_client_factory,
         exception_handler=dms_api_exception_handler
     )
 
     dms_tasks_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.datamigration.operations.tasks_operations#TasksOperations.{}',
+        operations_tmpl='azure.mgmt.datamigration.operations#TasksOperations.{}',
         client_factory=dms_client_factory,
         exception_handler=dms_api_exception_handler
     )
