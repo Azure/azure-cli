@@ -347,7 +347,7 @@ def _set_active_subscription(cli_ctx, cloud_name):
     profile = Profile(cli_ctx=cli_ctx)
     subscription_to_use = get_cloud_subscription(cloud_name) or \
                           next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
-                                if s[_STATE] == 'Enabled'),
+                                if s[_STATE] == 'Enabled' and s[_ENVIRONMENT_NAME] == cloud_name),
                                None)
     if subscription_to_use:
         try:
