@@ -93,7 +93,7 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
     nested_commands = []
 
     try:
-        command_args = shlex.split(command)[1:]
+        command_args = shlex.split(command, comments=True)[1:] # split commands into command args, ignore comments.
         command_args, nested_commands = _process_command_args(command_args)
         parser.parse_args(command_args)
     except ValueError as e:  # handle exception thrown by shlex.
@@ -116,17 +116,17 @@ def _extract_commands_from_example(example_text):
 
     # fold commands spanning multiple lines into one line. Split commands that use pipes
     example_text = example_text.replace("\\\n", " ")
-    example_text = example_text.replace("\\ ", " ")
-    example_text = example_text.replace(" | ", "\n")
+    example_text = example_text.replace("\\ ", " ")  # Handle cases where escpae is used to continue string on multiple line.
 
     commands = example_text.splitlines()
     processed_commands = []
     for command in commands:  # filter out commands
         if command.startswith("az"):
             processed_commands.append(command)
-        elif "az " in command:  # some commands start with "$(az ..." and even "`az in one case"
+        elif "az " in command:  # some commands start with "$(az ..." and even "`az in one case" deal with closing brackets later.
             idx = command.find("az ")
             command = command[idx:]
+            command = command.rstrip(")`")
             processed_commands.append(command)
 
     return processed_commands
@@ -141,10 +141,10 @@ def _process_command_args(command_args):
     result_args = []
     new_commands = []
     unwanted_chars = "$()`"  # to detect variable interpolation / command substitution
-    control_operators = ["&&","||"]
+    operators = ["&&","||", "|"]
 
     for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
-        if arg in control_operators: # handle cases where multiple commands are connected by control operators.
+        if arg in operators: # handle cases where multiple commands are connected by control operators or pipe.
             idx = command_args.index(arg)
             maybe_new_command = " ".join(command_args[idx:])
 
