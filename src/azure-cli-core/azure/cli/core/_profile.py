@@ -428,11 +428,8 @@ class Profile(object):
                   x[_ENVIRONMENT_NAME] == active_cloud.name]
 
         if len(result) != 1:
-            err = "The subscription of '{}' {} in cloud '{}'.".format(
-                subscription, 'has more than one match' if result else "doesn't exist", active_cloud.name)
-            if not result:
-                err += ' If this happens during "az cloud set", run "az account clear" and "az login" to clear it.'
-            raise CLIError(err)
+            raise CLIError("The subscription of '{}' {} in cloud '{}'.".format(
+                subscription, "doesn't exist" if not result else 'has more than one match', active_cloud.name))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False

@@ -233,6 +233,7 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 def _set_active_cloud(cli_ctx, cloud_name):
     cli_ctx.config.set_value('cloud', 'name', cloud_name)
+    cli_ctx.cloud = get_cloud(cli_ctx, cloud_name)
 
 
 def get_active_cloud_name(cli_ctx):
@@ -347,7 +348,7 @@ def _set_active_subscription(cli_ctx, cloud_name):
     profile = Profile(cli_ctx=cli_ctx)
     subscription_to_use = get_cloud_subscription(cloud_name) or \
                           next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
-                                if s[_STATE] == 'Enabled' and s[_ENVIRONMENT_NAME] == cloud_name),
+                                if s[_STATE] == 'Enabled'),
                                None)
     if subscription_to_use:
         try:
