@@ -236,7 +236,7 @@ class TestCloud(unittest.TestCase):
 
     @mock.patch('azure.cli.core.cloud._set_active_subscription', autospec=True)
     def test_switch_active_cloud(self, subscription_setter):
-        cli = DummyCli()
+        cli = mock.MagicMock()
         switch_active_cloud(cli, 'AzureGermanCloud')
         self.assertEquals(cli.cloud.name, 'AzureGermanCloud')
 
