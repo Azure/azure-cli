@@ -1399,8 +1399,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     if not disable_browser:
         wait_then_open_async(proxy_url)
     try:
-        subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                         "port-forward", "--address", listen_address, dashboard_pod, "{0}:9090".format(listen_port)])
+        try:
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                                    "port-forward", "--address", listen_address, dashboard_pod, "{0}:9090".format(listen_port)],
+                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as err:
+            if err.output.find(b'unknown flag: --address'):
+                logger.warning('The "--address" argument is only supported in kubectl v1.13 and later. It will be ignored.')
+                subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                                 "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
