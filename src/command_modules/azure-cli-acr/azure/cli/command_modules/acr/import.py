@@ -32,44 +32,48 @@ def acr_import(cmd,
                resource_group_name=None,
                repository=None,
                force=False):
-    
+
     if source_registry_username and not source_registry_password:
         raise CLIError(CREDENTIALS_INVALID)
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
-    
+
+    if not source:
+        raiseCLIError(SOURCE_NOT_FOUND)
+    source_image = source
+
     ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
         'ImportImageParameters', 'ImportSource', 'ImportMode')
 
     if source_registry:
         if is_valid_resource_id(source_registry):
-            source = ImportSource(resource_id=source_registry, source_image=source)
+            source = ImportSource(resource_id=source_registry, source_image=source_image)
         else:
             registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
             if registry:
-                source = ImportSource(resource_id=registry.id, source_image=source)
+                source = ImportSource(resource_id=registry.id, source_image=source_image)
             else:
                 raise CLIError(SOURCE_REGISTRY_NOT_FOUND)
     else:
-        slash = source.find('/')
+        slash = source_image.find('/')
         if slash > 0:
-            registry_uri = source[:slash]
+            registry_uri = source_image[:slash]
             dot = registry_uri.find('.')
             if dot > 0:
-                source = source[slash + 1:]
+                source_image = source_image[slash + 1:]
                 if source_registry_password:
                     ImportSourceCredentials = cmd.get_models('ImportSourceCredentials')
                     source = ImportSource(registry_uri=registry_uri,
-                                          source_image=source,
+                                          source_image=source_image,
                                           credentials=ImportSourceCredentials(password=source_registry_password,
                                                                               username=source_registry_username))
                 else:
                     registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
                     if registry:
-                        source = ImportSource(resource_id=registry.id, source_image=source)
+                        source = ImportSource(resource_id=registry.id, source_image=source_image)
                     else:
-                        source = ImportSource(registry_uri=registry_uri, source_image=source)
+                        source = ImportSource(registry_uri=registry_uri, source_image=source_image)
             else:
                 raise CLIError(LOGIN_SERVER_NOT_VALID)
         else:
