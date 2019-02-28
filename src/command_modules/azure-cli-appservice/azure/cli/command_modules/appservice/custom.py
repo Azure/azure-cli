@@ -2261,24 +2261,8 @@ def add_hc(cmd, name, resource_group, namespace, hybrid_connection):
     port = hostname_parts[1]
     id_parameters = hy_co_info.split("/")
 
-    # populate object with information from the hyrbid connection, and set it
-    """   # on webapp
-        hc = {
-        "name": hybrid_connection,
-        "type": hy_co.type,
-        "location": hy_co_location,
-        "properties": {
-            "serviceBusNamespace": id_parameters[8],
-            "relayName": hybrid_connection,
-            "relayArmUri": hy_co_info,
-            "hostName": hostname,
-            "port": port,
-            "sendKeyName": "defaultSender",
-            "sendKeyValue": hy_co_keys.primary_key
-        }
-        }
+    # populate object with information from the hyrbid connection, and set it on webapp
 
-    """
     hc = HybridConnection(service_bus_namespace=id_parameters[8], 
                         relay_name=hybrid_connection, 
                         relay_arm_uri=hy_co_info,
@@ -2491,19 +2475,9 @@ def add_vnet_int(cmd, name, resource_group, vnet, subnet):
         return
 
     subnet_resource_id = vnet_info.id + "/subnets/" + subnet
-    #swiftVnet = {
-    #    "id": swift_connection_info.id,
-    #    "name": swift_connection_info.name,
-    #    "type": swift_connection_info.type,
-    #    "location": vnet_info.location,
-    #    "properties": {
-    #        "subnetResourceId": subnet_resource_id,
-    #        "swiftSupported": "true"
-    #    }
-    #}
-    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=swift_connection_info.id,
-                                    swift_supported=True)
-
+    
+    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=swift_connection_info.id, swift_supported=True)
+    
     return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group, name, swiftVnet)
 
     # reformats the vnet entry, removing unecessary information
