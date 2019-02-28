@@ -38,7 +38,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
                                    RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
                                    DeletedAppRestoreRequest, DefaultErrorResponseException,
-                                   SnapshotRestoreRequest, SnapshotRecoverySource, HybridConnection)
+                                   SnapshotRestoreRequest, SnapshotRecoverySource, HybridConnection, SwiftVirtualNetwork)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -2281,7 +2281,7 @@ def add_hc(cmd, name, resource_group, namespace, hybrid_connection):
     """
     hc = HybridConnection(service_bus_namespace=id_parameters[8], 
                         relay_name=hybrid_connection, 
-                        relay_arm_uri=-hy_co_info,
+                        relay_arm_uri=hy_co_info,
                         hostname=hostname, 
                         port=port, 
                         send_key_name="defaultSender",
@@ -2426,8 +2426,11 @@ def list_vnet_int(cmd, name, resource_group):
     for x in result:
         # removes GUIDs from name and id
         longName = x.name
-        usIndex = longName.index('_')
-        shortName = longName[usIndex + 1:]
+        if '_' in longName:
+            usIndex = longName.index('_')
+            shortName = longName[usIndex + 1:]
+        else: 
+            shortName = longName
         v_id = x.id
         lastSlash = v_id.rindex('/')
         shortId = v_id[:lastSlash] + '/' + shortName
@@ -2488,18 +2491,20 @@ def add_vnet_int(cmd, name, resource_group, vnet, subnet):
         return
 
     subnet_resource_id = vnet_info.id + "/subnets/" + subnet
-    swiftVnet = {
-        "id": swift_connection_info.id,
-        "name": swift_connection_info.name,
-        "type": swift_connection_info.type,
-        "location": vnet_info.location,
-        "properties": {
-            "subnetResourceId": subnet_resource_id,
-            "swiftSupported": "true"
-        }
-    }
+    #swiftVnet = {
+    #    "id": swift_connection_info.id,
+    #    "name": swift_connection_info.name,
+    #    "type": swift_connection_info.type,
+    #    "location": vnet_info.location,
+    #    "properties": {
+    #        "subnetResourceId": subnet_resource_id,
+    #        "swiftSupported": "true"
+    #    }
+    #}
+    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=swift_connection_info.id,
+                                    swift_supported=True)
 
-    return_vnet = client.web_apps.set_swift_virtual_network_connection(resource_group, name, swiftVnet)
+    return_vnet = client.web_apps.create_or_update_swift_virtual_network_connection(resource_group, name, swiftVnet)
 
     # reformats the vnet entry, removing unecessary information
     id_strings = return_vnet.id.split('/')
