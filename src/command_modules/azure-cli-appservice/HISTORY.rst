@@ -2,11 +2,12 @@
 
 Release History
 ===============
-* functionapp: az functionapp devops-build, new command created
 
 0.2.14
 ++++++
 * webapp, functionapp: az webapp/function deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
+
+* functionapp: az functionapp devops-build, new command created
 
 0.2.13
 ++++++

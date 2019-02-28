@@ -283,6 +283,7 @@ short-summary: Get the details for available function app publishing credentials
 examples:
   - name: Get the details for available function app deployment publishing credentials.
     text: az functionapp deployment list-publishing-credentials --name MyFunctionApp   --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['functionapp deployment source'] = """
