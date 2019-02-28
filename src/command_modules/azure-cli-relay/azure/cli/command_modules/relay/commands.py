@@ -15,17 +15,17 @@ def load_command_table(self, _):
     from azure.cli.command_modules.relay.custom import empty_on_404
 
     sb_namespace_util = CliCommandType(
-        operations_tmpl='azure.mgmt.relay.operations.namespaces_operations#NamespacesOperations.{}',
+        operations_tmpl='azure.mgmt.relay.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory
     )
 
     sb_wcfrelay_util = CliCommandType(
-        operations_tmpl='azure.mgmt.relay.operations.wcf_relays_operations#WCFRelaysOperations.{}',
+        operations_tmpl='azure.mgmt.relay.operations#WCFRelaysOperations.{}',
         client_factory=wcfrelays_mgmt_client_factory
     )
 
     sb_hyco_util = CliCommandType(
-        operations_tmpl='azure.mgmt.relay.operations.hybrid_connections_operations#HybridConnectionsOperations.{}',
+        operations_tmpl='azure.mgmt.relay.operations#HybridConnectionsOperations.{}',
         client_factory=hycos_mgmt_client_factory
     )
 

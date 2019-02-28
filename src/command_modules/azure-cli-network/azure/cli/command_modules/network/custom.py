@@ -3576,7 +3576,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
                         virtual_network, location=None, tags=None,
                         no_wait=False, gateway_type=None, sku=None, vpn_type=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
-                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None):
+                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
+                        gateway_default_site=None):
     (VirtualNetworkGateway, BgpSettings, SubResource, VirtualNetworkGatewayIPConfiguration, VirtualNetworkGatewaySku,
      VpnClientConfiguration, AddressSpace) = cmd.get_models(
          'VirtualNetworkGateway', 'BgpSettings', 'SubResource', 'VirtualNetworkGatewayIPConfiguration',
@@ -3588,7 +3589,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
     vnet_gateway = VirtualNetworkGateway(
         gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
         sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
-        ip_configurations=[])
+        ip_configurations=[],
+        gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(
             subnet=SubResource(id=subnet),
@@ -3618,7 +3620,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
 def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
                         public_ip_address=None, gateway_type=None, enable_bgp=None,
                         asn=None, bgp_peering_address=None, peer_weight=None, virtual_network=None,
-                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None):
+                        address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
+                        gateway_default_site=None):
     AddressSpace, SubResource, VirtualNetworkGatewayIPConfiguration, VpnClientConfiguration = cmd.get_models(
         'AddressSpace', 'SubResource', 'VirtualNetworkGatewayIPConfiguration', 'VpnClientConfiguration')
 
@@ -3632,24 +3635,19 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
             instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = []
         instance.vpn_client_configuration.vpn_client_address_pool.address_prefixes = address_prefixes
 
-    if client_protocol is not None:
-        instance.vpn_client_configuration.vpn_client_protocols = client_protocol
+    with UpdateContext(instance.vpn_client_configuration) as c:
+        c.set_param('vpn_client_protocols', client_protocol)
+        c.set_param('radius_server_address', radius_server)
+        c.set_param('radius_server_secret', radius_secret)
 
-    if radius_server is not None:
-        instance.vpn_client_configuration.radius_server_address = radius_server
+    with UpdateContext(instance.sku) as c:
+        c.set_param('name', sku)
+        c.set_param('tier', sku)
 
-    if radius_secret is not None:
-        instance.vpn_client_configuration.radius_server_secret = radius_secret
-
-    if sku is not None:
-        instance.sku.name = sku
-        instance.sku.tier = sku
-
-    if vpn_type is not None:
-        instance.vpn_type = vpn_type
-
-    if tags is not None:
-        instance.tags = tags
+    with UpdateContext(instance) as c:
+        c.set_param('gateway_default_site', SubResource(id=gateway_default_site) if gateway_default_site else None)
+        c.set_param('vpn_type', vpn_type)
+        c.set_param('tags', tags)
 
     subnet_id = '{}/subnets/GatewaySubnet'.format(virtual_network) if virtual_network else \
         instance.ip_configurations[0].subnet.id
@@ -3848,7 +3846,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
                           enable_bgp=None, use_policy_based_traffic_selectors=None,
                           express_route_gateway_bypass=None):
-    ncf = network_client_factory(cmd.cli_ctx)
 
     with UpdateContext(instance) as c:
         c.set_param('routing_weight', routing_weight)
@@ -3860,29 +3857,32 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
 
     # TODO: Remove these when issue #1615 is fixed
     gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
+    ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway1_id['subscription'])
     instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
         gateway1_id['resource_group'], gateway1_id['name'])
 
     if instance.virtual_network_gateway2:
         gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
+        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
         instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
             gateway2_id['resource_group'], gateway2_id['name'])
 
     if instance.local_network_gateway2:
         gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
+        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
         instance.local_network_gateway2 = ncf.local_network_gateways.get(
             gateway2_id['resource_group'], gateway2_id['name'])
 
     return instance
+# endregion
 
 
-def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
-                              sa_life_time_seconds, sa_data_size_kilobytes,
-                              ipsec_encryption, ipsec_integrity,
-                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+# region IPSec Policy Commands
+def add_vnet_gateway_ipsec_policy(cmd, resource_group_name, gateway_name,
+                                  sa_life_time_seconds, sa_data_size_kilobytes,
+                                  ipsec_encryption, ipsec_integrity,
+                                  ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
     IpsecPolicy = cmd.get_models('IpsecPolicy')
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
-    conn = ncf.get(resource_group_name, connection_name)
     new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
                              sa_data_size_kilobytes=sa_data_size_kilobytes,
                              ipsec_encryption=ipsec_encryption,
@@ -3891,6 +3891,58 @@ def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
                              ike_integrity=ike_integrity,
                              dh_group=dh_group,
                              pfs_group=pfs_group)
+
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    try:
+        if gateway.vpn_client_configuration.vpn_client_ipsec_policies:
+            gateway.vpn_client_configuration.vpn_client_ipsec_policies.append(new_policy)
+        else:
+            gateway.vpn_client_configuration.vpn_client_ipsec_policies = [new_policy]
+    except AttributeError:
+        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+
+
+def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    gateway = ncf.get(resource_group_name, gateway_name)
+    try:
+        gateway.vpn_client_configuration.vpn_client_ipsec_policies = None
+    except AttributeError:
+        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+    if no_wait:
+        return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+
+    from azure.cli.core.commands import LongRunningOperation
+    poller = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, gateway_name, gateway)
+    return LongRunningOperation(cmd.cli_ctx)(poller).vpn_client_configuration.vpn_client_ipsec_policies
+
+
+def list_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
+    try:
+        return ncf.get(resource_group_name, gateway_name).vpn_client_configuration.vpn_client_ipsec_policies
+    except AttributeError:
+        raise CLIError('VPN client configuration must first be set through `az network vnet-gateway create/update`.')
+
+
+def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
+                              sa_life_time_seconds, sa_data_size_kilobytes,
+                              ipsec_encryption, ipsec_integrity,
+                              ike_encryption, ike_integrity, dh_group, pfs_group, no_wait=False):
+    IpsecPolicy = cmd.get_models('IpsecPolicy')
+    new_policy = IpsecPolicy(sa_life_time_seconds=sa_life_time_seconds,
+                             sa_data_size_kilobytes=sa_data_size_kilobytes,
+                             ipsec_encryption=ipsec_encryption,
+                             ipsec_integrity=ipsec_integrity,
+                             ike_encryption=ike_encryption,
+                             ike_integrity=ike_integrity,
+                             dh_group=dh_group,
+                             pfs_group=pfs_group)
+
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    conn = ncf.get(resource_group_name, connection_name)
     if conn.ipsec_policies:
         conn.ipsec_policies.append(new_policy)
     else:

@@ -8,6 +8,7 @@ from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_ty
 from ._validators import (validate_component_version,
                           validate_storage_account,
                           validate_msi,
+                          validate_storage_msi,
                           validate_subnet,
                           validate_domain_service)
 
@@ -98,6 +99,10 @@ def load_arguments(self, _):
                         'Uses the cluster name if none was specified. (WASB only)')
         c.argument('storage_default_filesystem', arg_group='Storage',
                    help='The storage filesystem the cluster will use. (DFS only)')
+        c.argument('storage_account_managed_identity', arg_group='Storage', validator=validate_storage_msi,
+                   completer=get_resource_name_completion_list('Microsoft.ManagedIdentity/userAssignedIdentities'),
+                   help='User-assigned managed identity with access to the storage account filesystem. '
+                        'Only required when storage account type is Azure Data Lake Storage Gen2.')
 
         # Network
         c.argument('vnet_name', arg_group='Network', validator=validate_subnet,

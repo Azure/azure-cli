@@ -19,11 +19,11 @@ def load_command_table(self, _):
     backup_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.backup.custom#{}')
 
     backup_vaults_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.recoveryservices.operations.vaults_operations#VaultsOperations.{}',
+        operations_tmpl='azure.mgmt.recoveryservices.operations#VaultsOperations.{}',
         client_factory=vaults_cf)
 
     backup_storage_config_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.recoveryservices.operations.backup_storage_configs_operations#BackupStorageConfigsOperations.{}',
+        operations_tmpl='azure.mgmt.recoveryservices.operations#BackupStorageConfigsOperations.{}',
         client_factory=vaults_cf)
 
     with self.command_group('backup vault', backup_vaults_sdk, client_factory=vaults_cf) as g:

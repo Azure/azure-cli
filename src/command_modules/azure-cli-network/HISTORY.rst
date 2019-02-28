@@ -3,11 +3,17 @@
 Release History
 ===============
 
+* `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
+
+2.3.3
++++++
 * `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
 * `express-route`: Port command groups from `express-route` extensions.
 * `express-route`: Added `express-route gateway` and `express-route port` command groups.
 * `express-route peering create/update`: Added argument `--legacy-mode`.
 * `express-route create/update`: Added argument `--allow-classic-operations` and `--express-route-port`.
+* `vnet-gateway create/update`: Add `--gateway-default-site` argument.
+* `vnet-gateway`: Added `ipsec-policy` commands.
 
 2.3.2
 +++++

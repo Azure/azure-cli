@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+* Remove erroneous print statement for `az webapp auth update`
+
+0.2.14
+++++++
 * functionapp: az functionapp devops-build, new command created
 
 0.2.13
