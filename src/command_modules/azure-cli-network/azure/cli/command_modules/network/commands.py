@@ -24,7 +24,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_interface_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
-    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links)
+    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_privatedns_mgmt_record_sets,
+    cf_privatedns_mgmt_virtual_network_links, cf_privatedns_mgmt_zones)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -38,7 +39,9 @@ from azure.cli.command_modules.network._format import (
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
-    transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
+    transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table,
+    transform_privatedns_link_table_output, transform_privatedns_record_set_output,
+    transform_privatedns_record_set_table_output, transform_privatedns_zone_table_output)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
@@ -289,6 +292,21 @@ def load_command_table(self, _):
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
+
+    network_privatedns_zone_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.privatedns.operations.private_zones_operations#PrivateZonesOperations.{}',
+        client_factory=cf_privatedns_mgmt_zones
+    )
+
+    network_privatedns_virtual_network_link_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.privatedns.operations.virtual_network_links_operations#VirtualNetworkLinksOperations.{}',
+        client_factory=cf_privatedns_mgmt_virtual_network_links
+    )
+
+    network_privatedns_record_set_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.privatedns.operations.record_sets_operations#RecordSetsOperations.{}',
+        client_factory=cf_privatedns_mgmt_record_sets
+    )
 
     # endregion
 
@@ -642,6 +660,51 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
         g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
                                  custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
+    # endregion
+
+    # region PrivateDns
+    with self.command_group('network private-dns zone', network_privatedns_zone_sdk) as g:
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.show_command('show', 'get', table_transformer=transform_privatedns_zone_table_output)
+        g.custom_command('list', 'list_privatedns_zones', client_factory=cf_privatedns_mgmt_zones, table_transformer=transform_privatedns_zone_table_output)
+        g.custom_command('create', 'create_privatedns_zone', client_factory=cf_privatedns_mgmt_zones, supports_no_wait=True)
+        g.generic_update_command('update', setter_name='update', custom_func_name='update_privatedns_zone', supports_no_wait=True)
+        g.wait_command('wait')
+
+    with self.command_group('network private-dns link vnet', network_privatedns_virtual_network_link_sdk) as g:
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.show_command('show', 'get', table_transformer=transform_privatedns_link_table_output)
+        g.command('list', 'list', table_transformer=transform_privatedns_link_table_output)
+        g.custom_command('create', 'create_privatedns_link', client_factory=cf_privatedns_mgmt_virtual_network_links, supports_no_wait=True)
+        g.generic_update_command('update', setter_name='update', custom_func_name='update_privatedns_link', supports_no_wait=True)
+        g.wait_command('wait')
+
+    with self.command_group('network private-dns record-set') as g:
+        g.custom_command('list', 'list_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
+
+    supported_records = ['a', 'aaaa', 'mx', 'ptr', 'srv', 'txt']
+    for record in supported_records:
+        with self.command_group('network private-dns record-set {}'.format(record), network_privatedns_record_set_sdk) as g:
+            g.show_command('show', 'get', transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
+            g.command('delete', 'delete', confirmation=True)
+            g.custom_command('list', 'list_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
+            g.custom_command('create', 'create_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+            g.custom_command('add-record', 'add_privatedns_{}_record'.format(record), client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+            g.custom_command('remove-record', 'remove_privatedns_{}_record'.format(record), client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+            g.generic_update_command('update', setter_name='update', custom_func_name='update_privatedns_record_set', transform=transform_privatedns_record_set_output)
+
+    with self.command_group('network private-dns record-set soa', network_privatedns_record_set_sdk) as g:
+        g.show_command('show', 'get', transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
+        g.custom_command('update', 'update_privatedns_soa_record', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+
+    with self.command_group('network private-dns record-set cname', network_privatedns_record_set_sdk) as g:
+        g.show_command('show', 'get', transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
+        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('list', 'list_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output, table_transformer=transform_privatedns_record_set_table_output)
+        g.custom_command('create', 'create_privatedns_record_set', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+        g.custom_command('set-record', 'add_privatedns_cname_record', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+        g.custom_command('remove-record', 'remove_privatedns_cname_record', client_factory=cf_privatedns_mgmt_record_sets, transform=transform_privatedns_record_set_output)
+        g.generic_update_command('update', setter_name='update', custom_func_name='update_privatedns_record_set', transform=transform_privatedns_record_set_output)
     # endregion
 
     # region NetworkProfiles

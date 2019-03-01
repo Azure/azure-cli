@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.3.4
++++++
+* `network private-dns`: Added support for Private DNS zones.
 * `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
 
 2.3.3
@@ -107,7 +110,7 @@ Release History
 
 2.2.2
 +++++
-* `dns`: Added dns support to 2017-03-09-profile for Azure Stack 
+* `dns`: Added dns support to 2017-03-09-profile for Azure Stack
 
 2.2.1
 ++++++

@@ -24,6 +24,9 @@ class NetworkCommandsLoader(AzCommandsLoader):
                                                         ModExtensionSuppress(__name__, 'dns', '0.0.2',
                                                                              reason='These commands are now in the CLI.',
                                                                              recommend_remove=True),
+                                                        ModExtensionSuppress(__name__, 'privatedns', '0.1.0',
+                                                                             reason='These commands are now in the CLI.',
+                                                                             recommend_remove=True),
                                                         ModExtensionSuppress(__name__, 'express-route', '0.1.3',
                                                                              reason='These commands are now in the CLI.',
                                                                              recommend_remove=True)
