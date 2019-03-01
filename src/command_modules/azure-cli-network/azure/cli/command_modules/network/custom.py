@@ -2752,7 +2752,6 @@ def _privatedns_add_record(record_set, record, record_type, is_list=False):
 
 
 def _privatedns_add_save_record(client, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=True):
-    from azure.mgmt.privatedns import PrivateDnsManagementClient
     from azure.mgmt.privatedns.models import RecordSet
     try:
         record_set = client.get(
@@ -2761,7 +2760,6 @@ def _privatedns_add_save_record(client, record, record_type, relative_record_set
         record_set = RecordSet(ttl=3600)
 
     _privatedns_add_record(record_set, record, record_type, is_list)
-
     return client.create_or_update(resource_group_name, private_zone_name, record_type, relative_record_set_name, record_set)
 
 
