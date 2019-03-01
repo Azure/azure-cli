@@ -3,6 +3,7 @@
 Release History
 ===============
 
+* webapp, functionapp: az webapp/functionapp deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
 * Remove erroneous print statement for `az webapp auth update`
 * functionapp: fix setting the correct image for runtime in Linux App Service plans
 
