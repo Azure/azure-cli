@@ -29,7 +29,7 @@ def load_command_table(self, _):
     )
 
     kv_vaults_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.keyvault.operations.vaults_operations#VaultsOperations.{}',
+        operations_tmpl='azure.mgmt.keyvault.operations#VaultsOperations.{}',
         client_factory=keyvault_client_vaults_factory,
         resource_type=ResourceType.MGMT_KEYVAULT
     )

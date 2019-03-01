@@ -14,27 +14,27 @@ def load_command_table(self, _):
     from ._client_factory import cf_hdinsight_script_actions
 
     hdinsight_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.clusters_operations#ClustersOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#ClustersOperations.{}',
         client_factory=cf_hdinsight_clusters
     )
 
     hdinsight_script_actions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.script_actions_operations#ScriptActionsOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#ScriptActionsOperations.{}',
         client_factory=cf_hdinsight_script_actions
     )
 
     hdinsight_applications_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.applications_operations#ApplicationsOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#ApplicationsOperations.{}',
         client_factory=cf_hdinsight_applications
     )
 
     hdinsight_extensions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.extensions_operations#ExtensionsOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#ExtensionsOperations.{}',
         client_factory=cf_hdinsight_extensions
     )
 
     hdinsight_locations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.locations_operations#LocationsOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#LocationsOperations.{}',
         client_factory=cf_hdinsight_locations
     )
 

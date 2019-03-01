@@ -72,6 +72,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('activate', 'activate')
+        g.command('list', 'list')
 
     with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
         g.show_command('show', 'get_quotas')
@@ -107,7 +108,6 @@ def load_command_table(self, _):
         g.batch_command('autoscale enable', 'enable_auto_scale')
         g.batch_command('autoscale evaluate', 'evaluate_auto_scale')
         g.custom_command('resize', 'resize_pool')
-        g.batch_command('os upgrade', 'upgrade_os')
 
     with self.command_group('batch node', pool_type) as g:
         g.batch_command('delete', 'remove_nodes')

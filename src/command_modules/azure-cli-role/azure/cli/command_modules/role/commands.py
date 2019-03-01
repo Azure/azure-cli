@@ -97,22 +97,22 @@ def get_graph_client_groups(cli_ctx, _):
 def load_command_table(self, _):
 
     role_users_sdk = CliCommandType(
-        operations_tmpl='azure.graphrbac.operations.users_operations#UsersOperations.{}',
+        operations_tmpl='azure.graphrbac.operations#UsersOperations.{}',
         client_factory=get_graph_client_users
     )
 
     role_group_sdk = CliCommandType(
-        operations_tmpl='azure.graphrbac.operations.groups_operations#GroupsOperations.{}',
+        operations_tmpl='azure.graphrbac.operations#GroupsOperations.{}',
         client_factory=get_graph_client_groups
     )
 
     signed_in_users_sdk = CliCommandType(
-        operations_tmpl='azure.graphrbac.operations.signed_in_user_operations#SignedInUserOperations.{}',
+        operations_tmpl='azure.graphrbac.operations#SignedInUserOperations.{}',
         client_factory=get_graph_client_signed_in_users
     )
 
     identity_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.msi.operations.user_assigned_identities_operations#UserAssignedIdentitiesOperations.{}',
+        operations_tmpl='azure.mgmt.msi.operations#UserAssignedIdentitiesOperations.{}',
         client_factory=_msi_user_identities_operations
     )
 

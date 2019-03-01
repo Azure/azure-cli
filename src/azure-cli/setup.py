@@ -8,14 +8,16 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
+
 try:
     from azure_bdist_wheel import cmdclass
 except ImportError:
     from distutils import log as logger
+
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.58"
+VERSION = "2.0.60"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -26,6 +28,7 @@ except OSError:
 else:
     import re
     import sys
+
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
         print('Could not find __version__ in azure/cli/__init__.py')
@@ -62,6 +65,7 @@ DEPENDENCIES = [
     'azure-cli-cdn',
     'azure-cli-cloud',
     'azure-cli-cognitiveservices',
+    'azure-cli-command_modules-nspkg',
     'azure-cli-configure',
     'azure-cli-consumption',
     'azure-cli-container',
@@ -100,8 +104,9 @@ DEPENDENCIES = [
     'azure-cli-servicefabric',
     'azure-cli-signalr',
     'azure-cli-sql',
-    'azure-cli-sqlvirtualmachine',
+    'azure-cli-sqlvm',
     'azure-cli-storage',
+    'azure-cli-telemetry',
     'azure-cli-vm'
 ]
 

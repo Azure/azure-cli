@@ -38,6 +38,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_registries
     )
 
+    acr_login_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.custom#{}'
+    )
+
     acr_import_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.import#{}',
         client_factory=cf_acr_registries
@@ -104,7 +108,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('create', 'acr_create')
         g.command('delete', 'acr_delete')
         g.show_command('show', 'acr_show')
-        g.command('login', 'acr_login', table_transformer=None)
         g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
         g.generic_update_command('update',
                                  getter_name='acr_update_get',
@@ -112,6 +115,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  custom_func_name='acr_update_custom',
                                  custom_func_type=acr_custom_util,
                                  client_factory=cf_acr_registries)
+
+    with self.command_group('acr', acr_login_util) as g:
+        g.command('login', 'acr_login')
 
     with self.command_group('acr', acr_import_util) as g:
         g.command('import', 'acr_import')

@@ -14,8 +14,8 @@ from knack.util import CLIError, todict
 from knack.log import get_logger
 from msrest.serialization import TZ_UTC
 from msrestazure.azure_exceptions import CloudError
-from azure.graphrbac.models.graph_error import GraphErrorException
 from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    GraphErrorException,
                                     ServicePrincipalCreateParameters)
 
 from azure.cli.command_modules.ams._client_factory import (_graph_client_factory, _auth_client_factory)

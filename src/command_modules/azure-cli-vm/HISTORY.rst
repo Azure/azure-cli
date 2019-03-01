@@ -2,11 +2,16 @@
 
 Release History
 ===============
+2.2.16
+++++++
+* vm create: Fixed issue where --accelerated-networking was not enabled by default for Ubuntu 18.0.
+
 2.2.15
 ++++++
 * vm list-skus: Allow use of `--all` in place of `--all true`
 * Add `vmss run-command [invoke / list / show]`
 * vmss encryption enable: Fixed bug where command fails if it was ran previously.
+* Moving `az identity` command tree to `azure-cli-role`.
 
 2.2.14
 ++++++

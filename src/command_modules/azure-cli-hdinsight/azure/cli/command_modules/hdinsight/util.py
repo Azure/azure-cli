@@ -23,7 +23,7 @@ def get_key_for_storage_account(cmd, storage_account):  # pylint: disable=unused
     return storage_account_key
 
 
-def get_storage_account_endpoint(cmd, storage_account, dfs):
+def get_storage_account_endpoint(cmd, storage_account, is_wasb):
     from ._client_factory import cf_storage
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
     host = None
@@ -37,16 +37,16 @@ def get_storage_account_endpoint(cmd, storage_account, dfs):
             resource_group_name=resource_group_name,
             account_name=storage_account_name)
 
-        def extract_endpoint(storage_account, dfs):
+        def extract_endpoint(storage_account, is_wasb):
             if not storage_account:
                 return None
-            return storage_account.primary_endpoints.dfs if dfs else storage_account.primary_endpoints.blob
+            return storage_account.primary_endpoints.dfs if not is_wasb else storage_account.primary_endpoints.blob
 
         def extract_host(uri):
             import re
             return uri and re.search('//(.*)/', uri).groups()[0]
 
-        host = extract_host(extract_endpoint(storage_account, dfs))
+        host = extract_host(extract_endpoint(storage_account, is_wasb))
     return host
 
 
@@ -90,8 +90,8 @@ def parse_domain_name(domain):
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
     domain_name = None
     if is_valid_resource_id(domain):
-        parsed_subnet_id = parse_resource_id(domain)
-        domain_name = parsed_subnet_id['resource_name']
+        parsed_domain_id = parse_resource_id(domain)
+        domain_name = parsed_domain_id['resource_name']
     return domain_name
 
 

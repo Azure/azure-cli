@@ -52,37 +52,37 @@ def load_command_table(self, _):
     resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
 
     resource_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#ResourceGroupsOperations.{}',
         client_factory=cf_resource_groups,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_provider_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#ProvidersOperations.{}',
         client_factory=cf_providers,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_feature_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.{}',
+        operations_tmpl='azure.mgmt.resource.features.operations#FeaturesOperations.{}',
         client_factory=cf_features,
         resource_type=ResourceType.MGMT_RESOURCE_FEATURES
     )
 
     resource_tag_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#TagsOperations.{}',
         client_factory=cf_tags,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_deployment_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentsOperations.{}',
         client_factory=cf_deployments,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_deployment_operation_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentOperations.{}',
         client_factory=cf_deployment_operations,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
@@ -122,13 +122,13 @@ def load_command_table(self, _):
     )
 
     resource_managementgroups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations.management_groups_operations#ManagementGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsOperations.{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
     )
 
     resource_managementgroups_subscriptions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations.management_group_subscriptions_operations#ManagementGroupSubscriptionsOperations.{}',
+        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
         client_factory=cf_management_group_subscriptions,
         exception_handler=managementgroups_exception_handler
     )

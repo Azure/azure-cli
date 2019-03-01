@@ -1039,7 +1039,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),  # this weird field means it is a linux
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp, plan, storage_account), checks=[
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
         result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
@@ -1047,6 +1047,10 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('[0].name', functionapp)
         ]).get_output_in_json()
         self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0')])
+
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
