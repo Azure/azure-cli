@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import abc
-import yaml
 import os
+import yaml
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core._help import (HelpExample, CliHelpFile)
@@ -92,14 +92,13 @@ class BaseHelpLoader(ABC):
         help_obj.parameters = loaded_params
 
 
-class YamlLoaderMixin(object): # pylint:disable=too-few-public-methods
+class YamlLoaderMixin(object):  # pylint:disable=too-few-public-methods
     """A class containing helper methods for Yaml Loaders."""
 
     # get the list of yaml help file names for the command or group
     @staticmethod
     def _get_yaml_help_files_list(nouns, cmd_loader_map_ref):
         import inspect
-        import os
 
         command_nouns = " ".join(nouns)
         # if command in map, get the loader. Path of loader is path of helpfile.
