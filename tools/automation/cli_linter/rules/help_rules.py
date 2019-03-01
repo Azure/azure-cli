@@ -8,6 +8,14 @@ from ..linter import RuleError
 from ..util import LinterError
 import shlex
 import mock
+import re
+
+# 'az' space then repeating runs of quoted tokens or non quoted characters
+_az_pattern = 'az\s*' + '(([^\"\'])*|' + '((\"[^\"]*\"\s*)|(\'[^\']*\'\s*))' + ')'
+# match the two types of command substitutions
+_CMD_SUB_1 = re.compile("\$\(\s*" + "(" + _az_pattern + ")" + "\)")
+_CMD_SUB_2 = re.compile("`\s*" + "(" + _az_pattern + ")" + "`")
+
 from knack.log import get_logger
 logger = get_logger(__name__)
 
@@ -111,36 +119,35 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
 
     return violation, nested_commands
 
+
 # return list of commands in the example text
 def _extract_commands_from_example(example_text):
 
     # fold commands spanning multiple lines into one line. Split commands that use pipes
-    example_text = example_text.replace("\\\n", " ")
-    example_text = example_text.replace("\\ ", " ")  # Handle cases where escpae is used to continue string on multiple line.
+    example_text = example_text.replace("\\\n", " ") # wrap escaped newline into one line.
+    example_text = example_text.replace("\\ ", " ")  # remove left over escape after wrapping
 
     commands = example_text.splitlines()
     processed_commands = []
     for command in commands:  # filter out commands
-        if command.startswith("az"):
+        command.strip()
+        if command.startswith("az"): # if this is a single az command add it.
             processed_commands.append(command)
-        elif "az " in command:  # some commands start with "$(az ..." and even "`az in one case" deal with closing brackets later.
-            idx = command.find("az ")
-            command = command[idx:]
-            command = command.rstrip(")`")
-            processed_commands.append(command)
+
+        for re_prog in [_CMD_SUB_1, _CMD_SUB_2]:
+            start = 0
+            match = re_prog.search(command, start)
+            while match:  # while there is a nested az command of type 1 $( az ...)
+                processed_commands.append(match.group(1).strip())  # add it
+                start = match.end(1)  # get index of rest of string
+                match = re_prog.search(command, start)  # attempt to get next match
 
     return processed_commands
 
 
 def _process_command_args(command_args):
-
-    def _is_special_arg(arg):
-        is_special = (arg.startswith("$(") and arg.endswith(")")) or (arg.startswith("`") and arg.endswith("`"))
-        return is_special
-
     result_args = []
     new_commands = []
-    unwanted_chars = "$()`"  # to detect variable interpolation / command substitution
     operators = ["&&","||", "|"]
 
     for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
@@ -152,11 +159,6 @@ def _process_command_args(command_args):
             if idx != -1:
                 new_commands.append(maybe_new_command[idx:])  # remaining command is in fact a new command / commands.
             break
-
-        if _is_special_arg(arg): # if this arg executes another command, it could be a cli command.
-            stripped = arg.strip(unwanted_chars)
-            if stripped.startswith("az "):  # store any new commands
-                new_commands.append(stripped)
 
         result_args.append(arg)
 
