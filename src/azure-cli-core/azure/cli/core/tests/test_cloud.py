@@ -23,7 +23,8 @@ from azure.cli.core.cloud import (Cloud,
                                   KNOWN_CLOUDS,
                                   update_cloud,
                                   CloudEndpointNotSetException,
-                                  CannotUnregisterCloudException)
+                                  CannotUnregisterCloudException,
+                                  switch_active_cloud)
 
 from azure.cli.core._profile import Profile
 
@@ -232,6 +233,15 @@ class TestCloud(unittest.TestCase):
         cli = DummyCli()
         self.assertTrue(cloud_is_registered(cli, AZURE_PUBLIC_CLOUD.name))
         self.assertFalse(cloud_is_registered(cli, 'MyUnknownCloud'))
+
+    @mock.patch('azure.cli.core.cloud._set_active_subscription', autospec=True)
+    def test_switch_active_cloud(self, subscription_setter):
+        cli = mock.MagicMock()
+        switch_active_cloud(cli, 'AzureGermanCloud')
+        self.assertEquals(cli.cloud.name, 'AzureGermanCloud')
+
+        switch_active_cloud(cli, 'AzureChinaCloud')
+        self.assertEquals(cli.cloud.name, 'AzureChinaCloud')
 
 
 if __name__ == '__main__':
