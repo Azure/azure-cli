@@ -292,17 +292,21 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
 def k8s_install_cli(cmd, client_version='latest', install_location=None):
     """Install kubectl, a command-line interface for Kubernetes clusters."""
 
+    source_url = "https://storage.googleapis.com/kubernetes-release/release"
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == 'azurechinacloud':
+        source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
+
     if client_version == 'latest':
         context = _ssl_context()
-        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt',
-                          context=context).read()
+        version = urlopen(source_url + '/stable.txt', context=context).read()
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
 
     file_url = ''
     system = platform.system()
-    base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
+    base_url = source_url + '/{}/bin/{}/amd64/{}'
 
     # ensure installation directory exists
     install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
