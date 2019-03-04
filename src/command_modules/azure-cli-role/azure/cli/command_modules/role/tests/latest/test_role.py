@@ -23,6 +23,12 @@ class RoleScenarioTest(ScenarioTest):
         account_info = self.cmd('account show').get_output_in_json()
         return account_info['user']['type'] == 'servicePrincipal'
 
+class LiveRoleScenarioTest(LiveScenarioTest):
+
+    def run_under_service_principal(self):
+        account_info = self.cmd('account show').get_output_in_json()
+        return account_info['user']['type'] == 'servicePrincipal'
+
 
 class RbacSPSecretScenarioTest(RoleScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
@@ -218,6 +224,36 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                      checks=self.is_empty())
 
 
+class LiveRoleAssignmentScenarioTest(LiveRoleScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_role_audit')
+    def test_role_assignment_audits(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        user = self.create_random_name('testuser', 15)
+        self.kwargs.update({
+            'upn': user + '@azuresdkteam.onmicrosoft.com',
+        })
+
+        self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+        try:
+            now = datetime.datetime.utcnow()
+            start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
+                                                     now.minute, now.second)
+
+            self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+            time.sleep(60)
+            result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
+
+            self.assertTrue([x for x in result if (resource_group in x['scope'] and
+                                                   x['principalName'] == self.kwargs['upn'])])
+        finally:
+            self.cmd('ad user delete --upn-or-object-id {upn}')
+
+
 class RoleAssignmentScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
@@ -279,40 +315,41 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
-    @ResourceGroupPreparer(name_prefix='cli_role_audit')
-    @AllowLargeResponse()
-    def test_role_assignment_audits(self, resource_group):
-        if self.run_under_service_principal():
-            return  # this test delete users which are beyond a SP's capacity, so quit...
-
-        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            user = self.create_random_name('testuser', 15)
-            self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
-            })
-
-            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
-
-            try:
-                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
-
-                if self.is_live or self.in_recording:
-                    now = datetime.datetime.utcnow()
-                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
-                                                             now.minute, now.second)
-                    time.sleep(60)
-                    result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
-                else:
-                    # NOTE: get the time range from the recording file and use them below for playback
-                    start_time, end_time = '2018-03-19T17:58:13Z', '2018-03-20T17:59:13Z'
-                    result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
-                                      start_time, end_time)).get_output_in_json()
-
-                self.assertTrue([x for x in result if (resource_group in x['scope'] and
-                                                       x['principalName'] == self.kwargs['upn'])])
-            finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+    # @ResourceGroupPreparer(name_prefix='cli_role_audit')
+    # @AllowLargeResponse()
+    # def test_role_assignment_audits(self, resource_group):
+    #     if self.run_under_service_principal():
+    #         return  # this test delete users which are beyond a SP's capacity, so quit...
+    #
+    #     with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+    #         user = self.create_random_name('testuser', 15)
+    #         self.kwargs.update({
+    #             'upn': user + '@azuresdkteam.onmicrosoft.com',
+    #         })
+    #
+    #         self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+    #         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+    #
+    #         try:
+    #             if self.is_live or self.in_recording:
+    #                 now = datetime.datetime.utcnow()
+    #                 start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
+    #                                                          now.minute, now.second)
+    #
+    #                 self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+    #                 time.sleep(60)
+    #                 result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
+    #             else:
+    #                 # NOTE: get the time range from the recording file and use them below for playback
+    #                 start_time, end_time = '2018-03-19T17:58:13Z', '2018-03-20T17:59:13Z'
+    #                 self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+    #                 result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
+    #                                   start_time, end_time)).get_output_in_json()
+    #
+    #             self.assertTrue([x for x in result if (resource_group in x['scope'] and
+    #                                                    x['principalName'] == self.kwargs['upn'])])
+    #         finally:
+    #             self.cmd('ad user delete --upn-or-object-id {upn}')
 
 
 class RoleAssignmentListScenarioTest(ScenarioTest):
