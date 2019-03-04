@@ -143,7 +143,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     # override
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
-        super().show_help(cli_name, nouns, parser, is_group)
+        super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
