@@ -1398,14 +1398,16 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     # look for the existing application
     query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
     aad_sps = list(client.service_principals.list(filter=query_exp))
-    if not aad_sps:
-        raise CLIError("can't find a service principal matching '{}'".format(name))
+
     if len(aad_sps) > 1:
         raise CLIError(
             'more than one entry matches the name, please provide unique names like '
             'app id guid, or app id uri')
-    app = show_application(client.applications, aad_sps[0].app_id)
+    app = (show_application(client.applications, aad_sps[0].app_id) if aad_sps else
+           show_application(client.applications, name))  # possible there is no SP created for the app
 
+    if not app:
+        raise CLIError("can't find an application matching '{}'".format(name))
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
