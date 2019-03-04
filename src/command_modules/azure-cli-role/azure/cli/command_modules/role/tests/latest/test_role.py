@@ -23,6 +23,7 @@ class RoleScenarioTest(ScenarioTest):
         account_info = self.cmd('account show').get_output_in_json()
         return account_info['user']['type'] == 'servicePrincipal'
 
+
 class LiveRoleScenarioTest(LiveScenarioTest):
 
     def run_under_service_principal(self):
