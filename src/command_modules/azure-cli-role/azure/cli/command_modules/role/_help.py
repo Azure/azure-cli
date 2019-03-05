@@ -327,6 +327,7 @@ helps['role definition list'] = """
 """
 helps['role definition update'] = """
     type: command
+    short-summary: Update a role definition.
     parameters:
         - name: --role-definition
           type: string
