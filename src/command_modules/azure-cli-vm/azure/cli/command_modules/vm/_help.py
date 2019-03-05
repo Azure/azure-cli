@@ -658,13 +658,17 @@ helps['vm disk attach'] = """
 helps['vm encryption'] = """
     type: group
     short-summary: "Manage encryption of VM disks."
-    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    long-summary: |
+        For more information, see:
+        https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vm encryption enable'] = """
     type: command
-    short-summary: "Enable disk encryption on the OS disk and/or data disks."
-    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks."
+    long-summary: |
+        For more information, see:
+        https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
     parameters:
         - name: --aad-client-id
           short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -680,7 +684,10 @@ helps['vm encryption enable'] = """
 
 helps['vm encryption disable'] = """
     type: command
-    short-summary: Disable disk encryption on the OS disk and/or data disks.
+    short-summary: Disable disk encryption on the OS disk and/or data disks. Decrypt mounted disks.
+    long-summary: |
+        For Linux VMs, disabling encryption is only permitted on data volumes.
+        For Windows VMS, disabling encryption is permitted on both OS and data volumes.
 """
 
 helps['vm encryption show'] = """
