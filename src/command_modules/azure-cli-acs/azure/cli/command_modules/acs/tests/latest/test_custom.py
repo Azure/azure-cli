@@ -634,7 +634,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'kubectl.exe')
-            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+            k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
             # 2 warnings, 1st for download result; 2nd for updating PATH
             self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
@@ -642,7 +642,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             if platform.system() == 'Windows':
                 # try again with install location in PATH, we should only get one more warning
                 os.environ['PATH'] += ';' + temp_dir
-                k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+                k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
                 self.assertEqual(logger_mock.warning.call_count, 3)
         finally:
             shutil.rmtree(temp_dir)
@@ -654,7 +654,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
-            k8s_install_cli(None, client_version='1.2.3', install_location=test_location)
+            k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertTrue(os.path.exists(test_location))
         finally:
             shutil.rmtree(temp_dir)
