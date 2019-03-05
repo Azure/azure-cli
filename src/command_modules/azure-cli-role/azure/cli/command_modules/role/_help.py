@@ -327,11 +327,10 @@ helps['role definition list'] = """
 """
 helps['role definition update'] = """
     type: command
-    short-summary: Update a role definition.
     parameters:
         - name: --role-definition
           type: string
-          short-summary: Description of an existing role as JSON, or a path to a file containing a JSON description. It must contain
+          short-summary: Description of an existing role as JSON, or a path to a file containing a JSON description.
     examples:
         - name: Update a role using the output of "az role definition list"
           text: |

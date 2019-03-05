@@ -71,16 +71,16 @@ def _create_update_role_definition(cmd, role_definition, for_update):
 
     worker = MultiAPIAdaptor(cmd.cli_ctx)
     if for_update:  # for update, we need to use guid style unique name
-        role_resouece_id = role_definition.get('id')
-        if not role_resouece_id:
+        role_resource_id = role_definition.get('id')
+        if not role_resource_id:
             logger.warning('Role "id" is missing. Look for the role in the current subscription...')
-        definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resouece_id).role_definitions
+        definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scope = (scopes_in_definition[0] if scopes_in_definition else
                  '/subscriptions/' + definitions_client.config.subscription_id)
-        if role_resouece_id:
+        if role_resource_id:
             from msrestazure.tools import parse_resource_id
-            role_id = parse_resource_id(role_resouece_id)['name']
+            role_id = parse_resource_id(role_resource_id)['name']
             role_name = role_definition['roleName']
         else:
             matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scope)
