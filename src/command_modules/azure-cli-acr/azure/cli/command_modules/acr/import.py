@@ -16,7 +16,7 @@ SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found in t
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
 SOURCE_NOT_FOUND = "Source cannot be found. " \
                    "Please provide a valid image and source registry or a fully qualified source."
-LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid" \
+LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
                          "because it is not a fully qualified domain name."
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
@@ -24,7 +24,7 @@ CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 def acr_import(cmd,
                client,
                registry_name,
-               source,
+               source_image,
                source_registry=None,
                source_registry_username=None,
                source_registry_password=None,
@@ -38,10 +38,6 @@ def acr_import(cmd,
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
-
-    if not source:
-        raise CLIError(SOURCE_NOT_FOUND)
-    source_image = source
 
     ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
         'ImportImageParameters', 'ImportSource', 'ImportMode')
