@@ -1732,6 +1732,16 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
     instance = client.get(resource_group_name, name)
+
+    if instance.kubernetes_version == kubernetes_version:
+        if instance.provisioning_state == "Succeeded":
+            logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
+                           "will occur when upgrading to the same version if the cluster is not in a failed state.",
+                           instance.kubernetes_version)
+        elif instance.provisioning_state == "Failed":
+            logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
+                           "attempt resolution of failed cluster state.", instance.kubernetes_version)
+
     instance.kubernetes_version = kubernetes_version
 
     # null out the SP and AAD profile because otherwise validation complains
