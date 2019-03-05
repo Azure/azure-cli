@@ -27,7 +27,7 @@ def validate_connector_name(namespace):
     found = regex.findall(namespace.connector_name)
     if not found:
         raise CLIError('--connector-name must consist of lower case alphanumeric characters or dashes (-), '
-                       'and must start and end with an alphanumeric character.')
+                       'and must start and end with alphanumeric characters.')
 
 
 def validate_ssh_key(namespace):
@@ -83,16 +83,16 @@ def validate_k8s_version(namespace):
             namespace.kubernetes_version = found[0]
         else:
             raise CLIError('--kubernetes-version should be the full version number, '
-                           'such as "1.7.12" or "1.8.7"')
+                           'such as "1.11.8" or "1.12.6"')
 
 
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     if namespace.nodepool_name != "":
         if len(namespace.nodepool_name) > 12:
-            raise CLIError('--nodepool-name can contain atmost 12 characters')
+            raise CLIError('--nodepool-name can contain at most 12 characters')
         if not namespace.nodepool_name.isalnum():
-            raise CLIError('--nodepool-name should only contain alphanumeric characters')
+            raise CLIError('--nodepool-name should contain only alphanumeric characters')
 
 
 def validate_k8s_client_version(namespace):
@@ -103,7 +103,7 @@ def validate_k8s_client_version(namespace):
         namespace.client_version = found[0]
     else:
         raise CLIError('--client-version should be the full version number '
-                       '(such as "1.7.12" or "1.8.7") or "latest"')
+                       '(such as "1.11.8" or "1.12.6") or "latest"')
 
 
 def validate_linux_host_name(namespace):
