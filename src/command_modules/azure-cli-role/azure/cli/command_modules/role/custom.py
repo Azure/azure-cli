@@ -56,7 +56,6 @@ def update_role_definition(cmd, role_definition):
 
 
 def _create_update_role_definition(cmd, role_definition, for_update):
-    definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
@@ -70,28 +69,38 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         new_name = n[:1].lower() + n[1:]
         role_definition[new_name] = role_definition.pop(n)
 
-    role_name = role_definition.get('name', None)
-    if not role_name:
-        raise CLIError("please provide role name")
+    worker = MultiAPIAdaptor(cmd.cli_ctx)
     if for_update:  # for update, we need to use guid style unique name
+        role_resource_id = role_definition.get('id')
+        if not role_resource_id:
+            logger.warning('Role "id" is missing. Look for the role in the current subscription...')
+        definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scope = (scopes_in_definition[0] if scopes_in_definition else
                  '/subscriptions/' + definitions_client.config.subscription_id)
-        matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_name, scope)
-        if len(matched) != 1:
-            raise CLIError('Please provide the unique logic name of an existing role')
-        role_definition['name'] = matched[0].name
-        # ensure correct logical name and guid name. For update we accept both
-        worker = MultiAPIAdaptor(cmd.cli_ctx)
-        role_name = worker.get_role_property(matched[0], 'role_name')
-        role_id = matched[0].name
-    else:
+        if role_resource_id:
+            from msrestazure.tools import parse_resource_id
+            role_id = parse_resource_id(role_resource_id)['name']
+            role_name = role_definition['roleName']
+        else:
+            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scope)
+            if len(matched) > 1:
+                raise CLIError('More than 2 definitions are found with the name of "{}"'.format(
+                    role_definition['name']))
+            elif not matched:
+                raise CLIError('No definition was found with the name of "{}"'.format(role_definition['name']))
+            role_id = role_definition['name'] = matched[0].name
+            role_name = worker.get_role_property(matched[0], 'role_name')
+    else:  # for create
+        definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
         role_id = _gen_guid()
+        role_name = role_definition.get('name', None)
+        if not role_name:
+            raise CLIError("please provide role name")
 
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
-    worker = MultiAPIAdaptor(cmd.cli_ctx)
     return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
 
 
