@@ -4,9 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import abc
+import os
+import yaml
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core._help import (HelpExample, CliHelpFile)
+
 
 logger = get_logger(__name__)
 
@@ -20,14 +23,27 @@ except AttributeError:  # Python 2.7, abc exists, but not ABC
 class BaseHelpLoader(ABC):
     def __init__(self, help_ctx=None):
         self.help_ctx = help_ctx
-        self._data = None
+        self._entry_data = None
+        self._file_content_dict = {}
 
     def versioned_load(self, help_obj, parser):
-        self.load_raw_data(help_obj, parser)
+        if not self._file_content_dict:
+            return
+        self._entry_data = None
+        # Cycle through versioned_load helpers
+        self.load_entry_data(help_obj, parser)
         if self._data_is_applicable():
             self.load_help_body(help_obj)
             self.load_help_parameters(help_obj)
             self.load_help_examples(help_obj)
+        self._entry_data = None
+
+    def update_file_contents(self, file_contents):
+        self._file_content_dict.update(file_contents)
+
+    @abc.abstractmethod
+    def get_noun_help_file_names(self, nouns):
+        pass
 
     @property
     @abc.abstractmethod
@@ -35,10 +51,10 @@ class BaseHelpLoader(ABC):
         pass
 
     def _data_is_applicable(self):
-        return self._data and self.version == self._data.get('version')
+        return self._entry_data and self.version == self._entry_data.get('version')
 
     @abc.abstractmethod
-    def load_raw_data(self, help_obj, parser):
+    def load_entry_data(self, help_obj, parser):
         pass
 
     @abc.abstractmethod
@@ -75,26 +91,14 @@ class BaseHelpLoader(ABC):
             loaded_params.append(param_obj)
         help_obj.parameters = loaded_params
 
-    # get the yaml help
+
+class YamlLoaderMixin(object):  # pylint:disable=too-few-public-methods
+    """A class containing helper methods for Yaml Loaders."""
+
+    # get the list of yaml help file names for the command or group
     @staticmethod
-    def _get_yaml_help_for_nouns(nouns, cmd_loader_map_ref):
+    def _get_yaml_help_files_list(nouns, cmd_loader_map_ref):
         import inspect
-        import os
-
-        def _parse_yaml_from_string(text, help_file_path):
-            import yaml
-
-            dir_name, base_name = os.path.split(help_file_path)
-
-            pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
-
-            try:
-                data = yaml.load(text)
-                if not data:
-                    raise CLIError("Error: Help file {} is empty".format(pretty_file_path))
-                return data
-            except yaml.YAMLError as e:
-                raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
 
         command_nouns = " ".join(nouns)
         # if command in map, get the loader. Path of loader is path of helpfile.
@@ -121,10 +125,21 @@ class BaseHelpLoader(ABC):
                 for file in files:
                     if file.endswith("help.yaml") or file.endswith("help.yml"):
                         help_file_path = os.path.join(dir_name, file)
-                        with open(help_file_path, "r") as f:
-                            text = f.read()
-                            results.append(_parse_yaml_from_string(text, help_file_path))
+                        results.append(help_file_path)
         return results
+
+    @staticmethod
+    def _parse_yaml_from_string(text, help_file_path):
+        dir_name, base_name = os.path.split(help_file_path)
+        pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
+
+        if not text:
+            raise CLIError("No content passed for {}.".format(pretty_file_path))
+
+        try:
+            return yaml.load(text)
+        except yaml.YAMLError as e:
+            raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
 
 
 class HelpLoaderV0(BaseHelpLoader):
@@ -136,7 +151,10 @@ class HelpLoaderV0(BaseHelpLoader):
     def versioned_load(self, help_obj, parser):
         super(CliHelpFile, help_obj).load(parser)  # pylint:disable=bad-super-call
 
-    def load_raw_data(self, help_obj, parser):
+    def get_noun_help_file_names(self, nouns):
+        pass
+
+    def load_entry_data(self, help_obj, parser):
         pass
 
     def load_help_body(self, help_obj):
@@ -149,7 +167,7 @@ class HelpLoaderV0(BaseHelpLoader):
         pass
 
 
-class HelpLoaderV1(BaseHelpLoader):
+class HelpLoaderV1(BaseHelpLoader, YamlLoaderMixin):
     core_attrs_to_keys = [("short_summary", "summary"), ("long_summary", "description")]
     body_attrs_to_keys = core_attrs_to_keys + [("links", "links")]
     param_attrs_to_keys = core_attrs_to_keys + [("value_sources", "value-sources")]
@@ -158,16 +176,29 @@ class HelpLoaderV1(BaseHelpLoader):
     def version(self):
         return 1
 
-    def load_raw_data(self, help_obj, parser):
+    def get_noun_help_file_names(self, nouns):
+        cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
+        return self._get_yaml_help_files_list(nouns, cmd_loader_map_ref)
+
+    def update_file_contents(self, file_contents):
+        for file_name in file_contents:
+            if file_name not in self._file_content_dict:
+                data_dict = {file_name: self._parse_yaml_from_string(file_contents[file_name], file_name)}
+                self._file_content_dict.update(data_dict)
+
+    def load_entry_data(self, help_obj, parser):
         prog = parser.prog if hasattr(parser, "prog") else parser._prog_prefix  # pylint: disable=protected-access
         command_nouns = prog.split()[1:]
         cmd_loader_map_ref = self.help_ctx.cli_ctx.invocation.commands_loader.cmd_to_loader_map
-        data_list = self._get_yaml_help_for_nouns(command_nouns, cmd_loader_map_ref)
-        self._data = self._get_entry_data(help_obj.command, data_list)
+
+        files_list = self._get_yaml_help_files_list(command_nouns, cmd_loader_map_ref)
+        data_list = [self._file_content_dict[name] for name in files_list]
+
+        self._entry_data = self._get_entry_data(help_obj.command, data_list)
 
     def load_help_body(self, help_obj):
         help_obj.long_summary = ""  # similar to knack...
-        self._update_obj_from_data_dict(help_obj, self._data, self.body_attrs_to_keys)
+        self._update_obj_from_data_dict(help_obj, self._entry_data, self.body_attrs_to_keys)
 
     def load_help_parameters(self, help_obj):
         def params_equal(param, param_dict):
@@ -176,18 +207,18 @@ class HelpLoaderV1(BaseHelpLoader):
             # for positionals, help file must name must match param name shown when -h is run
             return param_dict['name'] == param.name
 
-        if help_obj.type == "command" and hasattr(help_obj, "parameters") and self._data.get("arguments"):
+        if help_obj.type == "command" and hasattr(help_obj, "parameters") and self._entry_data.get("arguments"):
             loaded_params = []
             for param_obj in help_obj.parameters:
-                loaded_param = next((n for n in self._data["arguments"] if params_equal(param_obj, n)), None)
+                loaded_param = next((n for n in self._entry_data["arguments"] if params_equal(param_obj, n)), None)
                 if loaded_param:
                     self._update_obj_from_data_dict(param_obj, loaded_param, self.param_attrs_to_keys)
                 loaded_params.append(param_obj)
             help_obj.parameters = loaded_params
 
     def load_help_examples(self, help_obj):
-        if help_obj.type == "command" and self._data.get("examples"):
-            help_obj.examples = [HelpExample(**ex) for ex in self._data["examples"] if help_obj._should_include_example(ex)]  # pylint: disable=line-too-long, protected-access
+        if help_obj.type == "command" and self._entry_data.get("examples"):
+            help_obj.examples = [HelpExample(**ex) for ex in self._entry_data["examples"] if help_obj._should_include_example(ex)]  # pylint: disable=line-too-long, protected-access
 
     @staticmethod
     def _get_entry_data(cmd_name, data_list):
