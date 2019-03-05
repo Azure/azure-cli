@@ -47,7 +47,13 @@ def handle_exception(ex):
             logger.error(ex)
         return 1
 
+    # Otherwise, unhandled exception. Direct users to create an issue.
+    logger.error("The command failed with an unexpected error. Here is the traceback:\n")
     logger.exception(ex)
+    logger.error("\nIf you think this is a bug, please visit: https://github.com/Azure/azure-cli to create an issue."
+                 "\nIf you would like tips for using the CLI, "
+                 "visit: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md.")
+
     return 1
 
 
