@@ -28,7 +28,7 @@ short-summary: Create a Key Vault certificate.
 long-summary: Certificates can be used as a secrets for provisioned virtual machines.
 examples:
   - name: Create a self-signed certificate with the default policy and add it to a virtual machine.
-    text: |
+    text: |-
         az keyvault certificate create --vault-name vaultname -n cert1 \\
           -p "$(az keyvault certificate get-default-policy)"
 
@@ -47,11 +47,11 @@ short-summary: Download the public portion of a Key Vault certificate.
 long-summary: The certificate formatted as either PEM or DER. PEM is the default.
 examples:
   - name: Download a certificate as PEM and check its fingerprint in openssl.
-    text: |
+    text: |-
         az keyvault certificate download --vault-name vault -n cert-name -f cert.pem && \\
         openssl x509 -in cert.pem -inform PEM  -noout -sha1 -fingerprint
   - name: Download a certificate as DER and check its fingerprint in openssl.
-    text: |
+    text: |-
         az keyvault certificate download --vault-name vault -n cert-name -f cert.crt -e DER && \\
         openssl x509 -in cert.crt -inform DER  -noout -sha1 -fingerprint
 """
@@ -66,7 +66,7 @@ long-summary: |
     For more details, see: https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
 examples:
   - name: Create a self-signed certificate with the default policy
-    text: |
+    text: |-
         az keyvault certificate create --vault-name vaultname -n cert1 \\
           -p "$(az keyvault certificate get-default-policy)"
 """
@@ -77,7 +77,7 @@ short-summary: Import a certificate into KeyVault.
 long-summary: Certificates can also be used as a secrets in provisioned virtual machines.
 examples:
   - name: Create a service principal with a certificate, add the certificate to Key Vault and provision a VM with that certificate.
-    text: |
+    text: |-
         service_principal=$(az ad sp create-for-rbac --create-cert)
 
         cert_file=$(echo $service_principal | jq .fileWithCertAndPrivateKey -r)
@@ -169,7 +169,7 @@ helps['keyvault storage add'] = """
 type: command
 examples:
   - name: Create a storage account and setup a vault to manage its keys
-    text: |
+    text: |-
         $id = az storage account create -g resourcegroup -n storageacct --query id
 
         # assign the Azure Key Vault service the "Storage Account Key Operator Service Role" role.
@@ -189,8 +189,7 @@ helps['keyvault storage sas-definition create'] = """
 type: command
 examples:
   - name: Add a sas-definition for an account sas-token
-    text: |4
-
+    text: |-
         $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw \\
         --resource-types sco --services bfqt --https-only --account-name storageacct     \\
         --account-key 00000000
@@ -198,8 +197,7 @@ examples:
         az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
         -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
   - name: Add a sas-definition for a blob sas-token
-    text: >4
-
+    text: >-
         $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \\ -c container1 -n blob1 --https-only --permissions rw
 
         $url = az storage blob url --account-name storageacct -c container1 -n blob1
