@@ -208,8 +208,11 @@ def _get_new_yaml_dict(help_dict):
                     new_ex["summary"] = ex["name"]
                 if "text" in ex:
                     new_ex["command"] = ex["text"]
-                if "supported_profiles" in ex:
-                    new_ex["supported_profiles"] = ex["supported_profiles"]
+                supported_profiles, unsupported_profiles = "supported-profiles", "unsupported-profiles"
+                if supported_profiles in ex:
+                    new_ex[supported_profiles] = ex[supported_profiles]
+                if unsupported_profiles in ex:
+                    new_ex[unsupported_profiles] = ex[unsupported_profiles]
                 elem_examples.append(new_ex)
             elem_content["examples"] = elem_examples
 
