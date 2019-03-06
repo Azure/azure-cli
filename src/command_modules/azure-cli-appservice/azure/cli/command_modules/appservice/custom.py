@@ -2263,6 +2263,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         client.app_service_plans.create_or_update(rg_name, asp, plan_def)
         logger.warning("App service plan creation complete")
         _create_new_app = True
+        _show_tooMany_apps_warn = False
     else:
         logger.warning("App service plan '%s' already exists.", asp)
         _show_tooMany_apps_warn = get_num_apps_inAsp(cmd, rg_name, asp) > 5
