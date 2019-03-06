@@ -480,7 +480,7 @@ examples:
         secrets=$(az keyvault secret list-versions --vault-name vaultname \\
           -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-        vm_secrets=$(az vm secret format -s "$secrets") 
+        vm_secrets=$(az vm secret format -s "$secrets")
 
 
         az vm create -g group-name -n vm-name --admin-username deploy  \\
@@ -1537,7 +1537,7 @@ examples:
         secrets=$(az keyvault secret list-versions --vault-name vaultname \\
           -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-        vm_secrets=$(az vm secret format -s "$secrets") 
+        vm_secrets=$(az vm secret format -s "$secrets")
 
 
         az vmss create -g group-name -n vm-name --admin-username deploy  \\
