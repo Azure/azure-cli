@@ -7,35 +7,9 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-from azure.mgmt.containerregistry.v2018_09_01.models import (
-    Task,
-    SourceProperties,
-    AgentProperties,
-    TriggerProperties,
-    SourceTrigger,
-    TriggerStatus,
-    BaseImageTrigger,
-    PlatformProperties,
-    SourceTriggerEvent,
-    AuthInfo,
-    DockerBuildStep,
-    FileTaskStep,
-    TaskRunRequest,
-    TaskUpdateParameters,
-    PlatformUpdateParameters,
-    DockerBuildStepUpdateParameters,
-    FileTaskStepUpdateParameters,
-    TriggerUpdateParameters,
-    SourceUpdateParameters,
-    SourceTriggerUpdateParameters,
-    BaseImageTriggerUpdateParameters,
-    AuthInfoUpdateParameters,
-    SourceControlType,
-)
+
 from ._utils import validate_managed_registry, get_validate_platform
 from ._stream_utils import stream_logs
-from ._run_polling import get_run_with_polling
-
 
 logger = get_logger(__name__)
 
@@ -83,6 +57,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
     if file.endswith(ALLOWED_TASK_FILE_TYPES):
+        FileTaskStep = cmd.get_models('FileTaskStep')
         step = FileTaskStep(
             task_file_path=file,
             values_file_path=values,
@@ -91,6 +66,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
     else:
+        DockerBuildStep = cmd.get_models('DockerBuildStep')
         step = DockerBuildStep(
             image_names=image_names,
             is_push_enabled=not no_push,
@@ -105,6 +81,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
+    SourceControlType, SourceTriggerEvent = cmd.get_models('SourceControlType', 'SourceTriggerEvent')
     source_control_type = SourceControlType.visual_studio_team_service.value
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
@@ -117,6 +94,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
     # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
+        SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
+            'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
         source_triggers = [
             SourceTrigger(
                 source_repository=SourceProperties(
@@ -137,6 +116,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     base_image_trigger = None
     if base_image_trigger_enabled:
+        BaseImageTrigger, TriggerStatus = cmd.get_models('BaseImageTrigger', 'TriggerStatus')
         base_image_trigger = BaseImageTrigger(
             base_image_trigger_type=base_image_trigger_type,
             status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
@@ -145,6 +125,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
+    Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
+        'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties')
     task_create_parameters = Task(
         location=registry.location,
         step=step,
@@ -250,6 +232,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     else:
         set_values = (set_value if set_value else []) + (set_secret if set_secret else [])
 
+    FileTaskStepUpdateParameters, DockerBuildStepUpdateParameters = cmd.get_models(
+        'FileTaskStepUpdateParameters', 'DockerBuildStepUpdateParameters')
     if file and file.endswith(ALLOWED_TASK_FILE_TYPES):
         step = FileTaskStepUpdateParameters(
             task_file_path=file,
@@ -270,6 +254,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             target=target
         )
     elif step:
+        DockerBuildStep, FileTaskStep = cmd.get_models('DockerBuildStep', 'FileTaskStep')
         if isinstance(step, DockerBuildStep):
             step = DockerBuildStepUpdateParameters(
                 image_names=image_names,
@@ -293,19 +278,25 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     source_control_type = None
     if context_path:
+        SourceControlType = cmd.get_models('SourceControlType')
         if 'GITHUB.COM' in context_path.upper():
             source_control_type = SourceControlType.github.value
         else:
             source_control_type = SourceControlType.visual_studio_team_service.value
 
     # update trigger
-    source_trigger_update_params = None
-    base_image_trigger_update_params = None
+    source_trigger_update_params, base_image_trigger_update_params = None, None
     if task.trigger:
+        TriggerStatus = cmd.get_models('TriggerStatus')
+
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            source_trigger_events = _get_trigger_event_list(source_triggers,
+            SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
+                'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
+
+            source_trigger_events = _get_trigger_event_list(cmd,
+                                                            source_triggers,
                                                             commit_trigger_enabled,
                                                             pull_request_trigger_enabled)
             source_trigger_update_params = [
@@ -326,6 +317,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             ]
 
         if base_image_trigger_enabled or base_image_trigger is not None:
+            BaseImageTriggerUpdateParameters = cmd.get_models('BaseImageTriggerUpdateParameters')
+
             status = None
             if base_image_trigger_enabled is not None:
                 status = TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value
@@ -335,12 +328,12 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName"
             )
 
-    platform_os = None
-    platform_arch = None
-    platform_variant = None
+    platform_os, platform_arch, platform_variant = None, None, None
     if os_type or platform:
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
+    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
+        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
@@ -393,6 +386,7 @@ def acr_task_run(cmd,
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
+    TaskRunRequest = cmd.get_models('TaskRunRequest')
 
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(
@@ -414,7 +408,8 @@ def acr_task_run(cmd,
     logger.warning("Waiting for an agent...")
 
     if no_logs:
-        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
+        from ._run_polling import get_run_with_polling
+        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, True)
 
@@ -521,9 +516,12 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     return "{}.".format(base_message)
 
 
-def _get_trigger_event_list(source_triggers,
+def _get_trigger_event_list(cmd,
+                            source_triggers,
                             commit_trigger_enabled=None,
                             pull_request_trigger_enabled=None):
+    TriggerStatus, SourceTriggerEvent = cmd.get_models('TriggerStatus', 'SourceTriggerEvent')
+
     source_trigger_events = set()
     # perform merge with server-side event list
     if source_triggers:

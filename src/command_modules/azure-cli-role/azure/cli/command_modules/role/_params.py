@@ -44,6 +44,8 @@ def load_arguments(self, _):
         c.argument('oauth2_allow_implicit_flow', arg_type=get_three_state_flag(), help='whether to allow implicit grant flow for OAuth2')
         c.argument('required_resource_accesses', type=validate_file_or_dict,
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
+        c.argument('app_roles', type=validate_file_or_dict,
+                   help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
         c.argument('credential_description', help="the description of the password")
 
@@ -79,13 +81,19 @@ def load_arguments(self, _):
         with self.argument_context('ad sp {}'.format(item)) as c:
             c.argument('name', name_arg_type)
             c.argument('cert', arg_group='Credential', validator=validate_cert)
-            c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                       deprecate_info=c.deprecate(expiration='2.1.0', hide=False), help="If missing, CLI will generate a strong password")
             c.argument('years', type=int, default=None, arg_group='Credential')
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
             c.argument('credential_description', help="the description of the password", arg_group='Credential')
+
+    with self.argument_context('ad sp create-for-rbac') as c:
+        c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
+                   deprecate_info=c.deprecate(expiration='2.1.0', hide=False), help="If missing, CLI will generate a strong password")
+
+    with self.argument_context('ad sp credential reset') as c:
+        c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
+                   help="If missing, CLI will generate a strong password")
 
     with self.argument_context('ad app credential reset') as c:
         c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')

@@ -1866,6 +1866,27 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
 
 
+class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_gateway_ipsec')
+    def test_network_vnet_gateway_ipsec(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'ip': 'pip1',
+            'gw': 'gw1',
+            'gw_sku': 'VpnGw2',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} --gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol IkeV2 SSTP --radius-secret 111_aaa --radius-server 30.1.1.15')
+        self.cmd('network vnet-gateway ipsec-policy add -g {rg} --gateway-name {gw} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
+        self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway ipsec-policy clear -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
+
+
 class NetworkSubnetScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_set_test')

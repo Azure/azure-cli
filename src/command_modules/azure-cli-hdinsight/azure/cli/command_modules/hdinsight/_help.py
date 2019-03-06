@@ -39,6 +39,12 @@ helps['hdinsight create'] = """
              --encryption-key-version 00000000000000000000000000000000 \\
              --encryption-vault-uri https://MyKeyVault.vault.azure.net \\
              --assign-identity MyMSI
+        - name: Create a cluster with Azure Data Lake Storage Gen2
+          text: |-
+              az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+              -p "HttpPassword1234!" \\
+              --storage-account MyStorageAccount \\
+              --storage-account-managed-identity MyMSI
 """
 
 helps['hdinsight list'] = """

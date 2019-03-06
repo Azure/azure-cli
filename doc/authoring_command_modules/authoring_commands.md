@@ -92,7 +92,7 @@ Before your command can be used in the CLI, it must be registered. Within the `l
 ```Python
 # (1) Registering a command type for reuse among groups
 mymod_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.mymod.operations.myoperations#MyOperations.{}',
+    operations_tmpl='azure.mgmt.mymod.operations#MyOperations.{}',
     client_factory=cf_mymod
 )
 

@@ -11,6 +11,7 @@ import json
 import os
 import os.path
 import re
+import string
 from copy import deepcopy
 from enum import Enum
 from six.moves import BaseHTTPServer
@@ -68,6 +69,8 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
+
+_AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -467,7 +470,7 @@ class Profile(object):
     def get_subscription(self, subscription=None):  # take id or name
         subscriptions = self.load_cached_subscriptions()
         if not subscriptions:
-            raise CLIError("Please run 'az login' to setup account.")
+            raise CLIError(_AZ_LOGIN_MESSAGE)
 
         result = [x for x in subscriptions if (
             not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
@@ -673,7 +676,7 @@ class Profile(object):
                     result['clientCertificate'] = sp_auth.certificate_file
                 result['subscriptionId'] = account[_SUBSCRIPTION_ID]
             else:
-                raise CLIError('SDK Auth file is only applicable on service principals')
+                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
 
         result[_TENANT_ID] = account[_TENANT_ID]
         endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
@@ -765,7 +768,6 @@ class SubscriptionFinder(object):
         return result
 
     def find_through_authorization_code_flow(self, tenant, resource, authority_url):
-
         # launch browser and get the code
         results = _get_authorization_code(resource, authority_url)
 
@@ -1071,6 +1073,8 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 def _get_authorization_code_worker(authority_url, resource, results):
     import socket
+    import random
+
     reply_url = None
     for port in range(8400, 9000):
         try:
@@ -1084,10 +1088,15 @@ def _get_authorization_code_worker(authority_url, resource, results):
         logger.warning("Error: can't reserve a port for authentication reply url")
         return
 
+    try:
+        request_state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
+    except NotImplementedError:
+        request_state = 'code'
+
     # launch browser:
     url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
            '&redirect_uri={2}&state={3}&resource={4}&prompt=select_account')
-    url = url.format(authority_url, _CLIENT_ID, reply_url, 'code', resource)
+    url = url.format(authority_url, _CLIENT_ID, reply_url, request_state, resource)
     logger.info('Open browser with url: %s', url)
     succ = open_page_in_browser(url)
     if succ is False:
@@ -1116,6 +1125,14 @@ def _get_authorization_code_worker(authority_url, resource, results):
         logger.warning('Authentication Error: Authorization code was not captured in query strings "%s"',
                        web_server.query_params)
         return
+
+    if 'state' in web_server.query_params:
+        response_state = web_server.query_params['state'][0]
+        if response_state != request_state:
+            raise RuntimeError("mismatched OAuth state")
+    else:
+        raise RuntimeError("missing OAuth state")
+
     results['code'] = code[0]
     results['reply_url'] = reply_url
 

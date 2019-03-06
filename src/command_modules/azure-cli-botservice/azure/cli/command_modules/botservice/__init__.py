@@ -22,8 +22,9 @@ class BotServiceCommandsLoader(AzCommandsLoader):
                                                        suppress_extension=ModExtensionSuppress(
                                                            __name__,
                                                            'botservice',
-                                                           '0.4.1',
-                                                           reason='These commands are now in the CLI',
+                                                           '0.4.3',
+                                                           reason='These commands and functionality are now in the '
+                                                                  'core CLI.',
                                                            recommend_remove=True))
 
     def load_command_table(self, args):

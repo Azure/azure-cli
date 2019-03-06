@@ -158,8 +158,9 @@ class ResourceIDScenarioTest(ScenarioTest):
 
 
 class ResourceGenericUpdate(LiveScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
-    def test_resource_id_scenario(self, resource_group):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_generic_update')
+    def test_resource_generic_update(self, resource_group):
         self.kwargs.update({
             'stor_1': self.create_random_name(prefix='stor1', length=10),
             'stor_2': self.create_random_name(prefix='stor2', length=10)
@@ -661,8 +662,8 @@ class PolicyScenarioTest(ScenarioTest):
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
             'mode': 'Indexed',
-            'metadata': {u'category': u'test'},
-            'updated_metadata': {u'category': u'test2'},
+            'metadata': 'test',
+            'updated_metadata': 'test2',
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
@@ -670,24 +671,24 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
             self.check('description', '{desc}'),
             self.check('mode', '{mode}'),
-            self.check('metadata', '{metadata}')
+            self.check('metadata.category', '{metadata}')
         ])
 
         # update it
         self.kwargs['desc'] = self.kwargs['desc'] + '_new'
         self.kwargs['pdn'] = self.kwargs['pdn'] + '_new'
 
-        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2', management_group, subscription)
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
-            self.check('metadata', '{updated_metadata}')
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # update it with new parameters and a new rule
@@ -698,7 +699,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
-            self.check('metadata', '{updated_metadata}'),
+            self.check('metadata.category', '{updated_metadata}'),
             self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
             self.check('policyRule.then.effect', 'audit')
         ])

@@ -178,13 +178,15 @@ def _get_helm_command():
     try:
         p = Popen([helm_command, "--help"], stdout=PIPE, stderr=PIPE)
         _, stderr = p.communicate()
-    except OSError:
+    except OSError as e:
+        logger.debug("Could not run '%s' command. Exception: %s", helm_command, str(e))
         # The executable may not be discoverable in WSL so retry *.exe once
         try:
             helm_command = 'helm.exe'
             p = Popen([helm_command, "--help"], stdout=PIPE, stderr=PIPE)
             _, stderr = p.communicate()
-        except OSError:
+        except OSError as inner:
+            logger.debug("Could not run '%s' command. Exception: %s", helm_command, str(inner))
             raise CLIError(helm_not_installed)
 
     if stderr:

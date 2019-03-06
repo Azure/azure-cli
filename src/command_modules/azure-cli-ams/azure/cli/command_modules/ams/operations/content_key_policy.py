@@ -403,7 +403,10 @@ def _play_ready_configuration_factory(content):
 
     def __get_license(lic):
         import dateutil.parser
-        expiration_date = dateutil.parser.parse(lic.get('expirationDate'))
+        if lic.get('expirationDate') is None:
+            expiration_date = None
+        else:
+            expiration_date = dateutil.parser.parse(lic.get('expirationDate'))
         return ContentKeyPolicyPlayReadyLicense(
             allow_test_devices=lic.get('allowTestDevices'),
             begin_date=lic.get('beginDate'),

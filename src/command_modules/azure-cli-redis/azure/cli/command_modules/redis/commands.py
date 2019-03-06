@@ -11,19 +11,19 @@ from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_s
 
 def load_command_table(self, _):
     redis_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.redis.operations.redis_operations#RedisOperations.{}',
+        operations_tmpl='azure.mgmt.redis.operations#RedisOperations.{}',
         client_factory=cf_redis)
 
     redis_patch = CliCommandType(
-        operations_tmpl='azure.mgmt.redis.operations.patch_schedules_operations#PatchSchedulesOperations.{}',
+        operations_tmpl='azure.mgmt.redis.operations#PatchSchedulesOperations.{}',
         client_factory=cf_patch_schedules)
 
     redis_firewall_rules = CliCommandType(
-        operations_tmpl='azure.mgmt.redis.operations.firewall_rules_operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.redis.operations#FirewallRulesOperations.{}',
         client_factory=cf_firewall_rule)
 
     redis_linked_server = CliCommandType(
-        operations_tmpl='azure.mgmt.redis.operations.linked_server_operations#LinkedServerOperations.{}',
+        operations_tmpl='azure.mgmt.redis.operations#LinkedServerOperations.{}',
         client_factory=cf_linked_server)
 
     with self.command_group('redis', redis_sdk) as g:

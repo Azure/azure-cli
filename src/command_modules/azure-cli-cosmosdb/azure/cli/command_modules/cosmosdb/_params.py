@@ -46,6 +46,18 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb failover-priority-change') as c:
         c.argument('failover_policies', validator=validate_failover_policies, help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
 
+    with self.argument_context('cosmosdb network-rule list') as c:
+        c.argument('account_name', id_part=None)
+
+    with self.argument_context('cosmosdb network-rule add') as c:
+        c.argument('subnet', help="Name or ID of the subnet")
+        c.argument('virtual_network', help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
+        c.argument("ignore_missing_vnet_service_endpoint", arg_type=get_three_state_flag(), help="Create firewall rule before the virtual network has vnet service endpoint enabled.")
+
+    with self.argument_context('cosmosdb network-rule remove') as c:
+        c.argument('subnet', help="Name or ID of the subnet")
+        c.argument('virtual_network', help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
+
     with self.argument_context('cosmosdb collection') as c:
         c.argument('collection_id', options_list=['--collection-name', '-c'], help='Collection Name')
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')

@@ -16,12 +16,12 @@ def load_command_table(self, _):
         return CliCommandType(*args, exception_handler=reservations_exception_handler, **kwargs)
 
     reservations_order_sdk = reservations_type(
-        operations_tmpl='azure.mgmt.reservations.operations.reservation_order_operations#ReservationOrderOperations.{}',
+        operations_tmpl='azure.mgmt.reservations.operations#ReservationOrderOperations.{}',
         client_factory=reservation_order_mgmt_client_factory
     )
 
     reservations_sdk = reservations_type(
-        operations_tmpl='azure.mgmt.reservations.operations.reservation_operations#ReservationOperations.{}',
+        operations_tmpl='azure.mgmt.reservations.operations#ReservationOperations.{}',
         client_factory=reservation_mgmt_client_factory
     )
 

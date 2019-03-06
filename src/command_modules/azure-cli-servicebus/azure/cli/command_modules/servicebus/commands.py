@@ -15,37 +15,37 @@ def load_command_table(self, _):
         rules_mgmt_client_factory, disaster_recovery_mgmt_client_factory, migration_mgmt_client_factory
 
     sb_namespace_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.namespaces_operations#NamespacesOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory
     )
 
     sb_queue_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.queues_operations#QueuesOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#QueuesOperations.{}',
         client_factory=queues_mgmt_client_factory
     )
 
     sb_topic_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.topics_operations#TopicsOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#TopicsOperations.{}',
         client_factory=topics_mgmt_client_factory
     )
 
     sb_subscriptions_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.subscriptions_operations#SubscriptionsOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#SubscriptionsOperations.{}',
         client_factory=subscriptions_mgmt_client_factory
     )
 
     sb_rule_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.rules_operations#RulesOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#RulesOperations.{}',
         client_factory=rules_mgmt_client_factory
     )
 
     sb_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.disaster_recovery_configs_operations#DisasterRecoveryConfigsOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory
     )
 
     sb_migration_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations.migration_configs_operations#MigrationConfigsOperations.{}',
+        operations_tmpl='azure.mgmt.servicebus.operations#MigrationConfigsOperations.{}',
         client_factory=migration_mgmt_client_factory
     )
 

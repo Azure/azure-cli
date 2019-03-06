@@ -2,11 +2,18 @@
 
 Release History
 ===============
-* functionapp: add ability to create and configure functions using ACR containers
+
+* webapp, functionapp: az webapp/functionapp deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
+* Remove erroneous print statement for `az webapp auth update`
+* functionapp: fix setting the correct image for runtime in Linux App Service plans
+
+0.2.14
+++++++
 * functionapp: az functionapp devops-build, new command created
 
 0.2.13
 ++++++
+* functionapp: add ability to create and configure functions using ACR containers
 * webapp: add support for updating configurations through json
 * appservice plan: Updating help for appservice-plan-update command
 * functionapp: add support for app insights on functionapp create

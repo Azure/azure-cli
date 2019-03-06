@@ -28,7 +28,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
                                     KeyCredential, UserCreateParameters, PasswordProfile,
-                                    ServicePrincipalCreateParameters, RequiredResourceAccess,
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess, AppRole,
                                     ResourceAccess, GroupCreateParameters, CheckGroupMembershipParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
@@ -56,7 +56,6 @@ def update_role_definition(cmd, role_definition):
 
 
 def _create_update_role_definition(cmd, role_definition, for_update):
-    definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
@@ -70,28 +69,38 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         new_name = n[:1].lower() + n[1:]
         role_definition[new_name] = role_definition.pop(n)
 
-    role_name = role_definition.get('name', None)
-    if not role_name:
-        raise CLIError("please provide role name")
+    worker = MultiAPIAdaptor(cmd.cli_ctx)
     if for_update:  # for update, we need to use guid style unique name
+        role_resource_id = role_definition.get('id')
+        if not role_resource_id:
+            logger.warning('Role "id" is missing. Look for the role in the current subscription...')
+        definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scope = (scopes_in_definition[0] if scopes_in_definition else
                  '/subscriptions/' + definitions_client.config.subscription_id)
-        matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_name, scope)
-        if len(matched) != 1:
-            raise CLIError('Please provide the unique logic name of an existing role')
-        role_definition['name'] = matched[0].name
-        # ensure correct logical name and guid name. For update we accept both
-        worker = MultiAPIAdaptor(cmd.cli_ctx)
-        role_name = worker.get_role_property(matched[0], 'role_name')
-        role_id = matched[0].name
-    else:
+        if role_resource_id:
+            from msrestazure.tools import parse_resource_id
+            role_id = parse_resource_id(role_resource_id)['name']
+            role_name = role_definition['roleName']
+        else:
+            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scope)
+            if len(matched) > 1:
+                raise CLIError('More than 2 definitions are found with the name of "{}"'.format(
+                    role_definition['name']))
+            elif not matched:
+                raise CLIError('No definition was found with the name of "{}"'.format(role_definition['name']))
+            role_id = role_definition['name'] = matched[0].name
+            role_name = worker.get_role_property(matched[0], 'role_name')
+    else:  # for create
+        definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
         role_id = _gen_guid()
+        role_name = role_definition.get('name', None)
+        if not role_name:
+            raise CLIError("please provide role name")
 
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
-    worker = MultiAPIAdaptor(cmd.cli_ctx)
     return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
 
 
@@ -663,7 +672,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None,
-                       credential_description=None):
+                       credential_description=None, app_roles=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     if native_app:
@@ -679,6 +688,9 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
 
+    if app_roles:
+        app_roles = _build_app_roles(app_roles)
+
     app_patch_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
                                                   display_name=display_name,
                                                   identifier_uris=identifier_uris,
@@ -687,7 +699,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
                                                   key_credentials=key_creds,
                                                   password_credentials=password_creds,
                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
-                                                  required_resource_access=required_accesses)
+                                                  required_resource_access=required_accesses,
+                                                  app_roles=app_roles)
 
     try:
         result = graph_client.applications.create(app_patch_param)
@@ -806,7 +819,7 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, app_roles=None):
     from azure.cli.core.commands.arm import make_camel_case, make_snake_case
     password_creds, key_creds, required_accesses = None, None, None
     if any([password, key_value]):
@@ -815,6 +828,9 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
 
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
+
+    if app_roles:
+        app_roles = _build_app_roles(app_roles)
 
     # Workaround until https://github.com/Azure/azure-rest-api-specs/issues/3437 is fixed
     def _get_property(name):
@@ -832,7 +848,8 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
         password_credentials=password_creds or None,
         available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
         required_resource_access=required_accesses or _get_property('required_resource_access'),
-        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
+        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'),
+        app_roles=app_roles)
 
     return app_patch_param
 
@@ -844,14 +861,32 @@ def patch_application(cmd, identifier, parameters):
 
 
 def _build_application_accesses(required_resource_accesses):
-    required_accesses = None
+    if not required_resource_accesses:
+        return None
+    required_accesses = []
+    if isinstance(required_resource_accesses, dict):
+        logger.info('Getting "requiredResourceAccess" from a full manifest')
+        required_resource_accesses = required_resource_accesses.get('requiredResourceAccess', [])
     for x in required_resource_accesses:
         accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
-        if required_accesses is None:
-            required_accesses = []
         required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
                                                         resource_access=accesses))
     return required_accesses
+
+
+def _build_app_roles(app_roles):
+    if not app_roles:
+        return None
+    result = []
+    if isinstance(app_roles, dict):
+        logger.info('Getting "appRoles" from a full manifest')
+        app_roles = app_roles.get('appRoles', [])
+    for x in app_roles:
+        role = AppRole(id=x.get('id', None) or _gen_guid(), allowed_member_types=x.get('allowedMemberTypes', None),
+                       description=x.get('description', None), display_name=x.get('displayName', None),
+                       is_enabled=x.get('isEnabled', None), value=x.get('value', None))
+        result.append(role)
+    return result
 
 
 def show_application(client, identifier):
@@ -1372,14 +1407,16 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     # look for the existing application
     query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
     aad_sps = list(client.service_principals.list(filter=query_exp))
-    if not aad_sps:
-        raise CLIError("can't find a service principal matching '{}'".format(name))
+
     if len(aad_sps) > 1:
         raise CLIError(
             'more than one entry matches the name, please provide unique names like '
             'app id guid, or app id uri')
-    app = show_application(client.applications, aad_sps[0].app_id)
+    app = (show_application(client.applications, aad_sps[0].app_id) if aad_sps else
+           show_application(client.applications, name))  # possible there is no SP created for the app
 
+    if not app:
+        raise CLIError("can't find an application matching '{}'".format(name))
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
