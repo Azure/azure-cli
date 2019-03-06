@@ -331,7 +331,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
 
         cg_definition = None
         with open(output_file, 'r') as f:
-            cg_definition = yaml.load(f)
+            cg_definition = yaml.safe_load(f)
 
         self.check(cg_definition["name"], container_group_name)
         self.check(cg_definition['properties']['containers'][0]['properties']['image'], image)
