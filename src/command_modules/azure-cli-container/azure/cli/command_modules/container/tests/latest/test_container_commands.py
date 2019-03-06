@@ -326,12 +326,11 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('containers[0].image', '{image}'),
                          self.exists('containers[0].resources.requests.cpu'),
                          self.exists('containers[0].resources.requests.memoryInGb')])
-
         self.cmd('container export -g {rg} -n {container_group_name} -f "{output_file}"')
 
         cg_definition = None
         with open(output_file, 'r') as f:
-            cg_definition = yaml.load(f)
+            cg_definition = yaml.safe_load(f)
 
         self.check(cg_definition["name"], container_group_name)
         self.check(cg_definition['properties']['containers'][0]['properties']['image'], image)
