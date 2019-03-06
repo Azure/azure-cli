@@ -3,9 +3,7 @@
 Release History
 ===============
 
-0.3.14
-++++++
-* Minor fixes.
+* `container start/restart`: Added `--no-wait` argument.
 
 0.3.14
 ++++++
