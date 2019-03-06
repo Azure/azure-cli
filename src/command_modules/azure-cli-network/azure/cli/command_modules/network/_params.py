@@ -216,18 +216,6 @@ def load_arguments(self, _):
         c.argument('rule_name', help='Name of the rewrite rule.')
         c.argument('gateway_name', help='Name of the application gateway.')
 
-    # from ._resources import app_gateway_rewrite_ruleset, app_gateway_rewrite_rule, app_gateway_rewrite_rule_condition
-    # for command in ['list', 'show', 'delete']:
-    #     with self.argument_context('network application-gateway rewrite-rule set {}'.format(command)) as c:
-    #         app_gateway_rewrite_ruleset.register_dests(c)
-
-    #     with self.argument_context('network application-gateway rewrite-rule {}'.format(command)) as c:
-    #         app_gateway_rewrite_rule.register_dests(c)
-
-    #     with self.argument_context('network application-gateway rewrite-rule condition {}'.format(command)) as c:
-    #         app_gateway_rewrite_rule_condition.register_dests(c)
-
-
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
         c.argument('variable', help='The variable whose value is being evaluated.')
         c.argument('pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')

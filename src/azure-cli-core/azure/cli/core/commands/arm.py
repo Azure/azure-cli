@@ -1351,7 +1351,7 @@ class ArmCommandGroup(AzCommandGroup):
     def _get_command_type_property(self, name):
         return self.group_kwargs['command_type'].settings.get(name, None)
 
-    def _parse_model(self, model_cls):
+    def _parse_model(self, model_cls, ignore_collections=True):
         attr_map = model_cls.__dict__['_attribute_map']
         validation = model_cls.__dict__.get('_validation', {})
         prefix = self._model_prefix
@@ -1362,12 +1362,15 @@ class ArmCommandGroup(AzCommandGroup):
             if key in validation and validation[key].get('readonly'):
                 continue
             # skip collections. They will be their own command groups
-            if data_type.startswith('[') and data_type.endswith(']'):
+            if data_type.startswith('[') and data_type.endswith(']') and ignore_collections:
                 continue
             if self.command_loader.get_models(data_type):
-                raise CLIError('TBD: Complex type {}'.format(data_type))
-            key = key if not prefix else '{}_{}'.format(prefix, key)
-            self._model_map[key] = {'dest': key, 'type': type}
+                subprop_map = self._parse_model(self.command_loader.get_models(data_type), ignore_collections=False)
+                print(subprop_map)
+            else:
+                key = key if not prefix else '{}_{}'.format(prefix, key)
+                property_map = {'dest': key}
+        return property_map
 
     def __init__(self, command_loader, group_name, **kwargs):
         super(ArmCommandGroup, self).__init__(command_loader, group_name, **kwargs)
@@ -1377,12 +1380,9 @@ class ArmCommandGroup(AzCommandGroup):
             raise CLIError("command authoring error: ArmCommandGroup requires 'path' kwarg.")        
 
         model = self._get_command_type_property('model')
-        self._model_map = {}
         self._model_prefix = self._get_command_type_property('model_prefix')
-        if model:
-            self._parse_model(command_loader.get_models(model))
+        self._model_map = self._parse_model(command_loader.get_models(model)) if model else {}
 
-        print(self._model_map)
         # attributes
         self._parent_provider = None
         self._parent_type = None
