@@ -15,6 +15,8 @@ import colorama  # pylint: disable=import-error
 
 from azure.cli.core import telemetry as telemetry_core
 from knack.log import get_logger
+from azure.cli.core import __version__ as core_version
+from pkg_resources import parse_version
 logger = get_logger(__name__)
 
 WAIT_MESSAGE = ['I\'m an AI bot (learn more: aka.ms/aladdinkb); Let me see how I can help you...']
@@ -37,6 +39,9 @@ def process_query(cli_term):
             print("\nSorry I am not able to help with [" + cli_term + "]."
                   "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
         else:
+            if answer_list[0]['source'] == 'pruned':
+                print("\nPlease update your cli version to see most recent popular cli examples.")
+                answer_list.pop(0)
             print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
             num_results_to_show = min(3, len(answer_list))
             for i in range(num_results_to_show):
@@ -82,7 +87,8 @@ def call_aladdin_service(query):
         'session_id': telemetry_core._session._get_base_properties()['Reserved.SessionId'],  # pylint: disable=protected-access
         'subscription_id': telemetry_core._get_azure_subscription_id(),  # pylint: disable=protected-access
         'client_request_id': client_request_id,  # pylint: disable=protected-access
-        'installation_id': telemetry_core._get_installation_id()  # pylint: disable=protected-access
+        'installation_id': telemetry_core._get_installation_id(),  # pylint: disable=protected-access
+        'version_number': str(parse_version(core_version))
     }
 
     service_input = {
@@ -92,7 +98,7 @@ def call_aladdin_service(query):
         'context': context
     }
 
-    api_url = 'https://aladdinservice-prod.azurewebsites.net/api/aladdin/generateCards'
+    api_url = 'https://aladdinservice-dev.azurewebsites.net/api/aladdin/generateCards'
     headers = {'Content-Type': 'application/json'}
 
     response = requests.post(api_url, headers=headers, json=service_input)
