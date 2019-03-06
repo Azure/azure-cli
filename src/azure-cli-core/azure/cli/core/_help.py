@@ -138,6 +138,12 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         HelpObject._normalize_text = new_normalize_text  # pylint: disable=protected-access
 
         self._register_help_loaders()
+        self._name_to_content = {}
+
+    # override
+    def show_help(self, cli_name, nouns, parser, is_group):
+        self.update_loaders_with_help_file_contents(nouns)
+        super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
@@ -156,6 +162,25 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             raise CLIError("Two loaders have the same version. Loaders:\n\t{}".format(ldrs_str))
 
         self.versioned_loaders = versioned_loaders
+
+    def update_loaders_with_help_file_contents(self, nouns):
+        loader_file_names_dict = {}
+        file_name_set = set()
+        for ldr_cls_name, loader in self.versioned_loaders.items():
+            new_file_names = loader.get_noun_help_file_names(nouns) or []
+            loader_file_names_dict[ldr_cls_name] = new_file_names
+            file_name_set.update(new_file_names)
+
+        for file_name in file_name_set:
+            if file_name not in self._name_to_content:
+                with open(file_name, 'r') as f:
+                    self._name_to_content[file_name] = f.read()
+
+        for ldr_cls_name, file_names in loader_file_names_dict.items():
+            file_contents = {}
+            for name in file_names:
+                file_contents[name] = self._name_to_content[name]
+            self.versioned_loaders[ldr_cls_name].update_file_contents(file_contents)
 
 
 class CliHelpFile(KnackHelpFile):
