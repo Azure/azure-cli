@@ -95,7 +95,7 @@ def cli_eheventhub_create(client, resource_group_name, namespace_name, event_hub
         parameters=eventhubparameter1)
 
 
-def cli_eheventhub_update(instance, event_hub_name=None, message_retention_in_days=None, partition_count=None, status=None,
+def cli_eheventhub_update(instance, message_retention_in_days=None, partition_count=None, status=None,
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
