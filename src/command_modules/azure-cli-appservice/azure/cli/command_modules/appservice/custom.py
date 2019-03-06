@@ -52,7 +52,7 @@ from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
                            should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
-                           get_lang_from_content, get_num_apps_inAsp)
+                           get_lang_from_content, get_num_apps_in_asp)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME, RUNTIME_TO_IMAGE)
 
 logger = get_logger(__name__)
@@ -285,7 +285,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
-        logger.warning("Starting Zip Deployment")
+        logger.warning("Starting zip deployment")
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
     response = _check_zip_deployment_status(deployment_status_url, authorization, timeout)
@@ -2184,7 +2184,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
     _create_new_rg = True
     _create_new_asp = True
     _create_new_app = True
-    _set_build_appSetting = False
+    _set_build_app_setting = False
 
     # determine the details for app to be created from src contents
     lang_details = get_lang_from_content(src_dir)
@@ -2263,18 +2263,18 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         client.app_service_plans.create_or_update(rg_name, asp, plan_def)
         logger.warning("App service plan creation complete")
         _create_new_app = True
-        _show_tooMany_apps_warn = False
+        _show_too_many_apps_warn = False
     else:
         logger.warning("App service plan '%s' already exists.", asp)
-        _show_tooMany_apps_warn = get_num_apps_inAsp(cmd, rg_name, asp) > 5
+        _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
         _create_new_app = should_create_new_app(cmd, rg_name, name)
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ....", name)
         create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
         logger.warning("Webapp creation complete")
-        _set_build_appSetting = True
-        if _show_tooMany_apps_warn:
+        _set_build_app_setting = True
+        if _show_too_many_apps_warn:
             logger.warning("There are sites that have been deployed to the same hosting "
                            "VM of this region, to prevent performance impact please "
                            "delete existing site(s) or switch to a different default resource group "
@@ -2294,17 +2294,17 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
 
         if do_deployment and not is_skip_build:
-            _set_build_appSetting = True
+            _set_build_app_setting = True
             # setting the appsettings causes a app restart so we avoid if not needed
             application_settings = client.web_apps.list_application_settings(rg_name, name)
             _app_settings = application_settings.properties
             for key, value in _app_settings.items():
                 if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT' and value.upper() == "FALSE":
-                    _set_build_appSetting = False
+                    _set_build_app_setting = False
 
     # update create_json to include the app_url
     url = _get_url(cmd, rg_name, name)
-    if _set_build_appSetting:
+    if _set_build_app_setting:
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
         update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])

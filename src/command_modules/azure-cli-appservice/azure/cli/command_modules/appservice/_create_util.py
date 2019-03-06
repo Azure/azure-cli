@@ -114,7 +114,7 @@ def should_create_new_app(cmd, rg_name, app_name):
     return True
 
 
-def get_num_apps_inAsp(cmd, rg_name, asp_name):
+def get_num_apps_in_asp(cmd, rg_name, asp_name):
     client = web_client_factory(cmd.cli_ctx)
     return len(list(client.app_service_plans.list_web_apps(rg_name, asp_name)))
 
@@ -210,6 +210,7 @@ def parse_node_version(file_path):
                 non_decimal = re.compile(r'[^\d.]+')
                 # remove the string ~ or  > that sometimes exists in version value
                 c = non_decimal.sub('', value_detected)
+                print(c)
                 # reduce the version to '6.0' from '6.0.0'
                 version_detected.append(c[:4])
     return version_detected or ['0.0']
