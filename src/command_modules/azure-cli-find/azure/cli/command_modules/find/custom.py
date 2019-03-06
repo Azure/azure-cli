@@ -70,7 +70,7 @@ def style_message(msg):
 
 def should_enable_styling():
     try:
-        # Style if tty stream available
+        # Style if tty stream is available
         if sys.stdout.isatty():
             return True
     except AttributeError:
