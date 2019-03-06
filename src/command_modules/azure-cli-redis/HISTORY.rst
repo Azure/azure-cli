@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.4.1
++++++
+* Minor fixes.
+
 0.4.0
 ++++++
 * Added commands for managing firewall-rules (create, update, delete, show, list)

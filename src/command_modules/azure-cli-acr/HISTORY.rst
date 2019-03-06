@@ -3,12 +3,15 @@
 Release History
 ===============
 
+2.2.1
++++++
+* Add '--target' parameter for 'az acr build', 'az acr task create' and 'az acr task update' commands.
+* Improve error handling for runtime commands when not logged into Azure.
+
 2.2.0
 +++++
 * BREAKING CHANGE: Remove 'acr build-task' command group.
 * BREAKING CHANGE: Remove '--tag'/'--manifest' from 'acr repository delete' command.
-* Add '--target' parameter for 'az acr build', 'az acr task create' and 'az acr task update' commands.
-* Improve error handling for runtime commands when not logged into Azure.
 
 2.1.13
 ++++++
