@@ -11,12 +11,12 @@ from ._client_factory import (topics_factory, event_subscriptions_factory, topic
 
 def load_command_table(self, _):
     topics_mgmt_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventgrid.operations.topics_operations#TopicsOperations.{}',
+        operations_tmpl='azure.mgmt.eventgrid.operations#TopicsOperations.{}',
         client_factory=topics_factory
     )
 
     topic_type_mgmt_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventgrid.operations.topic_types_operations#TopicTypesOperations.{}',
+        operations_tmpl='azure.mgmt.eventgrid.operations#TopicTypesOperations.{}',
         client_factory=topic_types_factory
     )
 

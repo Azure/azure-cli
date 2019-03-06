@@ -10,7 +10,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._run_polling import get_run_with_polling
 from ._stream_utils import stream_logs
 from ._utils import validate_managed_registry, get_validate_platform
 from ._client_factory import cf_acr_registries
@@ -97,6 +96,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     logger.warning("Waiting for an agent...")
 
     if no_logs:
-        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
+        from ._run_polling import get_run_with_polling
+        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)

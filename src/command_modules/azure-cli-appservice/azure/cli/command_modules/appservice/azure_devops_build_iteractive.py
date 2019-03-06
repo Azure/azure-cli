@@ -480,7 +480,7 @@ class AzureDevopsBuildInteractive(object):
 
         while True:
             organization_name = prompt("Please enter the name of the new organization: ")
-            new_organization = self.adbp.create_organization(organization_name, region.regionCode)
+            new_organization = self.adbp.create_organization(organization_name, region.name)
             if new_organization.valid is False:
                 self.logger.warning(new_organization.message)
                 self.logger.warning("Note: any name must be globally unique")

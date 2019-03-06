@@ -160,7 +160,10 @@ helps['aks browse'] = """
           long-summary: Add this argument when launching a web browser manually, or for automated testing.
         - name: --listen-port
           short-summary: The listening port for the dashboard.
-          long-sumarry: Add this argument when the default listening port is used by another process or unavailable.
+          long-summary: Add this argument when the default listening port is used by another process or unavailable.
+        - name: --listen-address
+          short-summary: The listening address for the dashboard.
+          long-summary: Add this argument to listen on a specific IP address.
 """
 
 helps['aks create'] = """
@@ -199,7 +202,7 @@ helps['aks create'] = """
           short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.11.8" or "1.12.6".
           populator-commands:
           - "`az aks get-versions`"
         - name: --ssh-key-value
@@ -285,7 +288,7 @@ helps['aks create'] = """
         - name: Create a Kubernetes cluster with an existing SSH public key.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
         - name: Create a Kubernetes cluster with a specific version.
-          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.7
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
         - name: Create a Kubernetes cluster with a larger node pool.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
 """.format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
@@ -497,7 +500,7 @@ helps['aks upgrade'] = """
     parameters:
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.7.12" or "1.8.7".
+          short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.11.8" or "1.12.6".
           populator-commands:
           - "`az aks get-upgrades`"
 """

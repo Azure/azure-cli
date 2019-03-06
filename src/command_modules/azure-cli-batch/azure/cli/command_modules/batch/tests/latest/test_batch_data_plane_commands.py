@@ -51,15 +51,23 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @BatchAccountPreparer(location='japanwest')
     def test_batch_pool_cmd(self, resource_group, batch_account_name):
-        self.set_account_info(batch_account_name, resource_group)
+        #
+        endpoint = self.get_account_endpoint(
+            batch_account_name,
+            resource_group).replace("https://", "")
+        key = self.get_account_key(
+            batch_account_name,
+            resource_group)
+
         self.kwargs.update({
             'p_id': 'xplatCreatedPool',
             'c_file': self._get_test_data_file('batchCreatePool.json'),
-            'u_file': self._get_test_data_file('batchUpdatePool.json')
+            'u_file': self._get_test_data_file('batchUpdatePool.json'),
+            'acc_n': batch_account_name,
+            'acc_k': key,
+            'acc_u': endpoint
         })
-
         self.batch_cmd('batch pool create --json-file "{c_file}"')
-
         result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
                                 '--image a:b:c --node-agent-sku-id "batch.node.windows amd64"',
                                 expect_failure=True)

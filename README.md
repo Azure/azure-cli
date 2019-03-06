@@ -114,6 +114,8 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 #### More Samples and Snippets
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/en-us/cli/azure/overview](https://docs.microsoft.com/en-us/cli/azure/overview).
 
+For how to use CLI effectively, check out [tips](./doc/use_cli_effectively.md).
+
 ## Reporting issues and feedback
 
 If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/Azure/azure-cli/issues) section of our GitHub repo.

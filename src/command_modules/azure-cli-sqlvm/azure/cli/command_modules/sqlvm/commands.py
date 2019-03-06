@@ -30,7 +30,7 @@ def load_command_table(self, _):
     ###############################################
 
     sqlvm_vm_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sqlvirtualmachine.operations.sql_virtual_machines_operations#SqlVirtualMachinesOperations.{}',
+        operations_tmpl='azure.mgmt.sqlvirtualmachine.operations#SqlVirtualMachinesOperations.{}',
         client_factory=get_sqlvirtualmachine_sql_virtual_machines_operations
     )
 
@@ -50,7 +50,7 @@ def load_command_table(self, _):
     ###############################################
 
     sqlvm_group_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sqlvirtualmachine.operations.sql_virtual_machine_groups_operations#SqlVirtualMachineGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.sqlvirtualmachine.operations#SqlVirtualMachineGroupsOperations.{}',
         client_factory=get_sqlvirtualmachine_sql_virtual_machine_groups_operations
     )
 
@@ -68,7 +68,7 @@ def load_command_table(self, _):
     ###############################################
 
     sqlvm_agl_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sqlvirtualmachine.operations.availability_group_listeners_operations#AvailabilityGroupListenersOperations.{}',
+        operations_tmpl='azure.mgmt.sqlvirtualmachine.operations#AvailabilityGroupListenersOperations.{}',
         client_factory=get_sqlvirtualmachine_availability_group_listeners_operations
     )
 

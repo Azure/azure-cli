@@ -155,6 +155,19 @@ helps['ad app update'] = """
                         }
                    ]
                 }]
+        - name: declare an application role
+          text: |
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --app-roles @manifest.json
+                ("manifest.json" contains the following conten)
+                [{
+                    "allowedMemberTypes": [
+                      "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
+                }]
         - name: update an application's group membership claims to "All"
           text: >
                 az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All
@@ -318,7 +331,35 @@ helps['role definition update'] = """
     parameters:
         - name: --role-definition
           type: string
-          short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
+          short-summary: Description of an existing role as JSON, or a path to a file containing a JSON description.
+    examples:
+        - name: Update a role using the output of "az role definition list"
+          text: |
+                az role definition update --role-definition '{ \\
+                    "roleName": "Contoso On-call", \\
+                    "Description": "Perform VM actions and read storage and network information." \\
+                    "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/providers/Microsoft.Authorization/roleDefinitions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", \\
+                    "roleType": "CustomRole", \\
+                    "type": "Microsoft.Authorization/roleDefinitions", \\
+                    "Actions": [ \\
+                        "Microsoft.Compute/*/read", \\
+                        "Microsoft.Compute/virtualMachines/start/action", \\
+                        "Microsoft.Compute/virtualMachines/restart/action", \\
+                        "Microsoft.Network/*/read", \\
+                        "Microsoft.Storage/*/read", \\
+                        "Microsoft.Authorization/*/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
+                        "Microsoft.Support/*" \\
+                    ], \\
+                    "DataActions": [ \\
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*" \\
+                    ], \\
+                    "NotDataActions": [ \\
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write" \\
+                    ], \\
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
+                }'
 """
 helps['ad'] = """
     type: group
@@ -340,6 +381,19 @@ helps['ad app create'] = """
                             "type": "Scope"
                         }
                    ]
+                }]
+        - name: Create an application with a role
+          text: |
+                az ad app create --id e042ec79-34cd-498f-9d9f-123456781234 --display-name mytestapp --identifier-uris https://mytestapp.websites.net --app-roles @manifest.json
+                ("manifest.json" contains the following conten)
+                [{
+                    "allowedMemberTypes": [
+                      "User"
+                    ],
+                    "description": "Approvers can mark documents as approved",
+                    "displayName": "Approver",
+                    "isEnabled": "true",
+                    "value": "approver"
                 }]
 """
 helps['ad group'] = """

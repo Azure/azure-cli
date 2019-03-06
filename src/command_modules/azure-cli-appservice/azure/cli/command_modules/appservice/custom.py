@@ -53,7 +53,7 @@ from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
                            should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
                            get_lang_from_content)
-from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME)
+from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME, RUNTIME_TO_IMAGE)
 
 logger = get_logger(__name__)
 
@@ -479,7 +479,6 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
 
     for arg in args[2:]:
-        print(arg, values[arg])
         if values.get(arg, None):
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
@@ -1390,6 +1389,12 @@ def set_deployment_user(cmd, user_name, password=None):
     return client.update_publishing_user(user)
 
 
+def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
+    content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                      'list_publishing_credentials', slot)
+    return content.result()
+
+
 def list_publish_profiles(cmd, resource_group_name, name, slot=None):
     import xmltodict
 
@@ -1933,11 +1938,6 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         # if os_type is None, the os type is windows
         is_linux = os_type and os_type.lower() == 'linux'
 
-        # for linux consumption plan app the os_type should be Linux & should have a runtime specified
-        # currently in other cases the runtime is ignored
-        if is_linux and not runtime:
-            raise CLIError("usage error: --runtime RUNTIME required for linux functions apps with consumption plan.")
-
     else:  # apps with SKU based plan
         if is_valid_resource_id(plan):
             parse_result = parse_resource_id(plan)
@@ -1950,6 +1950,10 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         is_linux = plan_info.reserved
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
+
+    if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
+        raise CLIError(
+            "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
     if runtime:
         if is_linux and runtime not in LINUX_RUNTIMES:
@@ -1968,7 +1972,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         if consumption_plan_location:
             site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
         else:
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='beta'))
+            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
             if deployment_container_image_name:
@@ -1982,7 +1986,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                site_config.linux_fx_version = _format_fx_version('appsvc/azure-functions-runtime')
+                if runtime.lower() not in RUNTIME_TO_IMAGE:
+                    raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
+                site_config.linux_fx_version = _format_fx_version(RUNTIME_TO_IMAGE[runtime.lower()])
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))

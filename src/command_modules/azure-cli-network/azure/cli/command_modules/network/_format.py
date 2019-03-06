@@ -274,3 +274,32 @@ def transform_effective_nsg(result):
             ]))
             print_names = False
     return transformed
+
+
+def transform_vnet_gateway_routes_table(result):
+    transformed = []
+    for item in result.get('value', []):
+        transformed.append(OrderedDict([
+            ('Network', item['network']),
+            ('NextHop', item['nextHop']),
+            ('Origin', item['origin']),
+            ('SourcePeer', item['sourcePeer'] or ''),
+            ('AsPath', item['asPath'] or ''),
+            ('Weight', item['weight'])
+        ]))
+    return transformed
+
+
+def transform_vnet_gateway_bgp_peer_table(result):
+    transformed = []
+    for item in result.get('value', []):
+        transformed.append(OrderedDict([
+            ('Neighbor', item['neighbor'] or ''),
+            ('ASN', item['asn'] or ''),
+            ('State', item['state'] or ''),
+            ('ConnectedDuration', item['connected_duration'] or ''),
+            ('RoutesReceived', item['routes_received'] or ''),
+            ('MessagesSent', item['messages_sent'] or ''),
+            ('MessagesReceived', item['messages_received'] or '')
+        ]))
+    return transformed

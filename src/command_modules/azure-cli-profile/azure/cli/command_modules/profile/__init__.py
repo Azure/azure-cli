@@ -65,7 +65,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account show') as c:
-            c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true', help='output result in compatible with Azure SDK auth file')
+            c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true', help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader

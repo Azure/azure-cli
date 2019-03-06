@@ -6,9 +6,11 @@
 # pylint: disable=line-too-long
 from knack.arguments import CLIArgumentType
 
-from azure.cli.core.commands.parameters import (name_type)
-from azure.mgmt.kusto.models import AzureSkuName
-from azure.cli.core.commands.parameters import (get_enum_type)
+from azure.cli.core.commands.parameters import (name_type, get_enum_type)
+
+from .custom import (
+    AzureSkuName
+)
 
 
 def load_arguments(self, _):
@@ -16,7 +18,7 @@ def load_arguments(self, _):
     # Kusto clusters
     sku_arg_type = CLIArgumentType(help='The name of the sku.',
                                    arg_type=get_enum_type(AzureSkuName))
-    time_format_explenation = 'Time format is DDDD:HH:MM:SS (for example, 10 years would be 3650:00:00:00).'
+    time_format_explenation = 'Duration in ISO8601 format (for example, 100 days would be P100D).'
 
     with self.argument_context('kusto cluster') as c:
         c.ignore('kusto_management_request_options')

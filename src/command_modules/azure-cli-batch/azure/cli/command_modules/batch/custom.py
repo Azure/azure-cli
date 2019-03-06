@@ -13,7 +13,7 @@ from msrest.exceptions import DeserializationError
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
-                                     ApplicationUpdateParameters)
+                                     Application)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
@@ -133,16 +133,17 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             }
 
 
-@transfer_doc(ApplicationUpdateParameters)
+@transfer_doc(Application)
 def update_application(client,
-                       resource_group_name, account_name, application_id, allow_updates=None,
+                       resource_group_name, account_name, application_name, allow_updates=None,
                        display_name=None, default_version=None):
-    parameters = ApplicationUpdateParameters(allow_updates=allow_updates,
-                                             display_name=display_name,
-                                             default_version=default_version)
+    parameters = Application(
+        allow_updates=allow_updates,
+        display_name=display_name,
+        default_version=default_version)
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
-                         application_id=application_id,
+                         application_name=application_name,
                          parameters=parameters)
 
 
@@ -173,24 +174,24 @@ def _upload_package_blob(ctx, package_file, url):
 
 @transfer_doc(ApplicationPackageOperations.create)
 def create_application_package(cmd, client,
-                               resource_group_name, account_name, application_id, version,
+                               resource_group_name, account_name, application_name, version_name,
                                package_file):
     # create application if not exist
     mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     try:
-        mgmt_client.application.get(resource_group_name, account_name, application_id)
+        mgmt_client.application.get(resource_group_name, account_name, application_name)
     except Exception:  # pylint:disable=broad-except
-        mgmt_client.application.create(resource_group_name, account_name, application_id)
+        mgmt_client.application.create(resource_group_name, account_name, application_name)
 
-    result = client.create(resource_group_name, account_name, application_id, version)
+    result = client.create(resource_group_name, account_name, application_name, version_name)
 
     # upload binary as application package
     logger.info('Uploading %s to storage blob %s...', package_file, result.storage_url)
     _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
-    client.activate(resource_group_name, account_name, application_id, version, "zip")
-    return client.get(resource_group_name, account_name, application_id, version)
+    client.activate(resource_group_name, account_name, application_name, version_name, "zip")
+    return client.get(resource_group_name, account_name, application_name, version_name)
 
 
 # Data plane custom commands

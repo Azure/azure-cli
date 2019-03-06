@@ -2,7 +2,14 @@
 
 Release History
 ===============
-* Minor fixes
+
+2.0.60
+++++++
+cloud set: fix a bogus error about subscription not found 
+
+2.0.59
+++++++
+* Fix issue where in some instances using `--subscription NAME` would throw an exception.
 
 2.0.58
 ++++++
