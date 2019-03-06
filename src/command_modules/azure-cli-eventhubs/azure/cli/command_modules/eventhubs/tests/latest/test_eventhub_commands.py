@@ -125,10 +125,15 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             'messageretentionindays': 4,
             'partitioncount': 4,
             'destinationname': 'EventHubArchive.AzureBlockBlob',
-            'storageaccount': '/subscriptions/854d368f-1828-428f-8f3c-f2affa9b2f7d/resourcegroups/v-ajnavtest/providers/Microsoft.Storage/storageAccounts/testingsdkeventhub11',
+            'storageaccount': '',
             'blobcontainer': 'container01',
             'archinvenameformat': '{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}'
         })
+
+        # updated teh Storageaccount ID
+        subid = self.cmd('account show --query id -otsv').output.replace('\n', '')
+        storageaccountid = '/subscriptions/' + subid + '/resourcegroups/v-ajnavtest/providers/Microsoft.Storage/storageAccounts/testingsdkeventhub11'
+        self.kwargs.update({'storageaccount': storageaccountid})
 
         # Create Namespace
         self.cmd(
