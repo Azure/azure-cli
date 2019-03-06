@@ -13,7 +13,7 @@ from azure.cli.command_modules.cosmosdb._client_factory import cf_db_accounts
 def load_command_table(self, _):
 
     cosmosdb_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cosmosdb.operations.database_accounts_operations#DatabaseAccountsOperations.{}',
+        operations_tmpl='azure.mgmt.cosmosdb.operations#DatabaseAccountsOperations.{}',
         client_factory=cf_db_accounts)
 
     cosmosdb_custom_sdk = CliCommandType(

@@ -9,7 +9,7 @@ from azure.cli.command_modules.cognitiveservices._client_factory import cf_accou
 
 def load_command_table(self, _):
     mgmt_type = CliCommandType(
-        operations_tmpl='azure.mgmt.cognitiveservices.operations.accounts_operations#AccountsOperations.{}',
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#AccountsOperations.{}',
         client_factory=cf_accounts
     )
 

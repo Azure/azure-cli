@@ -23,73 +23,73 @@ from ._client_factory import (cf_security_tasks,
 def load_command_table(self, _):
 
     security_tasks_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.tasks_operations#TasksOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#TasksOperations.{}',
         client_factory=cf_security_tasks,
         operation_group='security_tasks'
     )
 
     security_alerts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.alerts_operations#AlertsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#AlertsOperations.{}',
         client_factory=cf_security_alerts,
         operation_group='security_alerts'
     )
 
     security_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.settings_operations#SettingsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#SettingsOperations.{}',
         client_factory=cf_security_settings,
         operation_group='security_settings'
     )
 
     security_contacts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.security_contacts_operations#SecurityContactsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#SecurityContactsOperations.{}',
         client_factory=cf_security_contacts,
         operation_group='security_contacts'
     )
 
     security_auto_provisioning_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.auto_provisioning_settings_operations#AutoProvisioningSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#AutoProvisioningSettingsOperations.{}',
         client_factory=cf_security_auto_provisioning_settings,
         operation_group='security_auto_provisioning_settings'
     )
 
     security_discovered_security_solutions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.discovered_security_solutions_operations#DiscoveredSecuritySolutionsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#DiscoveredSecuritySolutionsOperations.{}',
         client_factory=cf_security_discovered_security_solutions,
         operation_group='security_discovered_security_solutions'
     )
 
     security_external_security_solutions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.external_security_solutions_operations#ExternalSecuritySolutionsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#ExternalSecuritySolutionsOperations.{}',
         client_factory=cf_security_external_security_solutions,
         operation_group='security_external_security_solutions'
     )
 
     security_jit_network_access_policies_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.jit_network_access_policies_operations#JitNetworkAccessPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#JitNetworkAccessPoliciesOperations.{}',
         client_factory=cf_security_jit_network_access_policies,
         operation_group='security_jit_network_access_policies'
     )
 
     security_locations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.locations_operations#LocationsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#LocationsOperations.{}',
         client_factory=cf_security_locations,
         operation_group='security_locations'
     )
 
     security_pricings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.pricings_operations#PricingsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#PricingsOperations.{}',
         client_factory=cf_security_pricings,
         operation_group='security_pricings'
     )
 
     security_topology_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.topology_operations#TopologyOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#TopologyOperations.{}',
         client_factory=cf_security_topology,
         operation_group='security_topology'
     )
 
     security_workspace_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.security.operations.workspace_settings_operations#WorkspaceSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.security.operations#WorkspaceSettingsOperations.{}',
         client_factory=cf_security_workspace_settings,
         operation_group='security_workspace_settings'
     )

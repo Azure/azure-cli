@@ -292,17 +292,21 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
 def k8s_install_cli(cmd, client_version='latest', install_location=None):
     """Install kubectl, a command-line interface for Kubernetes clusters."""
 
+    source_url = "https://storage.googleapis.com/kubernetes-release/release"
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == 'azurechinacloud':
+        source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
+
     if client_version == 'latest':
         context = _ssl_context()
-        version = urlopen('https://storage.googleapis.com/kubernetes-release/release/stable.txt',
-                          context=context).read()
+        version = urlopen(source_url + '/stable.txt', context=context).read()
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
 
     file_url = ''
     system = platform.system()
-    base_url = 'https://storage.googleapis.com/kubernetes-release/release/{}/bin/{}/amd64/{}'
+    base_url = source_url + '/{}/bin/{}/amd64/{}'
 
     # ensure installation directory exists
     install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
@@ -1399,8 +1403,17 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     if not disable_browser:
         wait_then_open_async(proxy_url)
     try:
-        subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                         "port-forward", "--address", listen_address, dashboard_pod, "{0}:9090".format(listen_port)])
+        try:
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                                     "port-forward", "--address", listen_address, dashboard_pod,
+                                     "{0}:9090".format(listen_port)], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as err:
+            if err.output.find(b'unknown flag: --address'):
+                if listen_address != '127.0.0.1':
+                    logger.warning('"--address" is only supported in kubectl v1.13 and later.')
+                    logger.warning('The "--listen-address" argument will be ignored.')
+                subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
+                                 "port-forward", dashboard_pod, "{0}:9090".format(listen_port)])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
@@ -1732,6 +1745,16 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
     instance = client.get(resource_group_name, name)
+
+    if instance.kubernetes_version == kubernetes_version:
+        if instance.provisioning_state == "Succeeded":
+            logger.warning("The cluster is already on version %s and is not in a failed state. No operations "
+                           "will occur when upgrading to the same version if the cluster is not in a failed state.",
+                           instance.kubernetes_version)
+        elif instance.provisioning_state == "Failed":
+            logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
+                           "attempt resolution of failed cluster state.", instance.kubernetes_version)
+
     instance.kubernetes_version = kubernetes_version
 
     # null out the SP and AAD profile because otherwise validation complains

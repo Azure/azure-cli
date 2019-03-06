@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
+
 2.3.3
 +++++
 * `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.

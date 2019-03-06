@@ -7,6 +7,10 @@ Release History
 ++++++
 * Minor fixes.
 
+0.3.14
+++++++
+* Minor fixes.
+
 0.3.13
 ++++++
 * Adding 'az container start' command

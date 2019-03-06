@@ -10,7 +10,7 @@ from ._client_factory import servicefabric_fabric_client_factory
 
 def load_command_table(self, _):
     cluster_mgmt_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicefabric.operations.clusters_operations#ClustersOperations.{}',
+        operations_tmpl='azure.mgmt.servicefabric.operations#ClustersOperations.{}',
         client_factory=servicefabric_fabric_client_factory
     )
 

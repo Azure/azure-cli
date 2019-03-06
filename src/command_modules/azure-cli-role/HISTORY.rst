@@ -2,6 +2,9 @@
 
 Release History
 ===============
+* `role definition update`: use id to resolve definition correctly
+* `ad app credential reset`: drop the assumption that app's service principal always exists
+
 2.4.1
 +++++
 * `az ad app create/update`: support app roles
