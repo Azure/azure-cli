@@ -40,7 +40,8 @@ def process_query(cli_term):
                   "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
         else:
             if answer_list[0]['source'] == 'pruned':
-                print("\nPlease update your cli version to see most recent popular cli examples.")
+                print("\nMore commands and examples are available in the latest version of the CLI," 
+                      "please update for the best experience.")
                 answer_list.pop(0)
             print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
             num_results_to_show = min(3, len(answer_list))
@@ -98,7 +99,7 @@ def call_aladdin_service(query):
         'context': context
     }
 
-    api_url = 'https://aladdinservice-dev.azurewebsites.net/api/aladdin/generateCards'
+    api_url = 'https://aladdinservice-prod.azurewebsites.net/api/aladdin/generateCards'
     headers = {'Content-Type': 'application/json'}
 
     response = requests.post(api_url, headers=headers, json=service_input)
