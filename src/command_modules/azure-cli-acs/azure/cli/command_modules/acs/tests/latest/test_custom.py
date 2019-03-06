@@ -148,7 +148,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         }
 
         with open(addition.name, 'w+') as stream:
-            yaml.dump(obj2, stream)
+            yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         self.assertRaises(CLIError, merge_kubernetes_configurations, existing.name, addition.name, False)
@@ -192,7 +192,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             ]
         }
         with open(existing.name, 'w+') as stream:
-            yaml.dump(obj1, stream)
+            yaml.safe_dump(obj1, stream)
         self.addCleanup(os.remove, existing.name)
 
         obj2 = {
@@ -230,7 +230,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         }
 
         with open(addition.name, 'w+') as stream:
-            yaml.dump(obj2, stream)
+            yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         merge_kubernetes_configurations(existing.name, addition.name, False)
@@ -285,7 +285,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             ]
         }
         with open(existing.name, 'w+') as stream:
-            yaml.dump(obj1, stream)
+            yaml.safe_dump(obj1, stream)
         self.addCleanup(os.remove, existing.name)
         obj2 = {
             'apiVersion': 'v1',
@@ -322,7 +322,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             ]
         }
         with open(addition.name, 'w+') as stream:
-            yaml.dump(obj2, stream)
+            yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         merge_kubernetes_configurations(existing.name, addition.name, False)
@@ -375,7 +375,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             ]
         }
         with open(existing.name, 'w+') as stream:
-            yaml.dump(obj1, stream)
+            yaml.safe_dump(obj1, stream)
         self.addCleanup(os.remove, existing.name)
 
         obj2 = {
@@ -404,7 +404,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         }
 
         with open(addition.name, 'w+') as stream:
-            yaml.dump(obj2, stream)
+            yaml.safe_dump(obj2, stream)
         self.addCleanup(os.remove, addition.name)
 
         merge_kubernetes_configurations(existing.name, addition.name, False)
@@ -478,7 +478,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             'current-context': 'context1',
         }
         with open(existing.name, 'w+') as stream:
-            yaml.dump(obj1, stream)
+            yaml.safe_dump(obj1, stream)
 
         obj2 = {
             'clusters': [
@@ -513,7 +513,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         }
 
         with open(addition.name, 'w+') as stream:
-            yaml.dump(obj2, stream)
+            yaml.safe_dump(obj2, stream)
         with self.assertRaises(CLIError):
             merge_kubernetes_configurations(existing.name, addition.name, False)
 

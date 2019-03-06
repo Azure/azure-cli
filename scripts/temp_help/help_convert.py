@@ -360,7 +360,7 @@ if __name__ == "__main__":
         for file, help_dict in file_to_help.items():
             logger.warning("Writing {} ...".format(file))
             with open(file, "w") as f:
-                yaml.dump(help_dict, f)
+                yaml.safe_dump(help_dict, f)
 
         print("Loading all help again...")
         all_cli_help = get_all_help(az_cli)
@@ -383,7 +383,7 @@ if __name__ == "__main__":
             print("Generating help.yaml file...")
             out_file, result = convert(target_mods[0], mod_names[0])
             with open(out_file, "w") as f:
-                yaml.dump(result, f)
+                yaml.safe_dump(result, f)
             print("Done! Successfully generated {0}/help.yaml in {0} module.".format(mod_names[0]))
         else:
             print("Generating help.yaml files...")
@@ -392,6 +392,6 @@ if __name__ == "__main__":
                 if out_file is None or result is None:
                     continue
                 with open(out_file, "w") as f:
-                    yaml.dump(result, f)
+                    yaml.safe_dump(result, f)
                 print("Successfully generated {0}/help.yaml in {0} module.".format(mod_name))
 
