@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.3.4
++++++
+* eventhubs eventhub create/update: Added --skip-empty-archives flag to support empty archives in capture.
+
 0.3.3
 +++++
 * Minor fixes
@@ -12,7 +17,7 @@ Release History
 
 0.3.1
 +++++
-* eventhub namespace create/update: Added --enable-kafka flag to support Kafka.
+* eventhubs namespace create/update: Added --enable-kafka flag to support Kafka.
 
 0.3.0
 +++++

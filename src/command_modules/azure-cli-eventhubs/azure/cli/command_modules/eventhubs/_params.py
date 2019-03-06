@@ -70,7 +70,6 @@ def load_arguments_eh(self, _):
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
-
 # region - Eventhub Create
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
@@ -81,6 +80,7 @@ def load_arguments_eh(self, _):
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Status of Eventhub')
             c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture description is enabled.')
+            c.argument('skip_empty_archives', options_list=['--skip-empty-archives'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to Skip Empty.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
             c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination')
