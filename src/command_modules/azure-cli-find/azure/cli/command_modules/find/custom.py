@@ -14,9 +14,9 @@ import colorama  # pylint: disable=import-error
 
 
 from azure.cli.core import telemetry as telemetry_core
-from knack.log import get_logger
 from azure.cli.core import __version__ as core_version
 from pkg_resources import parse_version
+from knack.log import get_logger
 logger = get_logger(__name__)
 
 WAIT_MESSAGE = ['I\'m an AI bot (learn more: aka.ms/aladdinkb); Let me see how I can help you...']
