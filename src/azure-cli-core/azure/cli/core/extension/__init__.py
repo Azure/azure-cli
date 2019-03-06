@@ -259,7 +259,7 @@ def get_extension_modname(ext_name=None, ext_dir=None):
 
 
 def get_extension_path(ext_name):
-    return os.path.join(EXTENSIONS_DIR, ext_name)
+    return get_extension(ext_name).path
 
 
 def get_extensions(ext_type=None):
