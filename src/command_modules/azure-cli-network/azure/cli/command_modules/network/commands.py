@@ -365,7 +365,7 @@ def load_command_table(self, _):
         **ag_kwargs
     )
     with self._arm_command_group('network application-gateway rewrite-rule set', app_gateway_rewrite_ruleset) as g:
-        g.create()
+        g.create(supports_no_wait=True)
         g.list()
         g.show()
         g.delete(confirmation=True)
@@ -379,13 +379,13 @@ def load_command_table(self, _):
         **ag_kwargs
     )
     with self._arm_command_group('network application-gateway rewrite-rule', app_gateway_rewrite_rule) as g:
-        g.create()
+        g.create(supports_no_wait=True)
         g.list()
         g.show()
         g.delete()
 
     app_gateway_rewrite_rule_condition = CliCommandType(
-        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}/rewriteRules/{name:rule_name}/conditions/{variable}',
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}/rewriteRules/{name:rule_name}/conditions/{variable:condition_variable}',
         min_api='2018-12-01',
         model='ApplicationGatewayRewriteRuleCondition',
         model_prefix='condition',
@@ -393,7 +393,7 @@ def load_command_table(self, _):
     )
 
     with self._arm_command_group('network application-gateway rewrite-rule condition', app_gateway_rewrite_rule_condition) as g:
-        g.create()
+        g.create(supports_no_wait=True)
         g.list()
         g.show()
         g.delete()

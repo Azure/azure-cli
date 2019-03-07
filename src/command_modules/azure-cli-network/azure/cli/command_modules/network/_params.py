@@ -209,18 +209,19 @@ def load_arguments(self, _):
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
 
     with self.argument_context('network application-gateway rewrite-rule') as c:
-        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'))
-        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'))
-        c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
+        c.argument('rule_response_header_configurations', options_list='--response-headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('rule_response_header_configurations'))
+        c.argument('rule_request_header_configurations', options_list='--request-headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('rule_request_header_configurations'))
+        c.argument('rule_rule_sequence', options_list='--rule-sequence', type=int, help='Determines the execution order of the rule in the rule set.')
         c.argument('ruleset_name', help='Name of the rewrite rule set.')
         c.argument('rule_name', help='Name of the rewrite rule.')
         c.argument('gateway_name', help='Name of the application gateway.')
+        c.ignore('ruleset_id')
 
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
-        c.argument('variable', help='The variable whose value is being evaluated.')
-        c.argument('pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
-        c.argument('ignore_case', arg_type=get_three_state_flag(), help='Make comparison case-insensitive.')
-        c.argument('negate', arg_type=get_three_state_flag(), help='Check the negation of the condition.')
+        c.argument('condition_variable', help='The variable whose value is being evaluated.')
+        c.argument('condition_pattern', options_list='--pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
+        c.argument('condition_ignore_case', arg_type=get_three_state_flag(), options_list='--ignore-case', help='Make comparison case-insensitive.')
+        c.argument('condition_negate', arg_type=get_three_state_flag(), options_list='--negate', help='Check the negation of the condition.')
 
     with self.argument_context('network application-gateway rule create') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))

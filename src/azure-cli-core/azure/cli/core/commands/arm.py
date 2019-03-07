@@ -1201,7 +1201,9 @@ class ArmCommandGroup(AzCommandGroup):
             if no_wait:
                 sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent)
             else:
-                result = sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent).result()
+                result = sdk_no_wait(
+                    no_wait, client.create_or_update, resource_group_name, parent_name, parent
+                ).result()
                 match = None
                 try: 
                     match = self._find_child_item(result, kwargs)
@@ -1218,33 +1220,33 @@ class ArmCommandGroup(AzCommandGroup):
         def create_func(cmd, client, resource_group_name, **kwargs):
             no_wait = kwargs.get('no_wait', None)
             parent_name = self.get_parent_prop_name(kwargs)
-            child_name = self.get_child_prop_name(kwargs)
             parent = client.get(resource_group_name, parent_name)
             collection = self._find_child_collection(parent, kwargs)
-            new_item = cmd.get_models(model)(kwargs)
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent)
-
-        # def _upsert(parent, collection_name, obj_to_add, key_name, warn=True):
-        #     if not getattr(parent, collection_name, None):
-        #         setattr(parent, collection_name, [])
-        #     collection = getattr(parent, collection_name, None)
-
-        #     value = getattr(obj_to_add, key_name)
-        #     if value is None:
-        #         raise CLIError(
-        #             "Unable to resolve a value for key '{}' with which to match.".format(key_name))
-        #     match = next((x for x in collection if getattr(x, key_name, None) == value), None)
-        #     if match:
-        #         if warn:
-        #             logger.warning("Item '%s' already exists. Replacing with new values.", value)
-        #         collection.remove(match)
-
-        #     collection.append(obj_to_add)
+            new_item = self._build_model(cmd, resource_group_name, kwargs)
+            child_name = self.get_child_prop_name(kwargs)
+            match = next((x for x in collection if getattr(x, self._child_key, None) == child_name), None)
+            if match:
+                logger.warning("Item '%s' already exists. Replacing with new values.", child_name)
+                collection.remove(match)
+            collection.append(new_item)
+            if no_wait:
+                return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent)
+            parent = sdk_no_wait(
+                no_wait, client.create_or_update, resource_group_name, parent_name, parent
+            ).result()
+            return self._find_child_item(parent, kwargs)
 
         scope = '{} {}'.format(self.group_name, command_name)
         func_name = self._register_func(command_name, create_func)
         self.command(command_name, func_name, **kwargs)
-        self._add_dests(scope, optional=['no_wait'])
+        optionals = []
+        requires = []
+        for key, data in self._model_map.items():
+            if data.get('required'):
+                requires.append(key)
+            else:
+                optionals.append(key)
+        self._add_dests(scope, optional=optionals, required=requires)
 
     def _add_dests(self, scope, required=None, optional=None):
         from azure.cli.core.commands.parameters import get_resource_name_completion_list
@@ -1303,6 +1305,8 @@ class ArmCommandGroup(AzCommandGroup):
             else:  # collection properties
                 self._child_path.append(comp)
                 curr_collection = comp
+        self._child_dest = self._key_to_dest_map[self._child_path[-1]]
+        self._child_key = self._model_map[self._child_dest]['path']
 
     def _find_child(self, parent, paths, kwargs):
         current = parent
@@ -1351,7 +1355,25 @@ class ArmCommandGroup(AzCommandGroup):
     def _get_command_type_property(self, name):
         return self.group_kwargs['command_type'].settings.get(name, None)
 
-    def _parse_model(self, model_cls, ignore_collections=True):
+    def _build_model(self, cmd, resource_group_name, kwargs):
+        model_kwargs = {
+            'resource_group_name': resource_group_name
+        }
+        for dest, data in self._model_map.items():
+            dest_value = kwargs.get(dest)
+            if not dest_value:
+                continue
+            path = data['path']
+            if '.' in path:
+                parent, dest = path.split('.', 1)
+                if parent not in model_kwargs:
+                    model_kwargs[parent] = {}
+                model_kwargs[parent].update({dest: dest_value})
+            else:
+                model_kwargs[path] = dest_value
+        return cmd.get_models(self._model)(**model_kwargs)
+
+    def _parse_model(self, model_cls, ignore_collections=True, parent_path=None):
         attr_map = model_cls.__dict__['_attribute_map']
         validation = model_cls.__dict__.get('_validation', {})
         prefix = self._model_prefix
@@ -1364,12 +1386,20 @@ class ArmCommandGroup(AzCommandGroup):
             # skip collections. They will be their own command groups
             if data_type.startswith('[') and data_type.endswith(']') and ignore_collections:
                 continue
+            dest = key if not prefix else '{}_{}'.format(prefix, key)
             if self.command_loader.get_models(data_type):
-                subprop_map = self._parse_model(self.command_loader.get_models(data_type), ignore_collections=False)
-                print(subprop_map)
+                subprop_map = self._parse_model(
+                    self.command_loader.get_models(data_type),
+                    ignore_collections=False,
+                    parent_path=key
+                )
+                property_map.update(subprop_map)
             else:
-                key = key if not prefix else '{}_{}'.format(prefix, key)
-                property_map = {'dest': key}
+                property_map[dest] = {
+                    'dest': dest,
+                    'path': key if not parent_path else '{}.{}'.format(parent_path, key),
+                    'required': validation.get(key, {}).get('required', False)
+                }
         return property_map
 
     def __init__(self, command_loader, group_name, **kwargs):
@@ -1380,6 +1410,7 @@ class ArmCommandGroup(AzCommandGroup):
             raise CLIError("command authoring error: ArmCommandGroup requires 'path' kwarg.")        
 
         model = self._get_command_type_property('model')
+        self._model = model
         self._model_prefix = self._get_command_type_property('model_prefix')
         self._model_map = self._parse_model(command_loader.get_models(model)) if model else {}
 
@@ -1388,7 +1419,10 @@ class ArmCommandGroup(AzCommandGroup):
         self._parent_type = None
         self._parent_prop = None
         self._child_path = []
+        self._child_key = None
+        self._child_dest = None
         self._key_to_dest_map = {}
+        self._dest_to_key_map = {}
         self._dest_to_id_part_map = {}
         self._parse_path(path)
 
