@@ -1068,7 +1068,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write(html_file.read())
 
     def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        return  # this prevent http server from dumping messages to stdout
+        pass  # this prevent http server from dumping messages to stdout
 
 
 def _get_authorization_code_worker(authority_url, resource, results):
