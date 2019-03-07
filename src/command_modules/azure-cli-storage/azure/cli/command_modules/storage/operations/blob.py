@@ -160,9 +160,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
 
-        # add blob name to progress message
-        progress_callback.message = 'Downloading: "{}"'.format(blob_name)
-
         blob = blob_service.get_blob_to_path(container, blob_name, destination_path, max_connections=max_connections,
                                              progress_callback=progress_callback)
         return blob.name
@@ -190,7 +187,10 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         return []
 
     results = []
-    for blob_normed in blobs_to_download:
+    for index, blob_normed in enumerate(blobs_to_download):
+        # add blob name and number to progress message
+        progress_callback.message = '{}/{}: "{}"'.format(
+            index+1, len(blobs_to_download), blobs_to_download[blob_normed])
         results.append(_download_blob(
             client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
 
@@ -216,6 +216,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'eTag': upload_result.etag if upload_result else None}
 
     logger = get_logger(__name__)
+    source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
     results = []
@@ -226,19 +227,21 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         logger.info('       type %s', blob_type)
         logger.info('      total %d', len(source_files))
         results = []
-        for src, dst in source_files or []:
+        for src, dst in source_files:
             results.append(_create_return_result(dst, guess_content_type(src, content_settings, t_content_settings)))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
             return upload_blob(*args, **kwargs)
 
-        for src, dst in source_files or []:
+        for index, source_file in enumerate(source_files):
+            src, dst = source_file
             # logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
 
-            # add blob name to progress message
-            progress_callback.message = 'Uploading: "{}"'.format(normalize_blob_file_path(destination_path, dst))
+            # add blob name and number to progress message
+            progress_callback.message = '{}/{}: "{}"'.format(
+                index+1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
             include, result = _upload_blob(cmd, client, destination_container_name,
                                            normalize_blob_file_path(destination_path, dst), src,
