@@ -265,7 +265,7 @@ examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
   - name: Create a Kubernetes cluster with a specific version.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.7
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
 """
