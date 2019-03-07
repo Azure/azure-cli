@@ -238,10 +238,10 @@ class TestCloud(unittest.TestCase):
     def test_switch_active_cloud(self, subscription_setter):
         cli = mock.MagicMock()
         switch_active_cloud(cli, 'AzureGermanCloud')
-        self.assertEquals(cli.cloud.name, 'AzureGermanCloud')
+        self.assertEqual(cli.cloud.name, 'AzureGermanCloud')
 
         switch_active_cloud(cli, 'AzureChinaCloud')
-        self.assertEquals(cli.cloud.name, 'AzureChinaCloud')
+        self.assertEqual(cli.cloud.name, 'AzureChinaCloud')
 
 
 if __name__ == '__main__':
