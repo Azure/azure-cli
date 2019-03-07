@@ -160,6 +160,9 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
 
+        # add blob name to progress message
+        progress_callback.message = 'Downloading: "{}"'.format(blob_name)
+
         blob = blob_service.get_blob_to_path(container, blob_name, destination_path, max_connections=max_connections,
                                              progress_callback=progress_callback)
         return blob.name
@@ -186,8 +189,15 @@ def storage_blob_download_batch(client, source, destination, source_container_na
             logger.warning('  - %s', b)
         return []
 
-    return list(_download_blob(client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed])
-                for blob_normed in blobs_to_download)
+    results = []
+    for blob_normed in blobs_to_download:
+        results.append(_download_blob(
+            client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
+
+    # end progress hook
+    progress_callback.hook.end()
+
+    return results
 
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals
@@ -224,8 +234,11 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             return upload_blob(*args, **kwargs)
 
         for src, dst in source_files or []:
-            logger.warning('uploading %s', src)
+            # logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
+
+            # add blob name to progress message
+            progress_callback.message = 'Uploading: "{}"'.format(normalize_blob_file_path(destination_path, dst))
 
             include, result = _upload_blob(cmd, client, destination_container_name,
                                            normalize_blob_file_path(destination_path, dst), src,
@@ -238,7 +251,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                                            if_none_match=if_none_match, timeout=timeout)
             if include:
                 results.append(_create_return_result(dst, guessed_content_settings, result))
-
+        # end progress hook
+        progress_callback.hook.end()
         num_failures = len(source_files) - len(results)
         if num_failures:
             logger.warning('%s of %s files not uploaded due to "Failed Precondition"', num_failures, len(source_files))
