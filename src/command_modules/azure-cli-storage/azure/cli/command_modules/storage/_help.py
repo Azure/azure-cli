@@ -621,6 +621,9 @@ helps['storage file download-batch'] = """
         - name: --max-connections
           type: integer
           short-summary: The maximum number of parallel connections to use. Default value is 1.
+        - name: --snapshot
+          type: string
+          short-summary: A string that represents the snapshot version, if applicable.
         - name: --validate-content
           type: bool
           short-summary: If set, calculates an MD5 hash for each range of the file for validation.

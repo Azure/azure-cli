@@ -91,7 +91,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
 
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
-                                max_connections=1, progress_callback=None):
+                                max_connections=1, progress_callback=None, snapshot=None):
     """
     Download files from file share to local directory in batch
     """
@@ -122,7 +122,7 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
 
         get_file_args = {'share_name': source, 'directory_name': pair[0], 'file_name': pair[1],
                          'file_path': os.path.join(destination, *pair), 'max_connections': max_connections,
-                         'progress_callback': progress_callback}
+                         'progress_callback': progress_callback, 'snapshot': snapshot}
 
         if cmd.supported_api_version(min_api='2016-05-31'):
             get_file_args['validate_content'] = validate_content
