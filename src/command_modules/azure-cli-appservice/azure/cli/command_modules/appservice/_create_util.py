@@ -211,7 +211,9 @@ def parse_node_version(file_path):
                 # remove the string ~ or  > that sometimes exists in version value
                 c = non_decimal.sub('', value_detected)
                 # reduce the version to '6.0' from '6.0.0'
-                version_detected.append(c[:4])
+                num_array = c.split('.')
+                num = num_array[0] + "." + num_array[1]
+                version_detected.append(num)
     return version_detected or ['0.0']
 
 
