@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* `storage file download-batch`: add `--snapshot` to download from a share snapshot
+
 2.3.1
 +++++
 * Changed fix to update only properties that are changed on the same object
