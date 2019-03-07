@@ -471,7 +471,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
                 keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.
 
@@ -551,14 +551,14 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                     'Settings. Build will commence during deployment. For more information, see '
                     'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
     else:
-        logger.warn('Didn\'t detect SCM_DO_BUILD_DURING_DEPLOYMENT or its value was "false" in App Service\'s '
-                    'Application Settings. Build may not commence during deployment. To learn how to trigger a build '
-                    'when deploying to your App Service, see '
-                    'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
+        logger.warning('Didn\'t detect SCM_DO_BUILD_DURING_DEPLOYMENT or its value was "false" in App Service\'s '
+                       'Application Settings. Build may not commence during deployment. To learn how to trigger a build'
+                       ' when deploying to your App Service, see '
+                       'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        logger.warn('To change the Application Setting via az cli, use the following command:\naz webapp config '
-                    'appsettings set -n %s -g %s --subscription %s --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true' %
-                    (kudu_client.bot_site_name, resource_group_name, subscription_id))
+        logger.warning('To change the Application Setting via az cli, use the following command:\naz webapp config '  # pylint:disable=logging-not-lazy
+                       'appsettings set -n %s -g %s --subscription %s --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true' %
+                       (kudu_client.bot_site_name, resource_group_name, subscription_id))
 
     output = kudu_client.publish(zip_filepath, timeout, keep_node_modules, iis_publish_info['lang'])
 

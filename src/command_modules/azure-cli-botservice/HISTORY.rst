@@ -3,12 +3,15 @@
 Release History
 ===============
 
-0.1.7
+0.1.8
 +++++
 * Add "SCM_DO_BUILD_DURING_DEPLOYMENT" to ARM template's Application Settings for v4 Web App Bots
 * Add "Microsoft-BotFramework-AppId" and "Microsoft-BotFramework-AppPassword" to ARM template's Application Settings for v4 Web App Bots
 * Remove single quotes from `az bot publish` command output at end of `az bot create`
 * Use async zipdeploy API for deploying bots via `az bot publish`
+
+0.1.7
++++++
 * Suppress latest `botservice (0.4.3)` extension, this functionality has been rolled into the core CLI
 
 0.1.6
