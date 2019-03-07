@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.3.4
++++++
 * `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
 
 2.3.3

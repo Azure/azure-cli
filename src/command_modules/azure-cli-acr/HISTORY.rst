@@ -3,9 +3,12 @@
 Release History
 ===============
 
-2.2.1
+2.2.2
 +++++
 * Fix redundant sources in image import.
+
+2.2.1
++++++
 * Add '--target' parameter for 'az acr build', 'az acr task create' and 'az acr task update' commands.
 * Improve error handling for runtime commands when not logged into Azure.
 
