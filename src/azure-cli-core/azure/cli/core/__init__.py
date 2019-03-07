@@ -94,7 +94,7 @@ class AzCli(CLI):
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
-        return handle_exception(ex)
+        return handle_exception(ex, cli_ctx=self)
 
 
 class MainCommandsLoader(CLICommandsLoader):
