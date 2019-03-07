@@ -3,10 +3,11 @@
 Release History
 ===============
 
+* Fix issues with dev extension incompatibility. 
+
 2.0.60
 ++++++
 * cloud set: fix a bogus error about subscription not found
-* Fixes issues with dev extension incompatibility. 
 
 2.0.59
 ++++++
