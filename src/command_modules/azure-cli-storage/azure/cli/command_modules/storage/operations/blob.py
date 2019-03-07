@@ -190,7 +190,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     for index, blob_normed in enumerate(blobs_to_download):
         # add blob name and number to progress message
         progress_callback.message = '{}/{}: "{}"'.format(
-            index+1, len(blobs_to_download), blobs_to_download[blob_normed])
+            index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
         results.append(_download_blob(
             client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
 
@@ -241,7 +241,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
 
             # add blob name and number to progress message
             progress_callback.message = '{}/{}: "{}"'.format(
-                index+1, len(source_files), normalize_blob_file_path(destination_path, dst))
+                index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
             include, result = _upload_blob(cmd, client, destination_container_name,
                                            normalize_blob_file_path(destination_path, dst), src,
