@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-09-25T02:53:48Z"}}'
+      "date": "2019-03-06T18:50:26Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -9,19 +9,19 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.46]
+      ParameterSetName: [--location --name --tag]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_alias000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001","name":"cli_test_eh_alias000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-09-25T02:53:48Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001","name":"cli_test_eh_alias000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-06T18:50:26Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:53:54 GMT']
+      date: ['Wed, 06 Mar 2019 18:50:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -37,8 +37,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['32']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/CheckNameAvailability?api-version=2017-04-01
@@ -48,7 +49,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['53']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:53:54 GMT']
+      date: ['Wed, 06 Mar 2019 18:50:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -60,7 +61,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "SouthCentralUS", "tags": {"{tag2: value2,": "", "tag1: value1}":
+    body: '{"location": "SouthCentralUS", "tags": {"{tag1: value1,": "", "tag2: value2}":
       ""}, "sku": {"name": "Standard", "tier": "Standard"}}'
     headers:
       Accept: [application/json]
@@ -69,19 +70,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['132']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name --location --tags --sku]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002?api-version=2017-04-01
   response:
     body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002","name":"eh-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
-        Central US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000002","createdAt":"2018-09-25T02:53:56.617Z","updatedAt":"2018-09-25T02:53:56.617Z","serviceBusEndpoint":"https://eh-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'}
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000002","createdAt":"2019-03-06T18:50:30.823Z","updatedAt":"2019-03-06T18:50:30.823Z","serviceBusEndpoint":"https://eh-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['768']
+      content-length: ['789']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:53:56 GMT']
+      date: ['Wed, 06 Mar 2019 18:50:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -99,18 +101,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace create]
       Connection: [keep-alive]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name --location --tags --sku]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002?api-version=2017-04-01
   response:
     body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002","name":"eh-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
-        Central US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000002","createdAt":"2018-09-25T02:53:56.617Z","updatedAt":"2018-09-25T02:54:19.493Z","serviceBusEndpoint":"https://eh-nscli000002.servicebus.windows.net:443/","status":"Active"}}'}
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000002","createdAt":"2019-03-06T18:50:30.823Z","updatedAt":"2019-03-06T18:50:57.68Z","serviceBusEndpoint":"https://eh-nscli000002.servicebus.windows.net:443/","status":"Active"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['766']
+      content-length: ['786']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:54:27 GMT']
+      date: ['Wed, 06 Mar 2019 18:51:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -127,20 +130,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002?api-version=2017-04-01
   response:
     body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002","name":"eh-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
-        Central US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000002","createdAt":"2018-09-25T02:53:56.617Z","updatedAt":"2018-09-25T02:54:19.493Z","serviceBusEndpoint":"https://eh-nscli000002.servicebus.windows.net:443/","status":"Active"}}'}
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000002","createdAt":"2019-03-06T18:50:30.823Z","updatedAt":"2019-03-06T18:50:57.68Z","serviceBusEndpoint":"https://eh-nscli000002.servicebus.windows.net:443/","status":"Active"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['766']
+      content-length: ['786']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:54:28 GMT']
+      date: ['Wed, 06 Mar 2019 18:51:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -151,7 +154,7 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "NorthCentralUS", "tags": {"{tag2: value2,": "", "tag1: value1}":
+    body: '{"location": "NorthCentralUS", "tags": {"{tag1: value1,": "", "tag2: value2}":
       ""}, "sku": {"name": "Standard", "tier": "Standard"}}'
     headers:
       Accept: [application/json]
@@ -160,19 +163,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['132']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name --location --tags --sku]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003?api-version=2017-04-01
   response:
     body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003","name":"eh-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"North
-        Central US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2018-09-25T02:54:29.79Z","updatedAt":"2018-09-25T02:54:29.79Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'}
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2019-03-06T18:51:03.9Z","updatedAt":"2019-03-06T18:51:03.9Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['766']
+      content-length: ['785']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:54:30 GMT']
+      date: ['Wed, 06 Mar 2019 18:51:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -190,18 +194,48 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace create]
       Connection: [keep-alive]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name --location --tags --sku]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003?api-version=2017-04-01
   response:
     body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003","name":"eh-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"North
-        Central US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2018-09-25T02:54:29.79Z","updatedAt":"2018-09-25T02:54:54.74Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Active"}}'}
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2019-03-06T18:51:03.9Z","updatedAt":"2019-03-06T18:51:03.9Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['764']
+      content-length: ['785']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:00 GMT']
+      date: ['Wed, 06 Mar 2019 18:51:33 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
+      server-sb: [Service-Bus-Resource-Provider/CH3]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [eventhubs namespace create]
+      Connection: [keep-alive]
+      ParameterSetName: [--resource-group --name --location --tags --sku]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003?api-version=2017-04-01
+  response:
+    body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003","name":"eh-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"North
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2019-03-06T18:51:03.9Z","updatedAt":"2019-03-06T18:51:35.54Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Active"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['784']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 06 Mar 2019 18:52:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -218,20 +252,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003?api-version=2017-04-01
   response:
     body: {string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003","name":"eh-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"North
-        Central US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2018-09-25T02:54:29.79Z","updatedAt":"2018-09-25T02:54:54.74Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Active"}}'}
+        Central US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":false,"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:eh-nscli000003","createdAt":"2019-03-06T18:51:03.9Z","updatedAt":"2019-03-06T18:51:35.54Z","serviceBusEndpoint":"https://eh-nscli000003.servicebus.windows.net:443/","status":"Active"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['764']
+      content-length: ['784']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:01 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -250,19 +284,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['36']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --name --rights]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/AuthorizationRules/cliAutho000004?api-version=2017-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"","location":"South
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"South
         Central US","properties":{"rights":["Send"]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['355']
+      content-length: ['403']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:19 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -280,20 +315,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace authorization-rule show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/AuthorizationRules/cliAutho000004?api-version=2017-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"","location":"South
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"South
         Central US","properties":{"rights":["Send"]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['355']
+      content-length: ['403']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:21 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -312,8 +347,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['32']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/CheckNameAvailability?api-version=2017-04-01
@@ -323,7 +359,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['38']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:21 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -343,8 +379,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['243']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias --partner-namespace]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -354,7 +391,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:38 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -363,7 +400,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -372,9 +409,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -384,7 +421,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:38 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -401,9 +438,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -413,7 +450,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['639']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:39 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -430,9 +467,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -442,7 +479,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:40 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -459,20 +496,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias authorization-rule show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/cliAutho000004?api-version=2017-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"","location":"South
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"South
         Central US","properties":{"rights":["Send"]}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['400']
+      content-length: ['448']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:44 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -489,21 +526,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias authorization-rule list]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules?api-version=2017-04-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/RootManageSharedAccessKey","name":"RootManageSharedAccessKey","type":"","location":"South
-        Central US","properties":{"rights":["Listen","Manage","Send"]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"","location":"South
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/RootManageSharedAccessKey","name":"RootManageSharedAccessKey","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"South
+        Central US","properties":{"rights":["Listen","Manage","Send"]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/AuthorizationRules/cliAutho000004","name":"cliAutho000004","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"South
         Central US","properties":{"rights":["Send"]}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['841']
+      content-length: ['937']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:55:45 GMT']
+      date: ['Wed, 06 Mar 2019 18:52:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -520,9 +557,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -532,7 +569,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:56:16 GMT']
+      date: ['Wed, 06 Mar 2019 18:53:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -549,9 +586,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -561,7 +598,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:56:46 GMT']
+      date: ['Wed, 06 Mar 2019 18:53:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -578,9 +615,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -590,7 +627,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:57:17 GMT']
+      date: ['Wed, 06 Mar 2019 18:54:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -607,9 +644,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -619,7 +656,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['676']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:57:48 GMT']
+      date: ['Wed, 06 Mar 2019 18:54:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -637,9 +674,9 @@ interactions:
       CommandName: [eventhubs georecovery-alias break-pair]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005/breakPairing?api-version=2017-04-01
@@ -648,7 +685,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 02:57:50 GMT']
+      date: ['Wed, 06 Mar 2019 18:54:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -664,9 +701,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -676,7 +713,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:57:51 GMT']
+      date: ['Wed, 06 Mar 2019 18:54:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -693,9 +730,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -705,7 +742,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:58:22 GMT']
+      date: ['Wed, 06 Mar 2019 18:55:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -722,9 +759,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -734,7 +771,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:58:52 GMT']
+      date: ['Wed, 06 Mar 2019 18:55:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -751,9 +788,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -763,7 +800,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['449']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:59:22 GMT']
+      date: ['Wed, 06 Mar 2019 18:56:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -782,8 +819,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['243']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias --partner-namespace]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -793,7 +831,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:59:40 GMT']
+      date: ['Wed, 06 Mar 2019 18:56:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -811,9 +849,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -823,7 +861,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 02:59:41 GMT']
+      date: ['Wed, 06 Mar 2019 18:56:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -840,9 +878,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -852,7 +890,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:00:11 GMT']
+      date: ['Wed, 06 Mar 2019 18:57:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -869,9 +907,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -881,7 +919,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:00:41 GMT']
+      date: ['Wed, 06 Mar 2019 18:57:38 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -898,9 +936,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -910,7 +948,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['637']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:01:12 GMT']
+      date: ['Wed, 06 Mar 2019 18:58:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -927,9 +965,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -939,7 +977,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['676']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:01:44 GMT']
+      date: ['Wed, 06 Mar 2019 18:58:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -957,9 +995,9 @@ interactions:
       CommandName: [eventhubs georecovery-alias fail-over]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005/failover?api-version=2017-04-01
@@ -968,14 +1006,14 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:01:45 GMT']
+      date: ['Wed, 06 Mar 2019 18:58:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
       server-sb: [Service-Bus-Resource-Provider/CH3]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -984,9 +1022,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -996,7 +1034,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['639']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:01:46 GMT']
+      date: ['Wed, 06 Mar 2019 18:58:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1013,9 +1051,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -1025,7 +1063,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['639']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:02:16 GMT']
+      date: ['Wed, 06 Mar 2019 18:59:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1042,9 +1080,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -1054,7 +1092,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['639']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:02:47 GMT']
+      date: ['Wed, 06 Mar 2019 18:59:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1071,9 +1109,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs georecovery-alias show]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -1083,7 +1121,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['449']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 25 Sep 2018 03:03:18 GMT']
+      date: ['Wed, 06 Mar 2019 19:00:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1101,9 +1139,9 @@ interactions:
       CommandName: [eventhubs georecovery-alias delete]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --namespace-name --alias]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/disasterRecoveryConfigs/cliAlias000005?api-version=2017-04-01
@@ -1112,7 +1150,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:03:19 GMT']
+      date: ['Wed, 06 Mar 2019 19:00:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1129,9 +1167,9 @@ interactions:
       CommandName: [eventhubs namespace delete]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002?api-version=2017-04-01
@@ -1140,7 +1178,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:03:50 GMT']
+      date: ['Wed, 06 Mar 2019 19:00:47 GMT']
       expires: ['-1']
       location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/operationresults/eh-nscli000002?api-version=2017-04-01']
       pragma: [no-cache]
@@ -1157,8 +1195,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace delete]
       Connection: [keep-alive]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000002/operationresults/eh-nscli000002?api-version=2017-04-01
   response:
@@ -1166,7 +1205,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:04:19 GMT']
+      date: ['Wed, 06 Mar 2019 19:01:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1182,9 +1221,9 @@ interactions:
       CommandName: [eventhubs namespace delete]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003?api-version=2017-04-01
@@ -1193,7 +1232,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:04:51 GMT']
+      date: ['Wed, 06 Mar 2019 19:01:49 GMT']
       expires: ['-1']
       location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/operationresults/eh-nscli000003?api-version=2017-04-01']
       pragma: [no-cache]
@@ -1210,8 +1249,9 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [eventhubs namespace delete]
       Connection: [keep-alive]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 azure-mgmt-eventhub/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.46]
+      ParameterSetName: [--resource-group --name]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          azure-mgmt-eventhub/2.3.0 Azure-SDK-For-Python AZURECLI/2.0.59]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_alias000001/providers/Microsoft.EventHub/namespaces/eh-nscli000003/operationresults/eh-nscli000003?api-version=2017-04-01
   response:
@@ -1219,7 +1259,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:05:21 GMT']
+      date: ['Wed, 06 Mar 2019 19:02:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Service-Bus-Resource-Provider/CH3, Microsoft-HTTPAPI/2.0]
@@ -1235,10 +1275,9 @@ interactions:
       CommandName: [group delete]
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.46]
+      ParameterSetName: [--name --yes --no-wait]
+      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_alias000001?api-version=2018-05-01
@@ -1247,9 +1286,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 25 Sep 2018 03:05:23 GMT']
+      date: ['Wed, 06 Mar 2019 19:02:21 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGRUg6NUZBTElBU1hJNVpaRFVMSUROS1RGS0U1Qk1CNVlGUnwwMTlEQzE3Q0E4RjA2QzUwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGRUg6NUZBTElBU1NWMlM0RUxLU1M0SjdTSVpZVkgyQTNOSnxCOThBNjA4NTc3MTAzQjE3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
