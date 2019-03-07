@@ -322,7 +322,7 @@ def reload_extension(extension_name, extension_module=None):
 
 
 def add_extension_to_path(extension_name, ext_dir=None):
-    ext_dir = ext_dir or get_extension_path(extension_name)
+    ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
 
 
