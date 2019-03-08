@@ -5,6 +5,7 @@
 from azure.cli.testsdk import ScenarioTest
 from knack.util import CLIError
 
+
 class CloudTests(ScenarioTest):
     def test_cloud_set_AzureCloud(self):
         self.cmd('az cloud set -n AzureCloud')
