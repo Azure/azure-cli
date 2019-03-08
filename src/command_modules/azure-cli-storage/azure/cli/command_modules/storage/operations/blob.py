@@ -186,8 +186,24 @@ def storage_blob_download_batch(client, source, destination, source_container_na
             logger.warning('  - %s', b)
         return []
 
-    return list(_download_blob(client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed])
-                for blob_normed in blobs_to_download)
+    # Tell progress reporter to reuse the same hook
+    if progress_callback:
+        progress_callback.reuse = True
+
+    results = []
+    for index, blob_normed in enumerate(blobs_to_download):
+        # add blob name and number to progress message
+        if progress_callback:
+            progress_callback.message = '{}/{}: "{}"'.format(
+                index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
+        results.append(_download_blob(
+            client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
+
+    # end progress hook
+    if progress_callback:
+        progress_callback.hook.end()
+
+    return results
 
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals
@@ -206,6 +222,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'eTag': upload_result.etag if upload_result else None}
 
     logger = get_logger(__name__)
+    source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
     results = []
@@ -216,16 +233,26 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         logger.info('       type %s', blob_type)
         logger.info('      total %d', len(source_files))
         results = []
-        for src, dst in source_files or []:
+        for src, dst in source_files:
             results.append(_create_return_result(dst, guess_content_type(src, content_settings, t_content_settings)))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
             return upload_blob(*args, **kwargs)
 
-        for src, dst in source_files or []:
-            logger.warning('uploading %s', src)
+        # Tell progress reporter to reuse the same hook
+        if progress_callback:
+            progress_callback.reuse = True
+
+        for index, source_file in enumerate(source_files):
+            src, dst = source_file
+            # logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
+
+            # add blob name and number to progress message
+            if progress_callback:
+                progress_callback.message = '{}/{}: "{}"'.format(
+                    index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
             include, result = _upload_blob(cmd, client, destination_container_name,
                                            normalize_blob_file_path(destination_path, dst), src,
@@ -238,7 +265,9 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                                            if_none_match=if_none_match, timeout=timeout)
             if include:
                 results.append(_create_return_result(dst, guessed_content_settings, result))
-
+        # end progress hook
+        if progress_callback:
+            progress_callback.hook.end()
         num_failures = len(source_files) - len(results)
         if num_failures:
             logger.warning('%s of %s files not uploaded due to "Failed Precondition"', num_failures, len(source_files))
