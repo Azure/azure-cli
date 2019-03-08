@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import pytest
-
 from azure.cli.testsdk import ScenarioTest
+from knack.util import CLIError
 
 class CloudTests(ScenarioTest):
     def test_cloud_set_AzureCloud(self):
@@ -32,5 +31,5 @@ class CloudTests(ScenarioTest):
         self.cmd('az cloud set -n azuregermancloud')
 
     def test_cloud_set_unregistered_cloud_name(self):
-        with pytest.raises(Exception, match =  "The cloud 'azCloud' is not registered.") :
-            self.cmd('az cloud set -n azCloud').get_output_in_json()
+        with self.assertRaisesRegexp(CLIError, "The cloud 'azCloud' is not registered."):
+            self.cmd('az cloud set -n azCloud')
