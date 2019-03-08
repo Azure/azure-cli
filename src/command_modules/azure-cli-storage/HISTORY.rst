@@ -4,6 +4,7 @@ Release History
 ===============
 * `storage file download-batch`: add `--snapshot` to download from a share snapshot
 * `storage blob download-batch/upload-batch`- adjust progress bar to be less verbose and indicate current blob
+* `storage account update`- Fix faulty logic for updating of encryption parameters.
 
 2.3.1
 +++++
