@@ -426,9 +426,6 @@ def validate_encryption_source(cmd, namespace):
                          'when --encryption-key-source=Microsoft.Keyvault is specified.')
 
     if key_name or key_version or key_vault_uri:
-        if namespace.encryption_key_source != 'Microsoft.Keyvault':
-            raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
-                             'applicable when --encryption-key-source=Microsoft.Keyvault is not specified.')
         KeyVaultProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE, 'KeyVaultProperties',
                                      mod='models')
         if not KeyVaultProperties:
