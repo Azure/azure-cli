@@ -2220,7 +2220,9 @@ def _ensure_aks_service_principal(cli_ctx,
         else:
             # Nothing to load, make one.
             if not client_secret:
-                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+                special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
+                special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
+                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
             url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
@@ -2312,7 +2314,9 @@ def _ensure_service_principal(cli_ctx,
         else:
             # Nothing to load, make one.
             if not client_secret:
-                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+                special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
+                special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
+                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
             url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
