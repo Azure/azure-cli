@@ -259,6 +259,7 @@ def get_extension_modname(ext_name=None, ext_dir=None):
 
 
 def get_extension_path(ext_name):
+    # This will simply form the path for a WHEEL extension.
     return os.path.join(EXTENSIONS_DIR, ext_name)
 
 
