@@ -543,6 +543,9 @@ examples:
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
+parameters:
+    - name: --settings
+      short-summary: Space-separated appsettings in a format of either <name>=<value> or @<json_file>.
 """
 
 helps['webapp config backup'] = """
