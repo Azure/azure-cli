@@ -257,6 +257,10 @@ def get_custom_clouds(cli_ctx):
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
 
 
+def _get_cloud_name(cli_ctx, cloud_name):
+    return next((x.name for x in get_clouds(cli_ctx) if x.name.lower() == cloud_name.lower()), cloud_name)
+
+
 def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
