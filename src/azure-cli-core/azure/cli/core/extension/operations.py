@@ -321,8 +321,8 @@ def reload_extension(extension_name, extension_module=None):
     return reload_module(extension_module if extension_module else get_extension_modname(ext_name=extension_name))
 
 
-def add_extension_to_path(extension_name):
-    ext_dir = get_extension_path(extension_name)
+def add_extension_to_path(extension_name, ext_dir=None):
+    ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
 
 
