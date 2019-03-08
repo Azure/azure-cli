@@ -545,7 +545,7 @@ examples:
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
 parameters:
     - name: --settings
-      short-summary: Space-separated appsettings in a format of either <name>=<value> or @<json_file>.
+      short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
 """
 
 helps['webapp config backup'] = """
