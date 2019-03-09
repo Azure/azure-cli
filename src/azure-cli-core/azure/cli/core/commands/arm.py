@@ -21,6 +21,7 @@ from knack.util import todict, CLIError
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller, AzCommandGroup
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.parameters import CLIArgumentType
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import (
     shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, sdk_no_wait)
@@ -96,6 +97,44 @@ class ArmTemplateBuilder(object):
 
     def build_parameters(self):
         return json.loads(json.dumps(self.parameters))
+
+
+class _OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not getattr(namespace, 'ordered_arguments', None):
+            setattr(namespace, 'ordered_arguments', [])
+        namespace.ordered_arguments.append((option_string, values))
+
+
+_add_usage = '--add property.listProperty <key=value, string or JSON string>'
+_set_usage = '--set property1.property2=<value>'
+_remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
+_generic_arg_group = 'Generic Update'
+_generic_update_arguments = {
+    'properties_to_set': {
+        'options_list': ['--set'], 'nargs': '+',
+        'action': _OrderedArgsAction, 'default': [],
+        'help': 'Update an object by specifying a property path and value to set.  Example: {}'.format(_set_usage),
+        'metavar': 'KEY=VALUE', 'arg_group': _generic_arg_group
+    },
+    'properties_to_add': {
+        'options_list': ['--add'], 'nargs': '+',
+        'action': _OrderedArgsAction, 'default': [],
+        'help': 'Add an object to a list of objects by specifying a path and key value pairs.  Example: {}'.format(_add_usage),
+        'metavar': 'LIST KEY=VALUE', 'arg_group': _generic_arg_group
+    },
+    'properties_to_remove': {
+        'options_list': ['--remove'], 'nargs': '+',
+        'action': _OrderedArgsAction, 'default': [],
+        'help': 'Remove a property or an element from a list.  Example: {}'.format(_remove_usage),
+        'metavar': 'LIST INDEX', 'arg_group': _generic_arg_group
+    },
+    'force_string': {
+        'action': 'store_true', 'arg_group': _generic_arg_group,
+        'help': "When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON."
+    }
+}
 
 
 def handle_template_based_exception(ex):
@@ -364,11 +403,6 @@ def register_global_subscription_argument(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
 
 
-add_usage = '--add property.listProperty <key=value, string or JSON string>'
-set_usage = '--set property1.property2=<value>'
-remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
-
-
 def _get_child(parent, collection_name, item_name, collection_key):
     if not item_name:
         raise CLIError("Name property for collection '{}' not provided. Check your input.".format(collection_name))
@@ -438,39 +472,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         arguments.pop('parent', None)
         arguments.pop('expand', None)  # possibly inherited from the getter
         arguments.pop(setter_arg_name, None)
-
-        # Add the generic update parameters
-        class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
-
-            def __call__(self, parser, namespace, values, option_string=None):
-                if not getattr(namespace, 'ordered_arguments', None):
-                    setattr(namespace, 'ordered_arguments', [])
-                namespace.ordered_arguments.append((option_string, values))
-
-        group_name = 'Generic Update'
-        arguments['properties_to_set'] = CLICommandArgument(
-            'properties_to_set', options_list=['--set'], nargs='+',
-            action=OrderedArgsAction, default=[],
-            help='Update an object by specifying a property path and value to set.  Example: {}'.format(set_usage),
-            metavar='KEY=VALUE', arg_group=group_name
-        )
-        arguments['properties_to_add'] = CLICommandArgument(
-            'properties_to_add', options_list=['--add'], nargs='+',
-            action=OrderedArgsAction, default=[],
-            help='Add an object to a list of objects by specifying a path and '
-                 'key value pairs.  Example: {}'.format(add_usage),
-            metavar='LIST KEY=VALUE', arg_group=group_name
-        )
-        arguments['properties_to_remove'] = CLICommandArgument(
-            'properties_to_remove', options_list=['--remove'], nargs='+',
-            action=OrderedArgsAction, default=[],
-            help='Remove a property or an element from a list.  Example: {}'.format(remove_usage),
-            metavar='LIST INDEX', arg_group=group_name
-        )
-        arguments['force_string'] = CLICommandArgument(
-            'force_string', action='store_true', arg_group=group_name,
-            help="When using 'set' or 'add', preserve string literals instead of attempting to convert to JSON."
-        )
+        for dest, arg_kwargs in _generic_update_arguments.items():
+            arguments[dest] = CLICommandArgument(dest, **arg_kwargs)
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op, context):
@@ -534,17 +537,17 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
                     for expression in arg_values:
                         set_properties(instance, expression, force_string)
                 except ValueError:
-                    raise CLIError('invalid syntax: {}'.format(set_usage))
+                    raise CLIError('invalid syntax: {}'.format(_set_usage))
             elif arg_type == '--add':
                 try:
                     add_properties(instance, arg_values, force_string)
                 except ValueError:
-                    raise CLIError('invalid syntax: {}'.format(add_usage))
+                    raise CLIError('invalid syntax: {}'.format(_add_usage))
             elif arg_type == '--remove':
                 try:
                     remove_properties(instance, arg_values)
                 except ValueError:
-                    raise CLIError('invalid syntax: {}'.format(remove_usage))
+                    raise CLIError('invalid syntax: {}'.format(_remove_usage))
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
@@ -1247,6 +1250,147 @@ class ArmCommandGroup(AzCommandGroup):
             else:
                 optionals.append(key)
         self._add_dests(scope, optional=optionals, required=requires)
+
+    def update(self, command_name='update', **kwargs):
+
+
+        #def handler(args):  # pylint: disable=too-many-branches,too-many-statements
+        #    cmd = args.get('cmd')
+        #    context_copy = copy.copy(context)
+        #    context_copy.cli_ctx = cmd.cli_ctx
+        #    force_string = args.get('force_string', False)
+        #    ordered_arguments = args.pop('ordered_arguments', [])
+        #    for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
+        #        if args[item]:
+        #            raise CLIError("Unexpected '{}' was not empty.".format(item))
+        #        del args[item]
+
+        #    getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
+        #    if child_collection_prop_name:
+        #        parent = getter(**getterargs)
+        #        instance = _get_child(
+        #            parent,
+        #            child_collection_prop_name,
+        #            args.get(child_arg_name),
+        #            child_collection_key
+        #        )
+        #    else:
+        #        parent = None
+        #        instance = getter(**getterargs)
+
+        #    # pass instance to the custom_function, if provided
+        #    if custom_function_op:
+        #        custom_function, custom_func_args = _extract_handler_and_args(
+        #            args, cmd.command_kwargs, custom_function_op, context_copy)
+        #        if child_collection_prop_name:
+        #            parent = custom_function(instance=instance, parent=parent, **custom_func_args)
+        #        else:
+        #            instance = custom_function(instance=instance, **custom_func_args)
+
+        #    # apply generic updates after custom updates
+        #    setter, setterargs = _extract_handler_and_args(args, cmd.command_kwargs, setter_op, context_copy)
+
+        #    for arg in ordered_arguments:
+        #        arg_type, arg_values = arg
+        #        if arg_type == '--set':
+        #            try:
+        #                for expression in arg_values:
+        #                    set_properties(instance, expression, force_string)
+        #            except ValueError:
+        #                raise CLIError('invalid syntax: {}'.format(_set_usage))
+        #        elif arg_type == '--add':
+        #            try:
+        #                add_properties(instance, arg_values, force_string)
+        #            except ValueError:
+        #                raise CLIError('invalid syntax: {}'.format(_add_usage))
+        #        elif arg_type == '--remove':
+        #            try:
+        #                remove_properties(instance, arg_values)
+        #            except ValueError:
+        #                raise CLIError('invalid syntax: {}'.format(_remove_usage))
+
+        #    # Done... update the instance!
+        #    setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
+
+        #    # Handle no-wait
+        #    supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
+        #    if supports_no_wait:
+        #        no_wait_enabled = args.get('no_wait', False)
+        #        augment_no_wait_handler_args(no_wait_enabled,
+        #                                     setter,
+        #                                     setterargs)
+        #    else:
+        #        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+        #        if no_wait_param:
+        #            setterargs[no_wait_param] = args[no_wait_param]
+
+        #    result = setter(**setterargs)
+
+        #    if supports_no_wait and no_wait_enabled:
+        #        return None
+
+        #    no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+        #    if no_wait_param and setterargs.get(no_wait_param, None):
+        #        return None
+
+        #    if _is_poller(result):
+        #        result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
+
+        #    if child_collection_prop_name:
+        #        result = _get_child(
+        #            result,
+        #            child_collection_prop_name,
+        #            args.get(child_arg_name),
+        #            child_collection_key
+        #        )
+
+        #    return result
+
+        #context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access
+
+
+        def update_func(cmd, client, resource_group_name, **kwargs):
+            no_wait = kwargs.get('no_wait', None)
+
+            # retrieve the child object
+            parent_name = self.get_parent_prop_name(kwargs)
+            parent = client.get(resource_group_name, parent_name)
+            child = self._find_child_item(parent, kwargs)
+            child_dest = self._key_to_dest_map[self._child_path[-1]]
+
+            with cmd.update_context(child) as c:
+                for dest, value in kwargs.items():
+                    path = None
+                    if dest == child_dest:
+                        continue
+                    try:
+                        path = self._model_map[dest]['path']
+                    except KeyError:
+                        continue
+                    c.set_param(path, value)
+
+            # TODO: process generic updates
+
+            # put the parent object back
+            if no_wait:
+                return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, parent_name, parent)
+            parent = sdk_no_wait(
+                no_wait, client.create_or_update, resource_group_name, parent_name, parent
+            ).result()
+            return self._find_child_item(parent, kwargs)
+
+        scope = '{} {}'.format(self.group_name, command_name)
+        func_name = self._register_func(command_name, update_func)
+        self.command(command_name, func_name, **kwargs)
+        self._add_dests(scope, optional=list(self._model_map.keys()))
+        self._add_generic_arguments(scope)
+
+    def _add_generic_arguments(self, scope):
+
+        command = self.command_loader.command_table.get(scope)
+        for dest, arg_kwargs in _generic_update_arguments.items():
+            options_list = arg_kwargs.pop('options_list', [])
+            command.add_argument(dest, *options_list, **arg_kwargs)
 
     def _add_dests(self, scope, required=None, optional=None):
         from azure.cli.core.commands.parameters import get_resource_name_completion_list

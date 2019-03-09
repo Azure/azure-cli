@@ -370,7 +370,6 @@ def load_command_table(self, _):
         g.show()
         g.delete(confirmation=True)
 
-
     app_gateway_rewrite_rule = CliCommandType(
         path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}/rewriteRules/{name:rule_name}',
         min_api='2018-12-01',
@@ -391,9 +390,9 @@ def load_command_table(self, _):
         model_prefix='condition',
         **ag_kwargs
     )
-
     with self._arm_command_group('network application-gateway rewrite-rule condition', app_gateway_rewrite_rule_condition) as g:
         g.create(supports_no_wait=True)
+        g.update(supports_no_wait=True)
         g.list()
         g.show()
         g.delete()
