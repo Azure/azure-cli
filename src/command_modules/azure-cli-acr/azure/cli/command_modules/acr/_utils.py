@@ -375,6 +375,49 @@ def get_validate_platform(cmd, os_type, platform):
     return platform_os, platform_arch, platform_variant
 
 
+def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, username=None, password=None):
+    """Get the credential object from the input
+    :param str auth_mode: The login mode for the source registry
+    :param str login_server: The login server of custom registry
+    :param str username: The username for custom registry
+    :param str password: The password for custom registry
+    """
+    source_registry_credentials = None
+    if auth_mode is not None:
+        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
+        source_registry_credentials = SourceRegistryCredentials(login_mode=auth_mode)
+
+    custom_registries = {}
+    if login_server is not None:
+        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
+            'CustomRegistryCredentials',
+            'SecretObject',
+            'SecretObjectType'
+        )
+
+        # if empty username and password, then send a Null object to have it removed
+        custom_reg_credential = None
+        if username and password:
+            custom_reg_credential = CustomRegistryCredentials(
+                user_name=SecretObject(
+                    type=SecretObjectType.opaque,
+                    value=username
+                ),
+                password=SecretObject(
+                    type=SecretObjectType.opaque,
+                    value=password
+                )
+            )
+
+        custom_registries[login_server] = custom_reg_credential
+
+    Credentials = cmd.get_models('Credentials')
+    return Credentials(
+        source_registry=source_registry_credentials,
+        custom_registries=custom_registries
+    )
+
+
 class ResourceNotFound(CLIError):
     """For exceptions that a resource couldn't be found in user's subscription
     """

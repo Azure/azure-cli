@@ -11,7 +11,7 @@ from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry, get_validate_platform
+from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -34,7 +34,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             timeout=None,
             resource_group_name=None,
             os_type=None,
-            platform=None):
+            platform=None,
+            auth_mode=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
@@ -79,6 +80,10 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             os=platform_os,
             architecture=platform_arch,
             variant=platform_variant
+        ),
+        credentials=get_custom_registry_credentials(
+            cmd,
+            auth_mode=auth_mode
         )
     )
 
