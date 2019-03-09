@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* `deployment create\list\show`: improve table output
 
 2.1.11
 ++++++
