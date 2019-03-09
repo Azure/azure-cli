@@ -108,7 +108,7 @@ class WheelExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
-        from wheel.install import WHEEL_INFO_RE
+        from .operations import WHEEL_INFO_RE
         from glob import glob
         if not extension_exists(self.name):
             return None

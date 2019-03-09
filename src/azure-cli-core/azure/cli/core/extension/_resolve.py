@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from wheel.install import WHEEL_INFO_RE
+from .operations import WHEEL_INFO_RE
 from pkg_resources import parse_version
 
 from knack.log import get_logger

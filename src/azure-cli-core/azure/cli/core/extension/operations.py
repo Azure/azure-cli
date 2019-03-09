@@ -5,6 +5,7 @@
 from collections import OrderedDict
 import sys
 import os
+import re
 import tempfile
 import shutil
 import zipfile
@@ -14,7 +15,6 @@ from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 import requests
-from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
 
 from knack.log import get_logger
@@ -39,6 +39,12 @@ OUT_KEY_METADATA = 'metadata'
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
+
+WHEEL_INFO_RE = re.compile(
+    r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
+    ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
+    \.whl|\.dist-info)$""",
+    re.VERBOSE).match
 
 
 def _run_pip(pip_exec_args):
