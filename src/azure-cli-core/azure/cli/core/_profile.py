@@ -418,6 +418,9 @@ class Profile(object):
         s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
         return s or subscriptions[0]
 
+    def is_tenant_level_account(self):
+        return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
+
     def set_active_subscription(self, subscription):  # take id or name
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         active_cloud = self.cli_ctx.cloud
