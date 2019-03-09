@@ -192,9 +192,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
 
-    with self.argument_context('acr task credential') as c:
-        c.argument('login_with_kv', options_list=['--login-with-kv'], nargs='*', help="The identities to assign. Use '[system]' to refer to the system-assigned identity.")
-
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('repository', help=argparse.SUPPRESS)
