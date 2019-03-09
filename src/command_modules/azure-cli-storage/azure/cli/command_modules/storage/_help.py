@@ -84,10 +84,10 @@ helps['storage account create'] = """
     examples:
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          min_profile: latest
+          unsupported-profiles: 2017-03-09-profile
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          max_profile: 2017-03-09-profile
+          supported-profiles: 2017-03-09-profile
 """
 
 helps['storage container create'] = """
@@ -621,6 +621,9 @@ helps['storage file download-batch'] = """
         - name: --max-connections
           type: integer
           short-summary: The maximum number of parallel connections to use. Default value is 1.
+        - name: --snapshot
+          type: string
+          short-summary: A string that represents the snapshot version, if applicable.
         - name: --validate-content
           type: bool
           short-summary: If set, calculates an MD5 hash for each range of the file for validation.

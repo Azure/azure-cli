@@ -8,9 +8,15 @@ from knack.help_files import helps
 
 helps['find'] = """
     type: command
-    short-summary: Find Azure CLI commands.
+    short-summary: I'm an AI robot, my advice is based on our Azure documentation as well as the usage patterns of Azure CLI and Azure ARM users. Using me improves Azure products and documentation.
     examples:
-      - name: Search for commands containing 'vm' or 'secret'
-        text: >
-            az find -q vm secret
+        - name: Give me any Azure CLI group and I’ll show the most popular commands within the group.
+          text: |
+            az find 'az storage'
+        - name: Give me any Azure CLI command and I’ll show the most popular parameters and subcommands.
+          text: |
+            az find 'az monitor activity-log list'
+        - name: You can also enter a search term, and I'll try to help find the best commands.
+          text: |
+            az find 'arm template'
 """

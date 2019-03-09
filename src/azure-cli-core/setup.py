@@ -59,7 +59,7 @@ DEPENDENCIES = [
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
-    'knack==0.5.1',
+    'knack>=0.5.3',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
     'paramiko>=2.0.8',
@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml>=4.2b1',
+    'pyyaml',
     'requests>=2.20.0',
     'six',
     'tabulate>=0.7.7',

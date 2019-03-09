@@ -2,10 +2,13 @@
 
 Release History
 ===============
+* `storage file download-batch`: add `--snapshot` to download from a share snapshot
+* `storage blob download-batch/upload-batch`- adjust progress bar to be less verbose and indicate current blob
+
 2.3.1
 +++++
 * Changed fix to update only properties that are changed on the same object
-*  Fixed #8021, binary data is encoded in base 64 when returned
+* Fixed #8021, binary data is encoded in base 64 when returned
 
 2.3.0
 +++++
