@@ -23,9 +23,9 @@ def load_command_table(self, _):
 
     adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{{}}'
 
-    dla_account_sdk = CliCommandType(
-        operations_tmpl=adla_format_path.format('account', 'account_operations', 'AccountOperations'),
-        client_factory=cf_dla_account)
+    # dla_account_sdk = CliCommandType(
+    #     operations_tmpl=adla_format_path.format('account', 'account_operations', 'AccountOperations'),
+    #     client_factory=cf_dla_account)
 
     dla_firewall_sdk = CliCommandType(
         operations_tmpl=adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations'),
@@ -63,12 +63,12 @@ def load_command_table(self, _):
     )
 
     # account operations
-    with self.command_group('dla account', dla_account_sdk, client_factory=cf_dla_account) as g:
-        g.custom_command('create', 'create_adla_account')
-        g.custom_command('update', 'update_adla_account')
-        g.custom_command('list', 'list_adla_account')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
+    # with self.command_group('dla account', dla_account_sdk, client_factory=cf_dla_account) as g:
+    #     g.custom_command('create', 'create_adla_account')
+    #     g.custom_command('update', 'update_adla_account')
+    #     g.custom_command('list', 'list_adla_account')
+    #     g.show_command('show', 'get')
+    #     g.command('delete', 'delete')
 
     # account fire wall operations
     with self.command_group('dla account firewall', dla_firewall_sdk, client_factory=cf_dla_account_firewall) as g:
