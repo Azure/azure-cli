@@ -33,7 +33,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'pip',
-    'wheel==0.30.0',
+    'wheel',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
