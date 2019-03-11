@@ -52,10 +52,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_type='Runtime',
                     resource_group_name=None,
                     target=None,
-                    auth_mode=None,
-                    login_server=None,
-                    username=None,
-                    password=None):
+                    auth_mode=None):
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
@@ -150,10 +147,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         ),
         credentials=get_custom_registry_credentials(
             cmd,
-            auth_mode=auth_mode,
-            login_server=login_server,
-            username=username,
-            password=password
+            auth_mode=auth_mode
         )
     )
 
@@ -199,7 +193,7 @@ def acr_task_delete(cmd,
     return client.delete(resource_group_name, registry_name, task_name)
 
 
-def acr_task_update(cmd,  # pylint: disable=too-many-locals,too-many-statements
+def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     client,
                     task_name,
                     registry_name,
@@ -227,10 +221,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals,too-many-statements
                     base_image_trigger_enabled=None,
                     base_image_trigger_type=None,
                     target=None,
-                    auth_mode=None,
-                    login_server=None,
-                    username=None,
-                    password=None):
+                    auth_mode=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
@@ -347,9 +338,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals,too-many-statements
     if os_type or platform:
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
-    if login_server and (not username and not password):
-        logger.warning("This will remove the credential for %s", login_server)
-
     TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
         'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
@@ -370,10 +358,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals,too-many-statements
         ),
         credentials=get_custom_registry_credentials(
             cmd,
-            auth_mode=auth_mode,
-            login_server=login_server,
-            username=username,
-            password=password
+            auth_mode=auth_mode
         )
     )
 

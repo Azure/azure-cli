@@ -465,9 +465,6 @@ examples:
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
     text: >
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
-  - name: Create a task from a public GitHub repository which builds and pushes the image in 2 registries. One is the MyRegistry1 and the other one in this case is MyRegistry2 (per testtask.yaml file). The source registry credentials (MyRegistry1) are auto generated, while you can pass in credentials for MyRegistry2 using 'login-server', 'username' and 'password' flags
-    text: >
-      az acr task create -n hello-world -r MyRegistry1 -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml --values values.yaml --login-server 'MyRegistry2.azurecr.io' --username 'registryUsername' --password 'registrySecret' --commit-trigger-enabled false --pull-request-trigger-enabled false
 """
 
 helps['acr task delete'] = """
@@ -565,9 +562,6 @@ examples:
   - name: Update platform for the Build step of your Task to Windows (prev Linux).
     text: >
         az acr task update -n MyTask -r MyRegistry --platform Windows
-  - name: To remove a credential from a task, you can update the task by sending empty username and password for the Registry. For instance, Remove credentials for MyRegistry2.
-    text: >
-      az acr task update -n hello-world -r MyRegistry --credential 'MyRegistry1.azurecr.io' --username '' --password ''
 """
 
 helps['acr task update-run'] = """
@@ -585,7 +579,7 @@ short-summary: Credential for a task
 """
 
 helps['acr task credential add'] = """
-type: group
+type: command
 short-summary: Add a credential to the task
 examples:
   - name: Enable the system-assigned credential to an existing task. This will replace all existing user-assigned identities.
@@ -594,7 +588,7 @@ examples:
 """
 
 helps['acr task credential remove'] = """
-type: group
+type: command
 short-summary: Remove credential for a task.
 examples:
   - name: Remove a user-assigned credential from a task.
@@ -603,7 +597,7 @@ examples:
 """
 
 helps['acr task credential update'] = """
-type: group
+type: command
 short-summary: Update the credential for a task.
 examples:
   - name: Update the credential for a task
@@ -612,7 +606,7 @@ examples:
 """
 
 helps['acr task credential show'] = """
-type: group
+type: command
 short-summary: Display the Credentials for task.
 examples:
   - name: Display the Credentials for a task.

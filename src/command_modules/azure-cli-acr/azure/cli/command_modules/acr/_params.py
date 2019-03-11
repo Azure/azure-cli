@@ -184,13 +184,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
+    with self.argument_context('acr task create') as c:
+        c.argument('task_name', completer=None)
+
+    with self.argument_context('acr task credential') as c:
         # Custom registry credentials
         c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'")
         c.argument('username', options_list=['--username', '-u'], help='The username used to log into a custom container registry')
         c.argument('password', options_list=['--password', '-p'], help='The password used to log into a custom container registry')
-
-    with self.argument_context('acr task create') as c:
-        c.argument('task_name', completer=None)
 
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

@@ -12,8 +12,7 @@ Release History
 * Add '--target' parameter for 'az acr build', 'az acr task create' and 'az acr task update' commands.
 * Improve error handling for runtime commands when not logged into Azure.
 * Add '--auth-mode' for 'az acr build', 'az acr run', 'az acr task create', and 'az acr task update' commands.
-* Add '--login-server', '--username', and 'password' for 'az acr task create' and 'az acr task update' commands.
-* Add 'acr task credential' command group.
+* Add 'acr task credential' command group for managing credentials for a Task.
 
 2.2.0
 +++++
