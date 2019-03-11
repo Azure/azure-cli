@@ -3611,7 +3611,7 @@ helps['network vnet subnet create'] = """
         - name: Create new subnet attached to an NSG with a custom route table.
           text: |
             az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
-                --address-prefix 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
+                --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
 """
 
 helps['network vnet subnet delete'] = """
