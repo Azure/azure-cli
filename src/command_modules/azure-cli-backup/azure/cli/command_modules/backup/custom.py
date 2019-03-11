@@ -15,7 +15,7 @@ from knack.log import get_logger
 from msrest.paging import Paged
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, BackupStorageConfig
+from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
     AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
@@ -86,6 +86,7 @@ def list_vaults(client, resource_group_name=None):
 
 
 def set_backup_properties(client, vault_name, resource_group_name, backup_storage_redundancy):
+    from azure.mgmt.recoveryservices.models import BackupStorageConfig
     backup_storage_config = BackupStorageConfig(storage_model_type=backup_storage_redundancy)
     client.update(resource_group_name, vault_name, backup_storage_config)
 
