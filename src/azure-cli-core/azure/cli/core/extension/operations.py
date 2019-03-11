@@ -21,7 +21,7 @@ from knack.log import get_logger
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
-                                      WheelExtension, DevExtension, ExtensionNotInstalledException)
+                                      WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
 
 from ._homebrew_patch import HomebrewPipPatch
@@ -38,8 +38,6 @@ OUT_KEY_METADATA = 'metadata'
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
-
-
 
 
 def _run_pip(pip_exec_args):
