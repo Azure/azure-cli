@@ -201,11 +201,16 @@ class AzCliCommand(CLICommand):
             def __exit__(self, exc_type, exc_val, exc_tb):
                 pass
 
-            def set_param(self, prop, value, allow_clear=True):
-                if value == '' and allow_clear:
-                    setattr(self.instance, prop, None)
+            def set_param(self, prop, value, allow_clear=True, current=None):
+                current = current or self.instance
+                if '.' in prop:
+                    prop, path = prop.split('.', 1)
+                    current = getattr(current, prop)
+                    self.set_param(path, value, allow_clear, current)
+                elif value == '' and allow_clear:
+                    setattr(current, prop, None)
                 elif value is not None:
-                    setattr(self.instance, prop, value)
+                    setattr(current, prop, value)
         return UpdateContext(obj_inst)
 
 

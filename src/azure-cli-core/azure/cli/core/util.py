@@ -321,7 +321,10 @@ def poller_classes():
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
     """ Populates handler_args with the appropriate args for no wait """
-    h_args = get_arg_list(handler)
+    h_args = list(get_arg_list(handler))
+    if 'kwargs' in h_args and 'no_wait' not in h_args:
+        # support kwarg-based use of no-wait
+        handler_args['no_wait'] = no_wait_enabled
     if 'no_wait' in h_args:
         handler_args['no_wait'] = no_wait_enabled
     if 'raw' in h_args and no_wait_enabled:

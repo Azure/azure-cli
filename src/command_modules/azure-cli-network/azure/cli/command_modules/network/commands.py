@@ -379,6 +379,7 @@ def load_command_table(self, _):
     )
     with self._arm_command_group('network application-gateway rewrite-rule', app_gateway_rewrite_rule) as g:
         g.create(supports_no_wait=True)
+        g.update(supports_no_wait=True)
         g.list()
         g.show()
         g.delete()

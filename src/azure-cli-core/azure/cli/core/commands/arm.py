@@ -1193,8 +1193,7 @@ class ArmCommandGroup(AzCommandGroup):
         self._add_dests(scope)
 
     def delete(self, command_name='delete', **kwargs):
-        def delete_func(client, resource_group_name, **kwargs):
-            no_wait = kwargs.get('no_wait', None)
+        def delete_func(client, resource_group_name, no_wait=None, **kwargs):
             parent_name = self.get_parent_prop_name(kwargs)
             child_name = self.get_child_prop_name(kwargs)
             parent = client.get(resource_group_name, parent_name)
@@ -1216,12 +1215,14 @@ class ArmCommandGroup(AzCommandGroup):
                     raise CLIError("Failed to delete '{}' on '{}'".format(child_name, parent_name))
         scope = '{} {}'.format(self.group_name, command_name)
         func_name = self._register_func(command_name, delete_func)
+        kwargs['no_wait_param'] = 'no_wait'
         self.command(command_name, func_name, **kwargs)
-        self._add_dests(scope, optional=['no_wait'])
+        optionals = []
+        self._add_dests(scope, optional=optionals)
 
     def create(self, command_name='create', **kwargs):
         def create_func(cmd, client, resource_group_name, **kwargs):
-            no_wait = kwargs.get('no_wait', None)
+            no_wait = kwargs.get('no_wait')
             parent_name = self.get_parent_prop_name(kwargs)
             parent = client.get(resource_group_name, parent_name)
             collection = self._find_child_collection(parent, kwargs)
@@ -1249,115 +1250,21 @@ class ArmCommandGroup(AzCommandGroup):
                 requires.append(key)
             else:
                 optionals.append(key)
+        if kwargs.get('supports_no_wait', None):
+            kwargs['no_wait_param'] = 'no_wait'
+            optionals.append('no_wait')
         self._add_dests(scope, optional=optionals, required=requires)
 
     def update(self, command_name='update', **kwargs):
-
-
-        #def handler(args):  # pylint: disable=too-many-branches,too-many-statements
-        #    cmd = args.get('cmd')
-        #    context_copy = copy.copy(context)
-        #    context_copy.cli_ctx = cmd.cli_ctx
-        #    force_string = args.get('force_string', False)
-        #    ordered_arguments = args.pop('ordered_arguments', [])
-        #    for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
-        #        if args[item]:
-        #            raise CLIError("Unexpected '{}' was not empty.".format(item))
-        #        del args[item]
-
-        #    getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
-        #    if child_collection_prop_name:
-        #        parent = getter(**getterargs)
-        #        instance = _get_child(
-        #            parent,
-        #            child_collection_prop_name,
-        #            args.get(child_arg_name),
-        #            child_collection_key
-        #        )
-        #    else:
-        #        parent = None
-        #        instance = getter(**getterargs)
-
-        #    # pass instance to the custom_function, if provided
-        #    if custom_function_op:
-        #        custom_function, custom_func_args = _extract_handler_and_args(
-        #            args, cmd.command_kwargs, custom_function_op, context_copy)
-        #        if child_collection_prop_name:
-        #            parent = custom_function(instance=instance, parent=parent, **custom_func_args)
-        #        else:
-        #            instance = custom_function(instance=instance, **custom_func_args)
-
-        #    # apply generic updates after custom updates
-        #    setter, setterargs = _extract_handler_and_args(args, cmd.command_kwargs, setter_op, context_copy)
-
-        #    for arg in ordered_arguments:
-        #        arg_type, arg_values = arg
-        #        if arg_type == '--set':
-        #            try:
-        #                for expression in arg_values:
-        #                    set_properties(instance, expression, force_string)
-        #            except ValueError:
-        #                raise CLIError('invalid syntax: {}'.format(_set_usage))
-        #        elif arg_type == '--add':
-        #            try:
-        #                add_properties(instance, arg_values, force_string)
-        #            except ValueError:
-        #                raise CLIError('invalid syntax: {}'.format(_add_usage))
-        #        elif arg_type == '--remove':
-        #            try:
-        #                remove_properties(instance, arg_values)
-        #            except ValueError:
-        #                raise CLIError('invalid syntax: {}'.format(_remove_usage))
-
-        #    # Done... update the instance!
-        #    setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-
-        #    # Handle no-wait
-        #    supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
-        #    if supports_no_wait:
-        #        no_wait_enabled = args.get('no_wait', False)
-        #        augment_no_wait_handler_args(no_wait_enabled,
-        #                                     setter,
-        #                                     setterargs)
-        #    else:
-        #        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        #        if no_wait_param:
-        #            setterargs[no_wait_param] = args[no_wait_param]
-
-        #    result = setter(**setterargs)
-
-        #    if supports_no_wait and no_wait_enabled:
-        #        return None
-
-        #    no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        #    if no_wait_param and setterargs.get(no_wait_param, None):
-        #        return None
-
-        #    if _is_poller(result):
-        #        result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
-
-        #    if child_collection_prop_name:
-        #        result = _get_child(
-        #            result,
-        #            child_collection_prop_name,
-        #            args.get(child_arg_name),
-        #            child_collection_key
-        #        )
-
-        #    return result
-
-        #context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access
-
-
         def update_func(cmd, client, resource_group_name, **kwargs):
-            no_wait = kwargs.get('no_wait', None)
-
             # retrieve the child object
+            no_wait = kwargs.get('no_wait', None)
             parent_name = self.get_parent_prop_name(kwargs)
             parent = client.get(resource_group_name, parent_name)
             child = self._find_child_item(parent, kwargs)
             child_dest = self._key_to_dest_map[self._child_path[-1]]
 
+            # update the custom args
             with cmd.update_context(child) as c:
                 for dest, value in kwargs.items():
                     path = None
@@ -1369,7 +1276,32 @@ class ArmCommandGroup(AzCommandGroup):
                         continue
                     c.set_param(path, value)
 
-            # TODO: process generic updates
+            # process generic updates
+            force_string = kwargs.get('force_string', False)
+            ordered_arguments = kwargs.pop('ordered_arguments', [])
+            for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
+                if kwargs.get(item, None):
+                    raise CLIError("Unexpected '{}' was not empty.".format(item))
+                del kwargs[item]
+
+            for arg in ordered_arguments:
+                arg_type, arg_values = arg
+                if arg_type == '--set':
+                    try:
+                        for expression in arg_values:
+                            set_properties(child, expression, force_string)
+                    except ValueError:
+                        raise CLIError('invalid syntax: {}'.format(_set_usage))
+                elif arg_type == '--add':
+                    try:
+                        add_properties(child, arg_values, force_string)
+                    except ValueError:
+                        raise CLIError('invalid syntax: {}'.format(_add_usage))
+                elif arg_type == '--remove':
+                    try:
+                        remove_properties(child, arg_values)
+                    except ValueError:
+                        raise CLIError('invalid syntax: {}'.format(_remove_usage))
 
             # put the parent object back
             if no_wait:
@@ -1381,16 +1313,18 @@ class ArmCommandGroup(AzCommandGroup):
 
         scope = '{} {}'.format(self.group_name, command_name)
         func_name = self._register_func(command_name, update_func)
+        kwargs['no_wait_param'] = 'no_wait'
         self.command(command_name, func_name, **kwargs)
-        self._add_dests(scope, optional=list(self._model_map.keys()))
+        optionals = list(self._model_map.keys())
+        self._add_dests(scope, optional=optionals)
         self._add_generic_arguments(scope)
 
     def _add_generic_arguments(self, scope):
-
         command = self.command_loader.command_table.get(scope)
         for dest, arg_kwargs in _generic_update_arguments.items():
-            options_list = arg_kwargs.pop('options_list', [])
-            command.add_argument(dest, *options_list, **arg_kwargs)
+            options_list = arg_kwargs.get('options_list', [])
+            kwargs = {key:val for key, val in arg_kwargs.items() if key != 'options_list'}
+            command.add_argument(dest, *options_list, **kwargs)
 
     def _add_dests(self, scope, required=None, optional=None):
         from azure.cli.core.commands.parameters import get_resource_name_completion_list
