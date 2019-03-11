@@ -6,6 +6,7 @@
 import os
 import traceback
 import json
+import re
 
 from knack.config import CLIConfig
 from knack.log import get_logger
@@ -28,6 +29,12 @@ AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
 EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 EXT_METADATA_ISPREVIEW = 'azext.isPreview'
+
+WHEEL_INFO_RE = re.compile(
+    r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
+    ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
+    \.whl|\.dist-info)$""",
+    re.VERBOSE).match
 
 logger = get_logger(__name__)
 
@@ -108,7 +115,6 @@ class WheelExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
-        from .operations import WHEEL_INFO_RE
         from glob import glob
         if not extension_exists(self.name):
             return None
