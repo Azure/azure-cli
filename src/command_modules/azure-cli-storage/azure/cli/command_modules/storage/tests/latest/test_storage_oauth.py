@@ -37,6 +37,8 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('exists', True)])
         self.oauth_cmd('storage blob list -c {container} --account-name {account}', checks=[
             JMESPathCheck('length(@)', 1)])
+        self.oauth_cmd('storage blob show -c {container} --account-name {account} -n {blob}', checks=[
+            JMESPathCheck('name', self.kwargs['blob'])])
 
         # download the blob
         self.kwargs['download_path'] = os.path.join(self.kwargs.get('local_dir'), 'test.file')
