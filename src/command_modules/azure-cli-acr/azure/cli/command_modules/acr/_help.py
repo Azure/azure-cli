@@ -575,43 +575,43 @@ examples:
 
 helps['acr task credential'] = """
 type: group
-short-summary: Credential for a task
+short-summary: Manage credentials for a task
 """
 
 helps['acr task credential add'] = """
 type: command
-short-summary: Add a credential to the task
+short-summary: Add a custom registry login credential to the task
 examples:
-  - name: Enable the system-assigned credential to an existing task. This will replace all existing user-assigned identities.
+  - name: Add a registry login credential to a task.
     text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io --username 'myusername' --password 'mysecret'
-"""
-
-helps['acr task credential remove'] = """
-type: command
-short-summary: Remove credential for a task.
-examples:
-  - name: Remove a user-assigned credential from a task.
-    text: >
-        az acr task credential remove -n taskname -r registryname --login-server myregistry.docker.io
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'mysecret'
 """
 
 helps['acr task credential update'] = """
 type: command
-short-summary: Update the credential for a task.
+short-summary: Update the registry login credential for a task.
 examples:
   - name: Update the credential for a task
     text: >
-        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io --username 'myusername2' --password 'mysecret'
+        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername2' -p 'mysecret'
 """
 
-helps['acr task credential show'] = """
+helps['acr task credential delete'] = """
 type: command
-short-summary: Display the Credentials for task.
+short-summary: Delete credential for a task.
 examples:
-  - name: Display the Credentials for a task.
+  - name: Delete a registry login credential from a task.
     text: >
-        az acr task credential show -n taskname -r registryname
+        az acr task credential delete -n taskname -r registryname --login-server myregistry.docker.io
+"""
+
+helps['acr task credential list'] = """
+type: command
+short-summary: List all the custom registry credentials for task.
+examples:
+  - name: List the Credentials for a task.
+    text: >
+        az acr task credential list -n taskname -r registryname
 """
 
 helps['acr update'] = """

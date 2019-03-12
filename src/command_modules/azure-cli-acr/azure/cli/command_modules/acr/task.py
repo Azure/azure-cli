@@ -369,32 +369,15 @@ def acr_task_credential_add(cmd,
                             client,
                             task_name,
                             registry_name,
-                            login_server=None,
-                            username=None,
-                            password=None,
+                            login_server,
+                            username,
+                            password,
                             resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    if not login_server or not username or not password:
-        raise CLIError("--login-server, --username and --password are required to add a credential")
-
-    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
-        status=None,
-        platform=PlatformUpdateParameters(
-            os=None
-        ),
-        agent_configuration=AgentProperties(
-            cpu=None
-        ),
-        timeout=None,
-        step=None,
-        trigger=TriggerUpdateParameters(
-            source_triggers=None,
-            base_image_trigger=None
-        ),
         credentials=get_custom_registry_credentials(
             cmd,
             login_server=login_server,
@@ -406,75 +389,17 @@ def acr_task_credential_add(cmd,
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
-def acr_task_credential_update(cmd,
+def acr_task_credential_delete(cmd,
                                client,
                                task_name,
                                registry_name,
-                               login_server=None,
-                               username=None,
-                               password=None,
+                               login_server,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    if not login_server or not username or not password:
-        raise CLIError("--login-server, --username and --password are required to update a credential")
-
-    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
-        status=None,
-        platform=PlatformUpdateParameters(
-            os=None
-        ),
-        agent_configuration=AgentProperties(
-            cpu=None
-        ),
-        timeout=None,
-        step=None,
-        trigger=TriggerUpdateParameters(
-            source_triggers=None,
-            base_image_trigger=None
-        ),
-        credentials=get_custom_registry_credentials(
-            cmd,
-            login_server=login_server,
-            username=username,
-            password=password
-        )
-    )
-
-    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
-
-
-def acr_task_credential_remove(cmd,
-                               client,
-                               task_name,
-                               registry_name,
-                               login_server=None,
-                               resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-
-    if not login_server:
-        raise CLIError("--login-server is required to remove a credential")
-
-    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
-    taskUpdateParameters = TaskUpdateParameters(
-        status=None,
-        platform=PlatformUpdateParameters(
-            os=None
-        ),
-        agent_configuration=AgentProperties(
-            cpu=None
-        ),
-        timeout=None,
-        step=None,
-        trigger=TriggerUpdateParameters(
-            source_triggers=None,
-            base_image_trigger=None
-        ),
         credentials=get_custom_registry_credentials(
             cmd,
             login_server=login_server
@@ -484,7 +409,7 @@ def acr_task_credential_remove(cmd,
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
-def acr_task_credential_show(cmd,
+def acr_task_credential_list(cmd,
                              client,
                              task_name,
                              registry_name,
@@ -492,7 +417,8 @@ def acr_task_credential_show(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    return client.get_details(resource_group_name, registry_name, task_name).credentials
+    resp = client.get_details(resource_group_name, registry_name, task_name).credentials
+    return None if resp is None else resp.custom_registries
 
 
 def acr_task_update_run(cmd,

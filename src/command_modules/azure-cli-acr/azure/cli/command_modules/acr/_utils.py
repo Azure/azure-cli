@@ -387,7 +387,7 @@ def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, user
         SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(login_mode=auth_mode)
 
-    custom_registries = {}
+    custom_registries = None
     if login_server is not None:
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
@@ -408,8 +408,7 @@ def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, user
                     value=password
                 )
             )
-
-        custom_registries[login_server] = custom_reg_credential
+        custom_registries = {login_server: custom_reg_credential}
 
     Credentials = cmd.get_models('Credentials')
     return Credentials(

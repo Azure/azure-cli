@@ -187,11 +187,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
 
-    with self.argument_context('acr task credential') as c:
+    for scope in ['acr task credential add', 'acr task credential update']:
+        with self.argument_context(scope) as c:
+            # Custom registry credentials
+            c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
+            c.argument('username', options_list=['--username', '-u'], help='The username to login to the registry.', required=True)
+            c.argument('password', options_list=['--password', '-p'], help='The password to login to the registry.', required=True)
+
+    with self.argument_context('acr task credential delete') as c:
         # Custom registry credentials
-        c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'")
-        c.argument('username', options_list=['--username', '-u'], help='The username used to log into a custom container registry')
-        c.argument('password', options_list=['--password', '-p'], help='The password used to log into a custom container registry')
+        c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
+
 
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
