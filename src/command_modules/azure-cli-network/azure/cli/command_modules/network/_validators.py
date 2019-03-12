@@ -10,15 +10,15 @@ import base64
 import socket
 import os
 
-from knack.util import CLIError
-from knack.log import get_logger
-
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
+
+from knack.util import CLIError
+from knack.log import get_logger
 
 
 logger = get_logger(__name__)
@@ -137,9 +137,8 @@ def _generate_lb_id_list_from_names_or_ids(cli_ctx, namespace, prop, child_type)
             if not namespace.load_balancer_name:
                 raise CLIError('Unable to process {}. Please supply a well-formed ID or '
                                '--lb-name.'.format(item))
-            else:
-                result.append({'id': _generate_lb_subproperty_id(
-                    cli_ctx, namespace, child_type, item)})
+            result.append({'id': _generate_lb_subproperty_id(
+                cli_ctx, namespace, child_type, item)})
     setattr(namespace, prop, result)
 
 
@@ -511,7 +510,7 @@ def get_subnet_validator(has_type_field=False, allow_none=False, allow_new=False
         # error if vnet-name is provided along with a subnet ID
         if is_id and namespace.virtual_network_name:
             raise usage_error
-        elif not is_id and not namespace.virtual_network_name:
+        if not is_id and not namespace.virtual_network_name:
             raise usage_error
 
         if not is_id:
@@ -904,8 +903,7 @@ def process_vnet_create_namespace(cmd, namespace):
     if namespace.subnet_prefix and not namespace.subnet_name:
         if cmd.supported_api_version(min_api='2018-08-01'):
             raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefixes PREFIXES]')
-        else:
-            raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
+        raise ValueError('incorrect usage: --subnet-name NAME [--subnet-prefix PREFIX]')
 
     if namespace.subnet_name and not namespace.subnet_prefix:
         if isinstance(namespace.vnet_prefixes, str):
@@ -1172,7 +1170,7 @@ def process_nw_topology_namespace(cmd, namespace):
         # targeting subnet - OK
         if subnet_id and (vnet or rg):
             raise subnet_usage
-        elif not subnet_id and (not rg or not vnet or vnet_id):
+        if not subnet_id and (not rg or not vnet or vnet_id):
             raise subnet_usage
         if subnet_id:
             rg = parse_resource_id(subnet_id)['resource_group']
@@ -1195,7 +1193,7 @@ def process_nw_topology_namespace(cmd, namespace):
         vnet_usage = CLIError('usage error: --vnet ID | --vnet NAME --resource-group NAME')
         if vnet_id and (subnet or rg):
             raise vnet_usage
-        elif not vnet_id and not rg or subnet:
+        if not vnet_id and not rg or subnet:
             raise vnet_usage
         if vnet_id:
             rg = parse_resource_id(vnet_id)['resource_group']
@@ -1494,9 +1492,10 @@ class WafConfigExclusionAction(argparse.Action):
             selector=selector
         ))
 
+
 def get_header_configuration_validator(dest):
 
-    def validator(cmd, namespace):
+    def validator(namespace):
 
         values = getattr(namespace, dest, None)
         if not values:

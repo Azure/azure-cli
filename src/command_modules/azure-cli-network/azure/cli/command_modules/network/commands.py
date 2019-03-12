@@ -290,14 +290,12 @@ def load_command_table(self, _):
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
-
     # endregion
 
     # region NetworkRoot
     usage_path = 'azure.mgmt.network.operations.usages_operations#UsagesOperations.{}'
     with self.command_group('network') as g:
         g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
-
     # endregion
 
     # region ApplicationGateways
@@ -351,7 +349,6 @@ def load_command_table(self, _):
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                      child_collection_prop_name=subresource, validator=create_validator)
 
-
     ag_kwargs = {
         'operations_tmpl': 'azure.cli.core.commands.arm#{}',
         'client_factory': cf_application_gateways
@@ -364,7 +361,7 @@ def load_command_table(self, _):
         min_api='2018-12-01',
         **ag_kwargs
     )
-    with self._arm_command_group('network application-gateway rewrite-rule set', app_gateway_rewrite_ruleset) as g:
+    with self._arm_command_group('network application-gateway rewrite-rule set', app_gateway_rewrite_ruleset) as g:  # pylint: disable=protected-access
         g.create(supports_no_wait=True)
         g.list()
         g.show()
@@ -377,7 +374,7 @@ def load_command_table(self, _):
         model_prefix='rule',
         **ag_kwargs
     )
-    with self._arm_command_group('network application-gateway rewrite-rule', app_gateway_rewrite_rule) as g:
+    with self._arm_command_group('network application-gateway rewrite-rule', app_gateway_rewrite_rule) as g:  # pylint: disable=protected-access
         g.create(supports_no_wait=True)
         g.update(supports_no_wait=True)
         g.list()
@@ -391,7 +388,7 @@ def load_command_table(self, _):
         model_prefix='condition',
         **ag_kwargs
     )
-    with self._arm_command_group('network application-gateway rewrite-rule condition', app_gateway_rewrite_rule_condition) as g:
+    with self._arm_command_group('network application-gateway rewrite-rule condition', app_gateway_rewrite_rule_condition) as g:  # pylint: disable=protected-access
         g.create(supports_no_wait=True)
         g.update(supports_no_wait=True)
         g.list()
@@ -428,7 +425,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
-
     # endregion
 
     # region ApplicationSecurityGroups
@@ -438,7 +434,6 @@ def load_command_table(self, _):
         g.command('list', 'list_all')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_asg')
-
     # endregion
 
     # region DdosProtectionPlans
@@ -494,7 +489,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
         g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
         g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
-
     # endregion
 
     # region ExpressRoutes
@@ -670,7 +664,6 @@ def load_command_table(self, _):
     with self.command_group('network nic ip-config inbound-nat-rule') as g:
         g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
         g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
-
     # endregion
 
     # region NetworkSecurityGroups
@@ -754,7 +747,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_public_ip_prefixes')
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_public_ip_prefix')
-
     # endregion
 
     # region RouteFilters
@@ -773,7 +765,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_arg_name='route_filter_rule_parameters')
         sc_path = 'azure.mgmt.network.operations#BgpServiceCommunitiesOperations.{}'
         g.command('list-service-communities', 'list', operations_tmpl=sc_path, client_factory=cf_service_community, table_transformer=transform_service_community_table_output)
-
     # endregion
 
     # region RouteTables
@@ -794,7 +785,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.generic_update_command('update', setter_arg_name='route_parameters', custom_func_name='update_route')
-
     # endregion
 
     # region ServiceEndpoint
@@ -835,7 +825,6 @@ def load_command_table(self, _):
 
         tm_geographic_path = 'azure.mgmt.trafficmanager.operations.geographic_hierarchies_operations#GeographicHierarchiesOperations.{}'
         g.command('show-geographic-hierarchy', 'get_default', client_factory=cf_tm_geographic, operations_tmpl=tm_geographic_path, table_transformer=transform_geographic_hierachy_table_output)
-
     # endregion
 
     # region VirtualNetworks

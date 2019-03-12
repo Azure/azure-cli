@@ -622,20 +622,24 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
         self.cmd('network application-gateway rewrite-rule set show -g {rg} --gateway-name {gw} -n {set}')
 
         # manage rewrite rules
-        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule} --sequence 100 --request-headers foo=bar --response-headers cat=hat --no-wait')
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule} --rule-sequence 123 --request-headers foo=bar --response-headers cat=hat --no-wait')
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule} --rule-sequence 321 --request-headers bar=foo --response-headers hat=cat --no-wait')
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
         self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule}')
-        # list
-        # delete
-        # update
+        self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --ruleset-name {set}')
 
         # manage rewrite rule conditions
-        self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
-        self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule}')
-        # list
-        # delete
-        # update
+        self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --ruleset-name {set} --rule-name {rule} -n {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition update -g {rg} --gateway-name {gw} --ruleset-name {set} --rule-name {rule} -n {var} --pattern "^Bearers" --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition show -g {rg} --gateway-name {gw} --ruleset-name {set} --rule-name {rule} -n {var}')
+        self.cmd('network application-gateway rewrite-rule condition list -g {rg} --gateway-name {gw} --ruleset-name {set} --rule-name {rule}')
+        self.cmd('network application-gateway rewrite-rule condition delete -g {rg} --gateway-name {gw} --ruleset-name {set} --rule-name {rule} -n {var} --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition list -g {rg} --gateway-name {gw} --ruleset-name {set} --rule-name {rule}')
 
-        self.cmd('network application-gateway rewrite-rule set delete -g {rg} --gateway-name {gw} -n {set}')
+        self.cmd('network application-gateway rewrite-rule delete -g {rg} --gateway-name {gw} --ruleset-name {set} -n {rule} --no-wait')
+        self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --ruleset-name {set}')
+
+        self.cmd('network application-gateway rewrite-rule set delete -g {rg} --gateway-name {gw} -n {set} -y --no-wait')
         self.cmd('network application-gateway rewrite-rule set list -g {rg} --gateway-name {gw}')
 
 

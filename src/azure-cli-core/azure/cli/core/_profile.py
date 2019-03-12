@@ -16,13 +16,14 @@ from copy import deepcopy
 from enum import Enum
 from six.moves import BaseHTTPServer
 
-from knack.log import get_logger
-from knack.util import CLIError
-
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+
+from knack.log import get_logger
+from knack.util import CLIError
+
 
 logger = get_logger(__name__)
 
@@ -479,9 +480,9 @@ class Profile(object):
         if not result and subscription:
             raise CLIError("Subscription '{}' not found. "
                            "Check the spelling and casing and try again.".format(subscription))
-        elif not result and not subscription:
+        if not result and not subscription:
             raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
-        elif len(result) > 1:
+        if len(result) > 1:
             raise CLIError("Multiple subscriptions with the name '{}' found. "
                            "Specify the subscription ID.".format(subscription))
         return result[0]

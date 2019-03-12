@@ -8,10 +8,11 @@ import traceback
 import json
 import re
 
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+
 from knack.config import CLIConfig
 from knack.log import get_logger
 
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
 _CUSTOM_EXT_DIR = az_config.get('extension', 'dir', None)

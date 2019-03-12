@@ -8,8 +8,6 @@ from argcomplete.completers import FilesCompleter
 
 import six
 
-from knack.arguments import CLIArgumentType, ignore_type
-
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
                                                 tags_type, zone_type, zones_type,
                                                 file_type, get_resource_group_completion_list,
@@ -37,6 +35,8 @@ from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer)
 from azure.cli.core.util import get_json_object
+
+from knack.arguments import CLIArgumentType, ignore_type
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements

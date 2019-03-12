@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
-from knack.util import CLIError
+
 from azure.cli.core.util import sdk_no_wait
+
+from knack.util import CLIError
 
 from ._client_factory import network_client_factory
 
@@ -14,11 +16,10 @@ def _get_property(items, name):
     result = next((x for x in items if x.name.lower() == name.lower()), None)
     if not result:
         raise CLIError("Property '{}' does not exist".format(name))
-    else:
-        return result
+    return result
 
 
-def list_network_resource_property(resource, prop, path=None):
+def list_network_resource_property(resource, prop):
     """ Factory method for creating list functions. """
 
     def list_func(cmd, resource_group_name, resource_name):
@@ -30,7 +31,7 @@ def list_network_resource_property(resource, prop, path=None):
     return func_name
 
 
-def get_network_resource_property_entry(resource, prop, path=None):
+def get_network_resource_property_entry(resource, prop):
     """ Factory method for creating get functions. """
 
     def get_func(cmd, resource_group_name, resource_name, item_name):
@@ -40,15 +41,14 @@ def get_network_resource_property_entry(resource, prop, path=None):
         if not result:
             raise CLIError("Item '{}' does not exist on {} '{}'".format(
                 item_name, resource, resource_name))
-        else:
-            return result
+        return result
 
     func_name = 'get_network_resource_property_entry_{}_{}'.format(resource, prop)
     setattr(sys.modules[__name__], func_name, get_func)
     return func_name
 
 
-def delete_network_resource_property_entry(resource, prop, path=None):
+def delete_network_resource_property_entry(resource, prop):
     """ Factory method for creating delete functions. """
 
     def delete_func(cmd, resource_group_name, resource_name, item_name, no_wait=False):  # pylint: disable=unused-argument

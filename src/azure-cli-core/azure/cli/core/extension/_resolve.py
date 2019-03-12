@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 from pkg_resources import parse_version
 
-from knack.log import get_logger
-
 from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
+from azure.cli.core.extension import ext_compat_with_cli
 from azure.cli.core.extension._index import get_index_extensions
+
+from knack.log import get_logger
 
 
 logger = get_logger(__name__)

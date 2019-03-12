@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* `application-gateway`: Add command group `rewrite-rule` with `set` and `condition` subgroups.
+
 2.3.4
 +++++
 * `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.

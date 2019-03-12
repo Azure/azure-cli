@@ -13,19 +13,19 @@ import re
 import sys
 from six import string_types
 
+from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
+from azure.cli.core.commands import LongRunningOperation, _is_poller, AzCommandGroup
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.validators import IterateValue
+from azure.cli.core.util import (
+    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, sdk_no_wait)
+from azure.cli.core.profiles import ResourceType, get_sdk
+
 from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import todict, CLIError
 
-from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
-from azure.cli.core.commands import LongRunningOperation, _is_poller, AzCommandGroup
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.parameters import CLIArgumentType
-from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import (
-    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, sdk_no_wait)
-from azure.cli.core.profiles import ResourceType, get_sdk
 
 logger = get_logger(__name__)
 EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
@@ -121,7 +121,8 @@ _generic_update_arguments = {
     'properties_to_add': {
         'options_list': ['--add'], 'nargs': '+',
         'action': _OrderedArgsAction, 'default': [],
-        'help': 'Add an object to a list of objects by specifying a path and key value pairs.  Example: {}'.format(_add_usage),
+        'help': 'Add an object to a list of objects by specifying a path and key value pairs. '
+                'Example: {}'.format(_add_usage),
         'metavar': 'LIST KEY=VALUE', 'arg_group': _generic_arg_group
     },
     'properties_to_remove': {
@@ -758,7 +759,6 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
 def show_exception_handler(ex):
     if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
         logger.error(getattr(ex, 'message', ex))
-        import sys
         sys.exit(3)
     raise ex
 
@@ -1098,7 +1098,7 @@ def resolve_role_id(cli_ctx, role, scope):
             role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
                 raise CLIError(err.format(role, ids))
@@ -1168,6 +1168,7 @@ def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
     return client.resources.get_by_id(arm_id, api_version)
 
 
+# pylint: disable=too-many-instance-attributes
 class ArmCommandGroup(AzCommandGroup):
 
     def list(self, command_name='list', **kwargs):
@@ -1207,7 +1208,7 @@ class ArmCommandGroup(AzCommandGroup):
                     no_wait, client.create_or_update, resource_group_name, parent_name, parent
                 ).result()
                 match = None
-                try: 
+                try:
                     match = self._find_child_item(result, kwargs)
                 except CLIError:
                     pass
@@ -1323,11 +1324,12 @@ class ArmCommandGroup(AzCommandGroup):
         command = self.command_loader.command_table.get(scope)
         for dest, arg_kwargs in _generic_update_arguments.items():
             options_list = arg_kwargs.get('options_list', [])
-            kwargs = {key:val for key, val in arg_kwargs.items() if key != 'options_list'}
+            kwargs = {key: val for key, val in arg_kwargs.items() if key != 'options_list'}
             command.add_argument(dest, *options_list, **kwargs)
 
     def _add_dests(self, scope, required=None, optional=None):
-        from azure.cli.core.commands.parameters import get_resource_name_completion_list
+        # from azure.cli.core.commands.parameters import get_resource_name_completion_list
+        # TODO: add completers?
         required = required or list(self._key_to_dest_map.values())
         optional = optional or []
         command = self.command_loader.command_table.get(scope)
@@ -1485,7 +1487,7 @@ class ArmCommandGroup(AzCommandGroup):
         try:
             path = self._get_command_type_property('path')
         except (KeyError, AttributeError):
-            raise CLIError("command authoring error: ArmCommandGroup requires 'path' kwarg.")        
+            raise CLIError("command authoring error: ArmCommandGroup requires 'path' kwarg.")
 
         model = self._get_command_type_property('model')
         self._model = model

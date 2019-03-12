@@ -5,6 +5,9 @@
 
 from __future__ import print_function
 import argparse
+
+from azure.cli.core.commands import ExtensionCommandSource
+
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
                         HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
@@ -12,7 +15,7 @@ from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackComma
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.commands import ExtensionCommandSource
+
 
 logger = get_logger(__name__)
 

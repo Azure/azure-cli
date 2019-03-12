@@ -9,8 +9,6 @@ from collections import Counter, OrderedDict
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from knack.log import get_logger
-
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
@@ -23,6 +21,9 @@ from azure.cli.command_modules.network._util import _get_property
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
+
+from knack.log import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -73,7 +74,7 @@ def _get_default_value(balancer, property_name, option_name, return_name):
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
-    elif not values:
+    if not values:
         raise CLIError("No existing values found for '{0}'. Create one first and try "
                        "again.".format(option_name))
     return values[0].rsplit('/', 1)[1] if return_name else values[0]
@@ -485,80 +486,6 @@ def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_
         instance.include_path = include_path
     if include_query_string is not None:
         instance.include_query_string = include_query_string
-    return parent
-
-
-def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_name, item_name, no_wait=False, cache_result=None):
-    ApplicationGatewayRewriteRuleSet = cmd.get_models(
-        'ApplicationGatewayRewriteRuleSet')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    new_set = ApplicationGatewayRewriteRuleSet(name=item_name)
-    _upsert(ag, 'rewrite_rule_sets', new_set, 'name')
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_rewrite_rule_set(instance, parent, item_name, cache_result=None):
-    return parent
-
-
-def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, parent_name, item_name, 
-                           sequence=None, request_headers=None, response_headers=None, no_wait=False, cache_result=None):
-    ApplicationGatewayRewriteRule, ApplicationGatewayRewriteRuleActionSet = cmd.get_models(
-        'ApplicationGatewayRewriteRule', 'ApplicationGatewayRewriteRuleActionSet')
-    if not request_headers and not response_headers:
-        raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    rule_set = next((x for x in ag.rewrite_rule_sets if x.name == parent_name), None)
-    if not rule_set:
-        raise CLIError("rule set '{}' not found.".format(parent_name))
-    new_rule = ApplicationGatewayRewriteRule(
-        name=item_name,
-        rule_sequence=sequence,
-        action_set=ApplicationGatewayRewriteRuleActionSet(
-            request_header_configurations=request_headers,
-            response_header_configurations=response_headers
-        )
-    )
-    _upsert(rule_set, 'rewrite_rules', new_rule, 'name')
-    _upsert(ag, 'rewrite_rule_sets', rule_set, 'name', warn=False)
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_rewrite_rule(instance, parent, parent_name, item_name,
-                           sequence=None, request_headers=None, response_headers=None, cache_result=None):
-    return parent
-
-
-def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway_name, parent_name, item_name,
-                                     variable, no_wait=False, cache_result=False, pattern=None, ignore_case=None,
-                                     negate=None):
-    ApplicationGatewayRewriteRuleCondition = cmd.get_models(
-        'ApplicationGatewayRewriteRuleCondition')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    rule_set = next((x for x in ag.rewrite_rule_sets if x.name == parent_name), None)
-    if not rule_set:
-        raise CLIError("rule set '{}' not found.".format(parent_name))
-    rule = next((x for x in rule_set.rewrite_rules if x.name == item_name), None)
-    if not rule:
-        raise CLIError("rule '{}' in rule set '{}' not found.".format(item_name, parent_name))
-    if not rule.conditions:
-        rule.conditions = []
-    new_condition = ApplicationGatewayRewriteRuleCondition(
-        variable=variable,
-        pattern=pattern,
-        ignore_case=ignore_case,
-        negate=negate
-    )
-    _upsert(rule, 'condition', new_condition, 'variable')
-    _upsert(rule_set, 'rewrite_rules', rule, 'name', warn=False)
-    _upsert(ag, 'rewrite_rule_sets', rule_set, 'name', warn=False)
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_rewrite_rule_condition(instance, parent, item_name, cache_result=None):
     return parent
 
 
@@ -1863,7 +1790,7 @@ def create_express_route_port(cmd, resource_group_name, express_route_port_name,
     return client.create_or_update(resource_group_name, express_route_port_name, port)
 
 
-def update_express_route_port(instance, tags=None):
+def update_express_route_port(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
         c.update_param('tags', tags, True)
     return instance
@@ -2008,7 +1935,7 @@ def create_lb_inbound_nat_rule(
 
 
 def set_lb_inbound_nat_rule(
-        instance, parent, item_name, protocol=None, frontend_port=None,
+        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
@@ -2054,7 +1981,7 @@ def create_lb_inbound_nat_pool(
 
 
 def set_lb_inbound_nat_pool(
-        instance, parent, item_name, protocol=None,
+        cmd, instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
         frontend_ip_name=None, enable_tcp_reset=None, floating_ip=None, idle_timeout=None):
     with cmd.update_context(instance) as c:
@@ -2189,7 +2116,7 @@ def create_lb_probe(cmd, resource_group_name, load_balancer_name, item_name, pro
     return _get_property(poller.result().probes, item_name)
 
 
-def set_lb_probe(instance, parent, item_name, protocol=None, port=None,
+def set_lb_probe(cmd, instance, parent, item_name, protocol=None, port=None,
                  path=None, interval=None, threshold=None):
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
@@ -2233,7 +2160,7 @@ def create_lb_rule(
 
 
 def set_lb_rule(
-        instance, parent, item_name, protocol=None, frontend_port=None,
+        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
         load_distribution='default', floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
         disable_outbound_snat=None):
@@ -2985,7 +2912,8 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                 }
             }
         else:
-            with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            with cmd.update_context(
+                    config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
                 # update object
                 c.set_param('enabled', traffic_analytics_enabled)
                 # c.set_param('traffic_analytics_interval', traffic_analytics_interval)

@@ -15,14 +15,6 @@ import copy
 from importlib import import_module
 import six
 
-from knack.arguments import CLICommandArgument
-from knack.commands import CLICommand, CommandGroup
-from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
-from knack.invocation import CommandInvoker
-from knack.log import get_logger
-from knack.util import CLIError, CommandResultItem, todict
-from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
-
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -32,6 +24,15 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 import azure.cli.core.telemetry as telemetry
+
+from knack.arguments import CLICommandArgument
+from knack.commands import CLICommand, CommandGroup
+from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
+from knack.invocation import CommandInvoker
+from knack.log import get_logger
+from knack.util import CLIError, CommandResultItem, todict
+from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
+
 
 logger = get_logger(__name__)
 
@@ -350,7 +351,7 @@ class AzCliCommandInvoker(CommandInvoker):
         if len(exceptions) == 1 and not results:
             ex, id_arg = exceptions[0]
             raise ex
-        elif exceptions:
+        if exceptions:
             for exception, id_arg in exceptions:
                 logger.warning('%s: "%s"', id_arg, str(exception))
             if not results:

@@ -7,12 +7,13 @@ import os
 from pprint import pformat
 from six.moves import configparser
 
+from azure.cli.core.profiles import API_PROFILES
+from azure.cli.core._config import GLOBAL_CONFIG_DIR
+
 from knack.log import get_logger
 from knack.util import CLIError
 from knack.config import get_config_parser
 
-from azure.cli.core.profiles import API_PROFILES
-from azure.cli.core._config import GLOBAL_CONFIG_DIR
 
 logger = get_logger(__name__)
 
