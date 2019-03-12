@@ -66,7 +66,7 @@ def create(
         client, resource_group_name, account_name, sku_name, kind, location, tags=None, api_properties=None, yes=None):
 
     terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
-        ' or the Translator Speech API to improve Microsoft products and services.'\
+        ' to improve Microsoft products and services.'\
         'Where you send personal data to these Cognitive Services, you are responsible '\
         'for obtaining sufficient consent from the data subjects.'\
         'The General Privacy and Security Terms in the Online Services Terms '\
@@ -79,13 +79,16 @@ def create(
         ' Services deployments (https://docs.microsoft.com/en-us/azure/cognitive-servic'\
         'es/cognitive-services-apis-create-account).'
     hint = '\nPlease select'
-    if yes:
-        logger.warning(terms)
-    else:
-        logger.warning(terms)
-        option = prompt_y_n(hint)
-        if not option:
-            raise CLIError('Operation cancelled.')
+    import re
+    pattern = re.compile("^[Bb]ing\\..*$")
+    if pattern.match(kind)
+        if yes:
+            logger.warning(terms)
+        else:
+            logger.warning(terms)
+            option = prompt_y_n(hint)
+            if not option:
+                raise CLIError('Operation cancelled.')
     sku = Sku(name=sku_name)
 
     if api_properties is None:

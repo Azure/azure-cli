@@ -121,7 +121,7 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    completer=location_completer)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('sku_name', options_list=['--sku'], help='the Sku of cognitive services account',
+        c.argument('sku_name', options_list=['--sku'], help='Name of Sku of cognitive services account',
                    completer=sku_name_completer)
         c.argument('kind', help='the API name of cognitive services account',
                    completer=kind_completer)
