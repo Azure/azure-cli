@@ -338,12 +338,11 @@ def load_command_table(self, _):
     for kwargs in subresource_properties:
         alias = kwargs['name']
         subresource = kwargs['prop']
-        path = kwargs.get('path', None)
         create_validator = kwargs.get('validator', None)
         with self.command_group('network application-gateway {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('application_gateways', subresource, path))
-            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource, path))
-            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource, path), supports_no_wait=True)
+            g.command('list', list_network_resource_property('application_gateways', subresource))
+            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
+            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
             g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, validator=create_validator)
             g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
