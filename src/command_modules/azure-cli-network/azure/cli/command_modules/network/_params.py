@@ -16,7 +16,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.command_modules.network._validators import (
     dns_zone_name_type,
-    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
+    get_ssl_cert_validator, get_validate_cert, validate_inbound_nat_rule_id_list,
     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
@@ -80,7 +80,7 @@ def load_arguments(self, _):
     private_ip_address_type = CLIArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
     cookie_based_affinity_type = CLIArgumentType(arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
-    ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
+    ag_servers_type = CLIArgumentType(nargs='+', options_list='--servers', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -97,12 +97,13 @@ def load_arguments(self, _):
 
     # region ApplicationGateways
     with self.argument_context('network application-gateway') as c:
+        c.argument('gateway_name', help='Name of the application gateway.')
         c.argument('application_gateway_name', name_arg_type, help='The name of the application gateway.', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
-        c.ignore('virtual_network_type', 'private_ip_address_allocation')
         c.argument('zones', zones_type)
         c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
+        c.ignore('virtual_network_type', 'private_ip_address_allocation')
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -140,11 +141,8 @@ def load_arguments(self, _):
         c.argument('capacity', help='The number of instances to use with the application gateway.', type=int)
 
     ag_subresources = [
-        {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
-        {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
         {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
         {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
-        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
         {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
         {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
@@ -175,12 +173,9 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {}'.format(item)) as c:
             c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
 
-    with self.argument_context('network application-gateway address-pool') as c:
-        c.argument('servers', ag_servers_type, arg_group=None)
-
     for scope in ['auth-cert', 'root-cert']:
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
-            c.argument('cert_data', options_list='--cert-file', help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_cert)
+            c.argument('cert_data', options_list='--cert-file', help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=get_validate_cert('cert_data'))
 
     with self.argument_context('network application-gateway root-cert') as c:
         c.argument('keyvault_secret', help='KeyVault secret ID.')
@@ -208,20 +203,35 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
 
+    with self.argument_context('network application-gateway address-pool') as c:
+        c.argument('pool_backend_addresses', ag_servers_type, arg_group=None, validator=get_servers_validator('pool_backend_addresses'))
+        c.argument('pool_name', help='Name of the backend address pool.')
+        c.ignore('pool_etag', 'pool_id', 'pool_provisioning_state', 'pool_type', 'pool_backend_ip_configurations')
+
+    with self.argument_context('network application-gateway auth-cert') as c:
+        c.argument('auth_name', help='Name of the authorization certificate.')
+        c.argument('auth_data', options_list='--cert-file', help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=get_validate_cert('auth_data'))
+        c.ignore('auth_etag', 'auth_id', 'auth_provisioning_state', 'auth_type')
+
     with self.argument_context('network application-gateway rewrite-rule') as c:
         c.argument('rule_response_header_configurations', options_list='--response-headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('rule_response_header_configurations'))
         c.argument('rule_request_header_configurations', options_list='--request-headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('rule_request_header_configurations'))
         c.argument('rule_rule_sequence', options_list='--rule-sequence', type=int, help='Determines the execution order of the rule in the rule set.')
         c.argument('ruleset_name', help='Name of the rewrite rule set.')
         c.argument('rule_name', help='Name of the rewrite rule.')
-        c.argument('gateway_name', help='Name of the application gateway.')
-        c.ignore('ruleset_id')
+        c.ignore('ruleset_id', 'ruleset_rewrite_rules', 'rule_conditions')
 
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
         c.argument('condition_variable', help='The variable whose value is being evaluated.')
         c.argument('condition_pattern', options_list='--pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
         c.argument('condition_ignore_case', arg_type=get_three_state_flag(), options_list='--ignore-case', help='Make comparison case-insensitive.')
         c.argument('condition_negate', arg_type=get_three_state_flag(), options_list='--negate', help='Check the negation of the condition.')
+
+    with self.argument_context('network application-gateway ssl-cert') as c:
+        c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=get_ssl_cert_validator(data_dest='cert_data'))
+        c.argument('cert_password', help='Certificate password.')
+        c.ignore('cert_etag', 'cert_id', 'cert_provisioning_state', 'cert_type', 'cert_public_cert_data')
+        c.ignore('cert_key_vault_secret_id')  # Perhaps this should be exposed?
 
     with self.argument_context('network application-gateway rule create') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
@@ -255,10 +265,6 @@ def load_arguments(self, _):
         c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
-
-    with self.argument_context('network application-gateway ssl-cert') as c:
-        c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
-        c.argument('cert_password', help='Certificate password.')
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')

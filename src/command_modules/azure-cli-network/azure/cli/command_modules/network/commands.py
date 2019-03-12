@@ -311,11 +311,8 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     subresource_properties = [
-        {'prop': 'authentication_certificates', 'name': 'auth-cert'},
-        {'prop': 'ssl_certificates', 'name': 'ssl-cert'},
         {'prop': 'frontend_ip_configurations', 'name': 'frontend-ip'},
         {'prop': 'frontend_ports', 'name': 'frontend-port'},
-        {'prop': 'backend_address_pools', 'name': 'address-pool'},
         {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
@@ -353,6 +350,32 @@ def load_command_table(self, _):
         'client_factory': cf_application_gateways
     }
 
+    app_gateway_backend_pool = CliCommandType(
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/backendAddressPools/{name:pool_name}',
+        model='ApplicationGatewayBackendAddressPool',
+        model_prefix='pool',
+        **ag_kwargs
+    )
+    with self._arm_command_group('network application-gateway address-pool', app_gateway_backend_pool) as g:  # pylint: disable=protected-access
+        g.create(supports_no_wait=True)
+        g.update(supports_no_wait=True)
+        g.list()
+        g.show()
+        g.delete()
+
+    app_gateway_auth_cert = CliCommandType(
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/authenticationCertificates/{name:auth_name}',
+        model='ApplicationGatewayAuthenticationCertificate',
+        model_prefix='auth',
+        **ag_kwargs
+    )
+    with self._arm_command_group('network application-gateway auth-cert', app_gateway_auth_cert) as g:  # pylint: disable=protected-access
+        g.create(supports_no_wait=True)
+        g.update(supports_no_wait=True)
+        g.list()
+        g.show()
+        g.delete()
+
     app_gateway_rewrite_ruleset = CliCommandType(
         path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/rewriteRuleSets/{name:ruleset_name}',
         model='ApplicationGatewayRewriteRuleSet',
@@ -388,6 +411,19 @@ def load_command_table(self, _):
         **ag_kwargs
     )
     with self._arm_command_group('network application-gateway rewrite-rule condition', app_gateway_rewrite_rule_condition) as g:  # pylint: disable=protected-access
+        g.create(supports_no_wait=True)
+        g.update(supports_no_wait=True)
+        g.list()
+        g.show()
+        g.delete()
+
+    app_gateway_ssl_cert = CliCommandType(
+        path='Microsoft.Network/applicationGateways/{application_gateway_name:gateway_name}/sslCertificates/{name:cert_name}',
+        model='ApplicationGatewaySslCertificate',
+        model_prefix='cert',
+        **ag_kwargs
+    )
+    with self._arm_command_group('network application-gateway ssl-cert', app_gateway_ssl_cert) as g:  # pylint: disable=protected-access
         g.create(supports_no_wait=True)
         g.update(supports_no_wait=True)
         g.list()

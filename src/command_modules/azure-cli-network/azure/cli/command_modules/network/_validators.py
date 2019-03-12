@@ -197,33 +197,40 @@ def read_base_64_file(filename):
             return str(base64_data)
 
 
-def validate_cert(namespace):
-    if namespace.cert_data:
-        namespace.cert_data = read_base_64_file(namespace.cert_data)
+def get_validate_cert(dest):
+    def validate_cert(namespace):
+        if getattr(namespace, dest):
+            setattr(namespace, dest, read_base_64_file(getattr(namespace, dest)))
+    return validate_cert
 
 
-def validate_ssl_cert(namespace):
-    params = [namespace.cert_data, namespace.cert_password]
-    if all([not x for x in params]):
-        # no cert supplied -- use HTTP
-        if not namespace.frontend_port:
-            namespace.frontend_port = 80
-    else:
-        # cert supplied -- use HTTPS
-        if not all(params):
-            raise CLIError(
-                None, 'To use SSL certificate, you must specify both the filename and password')
+def get_ssl_cert_validator(data_dest='cert_data', password_dest='cert_password', port_dest='frontend_port'):
+    def validate_ssl_cert(namespace):
+        data = getattr(namespace, data_dest, None)
+        password = getattr(namespace, password_dest, None)
+        frontend_port = getattr(namespace, port_dest, None)
+        params = [data, password]
+        if all([not x for x in params]):
+            # no cert supplied -- use HTTP
+            if not frontend_port:
+                setattr(namespace, port_dest, 80)
+        else:
+            # cert supplied -- use HTTPS
+            if not all(params):
+                raise CLIError(
+                    None, 'To use SSL certificate, you must specify both the filename and password')
 
-        # extract the certificate data from the provided file
-        namespace.cert_data = read_base_64_file(namespace.cert_data)
+            # extract the certificate data from the provided file
+            setattr(namespace, data_dest, read_base_64_file(data))
 
-        try:
-            # change default to frontend port 443 for https
-            if not namespace.frontend_port:
-                namespace.frontend_port = 443
-        except AttributeError:
-            # app-gateway ssl-cert create does not have these fields and that is okay
-            pass
+            try:
+                # change default to frontend port 443 for https
+                if not frontend_port:
+                    setattr(namespace, port_dest, 443)
+            except AttributeError:
+                # app-gateway ssl-cert create does not have these fields and that is okay
+                pass
+    return validate_ssl_cert
 
 
 def validate_delegations(cmd, namespace):
@@ -572,16 +579,16 @@ def validate_service_endpoint_policy(cmd, namespace):
         namespace.service_endpoint_policy = policy_ids
 
 
-def get_servers_validator(camel_case=False):
+def get_servers_validator(dest='servers', camel_case=False):
     def validate_servers(namespace):
         servers = []
-        for item in namespace.servers if namespace.servers else []:
+        for item in getattr(namespace, dest, None) or []:
             try:
                 socket.inet_aton(item)  # pylint:disable=no-member
-                servers.append({'ipAddress' if camel_case else 'ip_address': item})
+                servers.append({'ipAddress': item} if camel_case else {'ip_address': item})
             except socket.error:  # pylint:disable=no-member
                 servers.append({'fqdn': item})
-        namespace.servers = servers
+        setattr(namespace, dest, servers)
     return validate_servers
 
 
@@ -735,7 +742,7 @@ def process_ag_create_namespace(cmd, namespace):
     if namespace.public_ip_address:
         get_public_ip_validator(
             has_type_field=True, allow_none=True, allow_new=True, default_none=True)(cmd, namespace)
-    validate_ssl_cert(namespace)
+    get_ssl_cert_validator()(namespace)
     validate_tags(namespace)
     validate_custom_error_pages(namespace)
 

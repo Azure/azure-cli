@@ -252,38 +252,6 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None, ena
     return instance
 
 
-def create_ag_authentication_certificate(cmd, resource_group_name, application_gateway_name, item_name,
-                                         cert_data, no_wait=False):
-    AuthCert = cmd.get_models('ApplicationGatewayAuthenticationCertificate')
-    ncf = network_client_factory(cmd.cli_ctx).application_gateways
-    ag = ncf.get(resource_group_name, application_gateway_name)
-    new_cert = AuthCert(data=cert_data, name=item_name)
-    _upsert(ag, 'authentication_certificates', new_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
-    instance.data = cert_data
-    return parent
-
-
-def create_ag_backend_address_pool(cmd, resource_group_name, application_gateway_name, item_name,
-                                   servers=None, no_wait=False):
-    ApplicationGatewayBackendAddressPool = cmd.get_models('ApplicationGatewayBackendAddressPool')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
-    _upsert(ag, 'backend_address_pools', new_pool, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_backend_address_pool(instance, parent, item_name, servers=None):
-    if servers is not None:
-        instance.backend_addresses = servers
-    return parent
-
-
 def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_gateway_name, item_name,
                                         public_ip_address=None, subnet=None,
                                         virtual_network_name=None, private_ip_address=None,
@@ -587,26 +555,6 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.url_path_map = SubResource(id=url_path_map)
     if rule_type is not None:
         instance.rule_type = rule_type
-    return parent
-
-
-def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name, item_name, cert_data,
-                              cert_password, no_wait=False):
-    ApplicationGatewaySslCertificate = cmd.get_models('ApplicationGatewaySslCertificate')
-    ncf = network_client_factory(cmd.cli_ctx)
-    ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
-    new_cert = ApplicationGatewaySslCertificate(
-        name=item_name, data=cert_data, password=cert_password)
-    _upsert(ag, 'ssl_certificates', new_cert, 'name')
-    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
-                       resource_group_name, application_gateway_name, ag)
-
-
-def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
-    if cert_data is not None:
-        instance.data = cert_data
-    if cert_password is not None:
-        instance.password = cert_password
     return parent
 
 

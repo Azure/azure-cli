@@ -1330,6 +1330,7 @@ class ArmCommandGroup(AzCommandGroup):
     def _add_dests(self, scope, required=None, optional=None):
         # from azure.cli.core.commands.parameters import get_resource_name_completion_list
         # TODO: add completers?
+        # TODO: add boilerplate help text?
         required = required or list(self._key_to_dest_map.values())
         optional = optional or []
         command = self.command_loader.command_table.get(scope)
@@ -1453,7 +1454,7 @@ class ArmCommandGroup(AzCommandGroup):
                 model_kwargs[path] = dest_value
         return cmd.get_models(self._model)(**model_kwargs)
 
-    def _parse_model(self, model_cls, ignore_collections=True, parent_path=None):
+    def _parse_model(self, model_cls, parent_path=None):
         attr_map = model_cls.__dict__['_attribute_map']
         validation = model_cls.__dict__.get('_validation', {})
         prefix = self._model_prefix
@@ -1463,14 +1464,10 @@ class ArmCommandGroup(AzCommandGroup):
             # ignore values if Swagger says they are readonly
             if key in validation and validation[key].get('readonly'):
                 continue
-            # skip collections. They will be their own command groups
-            if data_type.startswith('[') and data_type.endswith(']') and ignore_collections:
-                continue
             dest = key if not prefix else '{}_{}'.format(prefix, key)
             if self.command_loader.get_models(data_type):
                 subprop_map = self._parse_model(
                     self.command_loader.get_models(data_type),
-                    ignore_collections=False,
                     parent_path=key
                 )
                 property_map.update(subprop_map)
