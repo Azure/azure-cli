@@ -200,7 +200,7 @@ examples:
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
   - name: Import an image from a public repository in Docker Hub
     text: >
-        az acr import -n MyRegistry --source docker.io/sourcerepository:sourcetag -t targetrepository:targettag
+        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
 """
 
 helps['acr list'] = """

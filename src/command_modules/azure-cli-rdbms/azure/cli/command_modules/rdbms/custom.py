@@ -254,7 +254,7 @@ def _replica_stop(client, resource_group_name, server_name):
 def _server_update_custom_func(instance,
                                sku_name=None,
                                storage_mb=None,
-                               backup_retention_days=None,
+                               backup_retention=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None):
@@ -275,8 +275,8 @@ def _server_update_custom_func(instance,
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
 
-    if backup_retention_days:
-        instance.storage_profile.backup_retention_days = backup_retention_days
+    if backup_retention:
+        instance.storage_profile.backup_retention_days = backup_retention
 
     params = ServerUpdateParameters(sku=instance.sku,
                                     storage_profile=instance.storage_profile,

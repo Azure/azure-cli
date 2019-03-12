@@ -37,97 +37,97 @@ def load_command_table(self, _):
     )
 
     compute_availset_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#AvailabilitySetsOperations.{}',
         client_factory=cf_avail_set,
         operation_group='availability_sets'
     )
 
     compute_disk_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.disks_operations#DisksOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
         client_factory=cf_disks,
         operation_group='disks'
     )
 
     compute_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.images_operations#ImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#ImagesOperations.{}',
         client_factory=cf_images
     )
 
     compute_snapshot_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.snapshots_operations#SnapshotsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#SnapshotsOperations.{}',
         client_factory=cf_snapshots
     )
 
     compute_vm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachinesOperations.{}',
         client_factory=cf_vm
     )
 
     compute_vm_extension_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_extensions_operations#VirtualMachineExtensionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
         client_factory=cf_vm_ext
     )
 
     compute_vm_extension_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionImagesOperations.{}',
         client_factory=cf_vm_ext_image
     )
 
     compute_vm_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineImagesOperations.{}',
         client_factory=cf_vm_image
     )
 
     compute_vm_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.usage_operations#UsageOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#UsageOperations.{}',
         client_factory=cf_usage
     )
 
     compute_vm_run_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_run_commands_operations#VirtualMachineRunCommandsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineRunCommandsOperations.{}',
         client_factory=cf_run_commands
     )
 
     compute_vm_size_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_sizes_operations#VirtualMachineSizesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineSizesOperations.{}',
         client_factory=cf_vm_sizes
     )
 
     compute_vmss_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
         operation_group='virtual_machine_scale_sets'
     )
 
     compute_vmss_rolling_upgrade_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_rolling_upgrades_operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
         client_factory=cf_rolling_upgrade_commands,
         operation_group='virtual_machine_scale_sets'
     )
 
     compute_vmss_vm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVMsOperations.{}',
         client_factory=cf_vmss_vm,
         operation_group='virtual_machine_scale_sets'
     )
 
     network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_ni
     )
 
     compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.galleries_operations#GalleriesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
         client_factory=cf_galleries,
     )
 
     compute_gallery_images_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.gallery_images_operations#GalleryImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#GalleryImagesOperations.{}',
         client_factory=cf_gallery_images,
     )
 
     compute_gallery_image_versions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.gallery_image_versions_operations#GalleryImageVersionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#GalleryImageVersionsOperations.{}',
         client_factory=cf_gallery_image_versions,
     )
 

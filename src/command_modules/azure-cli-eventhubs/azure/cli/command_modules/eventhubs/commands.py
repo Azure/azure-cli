@@ -16,19 +16,19 @@ def load_command_table(self, _):
                                                                      disaster_recovery_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations.namespaces_operations#NamespacesOperations.{}',
+        operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory)
 
     eh_event_hub_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations.event_hubs_operations#EventHubsOperations.{}',
+        operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
         client_factory=event_hub_mgmt_client_factory)
 
     eh_consumer_groups_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations.consumer_groups_operations#ConsumerGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.eventhub.operations#ConsumerGroupsOperations.{}',
         client_factory=consumer_groups_mgmt_client_factory)
 
     eh_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations.disaster_recovery_configs_operations#DisasterRecoveryConfigsOperations.{}',
+        operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory)
 
 # Namespace Region

@@ -103,7 +103,7 @@ os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
 def list_cluster(client, resource_group_name=None):
     cluster_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
-    return list(cluster_list)
+    return cluster_list
 
 
 # pylint:disable=too-many-locals, too-many-statements, too-many-boolean-expressions, too-many-branches

@@ -233,6 +233,7 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 def _set_active_cloud(cli_ctx, cloud_name):
     cli_ctx.config.set_value('cloud', 'name', cloud_name)
+    cli_ctx.cloud = get_cloud(cli_ctx, cloud_name)
 
 
 def get_active_cloud_name(cli_ctx):

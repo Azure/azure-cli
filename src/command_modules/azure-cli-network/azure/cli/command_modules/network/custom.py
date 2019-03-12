@@ -3846,7 +3846,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
                           enable_bgp=None, use_policy_based_traffic_selectors=None,
                           express_route_gateway_bypass=None):
-    ncf = network_client_factory(cmd.cli_ctx)
 
     with UpdateContext(instance) as c:
         c.set_param('routing_weight', routing_weight)
@@ -3858,16 +3857,19 @@ def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, t
 
     # TODO: Remove these when issue #1615 is fixed
     gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
+    ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway1_id['subscription'])
     instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
         gateway1_id['resource_group'], gateway1_id['name'])
 
     if instance.virtual_network_gateway2:
         gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
+        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
         instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
             gateway2_id['resource_group'], gateway2_id['name'])
 
     if instance.local_network_gateway2:
         gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
+        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
         instance.local_network_gateway2 = ncf.local_network_gateways.get(
             gateway2_id['resource_group'], gateway2_id['name'])
 

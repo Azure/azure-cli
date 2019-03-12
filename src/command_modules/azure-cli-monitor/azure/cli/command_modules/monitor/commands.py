@@ -22,7 +22,7 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     action_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.action_groups_operations#ActionGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#ActionGroupsOperations.{}',
         client_factory=cf_action_groups,
         exception_handler=monitor_exception_handler)
 
@@ -32,12 +32,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     activity_log_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.event_categories_operations#EventCategoriesOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#EventCategoriesOperations.{}',
         client_factory=cf_event_categories,
         exception_handler=monitor_exception_handler)
 
     activity_log_alerts_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.activity_log_alerts_operations#ActivityLogAlertsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#ActivityLogAlertsOperations.{}',
         client_factory=cf_activity_log_alerts,
         exception_handler=monitor_exception_handler)
 
@@ -47,17 +47,17 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     alert_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.alert_rules_operations#AlertRulesOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#AlertRulesOperations.{}',
         client_factory=cf_alert_rules,
         exception_handler=monitor_exception_handler)
 
     alert_rule_incidents_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.alert_rule_incidents_operations#AlertRuleIncidentsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#AlertRuleIncidentsOperations.{}',
         client_factory=cf_alert_rule_incidents,
         exception_handler=monitor_exception_handler)
 
     autoscale_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.autoscale_settings_operations#AutoscaleSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#AutoscaleSettingsOperations.{}',
         client_factory=cf_autoscale,
         exception_handler=monitor_exception_handler)
 
@@ -67,12 +67,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     diagnostics_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.diagnostic_settings_operations#DiagnosticSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsOperations.{}',
         client_factory=cf_diagnostics,
         exception_handler=monitor_exception_handler)
 
     diagnostics_categories_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.diagnostic_settings_category_operations#DiagnosticSettingsCategoryOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
         client_factory=cf_diagnostics,
         exception_handler=monitor_exception_handler)
 
@@ -82,7 +82,7 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     log_profiles_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.log_profiles_operations#LogProfilesOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#LogProfilesOperations.{}',
         client_factory=cf_log_profiles,
         exception_handler=monitor_exception_handler)
 
@@ -97,12 +97,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler)
 
     metric_alert_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.metric_alerts_operations#MetricAlertsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#MetricAlertsOperations.{}',
         client_factory=cf_metric_alerts,
         exception_handler=monitor_exception_handler)
 
     metric_definitions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.monitor.operations.metric_definitions_operations#MetricDefinitionsOperations.{}',
+        operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
         client_factory=cf_metric_def,
         exception_handler=monitor_exception_handler)
 

@@ -109,9 +109,13 @@ class ApplicationSetScenarioTest(ScenarioTest):
             ])
         })
 
-        # crerate app through general option
+        # create app through general option
         self.cmd('ad app create --display-name {name} --homepage {app} --identifier-uris {app}',
                  checks=self.check('identifierUris[0]', '{app}'))
+
+        # set app password
+        result = self.cmd('ad app credential reset --id {app} --append --password "test" --years 2').get_output_in_json()
+        self.assertTrue(result['appId'])
 
         # show/list app
         self.cmd('ad app show --id {app}',

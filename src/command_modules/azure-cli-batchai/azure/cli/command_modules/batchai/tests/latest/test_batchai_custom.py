@@ -78,16 +78,16 @@ class TestBatchAICustom(unittest.TestCase):
                 admin_user_name='name',
                 admin_user_password='password'))
         actual = _update_user_account_settings(params, None, None, None)
-        self.assertEquals(params, actual)
+        self.assertEqual(params, actual)
 
     def test_batchai_update_cluster_user_account_settings_using_command_line(self):
         params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, 'name', SSH_KEY, 'password')
-        self.assertEquals(actual.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='name',
-                              admin_user_ssh_public_key=SSH_KEY,
-                              admin_user_password='password'))
+        self.assertEqual(actual.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='name',
+                             admin_user_ssh_public_key=SSH_KEY,
+                             admin_user_password='password'))
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_overriding_config(self):
         params = ClusterCreateParameters(
@@ -97,19 +97,19 @@ class TestBatchAICustom(unittest.TestCase):
                 admin_user_ssh_public_key='old key',
                 admin_user_password='old_password'))
         actual = _update_user_account_settings(params, 'name', SSH_KEY, 'password')
-        self.assertEquals(actual.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='name',
-                              admin_user_ssh_public_key=SSH_KEY,
-                              admin_user_password='password'))
+        self.assertEqual(actual.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='name',
+                             admin_user_ssh_public_key=SSH_KEY,
+                             admin_user_password='password'))
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_when_key_is_path(self):
         params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, 'user', _data_file('key.txt'), None)
-        self.assertEquals(actual.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='user',
-                              admin_user_ssh_public_key=SSH_KEY))
+        self.assertEqual(actual.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='user',
+                             admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_update_cluster_user_account_settings_using_command_line_when_key_is_wrong(self):
         params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
@@ -121,10 +121,10 @@ class TestBatchAICustom(unittest.TestCase):
         getuser.return_value = 'current_user'
         params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, None, None, 'password')
-        self.assertEquals(actual.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='current_user',
-                              admin_user_password='password'))
+        self.assertEqual(actual.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='current_user',
+                             admin_user_password='password'))
 
     @patch('getpass.getuser')
     @patch('azure.cli.command_modules.batchai.custom._get_default_ssh_public_key_location')
@@ -134,10 +134,10 @@ class TestBatchAICustom(unittest.TestCase):
         getuser.return_value = 'current_user'
         params = ClusterCreateParameters(vm_size=None, user_account_settings=None)
         actual = _update_user_account_settings(params, None, None, None)
-        self.assertEquals(actual.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='current_user',
-                              admin_user_ssh_public_key=SSH_KEY))
+        self.assertEqual(actual.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='current_user',
+                             admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_update_file_server_user_account_settings_using_config(self):
         params = FileServerCreateParameters(
@@ -147,16 +147,16 @@ class TestBatchAICustom(unittest.TestCase):
                 user_account_settings=UserAccountSettings(
                     admin_user_name='name', admin_user_password='password')))
         actual = _update_user_account_settings(params, None, None, None)
-        self.assertEquals(params, actual)
+        self.assertEqual(params, actual)
 
     def test_batchai_update_file_server_user_account_settings_using_command_line(self):
         params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, 'name', SSH_KEY, 'password')
-        self.assertEquals(actual.ssh_configuration.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='name',
-                              admin_user_ssh_public_key=SSH_KEY,
-                              admin_user_password='password'))
+        self.assertEqual(actual.ssh_configuration.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='name',
+                             admin_user_ssh_public_key=SSH_KEY,
+                             admin_user_password='password'))
 
     def test_batchai_update_file_server_user_account_settings_using_command_line_overriding_config(self):
         params = FileServerCreateParameters(
@@ -168,19 +168,19 @@ class TestBatchAICustom(unittest.TestCase):
                     admin_user_ssh_public_key='old_key',
                     admin_user_password='old_password')))
         actual = _update_user_account_settings(params, 'name', SSH_KEY, 'password')
-        self.assertEquals(actual.ssh_configuration.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='name',
-                              admin_user_ssh_public_key=SSH_KEY,
-                              admin_user_password='password'))
+        self.assertEqual(actual.ssh_configuration.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='name',
+                             admin_user_ssh_public_key=SSH_KEY,
+                             admin_user_password='password'))
 
     def test_batchai_update_file_server_user_account_settings_using_command_line_when_key_is_path(self):
         params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, 'user', _data_file('key.txt'), None)
-        self.assertEquals(actual.ssh_configuration.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='user',
-                              admin_user_ssh_public_key=SSH_KEY))
+        self.assertEqual(actual.ssh_configuration.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='user',
+                             admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_update_fileserver_user_account_settings_using_command_line_when_key_is_wrong(self):
         params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
@@ -192,10 +192,10 @@ class TestBatchAICustom(unittest.TestCase):
         getuser.return_value = 'current_user'
         params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, None, None, 'password')
-        self.assertEquals(actual.ssh_configuration.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='current_user',
-                              admin_user_password='password'))
+        self.assertEqual(actual.ssh_configuration.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='current_user',
+                             admin_user_password='password'))
 
     @patch('getpass.getuser')
     @patch('azure.cli.command_modules.batchai.custom._get_default_ssh_public_key_location')
@@ -205,10 +205,10 @@ class TestBatchAICustom(unittest.TestCase):
         getuser.return_value = 'current_user'
         params = FileServerCreateParameters(vm_size=None, data_disks=None, ssh_configuration=None)
         actual = _update_user_account_settings(params, None, None, None)
-        self.assertEquals(actual.ssh_configuration.user_account_settings,
-                          UserAccountSettings(
-                              admin_user_name='current_user',
-                              admin_user_ssh_public_key=SSH_KEY))
+        self.assertEqual(actual.ssh_configuration.user_account_settings,
+                         UserAccountSettings(
+                             admin_user_name='current_user',
+                             admin_user_ssh_public_key=SSH_KEY))
 
     def test_batchai_patch_mount_volumes_no_volumes(self):
         self.assertIsNone(_patch_mount_volumes(DummyCli(), None))
@@ -279,7 +279,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
     def test_batchai_patch_mount_volumes_with_templates_via_env_variables(self):
         # noinspection PyTypeChecker
@@ -346,7 +346,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_patch_mount_volumes_with_credentials(self, get_storage_client):
@@ -390,7 +390,7 @@ class TestBatchAICustom(unittest.TestCase):
                 )
             ]
         )
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
     @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
     def test_batchai_patch_mount_volumes_with_credentials_no_account_found(self, get_storage_client):
@@ -445,7 +445,7 @@ class TestBatchAICustom(unittest.TestCase):
             ]
         )
         actual = _patch_mount_volumes(DummyCli(), mount_volumes)
-        self.assertEquals(mount_volumes, actual)
+        self.assertEqual(mount_volumes, actual)
 
     def test_batchai_patch_mount_volumes_no_azure_file_url(self):
         # noinspection PyTypeChecker
@@ -483,23 +483,23 @@ class TestBatchAICustom(unittest.TestCase):
 
     def test_batchai_add_nfs_to_empty_mount_volumes(self):
         mount_volumes = _add_nfs_to_mount_volumes(MountVolumes(), 'id', 'relative_path')
-        self.assertEquals('id', mount_volumes.file_servers[0].file_server.id)
-        self.assertEquals('relative_path', mount_volumes.file_servers[0].relative_mount_path)
-        self.assertEquals('rw', mount_volumes.file_servers[0].mount_options)
+        self.assertEqual('id', mount_volumes.file_servers[0].file_server.id)
+        self.assertEqual('relative_path', mount_volumes.file_servers[0].relative_mount_path)
+        self.assertEqual('rw', mount_volumes.file_servers[0].mount_options)
 
     def test_batchai_add_nfs_to_absent_mount_volumes(self):
         mount_volumes = _add_nfs_to_mount_volumes(None, 'id', 'relative_path')
-        self.assertEquals('id', mount_volumes.file_servers[0].file_server.id)
-        self.assertEquals('relative_path', mount_volumes.file_servers[0].relative_mount_path)
-        self.assertEquals('rw', mount_volumes.file_servers[0].mount_options)
+        self.assertEqual('id', mount_volumes.file_servers[0].file_server.id)
+        self.assertEqual('relative_path', mount_volumes.file_servers[0].relative_mount_path)
+        self.assertEqual('rw', mount_volumes.file_servers[0].mount_options)
 
     def test_batchai_add_nfs_to_non_empty_mount_volumes(self):
         mount_volumes = _add_nfs_to_mount_volumes(MountVolumes(), 'id0', 'relative_path0')
         mount_volumes = _add_nfs_to_mount_volumes(mount_volumes, 'id1', 'relative_path1')
         for i in range(2):
-            self.assertEquals('id{0}'.format(i), mount_volumes.file_servers[i].file_server.id)
-            self.assertEquals('relative_path{0}'.format(i), mount_volumes.file_servers[i].relative_mount_path)
-            self.assertEquals('rw', mount_volumes.file_servers[i].mount_options)
+            self.assertEqual('id{0}'.format(i), mount_volumes.file_servers[i].file_server.id)
+            self.assertEqual('relative_path{0}'.format(i), mount_volumes.file_servers[i].relative_mount_path)
+            self.assertEqual('rw', mount_volumes.file_servers[i].mount_options)
 
     def test_batchai_add_azure_file_share_to_mount_volumes_no_account_info(self):
         with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
@@ -641,52 +641,52 @@ class TestBatchAICustom(unittest.TestCase):
                                                                                    admin_user_password='password'))
         # Update to autoscale Ubuntu DSVM.
         result = _update_nodes_information(params, 'ubuntudsvm', None, 'Standard_NC6', 'dedicated', None, 1, 3)
-        self.assertEquals(result.vm_size, 'Standard_NC6')
-        self.assertEquals(result.vm_priority, 'dedicated')
-        self.assertEquals(
+        self.assertEqual(result.vm_size, 'Standard_NC6')
+        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(
             ImageReference(publisher='microsoft-ads', offer='linux-data-science-vm-ubuntu', sku='linuxdsvmubuntu'),
             result.virtual_machine_configuration.image_reference)
-        self.assertEquals(result.scale_settings,
-                          ScaleSettings(auto_scale=AutoScaleSettings(minimum_node_count=1, maximum_node_count=3)))
+        self.assertEqual(result.scale_settings,
+                         ScaleSettings(auto_scale=AutoScaleSettings(minimum_node_count=1, maximum_node_count=3)))
 
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', None, 2, 2)
-        self.assertEquals(result.vm_size, 'Standard_NC6')
-        self.assertEquals(result.vm_priority, 'dedicated')
-        self.assertEquals(ImageReference(
+        self.assertEqual(result.vm_size, 'Standard_NC6')
+        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(ImageReference(
             publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference
         )
-        self.assertEquals(result.scale_settings, ScaleSettings(
+        self.assertEqual(result.scale_settings, ScaleSettings(
             manual=ManualScaleSettings(target_node_count=2)))
 
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, 2, 2)
-        self.assertEquals(result.vm_size, 'Standard_NC6')
-        self.assertEquals(result.vm_priority, 'dedicated')
-        self.assertEquals(
+        self.assertEqual(result.vm_size, 'Standard_NC6')
+        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference)
-        self.assertEquals(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(target_node_count=2)))
+        self.assertEqual(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(target_node_count=2)))
 
         # Update to manual scale Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 2, None, None)
-        self.assertEquals(result.vm_size, 'Standard_NC6')
-        self.assertEquals(result.vm_priority, 'dedicated')
-        self.assertEquals(
+        self.assertEqual(result.vm_size, 'Standard_NC6')
+        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference
         )
-        self.assertEquals(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(target_node_count=2)))
+        self.assertEqual(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(target_node_count=2)))
 
         # Update to auto-scale with initial count Ubuntu LTS.
         result = _update_nodes_information(params, 'UbuntuLTS', None, 'Standard_NC6', '', 1, 0, 2)
-        self.assertEquals(result.vm_size, 'Standard_NC6')
-        self.assertEquals(result.vm_priority, 'dedicated')
-        self.assertEquals(
+        self.assertEqual(result.vm_size, 'Standard_NC6')
+        self.assertEqual(result.vm_priority, 'dedicated')
+        self.assertEqual(
             ImageReference(publisher='Canonical', offer='UbuntuServer', sku='16.04-LTS'),
             result.virtual_machine_configuration.image_reference)
-        self.assertEquals(
+        self.assertEqual(
             ScaleSettings(
                 auto_scale=AutoScaleSettings(minimum_node_count=0, maximum_node_count=2, initial_node_count=1)),
             result.scale_settings)
@@ -694,10 +694,10 @@ class TestBatchAICustom(unittest.TestCase):
         # Update image.
         params.scale_settings = ScaleSettings(manual=ManualScaleSettings(target_node_count=2))
         result = _update_nodes_information(params, 'UbuntuDsvm', None, None, '', None, None, None)
-        self.assertEquals(
+        self.assertEqual(
             ImageReference(publisher='microsoft-ads', offer='linux-data-science-vm-ubuntu', sku='linuxdsvmubuntu'),
             result.virtual_machine_configuration.image_reference)
-        self.assertEquals(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(target_node_count=2)))
+        self.assertEqual(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(target_node_count=2)))
 
         # Update nothing.
         result = _update_nodes_information(params, None, None, None, '', None, None, None)
