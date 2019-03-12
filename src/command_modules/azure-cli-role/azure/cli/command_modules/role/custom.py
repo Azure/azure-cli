@@ -975,14 +975,17 @@ def show_service_principal(client, identifier):
 
 
 def delete_service_principal(cmd, identifier):
+    from azure.cli.core._profile import Profile
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client.service_principals, identifier)
     app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
 
-    assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
-    if assignments:
-        logger.warning('Removing role assignments')
-        delete_role_assignments(cmd, [a['id'] for a in assignments])
+    profile = Profile()
+    if not profile.is_tenant_level_account():
+        assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
+        if assignments:
+            logger.warning('Removing role assignments')
+            delete_role_assignments(cmd, [a['id'] for a in assignments])
 
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
         client.applications.delete(app_object_id)
