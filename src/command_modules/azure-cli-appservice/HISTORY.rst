@@ -2,6 +2,9 @@
 
 Release History
 ===============
+* functionapp: fix `az functionapp devops-build create` command azure-pipelines.yml generation issues
+* functionapp: improve `az functionapp devops-build create` error handlings and error indications
+
 0.2.16
 ++++++
 * webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly

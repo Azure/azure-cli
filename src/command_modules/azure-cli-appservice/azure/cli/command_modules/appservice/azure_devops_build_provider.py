@@ -6,7 +6,7 @@
 from azure_functions_devops_build.organization.organization_manager import OrganizationManager
 from azure_functions_devops_build.project.project_manager import ProjectManager
 from azure_functions_devops_build.yaml.yaml_manager import YamlManager
-from azure_functions_devops_build.respository.repository_manager import RepositoryManager
+from azure_functions_devops_build.repository.repository_manager import RepositoryManager
 from azure_functions_devops_build.pool.pool_manager import PoolManager
 from azure_functions_devops_build.service_endpoint.service_endpoint_manager import ServiceEndpointManager
 from azure_functions_devops_build.extension.extension_manager import ExtensionManager
@@ -96,28 +96,80 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
                                                project_name=project_name, creds=self._creds)
         return repository_manager.list_commits(repository_name)
 
-    def setup_repository(self, organization_name, project_name, repository_name):
+    def check_git(self):
+        """Check if git command does exist"""
+        return RepositoryManager.check_git()
+
+    def check_git_local_repository(self):
+        """Check if local git repository does exist"""
+        return RepositoryManager.check_git_local_repository()
+
+    def check_git_credential_manager(self):
+        return RepositoryManager.check_git_credential_manager()
+    
+    def check_git_remote(self, organization_name, project_name, repository_name):
+        """Check if local git remote name does exist"""
+        repository_manager = RepositoryManager(organization_name=organization_name,
+                                               project_name=project_name, creds=self._creds)
+        return repository_manager.check_git_remote(repository_name, remote_prefix="azuredevops")
+
+    def remove_git_remote(self, organization_name, project_name, repository_name):
+        repository_manager = RepositoryManager(organization_name=organization_name,
+                                               project_name=project_name, creds=self._creds)
+        return repository_manager.remove_git_remote(repository_name, remote_prefix="azuredevops")
+
+    def get_local_git_remote_name(self, organization_name, project_name, repository_name):
+        """Get the local git remote name for current repository"""
+        repository_manager = RepositoryManager(organization_name=organization_name,
+                                               project_name=project_name, creds=self._creds)
+        return repository_manager.get_local_git_remote_name(repository_name, remote_prefix="azuredevops")
+
+    def get_azure_devops_repository(self, organization_name, project_name, repository_name):
+        repository_manager = RepositoryManager(organization_name=organization_name,
+                                               project_name=project_name, creds=self._creds)
+        return repository_manager.get_azure_devops_repository(repository_name)
+
+    def get_azure_devops_repo_url(self, organization_name, project_name, repository_name):
+        """Get the azure devops repository url"""
+        repository_manager = RepositoryManager(organization_name=organization_name,
+                                               project_name=project_name, creds=self._creds)
+        return repository_manager.get_azure_devops_repo_url(repository_name)
+
+    def setup_local_git_repository(self, organization_name, project_name, repository_name):
         """Setup a repository locally and push to devops"""
         repository_manager = RepositoryManager(organization_name=organization_name,
                                                project_name=project_name, creds=self._creds)
-        return repository_manager.setup_repository(repository_name)
+        return repository_manager.setup_local_git_repository(repository_name, remote_prefix="azuredevops")
 
-    def setup_remote(self, organization_name, project_name, repository_name, remote_name):
-        """Setup a remote locally and push to devops"""
+    def get_azure_devops_repository_branches(self, organization_name, project_name, repository_name):
+        """Get Azure Devops repository branches"""
         repository_manager = RepositoryManager(organization_name=organization_name,
                                                project_name=project_name, creds=self._creds)
-        return repository_manager.setup_remote(repository_name, remote_name)
+        return repository_manager.get_azure_devops_repository_branches(repository_name)
+
+
+    def push_local_to_azure_devops_repository(self, organization_name, project_name, repository_name, force=False):
+        """Push local context to Azure Devops repository"""
+        repository_manager = RepositoryManager(organization_name=organization_name,
+                                               project_name=project_name, creds=self._creds)
+        return repository_manager.push_local_to_azure_devops_repository(repository_name, remote_prefix="azuredevops", force=force)
 
     def list_pools(self, organization_name, project_name):
         """List the devops pool resources"""
         pool_manager = PoolManager(organization_name=organization_name, project_name=project_name, creds=self._creds)
         return pool_manager.list_pools()
 
-    def create_service_endpoint(self, organization_name, project_name, name):
+    def get_service_endpoints(self, organization_name, project_name, repository_name):
+        """Query a service endpoint detail"""
+        service_endpoint_manager = ServiceEndpointManager(organization_name=organization_name,
+                                                          project_name=project_name, creds=self._creds)
+        return service_endpoint_manager.get_service_endpoints(repository_name)
+
+    def create_service_endpoint(self, organization_name, project_name, repository_name):
         """Create a service endpoint to allow authentication via ARM service principal"""
         service_endpoint_manager = ServiceEndpointManager(organization_name=organization_name,
                                                           project_name=project_name, creds=self._creds)
-        return service_endpoint_manager.create_service_endpoint(name)
+        return service_endpoint_manager.create_service_endpoint(repository_name)
 
     def list_service_endpoints(self, organization_name, project_name):
         """List the different service endpoints in a project"""

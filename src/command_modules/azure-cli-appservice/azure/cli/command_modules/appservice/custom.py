@@ -2436,10 +2436,9 @@ def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=to
 
 
 def create_devops_build(cmd, functionapp_name=None, organization_name=None, project_name=None,
-                        overwrite_yaml=None, use_local_settings=None, local_git=None):
+                        repository_name=None, overwrite_yaml=None, allow_force_push=None, use_local_settings=None):
     from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
     azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
-                                                                 organization_name, project_name,
-                                                                 overwrite_yaml, use_local_settings,
-                                                                 local_git)
+                                                                 organization_name, project_name, repository_name,
+                                                                 overwrite_yaml, allow_force_push, use_local_settings)
     return azure_devops_build_interactive.interactive_azure_devops_build()
