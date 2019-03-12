@@ -667,6 +667,7 @@ helps['vm encryption enable'] = """
     type: command
     short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks."
     long-summary: |
+        Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
         For more information, see:
         https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
     parameters:

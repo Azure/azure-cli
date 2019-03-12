@@ -199,6 +199,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        # Place aad arguments in their own group
+        aad_arguments = 'Azure Active Directory'
+        c.argument('aad_client_id', arg_group=aad_arguments)
+        c.argument('aad_client_secret', arg_group=aad_arguments)
+        c.argument('aad_client_cert_thumbprint', arg_group=aad_arguments)
 
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
