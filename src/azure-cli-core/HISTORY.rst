@@ -3,7 +3,8 @@
 Release History
 ===============
 
-* Fix issues with dev extension incompatibility. 
+* Fix issues with dev extension incompatibility.
+* Error handling now points customers to issues page.
 
 2.0.60
 ++++++

@@ -71,7 +71,7 @@ DEPENDENCIES = [
     'requests>=2.20.0',
     'six',
     'tabulate>=0.7.7',
-    'wheel==0.30.0',
+    'wheel',
     'azure-mgmt-resource==2.1.0'
 ]
 

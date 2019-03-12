@@ -20,7 +20,7 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 
-def handle_exception(ex):
+def handle_exception(ex, cli_ctx=None):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError
@@ -47,7 +47,20 @@ def handle_exception(ex):
             logger.error(ex)
         return 1
 
+    # Otherwise, unhandled exception. Direct users to create an issue.
+    is_extension = False
+    if cli_ctx:
+        try:
+            if cli_ctx.invocation.data['command_extension_name']:
+                is_extension = True
+        except (AttributeError, KeyError):
+            pass
+
+    issue_url = "https://aka.ms/azcli/ext/issues" if is_extension else "https://aka.ms/azcli/issues"
+    logger.error("The command failed with an unexpected error. Here is the traceback:\n")
     logger.exception(ex)
+    logger.warning("\nTo open an issue, please visit: %s", issue_url)
+
     return 1
 
 

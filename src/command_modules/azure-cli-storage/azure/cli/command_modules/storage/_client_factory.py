@@ -62,7 +62,8 @@ def page_blob_service_factory(cli_ctx, kwargs):
     return generic_data_service_factory(cli_ctx, t_page_blob_service, kwargs.pop('account_name', None),
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
+                                        sas_token=kwargs.pop('sas_token', None),
+                                        token_credential=kwargs.pop('token_credential', None))
 
 
 def blob_data_service_factory(cli_ctx, kwargs):
