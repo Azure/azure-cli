@@ -2332,12 +2332,14 @@ def _ensure_service_principal(cli_ctx,
     store_acs_service_principal(subscription_id, client_secret, service_principal)
     return load_acs_service_principal(subscription_id)
 
+
 def _create_client_secret():
     # Add a special character to satsify AAD SP secret requirements
     special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
     special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
     client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
     return client_secret
+
 
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     groups = cf_resource_groups(ctx, subscription_id=subscription_id)
