@@ -374,38 +374,6 @@ jobs:
     inputs:
       ArtifactName: debian
 
-
-
-- job: BuildUbuntuArtful
-  displayName: Build Ubuntu Artful Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Artful Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: artful
-      DISTRO_BASE_IMAGE: ubuntu:artful
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      ArtifactName: debian
-
-
-
 - job: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
 
@@ -564,7 +532,6 @@ jobs:
 
   dependsOn:
    - BuildUbuntuXenial
-   - BuildUbuntuArtful
    - BuildUbuntuTrusty
    - BuildUbuntuBionic
    - BuildDebianWheezy
@@ -592,8 +559,8 @@ jobs:
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
-       DISTROS=(wheezy jessie stretch artful xenial trusty)
-       BASE_IMAGES=(debian:wheezy debian:jessie debian:stretch ubuntu:artful ubuntu:xenial ubuntu:trusty)
+       DISTROS=(wheezy jessie stretch xenial trusty)
+       BASE_IMAGES=(debian:wheezy debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
 
        # Distros that don't require libssl1.1
        for i in ${!DISTROS[@]}; do
