@@ -26,7 +26,7 @@ def patch_progress_controller(unit_test):
 def patch_main_exception_handler(unit_test):
     from vcr.errors import CannotOverwriteExistingCassetteException
 
-    def _handle_main_exception(ex):
+    def _handle_main_exception(ex, *args, **kwargs):  # pylint: disable=unused-argument
         if isinstance(ex, CannotOverwriteExistingCassetteException):
             # This exception usually caused by a no match HTTP request. This is a product error
             # that is caused by change of SDK invocation.
