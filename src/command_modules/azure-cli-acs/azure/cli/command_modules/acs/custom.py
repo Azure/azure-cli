@@ -2220,9 +2220,7 @@ def _ensure_aks_service_principal(cli_ctx,
         else:
             # Nothing to load, make one.
             if not client_secret:
-                special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
-                special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
-                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
+                client_secret = _create_client_secret()
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
             url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
@@ -2249,7 +2247,7 @@ def _ensure_osa_aad(cli_ctx,
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not aad_client_app_id:
         if not aad_client_app_secret and update:
-            aad_client_app_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+            aad_client_app_secret = _create_client_secret()
         reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
 
         # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
@@ -2314,9 +2312,7 @@ def _ensure_service_principal(cli_ctx,
         else:
             # Nothing to load, make one.
             if not client_secret:
-                special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
-                special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
-                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
+                client_secret = _create_client_secret()
             salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
             url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
@@ -2336,6 +2332,12 @@ def _ensure_service_principal(cli_ctx,
     store_acs_service_principal(subscription_id, client_secret, service_principal)
     return load_acs_service_principal(subscription_id)
 
+def _create_client_secret():
+    # Add a special character to satsify AAD SP secret requirements
+    special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
+    special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
+    client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
+    return client_secret
 
 def _get_rg_location(ctx, resource_group_name, subscription_id=None):
     groups = cf_resource_groups(ctx, subscription_id=subscription_id)
