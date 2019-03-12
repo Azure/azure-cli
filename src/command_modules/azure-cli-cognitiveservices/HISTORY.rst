@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* Show disclaimer only for Bing APIs
+
 0.2.4
 +++++
 * Minor fixes
