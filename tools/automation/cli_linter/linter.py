@@ -181,7 +181,7 @@ class LinterManager(object):
 
         if paths:
             ci_exclusions_path = os.path.join(paths[0], 'ci_exclusions.yml')
-            self._ci_exclusions = yaml.load(open(ci_exclusions_path)) or {}
+            self._ci_exclusions = yaml.safe_load(open(ci_exclusions_path)) or {}
 
         # find all defined rules and check for name conflicts
         found_rules = set()

@@ -9,7 +9,7 @@ from azure.cli.command_modules.maps._client_factory import cf_accounts
 
 def load_command_table(self, _):
     mgmt_type = CliCommandType(
-        operations_tmpl='azure.mgmt.maps.operations.accounts_operations#AccountsOperations.{}',
+        operations_tmpl='azure.mgmt.maps.operations#AccountsOperations.{}',
         client_factory=cf_accounts)
 
     with self.command_group('maps account', mgmt_type) as g:

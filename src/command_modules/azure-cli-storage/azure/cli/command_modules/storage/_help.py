@@ -84,10 +84,10 @@ helps['storage account create'] = """
     examples:
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          min_profile: latest
+          unsupported-profiles: 2017-03-09-profile
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          max_profile: 2017-03-09-profile
+          supported-profiles: 2017-03-09-profile
 """
 
 helps['storage container create'] = """

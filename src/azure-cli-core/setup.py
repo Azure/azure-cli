@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.59"
+VERSION = "2.0.60"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,14 +53,13 @@ CLASSIFIERS = [
 
 # TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'futures',
     'adal>=1.2.0',
     'argcomplete>=1.8.0',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
-    'knack==0.5.1',
+    'knack>=0.5.3',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
     'paramiko>=2.0.8',
@@ -68,10 +67,10 @@ DEPENDENCIES = [
     'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml>=4.2b1',
+    'pyyaml',
     'requests>=2.20.0',
     'six',
-    'tabulate>=0.7.7,<=0.8.2',
+    'tabulate>=0.7.7',
     'wheel==0.30.0',
     'azure-mgmt-resource==2.1.0'
 ]
@@ -104,6 +103,7 @@ setup(
     extras_require={
         ":python_version<'3.4'": ['enum34'],
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
+        ':python_version<"3.0"': ['futures'],
         ":python_version<'3.0'": ['antlr4-python2-runtime'],
         ":python_version>='3.0'": ['antlr4-python3-runtime']
     },
