@@ -1921,7 +1921,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
     if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> --deployment-local-git')
+        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
 
@@ -2188,7 +2188,6 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
 
     # determine the details for app to be created from src contents
     lang_details = get_lang_from_content(src_dir)
-    print(lang_details)
     # we support E2E create and deploy for selected stacks, any other stack, set defaults for os & runtime
     # and skip deployment
     if lang_details['language'] is None:
