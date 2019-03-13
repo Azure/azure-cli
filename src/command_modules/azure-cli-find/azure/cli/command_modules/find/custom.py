@@ -40,7 +40,8 @@ def process_query(cli_term):
                   "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
         else:
             if answer_list[0]['source'] == 'pruned':
-                print("\nMore commands and examples are available in the latest version of the CLI,")
+                print("\nMore commands and examples are available in the latest version of the CLI,"
+                      "please update for the best experience.")
                 answer_list.pop(0)
             print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
             num_results_to_show = min(3, len(answer_list))
