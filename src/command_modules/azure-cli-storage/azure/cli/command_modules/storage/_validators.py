@@ -699,8 +699,6 @@ def get_source_file_or_blob_service_client(cmd, namespace):
 
 def add_progress_callback(cmd, namespace):
     def _update_progress(current, total):
-        hook = cmd.cli_ctx.get_progress_controller(det=True)
-        _update_progress.hook = hook
         message = getattr(_update_progress, 'message', 'Alive')
         reuse = getattr(_update_progress, 'reuse', False)
 
@@ -708,6 +706,9 @@ def add_progress_callback(cmd, namespace):
             hook.add(message=message, value=current, total_val=total)
             if total == current and not reuse:
                 hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
 
     if not namespace.no_progress:
         namespace.progress_callback = _update_progress
