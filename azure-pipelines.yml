@@ -59,13 +59,13 @@ jobs:
 
   - task: UniversalPackages@0
     displayName: Publish Edge Build
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
     inputs:
       command: publish
       publishFile: 'build_scripts/windows/out/msi/Microsoft Azure CLI.msi'
       vstsFeedPublish: 'edge'
       vstsFeedPackagePublish: ''
-      packagePublishDescription: ''
+      packagePublishDescription: 'MSI Installer for edge build of the Azure-CLI'
 
 
 - job: BuildDockerImage
