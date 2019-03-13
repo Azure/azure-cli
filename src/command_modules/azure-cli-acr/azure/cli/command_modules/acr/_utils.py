@@ -383,7 +383,7 @@ def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, user
     :param str password: The password for custom registry
     """
     source_registry_credentials = None
-    if auth_mode is not None:
+    if auth_mode:
         SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(login_mode=auth_mode)
 
