@@ -1520,24 +1520,34 @@ helps['image list'] = """
     short-summary: List custom VM images.
 """
 
+helps['image update'] = """
+    type: command
+    short-summary: Update custom VM images.
+    examples:
+        - name: Add or update a tag.
+          text: az image update -n ImageName -g ResourceGroup --set tags.tagName=tagValue
+        - name: Remove a tag.
+          text: az image update -n ImageName -g resourceGroup --remove tags.tagName
+"""
+
 helps['sig'] = """
     type: group
-    short-summary: manage shared image gallery
+    short-summary: Manage shared image galleries
 """
 
 helps['sig create'] = """
     type: command
-    short-summary: create a share image gallery.
+    short-summary: Create a shared image gallery.
 """
 
 helps['sig list'] = """
     type: command
-    short-summary: list share image galleries.
+    short-summary: List shared image galleries.
 """
 
 helps['sig update'] = """
     type: command
-    short-summary: update a share image gallery.
+    short-summary: Update a shared image gallery.
 """
 
 helps['sig image-definition'] = """
