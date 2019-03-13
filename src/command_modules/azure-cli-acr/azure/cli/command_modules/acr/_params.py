@@ -194,7 +194,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('username', options_list=['--username', '-u'], help='The username to login to the custom registry.', required=True)
             c.argument('password', options_list=['--password', '-p'], help='The password to login to the custom registry.', required=True)
 
-    with self.argument_context('acr task credential delete') as c:
+    with self.argument_context('acr task credential remove') as c:
         # Custom registry credentials
         c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
 

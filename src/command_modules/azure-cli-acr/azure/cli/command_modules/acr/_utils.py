@@ -395,9 +395,11 @@ def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, user
             'SecretObjectType'
         )
 
-        # if empty username and password, then send a Null object to have it removed
+        # if Null username and password, then have it removed
         custom_reg_credential = None
-        if username and password:
+        if (username and not password) or (password and not username):
+            raise CLIError("Please provide both username and password.")
+        elif username and password:
             custom_reg_credential = CustomRegistryCredentials(
                 user_name=SecretObject(
                     type=SecretObjectType.opaque,
@@ -408,6 +410,10 @@ def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, user
                     value=password
                 )
             )
+        elif username is not None or password is not None:
+            # case where user passes empty strings: -u '' -p ''
+            raise CLIError("username and password cannot be empty")
+
         custom_registries = {login_server: custom_reg_credential}
 
     Credentials = cmd.get_models('Credentials')

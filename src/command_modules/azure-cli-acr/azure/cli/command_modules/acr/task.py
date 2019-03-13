@@ -386,10 +386,14 @@ def acr_task_credential_add(cmd,
         )
     )
 
-    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    resp = LongRunningOperation(cmd.cli_ctx)(
+        client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    )
+    resp = resp.credentials
+    return {} if not resp else resp.custom_registries
 
 
-def acr_task_credential_delete(cmd,
+def acr_task_credential_remove(cmd,
                                client,
                                task_name,
                                registry_name,
@@ -406,7 +410,11 @@ def acr_task_credential_delete(cmd,
         )
     )
 
-    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    resp = LongRunningOperation(cmd.cli_ctx)(
+        client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    )
+    resp = resp.credentials
+    return {} if not resp else resp.custom_registries
 
 
 def acr_task_credential_list(cmd,
@@ -418,7 +426,7 @@ def acr_task_credential_list(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     resp = client.get_details(resource_group_name, registry_name, task_name).credentials
-    return None if resp is None else resp.custom_registries
+    return {} if not resp else resp.custom_registries
 
 
 def acr_task_update_run(cmd,

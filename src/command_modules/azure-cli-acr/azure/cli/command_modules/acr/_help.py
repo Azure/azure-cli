@@ -596,13 +596,13 @@ examples:
         az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername2' -p 'mysecret'
 """
 
-helps['acr task credential delete'] = """
+helps['acr task credential remove'] = """
 type: command
-short-summary: Delete credential for a task.
+short-summary: Remove credential for a task.
 examples:
-  - name: Delete a registry login credential from a task.
+  - name: Remove a registry login credential from a task.
     text: >
-        az acr task credential delete -n taskname -r registryname --login-server myregistry.docker.io
+        az acr task credential remove -n taskname -r registryname --login-server myregistry.docker.io
 """
 
 helps['acr task credential list'] = """
