@@ -119,7 +119,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
         target=target,
         credentials=get_custom_registry_credentials(
-            cmd,
+            cmd=cmd,
             auth_mode=auth_mode
         )
     )

@@ -146,7 +146,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             base_image_trigger=base_image_trigger
         ),
         credentials=get_custom_registry_credentials(
-            cmd,
+            cmd=cmd,
             auth_mode=auth_mode
         )
     )
@@ -357,7 +357,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             base_image_trigger=base_image_trigger_update_params
         ),
         credentials=get_custom_registry_credentials(
-            cmd,
+            cmd=cmd,
             auth_mode=auth_mode
         )
     )
@@ -379,7 +379,7 @@ def acr_task_credential_add(cmd,
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(
-            cmd,
+            cmd=cmd,
             login_server=login_server,
             username=username,
             password=password
@@ -401,7 +401,7 @@ def acr_task_credential_delete(cmd,
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(
-            cmd,
+            cmd=cmd,
             login_server=login_server
         )
     )

@@ -82,7 +82,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             variant=platform_variant
         ),
         credentials=get_custom_registry_credentials(
-            cmd,
+            cmd=cmd,
             auth_mode=auth_mode
         )
     )
