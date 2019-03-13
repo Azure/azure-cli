@@ -14,6 +14,6 @@ app.get('/', function (req, res) {
     console.log('PORT is:' + process.env.PORT)
     console.error("Something wrong");
     console.log("Something normal");
-    res.send('Hello world 4 using Node ' + process.version);
+    res.send('Hello world from Node ' + process.version);
   }
 });
