@@ -198,7 +198,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Custom registry credentials
         c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
 
-
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('repository', help=argparse.SUPPRESS)
