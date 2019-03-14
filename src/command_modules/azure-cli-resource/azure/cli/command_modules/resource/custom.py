@@ -87,7 +87,7 @@ def _process_parameters(template_param_defs, parameter_lists):
         param_type = param.get('type', None)
         if param_type:
             param_type = param_type.lower()
-        if param_type in ['object', 'array']:
+        if param_type in ['object', 'array', 'secureobject']:
             parameters[key] = {'value': shell_safe_json_parse(value)}
         elif param_type in ['string', 'securestring']:
             parameters[key] = {'value': value}
