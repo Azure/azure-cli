@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,  # pylint: disable=too-many-locals
            endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
-           language='Csharp', version='v3'):
+           language='Csharp', version='v4'):
     """Create a WebApp, Function, or Channels Registration Bot on Azure.
 
     This method is directly called via "bot create"
@@ -471,7 +471,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v4',  # pylint:disable=too-many-statements
                 keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.
 
