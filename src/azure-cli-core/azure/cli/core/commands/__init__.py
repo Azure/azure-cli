@@ -205,7 +205,22 @@ class AzCliCommandInvoker(CommandInvoker):
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
-        self.commands_loader.load_command_table(args)
+
+        command = self._rudimentary_get_command(args)  # copied from below
+
+        command_mod_dict = self.commands_loader.get_group_module_map(args)
+        module_names = set()
+
+        if args:
+            # try to get the module/s of the command or group
+            module_names = set(command_mod_dict.get(command, []))
+            # if that fails try to guess what modules the command or group is based on word
+            if not module_names:
+                for cmd, mods in command_mod_dict.items():
+                    if cmd.startswith(args[0]):
+                        module_names.update(mods)
+
+        self.commands_loader.load_command_table(args, module_names)
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
                                  load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
         command = self._rudimentary_get_command(args)
@@ -632,6 +647,10 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 def _load_command_loader(loader, args, name, prefix):
     from azure.cli.core.profiles import PROFILE_TYPE
     module = import_module(prefix + name)
+
+    if getattr(loader, 'index', False):
+        return
+
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     command_table = {}
 

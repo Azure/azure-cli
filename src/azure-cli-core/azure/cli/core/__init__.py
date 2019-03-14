@@ -111,8 +111,67 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.command_table = self.command_table
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
+    def get_group_module_map(self, args):
+        self.index = True
+        from importlib import import_module
+        import pkgutil
+        import traceback
+        from knack.help_files import helps
+        from azure.cli.core.commands import (
+            _load_module_command_loader, BLACKLISTED_MODS)
+        installed_command_modules = []
+        try:
+            mods_ns_pkg = import_module('azure.cli.command_modules')
+            installed_command_modules = [modname for _, modname, _ in
+                                         pkgutil.iter_modules(mods_ns_pkg.__path__)
+                                         if modname not in BLACKLISTED_MODS]
+        except ImportError as e:
+            logger.warning(e)
+
+        total_helps = {}
+
+        command_mod_dict = {}
+
+        logger.debug('Installed command modules %s', installed_command_modules)
+        cumulative_elapsed_time = 0
+        for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
+            try:
+                start_time = timeit.default_timer()
+
+                _load_module_command_loader(self, args, mod)  # in index modules
+
+                for key in helps:
+                    command_mod_dict.setdefault(key, []).append(mod)    # upsert the new key with mod info.
+
+                total_helps.update(helps)
+                helps.clear()
+
+                # for key in module_command_table.keys():
+                #     self.command_table.setdefault(key, []).append(mod)  # upsert the new key with mod info.
+                elapsed_time = timeit.default_timer() - start_time
+                logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
+                cumulative_elapsed_time += elapsed_time
+            except Exception as ex:  # pylint: disable=broad-except
+                # Changing this error message requires updating CI script that checks for failed
+                # module loading.
+                logger.warning(ex)
+                import azure.cli.core.telemetry as telemetry
+                logger.error("Error loading command module '%s'", mod)
+                telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
+                                        summary='Error loading module: {}'.format(mod))
+                logger.debug(traceback.format_exc())
+        logger.debug("Indexed all modules in %.3f seconds. "
+                     "(note: there's always an overhead with the first module loaded)",
+                     cumulative_elapsed_time)
+
+        helps.update(total_helps)
+
+        del self.index
+
+        return command_mod_dict
+
     # pylint: disable=too-many-statements
-    def load_command_table(self, args):
+    def load_command_table(self, args, module_names=None):
         from importlib import import_module
         import pkgutil
         import traceback
@@ -126,14 +185,18 @@ class MainCommandsLoader(CLICommandsLoader):
             When `module_name` is specified, only commands from that module will be loaded.
             If the module is not found, all commands are loaded.
             '''
-            installed_command_modules = []
-            try:
-                mods_ns_pkg = import_module('azure.cli.command_modules')
-                installed_command_modules = [modname for _, modname, _ in
-                                             pkgutil.iter_modules(mods_ns_pkg.__path__)
-                                             if modname not in BLACKLISTED_MODS]
-            except ImportError as e:
-                logger.warning(e)
+            if not module_names:
+                installed_command_modules = []
+                try:
+                    mods_ns_pkg = import_module('azure.cli.command_modules')
+                    installed_command_modules = [modname for _, modname, _ in
+                                                 pkgutil.iter_modules(mods_ns_pkg.__path__)
+                                                 if modname not in BLACKLISTED_MODS]
+                except ImportError as e:
+                    logger.warning(e)
+            else:
+                logger.info("Only loading modules: {}".format(", ".join(module_names)))
+                installed_command_modules = module_names
 
             logger.debug('Installed command modules %s', installed_command_modules)
             cumulative_elapsed_time = 0
