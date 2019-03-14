@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly
+
 0.2.15
 ++++++
 * webapp, functionapp: az webapp/functionapp deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
