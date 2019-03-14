@@ -189,10 +189,8 @@ def cli_cosmosdb_update(client,
 
     if enable_multiple_write_locations is None:
         enable_multiple_write_locations = existing.enable_multiple_write_locations
-    elif enable_multiple_write_locations != existing.enable_multiple_write_locations and \
-            enable_multiple_write_locations:
-        raise CLIError("Cannot convert account from single master to multi master")
-    elif enable_multiple_write_locations != existing.enable_multiple_write_locations:
+    elif enable_multiple_write_locations != existing.enable_multiple_write_locations \
+            and not enable_multiple_write_locations:
         logger.warning("Updating the account from multi master to single master will take 24 hours to complete.")
 
     params = DatabaseAccountCreateUpdateParameters(
