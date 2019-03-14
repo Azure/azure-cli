@@ -129,7 +129,7 @@ class MainCommandsLoader(CLICommandsLoader):
             logger.warning(e)
 
         total_helps = {}
-
+        helps.clear()
         command_mod_dict = {}
 
         logger.debug('Installed command modules %s', installed_command_modules)
