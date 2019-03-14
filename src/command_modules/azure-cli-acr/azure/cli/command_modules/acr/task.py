@@ -376,6 +376,46 @@ def acr_task_credential_add(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
+    existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
+    existingCreds = {} if not existingCreds else existingCreds.custom_registries
+
+    if login_server in existingCreds:
+        raise CLIError("Login server '{}' already exists. You cannot add it again.".format(login_server))
+
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
+    taskUpdateParameters = TaskUpdateParameters(
+        credentials=get_custom_registry_credentials(
+            cmd=cmd,
+            login_server=login_server,
+            username=username,
+            password=password
+        )
+    )
+
+    resp = LongRunningOperation(cmd.cli_ctx)(
+        client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+    )
+    resp = resp.credentials
+    return {} if not resp else resp.custom_registries
+
+
+def acr_task_credential_update(cmd,
+                               client,
+                               task_name,
+                               registry_name,
+                               login_server,
+                               username,
+                               password,
+                               resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
+    existingCreds = {} if not existingCreds else existingCreds.custom_registries
+
+    if login_server not in existingCreds:
+        raise CLIError("Login server '{}' not found.".format(login_server))
+
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(

@@ -175,7 +175,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_task_delete')
         g.command('update', 'acr_task_update')
         g.command('credential add', 'acr_task_credential_add')
-        g.command('credential update', 'acr_task_credential_add')
+        g.command('credential update', 'acr_task_credential_update')
         g.command('credential remove', 'acr_task_credential_remove')
         g.command('credential list', 'acr_task_credential_list')
         g.command('run', 'acr_task_run', client_factory=cf_acr_runs,
