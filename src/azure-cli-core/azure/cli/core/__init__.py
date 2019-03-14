@@ -165,9 +165,7 @@ class MainCommandsLoader(CLICommandsLoader):
                      cumulative_elapsed_time)
 
         helps.update(total_helps)
-
         del self.index
-
         return command_mod_dict
 
     # pylint: disable=too-many-statements
