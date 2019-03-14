@@ -2192,7 +2192,7 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
     # and skip deployment
     if lang_details['language'] is None:
         do_deployment = False
-        sku = sku | 'F1'
+        sku = sku or 'F1'
         os_val = OS_DEFAULT
         detected_version = '-'
         runtime_version = '-'
