@@ -346,6 +346,10 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
+            # try use --end-date
+            self.cmd('ad sp credential reset -n {app} --password verySecert123 --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
+            self.cmd('ad app credential reset --id {app} --password verySecert123 --end-date "2100-12-31" --credential-description newCred4')
+
             # ensure we can update other properties #7728
             self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
             self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
