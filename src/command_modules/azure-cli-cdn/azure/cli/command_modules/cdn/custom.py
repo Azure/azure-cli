@@ -6,6 +6,8 @@
 from azure.mgmt.cdn.models import (Endpoint, SkuName,
                                    EndpointUpdateParameters, ProfileUpdateParameters)
 
+from azure.cli.core.util import sdk_no_wait
+
 
 def default_content_types():
     return ["text/plain",
@@ -26,16 +28,14 @@ def _update_mapper(existing, new, keys):
 
 
 # region Custom Commands
-# pylint: disable=unused-argument
-def list_profiles(cmd, client, resource_group_name=None):
+def list_profiles(client, resource_group_name=None):
     profiles = client.profiles
     profile_list = profiles.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else profiles.list()
     return list(profile_list)
 
 
-# pylint: disable=unused-argument
-def update_endpoint(cmd, instance,
+def update_endpoint(instance,
                     origin_host_header=None,
                     origin_path=None,
                     content_types_to_compress=None,
@@ -71,11 +71,10 @@ def update_endpoint(cmd, instance,
     return params
 
 
-# pylint: disable=unused-argument
-def create_endpoint(cmd, client, resource_group_name, profile_name, name, origins, location=None,
+def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,
                     origin_host_header=None, origin_path=None, content_types_to_compress=None,
                     is_compression_enabled=None, is_http_allowed=None, is_https_allowed=None,
-                    query_string_caching_behavior=None, tags=None):
+                    query_string_caching_behavior=None, tags=None, no_wait=None):
     is_compression_enabled = False if is_compression_enabled is None else is_compression_enabled
     is_http_allowed = True if is_http_allowed is None else is_http_allowed
     is_https_allowed = True if is_https_allowed is None else is_https_allowed
@@ -92,11 +91,11 @@ def create_endpoint(cmd, client, resource_group_name, profile_name, name, origin
     if is_compression_enabled and not endpoint.content_types_to_compress:
         endpoint.content_types_to_compress = default_content_types()
 
-    return client.endpoints.create(resource_group_name, profile_name, name, endpoint)
+    return sdk_no_wait(no_wait, client.endpoints.create, resource_group_name, profile_name, name, endpoint)
 
 
 # pylint: disable=unused-argument
-def create_custom_domain(cmd, client, resource_group_name, profile_name, endpoint_name, custom_domain_name,
+def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, custom_domain_name,
                          hostname, location=None, tags=None):
     return client.custom_domains.create(resource_group_name,
                                         profile_name,
@@ -105,19 +104,16 @@ def create_custom_domain(cmd, client, resource_group_name, profile_name, endpoin
                                         hostname)
 
 
-# pylint: disable=unused-argument
-def update_profile(cmd, instance, tags=None):
+def update_profile(instance, tags=None):
     params = ProfileUpdateParameters(tags=tags)
     _update_mapper(instance, params, ['tags'])
     return params
 
 
-# pylint: disable=unused-argument
-def create_profile(cmd, client, resource_group_name, name,
+def create_profile(client, resource_group_name, name,
                    sku=SkuName.standard_akamai.value,
                    location=None, tags=None):
     from azure.mgmt.cdn.models import (Profile, Sku)
     profile = Profile(location=location, sku=Sku(name=sku), tags=tags)
     return client.profiles.create(resource_group_name, name, profile)
-
 # endregion
