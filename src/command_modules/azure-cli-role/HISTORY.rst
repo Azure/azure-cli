@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* `ad app/sp credential reset`: support --end-date
 * `ad app permission add`: support to add permissions on existing api
 * `ad app permission list`: fix a bad error when there is no permissions
 * `ad sp delete`: skip role assignment delete if the current account has no subscription
