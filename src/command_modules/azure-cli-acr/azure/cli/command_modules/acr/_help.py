@@ -459,9 +459,9 @@ examples:
   - name: Create a Linux task using a private GitHub repository which builds the hello-world image without triggers on Arm architecture (V7 variant)
     text: >
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
     text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --git-access-token 0000000000000000000000000000000000000000
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --git-access-token 0000000000000000000000000000000000000000
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
     text: >
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
@@ -571,6 +571,47 @@ examples:
   - name: Update an existing run to be archived.
     text: >
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
+"""
+
+helps['acr task credential'] = """
+type: group
+short-summary: Manage credentials for a task
+"""
+
+helps['acr task credential add'] = """
+type: command
+short-summary: Add a custom registry login credential to the task
+examples:
+  - name: Add a registry login credential to a task.
+    text: >
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'mysecret'
+"""
+
+helps['acr task credential update'] = """
+type: command
+short-summary: Update the registry login credential for a task.
+examples:
+  - name: Update the credential for a task
+    text: >
+        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername2' -p 'mysecret'
+"""
+
+helps['acr task credential remove'] = """
+type: command
+short-summary: Remove credential for a task.
+examples:
+  - name: Remove a registry login credential from a task.
+    text: >
+        az acr task credential remove -n taskname -r registryname --login-server myregistry.docker.io
+"""
+
+helps['acr task credential list'] = """
+type: command
+short-summary: List all the custom registry credentials for task.
+examples:
+  - name: List the Credentials for a task.
+    text: >
+        az acr task credential list -n taskname -r registryname
 """
 
 helps['acr update'] = """
