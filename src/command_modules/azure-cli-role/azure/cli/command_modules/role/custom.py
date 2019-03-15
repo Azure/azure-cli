@@ -1379,7 +1379,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
                 'keyCertSign'
             ],
             'subject': 'CN=KeyVault Generated',
-            'validity_in_months': ((years * 12) + 1)
+            'validity_in_months': int((years * 12) + 1)
         }
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
@@ -1433,12 +1433,21 @@ def _get_public(x509):
 
 
 def reset_service_principal_credential(cmd, name, password=None, create_cert=False, cert=None, years=None,
-                                       keyvault=None, append=False, credential_description=None):
+                                       end_date=None, keyvault=None, append=False, credential_description=None):
     client = _graph_client_factory(cmd.cli_ctx)
 
     # pylint: disable=no-member
-
-    years = years or 1
+    app_start_date = datetime.datetime.now(TZ_UTC)
+    if years is not None and end_date is not None:
+        raise CLIError('usage error: --years | --end-date')
+    if end_date is None:
+        years = years or 1
+        app_end_date = app_start_date + relativedelta(years=years)
+    else:
+        app_end_date = dateutil.parser.parse(end_date)
+        if app_end_date.tzinfo is None:
+            app_end_date = app_end_date.replace(tzinfo=TZ_UTC)
+        years = (app_end_date - app_start_date).days / 365
 
     # look for the existing application
     query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
@@ -1453,8 +1462,6 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
 
     if not app:
         raise CLIError("can't find an application matching '{}'".format(name))
-    app_start_date = datetime.datetime.now(TZ_UTC)
-    app_end_date = app_start_date + relativedelta(years=years or 1)
 
     # build a new password/cert credential and patch it
     public_cert_string = None
