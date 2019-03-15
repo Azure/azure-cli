@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from knack.util import CLIError
 
 from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
+
+from knack.util import CLIError
 
 
 def get_all_help(cli_ctx):

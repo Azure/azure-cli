@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.log import get_logger
-
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
+
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 

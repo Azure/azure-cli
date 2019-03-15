@@ -8,6 +8,7 @@ import os.path
 
 from knack.util import CLIError
 from knack.log import get_logger
+
 logger = get_logger(__name__)
 
 
