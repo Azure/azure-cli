@@ -532,7 +532,8 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
                             path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
 
 
-def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None, request_headers=None, response_headers=None):
+def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None,
+                           request_headers=None, response_headers=None):
     with cmd.update_context(instance) as c:
         c.set_param('rule_sequence', sequence)
         c.set_param('action_set.request_header_configurations', request_headers)
@@ -543,7 +544,8 @@ def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequ
 def show_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    return _find_child_item(gateway, rule_set_name, rule_name, path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+    return _find_child_item(gateway, rule_set_name, rule_name,
+                            path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
 
 
 def list_ag_rewrite_rules(cmd, resource_group_name, application_gateway_name, rule_set_name):
@@ -583,7 +585,8 @@ def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
                             path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
 
 
-def update_ag_rewrite_rule_condition(instance, parent, cmd, rule_set_name, rule_name, variable, pattern=None, ignore_case=None, negate=None):
+def update_ag_rewrite_rule_condition(instance, parent, cmd, rule_set_name, rule_name, variable, pattern=None,
+                                     ignore_case=None, negate=None):
     with cmd.update_context(instance) as c:
         c.set_param('pattern', pattern)
         c.set_param('ignore_case', ignore_case)
@@ -3040,8 +3043,8 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                 }
             }
         else:
-            with cmd.update_context(
-                    config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            # pylint: disable=line-too-long
+            with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
                 # update object
                 c.set_param('enabled', traffic_analytics_enabled)
                 # c.set_param('traffic_analytics_interval', traffic_analytics_interval)

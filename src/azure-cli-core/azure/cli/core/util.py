@@ -419,8 +419,10 @@ def get_default_admin_username():
         return None
 
 
-def _find_child(parent, *args, path=None, key_path=None):
+def _find_child(parent, *args, **kwargs):
     # tuple structure (path, key, dest)
+    path = kwargs.get('path', None)
+    key_path = kwargs.get('key_path', None)
     comps = zip(path.split('.'), key_path.split('.'), args)
     current = parent
     for path, key, val in comps:
@@ -434,17 +436,17 @@ def _find_child(parent, *args, path=None, key_path=None):
     return current
 
 
-def _find_child_item(parent, *args, path=None, key_path=None):
-    path = path or ''
-    key_path = key_path or ''
+def _find_child_item(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
     if len(args) != len(path.split('.')) != len(key_path.split('.')):
         raise CLIError('command authoring error: args, path and key_path must have equal number of components.')
     return _find_child(parent, *args, path=path, key_path=key_path)
 
 
-def _find_child_collection(parent, *args, path=None, key_path=None):
-    path = path or ''
-    key_path = key_path or ''
+def _find_child_collection(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
     arg_len = len(args)
     key_len = len(key_path.split('.'))
     path_len = len(path.split('.'))
@@ -454,6 +456,6 @@ def _find_child_collection(parent, *args, path=None, key_path=None):
     parent = _find_child(parent, *args, path=path, key_path=key_path)
     collection_path = path.split('.')[-1]
     collection = getattr(parent, collection_path, None)
-    if not collection:
+    if collection is None:
         raise CLIError("collection '{}' not found".format(collection_path))
     return collection

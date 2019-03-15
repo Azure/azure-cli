@@ -362,7 +362,6 @@ def load_command_table(self, _):
                                  child_collection_key='name.name',
                                  child_arg_name='rule_set_name.rule_name')
 
-
     with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
         g.custom_command('show', 'show_ag_rewrite_rule_condition')
@@ -373,7 +372,6 @@ def load_command_table(self, _):
                                  child_collection_prop_name='rewrite_rule_sets.rewrite_rules.conditions',
                                  child_collection_key='name.name.variable',
                                  child_arg_name='rule_set_name.rule_name.variable')
-
 
     with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
         subresource = 'redirect_configurations'

@@ -487,7 +487,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         force_string = args.get('force_string', False)
         ordered_arguments = args.pop('ordered_arguments', [])
         dest_names = child_arg_name.split('.')
-        child_names = [args[key] for key in dest_names]
+        child_names = [args.get(key, None) for key in dest_names]
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
             if args[item]:
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
@@ -496,7 +496,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
         if child_collection_prop_name:
             parent = getter(**getterargs)
-            instance = _find_child_item(parent, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
+            instance = _find_child_item(
+                parent, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         else:
             parent = None
             instance = getter(**getterargs)
@@ -560,7 +561,8 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
 
         if child_collection_prop_name:
-            result = _find_child_item(result, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
+            result = _find_child_item(
+                result, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         return result
 
     context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access

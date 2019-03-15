@@ -231,6 +231,10 @@ def load_arguments(self, _):
         c.argument('http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
         c.argument('http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
 
+    for scope in ['rewrite-rule list', 'rewrite-rule condition list']:
+        with self.argument_context('network application-gateway {}'.format(scope)) as c:
+            c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
+
     with self.argument_context('network lb rule create') as c:
         c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
         c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
