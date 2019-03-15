@@ -77,17 +77,19 @@ def load_command_table(self, _):
 
     with self.command_group('cdn endpoint', cdn_endpoints_sdk) as g:
         for name in ['start', 'stop', 'delete']:
-            g.command(name, name)
+            g.command(name, name, supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.command('load', 'load_content')
-        g.command('purge', 'purge_content')
+        g.command('load', 'load_content', supports_no_wait=True)
+        g.command('purge', 'purge_content', supports_no_wait=True)
         g.command('validate-custom-domain', 'validate_custom_domain')
         g.custom_command('create', 'create_endpoint', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint',
+                         supports_no_wait=True)
         g.generic_update_command('update', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='update_endpoint',
-                                 doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters')
+                                 doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
+                                 supports_no_wait=True)
 
     with self.command_group('cdn profile', cdn_profiles_sdk) as g:
         g.show_command('show', 'get')
