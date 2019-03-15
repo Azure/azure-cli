@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.9
++++++
+* Defaulted `az bot create` to create a v4 bot (instead of v3). Users must specify `-v v3` to create a v3 bot
+
 0.1.8
 +++++
 * Add "SCM_DO_BUILD_DURING_DEPLOYMENT" to ARM template's Application Settings for v4 Web App Bots
