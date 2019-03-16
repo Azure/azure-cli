@@ -21,14 +21,22 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 
 def handle_exception(ex, cli_ctx=None):
+    def remove_hdlr(exit_code, hdlr):
+        logger.removeHandler(hdlr)  # remove command metadata handler
+        return exit_code
+
+    hdlr = cli_ctx.logging.command_logger_handler
+    if hdlr:
+        logger.addHandler(hdlr)  # add command metadata handler
+
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError
     if isinstance(ex, (CLIError, CloudError)):
         logger.error(ex.args[0])
-        return ex.args[1] if len(ex.args) >= 2 else 1
+        return remove_hdlr(ex.args[1] if len(ex.args) >= 2 else 1, hdlr)
     if isinstance(ex, KeyboardInterrupt):
-        return 1
+        return remove_hdlr(1, hdlr)
     if isinstance(ex, HttpOperationError):
         try:
             response_dict = json.loads(ex.response.text)
@@ -45,7 +53,7 @@ def handle_exception(ex, cli_ctx=None):
 
         except (ValueError, KeyError):
             logger.error(ex)
-        return 1
+        return remove_hdlr(1, hdlr)
 
     # Otherwise, unhandled exception. Direct users to create an issue.
     is_extension = False
@@ -61,7 +69,7 @@ def handle_exception(ex, cli_ctx=None):
     logger.exception(ex)
     logger.warning("\nTo open an issue, please visit: %s", issue_url)
 
-    return 1
+    return remove_hdlr(1, hdlr)
 
 
 # pylint: disable=inconsistent-return-statements

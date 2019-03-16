@@ -18,3 +18,5 @@ Install Method (e.g. pip, interactive script, apt-get, Docker, MSI, edge build) 
 
 **Additional context**
 Add any other context about the problem here.
+
+Note: az feedback can be used to help generate some of this information.

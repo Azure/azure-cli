@@ -23,11 +23,93 @@ omitted     Warning     Debug       Critical    Debug
 
 """
 
-from knack.log import CLILogging
+import os
+import logging
+import datetime
 
-CLI_LOGGER_NAME = 'az'
+from knack.log import CLILogging, get_logger
+from knack.util import ensure_dir
+from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
+
+UNKNOWN_COMMAND = "unknown_command"
+CMD_LOG_LINE_PREFIX = "CMD-LOG-LINE-BEGIN"
 
 class AzCliLogging(CLILogging):
+    _COMMAND_METADATA_LOGGER = 'az_command_data_logger'
 
-    pass
+    def __init__(self, name, cli_ctx=None):
+        super(AzCliLogging, self).__init__(name, cli_ctx)
+        self.command_log_dir = AzCliLogging._get_command_log_dir(cli_ctx)
+        self.command_logger_handler = None
+        self.command_metadata_logger = None
+        self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
+
+    @staticmethod
+    def _get_command_log_dir(cli_ctx):
+        return os.path.join(cli_ctx.config.config_dir, 'commands')
+
+    @staticmethod
+    def init_command_file_logging(cli_ctx, **kwargs):
+        def _delete_old_logs(log_dir):
+            log_file_names = [file for file in os.listdir(log_dir) if file.endswith(".log")]
+            sorted_files = sorted(log_file_names, reverse=True)
+
+            if len(sorted_files) > 25:
+                for file in sorted_files[10:]:
+                    os.remove(os.path.join(log_dir, file))
+
+        # if tab-completion and not command don't log to file.
+        if not cli_ctx.data.get('completer_active', False):
+            self = cli_ctx.logging
+            args = kwargs['args']
+
+            cmd_logger = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)
+
+            self._init_command_logfile_handlers(cmd_logger, args)
+            get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", self.command_log_dir)
+
+            _delete_old_logs(self.command_log_dir)
+
+
+    def _init_command_logfile_handlers(self, command_metadata_logger, args):
+        ensure_dir(self.command_log_dir)
+        command = self.cli_ctx.invocation._rudimentary_get_command(args) or UNKNOWN_COMMAND
+        command = command.replace(" ", "_")
+        if command == "feedback":
+            return
+
+        date_str = str(datetime.datetime.now().date())
+        time = datetime.datetime.now().time()
+        time_str = "{:02}-{:02}-{:02}".format(time.hour, time.minute, time.second)
+
+        log_name = "{}.{}.{}.{}.{}".format(date_str, time_str, command, os.getpid(), "log")
+
+        log_file_path = os.path.join(self.command_log_dir, log_name)
+
+        logfile_handler = logging.FileHandler(log_file_path)
+
+        lfmt = logging.Formatter(CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')
+        logfile_handler.setFormatter(lfmt)
+        logfile_handler.setLevel(logging.DEBUG)
+        command_metadata_logger.addHandler(logfile_handler)
+
+        self.command_logger_handler = logfile_handler
+        self.command_metadata_logger = command_metadata_logger
+
+        command_metadata_logger.info("command args: %s", " ".join(args))
+
+    def _log_cmd_metadata_extension_info(self, extension_name, extension_version):
+        if self.command_metadata_logger:
+            self.command_metadata_logger.info("extension name: %s", extension_name)
+            self.command_metadata_logger.info("extension version: %s", extension_version)
+
+
+    def _end_cmd_metadata_logging(self, exit_code, elapsed_time=None):
+        if self.command_metadata_logger:
+            if elapsed_time:
+                self.command_metadata_logger.info("command ran in %.3f seconds.", elapsed_time)
+            self.command_metadata_logger.info("exit code: %s", exit_code)
+
+            # We have finished metadata logging, set metadata logger to None.
+            self.command_metadata_logger = None
