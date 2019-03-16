@@ -163,7 +163,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                  client_factory=cf_acr_replications)
 
     with self.command_group('acr', acr_build_util) as g:
-        g.command('build', 'acr_build')
+        g.command('build', 'acr_build', supports_no_wait=True)
 
     with self.command_group('acr', acr_run_util) as g:
         g.command('run', 'acr_run', supports_no_wait=True)
