@@ -36,6 +36,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_format=False,
               no_push=False,
               no_logs=False,
+              no_wait=False,
               os_type=None,
               platform=None,
               target=None,
@@ -124,14 +125,18 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         )
     )
 
-    queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
+    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         run_request=docker_build_request))
 
-    run_id = queued_build.run_id
+    run_id = queued.run_id
     logger.warning("Queued a build with ID: %s", run_id)
-    logger.warning("Waiting for agent...")
+
+    if no_wait:
+        return queued
+
+    logger.warning("Waiting for an agent...")
 
     if no_logs:
         from ._run_polling import get_run_with_polling
