@@ -83,7 +83,7 @@ helps['ad sp credential reset'] = """
     long-summary: Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
     parameters:
         - name: --name -n
-          short-summary: Name or app URI for the credential.
+          short-summary: Name or app ID of the service principal.
         - name: --password -p
           short-summary: The password used to log in.
           long-summary: If not present and `--cert` is not specified, a random password will be generated.
