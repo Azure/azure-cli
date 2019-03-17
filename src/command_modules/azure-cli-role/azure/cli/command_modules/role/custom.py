@@ -807,6 +807,34 @@ def delete_permission(cmd, identifier, api):
     return graph_client.applications.patch(application.object_id, update_parameter)
 
 
+def admin_consent(cmd, identifier):
+    import requests
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import UA_AGENT
+    from azure.cli.core.util import should_disable_connection_verify
+    if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
+        raise CLIError('This command does not function yet in solverign clouds')
+    # we will leverage portal endpoints to get admin consent done
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    url = 'https://main.iam.ad.ext.azure.com/api/RegisteredApplications/{}/Consent?onBehalfOfAll=true'.format(
+        application.app_id)
+    profile = Profile()
+
+    # the key is to get the access token to the portal resource:
+    access_token = profile.get_raw_token('74658136-14ec-4630-ad9b-26e160ff0fc6')
+    headers = {
+        'Authorization': "Bearer " + access_token[0][1],
+        'Accept-Encoding': 'gzip, deflate, br',
+        'x-ms-client-request-id': str(uuid.uuid4()),
+        'User-Agent': UA_AGENT
+    }
+    response = requests.post(url, headers=headers, verify=not should_disable_connection_verify())
+    if not response.ok:
+        raise CLIError(response.reason)
+
+
 def grant_application(cmd, identifier, api, consent_type=None, principal_id=None,
                       expires='1', scope='user_impersonation'):
     graph_client = _graph_client_factory(cmd.cli_ctx)
