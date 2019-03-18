@@ -167,16 +167,15 @@ def process_blob_source_uri(cmd, namespace):
         if any([container, blob, sas, snapshot, source_account_name, source_account_key]):
             raise ValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
-        else:
-            # simplest scenario--no further processing necessary
-            return
+        # simplest scenario--no further processing necessary
+        return
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
     # determine if the copy will happen in the same storage account
     if not source_account_name and source_account_key:
         raise ValueError(usage_string.format('Source account key is given but account name is not'))
-    elif not source_account_name and not source_account_key:
+    if not source_account_name and not source_account_key:
         # neither source account name or key is given, assume that user intends to copy blob in
         # the same account
         source_account_name = ns.get('account_name', None)
@@ -262,7 +261,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
     if not valid_blob_source and not valid_file_source:
         raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
-    elif valid_blob_source and valid_file_source:
+    if valid_blob_source and valid_file_source:
         raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
                                              'specified'))
 
@@ -674,8 +673,7 @@ def get_source_file_or_blob_service_client(cmd, namespace):
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
-        elif identifier.blob or identifier.directory or \
-                identifier.filename or nor_container_or_share:
+        if identifier.blob or identifier.directory or identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
 
         if identifier.sas_token:
@@ -904,7 +902,7 @@ def validate_subnet(cmd, namespace):
 
     if (subnet_is_id and not vnet) or (not subnet and not vnet):
         return
-    elif subnet and not subnet_is_id and vnet:
+    if subnet and not subnet_is_id and vnet:
         namespace.subnet = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
@@ -946,7 +944,7 @@ def ipv4_range_type(string):
     import re
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
-        if not re.match("^{}-{}$".format(ip_format, ip_format), string):
+        if not re.match("^{ip_format}-{ip_format}$".format(ip_format=ip_format), string):
             raise ValueError
     return string
 

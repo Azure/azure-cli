@@ -70,9 +70,8 @@ def get_container_access_type_names():
 def get_container_access_type(cli_ctx, name):
     if name == 'off':
         return None
-    elif name == 'blob':
+    if name == 'blob':
         return get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'PublicAccess', mod='blob.models').Blob
-    elif name == 'container':
+    if name == 'container':
         return get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'PublicAccess', mod='blob.models').Container
-    else:
-        raise KeyError
+    raise KeyError
