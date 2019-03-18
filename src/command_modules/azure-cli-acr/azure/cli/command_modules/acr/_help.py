@@ -424,6 +424,9 @@ examples:
   - name: Get the login server for an Azure Container Registry.
     text: >
         az acr show -n MyRegistry --query loginServer
+  - name: Get the details of an Azure Container Registry
+    text: az acr show --name MyRegistry --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['acr show-usage'] = """
