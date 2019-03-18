@@ -178,7 +178,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
         return list(
             filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client, source_container, pattern)))
 
-    elif source_share:
+    if source_share:
         # copy files from share to share
 
         # if the source client is None, assume the file share is in the same storage account as
@@ -206,9 +206,8 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
 
         return list(filter_none(
             action_file_copy(file) for file in collect_files(cmd, source_client, source_share, pattern)))
-    else:
-        # won't happen, the validator should ensure either source_container or source_share is set
-        raise ValueError('Fail to find source. Neither blob container or file share is specified.')
+    # won't happen, the validator should ensure either source_container or source_share is set
+    raise ValueError('Fail to find source. Neither blob container or file share is specified.')
 
 
 def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, timeout=None):

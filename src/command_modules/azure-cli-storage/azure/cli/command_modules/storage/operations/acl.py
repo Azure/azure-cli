@@ -67,14 +67,13 @@ def _get_service_container_type(cmd, client):
 
     if isinstance(client, t_block_blob_svc):
         return 'container'
-    elif isinstance(client, t_file_svc):
+    if isinstance(client, t_file_svc):
         return 'share'
-    elif isinstance(client, t_table_svc):
+    if isinstance(client, t_table_svc):
         return 'table'
-    elif isinstance(client, t_queue_svc):
+    if isinstance(client, t_queue_svc):
         return 'queue'
-    else:
-        raise ValueError('Unsupported service {}'.format(type(client)))
+    raise ValueError('Unsupported service {}'.format(type(client)))
 
 
 def _get_acl(cmd, client, container_name, **kwargs):
