@@ -543,6 +543,11 @@ examples:
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
+parameters:
+    - name: --settings
+      short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    - name: --slot-settings
+      short-summary: Space-separated slot appsettings in KEY=VALUE format. Use @{file} to load from a file.
 """
 
 helps['webapp config backup'] = """
