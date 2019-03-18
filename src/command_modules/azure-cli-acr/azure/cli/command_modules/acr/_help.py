@@ -467,6 +467,47 @@ examples:
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
 """
 
+helps['acr task credential'] = """
+type: group
+short-summary: Manage credentials for a task
+"""
+
+helps['acr task credential add'] = """
+type: command
+short-summary: Add a custom registry login credential to the task
+examples:
+  - name: Add a registry login credential to a task.
+    text: >
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'mysecret'
+"""
+
+helps['acr task credential list'] = """
+type: command
+short-summary: List all the custom registry credentials for task.
+examples:
+  - name: List the Credentials for a task.
+    text: >
+        az acr task credential list -n taskname -r registryname
+"""
+
+helps['acr task credential remove'] = """
+type: command
+short-summary: Remove credential for a task.
+examples:
+  - name: Remove a registry login credential from a task.
+    text: >
+        az acr task credential remove -n taskname -r registryname --login-server myregistry.docker.io
+"""
+
+helps['acr task credential update'] = """
+type: command
+short-summary: Update the registry login credential for a task.
+examples:
+  - name: Update the credential for a task
+    text: >
+        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername2' -p 'mysecret'
+"""
+
 helps['acr task delete'] = """
 type: command
 short-summary: Delete a task from an Azure Container Registry.
@@ -571,47 +612,6 @@ examples:
   - name: Update an existing run to be archived.
     text: >
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
-"""
-
-helps['acr task credential'] = """
-type: group
-short-summary: Manage credentials for a task
-"""
-
-helps['acr task credential add'] = """
-type: command
-short-summary: Add a custom registry login credential to the task
-examples:
-  - name: Add a registry login credential to a task.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'mysecret'
-"""
-
-helps['acr task credential update'] = """
-type: command
-short-summary: Update the registry login credential for a task.
-examples:
-  - name: Update the credential for a task
-    text: >
-        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername2' -p 'mysecret'
-"""
-
-helps['acr task credential remove'] = """
-type: command
-short-summary: Remove credential for a task.
-examples:
-  - name: Remove a registry login credential from a task.
-    text: >
-        az acr task credential remove -n taskname -r registryname --login-server myregistry.docker.io
-"""
-
-helps['acr task credential list'] = """
-type: command
-short-summary: List all the custom registry credentials for task.
-examples:
-  - name: List the Credentials for a task.
-    text: >
-        az acr task credential list -n taskname -r registryname
 """
 
 helps['acr update'] = """
