@@ -50,6 +50,7 @@ def get_all_help(cli_ctx, skip=True):
 
 def create_invoker_and_load_cmds_and_args(cli_ctx):
     from knack import events
+    from azure.cli.core.commands import register_cache_arguments
     from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
 
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
@@ -68,6 +69,7 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
 
     register_global_subscription_argument(cli_ctx)
     register_ids_argument(cli_ctx)  # global subscription must be registered first!
+    register_cache_arguments(cli_ctx)
     cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
     invoker.parser.load_command_table(invoker.commands_loader)
 

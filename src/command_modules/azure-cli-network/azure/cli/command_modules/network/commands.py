@@ -589,7 +589,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_lb_backend_address_pool')
 
     with self.command_group('network lb rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_rule')
+        g.custom_command('create', 'create_lb_rule', supports_local_cache=True)
         g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
                                  custom_func_name='set_lb_rule')
 
@@ -822,8 +822,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vnet', table_transformer=transform_vnet_table_output)
         g.show_command('show', 'get')
         g.command('check-ip-address', 'check_ip_address_availability', min_api='2016-09-01')
-        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace)
-        g.generic_update_command('update', custom_func_name='update_vnet')
+        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
+        g.generic_update_command('update', custom_func_name='update_vnet', supports_local_cache=True)
         g.command('list-endpoint-services', 'list', command_type=network_endpoint_service_sdk)
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
@@ -834,7 +834,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
-        g.custom_command('create', 'create_subnet')
+        g.custom_command('create', 'create_subnet', supports_local_cache=True)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')

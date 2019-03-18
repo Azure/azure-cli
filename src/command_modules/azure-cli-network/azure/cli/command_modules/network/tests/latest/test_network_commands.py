@@ -1772,6 +1772,35 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+class NetworkVNetCachingScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
+    def test_network_vnet_caching(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+        # test that custom commands work with caching
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --cache write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --cache read write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --cache read write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24 --cache read')
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('length(subnets)', 3)
+        ])
+
+        # test that generic update works with caching
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --cache write')
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2 --cache read write-through')
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('length(tags)', 2)
+        ])
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.c=3 --cache read')
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('length(tags)', 3)
+        ])
+
+
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):

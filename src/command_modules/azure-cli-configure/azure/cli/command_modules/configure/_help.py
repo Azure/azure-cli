@@ -20,3 +20,23 @@ helps['configure'] = """
         - name: Clear default webapp and VM names.
           text: az configure --defaults vm='' web=''
 """
+
+helps['cache'] = """
+    type: group
+    short-summary: Commands to manage the CLI's on-disk object cache.
+"""
+
+helps['cache list'] = """
+    type: command
+    short-summary: List the contents of the object cache.
+"""
+
+helps['cache show'] = """
+    type: command
+    short-summary: Show the contents of a specific object in the cache.
+"""
+
+helps['cache delete'] = """
+    type: command
+    short-summary: Delete an object from the cache.
+"""

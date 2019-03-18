@@ -5,15 +5,22 @@
 
 from __future__ import print_function
 
+import argparse
 import datetime
 import json
 import logging as logs
 import os
+import re
 import sys
 import time
 import copy
 from importlib import import_module
 import six
+
+try:
+    t_JSONDecodeError = json.JSONDecodeError
+except AttributeError:  # in Python 2.7
+    t_JSONDecodeError = ValueError
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
@@ -103,6 +110,111 @@ def _pre_command_table_create(cli_ctx, args):
     return _expand_file_prefixed_files(args)
 
 
+class CacheObject(object):
+
+    def _get_cached_object_path(self, args, kwargs):
+        from azure.cli.core._environment import get_config_dir
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
+        cli_ctx = self._cmd.cli_ctx
+        subscription_id = get_subscription_id(cli_ctx)
+        if not subscription_id:
+            raise CLIError('subscription ID unexpectedly empty')
+        if not cli_ctx.cloud.name:
+            raise CLIError('cloud name unexpectedly empty')
+        copy_kwargs = kwargs.copy()
+        copy_kwargs.pop('self', None)
+        resource_group = copy_kwargs.pop('resource_group_name', None) or args[0]
+
+        if len(args) > 2:
+            raise CLIError('expected 2 args, got {}: {}'.format(len(args), args))
+        if len(copy_kwargs) > 1:
+            raise CLIError('expected 1 kwarg, got {}: {}'.format(len(copy_kwargs), copy_kwargs))
+        
+        try:
+            resource_name = args[-1]
+        except IndexError:
+            resource_name = list(copy_kwargs.values())[0]
+
+        self._resource_group = resource_group
+        self._resource_name = resource_name
+
+        directory = os.path.join(
+            get_config_dir(),
+            'object_cache',
+            cli_ctx.cloud.name,
+            subscription_id,
+            self._resource_group,
+            self._model_type
+        )
+        filename = '{}.json'.format(resource_name)
+        return directory, filename
+
+    def _get_model_type(self):
+        rt_regex = re.compile(r'.* (?P<rt>[a-zA-Z]*)sOperations.*')
+        return rt_regex.findall(str(self._operation))[0]
+
+    def _dump_to_file(self, open_file):
+        cache_obj_dump = json.dumps({
+            '_last_touched': self._last_touched,
+            '_payload': self._payload
+        })
+        open_file.write(cache_obj_dump)
+
+    def load(self, args, kwargs):
+        cli_ctx = self._cmd.cli_ctx
+        directory, filename = self._get_cached_object_path(args, kwargs)
+        with open(os.path.join(directory, filename), 'r') as f:
+            logger.info("Loading %s '%s' from cache: %s", self._model_type, self._resource_name, os.path.join(directory, filename))
+            obj_data = json.loads(f.read())
+            self._payload = obj_data['_payload']
+        # need to save the lastTouched metadata when retrieved
+        with open(os.path.join(directory, filename), 'w') as f:
+            self._dump_to_file(f)
+        self._payload = self.result()
+
+    def save(self, args, kwargs):
+        from knack.util import ensure_dir
+        cli_ctx = self._cmd.cli_ctx
+        directory, filename = self._get_cached_object_path(args, kwargs)
+        ensure_dir(directory)
+        with open(os.path.join(directory, filename), 'w') as f:
+            logger.info("Caching %s '%s' as: %s", self._model_type, self._resource_name, os.path.join(directory, filename))
+            self._dump_to_file(f)
+
+    def result(self):
+        model_cls = self._cmd.get_models(self._model_type)
+        return model_cls.deserialize(self._payload)
+
+    def prop_dict(self):
+        return {
+            'model': self._model_type,
+            'name': self._resource_name,
+            'group': self._resource_group
+        }
+
+    def __init__(self, cmd, payload, operation):
+        self._cmd = cmd
+        self._operation = operation
+        self._model_type = self._get_model_type()
+        self._payload = payload
+        self._last_touched = str(datetime.datetime.now())
+
+    def __getattribute__(self, key):
+        try:
+            return super(CacheObject, self).__getattribute__(key)
+        except AttributeError:
+            payload = self._payload
+            return payload.__getattribute__(key)
+
+    def __setattr__(self, key, value):
+        try:
+            return super(CacheObject, self).__setattr__(key, value)
+        except AttributeError:
+            return self._payload.__setattr__(key, value)
+
+
+
 class AzCliCommand(CLICommand):
 
     def __init__(self, loader, name, handler, description=None, table_transformer=None,
@@ -185,6 +297,57 @@ class AzCliCommand(CLICommand):
                 elif value is not None:
                     setattr(curr_obj, prop, value)
         return UpdateContext(obj_inst)
+
+
+def cached_get(cmd, operation, *args, **kwargs):
+
+    def _get_operation():
+        if args:
+            result = operation(*args)
+        elif kwargs:
+            result = operation(**kwargs)
+        return result
+
+    cache_opt = cmd.cli_ctx.data.get('_cache', '')
+    if 'read' not in cache_opt:
+        return _get_operation()
+
+    cache_obj = CacheObject(cmd, None, operation)
+    try:
+        cache_obj.load(args, kwargs)
+        return cache_obj
+    except FileNotFoundError:
+        logger.warning(
+            "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict()))
+        return _get_operation()
+    except t_JSONDecodeError:
+        logger.warning(
+            "{model} '{name}' found corrupt in cache. Retrieving from Azure...".format(**cache_obj.prod_dict()))
+        return _get_operation()
+
+
+def cached_put(cmd, operation, parameters, *args, **kwargs):
+
+    def _put_operation():
+        copy_kwargs = kwargs.copy()
+        if args:
+            result = operation(*args, parameters)
+        elif kwargs:
+            result = operation(**kwargs, parameters=parameters)
+        return result
+
+    cache_opt = cmd.cli_ctx.data.get('_cache', '')
+    write = 'write' in cache_opt
+    write_through = 'write-through' in cache_opt
+
+    if not write and not write_through:
+        return _put_operation()
+
+    cache_obj = CacheObject(cmd, parameters.serialize(), operation)
+    cache_obj.save(args, kwargs)
+    if not write_through:
+        return cache_obj
+    return _put_operation()
 
 
 # pylint: disable=too-few-public-methods
@@ -942,3 +1105,40 @@ class AzCommandGroup(CommandGroup):
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
         _cli_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                           custom_command=custom_command, **merged_kwargs)
+
+
+def register_cache_arguments(cli_ctx):
+    from knack import events
+    from azure.cli.core.commands.parameters import CaseInsensitiveList
+
+    cache_dest = '_cache'
+
+    def add_cache_arguments(_, **kwargs):  # pylint: disable=unused-argument
+
+        command_table = kwargs.get('commands_loader').command_table
+
+        if not command_table:
+            return
+
+        class CacheAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, values, option_string=None):
+                setattr(namespace, cache_dest, values)
+                # save caching status to CLI context
+                cmd = getattr(namespace, 'cmd', None) or getattr(namespace, '_cmd', None)
+                cmd.cli_ctx.data[cache_dest] = values
+
+        for command in command_table.values():
+            supports_local_cache = command.command_kwargs.get('supports_local_cache')
+            if supports_local_cache:
+                command.arguments[cache_dest] = CLICommandArgument(
+                    '_cache',
+                    options_list='--cache',
+                    arg_group='Caching Strategy',
+                    nargs='+',
+                    choices=CaseInsensitiveList(['read', 'write', 'write-through']),
+                    action=CacheAction,
+                    help='Space-separated list of caching directives.'
+                )
+
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_cache_arguments)
