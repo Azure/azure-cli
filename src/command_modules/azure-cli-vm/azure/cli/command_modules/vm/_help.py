@@ -854,7 +854,7 @@ helps['vm image list-skus'] = """
     parameters:
         - name: --publisher -p
           populator-commands:
-          - az vm list-publishers
+          - az vm image list-publishers
     examples:
         - name: List all skus available for CentOS published by OpenLogic in the West US region.
           text: az vm image list-skus -l westus -f CentOS -p OpenLogic
