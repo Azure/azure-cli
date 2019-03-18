@@ -814,7 +814,7 @@ def admin_consent(cmd, identifier):
     from azure.cli.core.commands.client_factory import UA_AGENT
     from azure.cli.core.util import should_disable_connection_verify
     if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
-        raise CLIError('This command does not function yet in solverign clouds')
+        raise CLIError('This command is not yet supported on sovereign clouds')
     # we will leverage portal endpoints to get admin consent done
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
