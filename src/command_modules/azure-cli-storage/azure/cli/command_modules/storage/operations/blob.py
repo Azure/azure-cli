@@ -33,11 +33,10 @@ def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', ti
     if blob_type == 'block':
         return client.set_standard_blob_tier(container_name=container_name, blob_name=blob_name,
                                              standard_blob_tier=tier, timeout=timeout)
-    elif blob_type == 'page':
+    if blob_type == 'page':
         return client.set_premium_page_blob_tier(container_name=container_name, blob_name=blob_name,
                                                  premium_page_blob_tier=tier, timeout=timeout)
-    else:
-        raise ValueError('Blob tier is only applicable to block or page blob.')
+    raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
 def set_delete_policy(client, enable=None, days_retained=None):
@@ -122,7 +121,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                                                                                  source_container,
                                                                                  pattern)))
 
-    elif source_share:
+    if source_share:
         # copy blob from file share
 
         # if the source client is None, recreate one from the destination client.
@@ -145,8 +144,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                                                                                  source_client,
                                                                                  source_share,
                                                                                  pattern)))
-    else:
-        raise ValueError('Fail to find source. Neither blob container or file share is specified')
+    raise ValueError('Fail to find source. Neither blob container or file share is specified')
 
 
 # pylint: disable=unused-argument
