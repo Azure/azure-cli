@@ -409,6 +409,9 @@ examples:
   - name: Queue a contextless run.
     text: >
         az acr run -r MyRegistry --cmd bash /dev/null
+  - name: Queue a run from standard input. Either 'Ctrl + z' or 'Ctrl + d' terminates the input stream.
+    text: >
+        az acr run -r MyRegistry -f - .
   - name: Queue a local context, pushed to ACR with streaming logs.
     text: >
         az acr run -r MyRegistry -f bash-echo.yaml .
@@ -462,6 +465,9 @@ examples:
   - name: Create a contextless task.
     text: >
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry --cmd bash -c /dev/null
+  - name: Create a task from standard input. Either 'Ctrl + z' or 'Ctrl + d' terminates the input stream.
+    text: >
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -f - -c /dev/null
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers
     text: >
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false

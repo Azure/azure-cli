@@ -59,7 +59,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    if context_path == NULL_CONTEXT:
+    if context_path.lower() == NULL_CONTEXT:
         context_path = None
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False

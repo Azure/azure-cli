@@ -132,7 +132,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
-        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
+        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). /dev/null will be its value for a contextless run.", completer=FilesCompleter())
         c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context.")
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
@@ -163,7 +163,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values/parameters file path relative to the source context.")
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
-        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo).")
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo). /dev/null will be its value for a contextless task.")
         c.argument('arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format.", action='append', validator=validate_set)

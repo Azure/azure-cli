@@ -49,7 +49,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
-    if source_location == NULL_SOURCE_LOCATION:
+    if source_location.lower() == NULL_SOURCE_LOCATION:
         source_location = None
     elif os.path.exists(source_location):
         if not os.path.isdir(source_location):
