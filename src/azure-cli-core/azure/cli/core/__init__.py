@@ -20,7 +20,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
 
-
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',

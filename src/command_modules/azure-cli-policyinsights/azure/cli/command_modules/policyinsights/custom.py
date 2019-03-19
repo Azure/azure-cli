@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, resource_id
+
 from azure.cli.core.commands.client_factory import get_subscription_id
+
+from knack.util import CLIError
 
 
 def list_policy_events(
@@ -424,7 +426,7 @@ def create_policy_remediation(
         policy_assignment_ids = [p.id for p in policy_assignments if p.name.lower() == policy_assignment.lower()]
         if not policy_assignment_ids:
             raise CLIError("No policy assignment with the name '{}' found.".format(policy_assignment))
-        elif len(policy_assignment_ids) > 1:
+        if len(policy_assignment_ids) > 1:
             raise CLIError("Multiple policy assignment with the name '{}' found. "
                            "Specify the policy assignment ID.".format(policy_assignment))
         policy_assignment = policy_assignment_ids[0]
@@ -506,7 +508,7 @@ def _build_remediation_scope(
 
     if management_group:
         return "/providers/Microsoft.Management/managementGroups/{}".format(management_group)
-    elif resource:
+    if resource:
         return _build_resource_id(subscription, resource, resource_group_name,
                                   namespace, resource_type_parent, resource_type)
     return resource_id(subscription=subscription, resource_group=resource_group_name)

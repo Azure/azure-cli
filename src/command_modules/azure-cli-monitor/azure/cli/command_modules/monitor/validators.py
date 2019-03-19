@@ -114,10 +114,10 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
                                '[--{0}-namespace NAMESPACE]'.format(alias))
         if not name_or_id and required:
             raise usage_error
-        elif name_or_id:
+        if name_or_id:
             if is_valid_resource_id(name_or_id) and any((res_ns, parent, res_type)):
                 raise usage_error
-            elif not is_valid_resource_id(name_or_id):
+            if not is_valid_resource_id(name_or_id):
                 from azure.cli.core.commands.client_factory import get_subscription_id
                 if res_type and '/' in res_type:
                     res_ns = res_ns or res_type.rsplit('/', 1)[0]
