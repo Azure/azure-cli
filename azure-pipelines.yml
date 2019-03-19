@@ -29,6 +29,34 @@ jobs:
     inputs:
       ArtifactName: metadata
 
+- job: VerifyVersions
+  displayName: Verify Command Module Versions
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+
+  - bash: |
+      #!/usr/bin/env bash
+
+      set -ev
+
+      pip install azdev
+    displayName: 'Install azdev'
+
+  - bash: |
+      #!/usr/bin/env bash
+
+      set -ev
+
+      azdev verify version
+
+    displayName: 'Verify Versions'
+
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
 
