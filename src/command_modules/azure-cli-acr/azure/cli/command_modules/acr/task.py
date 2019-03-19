@@ -52,7 +52,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
-                    assign_identity=None,
                     resource_group_name=None,
                     target=None,
                     auth_mode=None):
@@ -64,7 +63,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         context_path = None
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False
-        
+
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
@@ -75,10 +74,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     if file == "-":
         import sys
-        YAML_TEMPLATE=""
+        YAML_TEMPLATE = ""
         for s in sys.stdin.readlines():
             YAML_TEMPLATE += s
-        values_content = "";
+        values_content = ""
 
     if values_content is not None:
         import base64
@@ -160,12 +159,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
         'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties')
 
-    identity = None
-    if assign_identity is not None:
-        identity = _build_identities_info(cmd, assign_identity)
-
     task_create_parameters = Task(
-        identity=identity,
         location=registry.location,
         step=step,
         platform=PlatformProperties(

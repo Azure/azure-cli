@@ -77,10 +77,10 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if file == "-":
         import sys
-        YAML_TEMPLATE=""
+        YAML_TEMPLATE = ""
         for s in sys.stdin.readlines():
             YAML_TEMPLATE += s
-        values_content = "";
+        values_content = ""
 
     if cmd_value:
         YAML_TEMPLATE = "steps: \n  - cmd: {{ .Values.run_image }}\n"
