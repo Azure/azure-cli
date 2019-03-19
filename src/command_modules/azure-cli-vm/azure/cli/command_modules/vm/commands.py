@@ -146,7 +146,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_images')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_image')
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)

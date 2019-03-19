@@ -1524,10 +1524,10 @@ helps['image update'] = """
     type: command
     short-summary: Update custom VM images.
     examples:
-        - name: Add or update a tag.
-          text: az image update -n ImageName -g ResourceGroup --set tags.tagName=tagValue
-        - name: Remove a tag.
-          text: az image update -n ImageName -g resourceGroup --remove tags.tagName
+        - name: Add or update tags.
+          text: az image update -n ImageName -g ResourceGroup --tags tag1=val1 tag2=val2
+        - name: Remove all tags.
+          text: az image update -n ImageName -g resourceGroup --tags
 """
 
 helps['sig'] = """
