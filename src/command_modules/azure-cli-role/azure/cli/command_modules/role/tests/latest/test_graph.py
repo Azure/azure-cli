@@ -93,7 +93,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             'web_app_name': self.create_random_name('cli-web-', 20)
         }
 
-        result = self.cmd("ad app create --display-name {web_app_name} --available-to-other-tenants true", checks=[
+        self.cmd("ad app create --display-name {web_app_name} --available-to-other-tenants true", checks=[
             self.exists('appId')
         ])
 
