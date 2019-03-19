@@ -101,7 +101,6 @@ def load_arguments(self, _):
         c.argument('image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
         c.argument('tags', tags_type)
 
-
     with self.argument_context('image create') as c:
         # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
         c.argument('name', arg_type=name_arg_type, help='new image name')
