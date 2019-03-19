@@ -60,6 +60,15 @@ jobs:
       . ./venv/bin/activate
       azdev verify history
 
+    displayName: 'Verify History'
+
+  - bash: |
+      #!/usr/bin/env bash
+
+      set -ev
+
+      . ./venv/bin/activate
+      azdev cli check-versions
     displayName: 'Verify Versions'
 
 - job: BuildWindowsMSI
