@@ -44,7 +44,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
-    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
+    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
@@ -77,19 +78,19 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if file == "-":
         import sys
-        YAML_TEMPLATE = ""
+        yaml_template = ""
         for s in sys.stdin.readlines():
-            YAML_TEMPLATE += s
+            yaml_template += s
         values_content = ""
 
     if cmd_value:
-        YAML_TEMPLATE = "steps: \n  - cmd: {{ .Values.run_image }}\n"
+        yaml_template = "steps: \n  - cmd: {{ .Values.run_image }}\n"
         values_content = "run_image: {0}\n".format(cmd_value)
 
-    if values_content is not None:
+    if yaml_template is not None:
         import base64
         request = EncodedTaskRunRequest(
-            encoded_task_content=base64.b64encode(YAML_TEMPLATE.encode()).decode(),
+            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
             encoded_values_content=base64.b64encode(values_content.encode()).decode(),
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
@@ -98,6 +99,10 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 os=platform_os,
                 architecture=platform_arch,
                 variant=platform_variant
+            ),
+            credentials=get_custom_registry_credentials(
+                cmd=cmd,
+                auth_mode=auth_mode
             )
         )
     else:

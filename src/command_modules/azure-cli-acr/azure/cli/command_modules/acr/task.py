@@ -69,21 +69,21 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
     if cmd_value:
-        YAML_TEMPLATE = "steps: \n  - cmd: {{ .Values.image }}\n"
+        yaml_template = "steps: \n  - cmd: {{ .Values.image }}\n"
         values_content = "image: {0}\n".format(cmd_value)
 
     if file == "-":
         import sys
-        YAML_TEMPLATE = ""
+        yaml_template = ""
         for s in sys.stdin.readlines():
-            YAML_TEMPLATE += s
+            yaml_template += s
         values_content = ""
 
-    if values_content is not None:
+    if yaml_template is not None:
         import base64
         EncodedTaskStep = cmd.get_models('EncodedTaskStep')
         step = EncodedTaskStep(
-            encoded_task_content=base64.b64encode(YAML_TEMPLATE.encode()).decode(),
+            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
             encoded_values_content=base64.b64encode(values_content.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
