@@ -70,6 +70,7 @@ jobs:
 
       azdev cli check-versions | grep "OK!"
     displayName: 'Verify Versions'
+    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
