@@ -16,13 +16,13 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 import requests
 from pkg_resources import parse_version
 
-from knack.log import get_logger
-
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
+
+from knack.log import get_logger
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions

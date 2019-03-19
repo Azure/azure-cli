@@ -6,10 +6,11 @@
 import abc
 import os
 import yaml
-from knack.util import CLIError
-from knack.log import get_logger
+
 from azure.cli.core._help import (HelpExample, CliHelpFile)
 
+from knack.util import CLIError
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 

@@ -12,17 +12,17 @@ import re
 import copy
 from six import string_types
 
-from knack.arguments import CLICommandArgument, ignore_type
-from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
-from knack.log import get_logger
-from knack.util import todict, CLIError
-
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg
 from azure.cli.core.profiles import ResourceType, get_sdk
+
+from knack.arguments import CLICommandArgument, ignore_type
+from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
+from knack.log import get_logger
+from knack.util import todict, CLIError
 
 logger = get_logger(__name__)
 EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
@@ -1093,7 +1093,7 @@ def resolve_role_id(cli_ctx, role, scope):
             role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
                 raise CLIError(err.format(role, ids))

@@ -11,14 +11,14 @@ import difflib
 import argparse
 import argcomplete
 
-from knack.log import get_logger
-from knack.parser import CLICommandParser
-from knack.util import CLIError
-
 import azure.cli.core.telemetry as telemetry
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
+
+from knack.log import get_logger
+from knack.parser import CLICommandParser
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -27,7 +27,7 @@ class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
     '''
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 class AzCompletionFinder(argcomplete.CompletionFinder):
