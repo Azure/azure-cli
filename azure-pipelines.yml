@@ -54,21 +54,21 @@ jobs:
 
   - bash: |
       #!/usr/bin/env bash
+      . ./venv/bin/activate
 
       set -ev
 
-      . ./venv/bin/activate
       azdev verify history
 
     displayName: 'Verify History'
 
   - bash: |
       #!/usr/bin/env bash
+      . ./venv/bin/activate
 
       set -ev
 
-      . ./venv/bin/activate
-      azdev cli check-versions
+      ! azdev cli check-versions | tee /dev/stderr | grep "ERROR: The following modules"
     displayName: 'Verify Versions'
 
 - job: BuildWindowsMSI
