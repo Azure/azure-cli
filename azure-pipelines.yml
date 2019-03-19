@@ -45,6 +45,9 @@ jobs:
 
       set -ev
 
+      pip install virtualenv
+      python -m virtualenv venv/
+      . ./venv/bin/activate
       pip install azdev
       azdev setup -c $(pwd)
     displayName: 'Install azdev'
