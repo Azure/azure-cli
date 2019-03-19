@@ -16,6 +16,7 @@ logger = get_logger(__name__)
 
 TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
+NULL_CONTEXT = '/dev/null'
 
 DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
@@ -28,7 +29,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     context_path,
-                    file,
+                    file='acb.yaml',
+                    cmd_value=None,
                     git_access_token=None,
                     image_names=None,
                     status='Enabled',
@@ -50,37 +52,66 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
+                    assign_identity=None,
                     resource_group_name=None,
                     target=None,
                     auth_mode=None):
+
+    registry, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    if context_path == NULL_CONTEXT:
+        context_path = None
+        commit_trigger_enabled = False
+        pull_request_trigger_enabled = False
+        
     if (commit_trigger_enabled or pull_request_trigger_enabled) and not git_access_token:
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
-    if file.endswith(ALLOWED_TASK_FILE_TYPES):
-        FileTaskStep = cmd.get_models('FileTaskStep')
-        step = FileTaskStep(
-            task_file_path=file,
-            values_file_path=values,
+    if cmd_value:
+        YAML_TEMPLATE = "steps: \n  - cmd: {{ .Values.image }}\n"
+        values_content = "image: {0}\n".format(cmd_value)
+
+    if file == "-":
+        import sys
+        YAML_TEMPLATE=""
+        for s in sys.stdin.readlines():
+            YAML_TEMPLATE += s
+        values_content = "";
+
+    if values_content is not None:
+        import base64
+        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
+        step = EncodedTaskStep(
+            encoded_task_content=base64.b64encode(YAML_TEMPLATE.encode()).decode(),
+            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
     else:
-        DockerBuildStep = cmd.get_models('DockerBuildStep')
-        step = DockerBuildStep(
-            image_names=image_names,
-            is_push_enabled=not no_push,
-            no_cache=no_cache,
-            docker_file_path=file,
-            arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-            context_path=context_path,
-            context_access_token=git_access_token,
-            target=target
-        )
-
-    registry, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+        if file.endswith(ALLOWED_TASK_FILE_TYPES):
+            FileTaskStep = cmd.get_models('FileTaskStep')
+            step = FileTaskStep(
+                task_file_path=file,
+                values_file_path=values,
+                context_path=context_path,
+                context_access_token=git_access_token,
+                values=(set_value if set_value else []) + (set_secret if set_secret else [])
+            )
+        else:
+            DockerBuildStep = cmd.get_models('DockerBuildStep')
+            step = DockerBuildStep(
+                image_names=image_names,
+                is_push_enabled=not no_push,
+                no_cache=no_cache,
+                docker_file_path=file,
+                arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                context_path=context_path,
+                context_access_token=git_access_token,
+                target=target
+            )
 
     SourceControlType, SourceTriggerEvent = cmd.get_models('SourceControlType', 'SourceTriggerEvent')
     source_control_type = SourceControlType.visual_studio_team_service.value
@@ -128,7 +159,13 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
         'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties')
+
+    identity = None
+    if assign_identity is not None:
+        identity = _build_identities_info(cmd, assign_identity)
+
     task_create_parameters = Task(
+        identity=identity,
         location=registry.location,
         step=step,
         platform=PlatformProperties(
