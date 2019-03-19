@@ -88,6 +88,15 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         except Exception:
             self.cmd('ad app delete --id {id}')
 
+    def test_web_app_no_identifier_uris_other_tenants_create_scenario(self):
+        self.kwargs = {
+            'web_app_name': self.create_random_name('cli-web-', 20)
+        }
+
+        result = self.cmd("ad app create --display-name {web_app_name} --available-to-other-tenants true", checks=[
+            self.exists('appId')
+        ])
+
 
 class ApplicationSetScenarioTest(ScenarioTest):
 

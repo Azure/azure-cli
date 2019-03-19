@@ -675,13 +675,12 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                        credential_description=None, app_roles=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
+    if not identifier_uris:
+        identifier_uris = []
     if native_app:
         if identifier_uris:
             raise CLIError("'--identifier-uris' is not required for creating a native application")
-        identifier_uris = ['http://{}'.format(_gen_guid())]  # we will create a temporary one and remove it later
     else:
-        if not identifier_uris:
-            raise CLIError("'--identifier-uris' is required for creating an application")
         password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage,
                                                              start_date, end_date, credential_description)
 
@@ -715,8 +714,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
         # AAD graph doesn't have the API to create a native app, aka public client, the recommended hack is
         # to create a web app first, then convert to a native one
         # pylint: disable=protected-access
-        app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
-        app_patch_param.public_client = True
+        app_patch_param = ApplicationUpdateParameters(public_client=True)
         graph_client.applications.patch(result.object_id, app_patch_param)
         result = graph_client.applications.get(result.object_id)
 
