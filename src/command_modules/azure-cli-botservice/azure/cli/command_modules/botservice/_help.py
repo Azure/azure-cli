@@ -30,7 +30,7 @@ helps['bot prepare-publish'] = """
 """
 helps['bot prepare-deploy'] = """
     type: command
-    short-summary: Add scripts and configuration files to your local source code directory to be able to publish back 
+    short-summary: Add scripts and configuration files to your local source code directory to be able to publish back
                    using `az webapp deployment source`.
     examples:
         - name: Prepare to use `az webapp` to deploy a Node.js bot by fetching a necessary file.
