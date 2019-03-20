@@ -31,7 +31,7 @@ jobs:
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
-  # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -59,6 +59,7 @@ jobs:
 
       set -ev
 
+      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
       azdev verify history 2>&1 | grep -e "^OK$"
 
     displayName: 'Verify History'
@@ -69,6 +70,7 @@ jobs:
 
       set -ev
 
+      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
       azdev cli check-versions | grep "OK!"
     displayName: 'Verify Versions'
     condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
