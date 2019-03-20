@@ -604,7 +604,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
-    
+
 class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
     @ResourceGroupPreparer(parameter_name='resource_group')
@@ -639,7 +639,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
         if isBasicTier is False:
             # enable replication support for  GP/MO servers
             self.cmd('{} server configuration set -g {} -s {} -n azure.replication_support --value REPLICA'
-                     .format(database_engine, resource_group, server), 
+                     .format(database_engine, resource_group, server),
                      checks=[
                          JMESPathCheck('name', 'azure.replication_support'),
                          JMESPathCheck('value', 'REPLICA')])
@@ -647,7 +647,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             self.cmd('{} server restart -g {} --name {}'
                      .format(database_engine, resource_group, server), checks=NoneCheck())
             sleep(120)
-        
+
         # test replica create
         self.cmd('{} server replica create -g {} -n {} '
                  '--source-server {}'
