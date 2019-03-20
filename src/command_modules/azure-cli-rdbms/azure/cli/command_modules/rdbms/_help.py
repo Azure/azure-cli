@@ -86,6 +86,35 @@ def add_helps(command_group, server_type):
                     - name: List all read replicas for master server 'testsvr'.
                       text: az mysql server replica list -g testgroup -s testsvr
                 """
+    helps['postgres server replica'] = """
+                type: group
+                short-summary: Manage read replicas.
+                """
+    helps['postgres server replica create'] = """
+                type: command
+                short-summary: Create a read replica for a server.
+                examples:
+                    - name: Create a read replica 'testreplsvr' for 'testsvr'.
+                      text: az postgres server replica create -n testreplsvr -g testgroup -s testsvr
+                    - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
+                      text: |
+                        az postgres server replica create -n testreplsvr -g testgroup \\
+                            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testsvr2"
+                """
+    helps['postgres server replica stop'] = """
+                type: command
+                short-summary: Stop replication to a read replica and make it a read/write server.
+                examples:
+                    - name: Stop replication to 'testreplsvr' and make it a read/write server.
+                      text: az postgres server replica stop -g testgroup -n testreplsvr
+                """
+    helps['postgres server replica list'] = """
+                type: command
+                short-summary: List all read replicas for a given server.
+                examples:
+                    - name: List all read replicas for master server 'testsvr'.
+                      text: az postgres server replica list -g testgroup -s testsvr
+                """
     helps['{} server update'.format(command_group)] = """
                 type: command
                 short-summary: Update a server.
@@ -119,6 +148,13 @@ def add_helps(command_group, server_type):
                     - name: List all {0} servers in a resource group.
                       text: az {1} server list -g testgroup
                 """.format(server_type, command_group)
+    helps['{} server restart'.format(command_group)] = """
+                type: command
+                short-summary: Restart a server.
+                examples:
+                    - name: Restart a server.
+                      text: az {0} server restart -g testgroup -n testsvr
+                """.format(command_group)
     helps['{} server firewall-rule'.format(command_group)] = """
                 type: group
                 short-summary: Manage firewall rules for a server.

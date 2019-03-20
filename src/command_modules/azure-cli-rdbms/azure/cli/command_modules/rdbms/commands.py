@@ -24,7 +24,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_firewall_rules,
     cf_postgres_virtual_network_rules_operations,
     cf_postgres_config,
-    cf_postgres_log)
+    cf_postgres_log,
+    cf_postgres_replica)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -50,6 +51,11 @@ def load_command_table(self, _):
     mysql_replica_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations#ReplicasOperations.{}',
         client_factory=cf_mysql_replica
+    )
+
+    postgres_replica_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ReplicasOperations.{}',
+        client_factory=cf_postgres_replica
     )
 
     mariadb_firewall_rule_sdk = CliCommandType(
@@ -139,6 +145,7 @@ def load_command_table(self, _):
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mariadb_get')
+        g.command('restart', 'restart')
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
         g.custom_command('create', '_server_create')
@@ -152,6 +159,7 @@ def load_command_table(self, _):
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mysql_get')
+        g.command('restart', 'restart')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
@@ -165,11 +173,19 @@ def load_command_table(self, _):
                                  setter_name='_server_update_set', setter_type=rdbms_custom, setter_arg_name='parameters',
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_postgresql_get')
+        g.command('restart', 'restart')
 
     with self.command_group('mysql server replica', mysql_replica_sdk) as g:
         g.command('list', 'list_by_server')
 
     with self.command_group('mysql server replica', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
+        g.custom_command('create', '_replica_create', supports_no_wait=True)
+        g.custom_command('stop', '_replica_stop', confirmation=True)
+
+    with self.command_group('postgres server replica', postgres_replica_sdk) as g:
+        g.command('list', 'list_by_server')
+
+    with self.command_group('postgres server replica', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_replica_create', supports_no_wait=True)
         g.custom_command('stop', '_replica_stop', confirmation=True)
 
