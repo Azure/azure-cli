@@ -63,6 +63,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
+    show_password = True if not password else False
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -99,7 +100,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
         # Registration bot specific validation
         if not endpoint:
-            raise CLIError('Endpoint is required for creating a registration bot.')
+            endpoint = ''
         if not msa_app_id:
             raise CLIError('Microsoft application id is required for creating a registration bot.')
 
@@ -118,11 +119,14 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         logger.info('Bot parameters client side validation successful.')
         logger.info('Creating bot.')
 
-        return client.bots.create(
+        result = client.bots.create(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             parameters=parameters
         )
+        if show_password:
+            result['appPassword'] = password
+        return result
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
