@@ -16,7 +16,7 @@ from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
-from azure.cli.core.util import CLIError, sdk_no_wait, _find_child_item, _find_child_collection
+from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._util import _get_property
 
@@ -498,8 +498,8 @@ def create_ag_rewrite_rule_set(cmd, resource_group_name, application_gateway_nam
     if no_wait:
         return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
     parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
-    return _find_child_item(parent, item_name,
-                            path='rewrite_rule_sets', key_path='name')
+    return find_child_item(parent, item_name,
+                           path='rewrite_rule_sets', key_path='name')
 
 
 def update_ag_rewrite_rule_set(instance, parent, item_name):
@@ -514,8 +514,8 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
         raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    rule_set = _find_child_item(ag, rule_set_name,
-                                path='rewrite_rule_sets', key_path='name')
+    rule_set = find_child_item(ag, rule_set_name,
+                               path='rewrite_rule_sets', key_path='name')
     new_rule = ApplicationGatewayRewriteRule(
         name=rule_name,
         rule_sequence=sequence,
@@ -528,8 +528,8 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
     if no_wait:
         return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
     parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
-    return _find_child_item(parent, rule_set_name, rule_name,
-                            path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+    return find_child_item(parent, rule_set_name, rule_name,
+                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
 
 
 def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None,
@@ -544,21 +544,21 @@ def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequ
 def show_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    return _find_child_item(gateway, rule_set_name, rule_name,
-                            path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+    return find_child_item(gateway, rule_set_name, rule_name,
+                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
 
 
 def list_ag_rewrite_rules(cmd, resource_group_name, application_gateway_name, rule_set_name):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    return _find_child_collection(gateway, rule_set_name, path='rewrite_rule_sets.rewrite_rules', key_path='name')
+    return find_child_collection(gateway, rule_set_name, path='rewrite_rule_sets.rewrite_rules', key_path='name')
 
 
 def delete_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name, no_wait=None):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    rule_set = _find_child_item(gateway, rule_set_name, path='rewrite_rule_sets', key_path='name')
-    rule = _find_child_item(rule_set, rule_name, path='rewrite_rules', key_path='name')
+    rule_set = find_child_item(gateway, rule_set_name, path='rewrite_rule_sets', key_path='name')
+    rule = find_child_item(rule_set, rule_name, path='rewrite_rules', key_path='name')
     rule_set.rewrite_rules.remove(rule)
     sdk_no_wait(no_wait, client.create_or_update, resource_group_name, application_gateway_name, gateway)
 
@@ -569,8 +569,8 @@ def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
         'ApplicationGatewayRewriteRuleCondition')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
-    rule = _find_child_item(ag, rule_set_name, rule_name,
-                            path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+    rule = find_child_item(ag, rule_set_name, rule_name,
+                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
     new_condition = ApplicationGatewayRewriteRuleCondition(
         variable=variable,
         pattern=pattern,
@@ -581,8 +581,8 @@ def create_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
     if no_wait:
         return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
     parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
-    return _find_child_item(parent, rule_set_name, rule_name, variable,
-                            path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
+    return find_child_item(parent, rule_set_name, rule_name, variable,
+                           path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
 
 
 def update_ag_rewrite_rule_condition(instance, parent, cmd, rule_set_name, rule_name, variable, pattern=None,
@@ -598,24 +598,24 @@ def show_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway
                                    rule_name, variable):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    return _find_child_item(gateway, rule_set_name, rule_name, variable,
-                            path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
+    return find_child_item(gateway, rule_set_name, rule_name, variable,
+                           path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
 
 
 def list_ag_rewrite_rule_conditions(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    return _find_child_collection(gateway, rule_set_name, rule_name,
-                                  path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name')
+    return find_child_collection(gateway, rule_set_name, rule_name,
+                                 path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name')
 
 
 def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gateway_name, rule_set_name,
                                      rule_name, variable, no_wait=None):
     client = network_client_factory(cmd.cli_ctx).application_gateways
     gateway = client.get(resource_group_name, application_gateway_name)
-    rule = _find_child_item(gateway, rule_set_name, rule_name,
-                            path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
-    condition = _find_child_item(rule, variable, path='conditions', key_path='variable')
+    rule = find_child_item(gateway, rule_set_name, rule_name,
+                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+    condition = find_child_item(rule, variable, path='conditions', key_path='variable')
     rule.conditions.remove(condition)
     sdk_no_wait(no_wait, client.create_or_update, resource_group_name, application_gateway_name, gateway)
 

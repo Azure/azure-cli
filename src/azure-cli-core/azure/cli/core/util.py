@@ -436,7 +436,7 @@ def _find_child(parent, *args, **kwargs):
     return current
 
 
-def _find_child_item(parent, *args, **kwargs):
+def find_child_item(parent, *args, **kwargs):
     path = kwargs.get('path', '')
     key_path = kwargs.get('key_path', '')
     if len(args) != len(path.split('.')) != len(key_path.split('.')):
@@ -444,7 +444,7 @@ def _find_child_item(parent, *args, **kwargs):
     return _find_child(parent, *args, path=path, key_path=key_path)
 
 
-def _find_child_collection(parent, *args, **kwargs):
+def find_child_collection(parent, *args, **kwargs):
     path = kwargs.get('path', '')
     key_path = kwargs.get('key_path', '')
     arg_len = len(args)

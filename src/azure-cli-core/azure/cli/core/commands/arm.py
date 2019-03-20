@@ -17,7 +17,7 @@ from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import (
-    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, _find_child_item)
+    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, find_child_item)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -496,7 +496,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
         if child_collection_prop_name:
             parent = getter(**getterargs)
-            instance = _find_child_item(
+            instance = find_child_item(
                 parent, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         else:
             parent = None
@@ -561,7 +561,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
 
         if child_collection_prop_name:
-            result = _find_child_item(
+            result = find_child_item(
                 result, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         return result
 
