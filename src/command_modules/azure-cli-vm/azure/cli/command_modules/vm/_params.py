@@ -99,6 +99,7 @@ def load_arguments(self, _):
     with self.argument_context('image') as c:
         c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']))
         c.argument('image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
+        c.argument('tags', tags_type)
 
     with self.argument_context('image create') as c:
         # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
