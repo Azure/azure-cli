@@ -6,6 +6,8 @@ Release History
 0.1.9
 +++++
 * Add `az bot prepare-deploy` to prepare for deploying bots via `az webapp`
+* Have `az bot create --kind registration` show password if the password is not provided
+* Have `--endpoint` in `az bot create --kind registration` default empty string instead of being required
 
 0.1.8
 +++++
