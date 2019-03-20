@@ -127,7 +127,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('encryption_key_vault', help='The Uri of the KeyVault')
         c.extra('encryption_key_version', help='The version of the KeyVault key')
         c.argument('encryption_key_source',
-                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault'], 'Microsoft.Storage'),
+                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault']),
                    help='The default encryption service',
                    validator=validate_encryption_source)
         c.ignore('encryption_key_vault_properties')

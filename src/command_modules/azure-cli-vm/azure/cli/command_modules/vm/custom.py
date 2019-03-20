@@ -812,7 +812,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
                        'directly.')
-    elif not nic_ids:
+    if not nic_ids:
         raise CLIError("No NIC associated with VM '{}'".format(vm_name))
 
     # get existing NSG or create a new one

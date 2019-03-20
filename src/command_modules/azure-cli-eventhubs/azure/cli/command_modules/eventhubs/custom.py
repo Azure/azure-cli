@@ -63,7 +63,7 @@ def cli_autho_update(instance, rights):
 
 # Eventhub Region
 def cli_eheventhub_create(client, resource_group_name, namespace_name, event_hub_name, message_retention_in_days=None, partition_count=None, status=None,
-                          enabled=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
+                          enabled=None, skip_empty_archives=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
     from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination, EncodingCaptureDescription
     eventhubparameter1 = Eventhub()
     if message_retention_in_days:
@@ -78,6 +78,7 @@ def cli_eheventhub_create(client, resource_group_name, namespace_name, event_hub
     if enabled and enabled is True:
         eventhubparameter1.capture_description = CaptureDescription(
             enabled=enabled,
+            skip_empty_archives=skip_empty_archives,
             encoding=EncodingCaptureDescription.avro,
             interval_in_seconds=capture_interval_seconds,
             size_limit_in_bytes=capture_size_limit_bytes,
@@ -95,10 +96,11 @@ def cli_eheventhub_create(client, resource_group_name, namespace_name, event_hub
 
 
 def cli_eheventhub_update(instance, message_retention_in_days=None, partition_count=None, status=None,
-                          enabled=None, capture_interval_seconds=None,
+                          enabled=None, skip_empty_archives=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
     from azure.mgmt.eventhub.models import CaptureDescription, Destination, EncodingCaptureDescription
+
     if message_retention_in_days:
         instance.message_retention_in_days = message_retention_in_days
 
@@ -108,14 +110,14 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
     if status:
         instance.status = status
 
-    if enabled:
+    if enabled and not instance.capture_description:
+        instance.capture_description = CaptureDescription()
+        instance.capture_description.destination = Destination()
+        instance.capture_description.encoding = EncodingCaptureDescription.avro
         instance.capture_description.enabled = enabled
 
-        if not instance.capture_description:
-            instance.capture_description = CaptureDescription()
-            instance.capture_description.destination = Destination()
-            instance.capture_description.encoding = EncodingCaptureDescription.avro
-
+    if enabled and instance.capture_description:
+        instance.capture_description.enabled = enabled
         if capture_interval_seconds:
             instance.interval_in_seconds = capture_interval_seconds
         if capture_size_limit_bytes:
@@ -128,5 +130,7 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
             instance.capture_description.destination.blob_container = blob_container
         if archive_name_format:
             instance.capture_description.destination.archive_name_format = archive_name_format
+        if skip_empty_archives:
+            instance.capture_description.skip_empty_archives = skip_empty_archives
 
     return instance

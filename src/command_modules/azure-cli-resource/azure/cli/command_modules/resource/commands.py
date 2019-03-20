@@ -40,9 +40,18 @@ def transform_resource_list(result):
 
 
 # Resource group deployment commands
+def transform_deployment(result):
+    r = result
+    return OrderedDict([('Name', r['name']),
+                        ('ResourceGroup', r['resourceGroup']),
+                        ('State', r['properties']['provisioningState']),
+                        ('Timestamp', r['properties']['timestamp']),
+                        ('Mode', r['properties']['mode'])])
+
+
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
-    return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
+    return [transform_deployment(r) for r in sort_list]
 
 
 # pylint: disable=too-many-statements
@@ -208,10 +217,11 @@ def load_command_table(self, _):
         g.command('remove-value', 'delete_value')
 
     with self.command_group('group deployment', resource_deployment_sdk) as g:
-        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace,
+                         table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
-        g.show_command('show', 'get')
+        g.show_command('show', 'get', table_transformer=transform_deployment)
         g.command('delete', 'delete', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_deployment_as_template')

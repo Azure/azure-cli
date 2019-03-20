@@ -264,7 +264,6 @@ def _server_update_custom_func(instance,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None):
-    from azure.mgmt.rdbms.mysql.models import StorageProfile  # pylint: disable=unused-variable
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))

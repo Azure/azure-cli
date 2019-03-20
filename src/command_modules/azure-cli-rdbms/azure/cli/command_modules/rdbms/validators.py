@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.prompting import prompt_pass, NoTTYException
-from knack.util import CLIError
-
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
+
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
 
 
 def get_combined_validator(validators):

@@ -122,7 +122,7 @@ helps['vm create'] = """
           text: >
              az vm create -n MyVm -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a VM in an availability zone in the current resource group's region
-          min_profile: latest
+          supported-profiles: latest
           text: >
              az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """
@@ -181,7 +181,7 @@ helps['vmss create'] = """
           text: >
              az vmss create -n MyVmss -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a single zone VM scaleset in the current resource group's region
-          min_profile: latest
+          supported-profiles: latest
           text: >
              az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """
@@ -658,13 +658,18 @@ helps['vm disk attach'] = """
 helps['vm encryption'] = """
     type: group
     short-summary: "Manage encryption of VM disks."
-    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    long-summary: |
+        For more information, see:
+        https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
 helps['vm encryption enable'] = """
     type: command
-    short-summary: "Enable disk encryption on the OS disk and/or data disks."
-    long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
+    short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks."
+    long-summary: |
+        Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
+        For more information, see:
+        https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
     parameters:
         - name: --aad-client-id
           short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -680,7 +685,10 @@ helps['vm encryption enable'] = """
 
 helps['vm encryption disable'] = """
     type: command
-    short-summary: Disable disk encryption on the OS disk and/or data disks.
+    short-summary: Disable disk encryption on the OS disk and/or data disks. Decrypt mounted disks.
+    long-summary: |
+        For Linux VMs, disabling encryption is only permitted on data volumes.
+        For Windows VMS, disabling encryption is permitted on both OS and data volumes.
 """
 
 helps['vm encryption show'] = """
@@ -847,7 +855,7 @@ helps['vm image list-skus'] = """
     parameters:
         - name: --publisher -p
           populator-commands:
-          - az vm list-publishers
+          - az vm image list-publishers
     examples:
         - name: List all skus available for CentOS published by OpenLogic in the West US region.
           text: az vm image list-skus -l westus -f CentOS -p OpenLogic

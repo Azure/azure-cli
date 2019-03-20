@@ -2067,7 +2067,7 @@ helps['network express-route peering update'] = """
             az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit \\
                 --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 \\
                 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
-          min_profile: latest
+          supported-profiles: latest
 """
 
 helps['network express-route peering connection'] = """
@@ -3611,7 +3611,7 @@ helps['network vnet subnet create'] = """
         - name: Create new subnet attached to an NSG with a custom route table.
           text: |
             az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
-                --address-prefix 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
+                --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
 """
 
 helps['network vnet subnet delete'] = """

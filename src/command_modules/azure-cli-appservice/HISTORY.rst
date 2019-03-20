@@ -3,9 +3,14 @@
 Release History
 ===============
 
+* webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly
+
+0.2.15
+++++++
 * webapp, functionapp: az webapp/functionapp deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
 * Remove erroneous print statement for `az webapp auth update`
 * functionapp: fix setting the correct image for runtime in Linux App Service plans
+* webapp: remove preview tag for az webapp up and other improvements to the command
 
 0.2.14
 ++++++

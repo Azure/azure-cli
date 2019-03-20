@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from knack.util import CLIError
 
 from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
+
+from knack.util import CLIError
 
 
 def get_all_help(cli_ctx):
@@ -27,6 +28,7 @@ def get_all_help(cli_ctx):
     help_files = []
     for cmd, parser in zip(sub_parser_keys, sub_parser_values):
         try:
+            help_ctx.update_loaders_with_help_file_contents(cmd.split())
             help_file = CliGroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) \
                 else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)

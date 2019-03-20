@@ -132,11 +132,11 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             storageAccountName, location, sku_name, appInsightsLocation, language, version)
 
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        publish_cmd = "az bot publish --resource-group %s -n '%s' --subscription %s -v %s" % (
+        publish_cmd = "az bot publish --resource-group %s -n %s --subscription %s -v %s" % (
             resource_group_name, resource_name, subscription_id, version)
         if language == 'Csharp':
             proj_file = '%s.csproj' % resource_name
-            publish_cmd += " --proj-file-path '%s'" % proj_file
+            publish_cmd += " --proj-file-path %s" % proj_file
         creation_results['publishCommand'] = publish_cmd
         logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
                     publish_cmd)
@@ -471,8 +471,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',
-                keep_node_modules=None):
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
+                keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
@@ -485,6 +485,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     :param proj_file_path:
     :param version:
     :param keep_node_modules:
+    :param timeout:
     :return:
     """
     # Get the bot information and ensure it's not only a registration bot.
@@ -538,7 +539,28 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     logger.info('Zip file path created, at %s.', zip_filepath)
 
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot, logger)
-    output = kudu_client.publish(zip_filepath, keep_node_modules, iis_publish_info['lang'])
+
+    app_settings = WebAppOperations.get_app_settings(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        name=kudu_client.bot_site_name
+    )
+    scm_do_build = [item['value'] for item in app_settings if item['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT']
+    if scm_do_build and scm_do_build[0] == 'true':
+        logger.info('Detected SCM_DO_BUILD_DURING_DEPLOYMENT with value of "true" in App Service\'s Application '
+                    'Settings. Build will commence during deployment. For more information, see '
+                    'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
+    else:
+        logger.warning('Didn\'t detect SCM_DO_BUILD_DURING_DEPLOYMENT or its value was "false" in App Service\'s '
+                       'Application Settings. Build may not commence during deployment. To learn how to trigger a build'
+                       ' when deploying to your App Service, see '
+                       'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        logger.warning('To change the Application Setting via az cli, use the following command:\naz webapp config '  # pylint:disable=logging-not-lazy
+                       'appsettings set -n %s -g %s --subscription %s --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true' %
+                       (kudu_client.bot_site_name, resource_group_name, subscription_id))
+
+    output = kudu_client.publish(zip_filepath, timeout, keep_node_modules, iis_publish_info['lang'])
 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
