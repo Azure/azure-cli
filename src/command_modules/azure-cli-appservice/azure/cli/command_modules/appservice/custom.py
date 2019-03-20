@@ -1740,8 +1740,7 @@ def _update_host_name_ssl_state(cli_ctx, resource_group_name, webapp_name, locat
                                                                  thumbprint=thumbprint,
                                                                  to_update=True)],
                           location=location)
-    name = '{}({})'.format(webapp_name, slot) if slot else webapp_name
-    return _generic_site_operation(cli_ctx, resource_group_name, name, 'create_or_update',
+    return _generic_site_operation(cli_ctx, resource_group_name, webapp_name, 'create_or_update',
                                    slot, updated_webapp)
 
 
