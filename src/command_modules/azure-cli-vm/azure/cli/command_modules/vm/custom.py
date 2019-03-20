@@ -353,6 +353,12 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     return client.images.create_or_update(resource_group_name, name, image)
 
 
+def update_image(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+
 def list_images(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
