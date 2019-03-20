@@ -2,13 +2,14 @@
 
 Release History
 ===============
-0.3.8
+
+0.3.9
 +++++
-* Minor fixes: Get default location from resource group when not provided for creating servers and add validation for retention days. 
+* Add postgresql replica commands and restart server command
 
 0.3.8
 +++++
-* Add postgresql replica commands and restart server command
+* Minor fixes: Get default location from resource group when not provided for creating servers and add validation for retention days. 
 
 0.3.7
 +++++
