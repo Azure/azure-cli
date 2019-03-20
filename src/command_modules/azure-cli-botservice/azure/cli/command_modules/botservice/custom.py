@@ -471,6 +471,43 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
+def prepare_webapp_deploy(cmd, client, language, code_dir=None, proj_file_path=None):
+    if not code_dir:
+        code_dir = os.getcwd()
+        logger.info('--code-dir not provided, defaulting to current working directory: %s\n'
+                    'For more information, run "az bot prepare-deploy -h"', code_dir)
+    elif not os.path.exists(code_dir):
+        raise CLIError('Provided --code-dir value ({0}) does not exist'.format(code_dir))
+
+    def does_file_exist(file_name):
+        if os.path.exists(os.path.join(code_dir, file_name)):
+            raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
+                           'prepare-deploy"' % (file_name, code_dir, file_name))
+
+    if language != 'Csharp':
+        if proj_file_path:
+            raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
+        does_file_exist('web.config')
+
+        BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, {'lang': language,
+                                                                             'has_web_config': False,
+                                                                             'has_iisnode_yml': True})
+    else:
+        if not proj_file_path:
+            raise CLIError('--proj-file-path must be provided if language is Csharp')
+        does_file_exist('.deployment')
+        csproj_file = os.path.join(code_dir, proj_file_path)
+        if not os.path.exists(csproj_file):
+            raise CLIError('%s file not found\nPlease verify the relative path to the .csproj file from the '
+                           '--code-dir', csproj_file)
+
+        with open(os.path.join(code_dir, '.deployment'), 'w') as f:
+            f.write('[config]\n')
+            proj_file = proj_file_path.lower()
+            proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+            f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
+
+
 def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
                 keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.

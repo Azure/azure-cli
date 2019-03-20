@@ -28,6 +28,15 @@ helps['bot prepare-publish'] = """
     short-summary: Add scripts to your local source code directory to
                    be able to publish back using `az bot publish`.
 """
+helps['bot prepare-deploy'] = """
+    type: command
+    short-summary: Add scripts and configuration files to your local source code directory to be able to publish back 
+                   using `az webapp deployment source`.
+    examples:
+        - name: Prepare to use `az webapp` to deploy a Node.js bot by fetching a necessary file.
+          text: |-
+            az bot prepare-deploy --lang Node --code-dir "MyBotCode"
+"""
 helps['bot delete'] = """
     type: command
     short-summary: Delete an existing bot.

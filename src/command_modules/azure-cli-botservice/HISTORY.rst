@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.9
++++++
+* Add `az bot prepare-deploy` to prepare for deploying bots via `az webapp`
+
 0.1.8
 +++++
 * Add "SCM_DO_BUILD_DURING_DEPLOYMENT" to ARM template's Application Settings for v4 Web App Bots

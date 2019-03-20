@@ -3,14 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import filecmp
+import os
+import json
+import shutil
+import uuid
+import requests
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
-import uuid
-import os
-import shutil
-import json
-import requests
 
 
 class DirectLineClient(object):
@@ -664,6 +665,116 @@ class BotTests(ScenarioTest):
                                           "to prepare and publish a v4 bot."
 
         except Exception as error:
+            raise error
+
+    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):
+        dir_path = 'does_not_exist'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Node'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+            raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
+        except CLIError as cli_error:
+            print(cli_error.__str__())
+            assert cli_error.__str__() == 'Provided --code-dir value (does_not_exist) does not exist'
+        except Exception as error:
+            raise error
+
+    def test_botservice_prepare_deploy_node_should_fail_with_proj_file_path(self):
+        self.kwargs.update({'language': 'Node',
+                            'proj_file': 'node_bot/test.csproj'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            raise Exception("'az bot prepare-publish --lang Node' should have failed with --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+        except Exception as error:
+            raise error
+
+    def test_botservice_prepare_deploy_node(self):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Node'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+        assert os.path.exists(os.path.join(dir_path, 'web.config'))
+        shutil.rmtree(dir_path)
+
+    def test_botservice_prepare_deploy_csharp(self):
+        dir_path = 'csharp_bot'
+        proj_file = 'test.csproj'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Csharp',
+                            'proj_file': proj_file})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        open(os.path.join(dir_path, proj_file), 'w')
+
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
+        assert os.path.exists(os.path.join(dir_path, '.deployment'))
+        with open(os.path.join(dir_path, '.deployment')) as d:
+            assert d.readline() == '[config]\n'
+            assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file)
+        shutil.rmtree(dir_path)
+
+    def test_botservice_prepare_deploy_csharp_no_proj_file(self):
+        self.kwargs.update({'language': 'Csharp'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language}')
+            raise Exception("'az bot prepare-publish --lang Csharp' should have failed with no --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
+        except Exception as error:
+            raise error
+
+    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self):
+        dir_path = 'csharp_bot'
+        proj_file = 'test.csproj'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Csharp',
+                            'proj_file': proj_file})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        open(os.path.join(dir_path, proj_file), 'w')
+        open(os.path.join(dir_path, '.deployment'), 'w')
+
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path} --proj-file-path {proj_file}')
+            shutil.rmtree(dir_path)
+        except CLIError as cli_error:
+            shutil.rmtree(dir_path)
+            assert cli_error.__str__() == '.deployment found in csharp_bot\nPlease delete this .deployment before ' \
+                                          'calling "az bot prepare-deploy"'
+        except Exception as error:
+            shutil.rmtree(dir_path)
+            raise error
+
+    def test_botservice_prepare_deploy_node_fail_if_web_config_exists(self):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Node'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        open(os.path.join(dir_path, 'web.config'), 'w')
+
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+            shutil.rmtree(dir_path)
+        except CLIError as cli_error:
+            shutil.rmtree(dir_path)
+            assert cli_error.__str__() == 'web.config found in node_bot\nPlease delete this web.config before ' \
+                                          'calling "az bot prepare-deploy"'
+        except Exception as error:
+            shutil.rmtree(dir_path)
             raise error
 
     def __talk_to_bot(self, message_text='Hi', expected_text=None):
