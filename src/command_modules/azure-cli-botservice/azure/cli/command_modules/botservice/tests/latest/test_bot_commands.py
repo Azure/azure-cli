@@ -667,7 +667,8 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self, resource_group):
         dir_path = 'does_not_exist'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Node'})
@@ -680,7 +681,8 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    def test_botservice_prepare_deploy_node_should_fail_with_proj_file_path(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_node_should_fail_with_proj_file_path(self, resource_group):
         self.kwargs.update({'language': 'Node',
                             'proj_file': 'node_bot/test.csproj'})
         try:
@@ -691,7 +693,8 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    def test_botservice_prepare_deploy_node(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_node(self, resource_group):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Node'})
@@ -703,7 +706,8 @@ class BotTests(ScenarioTest):
         assert os.path.exists(os.path.join(dir_path, 'web.config'))
         shutil.rmtree(dir_path)
 
-    def test_botservice_prepare_deploy_csharp(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_csharp(self, resource_group):
         dir_path = 'csharp_bot'
         proj_file = 'test.csproj'
         self.kwargs.update({'dir_path': dir_path,
@@ -722,7 +726,8 @@ class BotTests(ScenarioTest):
             assert d.readline() == 'SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file)
         shutil.rmtree(dir_path)
 
-    def test_botservice_prepare_deploy_csharp_no_proj_file(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_csharp_no_proj_file(self, resource_group):
         self.kwargs.update({'language': 'Csharp'})
         try:
             self.cmd('az bot prepare-deploy --lang {language}')
@@ -732,7 +737,8 @@ class BotTests(ScenarioTest):
         except Exception as error:
             raise error
 
-    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self, resource_group):
         dir_path = 'csharp_bot'
         proj_file = 'test.csproj'
         self.kwargs.update({'dir_path': dir_path,
@@ -756,7 +762,8 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
             raise error
 
-    def test_botservice_prepare_deploy_node_fail_if_web_config_exists(self):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_node_fail_if_web_config_exists(self, resource_group):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
                             'language': 'Node'})

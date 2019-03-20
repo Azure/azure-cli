@@ -471,7 +471,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def prepare_webapp_deploy(cmd, client, language, code_dir=None, proj_file_path=None):
+def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
     if not code_dir:
         code_dir = os.getcwd()
         logger.info('--code-dir not provided, defaulting to current working directory: %s\n'
@@ -498,8 +498,8 @@ def prepare_webapp_deploy(cmd, client, language, code_dir=None, proj_file_path=N
         does_file_exist('.deployment')
         csproj_file = os.path.join(code_dir, proj_file_path)
         if not os.path.exists(csproj_file):
-            raise CLIError('%s file not found\nPlease verify the relative path to the .csproj file from the '
-                           '--code-dir', csproj_file)
+            raise CLIError('{0} file not found\nPlease verify the relative path to the .csproj file from the '
+                           '--code-dir'.format(csproj_file))
 
         with open(os.path.join(code_dir, '.deployment'), 'w') as f:
             f.write('[config]\n')
