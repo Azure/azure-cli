@@ -35,7 +35,8 @@ from azure.cli.command_modules.network._validators import (
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer)
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
+    get_sdk_completer)
 from azure.cli.core.util import get_json_object
 
 
@@ -215,13 +216,13 @@ def load_arguments(self, _):
         c.argument('rule_name', rewrite_rule_name_type, options_list=['--name', '-n'])
         c.argument('rule_set_name', rewrite_rule_set_name_type)
         c.argument('application_gateway_name', app_gateway_name_type)
-        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'))
-        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'))
+        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'), completer=get_sdk_completer('application_gateways', 'list_available_response_headers'))
+        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'), completer=get_sdk_completer('application_gateways', 'list_available_request_headers'))
         c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
 
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
         c.argument('rule_name', rewrite_rule_name_type)
-        c.argument('variable', help='The variable whose value is being evaluated.')
+        c.argument('variable', help='The variable whose value is being evaluated.', completer=get_sdk_completer('application_gateways', 'list_available_server_variables'))
         c.argument('pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
         c.argument('ignore_case', arg_type=get_three_state_flag(), help='Make comparison case-insensitive.')
         c.argument('negate', arg_type=get_three_state_flag(), help='Check the negation of the condition.')
