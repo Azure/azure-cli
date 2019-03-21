@@ -3,10 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest
-from knack.util import CLIError
 
 
 class CloudTests(ScenarioTest):
+    def setUp(self):
+        self.cloudname = self.cmd('az cloud show').get_output_in_json().get('name')
+
+    def tearDown(self):
+        # cli_ctx cloud name is used to check with the cloud name to set
+        # If both are same, it will skip the switch
+        # The test case cli_ctx isn't change even when the cloud is really changed
+        # So here set the cli_ctx cloud name to empty to enforce cloud to switch
+        self.cli_ctx.cloud.name = ''
+        self.cmd('az cloud set -n ' + self.cloudname)
+
     def test_cloud_set_AzureCloud(self):
         self.cmd('az cloud set -n AzureCloud')
 
@@ -32,5 +42,4 @@ class CloudTests(ScenarioTest):
         self.cmd('az cloud set -n azuregermancloud')
 
     def test_cloud_set_unregistered_cloud_name(self):
-        with self.assertRaisesRegexp(CLIError, "The cloud 'azCloud' is not registered."):
-            self.cmd('az cloud set -n azCloud')
+        self.cmd('az cloud set -n azCloud', expect_failure=True)
