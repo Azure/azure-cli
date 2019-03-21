@@ -57,15 +57,15 @@ jobs:
 
       ArtifactName: msi
 
-  - task: UniversalPackages@0
+  - task: AzureFileCopy@3
     displayName: Publish Edge Build
     # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
     inputs:
-      command: publish
-      publishFile: 'build_scripts/windows/out/msi/Microsoft Azure CLI.msi'
-      vstsFeedPublish: 'edge'
-      vstsFeedPackagePublish: 'azure-cli-msi'
-      packagePublishDescription: 'MSI Installer for edge build of the Azure-CLI'
+      destination: azureBlob
+      sourcePath: '$(System.ArtifactsDirectory)/msi/Microsoft Azure CLI.msi'
+      azureSubscription: SDKInfrastructureSP
+      storage: azurecliprod
+      containerName: edge-devops
 
 
 - job: BuildDockerImage
