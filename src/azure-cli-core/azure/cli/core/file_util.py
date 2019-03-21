@@ -7,6 +7,7 @@ from __future__ import print_function
 
 from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
 
+from knack.help import HelpAuthoringException
 from knack.util import CLIError
 
 
@@ -33,6 +34,8 @@ def get_all_help(cli_ctx):
                 else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
+        except HelpAuthoringException:
+            raise
         except Exception as ex:  # pylint: disable=broad-except
             print("Skipped '{}' due to '{}'".format(cmd, ex))
     help_files = sorted(help_files, key=lambda x: x.command)
