@@ -54,6 +54,7 @@ def load_command_table(self, _):
         g.custom_command('publish', 'publish_app')
         g.custom_command('download', 'download_app')
         g.custom_command('prepare-publish', 'prepare_publish')
+        g.custom_command('prepare-deploy', 'prepare_webapp_deploy')
 
     with self.command_group('bot', botServices_commandType) as g:
         g.custom_command('show', 'get_bot')

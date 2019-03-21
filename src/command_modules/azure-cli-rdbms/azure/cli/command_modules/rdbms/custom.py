@@ -228,6 +228,12 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
             sku=mysql.models.Sku(name=source_server_object.sku.name),
             properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=source_server_object.location)
+    elif provider == 'Microsoft.DBforPostgreSQL':
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            sku=postgresql.models.Sku(name=source_server_object.sku.name),
+            properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
+            location=source_server_object.location)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 

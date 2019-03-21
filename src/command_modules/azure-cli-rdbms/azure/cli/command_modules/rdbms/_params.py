@@ -53,6 +53,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('mysql server replica') as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the master server to the create replica for.')
 
+        with self.argument_context('postgres server replica') as c:
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the master server to the create replica for.')
+
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
             c.ignore('source')
@@ -117,6 +120,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
+
+    with self.argument_context('postgres server replica list') as c:
+        c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
 
     with self.argument_context('mysql server replica list') as c:
         c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
