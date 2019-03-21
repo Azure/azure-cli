@@ -69,8 +69,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.image }}\n"
-        values_content = "image: {0}\n".format(cmd_value)
+        yaml_template = "steps: \n  - cmd: {{ .Values.image }}\n    timeout: {{ .Values.timeout }}\n"
+        values_content = "image: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
 
     if file == "-":
         import sys
