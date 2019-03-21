@@ -63,7 +63,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
-    show_password = True if not password else False
+    show_password = False
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -87,7 +87,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     if not msa_app_id:
 
         logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
-
+        show_password = True
         msa_app_id, password = ConvergedApp.provision(resource_name)
         logger.info('Microsoft application provisioning successful. Application Id: %s.', msa_app_id)
 
