@@ -29,51 +29,51 @@ jobs:
     inputs:
       ArtifactName: metadata
 
-- job: VerifyVersions
-  displayName: Verify Command Module Versions
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
-    inputs:
-      versionSpec: 3.7
-
-  - bash: |
-      #!/usr/bin/env bash
-
-      set -ev
-
-      pip install virtualenv
-      python -m virtualenv venv/
-      . ./venv/bin/activate
-      pip install azdev
-      azdev setup -c $(pwd)
-    displayName: 'Install azdev'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
-      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
-      azdev verify history 2>&1 | grep -e "^OK$"
-
-    displayName: 'Verify History'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
-      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
-      azdev cli check-versions | grep "OK!"
-    displayName: 'Verify Versions'
-    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
+#- job: VerifyVersions
+#  displayName: Verify Command Module Versions
+#  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
+#
+#  pool:
+#    vmImage: 'ubuntu-16.04'
+#  steps:
+#  - task: UsePythonVersion@0
+#    displayName: 'Use Python 3.7'
+#    inputs:
+#      versionSpec: 3.7
+#
+#  - bash: |
+#      #!/usr/bin/env bash
+#
+#      set -ev
+#
+#      pip install virtualenv
+#      python -m virtualenv venv/
+#      . ./venv/bin/activate
+#      pip install azdev
+#      azdev setup -c $(pwd)
+#    displayName: 'Install azdev'
+#
+#  - bash: |
+#      #!/usr/bin/env bash
+#      . ./venv/bin/activate
+#
+#      set -ev
+#
+#      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
+#      azdev verify history 2>&1 | grep -e "^OK$"
+#
+#    displayName: 'Verify History'
+#
+#  - bash: |
+#      #!/usr/bin/env bash
+#      . ./venv/bin/activate
+#
+#      set -ev
+#
+#      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
+#      azdev cli check-versions | grep "OK!"
+#    displayName: 'Verify Versions'
+#    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
