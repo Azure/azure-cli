@@ -31,7 +31,7 @@ jobs:
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release'))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/release')))
 
   pool:
     vmImage: 'ubuntu-16.04'
