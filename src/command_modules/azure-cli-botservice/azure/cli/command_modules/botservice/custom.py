@@ -123,9 +123,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             parameters=parameters
-        )
+        ).as_dict()
         if show_password:
-            result['appPassword'] = password
+            result['password'] = password
         return result
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
