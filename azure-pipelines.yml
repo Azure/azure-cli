@@ -42,7 +42,6 @@ jobs:
     inputs:
       artifactName: metadata
 
-
   - script: |
        set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
        set
@@ -57,12 +56,16 @@ jobs:
 
       ArtifactName: msi
 
+  - script: |
+      cd $(System.ArtifactsDirectory)\msi
+      dir
+
   - task: AzureFileCopy@3
     displayName: Publish Edge Build
     # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
     inputs:
       destination: azureBlob
-      sourcePath: '$(System.ArtifactsDirectory)/msi/Microsoft Azure CLI.msi'
+      sourcePath: '$(System.ArtifactsDirectory)\msi\Microsoft Azure CLI.msi'
       azureSubscription: SDKInfrastructureSP
       storage: azurecliprod
       containerName: edge-devops
