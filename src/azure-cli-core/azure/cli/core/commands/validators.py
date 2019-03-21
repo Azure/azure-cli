@@ -7,9 +7,9 @@ import argparse
 import time
 import random
 
-from knack.log import get_logger
-
 from azure.cli.core.profiles import ResourceType
+
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,7 +31,7 @@ class IterateValue(list):
 
     Typical use is to allow multiple ID parameter to a show command etc.
     """
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 def validate_tags(ns):

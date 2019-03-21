@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-02-06T03:24:33Z"}}'
+      "date": "2019-03-07T01:11:04Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -11,17 +11,17 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       ParameterSetName: [--location --name --tag]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-06T03:24:33Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-07T01:11:04Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['274']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:24:33 GMT']
+      date: ['Thu, 07 Mar 2019 01:11:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -36,7 +36,7 @@ interactions:
       CommandName: [unknown]
       Connection: [keep-alive]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2016-06-01
@@ -71,12 +71,14 @@ interactions:
         Central","longitude":"2.3730","latitude":"46.3772"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth","name":"francesouth","displayName":"France
         South","longitude":"2.1972","latitude":"43.8345"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral","name":"australiacentral","displayName":"Australia
         Central","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2","name":"australiacentral2","displayName":"Australia
-        Central 2","longitude":"149.1244","latitude":"-35.3075"}]}'}
+        Central 2","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth","name":"southafricanorth","displayName":"South
+        Africa North","longitude":"28.218370","latitude":"-25.731340"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest","name":"southafricawest","displayName":"South
+        Africa West","longitude":"18.843266","latitude":"-34.075691"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['5269']
+      content-length: ['5660']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:24:34 GMT']
+      date: ['Thu, 07 Mar 2019 01:11:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -93,12 +95,12 @@ interactions:
     method: GET
     uri: https://dev.botframework.com/api/misc/botFileEncryptionKey
   response:
-    body: {string: '"K+UfZl0bbuj/M5CnpUq6EtVSZVD6qstzD6wwAxci5lM="'}
+    body: {string: '"KRr6FBpIuVLGCS7mzICAh2Sr1C3bSUcBC1NMOicBza4="'}
     headers:
       cache-control: ['must-revalidate, no-cache']
       content-length: ['46']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:24:34 GMT']
+      date: ['Thu, 07 Mar 2019 01:11:06 GMT']
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000]
       vary: [Accept-Encoding]
@@ -173,16 +175,18 @@ interactions:
       \''2015-05-01-preview\'').key1,\'';\'')]"}, {"name": "AzureWebJobsDashboard",
       "value": "[concat(\''DefaultEndpointsProtocol=https;AccountName=\'',parameters(\''storageAccountName\''),\'';AccountKey=\'',listkeys(variables(\''storageAccountId\''),
       \''2015-05-01-preview\'').key1,\'';\'')]"}, {"name": "WEBSITE_NODE_DEFAULT_VERSION",
-      "value": "10.14.1"}, {"name": "BotEnv", "value": "[parameters(\''botEnv\'')]"},
-      {"name": "BotOpenIdMetadata", "value": "[variables(\''currentConfig\'').openIdMetadata]"},
-      {"name": "botFilePath", "value": "[concat(\''./\'', parameters(\''botId\''),
-      \''.bot\'')]"}, {"name": "botFileSecret", "value": "[parameters(\''botFileEncryptionKey\'')]"}],
-      "cors": {"allowedOrigins": ["https://botservice.hosting.portal.azure.net", "https://hosting.onecloud.azure-test.net/"]}}},
-      "resources": [{"name": "MSDeploy", "type": "Extensions", "apiVersion": "2015-02-01",
-      "condition": "[not(equals(parameters(\''zipUrl\''), \''\''))]", "dependsOn":
-      ["[concat(\''Microsoft.Web/Sites/\'', parameters(\''siteName\''))]"], "properties":
-      {"packageUri": "[parameters(\''zipUrl\'')]", "dbType": "None", "connectionString":
-      "", "setParameters": {"IIS Web Application Name": "[parameters(\''siteName\'')]"}}}]},
+      "value": "10.14.1"}, {"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true"},
+      {"name": "BotEnv", "value": "[parameters(\''botEnv\'')]"}, {"name": "BotOpenIdMetadata",
+      "value": "[variables(\''currentConfig\'').openIdMetadata]"}, {"name": "botFilePath",
+      "value": "[concat(\''./\'', parameters(\''botId\''), \''.bot\'')]"}, {"name":
+      "botFileSecret", "value": "[parameters(\''botFileEncryptionKey\'')]"}, {"name":
+      "MicrosoftAppId", "value": "[parameters(\''appId\'')]"}, {"name": "MicrosoftAppPassword",
+      "value": "[parameters(\''appSecret\'')]"}], "cors": {"allowedOrigins": ["https://botservice.hosting.portal.azure.net",
+      "https://hosting.onecloud.azure-test.net/"]}}}, "resources": [{"name": "MSDeploy",
+      "type": "Extensions", "apiVersion": "2015-02-01", "condition": "[not(equals(parameters(\''zipUrl\''),
+      \''\''))]", "dependsOn": ["[concat(\''Microsoft.Web/Sites/\'', parameters(\''siteName\''))]"],
+      "properties": {"packageUri": "[parameters(\''zipUrl\'')]", "dbType": "None",
+      "connectionString": "", "setParameters": {"IIS Web Application Name": "[parameters(\''siteName\'')]"}}}]},
       {"apiVersion": "2016-03-01", "type": "Microsoft.Web/sites", "condition": "[not(equals(parameters(\''proactiveZipUrl\''),
       \''\''))]", "name": "[variables(\''proactiveFunctionName\'')]", "location":
       "[parameters(\''location\'')]", "kind": "functionapp", "dependsOn": ["[resourceId(\''Microsoft.Storage/storageAccounts/\'',
@@ -217,11 +221,11 @@ interactions:
       "[concat(\''DefaultEndpointsProtocol=https;AccountName=\'',parameters(\''storageAccountName\''),\'';AccountKey=\'',listkeys(variables(\''storageAccountId\''),
       \''2015-05-01-preview\'').key1,\'';\'')]", "AzureWebJobsDashboard": "[concat(\''DefaultEndpointsProtocol=https;AccountName=\'',parameters(\''storageAccountName\''),\'';AccountKey=\'',listkeys(variables(\''storageAccountId\''),
       \''2015-05-01-preview\'').key1,\'';\'')]", "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
-      "BotEnv": "[parameters(\''botEnv\'')]", "BotId": "[parameters(\''botId\'')]",
-      "MicrosoftAppId": "[parameters(\''appId\'')]", "MicrosoftAppPassword": "[parameters(\''appSecret\'')]",
-      "BotStateEndpoint": "[variables(\''currentConfig\'').stateEndpoint]", "BotOpenIdMetadata":
-      "[variables(\''currentConfig\'').openIdMetadata]", "UseTableStorageForConversationState":
-      "true", "BotDevAppInsightsKey": "[reference(resourceId(\''microsoft.insights/components/\'',
+      "SCM_DO_BUILD_DURING_DEPLOYMENT": "true", "BotEnv": "[parameters(\''botEnv\'')]",
+      "BotId": "[parameters(\''botId\'')]", "MicrosoftAppId": "[parameters(\''appId\'')]",
+      "MicrosoftAppPassword": "[parameters(\''appSecret\'')]", "BotStateEndpoint":
+      "[variables(\''currentConfig\'').stateEndpoint]", "BotOpenIdMetadata": "[variables(\''currentConfig\'').openIdMetadata]",
+      "UseTableStorageForConversationState": "true", "BotDevAppInsightsKey": "[reference(resourceId(\''microsoft.insights/components/\'',
       variables(\''insightsName\'')), \''2015-05-01\'').InstrumentationKey]", "BotDevAppInsightsName":
       "[variables(\''insightsName\'')]", "BotDevAppInsightsAppId": "[reference(resourceId(\''microsoft.insights/components/\'',
       variables(\''insightsName\'')), \''2015-05-01\'').AppId]", "botFilePath": "[concat(\''./\'',
@@ -232,36 +236,36 @@ interactions:
       "[resourceId(\''microsoft.insights/components/\'', variables(\''insightsName\''))]"]}]},
       "parameters": {"location": {"value": "westus"}, "kind": {"value": "sdk"}, "sku":
       {"value": "F0"}, "siteName": {"value": "cli000002"}, "appId": {"value":
-      "2ef08845-681a-46df-98aa-b0dc19748438"}, "appSecret": {"value": "e4b528ff-75ab-4d9c-be44-34827d2e18c1"},
+      "f66c7905-f570-4d41-9b60-a52f212cd15e"}, "appSecret": {"value": "185c3b2c-f8af-4312-853c-0b348d5be2de"},
       "storageAccountResourceId": {"value": ""}, "serverFarmId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},
       "zipUrl": {"value": "https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip"},
       "createNewStorage": {"value": true}, "storageAccountName": {"value": "cli000002"},
       "botEnv": {"value": "prod"}, "useAppInsights": {"value": true}, "appInsightsLocation":
       {"value": "southcentralus"}, "createServerFarm": {"value": true}, "serverFarmLocation":
       {"value": "westus"}, "azureWebJobsBotFrameworkDirectLineSecret": {"value": ""},
-      "botId": {"value": "cli000002"}, "botFileEncryptionKey": {"value": "K+UfZl0bbuj/M5CnpUq6EtVSZVD6qstzD6wwAxci5lM="}},
+      "botId": {"value": "cli000002"}, "botFileEncryptionKey": {"value": "KRr6FBpIuVLGCS7mzICAh2Sr1C3bSUcBC1NMOicBza4="}},
       "mode": "Incremental"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [bot create]
       Connection: [keep-alive]
-      Content-Length: ['12347']
+      Content-Length: ['12584']
       Content-Type: [application/json; charset=utf-8]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"12126636515959107833","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"2ef08845-681a-46df-98aa-b0dc19748438"},"appSecret":{"type":"String","value":"e4b528ff-75ab-4d9c-be44-34827d2e18c1"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"southcentralus"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"},"botFileEncryptionKey":{"type":"String","value":"K+UfZl0bbuj/M5CnpUq6EtVSZVD6qstzD6wwAxci5lM="}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-02-06T03:24:38.4417684Z","duration":"PT0.9396981S","correlationId":"dc6276e8-9bff-4013-add0-fe664e42d961","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["southcentralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002","apiVersion":"2015-05-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"17572642595832455481","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"f66c7905-f570-4d41-9b60-a52f212cd15e"},"appSecret":{"type":"String","value":"185c3b2c-f8af-4312-853c-0b348d5be2de"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"southcentralus"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"},"botFileEncryptionKey":{"type":"String","value":"KRr6FBpIuVLGCS7mzICAh2Sr1C3bSUcBC1NMOicBza4="}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-03-07T01:11:09.7961843Z","duration":"PT1.1230318S","correlationId":"83e12952-ce1c-4cc2-a878-924b82a048e2","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["southcentralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002","apiVersion":"2015-05-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586521834079756039?api-version=2018-05-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586496858168045198?api-version=2018-05-01']
       cache-control: [no-cache]
       content-length: ['8083']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:24:37 GMT']
+      date: ['Thu, 07 Mar 2019 01:11:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -277,16 +281,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496858168045198?api-version=2018-05-01
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['20']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:25:08 GMT']
+      date: ['Thu, 07 Mar 2019 01:11:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -302,16 +306,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496858168045198?api-version=2018-05-01
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['20']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:25:38 GMT']
+      date: ['Thu, 07 Mar 2019 01:12:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -327,16 +331,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496858168045198?api-version=2018-05-01
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['20']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:26:09 GMT']
+      date: ['Thu, 07 Mar 2019 01:12:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -352,16 +356,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496858168045198?api-version=2018-05-01
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['20']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:26:39 GMT']
+      date: ['Thu, 07 Mar 2019 01:13:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -377,16 +381,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496858168045198?api-version=2018-05-01
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['20']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:27:09 GMT']
+      date: ['Thu, 07 Mar 2019 01:13:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -402,66 +406,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
-  response:
-    body: {string: '{"status":"Running"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:27:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p -v --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
-  response:
-    body: {string: '{"status":"Running"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:28:10 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p -v --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586521834079756039?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496858168045198?api-version=2018-05-01
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:28:41 GMT']
+      date: ['Thu, 07 Mar 2019 01:14:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -477,16 +431,16 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"12126636515959107833","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"2ef08845-681a-46df-98aa-b0dc19748438"},"appSecret":{"type":"String","value":"e4b528ff-75ab-4d9c-be44-34827d2e18c1"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"southcentralus"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"},"botFileEncryptionKey":{"type":"String","value":"K+UfZl0bbuj/M5CnpUq6EtVSZVD6qstzD6wwAxci5lM="}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-02-06T03:28:36.6411482Z","duration":"PT3M59.1390779S","correlationId":"dc6276e8-9bff-4013-add0-fe664e42d961","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["southcentralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002","apiVersion":"2015-05-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/nosuch"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"17572642595832455481","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"f66c7905-f570-4d41-9b60-a52f212cd15e"},"appSecret":{"type":"String","value":"185c3b2c-f8af-4312-853c-0b348d5be2de"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"southcentralus"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"},"botFileEncryptionKey":{"type":"String","value":"KRr6FBpIuVLGCS7mzICAh2Sr1C3bSUcBC1NMOicBza4="}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-03-07T01:14:07.1413367Z","duration":"PT2M58.4681842S","correlationId":"83e12952-ce1c-4cc2-a878-924b82a048e2","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["southcentralus"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002","resourceType":"microsoft.insights/components","resourceName":"cli000002","apiVersion":"2015-05-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/config/publishingcredentials","resourceType":"Microsoft.Web/Sites/config","resourceName":"cli000002/publishingcredentials","actionName":"list","apiVersion":"2018-02-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/nosuch"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy"}]}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['9495']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:28:41 GMT']
+      date: ['Thu, 07 Mar 2019 01:14:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -502,18 +456,18 @@ interactions:
       Connection: [keep-alive]
       ParameterSetName: [-k -g -n --appid -p -v --lang]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"W/\"datetime''2019-02-06T03%3A28%3A30.3526157Z''\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"2ef08845-681a-46df-98aa-b0dc19748438","developerAppInsightKey":"290837b2-299f-40cd-a073-e6c08695a49c","developerAppInsightsApplicationId":"cli000002","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":"","storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"0d00af5d-0000-0000-0000-5c8070590000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"f66c7905-f570-4d41-9b60-a52f212cd15e","developerAppInsightKey":"5c7cce1a-ddca-4f42-987d-04b0be5adb9a","developerAppInsightsApplicationId":"cli000002","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1033']
+      content-length: ['1029']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 03:28:41 GMT']
-      etag: [W/"datetime'2019-02-06T03%3A28%3A30.3526157Z'"]
+      date: ['Thu, 07 Mar 2019 01:14:13 GMT']
+      etag: ['"0d00af5d-0000-0000-0000-5c8070590000"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -532,7 +486,7 @@ interactions:
       Content-Length: ['0']
       ParameterSetName: [--name --yes --no-wait]
       User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.58]
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
@@ -541,12 +495,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 06 Feb 2019 03:28:41 GMT']
+      date: ['Thu, 07 Mar 2019 01:14:14 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdURUFPSUFZV0tKLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkczWVNIMldMNDRCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14997']
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
     status: {code: 202, message: Accepted}
 version: 1

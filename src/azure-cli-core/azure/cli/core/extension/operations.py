@@ -14,16 +14,15 @@ from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 import requests
-from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
-
-from knack.log import get_logger
 
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
-                                      WheelExtension, DevExtension, ExtensionNotInstalledException)
+                                      WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
+
+from knack.log import get_logger
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions
@@ -321,8 +320,8 @@ def reload_extension(extension_name, extension_module=None):
     return reload_module(extension_module if extension_module else get_extension_modname(ext_name=extension_name))
 
 
-def add_extension_to_path(extension_name):
-    ext_dir = get_extension_path(extension_name)
+def add_extension_to_path(extension_name, ext_dir=None):
+    ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
 
 

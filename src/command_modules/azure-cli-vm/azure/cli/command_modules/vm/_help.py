@@ -122,7 +122,7 @@ helps['vm create'] = """
           text: >
              az vm create -n MyVm -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a VM in an availability zone in the current resource group's region
-          min_profile: latest
+          supported-profiles: latest
           text: >
              az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """
@@ -181,7 +181,7 @@ helps['vmss create'] = """
           text: >
              az vmss create -n MyVmss -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a single zone VM scaleset in the current resource group's region
-          min_profile: latest
+          supported-profiles: latest
           text: >
              az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """
@@ -667,6 +667,7 @@ helps['vm encryption enable'] = """
     type: command
     short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks."
     long-summary: |
+        Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
         For more information, see:
         https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview
     parameters:
@@ -854,7 +855,7 @@ helps['vm image list-skus'] = """
     parameters:
         - name: --publisher -p
           populator-commands:
-          - az vm list-publishers
+          - az vm image list-publishers
     examples:
         - name: List all skus available for CentOS published by OpenLogic in the West US region.
           text: az vm image list-skus -l westus -f CentOS -p OpenLogic
@@ -1520,24 +1521,34 @@ helps['image list'] = """
     short-summary: List custom VM images.
 """
 
+helps['image update'] = """
+    type: command
+    short-summary: Update custom VM images.
+    examples:
+        - name: Add or update tags.
+          text: az image update -n ImageName -g ResourceGroup --tags tag1=val1 tag2=val2
+        - name: Remove all tags.
+          text: az image update -n ImageName -g resourceGroup --tags
+"""
+
 helps['sig'] = """
     type: group
-    short-summary: manage shared image gallery
+    short-summary: Manage shared image galleries
 """
 
 helps['sig create'] = """
     type: command
-    short-summary: create a share image gallery.
+    short-summary: Create a shared image gallery.
 """
 
 helps['sig list'] = """
     type: command
-    short-summary: list share image galleries.
+    short-summary: List shared image galleries.
 """
 
 helps['sig update'] = """
     type: command
-    short-summary: update a share image gallery.
+    short-summary: Update a shared image gallery.
 """
 
 helps['sig image-definition'] = """

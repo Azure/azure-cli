@@ -8,8 +8,6 @@
 import itertools
 from enum import Enum
 
-from knack.arguments import CLIArgumentType, ignore_type
-
 from azure.mgmt.sql.models import (
     Database,
     ElasticPool,
@@ -43,6 +41,8 @@ from azure.cli.core.commands.parameters import (
     get_location_type,
     tags_type
 )
+
+from knack.arguments import CLIArgumentType, ignore_type
 
 from .custom import (
     ClientAuthenticationType,

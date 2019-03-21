@@ -45,7 +45,7 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, OsType, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus = self.get_models('SkuName', 'PasswordName', 'OsType', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus')
+    SkuName, PasswordName, OsType, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode = self.get_models('SkuName', 'PasswordName', 'OsType', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode')
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
@@ -66,6 +66,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType), deprecate_info=c.deprecate(redirect='platform', hide=True))
         c.argument('platform', help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
+        c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
@@ -141,6 +142,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
+        c.argument('no_wait', help="Do not wait for the build to complete and return immediately after queuing the build.", action='store_true')
         c.argument('arg', options_list=['--build-arg'], help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
 
@@ -185,6 +187,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
+
+    with self.argument_context('acr task credential') as c:
+        # Custom registry credentials
+        c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
+
+    for scope in ['acr task credential add', 'acr task credential update']:
+        with self.argument_context(scope) as c:
+            c.argument('username', options_list=['--username', '-u'], help='The username to login to the custom registry.', required=True)
+            c.argument('password', options_list=['--password', '-p'], help='The password to login to the custom registry.', required=True)
 
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

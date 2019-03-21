@@ -194,10 +194,10 @@ In your YAML files, the same `short-summary` and `long-summary` is used for all 
 
 For the command parameters section, any parameters not used by a profile will be ignored and not displayed.
 
-For command examples, you optionally specify the profile the example is for with the `min_profile` and `max_profile` options.
+For command examples, you can optionally specify the profile the example is for with the `supported-profiles` and `unsupported-profiles` fields.
 
-Here's a samply for `storage account create`:  
-The first example is only supported on the profile `latest` and above whilst the second example if only supported on `2017-03-09-profile` and below.
+Here's a demonstration for `storage account create`:
+The first example is only supported on the `latest` and `2018-03-01-hybrid` profiles whilst the second example is only supported on `2017-03-09-profile`.
 
 ### _help.py
 
@@ -205,10 +205,12 @@ The first example is only supported on the profile `latest` and above whilst the
     examples:
         - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          min_profile: latest
+          unsupported-profiles: 2017-03-09-profile
+          # alternatively 
+          # supported-profiles: latest, 2018-03-01-hybrid
         - name: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          max_profile: 2017-03-09-profile
+          supported-profiles: 2017-03-09-profile
 ```
 
 ### help.yaml
@@ -217,15 +219,17 @@ The first example is only supported on the profile `latest` and above whilst the
     examples:
         - summary: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           command: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          min_profile: latest
+          supported-profiles: latest, 2018-03-01-hybrid
+          # alternatively 
+          # supported-profiles: latest, 2018-03-01-hybrid
         - summary: Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US region with locally redundant storage.
           command: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          max_profile: 2017-03-09-profile
+          supported-profiles: 2017-03-09-profile
 ```
 
 Here is how this looks in CLI `--help`:
 
-On profile `latest`.
+On profiles `latest` and `2018-03-01-hybrid`.
 ```
 Examples
     Create a storage account MyStorageAccount in resource group MyResourceGroup in the West US

@@ -543,6 +543,11 @@ examples:
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
+parameters:
+    - name: --settings
+      short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+    - name: --slot-settings
+      short-summary: Space-separated slot appsettings in KEY=VALUE format. Use @{file} to load from a file.
 """
 
 helps['webapp config backup'] = """
@@ -1166,7 +1171,7 @@ short-summary: Display the current distribution of traffic across slots.
 
 helps['webapp up'] = """
 type: command
-short-summary: (Preview) Create and deploy existing local code to the web app, by running the command from the folder where the code is present. Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET, staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command is run from an empty folder, an empty windows web app is created.
+short-summary: Create and deploy existing local code to the web app, by running the command from the folder where the code is present. Supports running the command in preview mode using --dryrun parameter. Current supports includes Node, Python,.NET Core, ASP.NET, staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command is run from an empty folder, an empty windows web app is created.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >

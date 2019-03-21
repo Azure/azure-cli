@@ -7,7 +7,9 @@ import os
 
 from knack.log import get_logger
 from knack.util import CLIError
+
 from .util import should_disable_connection_verify, DISABLE_VERIFY_VARIABLE_NAME
+
 logger = get_logger(__name__)
 
 ADAL_PYTHON_SSL_NO_VERIFY = "ADAL_PYTHON_SSL_NO_VERIFY"

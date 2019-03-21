@@ -10,30 +10,11 @@ from azure.cli.core.util import sdk_no_wait
 from ._client_factory import network_client_factory
 
 
-class UpdateContext(object):
-
-    def __init__(self, instance):
-        self.instance = instance
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    def set_param(self, prop, value, allow_clear=True):
-        if value == '' and allow_clear:
-            setattr(self.instance, prop, None)
-        elif value is not None:
-            setattr(self.instance, prop, value)
-
-
 def _get_property(items, name):
     result = next((x for x in items if x.name.lower() == name.lower()), None)
     if not result:
         raise CLIError("Property '{}' does not exist".format(name))
-    else:
-        return result
+    return result
 
 
 def list_network_resource_property(resource, prop):
@@ -53,14 +34,12 @@ def get_network_resource_property_entry(resource, prop):
 
     def get_func(cmd, resource_group_name, resource_name, item_name):
         client = getattr(network_client_factory(cmd.cli_ctx), resource)
-        items = getattr(client.get(resource_group_name, resource_name), prop)
-
-        result = next((x for x in items if x.name.lower() == item_name.lower()), None)
+        parent = getattr(client.get(resource_group_name, resource_name), prop)
+        result = next((x for x in parent if x.name.lower() == item_name.lower()), None)
         if not result:
             raise CLIError("Item '{}' does not exist on {} '{}'".format(
                 item_name, resource, resource_name))
-        else:
-            return result
+        return result
 
     func_name = 'get_network_resource_property_entry_{}_{}'.format(resource, prop)
     setattr(sys.modules[__name__], func_name, get_func)
@@ -75,7 +54,7 @@ def delete_network_resource_property_entry(resource, prop):
         item = client.get(resource_group_name, resource_name)
         keep_items = \
             [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
-        with UpdateContext(item) as c:
+        with cmd.update_context(item) as c:
             c.set_param(prop, keep_items)
         if no_wait:
             sdk_no_wait(no_wait, client.create_or_update, resource_group_name, resource_name, item)

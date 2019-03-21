@@ -3,9 +3,15 @@
 Release History
 ===============
 
-2.2.1
+2.2.2
 +++++
 * Fix redundant sources in image import.
+* Add '--auth-mode' for 'az acr build', 'az acr run', 'az acr task create', and 'az acr task update' commands.
+* Add 'acr task credential' command group for managing credentials for a Task.
+* Add '--no-wait' for 'az acr build' command.
+
+2.2.1
++++++
 * Add '--target' parameter for 'az acr build', 'az acr task create' and 'az acr task update' commands.
 * Improve error handling for runtime commands when not logged into Azure.
 

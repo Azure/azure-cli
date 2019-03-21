@@ -6,10 +6,11 @@
 import abc
 import os
 import yaml
-from knack.util import CLIError
-from knack.log import get_logger
+
 from azure.cli.core._help import (HelpExample, CliHelpFile)
 
+from knack.util import CLIError
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -137,7 +138,7 @@ class YamlLoaderMixin(object):  # pylint:disable=too-few-public-methods
             raise CLIError("No content passed for {}.".format(pretty_file_path))
 
         try:
-            return yaml.load(text)
+            return yaml.safe_load(text)
         except yaml.YAMLError as e:
             raise CLIError("Error parsing {}:\n\n{}".format(pretty_file_path, e))
 
