@@ -31,7 +31,7 @@ jobs:
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -482,34 +482,34 @@ jobs:
 
 
 
-- job: BuildDebianWheezy
-  displayName: Build Debian Wheezy Package
+# - job: BuildDebianWheezy
+#   displayName: Build Debian Wheezy Package
 
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Debian Wheezy'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: wheezy
-      DISTRO_BASE_IMAGE: debian:wheezy
+#   dependsOn: BuildPythonWheel
+#   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+#   pool:
+#     vmImage: 'ubuntu-16.04'
+#   steps:
+#   - task: DownloadBuildArtifacts@0
+#     displayName: 'Download Build Artifacts'
+#     inputs:
+#       artifactName: pypi
 
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      ArtifactName: debian
+#   - task: Bash@3
+#     displayName: 'Build Debian Wheezy'
+#     inputs:
+#       targetType: 'filePath'
+#       filePath: scripts/release/debian/pipeline.sh
+#     env:
+#       DISTRO: wheezy
+#       DISTRO_BASE_IMAGE: debian:wheezy
+
+
+#   - task: PublishBuildArtifacts@1
+#     displayName: 'Publish Artifact: debian'
+#     inputs:
+#       ArtifactName: debian
 
 
 
@@ -580,7 +580,6 @@ jobs:
    - BuildUbuntuXenial
    - BuildUbuntuTrusty
    - BuildUbuntuBionic
-   - BuildDebianWheezy
    - BuildDebianJessie
    - BuildDebianStretch
    - BuildUbuntuCosmic
@@ -605,8 +604,8 @@ jobs:
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
-       DISTROS=(wheezy jessie stretch xenial trusty)
-       BASE_IMAGES=(debian:wheezy debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
+       DISTROS=(jessie stretch xenial trusty)
+       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
 
        # Distros that don't require libssl1.1
        for i in ${!DISTROS[@]}; do
