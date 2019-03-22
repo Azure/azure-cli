@@ -403,6 +403,17 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('deleteRetentionPolicy.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.days', 1))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_copy_cancel_nopendingcopyoperation_error(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+        copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
+
 
 if __name__ == '__main__':
     unittest.main()
