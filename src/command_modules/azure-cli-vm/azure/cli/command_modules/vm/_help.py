@@ -18,7 +18,7 @@ long-summary: >4
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
 
-    Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
+    Azure Managed Data Disks have a maximum size of 32767 GB, and Azure Unmanaged Disks have a maximum capacity of 4095 GB.
 
 
     For more information, see:
