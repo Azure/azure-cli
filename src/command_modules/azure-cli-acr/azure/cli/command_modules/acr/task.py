@@ -8,13 +8,11 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials
+from ._utils import get_validate_platform, get_custom_registry_credentials
 from ._stream_utils import stream_logs
 
 logger = get_logger(__name__)
 
-
-TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
 NULL_CONTEXT = '/dev/null'
 
@@ -55,9 +53,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     resource_group_name=None,
                     target=None,
                     auth_mode=None):
-
-    registry, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     if context_path.lower() == NULL_CONTEXT:
         context_path = None
@@ -197,8 +192,6 @@ def acr_task_show(cmd,
                   registry_name,
                   with_secure_properties=False,
                   resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     if with_secure_properties:
         return client.get_details(resource_group_name, registry_name, task_name)
@@ -209,8 +202,6 @@ def acr_task_list(cmd,
                   client,
                   registry_name,
                   resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
 
@@ -219,8 +210,6 @@ def acr_task_delete(cmd,
                     task_name,
                     registry_name,
                     resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, task_name)
 
 
@@ -253,8 +242,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_type=None,
                     target=None,
                     auth_mode=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
@@ -404,8 +391,6 @@ def acr_task_credential_add(cmd,
                             username,
                             password,
                             resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
     existingCreds = {} if not existingCreds else existingCreds.custom_registries
@@ -438,8 +423,6 @@ def acr_task_credential_update(cmd,
                                username,
                                password,
                                resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
     existingCreds = {} if not existingCreds else existingCreds.custom_registries
@@ -470,8 +453,6 @@ def acr_task_credential_remove(cmd,
                                registry_name,
                                login_server,
                                resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
@@ -493,8 +474,6 @@ def acr_task_credential_list(cmd,
                              task_name,
                              registry_name,
                              resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     resp = client.get_details(resource_group_name, registry_name, task_name).credentials
     return {} if not resp else resp.custom_registries
@@ -506,8 +485,6 @@ def acr_task_update_run(cmd,
                         registry_name,
                         no_archive=None,
                         resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     is_archive_enabled = not no_archive if no_archive is not None else None
 
@@ -526,8 +503,6 @@ def acr_task_run(cmd,
                  no_logs=False,
                  no_wait=False,
                  resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
@@ -564,8 +539,6 @@ def acr_task_show_run(cmd,
                       run_id,
                       registry_name,
                       resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, run_id)
 
 
@@ -574,8 +547,6 @@ def acr_task_cancel_run(cmd,
                         run_id,
                         registry_name,
                         resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
     return client.cancel(resource_group_name, registry_name, run_id)
 
 
@@ -587,8 +558,6 @@ def acr_task_list_runs(cmd,
                        run_status=None,
                        image=None,
                        resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     filter_str = None
     filter_str = _add_run_filter(filter_str, 'TaskName', task_name, 'eq')
@@ -628,8 +597,6 @@ def acr_task_logs(cmd,
                   task_name=None,
                   image=None,
                   resource_group_name=None):
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     if not run_id:
         # show logs for the last run

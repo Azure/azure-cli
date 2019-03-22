@@ -67,6 +67,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('platform', help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
+        # Overwrite default shorthand of cmd to make availability for acr usage
+        c.argument('cmd', options_list=['--__cmd__'])
+        c.argument('cmd_value', help="Commands to execute.", options_list=['--cmd'])
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
@@ -137,9 +140,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
-        # Overwrite default shorthand of cmd to make availability for image usage
-        c.argument('cmd', options_list=['--__cmd__'])
-        c.argument('cmd_value', help="Commands to execute for the queued run.", options_list=['--cmd'])
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -190,9 +190,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
-        # Overwrite default shorthand of cmd to make availability for image usage
-        c.argument('cmd', options_list=['--__cmd__'])
-        c.argument('cmd_value', help="Commands to execute in the task.", options_list=['--cmd'])
 
     with self.argument_context('acr task credential') as c:
         # Custom registry credentials
