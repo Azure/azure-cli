@@ -2,7 +2,8 @@
 
 Release History
 ===============
-
+0.2.16
+++++++
 * webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly
 * webapp, functionapp: az webapp config ssl bind command was failing for slots
 
