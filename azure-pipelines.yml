@@ -71,7 +71,7 @@ jobs:
       set -ev
 
       # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
-      azdev cli check-versions | grep "OK!"
+      azdev cli check-versions 2>&1 >/dev/null | grep "OK!"
     displayName: 'Verify Versions'
     condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
