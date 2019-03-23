@@ -405,8 +405,8 @@ def _get_displayable_name(graph_object):
     return graph_object.display_name or ''
 
 
-def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
-                            resource_group_name=None, scope=None, include_inherited=False):
+def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
+                            scope=None, include_inherited=False, yes=None):
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -417,6 +417,15 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
         for i in ids:
             assignments_client.delete_by_id(i)
         return
+
+    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
+        from knack.prompting import prompt_y_n, NoTTYException
+        try:
+            msg = 'You are deleting all role assignments under the subscription. Are you sure to continue?'
+            if not prompt_y_n(msg, default="n"):
+                return
+        except NoTTYException:
+            raise CLIError('Unable to prompt for confirmation as no tty available. Use --yes.')
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
