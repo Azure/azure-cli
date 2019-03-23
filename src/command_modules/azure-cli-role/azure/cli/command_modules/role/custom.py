@@ -417,7 +417,6 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
         for i in ids:
             assignments_client.delete_by_id(i)
         return
-
     if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
         from knack.prompting import prompt_y_n, NoTTYException
         try:
