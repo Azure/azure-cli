@@ -243,9 +243,9 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 
 
 # region Disks (Managed)
-def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
+def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals
                         size_gb=None, sku='Premium_LRS', os_type=None,
-                        source=None, for_upload=None, # pylint: disable=unused-argument
+                        source=None, for_upload=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
@@ -267,7 +267,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id)
 
-    if size_gb is None and option == DiskCreateOption.empty:
+    if size_gb is None and (option == DiskCreateOption.empty or for_upload):
         raise CLIError('usage error: --size-gb required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
@@ -376,9 +376,9 @@ def list_images(cmd, resource_group_name=None):
 
 # region Snapshots
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None, # pylint: disable=unused-argument
+                    source=None, for_upload=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
-                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None, 
+                    source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False):
     Snapshot, CreationData, DiskCreateOption = cmd.get_models('Snapshot', 'CreationData', 'DiskCreateOption')
 

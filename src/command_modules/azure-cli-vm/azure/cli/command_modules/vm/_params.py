@@ -71,7 +71,7 @@ def load_arguments(self, _):
             if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
                 c.argument('for_upload', arg_type=get_three_state_flag(),
-                           help='create the disk for uploading blobs later through storage commands, run "az disk/snpashot grant-access --access-level Write" to get required SAS token')
+                           help='Create the {0} for uploading blobs later on through storage commands. Run "az {0} grant-access --access-level Write" to retrieve the {0}\'s SAS token.'.format(scope))
                 c.argument('hyper_v_generation', help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only. Possible values include: "V1", "V2"')
 
     for scope in ['disk create', 'snapshot create']:
