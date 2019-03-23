@@ -8,7 +8,12 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._utils import get_registry_by_name, validate_managed_registry, get_validate_platform, get_custom_registry_credentials
+from ._utils import (
+    get_registry_by_name,
+    validate_managed_registry,
+    get_validate_platform,
+    get_custom_registry_credentials
+)
 from ._stream_utils import stream_logs
 
 logger = get_logger(__name__)
