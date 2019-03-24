@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Fixes database create and update
+
 0.2.0
 +++++
 
