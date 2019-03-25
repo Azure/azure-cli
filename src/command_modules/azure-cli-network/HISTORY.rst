@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
+* `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
 * `application-gateway`: Add `rewrite-rule` command group.
 
 2.3.4

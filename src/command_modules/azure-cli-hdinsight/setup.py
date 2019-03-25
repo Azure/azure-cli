@@ -32,7 +32,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-mgmt-hdinsight==0.2.1',
     'azure-mgmt-storage==3.1.1',
-    'azure-mgmt-network==2.6.0rc1',
+    'azure-mgmt-network==2.6.0',
     'azure-cli-core',
 ]
 
