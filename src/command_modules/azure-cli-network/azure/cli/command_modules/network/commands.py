@@ -384,6 +384,11 @@ def load_command_table(self, _):
                                  custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                  child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
 
+    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
+        g.command('condition list-server-variables', 'list_available_server_variables')
+        g.command('list-request-headers', 'list_available_request_headers')
+        g.command('list-response-headers', 'list_available_response_headers')
+
     with self.command_group('network application-gateway ssl-policy') as g:
         g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
         g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace)

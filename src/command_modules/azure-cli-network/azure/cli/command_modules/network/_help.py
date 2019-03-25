@@ -516,6 +516,13 @@ helps['network application-gateway rewrite-rule'] = """
 helps['network application-gateway rewrite-rule create'] = """
     short-summary: Create a rewrite rule.
     type: command
+    parameters:
+      - name: --request-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-request-headers
+      - name: --response-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-response-headers
 """
 
 helps['network application-gateway rewrite-rule delete'] = """
@@ -536,6 +543,13 @@ helps['network application-gateway rewrite-rule show'] = """
 helps['network application-gateway rewrite-rule update'] = """
     short-summary: Update a rewrite rule.
     type: command
+    parameters:
+      - name: --request-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-request-headers
+      - name: --response-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-response-headers
 """
 
 helps['network application-gateway rewrite-rule set'] = """
@@ -576,6 +590,10 @@ helps['network application-gateway rewrite-rule condition'] = """
 helps['network application-gateway rewrite-rule condition create'] = """
     short-summary: Create a rewrite rule condition.
     type: command
+    parameters:
+      - name: --variable
+        populator-commands:
+          - az network application-gateway rewrite-rule condition list-server-variables
 """
 
 helps['network application-gateway rewrite-rule condition delete'] = """
@@ -596,6 +614,10 @@ helps['network application-gateway rewrite-rule condition show'] = """
 helps['network application-gateway rewrite-rule condition update'] = """
     short-summary: Update a rewrite rule condition.
     type: command
+    parameters:
+      - name: --variable
+        populator-commands:
+          - az network application-gateway rewrite-rule condition list-server-variables
 """
 # endregion
 
