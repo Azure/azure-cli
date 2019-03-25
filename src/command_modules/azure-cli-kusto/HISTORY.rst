@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.1
++++++
+* kusto dependency bug fix
+
 0.2.0
 +++++
 
