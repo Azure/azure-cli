@@ -78,6 +78,7 @@ def service_endpoint_completer(cmd, prefix, namespace, **kwargs):  # pylint: dis
     location = namespace.location
     return [x.name for x in client.list(location=location)]
 
+
 def get_sdk_completer(group, operation_name):
 
     @Completer
