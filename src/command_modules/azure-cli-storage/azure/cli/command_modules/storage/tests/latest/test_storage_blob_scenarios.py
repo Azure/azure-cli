@@ -409,9 +409,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
+        local_file = self.create_temp_file(1)
         copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
 
-        with self.assertRaises(Exception):
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
+        with self.assertRaisesRegexp(TypeError, "'CommandResultItem' object is not iterable"):
             self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
 
 
