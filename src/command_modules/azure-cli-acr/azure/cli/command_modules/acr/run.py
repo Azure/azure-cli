@@ -84,8 +84,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         values_content = ""
 
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.run_image }}\n"
-        values_content = "run_image: {0}\n".format(cmd_value)
+        yaml_template = "steps: \n  - cmd: {{ .Values.run_image }}\n    timeout: {{ .Values.timeout }}\n"
+        values_content = "run_image: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
 
     if yaml_template is not None:
         import base64
