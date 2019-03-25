@@ -186,7 +186,7 @@ def load_arguments(self, _):
         c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
         c.argument('new', action='store_true', help='create a new disk')
         c.argument('sku', arg_type=disk_sku, help='Underlying storage SKU')
-        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Managed Disks Max size: 32767 GB, Unmanaged Disks Max size: 4095 GB', type=int)
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
     with self.argument_context('vm disk attach') as c:
