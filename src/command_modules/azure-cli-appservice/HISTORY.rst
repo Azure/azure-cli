@@ -5,6 +5,7 @@ Release History
 
 0.2.17
 ++++++
+* webapp: Adding --logs support to az webapp up and other improvements to the up command
 * functionapp: fix `az functionapp devops-build create` command azure-pipelines.yml generation issues
 * functionapp: improve `az functionapp devops-build create` error handlings and error indications
 * functionapp: remove `--local_git` flag in devops-build command, local git detection and handling are compulsory for creating Azure DevOps pipelines
