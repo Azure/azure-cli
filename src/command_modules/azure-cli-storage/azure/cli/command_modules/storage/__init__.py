@@ -142,7 +142,7 @@ class StorageCommandGroup(AzCommandGroup):
             self._register_data_plane_oauth_arguments(command_name)
 
     def storage_command_oauth(self, *args, **kwargs):
-        _merge_new_exception_handler(kwargs, self.get_handler_suppress_403())
+        _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
         self.storage_command(*args, oauth=True, **kwargs)
 
     def storage_custom_command(self, name, method_name, oauth=False, **kwargs):
@@ -152,10 +152,10 @@ class StorageCommandGroup(AzCommandGroup):
             self._register_data_plane_oauth_arguments(command_name)
 
     def storage_custom_command_oauth(self, *args, **kwargs):
-        _merge_new_exception_handler(kwargs, self.get_handler_suppress_403())
+        _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
-    def get_handler_suppress_403(self):
+    def get_handler_suppress_some_400(self):
         def handler(ex):
             from azure.cli.core.profiles import get_sdk
             from knack.log import get_logger
@@ -176,6 +176,9 @@ Depending on your operation, you may need to be assigned one of the following ro
 If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
                 """
                 logger.error(message)
+                return
+            if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
+                logger.error(ex.args[0])
                 return
             raise ex
 
