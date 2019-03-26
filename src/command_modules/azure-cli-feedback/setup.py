@@ -32,7 +32,6 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'pyperclip'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

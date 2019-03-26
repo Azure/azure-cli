@@ -21,55 +21,51 @@ COMPONENT_PREFIX = 'azure-cli-'
 
 
 def handle_exception(ex, cli_ctx=None):
-    def remove_hdlr(exit_code, hdlr):
-        logger.removeHandler(hdlr)  # remove command metadata handler
-        return exit_code
-
-    hdlr = cli_ctx.logging.command_logger_handler
-    if hdlr:
-        logger.addHandler(hdlr)  # add command metadata handler
-
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError
-    if isinstance(ex, (CLIError, CloudError)):
-        logger.error(ex.args[0])
-        return remove_hdlr(ex.args[1] if len(ex.args) >= 2 else 1, hdlr)
-    if isinstance(ex, KeyboardInterrupt):
-        return remove_hdlr(1, hdlr)
-    if isinstance(ex, HttpOperationError):
-        try:
-            response_dict = json.loads(ex.response.text)
-            error = response_dict['error']
+    from azure.cli.core.azlogging import CommandLoggerContext
 
-            # ARM should use ODATA v4. So should try this first.
-            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
-            if isinstance(error, dict):
-                code = "{} - ".format(error.get('code', 'Unknown Code'))
-                message = error.get('message', ex)
-                logger.error("%s%s", code, message)
-            else:
-                logger.error(error)
+    with CommandLoggerContext(cli_ctx, logger):
 
-        except (ValueError, KeyError):
-            logger.error(ex)
-        return remove_hdlr(1, hdlr)
+        if isinstance(ex, (CLIError, CloudError)):
+            logger.error(ex.args[0])
+            return ex.args[1] if len(ex.args) >= 2 else 1
+        if isinstance(ex, KeyboardInterrupt):
+            return 1
+        if isinstance(ex, HttpOperationError):
+            try:
+                response_dict = json.loads(ex.response.text)
+                error = response_dict['error']
 
-    # Otherwise, unhandled exception. Direct users to create an issue.
-    is_extension = False
-    if cli_ctx:
-        try:
-            if cli_ctx.invocation.data['command_extension_name']:
-                is_extension = True
-        except (AttributeError, KeyError):
-            pass
+                # ARM should use ODATA v4. So should try this first.
+                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+                if isinstance(error, dict):
+                    code = "{} - ".format(error.get('code', 'Unknown Code'))
+                    message = error.get('message', ex)
+                    logger.error("%s%s", code, message)
+                else:
+                    logger.error(error)
 
-    issue_url = "https://aka.ms/azcli/ext/issues" if is_extension else "https://aka.ms/azcli/issues"
-    logger.error("The command failed with an unexpected error. Here is the traceback:\n")
-    logger.exception(ex)
-    logger.warning("\nTo open an issue, please visit: %s", issue_url)
+            except (ValueError, KeyError):
+                logger.error(ex)
+            return 1
 
-    return remove_hdlr(1, hdlr)
+        # Otherwise, unhandled exception. Direct users to create an issue.
+        is_extension = False
+        if cli_ctx:
+            try:
+                if cli_ctx.invocation.data['command_extension_name']:
+                    is_extension = True
+            except (AttributeError, KeyError):
+                pass
+
+        issue_url = "https://aka.ms/azcli/ext/issues" if is_extension else "https://aka.ms/azcli/issues"
+        logger.error("The command failed with an unexpected error. Here is the traceback:\n")
+        logger.exception(ex)
+        logger.warning("\nTo open an issue, please visit: %s", issue_url)
+
+        return 1
 
 
 # pylint: disable=inconsistent-return-statements

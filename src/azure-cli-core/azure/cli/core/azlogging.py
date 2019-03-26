@@ -40,14 +40,14 @@ class AzCliLogging(CLILogging):
 
     def __init__(self, name, cli_ctx=None):
         super(AzCliLogging, self).__init__(name, cli_ctx)
-        self.command_log_dir = AzCliLogging._get_command_log_dir(cli_ctx)
+        self.command_log_dir = os.path.join(cli_ctx.config.config_dir, 'commands')
         self.command_logger_handler = None
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
 
-    @staticmethod
-    def _get_command_log_dir(cli_ctx):
-        return os.path.join(cli_ctx.config.config_dir, 'commands')
+
+    def _get_command_log_dir(self):
+        return self.command_log_dir
 
     @staticmethod
     def init_command_file_logging(cli_ctx, **kwargs):
@@ -111,5 +111,29 @@ class AzCliLogging(CLILogging):
                 self.command_metadata_logger.info("command ran in %.3f seconds.", elapsed_time)
             self.command_metadata_logger.info("exit code: %s", exit_code)
 
-            # We have finished metadata logging, set metadata logger to None.
+            # We have finished metadata logging, remove handler and set command_metadata_handler to None.
+            # crucial to remove handler as in python logger objects are shared which can affect testing of this logger
+            # we do not want duplicate handlers to be added in subsequent calls of _init_command_logfile_handlers
+            self.command_metadata_logger.removeHandler(self.command_logger_handler)
             self.command_metadata_logger = None
+
+class CommandLoggerContext(object):
+    def __init__(self, cli_ctx, module_logger):
+        self.cli_ctx = cli_ctx
+        self.logger = module_logger
+
+
+    def __enter__(self):
+        if not self.cli_ctx:
+            return self
+        hdlr = self.cli_ctx.logging.command_logger_handler
+        if hdlr:
+            self.logger.addHandler(hdlr)  # add command metadata handler
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self.cli_ctx:
+            return
+        hdlr = self.cli_ctx.logging.command_logger_handler
+        if hdlr:
+            self.logger.removeHandler(hdlr)

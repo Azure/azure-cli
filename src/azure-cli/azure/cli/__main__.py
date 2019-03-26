@@ -60,6 +60,6 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
         az_cli.logging._end_cmd_metadata_logging(exit_code, elapsed_time)
     except NameError:
         az_cli.logging._end_cmd_metadata_logging(exit_code, None)
-
+    raise ex
 finally:
     telemetry.conclude()

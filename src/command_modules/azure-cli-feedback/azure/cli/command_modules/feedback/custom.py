@@ -27,23 +27,22 @@ _ONE_HR_IN_SECS = 3600
 
 logger = get_logger(__name__)
 
-MSG_THNK = 'Thanks for your feedback!'
+_MSG_THNK = 'Thanks for your feedback!'
 
 _GET_STARTED_URL = "aka.ms/azcli/get-started"
 _QUESTIONS_URL = "aka.ms/azcli/questions"
 _CLI_ISSUES_URL = "aka.ms/azcli/issues"
 _EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
 
-MSG_INTR = \
+_MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
     'For more information on getting started, visit: {}\n' \
     'If you have questions, visit our Stack Overflow page: {}\n'\
         .format(_GET_STARTED_URL, _QUESTIONS_URL)
 
-MSG_CMD_ISSUE = "If you would like to create an issue, please enter the number of the appropriate command.\n" \
-                "Otherwise enter 0 to create a generic issue or enter q to quit: "
+_MSG_CMD_ISSUE = "\nEnter the number of the command you would like to create an issue for. \nEnter {} to create a generic issue. Enter q to quit: "
 
-MSG_ISSUE = "Would you like to create an issue? Enter Y or N: "
+_MSG_ISSUE = "Would you like to create an issue? Enter Y or N: "
 
 _ISSUES_TEMPLATE_PREFIX = """
 
@@ -98,13 +97,13 @@ Add any other context about the problem here.
 
 """
 
+_LogMetadataType = namedtuple('LogMetadata', ['cmd', 'seconds_ago', 'file_path', 'p_id'])
 
-_LogMetadataType = namedtuple('LogMetadata', ['cmd', 'log_time', 'file_path', 'p_id'])
 
 class CommandLogFile(object):
     _LogRecordType = namedtuple("LogRecord", ["p_id", "date_time", "level", "logger", "log_msg"])
 
-    def __init__(self, log_file_path, time_now=None):
+    def __init__(self, log_file_path, time_now=None, cli_ctx=None):
 
         if (time_now is not None) and (not isinstance(time_now, datetime.datetime)):
             raise TypeError("Expected type {} for time_now, instead received {}.", datetime.datetime, type(time_now))
@@ -121,6 +120,8 @@ class CommandLogFile(object):
 
         self._metadata = self._get_command_metadata_from_file()
         self._data = None
+
+        self.cli_ctx = None
 
 
     @property
@@ -154,16 +155,18 @@ class CommandLogFile(object):
         if not self.metadata_tup:
             return ""
 
-        total_seconds = self.metadata_tup.log_time
+        total_seconds = self.metadata_tup.seconds_ago
 
         time_delta = datetime.timedelta(seconds=total_seconds)
+        logger.debug("%s time_delta", time_delta)
 
         if time_delta.days > 0:
             time_str = "Ran: {} days ago".format(time_delta.days)
         elif total_seconds > _ONE_HR_IN_SECS:
             hrs, secs = divmod(total_seconds, _ONE_HR_IN_SECS)
+            logger.debug("%s hrs, %s secs", hrs, secs)
             hrs = int(hrs)
-            mins = math.floor(total_seconds / _ONE_MIN_IN_SECS)
+            mins = math.floor(secs / _ONE_MIN_IN_SECS)
             time_str = "Ran: {} hrs {:02} mins ago".format(hrs, mins)
         elif total_seconds > _ONE_MIN_IN_SECS:
             time_str = "Ran: {} mins ago".format(math.floor(total_seconds / _ONE_MIN_IN_SECS))
@@ -213,12 +216,12 @@ class CommandLogFile(object):
             logger.debug(e)
             return None
 
-        difference = (time_now - date_time_stamp)
+        difference = time_now - date_time_stamp
 
         total_seconds = difference.total_seconds()
 
 
-        return _LogMetadataType(cmd=command, log_time=total_seconds, file_path=self._log_file_path, p_id=int(poss_pid))
+        return _LogMetadataType(cmd=command, seconds_ago=total_seconds, file_path=self._log_file_path, p_id=int(poss_pid))
 
 
     def _get_command_data_from_metadata(self):
@@ -306,7 +309,7 @@ class CommandLogFile(object):
             command_args_msg = log_record_list[0].log_msg.strip().lower()
             if command_args_msg.startswith("command args:"):
                 idx = command_args_msg.index(":")
-                log_data["command_args"] = command_args_msg[idx + 1:]
+                log_data["command_args"] = command_args_msg[idx + 1:].strip()
             else:
                 raise ValueError
         except (IndexError, ValueError):
@@ -346,64 +349,14 @@ class CommandLogFile(object):
         return CommandLogFile._LogRecordType(*parts)
 
 
-def _prompt_issue(recent_command_list):
-    if recent_command_list:
-        max_idx = len(recent_command_list)
-        ans = -1
-        help_string = 'Please rate between 0 and {}, or enter q to quit: '.format(max_idx)
-
-        while ans < 0 or ans > max_idx:
-            try:
-                ans = prompt(MSG_CMD_ISSUE, help_string=help_string)
-                if ans in ["q", "quit"]:
-                    break
-                ans = int(ans)
-            except ValueError:
-                logger.warning(help_string)
-                ans = -1
-
-    else:
-        ans = None
-        help_string = 'Please rate between Y and N: '
-
-        while not ans:
-            ans = prompt(MSG_ISSUE, help_string=help_string)
-            if ans.lower() not in ["y", "n", "yes", "no"]:
-                ans = None
-                continue
-
-            # strip to short form
-            ans = ans[0].lower() if ans else None
-
-    if ans in ["y", "n"]:
-        if ans == "y":
-            prefix, body, url = _build_issue_body()
+def _build_issue_info_tup(command_log_file=None):
+    def _get_parent_proc_name():
+        import psutil
+        parent = psutil.Process(os.getpid()).parent()
+        if parent:
+            return parent.name()
         else:
-            return False
-    else:
-        if ans in ["q", "quit"]:
-            return False
-        if ans == 0:
-            prefix, body, url = _build_issue_body()
-
-        else:
-            prefix, body, url = _build_issue_body(recent_command_list[ans-1])
-
-    print(prefix)
-
-    # open issues page in browser and copy issue body to clipboard
-    try:
-        pyperclip.copy(body)
-    except pyperclip.PyperclipException as ex:
-        logger.debug(ex)
-
-    logger.info(body)
-    open_page_in_browser("https://" + url)
-
-    return True
-
-
-def _build_issue_body(command_log_file=None):
+            return None
 
     format_dict = {"command_name": "",
                    "command_duration": "", "errors_string": "",
@@ -436,7 +389,7 @@ def _build_issue_body(command_log_file=None):
     format_dict["python_info"] = "Python {}".format(platform.python_version())
     format_dict["system_name"] = "OS/System Name: {}".format(platform.system())
     format_dict["platform"] = "Platform Name: {}".format(platform.platform())
-    format_dict["shell"] = "Shell: {}".format(os.getenv("SHELL", ""))
+    format_dict["shell"] = "Shell: {}".format(_get_parent_proc_name())
 
     issues_url = _EXTENSIONS_ISSUES_URL if is_ext else _CLI_ISSUES_URL
 
@@ -483,22 +436,9 @@ def _display_recent_commands(cmd):
 
     time_now = datetime.datetime.now()
 
-    command_logs_dir = cmd.cli_ctx.logging._get_command_log_dir(cmd.cli_ctx)
+    command_log_files = _get_command_log_files(cmd.cli_ctx, time_now)
 
-    files = os.listdir(command_logs_dir)
-    files = (file_name for file_name in files if file_name.endswith(".log"))
-    files = sorted(files)
-
-    command_log_files = []
-    for file_name in files:
-        file_path = os.path.join(command_logs_dir, file_name)
-        cmd_log_file = CommandLogFile(file_path, time_now)
-
-        if cmd_log_file.metadata_tup:
-            command_log_files.append(cmd_log_file)
-        else:
-            logger.debug("%s is an invalid command log file.", file_path)
-
+    # if no command log files, return
     if not command_log_files:
         return []
 
@@ -512,6 +452,7 @@ def _display_recent_commands(cmd):
             max_len_dict["time_len"] = max(len(log_file.get_command_time_str()), max_len_dict["time_len"])
             max_len_dict["duration_len"] = max(len(log_file.get_command_duration_str()), max_len_dict["duration_len"])
 
+    print("Recent commands:\n")
     for i, log_info in enumerate(command_log_files):
         idx = i + 1
 
@@ -521,17 +462,94 @@ def _display_recent_commands(cmd):
         duration_msg = _pad_string(log_info.get_command_duration_str() + ".", max_len_dict["duration_len"] + 1)
         print("   [{}] {}: {} {} {} ".format(idx, cmd_name, success_msg, time_msg, duration_msg))
 
+    print("   [{}] None".format(len(command_log_files) + 1))
+    command_log_files.append(None)
+
     return command_log_files
+
+
+def _get_command_log_files(cli_ctx, time_now=None):
+    command_logs_dir = cli_ctx.logging._get_command_log_dir()
+    files = os.listdir(command_logs_dir)
+    files = (file_name for file_name in files if file_name.endswith(".log"))
+    files = sorted(files)
+    command_log_files = []
+    for file_name in files:
+        file_path = os.path.join(command_logs_dir, file_name)
+        cmd_log_file = CommandLogFile(file_path, time_now, cli_ctx)
+
+        if cmd_log_file.metadata_tup:
+            command_log_files.append(cmd_log_file)
+        else:
+            logger.debug("%s is an invalid command log file.", file_path)
+    return command_log_files
+
+
+def _prompt_issue(recent_command_list):
+    if recent_command_list:
+        max_idx = len(recent_command_list)
+        ans = -1
+        help_string = 'Please choose between 1 and {}, or enter q to quit: '.format(max_idx)
+
+        while ans < 1 or ans > max_idx:
+            try:
+                ans = prompt(_MSG_CMD_ISSUE.format(max_idx), help_string=help_string)
+                if ans in ["q", "quit"]:
+                    break
+                ans = int(ans)
+            except ValueError:
+                logger.warning(help_string)
+                ans = -1
+
+    else:
+        ans = None
+        help_string = 'Please choose between Y and N: '
+
+        while not ans:
+            ans = prompt(_MSG_ISSUE, help_string=help_string)
+            if ans.lower() not in ["y", "n", "yes", "no", "q"]:
+                ans = None
+                continue
+
+            # strip to short form
+            ans = ans[0].lower() if ans else None
+
+    if ans in ["y", "n"]:
+        if ans == "y":
+            prefix, body, url = _build_issue_info_tup()
+        else:
+            return False
+    else:
+        if ans in ["q", "quit"]:
+            return False
+        if ans == 0:
+            prefix, body, url = _build_issue_info_tup()
+
+        else:
+            prefix, body, url = _build_issue_info_tup(recent_command_list[ans - 1])
+
+    print(prefix)
+
+    # open issues page in browser and copy issue body to clipboard
+    try:
+        pyperclip.copy(body)
+    except pyperclip.PyperclipException as ex:
+        logger.debug(ex)
+
+    logger.info(body)
+    open_page_in_browser("https://" + url)
+
+    return True
 
 
 def handle_feedback(cmd):
     try:
-        print(MSG_INTR)
+        print(_MSG_INTR)
         recent_commands = _display_recent_commands(cmd)
         res = _prompt_issue(recent_commands)
 
         if res:
-            print(MSG_THNK)
+            print(_MSG_THNK)
         return
     except NoTTYException:
         raise CLIError('This command is interactive, however no tty is available.')
