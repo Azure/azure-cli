@@ -6,6 +6,7 @@ Release History
 * `storage blob download-batch/upload-batch`- adjust progress bar to be less verbose and indicate current blob
 * `storage account update`- Fix faulty logic for updating of encryption parameters.
 * `storage blob show`- Fix failing command when using oauth (`--auth-mode=login`).
+* `storage blob copy cancel` - only show the error instead of exception for NoPendingCopyOperation.
 
 2.3.1
 +++++
