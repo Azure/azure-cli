@@ -313,7 +313,7 @@ helps['storage blob upload-batch'] = """
         - name: --maxsize-condition
           short-summary: The max length in bytes permitted for an append blob.
         - name: --lease-id
-          short-summary: Required if the blob has an active lease
+          short-summary: The active lease id for the blob
     examples:
         - name: Upload all files that end with .py unless blob exists and has been modified since given date.
           text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
