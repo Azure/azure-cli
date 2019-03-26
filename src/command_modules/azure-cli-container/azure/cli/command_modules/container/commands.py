@@ -9,7 +9,7 @@ from ._format import transform_container_group_list, transform_container_group
 
 
 container_group_sdk = CliCommandType(
-    operations_tmpl='azure.mgmt.containerinstance.operations.container_groups_operations#ContainerGroupsOperations.{}',
+    operations_tmpl='azure.mgmt.containerinstance.operations#ContainerGroupsOperations.{}',
     client_factory=cf_container_groups
 )
 

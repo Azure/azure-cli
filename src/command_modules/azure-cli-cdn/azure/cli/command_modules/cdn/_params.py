@@ -57,7 +57,8 @@ def load_arguments(self, _):
     # Endpoint #
 
     with self.argument_context('cdn endpoint') as c:
-        c.argument('endpoint_name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
+        c.argument('content_paths', nargs='+')
+        c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Name of the CDN endpoint.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('origins', options_list='--origin', nargs='+', action=OriginType, validator=validate_origin,
                    help='Endpoint origin specified by the following space-delimited 3 '
@@ -79,16 +80,13 @@ def load_arguments(self, _):
         c.argument('query_string_caching_behavior', options_list='--query-string-caching',
                    arg_type=get_enum_type(caching_behavior))
         c.argument('content_types_to_compress', nargs='+')
-        c.argument('profile_name', help=profile_name_help)
+        c.argument('profile_name', help=profile_name_help, id_part='name')
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
 
-    with self.argument_context('cdn endpoint load') as c:
-        c.argument('content_paths', nargs='+')
-
-    with self.argument_context('cdn endpoint purge') as c:
-        c.argument('content_paths', nargs='+')
+    with self.argument_context('cdn endpoint list') as c:
+        c.argument('profile_name', id_part=None)
 
     # Custom Domain #
 

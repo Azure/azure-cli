@@ -15,14 +15,6 @@ import copy
 from importlib import import_module
 import six
 
-from knack.arguments import CLICommandArgument
-from knack.commands import CLICommand, CommandGroup
-from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
-from knack.invocation import CommandInvoker
-from knack.log import get_logger
-from knack.util import CLIError, CommandResultItem, todict
-from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
-
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -32,6 +24,14 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 import azure.cli.core.telemetry as telemetry
+
+from knack.arguments import CLICommandArgument
+from knack.commands import CLICommand, CommandGroup
+from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
+from knack.invocation import CommandInvoker
+from knack.log import get_logger
+from knack.util import CLIError, CommandResultItem, todict
+from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 
 logger = get_logger(__name__)
 
@@ -189,6 +189,29 @@ class AzCliCommand(CLICommand):
         return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models',
                                    operation_group=operation_group)
 
+    def update_context(self, obj_inst):
+        class UpdateContext(object):
+            def __init__(self, instance):
+                self.instance = instance
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            def set_param(self, prop, value, allow_clear=True, curr_obj=None):
+                curr_obj = curr_obj or self.instance
+                if '.' in prop:
+                    prop, path = prop.split('.', 1)
+                    curr_obj = getattr(curr_obj, prop)
+                    self.set_param(path, value, allow_clear=allow_clear, curr_obj=curr_obj)
+                elif value == '' and allow_clear:
+                    setattr(curr_obj, prop, None)
+                elif value is not None:
+                    setattr(curr_obj, prop, value)
+        return UpdateContext(obj_inst)
+
 
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
@@ -326,7 +349,7 @@ class AzCliCommandInvoker(CommandInvoker):
         if len(exceptions) == 1 and not results:
             ex, id_arg = exceptions[0]
             raise ex
-        elif exceptions:
+        if exceptions:
             for exception, id_arg in exceptions:
                 logger.warning('%s: "%s"', id_arg, str(exception))
             if not results:

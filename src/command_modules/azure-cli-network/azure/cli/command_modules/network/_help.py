@@ -505,7 +505,120 @@ helps['network application-gateway redirect-config update'] = """
             az network application-gateway redirect-config update -g MyResourceGroup --gateway-name MyAppGateway \\
                 -n MyRedirectConfig --type Permanent --target-listener MyNewBackendListener
 """
+# endregion
 
+# region Application Gateway rewrite rules
+helps['network application-gateway rewrite-rule'] = """
+    short-summary: Manage rewrite rules of an application gateway.
+    type: group
+"""
+
+helps['network application-gateway rewrite-rule create'] = """
+    short-summary: Create a rewrite rule.
+    type: command
+    parameters:
+      - name: --request-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-request-headers
+      - name: --response-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-response-headers
+"""
+
+helps['network application-gateway rewrite-rule delete'] = """
+    short-summary: Delete a rewrite rule.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule list'] = """
+    short-summary: List rewrite rules.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule show'] = """
+    short-summary: Get the details of a rewrite rule.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule update'] = """
+    short-summary: Update a rewrite rule.
+    type: command
+    parameters:
+      - name: --request-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-request-headers
+      - name: --response-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-response-headers
+"""
+
+helps['network application-gateway rewrite-rule set'] = """
+    short-summary: Manage rewrite rule sets of an application gateway.
+    type: group
+"""
+
+helps['network application-gateway rewrite-rule set create'] = """
+    short-summary: Create a rewrite rule set.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule set delete'] = """
+    short-summary: Delete a rewrite rule set.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule set list'] = """
+    short-summary: List rewrite rule sets.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule set show'] = """
+    short-summary: Get the details of a rewrite rule set.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule set update'] = """
+    short-summary: Update a rewrite rule set.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule condition'] = """
+    short-summary: Manage rewrite rule conditions of an application gateway.
+    type: group
+"""
+
+helps['network application-gateway rewrite-rule condition create'] = """
+    short-summary: Create a rewrite rule condition.
+    type: command
+    parameters:
+      - name: --variable
+        populator-commands:
+          - az network application-gateway rewrite-rule condition list-server-variables
+"""
+
+helps['network application-gateway rewrite-rule condition delete'] = """
+    short-summary: Delete a rewrite rule condition.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule condition list'] = """
+    short-summary: List rewrite rule conditions.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule condition show'] = """
+    short-summary: Get the details of a rewrite rule condition.
+    type: command
+"""
+
+helps['network application-gateway rewrite-rule condition update'] = """
+    short-summary: Update a rewrite rule condition.
+    type: command
+    parameters:
+      - name: --variable
+        populator-commands:
+          - az network application-gateway rewrite-rule condition list-server-variables
+"""
 # endregion
 
 # region Application Gateway rules
@@ -2067,7 +2180,7 @@ helps['network express-route peering update'] = """
             az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit \\
                 --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 \\
                 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
-          min_profile: latest
+          supported-profiles: latest
 """
 
 helps['network express-route peering connection'] = """
@@ -3611,7 +3724,7 @@ helps['network vnet subnet create'] = """
         - name: Create new subnet attached to an NSG with a custom route table.
           text: |
             az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
-                --address-prefix 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
+                --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
 """
 
 helps['network vnet subnet delete'] = """

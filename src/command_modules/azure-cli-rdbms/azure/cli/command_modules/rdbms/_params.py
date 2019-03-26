@@ -10,7 +10,8 @@ from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, retention_validator
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
@@ -27,11 +28,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('administrator_login', required=True, arg_group='Authentication')
             c.argument('administrator_login_password', required=True, arg_group='Authentication')
 
-            c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
+            c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
 
-            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
             c.argument('version', help='Server major version.')
 
         with self.argument_context('{} server update'.format(command_group)) as c:
@@ -46,10 +47,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
             c.argument('sku_name', options_list=['--sku-name'], required=False, help='The name of the sku. Defaults to sku of the source server. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
             c.argument('source_server', options_list=['--source-server', '-s'], required=True, help='The name or ID of the source server to restore from.')
-            c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
+            c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
 
         with self.argument_context('mysql server replica') as c:
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the master server to the create replica for.')
+
+        with self.argument_context('postgres server replica') as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the master server to the create replica for.')
 
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
@@ -80,7 +84,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
             c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
-            c.argument('backup_retention_days', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
+            c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('tags', tags_type)
 
     for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
@@ -116,6 +120,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
+
+    with self.argument_context('postgres server replica list') as c:
+        c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
 
     with self.argument_context('mysql server replica list') as c:
         c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')

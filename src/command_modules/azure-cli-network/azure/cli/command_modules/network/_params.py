@@ -30,11 +30,13 @@ from azure.cli.command_modules.network._validators import (
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
-    validate_express_route_port, bandwidth_validator_factory)
+    validate_express_route_port, bandwidth_validator_factory,
+    get_header_configuration_validator)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer)
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
+    get_sdk_completer)
 from azure.cli.core.util import get_json_object
 
 
@@ -80,6 +82,7 @@ def load_arguments(self, _):
     cookie_based_affinity_type = CLIArgumentType(arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
     ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
+    app_gateway_name_type = CLIArgumentType(help='Name of the application gateway.', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -91,11 +94,12 @@ def load_arguments(self, _):
         c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
         c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.', min_api='2018-07-01')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('cache_result', arg_type=get_enum_type(['in', 'out', 'inout']), options_list='--cache', help='Cache the JSON object instead of sending off immediately.')
     # endregion
 
     # region ApplicationGateways
     with self.argument_context('network application-gateway') as c:
-        c.argument('application_gateway_name', name_arg_type, help='The name of the application gateway.', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+        c.argument('application_gateway_name', app_gateway_name_type, options_list=['--name', '-n'])
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
@@ -152,12 +156,14 @@ def load_arguments(self, _):
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         ag_subresources.append({'name': 'root-cert', 'display': 'trusted root certificate', 'ref': 'trusted_root_certificates'})
+    if self.supported_api_version(min_api='2018-12-01'):
+        ag_subresources.append({'name': 'rewrite-rule set', 'display': 'rewrite rule set', 'ref': 'rewrite_rule_sets'})
 
     for item in ag_subresources:
         with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
-            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name_1')
-            c.argument('resource_name', options_list='--gateway-name', help='The name of the application gateway.')
-            c.argument('application_gateway_name', options_list='--gateway-name', help='The name of the application gateway.')
+            c.argument('item_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']))
+            c.argument('resource_name', options_list='--gateway-name', help='The name of the application gateway.', id_part='name')
+            c.argument('application_gateway_name', app_gateway_name_type)
             c.argument('private_ip_address', arg_group=None)
             c.argument('virtual_network_name', arg_group=None)
 
@@ -165,7 +171,7 @@ def load_arguments(self, _):
             c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}.'.format(item['display']), completer=None)
 
         with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
-            c.argument('resource_name', options_list=['--gateway-name'])
+            c.argument('resource_name', options_list=['--gateway-name'], id_part=None)
 
     for item in ['create', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
@@ -204,10 +210,31 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
 
+    with self.argument_context('network application-gateway rewrite-rule') as c:
+        rewrite_rule_set_name_type = CLIArgumentType(help='Name of the rewrite rule set.', options_list='--rule-set-name', id_part='child_name_1')
+        rewrite_rule_name_type = CLIArgumentType(help='Name of the rewrite rule.', options_list='--rule-name', id_part='child_name_2')
+        c.argument('rule_name', rewrite_rule_name_type, options_list=['--name', '-n'])
+        c.argument('rule_set_name', rewrite_rule_set_name_type)
+        c.argument('application_gateway_name', app_gateway_name_type)
+        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'), completer=get_sdk_completer('application_gateways', 'list_available_response_headers'))
+        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'), completer=get_sdk_completer('application_gateways', 'list_available_request_headers'))
+        c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
+
+    with self.argument_context('network application-gateway rewrite-rule condition') as c:
+        c.argument('rule_name', rewrite_rule_name_type)
+        c.argument('variable', help='The variable whose value is being evaluated.', completer=get_sdk_completer('application_gateways', 'list_available_server_variables'))
+        c.argument('pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
+        c.argument('ignore_case', arg_type=get_three_state_flag(), help='Make comparison case-insensitive.')
+        c.argument('negate', arg_type=get_three_state_flag(), help='Check the negation of the condition.')
+
     with self.argument_context('network application-gateway rule create') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
         c.argument('http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
         c.argument('http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
+
+    for scope in ['rewrite-rule list', 'rewrite-rule condition list']:
+        with self.argument_context('network application-gateway {}'.format(scope)) as c:
+            c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
 
     with self.argument_context('network lb rule create') as c:
         c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
@@ -284,7 +311,7 @@ def load_arguments(self, _):
 
     for item in ['ssl-policy', 'waf-config']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:
-            c.argument('application_gateway_name', options_list=['--gateway-name'], help='The name of the application gateway.')
+            c.argument('application_gateway_name', app_gateway_name_type)
 
     with self.argument_context('network application-gateway waf-config list-rule-sets') as c:
         c.argument('_type', options_list=['--type'])
@@ -681,7 +708,7 @@ def load_arguments(self, _):
 
         with self.argument_context('network nic {}'.format(item), arg_group='Application Gateway') as c:
             c.argument('app_gateway_backend_address_pools', options_list='--app-gateway-address-pools', nargs='+', help='Space-separated list of names or IDs of application gateway backend address pools to associate with the NIC. If names are used, --gateway-name must be specified.', validator=validate_ag_address_pools, completer=get_ag_subresource_completion_list('backendAddressPools'))
-            c.extra('application_gateway_name', options_list='--gateway-name', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), help='The name of the application gateway to use when adding address pools by name (ignored when IDs are specified).')
+            c.extra('application_gateway_name', app_gateway_name_type, help='The name of the application gateway to use when adding address pools by name (ignored when IDs are specified).')
 
     with self.argument_context('network nic ip-config') as c:
         c.argument('network_interface_name', options_list='--nic-name', metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
@@ -696,7 +723,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('application_gateway_name', options_list='--gateway-name', help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'))
+        c.argument('application_gateway_name', app_gateway_name_type, help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).')
         c.argument('backend_address_pool', options_list='--address-pool', help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
 
     with self.argument_context('network nic ip-config inbound-nat-rule') as c:
@@ -1116,7 +1143,6 @@ def load_arguments(self, _):
         c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
         c.argument('client_root_certificates', nargs='+', help='Space-separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
         c.argument('use_legacy', min_api='2017-06-01', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
-
     # endregion
 
     # region VirtualNetworkGatewayConnections

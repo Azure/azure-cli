@@ -222,7 +222,5 @@ def _get_alert_settings(client, resource_group_name, activity_log_alert_name, th
             if throw_if_missing:
                 raise CLIError('Can\'t find activity log alert {} in resource group {}.'.format(activity_log_alert_name,
                                                                                                 resource_group_name))
-            else:
-                return None
-        else:
-            raise CLIError(ex.message)
+            return None
+        raise CLIError(ex.message)

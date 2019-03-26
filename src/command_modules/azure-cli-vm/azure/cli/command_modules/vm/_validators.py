@@ -585,7 +585,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
-        elif subnet_exists:
+        if subnet_exists:
             # 2 - user specified existing vnet/subnet
             namespace.vnet_type = 'existing'
             logger.debug("using specified vnet '%s' and subnet '%s'", namespace.vnet_name, namespace.subnet)
@@ -1003,7 +1003,7 @@ def _resolve_role_id(cli_ctx, role, scope):
             role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
                 raise CLIError(err.format(role, ids))
@@ -1049,7 +1049,7 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
-    elif not values:
+    if not values:
         raise CLIError("No existing values found for '{0}'. Create one first and try "
                        "again.".format(option_name))
     return values[0]
@@ -1145,7 +1145,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    elif not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
+                    if not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
                         logger.warning("No inbound nat pool was configured on '%s'", namespace.load_balancer)
                     else:
                         namespace.nat_pool_name = lb.inbound_nat_pools[0].name
@@ -1239,7 +1239,7 @@ def validate_vmss_disk(cmd, namespace):
                                           namespace.resource_group_name, 'disks', 'Microsoft.Compute')
     if bool(namespace.disk) == bool(namespace.size_gb):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GB')
-    elif bool(namespace.disk) != bool(namespace.instance_id):
+    if bool(namespace.disk) != bool(namespace.instance_id):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 

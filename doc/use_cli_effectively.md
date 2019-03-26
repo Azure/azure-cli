@@ -14,8 +14,8 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 
   3. `tsv` for concise output and scripting purposes. The will strip double quotes that the JSON format preserves. To specify the format you want for TSV, use the `--query` argument.
 
-        export vm_ids=$(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)  
-        az vm stop --ids $vm_ids
+         export vm_ids=$(az vm list -d -g my_rg --query "[?powerState=='VM running'].id" -o tsv)  
+         az vm stop --ids $vm_ids
         
 ## Passing values from one command to the other ##
   1. If the value will be used more than once, assign it to a variable. Note the use of `-o tsv` in the following example:
@@ -84,7 +84,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 ## Quoting Issues ##
   This becomes an issue because when the command shell (bash, zsh, Windows command prompt, etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
   1. If the value contains whitespace, you must wrap it in quotes.
-  2. In bash, both single and double quotes will be intepreted while in Windows, only double quotes are handled which means single quotes will be interpreted as a part of the value.
+  2. In bash or Windows PowerShell, both single and double quotes will be intepreted, while in Windows command prompt, only double quotes are handled which means single quotes will be interpreted as a part of the value.
   3. If your command only runs on bash (or zsh), using single quotes has the benefit of preserving the content inside. This can be very helpful when supplying inline JSON. For example this works in bash: `'{"foo": "bar"}'`
   4. If your command will run on Windows command prompt, you must use double quotes exclusively. If the value contains double quotes, you must escape it: "i like to use \\" a lot". The coimmand propmpt equivalent of the above would be: `"{\"foo\": \"bar\"}"
   5. Exported variables in bash inside double quotes will be evaluated. If this is not what you want, again use \\ to escape it like `"\\$var"` or use single quotes `'$var'`. 
@@ -107,7 +107,9 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
   1. Disable the certificate check across the CLI by setting the env var of `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` to any value. This is not safe, but good for a short period like you want to capture a trace for a specific command and promptly turn it off after done.
   2. Set env var of `REQUESTS_CA_BUNDLE` to the file path of the proxy server's certificate. This is recommended if you use CLI frequently behind a corporate proxy. 
 
-  For more details, check out [Stefan's blog](https://blog.jhnr.ch/2018/05/16/working-with-azure-cli-behind-ssl-intercepting-proxy-server/).
+  A frequent ask is whether or not `HTTP_PROXY` or `HTTPS_PROXY` envionment variables should be set, the answer is it depends. For fiddler on Windows, by default it acts as system proxy on start, you don't need to set anything. If the option is off or using other tools which don't work as system proxy, you should set them. Since almost all traffics from CLI are SSL based, so only `HTTPS_PROXY` should be set. If you are not sure, just set them, but do remember to unset it after the proxy is shut down. For fiddler, the default value is `http://localhost:8888`.
+
+  For other details, check out [Stefan's blog](https://blog.jhnr.ch/2018/05/16/working-with-azure-cli-behind-ssl-intercepting-proxy-server/).
 
 ## Appendix
    ### Windows batch scripts for saving to variables and using it later 

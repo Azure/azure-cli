@@ -3,20 +3,29 @@
 Release History
 ===============
 
+* `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
+* `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
+* `application-gateway`: Add `rewrite-rule` command group.
+
+2.3.4
++++++
 * `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
+
+2.3.3
++++++
 * `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
 * `express-route`: Port command groups from `express-route` extensions.
 * `express-route`: Added `express-route gateway` and `express-route port` command groups.
 * `express-route peering create/update`: Added argument `--legacy-mode`.
 * `express-route create/update`: Added argument `--allow-classic-operations` and `--express-route-port`.
+* `vnet-gateway create/update`: Add `--gateway-default-site` argument.
+* `vnet-gateway`: Added `ipsec-policy` commands.
 
 2.3.2
 +++++
 * `dns zone export`: Ensure exported CNAMEs are FQDNs.
 * `nic ip-config address-pool add/remove`: Add `--gateway-name` to support application gateway backend address pools.
 * `network watcher flow-log configure`: Add arguments `--traffic-analytics`, `--workspace` to support traffic analytics through a Log Analytics workspace.
-* `vnet-gateway create/update`: Add `--gateway-default-site` argument.
-* `vnet-gateway`: Added `ipsec-policy` commands.
 * `lb inbound-nat-pool create/update`: Add arguments `--idle-timeout`, `--floating-ip`.
 
 2.3.1

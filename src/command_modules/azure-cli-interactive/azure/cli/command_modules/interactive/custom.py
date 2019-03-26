@@ -24,7 +24,8 @@ def start_shell(cmd, update=None, style=None):
         logger.warning("Installing the Interactive extension..")
         add_extension(extension_name=INTERACTIVE_EXTENSION_NAME)
 
-    add_extension_to_path(INTERACTIVE_EXTENSION_NAME)
-    interactive_module = get_extension_modname(ext_name=INTERACTIVE_EXTENSION_NAME)
+    ext_path = get_extension(INTERACTIVE_EXTENSION_NAME).path
+    add_extension_to_path(INTERACTIVE_EXTENSION_NAME, ext_dir=ext_path)
+    interactive_module = get_extension_modname(ext_name=INTERACTIVE_EXTENSION_NAME, ext_dir=ext_path)
     azext_interactive = import_module(interactive_module)
     azext_interactive.start_shell(cmd, style=style)

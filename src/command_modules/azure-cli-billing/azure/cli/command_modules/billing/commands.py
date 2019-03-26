@@ -15,19 +15,19 @@ from ._exception_handler import billing_exception_handler
 
 def load_command_table(self, _):
     billing_invoice_util = CliCommandType(
-        operations_tmpl='azure.mgmt.billing.operations.invoices_operations#InvoicesOperations.{}',
+        operations_tmpl='azure.mgmt.billing.operations#InvoicesOperations.{}',
         client_factory=invoices_mgmt_client_factory,
         exception_handler=billing_exception_handler
     )
 
     billing_period_util = CliCommandType(
-        operations_tmpl='azure.mgmt.billing.operations.billing_periods_operations#BillingPeriodsOperations.{}',
+        operations_tmpl='azure.mgmt.billing.operations#BillingPeriodsOperations.{}',
         client_factory=billing_periods_mgmt_client_factory,
         exception_handler=billing_exception_handler
     )
 
     enrollment_account_util = CliCommandType(
-        operations_tmpl='azure.mgmt.billing.operations.enrollment_accounts_operations#EnrollmentAccountsOperations.{}',
+        operations_tmpl='azure.mgmt.billing.operations#EnrollmentAccountsOperations.{}',
         client_factory=enrollment_accounts_mgmt_client_factory,
         exception_handler=billing_exception_handler
     )

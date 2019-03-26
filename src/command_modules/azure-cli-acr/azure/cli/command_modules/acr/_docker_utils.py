@@ -176,16 +176,19 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
             registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
 
     # Validate the login server is reachable
-    challenge = 'https://' + login_server + '/v2/'
+    url = 'https://' + login_server + '/v2/'
     try:
-        requests.get(challenge, verify=(not should_disable_connection_verify()))
+        challenge = requests.get(url, verify=(not should_disable_connection_verify()))
+        if challenge.status_code in [403]:
+            raise CLIError("Looks like you don't have access to registry '{}'. "
+                           "Are firewalls and virtual networks enabled?".format(login_server))
     except RequestException as e:
         logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
         raise CLIError("Could not connect to the registry login server '{}'. ".format(login_server) +
                        "Please verify that the registry exists and " +
-                       "the URL '{}' is reachable from your environment.".format(challenge))
+                       "the URL '{}' is reachable from your environment.".format(url))
 
     # 1. if username was specified, verify that password was also specified
     if username:

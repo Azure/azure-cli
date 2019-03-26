@@ -28,6 +28,27 @@ class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.profile_delete_cmd(resource_group, profile_name)
 
 
+class CdnProfileDeleteDoesNotExistScenarioTest(CdnScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_cdn_profile_delete_not_found(self, resource_group):
+        # see https://github.com/Azure/azure-cli/issues/3304
+        # request should respond with a 204 rather than a 404
+        res = self.profile_delete_cmd(resource_group, "foo12345")
+        self.assertEqual("", res.output)
+
+
+class CdnProfileMicrosoftScenarioTest(CdnScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_cdn_microsoft_standard_sku(self, resource_group):
+        # https://github.com/Azure/azure-cli/issues/7635
+        self.kwargs.update({
+            'profile': 'cdnprofile1',
+            'sku': 'Standard_Microsoft',
+            'rg': resource_group,
+        })
+        self.cmd('cdn profile create -g {rg} -n {profile} --sku {sku}')
+
+
 class CdnCustomDomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
     def test_cdn_custom_domain(self, resource_group):
@@ -39,7 +60,8 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
             'endpoint': self.create_random_name(prefix='endpoint', length=24),
             'origin': 'www.test.com',
             'hostname': 'www.example.com',
-            'name': 'customdomain1'
+            'name': 'customdomain1',
+            'rg': resource_group,
         })
 
         self.cmd('cdn profile create -g {rg} -n {profile}')

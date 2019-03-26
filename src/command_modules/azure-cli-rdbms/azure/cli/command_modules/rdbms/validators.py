@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.prompting import prompt_pass, NoTTYException
-from knack.util import CLIError
-
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
+
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
 
 
 def get_combined_validator(validators):
@@ -39,6 +39,13 @@ def password_validator(ns):
             ns.administrator_login_password = prompt_pass(msg='Admin Password: ')
         except NoTTYException:
             raise CLIError('Please specify password in non-interactive mode.')
+
+
+def retention_validator(ns):
+    if ns.backup_retention:
+        val = ns.backup_retention
+        if not 7 <= val <= 35:
+            raise CLIError('incorrect usage: --backup_retention. Range is 7 to 35 days.')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
