@@ -107,6 +107,31 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
+    '2019-03-01-hybrid': {
+        ResourceType.MGMT_STORAGE: '2017-10-01',
+        ResourceType.MGMT_NETWORK: '2017-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
+            'resource_skus': '2017-09-01',
+            'disks': '2017-03-30',
+            'snapshots': '2017-03-30'
+        }),
+        ResourceType.MGMT_RESOURCE_LINKS: '2018-05-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
+            'classic_administrators': '2015-06-01',
+            'policy_assignments': '2016-12-01',
+            'policy_definitions': '2016-12-01'
+        }),
+        ResourceType.MGMT_CONTAINERREGISTRY: '2018-09-01',
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_STORAGE: '2017-11-09',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+    },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2017-10-01',
