@@ -355,9 +355,10 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('knack.prompting.prompt_y_n', autospec=True)
     def test_role_assignment_delete_prompt(self, prompt_mock, client_mock):
-        matched_assignments = mock.MagicMock()
         prompt_mock.return_value = False
+        # action
         delete_role_assignments(mock.MagicMock())
+        # assert
         prompt_mock.assert_called_once_with(mock.ANY, 'n')
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
