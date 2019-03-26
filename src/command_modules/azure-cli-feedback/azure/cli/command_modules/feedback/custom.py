@@ -40,7 +40,8 @@ _MSG_INTR = \
     'If you have questions, visit our Stack Overflow page: {}\n'\
     .format(_GET_STARTED_URL, _QUESTIONS_URL)
 
-_MSG_CMD_ISSUE = "\nEnter the number of the command you would like to create an issue for. \nEnter {} to create a generic issue. Enter q to quit: "
+_MSG_CMD_ISSUE = "\nEnter the number of the command you would like to create an issue for. " \
+                 "\nEnter {} to create a generic issue. Enter q to quit: "
 
 _MSG_ISSUE = "Would you like to create an issue? Enter Y or N: "
 
@@ -103,13 +104,13 @@ _LogMetadataType = namedtuple('LogMetadata', ['cmd', 'seconds_ago', 'file_path',
 class CommandLogFile(object):
     _LogRecordType = namedtuple("LogRecord", ["p_id", "date_time", "level", "logger", "log_msg"])
 
-    def __init__(self, log_file_path, time_now=None, cli_ctx=None):
+    def __init__(self, log_file_path, time_now=None):
 
         if (time_now is not None) and (not isinstance(time_now, datetime.datetime)):
-            raise TypeError("Expected type {} for time_now, instead received {}.", datetime.datetime, type(time_now))
+            raise TypeError("Expected type {} for time_now, instead received {}.".format(datetime.datetime, type(time_now)))  # pylint: disable=line-too-long
 
         if not os.path.isfile(log_file_path):
-            raise ValueError("File {} is not an existing file.", log_file_path)
+            raise ValueError("File {} is not an existing file.".format(log_file_path))
 
         self._log_file_path = log_file_path
 
@@ -206,7 +207,7 @@ class CommandLogFile(object):
 
         try:
             _, file_name = os.path.split(self._log_file_path)
-            poss_date, poss_time, poss_command, poss_pid, _ = file_name.split(sep=".")
+            poss_date, poss_time, poss_command, poss_pid, _ = file_name.split(".")
             date_time_stamp = datetime.datetime.strptime("{}-{}".format(poss_date, poss_time), "%Y-%m-%d-%H-%M-%S")
             command = "az " + poss_command.replace("_", " ") if poss_command != UNKNOWN_COMMAND else "Unknown"
         except ValueError as e:
@@ -218,9 +219,36 @@ class CommandLogFile(object):
 
         total_seconds = difference.total_seconds()
 
-        return _LogMetadataType(cmd=command, seconds_ago=total_seconds, file_path=self._log_file_path, p_id=int(poss_pid))
+        return _LogMetadataType(cmd=command, seconds_ago=total_seconds, file_path=self._log_file_path, p_id=int(poss_pid))  # pylint: disable=line-too-long
 
-    def _get_command_data_from_metadata(self):
+    def _get_command_data_from_metadata(self):  # pylint: disable=too-many-statements
+        def _get_log_record_list(log_fp, p_id):
+            """
+             Get list of records / messages in the log file
+            :param log_fp: log file object
+            :param p_id: process id of command
+            :return:
+            """
+            prev_record = None
+            log_record_list = []
+            for line in log_fp:
+                # attempt to extract log data
+                log_record = CommandLogFile._get_info_from_log_line(line, p_id)
+
+                if log_record:  # if new record parsed, add old record to the list
+                    if prev_record:
+                        log_record_list.append(prev_record)
+                    prev_record = log_record
+                elif prev_record:  # otherwise this is a continuation of a log record, add to prev record
+                    new_log_msg = prev_record.log_msg + line
+                    prev_record = CommandLogFile._LogRecordType(p_id=prev_record.p_id, date_time=prev_record.date_time,
+                                                                # pylint: disable=line-too-long
+                                                                level=prev_record.level, logger=prev_record.logger,
+                                                                log_msg=new_log_msg)
+            if prev_record:
+                log_record_list.append(prev_record)
+            return log_record_list
+
         if not self.metadata_tup:
             return None
 
@@ -232,31 +260,13 @@ class CommandLogFile(object):
 
         try:
             with open(file_name, 'r') as log_fp:
-                prev_record = None
-                log_record_list = []
-                for line in log_fp:
-                    # attempt to extract log data
-                    log_record = CommandLogFile._get_info_from_log_line(line, p_id)
-
-                    if log_record:  # if new record parsed, add old record to the list
-                        if prev_record:
-                            log_record_list.append(prev_record)
-                        prev_record = log_record
-                    elif prev_record:  # otherwise this is a continuation of a log record, add to prev record
-                        new_log_msg = prev_record.log_msg + line
-                        prev_record = CommandLogFile._LogRecordType(p_id=prev_record.p_id, date_time=prev_record.date_time,
-                                                                    level=prev_record.level,
-                                                                    logger=prev_record.logger, log_msg=new_log_msg)
-
-                if prev_record:
-                    log_record_list.append(prev_record)
-
-                if not log_record_list:
-                    logger.debug("No command log messages found in file %s", file_name)
-                    return None
-
+                log_record_list = _get_log_record_list(log_fp, p_id)
         except IOError:
             logger.debug("Failed to open command log file %s", file_name)
+            return None
+
+        if not log_record_list:
+            logger.debug("No command log messages found in file %s", file_name)
             return None
 
         log_data = {}
@@ -328,18 +338,17 @@ class CommandLogFile(object):
             return None
 
         line = line[len(CMD_LOG_LINE_PREFIX):]
-        parts = line.split("|", maxsplit=4)
+        parts = line.split("|", 4)
 
         if len(parts) != 5:  # there must be 5 items
             return None
 
         for i, part in enumerate(parts):
+            parts[i] = part.strip()
             if i == 0:
                 parts[0] = int(parts[0])
                 if parts[0] != p_id:  # ensure that this is indeed a valid log.
                     return None
-            else:
-                parts[i] = part.strip()
 
         return CommandLogFile._LogRecordType(*parts)
 
@@ -350,8 +359,7 @@ def _build_issue_info_tup(command_log_file=None):
         parent = psutil.Process(os.getpid()).parent()
         if parent:
             return parent.name()
-        else:
-            return None
+        return None
 
     format_dict = {"command_name": "",
                    "command_duration": "", "errors_string": "",
@@ -464,14 +472,14 @@ def _display_recent_commands(cmd):
 
 
 def _get_command_log_files(cli_ctx, time_now=None):
-    command_logs_dir = cli_ctx.logging._get_command_log_dir()
+    command_logs_dir = cli_ctx.logging.get_command_log_dir()
     files = os.listdir(command_logs_dir)
     files = (file_name for file_name in files if file_name.endswith(".log"))
     files = sorted(files)
     command_log_files = []
     for file_name in files:
         file_path = os.path.join(command_logs_dir, file_name)
-        cmd_log_file = CommandLogFile(file_path, time_now, cli_ctx)
+        cmd_log_file = CommandLogFile(file_path, time_now)
 
         if cmd_log_file.metadata_tup:
             command_log_files.append(cmd_log_file)

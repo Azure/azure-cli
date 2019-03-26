@@ -3,10 +3,6 @@ name: "\U0001F41BBug report"
 about: Create a report to help us improve
 
 ---
-
-#### **TIP**: `az feedback`
-`az feedback` can be used to help generate some of the information requested below, such as, command, error and environment information.
-
 **Describe the bug**
 A clear and concise description of what the bug is.
 

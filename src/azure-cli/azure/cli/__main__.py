@@ -46,7 +46,7 @@ try:
         telemetry.set_success()
 
     elapsed_time = timeit.default_timer() - start_time
-    az_cli.logging._end_cmd_metadata_logging(exit_code, elapsed_time)
+    az_cli.logging.end_cmd_metadata_logging(exit_code, elapsed_time)
 
     sys.exit(exit_code)
 
@@ -57,9 +57,9 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     exit_code = ex.code if ex.code is not None else 1
     try:
         elapsed_time = timeit.default_timer() - start_time
-        az_cli.logging._end_cmd_metadata_logging(exit_code, elapsed_time)
+        az_cli.logging.end_cmd_metadata_logging(exit_code, elapsed_time)
     except NameError:
-        az_cli.logging._end_cmd_metadata_logging(exit_code, None)
+        az_cli.logging.end_cmd_metadata_logging(exit_code, None)
     raise ex
 finally:
     telemetry.conclude()

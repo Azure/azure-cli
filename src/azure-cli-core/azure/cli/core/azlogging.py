@@ -46,7 +46,7 @@ class AzCliLogging(CLILogging):
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
 
-    def _get_command_log_dir(self):
+    def get_command_log_dir(self):
         return self.command_log_dir
 
     @staticmethod
@@ -57,7 +57,10 @@ class AzCliLogging(CLILogging):
 
             if len(sorted_files) > 25:
                 for file in sorted_files[5:]:
-                    os.remove(os.path.join(log_dir, file))
+                    try:
+                        os.remove(os.path.join(log_dir, file))
+                    except OSError:  # FileNotFoundError introduced in Python 3
+                        continue
 
         # if tab-completion and not command don't log to file.
         if not cli_ctx.data.get('completer_active', False):
@@ -66,14 +69,14 @@ class AzCliLogging(CLILogging):
 
             cmd_logger = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)
 
-            self._init_command_logfile_handlers(cmd_logger, args)
+            self._init_command_logfile_handlers(cmd_logger, args)  # pylint: disable=protected-access
             get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", self.command_log_dir)
 
             _delete_old_logs(self.command_log_dir)
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
         ensure_dir(self.command_log_dir)
-        command = self.cli_ctx.invocation._rudimentary_get_command(args) or UNKNOWN_COMMAND
+        command = self.cli_ctx.invocation._rudimentary_get_command(args) or UNKNOWN_COMMAND  # pylint: disable=protected-access, line-too-long
         command = command.replace(" ", "_")
         if command == "feedback":
             return
@@ -88,7 +91,7 @@ class AzCliLogging(CLILogging):
 
         logfile_handler = logging.FileHandler(log_file_path)
 
-        lfmt = logging.Formatter(CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')
+        lfmt = logging.Formatter(CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')  # pylint: disable=line-too-long
         logfile_handler.setFormatter(lfmt)
         logfile_handler.setLevel(logging.DEBUG)
         command_metadata_logger.addHandler(logfile_handler)
@@ -98,12 +101,12 @@ class AzCliLogging(CLILogging):
 
         command_metadata_logger.info("command args: %s", " ".join(args))
 
-    def _log_cmd_metadata_extension_info(self, extension_name, extension_version):
+    def log_cmd_metadata_extension_info(self, extension_name, extension_version):
         if self.command_metadata_logger:
             self.command_metadata_logger.info("extension name: %s", extension_name)
             self.command_metadata_logger.info("extension version: %s", extension_version)
 
-    def _end_cmd_metadata_logging(self, exit_code, elapsed_time=None):
+    def end_cmd_metadata_logging(self, exit_code, elapsed_time=None):
         if self.command_metadata_logger:
             if elapsed_time:
                 self.command_metadata_logger.info("command ran in %.3f seconds.", elapsed_time)

@@ -355,7 +355,7 @@ def open_page_in_browser(url):
     if _is_wsl(platform_name, release):   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
-        except FileNotFoundError:  # WSL might be too old
+        except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
         # handle 2 things:

@@ -190,7 +190,7 @@ class TestCommandLogFile(ScenarioTest):
                 logger.error("There was an error during execution.")
 
         elapsed_time = timeit.default_timer() - start_time
-        cli_ctx.logging._end_cmd_metadata_logging(result.exit_code, elapsed_time)
+        cli_ctx.logging.end_cmd_metadata_logging(result.exit_code, elapsed_time)
 
         return result
 
