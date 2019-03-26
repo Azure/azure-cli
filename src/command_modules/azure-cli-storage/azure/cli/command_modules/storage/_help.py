@@ -93,11 +93,17 @@ helps['storage account create'] = """
 helps['storage container create'] = """
     type: command
     short-summary: Create a container in a storage account.
+    long-summary: >
+       By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs.
+       Use "container" to allow public read and list access to the entire container.
+       You can configure the --public-access using `az storage container set-permission -n CONTAINER_NAME --public-access blob/container/off`.
     examples:
         - name: Create a storage container in a storage account.
           text: az storage container create -n MyStorageContainer
         - name: Create a storage container in a storage account and return an error if the container already exists.
           text: az storage container create -n MyStorageContainer --fail-on-exist
+        - name: Create a storage container in a storage account and allow public read access for blobs.
+          text: az storage container create -n MyStorageContainer --public-access blob
 """
 
 helps['storage container delete'] = """
