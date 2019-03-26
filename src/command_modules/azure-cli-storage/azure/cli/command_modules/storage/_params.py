@@ -381,7 +381,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(get_container_access_type_names()),
                    help='Specifies whether data in the container may be accessed publically. By default, container '
                         'data is private ("off") to the account owner. Use "blob" to allow public read access for '
-                        'blobs. Use "container" to allow public read and list access to the entire container.')
+                        'blobs. Use "container" to allow public read and list access to the entire container. You '
+                        'can configure the --public-access using `az storage container set-permission -n '
+                        'CONTAINER_NAME --public-access blob/container/off`')
 
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
