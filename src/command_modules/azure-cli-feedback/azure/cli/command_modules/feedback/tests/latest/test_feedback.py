@@ -8,7 +8,7 @@ import logging
 import os
 import time
 import timeit
-
+import unittest
 
 from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
@@ -18,6 +18,8 @@ from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 
+# pylint: disable=line-too-long
+# pylint: disable=too-many-lines
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,6 @@ class TestCommandLogFile(ScenarioTest):
 
         self.disable_recording = True
         self.is_live = True
-
 
     @classmethod
     def setUpClass(cls):
@@ -55,7 +56,6 @@ class TestCommandLogFile(ScenarioTest):
         for ext_name in cls.original_extensions:
             add_extension(extension_name=ext_name)
             logger.warning("Adding whl ext %s", ext_name)
-
 
     # using setup to benefit from self.cmd(). There should be only one test fixture in this class
     def setUp(self):
@@ -107,7 +107,6 @@ class TestCommandLogFile(ScenarioTest):
         self.assertEqual("az alias create", command_log_files[2].metadata_tup.cmd)
         self.assertEqual("az alias list", command_log_files[3].metadata_tup.cmd)
 
-
     def _helper_test_log_contents_correct(self):
         time_now = datetime.datetime.now()
         command_log_files = _get_command_log_files(self.cli_ctx, time_now)
@@ -144,7 +143,6 @@ class TestCommandLogFile(ScenarioTest):
         self.assertTrue(data_dict["success"] is True)
         self.assertEqual(data_dict["command_args"], "alias list")
 
-
         ext_version = self.cmd("az extension show -n alias").get_output_in_json()["version"]
         for i, log_file in enumerate(command_log_files):
             self.assertTrue("duration" in data_dict)
@@ -160,7 +158,6 @@ class TestCommandLogFile(ScenarioTest):
         issue_prefix, issue_body, _ = _build_issue_info_tup(log_file)
         items.append((log_file, issue_body))
         self.assertTrue(_CLI_ISSUES_URL in issue_prefix)
-
 
         log_file = command_log_files[2]
         issue_prefix, issue_body, _ = _build_issue_info_tup(log_file)
@@ -196,3 +193,7 @@ class TestCommandLogFile(ScenarioTest):
         cli_ctx.logging._end_cmd_metadata_logging(result.exit_code, elapsed_time)
 
         return result
+
+
+if __name__ == '__main__':
+    unittest.main()

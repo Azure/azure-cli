@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.2.0
++++++
+* `az feedback` now shows metadata on recently run commands
+* `az feedback` generates command and system related information to improve issue creation process
+
 2.1.4
 +++++
 * Minor fixes

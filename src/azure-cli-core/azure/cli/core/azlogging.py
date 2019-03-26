@@ -35,6 +35,7 @@ from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 UNKNOWN_COMMAND = "unknown_command"
 CMD_LOG_LINE_PREFIX = "CMD-LOG-LINE-BEGIN"
 
+
 class AzCliLogging(CLILogging):
     _COMMAND_METADATA_LOGGER = 'az_command_data_logger'
 
@@ -44,7 +45,6 @@ class AzCliLogging(CLILogging):
         self.command_logger_handler = None
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
-
 
     def _get_command_log_dir(self):
         return self.command_log_dir
@@ -56,7 +56,7 @@ class AzCliLogging(CLILogging):
             sorted_files = sorted(log_file_names, reverse=True)
 
             if len(sorted_files) > 25:
-                for file in sorted_files[10:]:
+                for file in sorted_files[5:]:
                     os.remove(os.path.join(log_dir, file))
 
         # if tab-completion and not command don't log to file.
@@ -70,7 +70,6 @@ class AzCliLogging(CLILogging):
             get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", self.command_log_dir)
 
             _delete_old_logs(self.command_log_dir)
-
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
         ensure_dir(self.command_log_dir)
@@ -104,7 +103,6 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger.info("extension name: %s", extension_name)
             self.command_metadata_logger.info("extension version: %s", extension_version)
 
-
     def _end_cmd_metadata_logging(self, exit_code, elapsed_time=None):
         if self.command_metadata_logger:
             if elapsed_time:
@@ -117,11 +115,11 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger.removeHandler(self.command_logger_handler)
             self.command_metadata_logger = None
 
+
 class CommandLoggerContext(object):
     def __init__(self, cli_ctx, module_logger):
         self.cli_ctx = cli_ctx
         self.logger = module_logger
-
 
     def __enter__(self):
         if not self.cli_ctx:

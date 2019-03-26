@@ -38,7 +38,7 @@ _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
     'For more information on getting started, visit: {}\n' \
     'If you have questions, visit our Stack Overflow page: {}\n'\
-        .format(_GET_STARTED_URL, _QUESTIONS_URL)
+    .format(_GET_STARTED_URL, _QUESTIONS_URL)
 
 _MSG_CMD_ISSUE = "\nEnter the number of the command you would like to create an issue for. \nEnter {} to create a generic issue. Enter q to quit: "
 
@@ -60,7 +60,7 @@ _ISSUES_TEMPLATE = """
 
 **Command Name**
     `{command_name}`
-    
+
 **Ran:**
     `{executed_command}`
 
@@ -122,7 +122,6 @@ class CommandLogFile(object):
         self._data = None
 
         self.cli_ctx = None
-
 
     @property
     def metadata_tup(self):
@@ -199,7 +198,6 @@ class CommandLogFile(object):
 
         return duration_str
 
-
     def _get_command_metadata_from_file(self):
         if not self._log_file_path:
             return None
@@ -208,7 +206,7 @@ class CommandLogFile(object):
 
         try:
             _, file_name = os.path.split(self._log_file_path)
-            poss_date, poss_time, poss_command, poss_pid, _  = file_name.split(sep=".")
+            poss_date, poss_time, poss_command, poss_pid, _ = file_name.split(sep=".")
             date_time_stamp = datetime.datetime.strptime("{}-{}".format(poss_date, poss_time), "%Y-%m-%d-%H-%M-%S")
             command = "az " + poss_command.replace("_", " ") if poss_command != UNKNOWN_COMMAND else "Unknown"
         except ValueError as e:
@@ -220,9 +218,7 @@ class CommandLogFile(object):
 
         total_seconds = difference.total_seconds()
 
-
         return _LogMetadataType(cmd=command, seconds_ago=total_seconds, file_path=self._log_file_path, p_id=int(poss_pid))
-
 
     def _get_command_data_from_metadata(self):
         if not self.metadata_tup:
@@ -249,8 +245,8 @@ class CommandLogFile(object):
                     elif prev_record:  # otherwise this is a continuation of a log record, add to prev record
                         new_log_msg = prev_record.log_msg + line
                         prev_record = CommandLogFile._LogRecordType(p_id=prev_record.p_id, date_time=prev_record.date_time,
-                                                          level=prev_record.level,
-                                                          logger=prev_record.logger, log_msg=new_log_msg)
+                                                                    level=prev_record.level,
+                                                                    logger=prev_record.logger, log_msg=new_log_msg)
 
                 if prev_record:
                     log_record_list.append(prev_record)
@@ -262,7 +258,6 @@ class CommandLogFile(object):
         except IOError:
             logger.debug("Failed to open command log file %s", file_name)
             return None
-
 
         log_data = {}
         # 1. Figure out whether the command was successful or not. Last log record should be the exit code
@@ -405,7 +400,7 @@ def _get_az_version_summary():
 
     lines = az_vers_string.splitlines()
 
-    new_lines=[]
+    new_lines = []
     ext_line = -1
     legal_line = -1
     for i, line in enumerate(lines):
@@ -427,12 +422,12 @@ def _get_az_version_summary():
 
     return "\n".join(new_lines)
 
+
 def _display_recent_commands(cmd):
     def _pad_string(my_str, pad_len):
         while len(my_str) < pad_len:
             my_str += " "
         return my_str
-
 
     time_now = datetime.datetime.now()
 
@@ -447,10 +442,10 @@ def _display_recent_commands(cmd):
     max_len_dict = dict(name_len=0, success_len=0, time_len=0, duration_len=0)
 
     for log_file in command_log_files:
-            max_len_dict["name_len"] = max(len(log_file.metadata_tup.cmd), max_len_dict["name_len"])
-            max_len_dict["success_len"] = max(len(log_file.get_command_status()), max_len_dict["success_len"])
-            max_len_dict["time_len"] = max(len(log_file.get_command_time_str()), max_len_dict["time_len"])
-            max_len_dict["duration_len"] = max(len(log_file.get_command_duration_str()), max_len_dict["duration_len"])
+        max_len_dict["name_len"] = max(len(log_file.metadata_tup.cmd), max_len_dict["name_len"])
+        max_len_dict["success_len"] = max(len(log_file.get_command_status()), max_len_dict["success_len"])
+        max_len_dict["time_len"] = max(len(log_file.get_command_time_str()), max_len_dict["time_len"])
+        max_len_dict["duration_len"] = max(len(log_file.get_command_duration_str()), max_len_dict["duration_len"])
 
     print("Recent commands:\n")
     for i, log_info in enumerate(command_log_files):
