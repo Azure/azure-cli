@@ -185,7 +185,7 @@ class TestCommandLogFile(ScenarioTest):
         result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
         # manually handle error logging as azure.cli.core.util's handle_exception function is mocked in testsdk / patches
-        with CommandLoggerContext(cli_ctx, logger):
+        with CommandLoggerContext(logger):
             if result.exit_code != 0:
                 logger.error("There was an error during execution.")
 

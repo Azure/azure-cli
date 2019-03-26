@@ -26,7 +26,7 @@ def handle_exception(ex, cli_ctx=None):
     from msrest.exceptions import HttpOperationError
     from azure.cli.core.azlogging import CommandLoggerContext
 
-    with CommandLoggerContext(cli_ctx, logger):
+    with CommandLoggerContext(logger):
 
         if isinstance(ex, (CLIError, CloudError)):
             logger.error(ex.args[0])

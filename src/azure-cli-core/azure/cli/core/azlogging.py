@@ -120,21 +120,15 @@ class AzCliLogging(CLILogging):
 
 
 class CommandLoggerContext(object):
-    def __init__(self, cli_ctx, module_logger):
-        self.cli_ctx = cli_ctx
+    def __init__(self, module_logger):
         self.logger = module_logger
+        self.hdlr = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)  # pylint: disable=protected-access
 
     def __enter__(self):
-        if not self.cli_ctx:
-            return self
-        hdlr = self.cli_ctx.logging.command_logger_handler
-        if hdlr:
-            self.logger.addHandler(hdlr)  # add command metadata handler
+        if self.hdlr:
+            self.logger.addHandler(self.hdlr)  # add command metadata handler
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self.cli_ctx:
-            return
-        hdlr = self.cli_ctx.logging.command_logger_handler
-        if hdlr:
-            self.logger.removeHandler(hdlr)
+        if self.hdlr:
+            self.logger.removeHandler(self.hdlr)
