@@ -42,11 +42,6 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
-
-    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
-
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
     if source_location.lower() == NULL_SOURCE_LOCATION:
@@ -76,18 +71,23 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
+    yaml_template = None
     if file == "-":
         import sys
-        yaml_template = ""
         for s in sys.stdin.readlines():
             yaml_template += s
         values_content = ""
 
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.run_image }}\n    timeout: {{ .Values.timeout }}\n"
-        values_content = "run_image: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
+        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n    timeout: {{ .Values.timeout }}\n"
+        values_content = "command: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
 
-    if yaml_template is not None:
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+
+    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
+
+    if yaml_template:
         import base64
         request = EncodedTaskRunRequest(
             encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),

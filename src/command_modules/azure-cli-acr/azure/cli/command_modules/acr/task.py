@@ -73,18 +73,18 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
+    yaml_template=None
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.image }}\n    timeout: {{ .Values.timeout }}\n"
-        values_content = "image: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
+        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n    timeout: {{ .Values.timeout }}\n"
+        values_content = "command: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
 
     if file == "-":
         import sys
-        yaml_template = ""
         for s in sys.stdin.readlines():
             yaml_template += s
         values_content = ""
 
-    if yaml_template is not None:
+    if yaml_template:
         import base64
         EncodedTaskStep = cmd.get_models('EncodedTaskStep')
         step = EncodedTaskStep(

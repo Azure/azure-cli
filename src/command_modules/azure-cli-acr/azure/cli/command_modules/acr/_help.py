@@ -409,7 +409,7 @@ examples:
   - name: Queue a run to execute a container command.
     text: >
         az acr run -r MyRegistry --cmd MyImage /dev/null
-  - name: Queue a run with the task definition from the standard input. Either 'Ctrl + z'(Windows) or 'Ctrl + d'(Linux) terminates the input stream.
+  - name: Queue a run with the task definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr run -r MyRegistry -f - /dev/null
   - name: Queue a piped run.
@@ -468,7 +468,7 @@ examples:
   - name: Create a task without the source location.
     text: >
         az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null
-  - name: Create a task with the definition from the standard input. Either 'Ctrl + z'(Windows) or 'Ctrl + d'(Linux) terminates the input stream.
+  - name: Create a task with the definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
   - name: Create a piped task.
