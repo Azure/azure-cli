@@ -30,8 +30,7 @@ from azure.cli.command_modules.network._validators import (
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
-    validate_express_route_port, bandwidth_validator_factory, privatedns_zone_name_type,
-    get_privatedns_vnet_validator, validate_privatedns_metadata, validate_privatedns_record_type)
+    validate_express_route_port, bandwidth_validator_factory, validate_privatedns_metadata, validate_privatedns_record_type)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -881,16 +880,16 @@ def load_arguments(self, _):
     with self.argument_context('network private-dns') as c:
         c.argument('tags', tags_type)
         c.argument('relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the Private DNS zone.')
-        c.argument('private_zone_name', options_list=('--zone-name', '-z'), help='The name of the Private DNS zone.', type=privatedns_zone_name_type)
+        c.argument('private_zone_name', options_list=('--zone-name', '-z'), help='The name of the Private DNS zone.', type=dns_zone_name_type)
         c.argument('metadata', tags_type, help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_privatedns_metadata)
 
     with self.argument_context('network private-dns zone') as c:
-        c.argument('private_zone_name', name_arg_type, type=privatedns_zone_name_type)
+        c.argument('private_zone_name', name_arg_type, type=dns_zone_name_type)
         c.ignore('location')
 
     with self.argument_context('network private-dns link') as c:
         c.argument('virtual_network_link_name', name_arg_type, help='The name of the virtual network link to the specified Private DNS zone.')
-        c.argument('virtual_network', help='Name or ID of the virtual network.', options_list=('--virtual-network', '-v'), validator=get_privatedns_vnet_validator)
+        c.argument('virtual_network', help='Name or ID of the virtual network.', options_list=('--virtual-network', '-v'), validator=get_vnet_validator('virtual_network'))
         c.argument('registration_enabled', help='Specify if the link is registration enabled.', options_list=('--registration-enabled', '-e'), arg_type=get_three_state_flag())
 
     with self.argument_context('network private-dns record-set') as c:
