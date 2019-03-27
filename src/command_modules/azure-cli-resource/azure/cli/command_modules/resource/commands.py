@@ -202,7 +202,7 @@ def load_command_table(self, _):
 
     # Resource feature commands
     with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
-                            min_api='2018-03-02-hybrid') as g:
+                            min_api='2019-03-02-hybrid') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
