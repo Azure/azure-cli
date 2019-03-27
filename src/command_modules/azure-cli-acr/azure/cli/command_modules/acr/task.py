@@ -73,7 +73,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
-    yaml_template=None
+    yaml_template = None
     if cmd_value:
         yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n    timeout: {{ .Values.timeout }}\n"
         values_content = "command: {0}\ntimeout: {1}\n".format(cmd_value, timeout)
