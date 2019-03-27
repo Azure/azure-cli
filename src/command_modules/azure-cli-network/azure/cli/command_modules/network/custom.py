@@ -2805,6 +2805,9 @@ def create_privatedns_zone(cmd, resource_group_name, private_zone_name, tags=Non
     from azure.mgmt.privatedns import PrivateDnsManagementClient
     from azure.mgmt.privatedns.models import PrivateZone
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient).private_zones
+    if private_zone_name.endswith(".local"):
+        logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
+                        "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
     zone = PrivateZone(location='global', tags=tags)
     return client.create_or_update(resource_group_name, private_zone_name, zone, if_none_match='*')
 
