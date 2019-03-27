@@ -213,7 +213,7 @@ class RoleCreateScenarioTest(RoleScenarioTest):
 
             self.cmd('role definition delete -n {role}',
                      checks=self.is_empty())
-            time.sleep(120)
+            time.sleep(240)
             self.cmd('role definition list -n {role}',
                      checks=self.is_empty())
 

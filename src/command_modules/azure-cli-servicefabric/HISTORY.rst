@@ -3,6 +3,8 @@
 Release History
 ===============
 
+0.1.14
+++++++
 * sf cluster list: Fix issue 'ClusterListResult is not iterable.
 
 0.1.13

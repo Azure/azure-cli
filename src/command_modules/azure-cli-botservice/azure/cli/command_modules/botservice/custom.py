@@ -63,6 +63,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
+    show_password = False
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -86,7 +87,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     if not msa_app_id:
 
         logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
-
+        show_password = True
         msa_app_id, password = ConvergedApp.provision(resource_name)
         logger.info('Microsoft application provisioning successful. Application Id: %s.', msa_app_id)
 
@@ -99,7 +100,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
         # Registration bot specific validation
         if not endpoint:
-            raise CLIError('Endpoint is required for creating a registration bot.')
+            endpoint = ''
         if not msa_app_id:
             raise CLIError('Microsoft application id is required for creating a registration bot.')
 
@@ -118,11 +119,14 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         logger.info('Bot parameters client side validation successful.')
         logger.info('Creating bot.')
 
-        return client.bots.create(
+        result = client.bots.create(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             parameters=parameters
-        )
+        ).as_dict()
+        if show_password:
+            result['password'] = password
+        return result
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
@@ -132,11 +136,11 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
             storageAccountName, location, sku_name, appInsightsLocation, language, version)
 
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        publish_cmd = "az bot publish --resource-group %s -n '%s' --subscription %s -v %s" % (
+        publish_cmd = "az bot publish --resource-group %s -n %s --subscription %s -v %s" % (
             resource_group_name, resource_name, subscription_id, version)
         if language == 'Csharp':
             proj_file = '%s.csproj' % resource_name
-            publish_cmd += " --proj-file-path '%s'" % proj_file
+            publish_cmd += " --proj-file-path %s" % proj_file
         creation_results['publishCommand'] = publish_cmd
         logger.info('To publish your local changes to Azure, use the following command from your code directory:\n  %s',
                     publish_cmd)
@@ -471,8 +475,45 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     logger.info('Bot prepare publish completed successfully.')
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',
-                keep_node_modules=None):
+def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
+    if not code_dir:
+        code_dir = os.getcwd()
+        logger.info('--code-dir not provided, defaulting to current working directory: %s\n'
+                    'For more information, run "az bot prepare-deploy -h"', code_dir)
+    elif not os.path.exists(code_dir):
+        raise CLIError('Provided --code-dir value ({0}) does not exist'.format(code_dir))
+
+    def does_file_exist(file_name):
+        if os.path.exists(os.path.join(code_dir, file_name)):
+            raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
+                           'prepare-deploy"' % (file_name, code_dir, file_name))
+
+    if language != 'Csharp':
+        if proj_file_path:
+            raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
+        does_file_exist('web.config')
+
+        BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, {'lang': language,
+                                                                             'has_web_config': False,
+                                                                             'has_iisnode_yml': True})
+    else:
+        if not proj_file_path:
+            raise CLIError('--proj-file-path must be provided if language is Csharp')
+        does_file_exist('.deployment')
+        csproj_file = os.path.join(code_dir, proj_file_path)
+        if not os.path.exists(csproj_file):
+            raise CLIError('{0} file not found\nPlease verify the relative path to the .csproj file from the '
+                           '--code-dir'.format(csproj_file))
+
+        with open(os.path.join(code_dir, '.deployment'), 'w') as f:
+            f.write('[config]\n')
+            proj_file = proj_file_path.lower()
+            proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+            f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
+
+
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
+                keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.
 
     This method is directly called via "bot publish"
@@ -485,6 +526,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     :param proj_file_path:
     :param version:
     :param keep_node_modules:
+    :param timeout:
     :return:
     """
     # Get the bot information and ensure it's not only a registration bot.
@@ -538,7 +580,28 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     logger.info('Zip file path created, at %s.', zip_filepath)
 
     kudu_client = KuduClient(cmd, resource_group_name, resource_name, bot, logger)
-    output = kudu_client.publish(zip_filepath, keep_node_modules, iis_publish_info['lang'])
+
+    app_settings = WebAppOperations.get_app_settings(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        name=kudu_client.bot_site_name
+    )
+    scm_do_build = [item['value'] for item in app_settings if item['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT']
+    if scm_do_build and scm_do_build[0] == 'true':
+        logger.info('Detected SCM_DO_BUILD_DURING_DEPLOYMENT with value of "true" in App Service\'s Application '
+                    'Settings. Build will commence during deployment. For more information, see '
+                    'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
+    else:
+        logger.warning('Didn\'t detect SCM_DO_BUILD_DURING_DEPLOYMENT or its value was "false" in App Service\'s '
+                       'Application Settings. Build may not commence during deployment. To learn how to trigger a build'
+                       ' when deploying to your App Service, see '
+                       'https://github.com/projectkudu/kudu/wiki/Deploying-from-a-zip-file')
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        logger.warning('To change the Application Setting via az cli, use the following command:\naz webapp config '  # pylint:disable=logging-not-lazy
+                       'appsettings set -n %s -g %s --subscription %s --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true' %
+                       (kudu_client.bot_site_name, resource_group_name, subscription_id))
+
+    output = kudu_client.publish(zip_filepath, timeout, keep_node_modules, iis_publish_info['lang'])
 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')

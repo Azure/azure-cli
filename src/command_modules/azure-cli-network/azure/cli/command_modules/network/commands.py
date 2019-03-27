@@ -6,7 +6,8 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
+from azure.cli.core.commands.arm import (
+    deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
@@ -339,7 +340,8 @@ def load_command_table(self, _):
         {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_listener_create_namespace},
         {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
         {'prop': 'probes', 'name': 'probe'},
-        {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace}
+        {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace},
+        {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
     ]
     if self.supported_api_version(min_api='2018-08-01'):
         subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
@@ -367,6 +369,28 @@ def load_command_table(self, _):
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                      child_collection_prop_name=subresource, validator=create_validator)
 
+    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
+        g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
+        g.custom_command('show', 'show_ag_rewrite_rule')
+        g.custom_command('list', 'list_ag_rewrite_rules')
+        g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
+        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
+                                 custom_func_name='update_ag_rewrite_rule',
+                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules',
+                                 child_collection_key='name.name',
+                                 child_arg_name='rule_set_name.rule_name')
+
+    with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
+        g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
+        g.custom_command('show', 'show_ag_rewrite_rule_condition')
+        g.custom_command('list', 'list_ag_rewrite_rule_conditions')
+        g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
+        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
+                                 custom_func_name='update_ag_rewrite_rule_condition',
+                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules.conditions',
+                                 child_collection_key='name.name.variable',
+                                 child_arg_name='rule_set_name.rule_name.variable')
+
     with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
         subresource = 'redirect_configurations'
         g.command('list', list_network_resource_property('application_gateways', subresource))
@@ -377,6 +401,11 @@ def load_command_table(self, _):
                                  client_factory=cf_application_gateways, supports_no_wait=True,
                                  custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                  child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
+
+    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
+        g.command('condition list-server-variables', 'list_available_server_variables')
+        g.command('list-request-headers', 'list_available_request_headers')
+        g.command('list-response-headers', 'list_available_response_headers')
 
     with self.command_group('network application-gateway ssl-policy') as g:
         g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
@@ -397,7 +426,6 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
-
     # endregion
 
     # region ApplicationSecurityGroups
@@ -407,7 +435,6 @@ def load_command_table(self, _):
         g.command('list', 'list_all')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_asg')
-
     # endregion
 
     # region DdosProtectionPlans

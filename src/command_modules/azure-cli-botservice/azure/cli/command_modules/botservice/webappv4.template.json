@@ -218,6 +218,10 @@
                             "value": "10.14.1"
                         },
                         {
+                            "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                            "value": "true"
+                        },
+                        {
                             "name": "BotEnv",
                             "value": "[parameters('botEnv')]"
                         },
@@ -232,6 +236,14 @@
                         {
                             "name": "botFileSecret",
                             "value": "[parameters('botFileEncryptionKey')]"
+                        },
+                        {
+                            "name": "MicrosoftAppId",
+                            "value": "[parameters('appId')]"
+                        },
+                        {
+                            "name": "MicrosoftAppPassword",
+                            "value": "[parameters('appSecret')]"
                         }
                     ],
                     "cors": {
@@ -345,6 +357,7 @@
                     "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=',listkeys(variables('storageAccountId'), '2015-05-01-preview').key1,';')]",
                     "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storageAccountName'),';AccountKey=',listkeys(variables('storageAccountId'), '2015-05-01-preview').key1,';')]",
                     "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
+                    "SCM_DO_BUILD_DURING_DEPLOYMENT": "true",
                     "BotEnv": "[parameters('botEnv')]",
                     "BotId": "[parameters('botId')]",
                     "MicrosoftAppId": "[parameters('appId')]",

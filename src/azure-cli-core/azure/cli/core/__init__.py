@@ -20,7 +20,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
 
-
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
@@ -94,7 +93,7 @@ class AzCli(CLI):
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
-        return handle_exception(ex)
+        return handle_exception(ex, cli_ctx=self)
 
 
 class MainCommandsLoader(CLICommandsLoader):

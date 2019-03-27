@@ -280,6 +280,9 @@ short-summary: List preview features.
 helps['feature register'] = """
 type: command
 short-summary: register a preview feature.
+examples:
+  - name: register the "Shared Image Gallery" feature
+    text: az feature register --namespace Microsoft.Compute --name GalleryPreview
 """
 
 helps['group'] = """

@@ -46,7 +46,7 @@ def list_security_alerts(client, resource_group_name=None, location=None):
 
         return client.list_subscription_level_alerts_by_region()
 
-    elif resource_group_name:
+    if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
 
     return client.list()
@@ -206,7 +206,7 @@ def list_security_jit_network_access_policies(client, resource_group_name=None, 
 
         return client.list_by_region()
 
-    elif resource_group_name:
+    if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
 
     return client.list()

@@ -7,16 +7,16 @@
 import argparse
 import platform
 
-from knack.arguments import (
-    CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
-from knack.log import get_logger
-from knack.util import CLIError
-
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_PARAM_KWARGS
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
+
+from knack.arguments import (
+    CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
+from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 

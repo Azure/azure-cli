@@ -49,7 +49,7 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     install_requires=[
-        'applicationinsights>=0.11.1',
+        'applicationinsights>=0.11.1,<0.11.8',
         'portalocker==1.2.1',
     ],
     packages=[

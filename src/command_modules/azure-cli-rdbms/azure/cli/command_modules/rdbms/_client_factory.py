@@ -38,9 +38,8 @@ def get_mariadb_management_client(cli_ctx, **_):
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
             credentials=credentials)
-    else:
-        # Normal production scenario.
-        return get_mgmt_service_client(cli_ctx, MariaDBManagementClient)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, MariaDBManagementClient)
 
 
 def get_mysql_management_client(cli_ctx, **_):
@@ -67,9 +66,8 @@ def get_mysql_management_client(cli_ctx, **_):
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
             credentials=credentials)
-    else:
-        # Normal production scenario.
-        return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
 
 def get_postgresql_management_client(cli_ctx, **_):
@@ -96,9 +94,8 @@ def get_postgresql_management_client(cli_ctx, **_):
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
             credentials=credentials)
-    else:
-        # Normal production scenario.
-        return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
 
 
 def cf_mariadb_servers(cli_ctx, _):
@@ -175,3 +172,7 @@ def cf_postgres_virtual_network_rules_operations(cli_ctx, _):
 
 def cf_mysql_replica(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).replicas
+
+
+def cf_postgres_replica(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).replicas

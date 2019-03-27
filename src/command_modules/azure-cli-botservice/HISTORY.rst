@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.1.9
++++++
+* Add `az bot prepare-deploy` to prepare for deploying bots via `az webapp`
+* Have `az bot create --kind registration` show password if the password is not provided
+* Have `--endpoint` in `az bot create --kind registration` default empty string instead of being required
+
+0.1.8
++++++
+* Add "SCM_DO_BUILD_DURING_DEPLOYMENT" to ARM template's Application Settings for v4 Web App Bots
+* Add "Microsoft-BotFramework-AppId" and "Microsoft-BotFramework-AppPassword" to ARM template's Application Settings for v4 Web App Bots
+* Remove single quotes from `az bot publish` command output at end of `az bot create`
+* Use async zipdeploy API for deploying bots via `az bot publish`
+
 0.1.7
 +++++
 * Suppress latest `botservice (0.4.3)` extension, this functionality has been rolled into the core CLI

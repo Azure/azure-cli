@@ -20,7 +20,7 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 
-def handle_exception(ex):
+def handle_exception(ex, cli_ctx=None):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError
@@ -47,7 +47,20 @@ def handle_exception(ex):
             logger.error(ex)
         return 1
 
+    # Otherwise, unhandled exception. Direct users to create an issue.
+    is_extension = False
+    if cli_ctx:
+        try:
+            if cli_ctx.invocation.data['command_extension_name']:
+                is_extension = True
+        except (AttributeError, KeyError):
+            pass
+
+    issue_url = "https://aka.ms/azcli/ext/issues" if is_extension else "https://aka.ms/azcli/issues"
+    logger.error("The command failed with an unexpected error. Here is the traceback:\n")
     logger.exception(ex)
+    logger.warning("\nTo open an issue, please visit: %s", issue_url)
+
     return 1
 
 
@@ -404,3 +417,45 @@ def get_default_admin_username():
         return getpass.getuser()
     except KeyError:
         return None
+
+
+def _find_child(parent, *args, **kwargs):
+    # tuple structure (path, key, dest)
+    path = kwargs.get('path', None)
+    key_path = kwargs.get('key_path', None)
+    comps = zip(path.split('.'), key_path.split('.'), args)
+    current = parent
+    for path, key, val in comps:
+        current = getattr(current, path, None)
+        if current is None:
+            raise CLIError("collection '{}' not found".format(path))
+        match = next((x for x in current if getattr(x, key).lower() == val.lower()), None)
+        if match is None:
+            raise CLIError("item '{}' not found in {}".format(val, path))
+        current = match
+    return current
+
+
+def find_child_item(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    if len(args) != len(path.split('.')) != len(key_path.split('.')):
+        raise CLIError('command authoring error: args, path and key_path must have equal number of components.')
+    return _find_child(parent, *args, path=path, key_path=key_path)
+
+
+def find_child_collection(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    arg_len = len(args)
+    key_len = len(key_path.split('.'))
+    path_len = len(path.split('.'))
+    if arg_len != key_len and path_len != arg_len + 1:
+        raise CLIError('command authoring error: args and key_path must have equal number of components, and '
+                       'path must have one extra component (the path to the collection of interest.')
+    parent = _find_child(parent, *args, path=path, key_path=key_path)
+    collection_path = path.split('.')[-1]
+    collection = getattr(parent, collection_path, None)
+    if collection is None:
+        raise CLIError("collection '{}' not found".format(collection_path))
+    return collection

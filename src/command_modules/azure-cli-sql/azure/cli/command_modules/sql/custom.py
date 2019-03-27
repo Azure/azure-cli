@@ -6,8 +6,6 @@
 # pylint: disable=C0302
 from enum import Enum
 
-from knack.log import get_logger
-
 from azure.cli.core.util import (
     CLIError,
     sdk_no_wait,
@@ -35,6 +33,8 @@ from azure.mgmt.sql.models import (
     Sku,
     StorageKeyType,
 )
+
+from knack.log import get_logger
 
 from ._util import (
     get_sql_capabilities_operations,
@@ -210,17 +210,16 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
                         capacity=sku.capacity,
                         capacities=[slo.sku.capacity for slo in supported_service_level_objectives]
                     ))
-            else:
-                raise CLIError(
-                    "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
-                    " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
-                    " supported combinations of family and capacity.".format(
-                        tier=sku.tier,
-                        family=sku.family,
-                        capacity=sku.capacity,
-                        skus=[(slo.sku.family, slo.sku.capacity)
-                              for slo in supported_service_level_objectives]
-                    ))
+            raise CLIError(
+                "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
+                " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
+                " supported combinations of family and capacity.".format(
+                    tier=sku.tier,
+                    family=sku.family,
+                    capacity=sku.capacity,
+                    skus=[(slo.sku.family, slo.sku.capacity)
+                          for slo in supported_service_level_objectives]
+                ))
     elif sku.family:
         # Error - cannot find based on family alone.
         raise CLIError('If --family is specified, --capacity must also be specified.')
@@ -1922,8 +1921,7 @@ def encryption_protector_update(
     else:
         if kid is None:
             raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
-        else:
-            key_name = _get_server_key_name_from_uri(kid)
+        key_name = _get_server_key_name_from_uri(kid)
 
     return client.create_or_update(
         resource_group_name=resource_group_name,

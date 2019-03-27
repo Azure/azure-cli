@@ -84,20 +84,26 @@ helps['storage account create'] = """
     examples:
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --sku Standard_LRS
-          min_profile: latest
+          unsupported-profiles: 2017-03-09-profile
         - name: Create a storage account 'MyStorageAccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
           text: az storage account create -n MyStorageAccount -g MyResourceGroup -l westus --account-type Standard_LRS
-          max_profile: 2017-03-09-profile
+          supported-profiles: 2017-03-09-profile
 """
 
 helps['storage container create'] = """
     type: command
     short-summary: Create a container in a storage account.
+    long-summary: >
+       By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs.
+       Use "container" to allow public read and list access to the entire container.
+       You can configure the --public-access using `az storage container set-permission -n CONTAINER_NAME --public-access blob/container/off`.
     examples:
         - name: Create a storage container in a storage account.
           text: az storage container create -n MyStorageContainer
         - name: Create a storage container in a storage account and return an error if the container already exists.
           text: az storage container create -n MyStorageContainer --fail-on-exist
+        - name: Create a storage container in a storage account and allow public read access for blobs.
+          text: az storage container create -n MyStorageContainer --public-access blob
 """
 
 helps['storage container delete'] = """
@@ -313,7 +319,7 @@ helps['storage blob upload-batch'] = """
         - name: --maxsize-condition
           short-summary: The max length in bytes permitted for an append blob.
         - name: --lease-id
-          short-summary: Required if the blob has an active lease
+          short-summary: The active lease id for the blob
     examples:
         - name: Upload all files that end with .py unless blob exists and has been modified since given date.
           text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z
@@ -621,6 +627,9 @@ helps['storage file download-batch'] = """
         - name: --max-connections
           type: integer
           short-summary: The maximum number of parallel connections to use. Default value is 1.
+        - name: --snapshot
+          type: string
+          short-summary: A string that represents the snapshot version, if applicable.
         - name: --validate-content
           type: bool
           short-summary: If set, calculates an MD5 hash for each range of the file for validation.

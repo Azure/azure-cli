@@ -6,6 +6,7 @@
 import copy
 import json
 import os
+import time
 import zipfile
 import requests
 import urllib3
@@ -20,6 +21,7 @@ except ImportError:
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 
 class KuduClient:  # pylint:disable=too-many-instance-attributes
@@ -35,7 +37,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         self.__password = None
         self.__scm_url = None
         self.__auth_headers = None
-        self.bot_site_name = None
+        self.bot_site_name = WebAppOperations.get_bot_site_name(self.__bot.properties.endpoint)
 
     def download_bot_zip(self, file_save_path, folder_path):
         """Download bot's source code from Kudu.
@@ -129,12 +131,19 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
                 self.__logger.warning('Your Kudu website for this bot is: %s' % self.__scm_url)
                 self.__logger.warning('\nYou can also use `--keep-node-modules` in your `az bot publish` command to '
                                       'not `npm install` the dependencies for the bot on Kudu.')
+                subscription_id = get_subscription_id(self.__cmd.cli_ctx)
+                self.__logger.warning('Alternatively, you can configure your Application Settings for the App Service '
+                                      'to build during zipdeploy by using the following command:\n  az webapp config '
+                                      'appsettings set -n %s -g %s --subscription %s --settings '
+                                      'SCM_DO_BUILD_DURING_DEPLOYMENT=true' %
+                                      (self.bot_site_name, self.__resource_group_name, subscription_id))
+
             else:
                 raise e
 
         return response.json()
 
-    def publish(self, zip_file_path, keep_node_modules, detected_language):
+    def publish(self, zip_file_path, timeout, keep_node_modules, detected_language):
         """Publishes zipped bot source code to Kudu.
 
         Performs the following steps:
@@ -144,6 +153,9 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         4. Gets the results of the latest Kudu deployment
 
         :param zip_file_path:
+        :param timeout:
+        :param keep_node_modules:
+        :param detected_language:
         :return: Dictionary with results of the latest deployment
         """
         if not self.__initialized:
@@ -158,7 +170,28 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
                                     data=zip_content)
             HttpResponseValidator.check_response_status(response)
 
-        return self.__enable_zip_deploy(zip_file_path, keep_node_modules, detected_language)
+        return self.__enable_zip_deploy(zip_file_path, timeout, keep_node_modules, detected_language)
+
+    def __check_zip_deployment_status(self, timeout=None):
+        deployment_status_url = self.__scm_url + '/api/deployments/latest'
+        total_trials = (int(timeout) // 2) if timeout else 450
+        num_trials = 0
+        while num_trials < total_trials:
+            time.sleep(2)
+            response = requests.get(deployment_status_url, headers=self.__auth_headers)
+            res_dict = response.json()
+            num_trials = num_trials + 1
+            if res_dict.get('status', 0) == 3:
+                raise CLIError('Zip deployment failed.')
+            elif res_dict.get('status', 0) == 4:
+                break
+            if 'progress' in res_dict:
+                self.__logger.debug(res_dict['progress'])
+        # if the deployment is taking longer than expected
+        if res_dict.get('status', 0) != 4:
+            raise CLIError("""Deployment is taking longer than expected. Please verify
+                                status at '{}' beforing launching the app""".format(deployment_status_url))
+        return res_dict
 
     def __empty_source_folder(self):
         """Remove the `clirepo/` folder from Kudu.
@@ -207,7 +240,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         HttpResponseValidator.check_response_status(response)
         self.__logger.info('"site/wwwroot/" successfully emptied.')
 
-    def __enable_zip_deploy(self, zip_file_path, keep_node_modules, detected_language):
+    def __enable_zip_deploy(self, zip_file_path, timeout, keep_node_modules, detected_language):
         """Pushes local bot's source code in zip format to Kudu for deployment.
 
         This method deploys the zipped bot source code via Kudu's zipdeploy API. This API does not run any build
@@ -216,10 +249,8 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         :param zip_file_path: string
         :return: Dictionary with results of the latest deployment
         """
-        if not self.__initialized:
-            self.__initialize()
 
-        zip_url = self.__scm_url + '/api/zipdeploy'
+        zip_url = self.__scm_url + '/api/zipdeploy?isAsync=true'
         headers = self.__get_application_octet_stream_headers()
         if not keep_node_modules or detected_language == 'Csharp':
             self.__empty_source_folder()
@@ -230,16 +261,13 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
             zip_content = fs.read()
             self.__logger.info('Source code read, uploading to Kudu.')
             r = requests.post(zip_url, data=zip_content, headers=headers)
-            if r.status_code != 200:
+            if r.status_code != 202:
                 raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
                     zip_url, r.status_code, r.text))
-            self.__logger.info('Source code successfully uploaded.')
 
-        self.__logger.info('Retrieving the latest deployment info.')
+        self.__logger.info('Retrieving current deployment info.')
         # On successful deployment navigate to the app, display the latest deployment JSON response.
-        response = requests.get(self.__scm_url + '/api/deployments/latest', headers=self.__auth_headers)
-        HttpResponseValidator.check_response_status(response)
-        return response.json()
+        return self.__check_zip_deployment_status(timeout)
 
     def __get_application_json_headers(self):
         headers = copy.deepcopy(self.__auth_headers)
@@ -256,7 +284,6 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
 
         :return: None
         """
-        self.bot_site_name = WebAppOperations.get_bot_site_name(self.__bot.properties.endpoint)
         user_name, password = WebAppOperations.get_site_credential(self.__cmd.cli_ctx,
                                                                    self.__resource_group_name,
                                                                    self.bot_site_name,

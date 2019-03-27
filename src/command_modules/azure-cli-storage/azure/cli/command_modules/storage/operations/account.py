@@ -100,6 +100,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
+
     domain = instance.custom_domain
     if custom_domain is not None:
         domain = CustomDomain(name=custom_domain)
@@ -107,18 +108,16 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             domain.use_sub_domain_name = use_subdomain == 'true'
 
     encryption = instance.encryption
+    if not encryption and any((encryption_services, encryption_key_source, encryption_key_vault_properties)):
+        encryption = Encryption()
     if encryption_services:
-        if not encryption:
-            encryption = Encryption(services=encryption_services)
-        else:
-            encryption.services = encryption_services
-
-    if encryption_key_source or encryption_key_vault_properties:
-        if encryption:
-            encryption.key_source = encryption_key_source
-            encryption.key_vault_properties = encryption_key_vault_properties
-        else:
-            raise ValueError('--encryption-services is required when configure encryption key source')
+        encryption.services = encryption_services
+    if encryption_key_source:
+        encryption.key_source = encryption_key_source
+    if encryption_key_vault_properties:
+        if encryption.key_source != 'Microsoft.Keyvault':
+            raise ValueError('Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
+        encryption.key_vault_properties = encryption_key_vault_properties
 
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,

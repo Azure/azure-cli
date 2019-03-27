@@ -3,9 +3,18 @@
 Release History
 ===============
 
-2.3.4
+2.3.6
 +++++
 * `network private-dns`: Added support for Private DNS zones.
+
+2.3.5
++++++
+* `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
+* `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
+* `application-gateway`: Add `rewrite-rule` command group.
+
+2.3.4
++++++
 * `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
 
 2.3.3

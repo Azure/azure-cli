@@ -11,19 +11,20 @@ from ._utils import (
     get_registry_from_name_or_login_server
 )
 
-SOURCE_REGISTRY_MISSING = "Please specify the source container registry name, login server or resource ID: "
+SOURCE_REGISTRY_NOT_FOUND = "The source container registry can not be found in the current subscription. " \
+                            "Please provide a valid address and/or credentials."
 IMPORT_NOT_SUPPORTED = "Imports are only supported for managed registries."
-INVALID_SOURCE_IMAGE = "Please specify source image in the format '[registry.azurecr.io/]repository[:tag]' or " \
-                       "'[registry.azurecr.io/]repository@digest'"
-NO_TTY_ERROR = "Please specify source registry ID by passing parameters to import command directly."
-REGISTRY_MISMATCH = "Registry mismatch. Please check either source-image or resource ID " \
-                    "to make sure that they are referring to the same registry and try again."
+SOURCE_NOT_FOUND = "Source cannot be found. " \
+                   "Please provide a valid image and source registry or a fully qualified source."
+LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
+                         "because it is not a fully qualified domain name."
+CREDENTIALS_INVALID = "Authentication failed. Please provide password."
 
 
 def acr_import(cmd,
                client,
                registry_name,
-               source,
+               source_image,
                source_registry=None,
                source_registry_username=None,
                source_registry_password=None,
@@ -32,57 +33,47 @@ def acr_import(cmd,
                repository=None,
                force=False):
 
+    if source_registry_username and not source_registry_password:
+        raise CLIError(CREDENTIALS_INVALID)
+
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, IMPORT_NOT_SUPPORTED)
 
-    if not source:
-        raise CLIError(INVALID_SOURCE_IMAGE)
-    source_image = source
-
-    slash = source.find('/')
-
     ImportImageParameters, ImportSource, ImportMode = cmd.get_models(
         'ImportImageParameters', 'ImportSource', 'ImportMode')
-    if slash < 0:
-        if not source_registry:
-            from knack.prompting import prompt, NoTTYException
-            try:
-                source_registry = prompt(SOURCE_REGISTRY_MISSING)
-            except NoTTYException:
-                raise CLIError(NO_TTY_ERROR)
-        if not is_valid_resource_id(source_registry):
+
+    if source_registry:
+        if is_valid_resource_id(source_registry):
+            source = ImportSource(resource_id=source_registry, source_image=source_image)
+        else:
             registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
             if registry:
-                source_registry = registry.id
-        source = ImportSource(resource_id=source_registry, source_image=source_image)
+                source = ImportSource(resource_id=registry.id, source_image=source_image)
+            else:
+                raise CLIError(SOURCE_REGISTRY_NOT_FOUND)
     else:
-        source_registry_login_server = source_image[:slash]
-        source_image = source_image[slash + 1:]
-        if not source_image or not source_registry_login_server:
-            raise CLIError(INVALID_SOURCE_IMAGE)
-        registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry_login_server)
-        if registry:
-            if source_registry and \
-               source_registry.lower() != registry.id.lower() and \
-               source_registry.lower() != registry.name.lower() and \
-               source_registry.lower() != registry.login_server.lower():
-                raise CLIError(REGISTRY_MISMATCH)
-            source = ImportSource(resource_id=registry.id,
-                                  source_image=source_image)
-        else:
-            if source_registry_password:
-                ImportSourceCredentials = cmd.get_models('ImportSourceCredentials')
-                if source_registry_username:
-                    source = ImportSource(registry_uri=source_registry_login_server,
+        slash = source_image.find('/')
+        if slash > 0:
+            registry_uri = source_image[:slash]
+            dot = registry_uri.find('.')
+            if dot > 0:
+                source_image = source_image[slash + 1:]
+                if source_registry_password:
+                    ImportSourceCredentials = cmd.get_models('ImportSourceCredentials')
+                    source = ImportSource(registry_uri=registry_uri,
                                           source_image=source_image,
                                           credentials=ImportSourceCredentials(password=source_registry_password,
                                                                               username=source_registry_username))
                 else:
-                    source = ImportSource(registry_uri=source_registry_login_server,
-                                          source_image=source_image,
-                                          credentials=ImportSourceCredentials(password=source_registry_password))
+                    registry = get_registry_from_name_or_login_server(cmd.cli_ctx, registry_uri)
+                    if registry:
+                        source = ImportSource(resource_id=registry.id, source_image=source_image)
+                    else:
+                        source = ImportSource(registry_uri=registry_uri, source_image=source_image)
             else:
-                source = ImportSource(registry_uri=source_registry_login_server, source_image=source_image)
+                raise CLIError(LOGIN_SERVER_NOT_VALID)
+        else:
+            raise CLIError(SOURCE_NOT_FOUND)
 
     if not target_tags and not repository:
         index = source_image.find("@")

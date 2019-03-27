@@ -84,7 +84,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 ## Quoting Issues ##
   This becomes an issue because when the command shell (bash, zsh, Windows command prompt, etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
   1. If the value contains whitespace, you must wrap it in quotes.
-  2. In bash, both single and double quotes will be intepreted while in Windows, only double quotes are handled which means single quotes will be interpreted as a part of the value.
+  2. In bash or Windows PowerShell, both single and double quotes will be intepreted, while in Windows command prompt, only double quotes are handled which means single quotes will be interpreted as a part of the value.
   3. If your command only runs on bash (or zsh), using single quotes has the benefit of preserving the content inside. This can be very helpful when supplying inline JSON. For example this works in bash: `'{"foo": "bar"}'`
   4. If your command will run on Windows command prompt, you must use double quotes exclusively. If the value contains double quotes, you must escape it: "i like to use \\" a lot". The coimmand propmpt equivalent of the above would be: `"{\"foo\": \"bar\"}"
   5. Exported variables in bash inside double quotes will be evaluated. If this is not what you want, again use \\ to escape it like `"\\$var"` or use single quotes `'$var'`. 
