@@ -2569,13 +2569,16 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         family = 'Gen4'
         resource_group_1 = "cl_one"
         collation = "Serbian_Cyrillic_100_CS_AS"
+        proxy_override = "Proxy"
+        proxy_override_update = "Redirect"
+        public_data_endpoint_enabled_update = "False"
 
         user = admin_login
 
         # test create sql managed_instance with minimal required parameters
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
-                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {}'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation),
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -2587,7 +2590,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('sku.family', family),
                                           JMESPathCheck('sku.capacity', v_cores),
                                           JMESPathCheck('identity', None),
-                                          JMESPathCheck('collation', collation)]).get_output_in_json()
+                                          JMESPathCheck('collation', collation),
+                                          JMESPathCheck('proxyOverride', proxy_override),
+                                          JMESPathCheck('publicDataEndpointEnabled', 'true')]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -2624,10 +2629,19 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
+        #test update proxyOverride and publicDataEndpointEnabled
+        self.cmd('sql mi update -g {} -n {} --proxy-override {} --public-data-endpoint-enabled {}'
+                 .format(resource_group_1, managed_instance_name_1, proxy_override_update, public_data_endpoint_enabled_update),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('proxyOverride', proxy_override_update),
+                     JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update.lower())])
+
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
-                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {}'
-                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation),
+                 '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
+                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override),
                  checks=[
                      JMESPathCheck('name', managed_instance_name_2),
                      JMESPathCheck('resourceGroup', resource_group_1),
@@ -2639,7 +2653,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.family', family),
                      JMESPathCheck('sku.capacity', v_cores),
                      JMESPathCheck('identity.type', 'SystemAssigned'),
-                     JMESPathCheck('collation', collation)])
+                     JMESPathCheck('collation', collation),
+                     JMESPathCheck('proxyOverride', proxy_override),
+                     JMESPathCheck('publicDataEndpointEnabled', 'true')])
 
         # test show sql managed instance 2
         self.cmd('sql mi show -g {} -n {}'

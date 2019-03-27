@@ -1985,6 +1985,7 @@ def managed_instance_create(
         virtual_network_subnet_id,
         assign_identity=False,
         sku=None,
+        public_data_endpoint_enabled=False,
         **kwargs):
     '''
     Creates a managed instance.
@@ -1992,6 +1993,9 @@ def managed_instance_create(
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    if public_data_endpoint_enabled:
+        kwargs['public_data_endpoint_enabled'] = public_data_endpoint_enabled
 
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
@@ -2025,7 +2029,9 @@ def managed_instance_update(
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
-        assign_identity=False):
+        assign_identity=False,
+        proxy_override=None,
+        public_data_endpoint_enabled=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2043,6 +2049,11 @@ def managed_instance_update(
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.proxy_override = (
+        proxy_override or instance.proxy_override)
+
+    if public_data_endpoint_enabled == "True" or public_data_endpoint_enabled == "False":
+        instance.public_data_endpoint_enabled = public_data_endpoint_enabled == "True"
 
     return instance
 
