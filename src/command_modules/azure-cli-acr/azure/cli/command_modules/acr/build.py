@@ -17,6 +17,8 @@ from ._utils import validate_managed_registry, get_validate_platform
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
 
+from ._constants import INVALID_REMOTE_SOURCE_LOCATION
+
 logger = get_logger(__name__)
 
 
@@ -88,7 +90,16 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
             docker_file_path = "Dockerfile"
             logger.info("'--file or -f' is not provided. '%s' is used.", docker_file_path)
 
-        source_location = check_remote_source_code(source_location)
+        try:
+            source_location = check_remote_source_code(source_location)
+        except Exception as err:
+            if str(err) == INVALID_REMOTE_SOURCE_LOCATION.format(source_location):
+                try:
+                    open(source_location, 'r')
+                except FileNotFoundError as err:
+                    raise CLIError(err)
+            else:
+                raise CLIError(err)
         logger.warning("Sending context to registry: %s...", registry_name)
 
     if no_push:

@@ -12,6 +12,7 @@ REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
+INVALID_REMOTE_SOURCE_LOCATION = "'{}' is not a valid remote URL for git or tarball."
 
 
 def get_classic_sku(cmd):
