@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.4.2
++++++
+* Minor fixes
+
 0.4.1
 +++++
 * Add RedHat in the reserved resource enum type
