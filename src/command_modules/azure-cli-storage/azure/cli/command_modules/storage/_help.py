@@ -363,6 +363,8 @@ helps['storage blob delete-batch'] = """
         - name: --dryrun
           type: bool
           short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
+          long-summary: If this is specified, it will ignore all the Precondition Arguments that include --if-modified-since and --if-unmodified-since.
+                        So the file(s) will be deleted with the command without --dryrun may be different from the result list with --dryrun flag on.
         - name: --if-match
           type: string
           short-summary: An ETag value, or the wildcard character (*). Specify this header to perform the operation
