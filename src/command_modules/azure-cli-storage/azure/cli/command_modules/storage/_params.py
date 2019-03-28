@@ -216,6 +216,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
         c.register_sas_arguments()
+        c.extra('full_uri')
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('full_uri', action='store_true',
+                   help='Indicates that this command return the full blob URI and the shared access signature token.')
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
