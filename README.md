@@ -141,8 +141,22 @@ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
 
 ### Edge Builds
 
-If you want to get the latest build from the `dev` branch, you can use our "edge" builds feed. Here's an example of
-installing edge dev builds with pip in a virtual environment.
+If you want to get the latest build from the `dev` branch, you can use our "edge" builds.
+
+You can download the latest builds by following the links below:
+
+| Platform  | Link                                       |
+| :-------: | :----------------------------------------- |
+| Windows   | https://aka.ms/InstallAzureCliWindowsEdge  |
+| Homebrew  | https://aka.ms/InstallAzureCliHomebrewEdge |
+
+You can easily install the latest Homebrew edge build with the following command:
+
+```bash
+brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
+```
+
+Here's an example of installing edge dev builds with pip in a virtual environment.
 
 ```bash
 $ virtualenv env
