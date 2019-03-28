@@ -60,7 +60,13 @@ def get_vnet_validator(dest):
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name
-        names_or_ids = getattr(namespace, dest)
+        names_or_ids_raw = getattr(namespace, dest)
+
+        if isinstance(names_or_ids_raw, str):
+            names_or_ids = [names_or_ids_raw]
+        else:
+            names_or_ids = names_or_ids_raw
+
         ids = []
 
         if names_or_ids == [''] or not names_or_ids:
@@ -75,7 +81,11 @@ def get_vnet_validator(dest):
                     name=val
                 )
             ids.append(SubResource(id=val))
-        setattr(namespace, dest, ids)
+
+        if isinstance(names_or_ids_raw, str):
+            setattr(namespace, dest, ids[0])
+        else:
+            setattr(namespace, dest, ids)
 
     return _validate_vnet_name_or_id
 
