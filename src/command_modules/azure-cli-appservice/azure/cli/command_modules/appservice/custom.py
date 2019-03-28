@@ -1162,7 +1162,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
 
     instance.sku = sku_def
     if admin_site_name is not None:
-        Logger.warning("The 'admin_site_name' property has been deprecated")
+        logger.warning("The 'admin_site_name' property has been deprecated")
     return instance
 
 
