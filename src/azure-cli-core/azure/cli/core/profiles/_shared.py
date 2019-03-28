@@ -115,7 +115,7 @@ AZURE_API_PROFILES = {
             'disks': '2017-03-30',
             'snapshots': '2017-03-30'
         }),
-        ResourceType.MGMT_RESOURCE_LINKS: '2018-05-01',
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2018-05-01',
