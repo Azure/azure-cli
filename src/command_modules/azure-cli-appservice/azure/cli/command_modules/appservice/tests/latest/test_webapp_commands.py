@@ -1073,6 +1073,16 @@ class FunctionAppServicePlan(ScenarioTest):
         ])
 
 
+class FunctionAppServicePlanLinux(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    def test_functionapp_app_service_plan_linux(self, resource_group):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+            JMESPathCheck('kind', 'linux')
+        ])
+
+
 class WebappAuthenticationTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_authentication')
     def test_webapp_authentication(self, resource_group):
