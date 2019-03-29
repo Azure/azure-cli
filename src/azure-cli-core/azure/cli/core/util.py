@@ -88,8 +88,13 @@ def _update_latest_from_pypi(versions):
     from subprocess import check_output, STDOUT, CalledProcessError
 
     success = False
+
+    if not check_connectivity(max_retries=0):
+        return versions, success
+
     try:
-        cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir'.split()
+        cmd = [sys.executable] + \
+            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
         logger.debug('Running: %s', cmd)
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
         success = True
@@ -459,3 +464,22 @@ def find_child_collection(parent, *args, **kwargs):
     if collection is None:
         raise CLIError("collection '{}' not found".format(collection_path))
     return collection
+
+
+def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+    import requests
+    import timeit
+    start = timeit.default_timer()
+    success = None
+    try:
+        s = requests.Session()
+        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+        s.head(url, timeout=timeout)
+        success = True
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
+        logger.info('Connectivity problem detected.')
+        logger.debug(ex)
+        success = False
+    stop = timeit.default_timer()
+    logger.debug('Connectivity check: %s sec', stop - start)
+    return success
