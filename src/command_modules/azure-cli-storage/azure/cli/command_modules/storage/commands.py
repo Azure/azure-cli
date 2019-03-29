@@ -107,8 +107,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('snapshot', 'snapshot_blob')
         g.storage_command_oauth('update', 'set_blob_properties')
         g.storage_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command_oauth('delete', 'delete_blob', transform=create_boolean_result_output_transformer('deleted'),
-                                table_transformer=transform_boolean_for_table)
+        g.storage_command_oauth('delete', 'delete_blob')
         g.storage_command_oauth('undelete', 'undelete_blob',
                                 transform=create_boolean_result_output_transformer('undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
