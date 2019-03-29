@@ -92,7 +92,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
         try:
             source_location = check_remote_source_code(source_location)
-        except Exception as err:
+        except CLIError as err:
             if str(err) == INVALID_REMOTE_SOURCE_LOCATION.format(source_location):
                 try:
                     open(source_location, 'r')
