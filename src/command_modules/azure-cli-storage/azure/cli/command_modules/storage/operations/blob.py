@@ -394,9 +394,9 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
 
     if dryrun:
         if if_modified_since:
-            logger.warning('--if-modified-since argument is ignored.')
+            logger.warning('--if-modified-since argument is ignored when using --dry-run.')
         if if_unmodified_since:
-            logger.warning('--if-unmodified-since argument is ignored.')
+            logger.warning('--if-unmodified-since argument is ignored when using --dry-run.')
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
