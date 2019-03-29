@@ -896,6 +896,7 @@ helps['storage container generate-sas'] = """
 
 helps['storage blob generate-sas'] = """
     type: command
+    short-summary: Generates a shared access signature for the blob.
     examples:
         - name: Generate a sas token for a blob with read-only permissions.
           text: |
