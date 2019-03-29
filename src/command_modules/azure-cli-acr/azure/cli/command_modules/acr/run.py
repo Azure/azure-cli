@@ -81,7 +81,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     if cmd_value:
         yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
         values_content = "command: {0}\n".format(cmd_value)
-    
+
     if len(yaml_template) > 0 and timeout:
         yaml_template += "    timeout: {{ .Values.timeout }}\n"
         values_content += "timeout: {0}\n".format(timeout)
