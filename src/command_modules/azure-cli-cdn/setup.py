@@ -17,6 +17,7 @@ except ImportError:
 
 
 VERSION = "0.3.0"
+
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [

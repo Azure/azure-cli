@@ -182,6 +182,9 @@ def load_arguments(self, _):
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
 
+    with self.argument_context('role assignment delete') as c:
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Continue to delete all assignments under the subscription')
+
     with self.argument_context('role definition') as c:
         c.argument('role_definition_id', options_list=['--name', '-n'], help='the role definition name')
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='custom roles only(vs. build-in ones)')

@@ -93,11 +93,17 @@ helps['storage account create'] = """
 helps['storage container create'] = """
     type: command
     short-summary: Create a container in a storage account.
+    long-summary: >
+       By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs.
+       Use "container" to allow public read and list access to the entire container.
+       You can configure the --public-access using `az storage container set-permission -n CONTAINER_NAME --public-access blob/container/off`.
     examples:
         - name: Create a storage container in a storage account.
           text: az storage container create -n MyStorageContainer
         - name: Create a storage container in a storage account and return an error if the container already exists.
           text: az storage container create -n MyStorageContainer --fail-on-exist
+        - name: Create a storage container in a storage account and allow public read access for blobs.
+          text: az storage container create -n MyStorageContainer --public-access blob
 """
 
 helps['storage container delete'] = """
@@ -313,7 +319,7 @@ helps['storage blob upload-batch'] = """
         - name: --maxsize-condition
           short-summary: The max length in bytes permitted for an append blob.
         - name: --lease-id
-          short-summary: Required if the blob has an active lease
+          short-summary: The active lease id for the blob
     examples:
         - name: Upload all files that end with .py unless blob exists and has been modified since given date.
           text: az storage blob upload-batch -d MyContainer --account-name MyStorageAccount -s directory_path --pattern *.py --if-unmodified-since 2018-08-27T20:51Z

@@ -162,7 +162,7 @@ short-summary: Create a new managed Kubernetes cluster.
 parameters:
   - name: --generate-ssh-keys
     type: string
-    short-summary: Generate SSH public and private key files if missing.
+    short-summary: Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory.
   - name: --service-principal
     type: string
     short-summary: Service principal used for authentication to Azure APIs.
