@@ -88,23 +88,24 @@ def _update_latest_from_pypi(versions):
     from subprocess import check_output, STDOUT, CalledProcessError
 
     success = False
-    try:
-        cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir'.split()
-        logger.debug('Running: %s', cmd)
-        log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
-        success = True
-        for line in log_output.splitlines():
-            if not line.startswith(CLI_PACKAGE_NAME):
-                continue
-            comps = line.split()
-            mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
-            version = comps[1].replace('(', '').replace(')', '')
-            try:
-                versions[mod]['pypi'] = version
-            except KeyError:
-                pass
-    except CalledProcessError:
-        pass
+
+    if not check_connectivity():
+        return versions, success
+
+    cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
+    logger.debug('Running: %s', cmd)
+    log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
+    success = True
+    for line in log_output.splitlines():
+        if not line.startswith(CLI_PACKAGE_NAME):
+            continue
+        comps = line.split()
+        mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
+        version = comps[1].replace('(', '').replace(')', '')
+        try:
+            versions[mod]['pypi'] = version
+        except KeyError:
+            pass
     return versions, success
 
 
@@ -459,3 +460,22 @@ def find_child_collection(parent, *args, **kwargs):
     if collection is None:
         raise CLIError("collection '{}' not found".format(collection_path))
     return collection
+
+
+def check_connectivity(url='https://example.org', max_retries=0, timeout=1):
+    import requests
+    import timeit
+    start = timeit.default_timer()
+    success = None
+    try:
+        s = requests.Session()
+        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+        s.head(url, timeout=timeout)
+        success = True
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
+        logger.info('Connectivity problem detected.')
+        logger.debug(ex)
+        success = False
+    stop = timeit.default_timer()
+    logger.debug('Connectivity check: %s sec', stop - start)
+    return success
