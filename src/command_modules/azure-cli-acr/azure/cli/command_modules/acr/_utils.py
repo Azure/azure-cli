@@ -375,6 +375,38 @@ def get_validate_platform(cmd, os_type, platform):
     return platform_os, platform_arch, platform_variant
 
 
+def get_yaml_and_values(cmd_value, timeout, file):
+    """Generates yaml template and its value content if applicable
+    :param str cmd_value: The command to execute in each step
+    :param str timeout: The timeout for each step
+    :param str file: The task definition
+    """
+    yaml_template = ""
+    values_content = ""
+    if cmd_value:
+        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
+        values_content = "command: {0}\n".format(cmd_value)
+        if timeout:
+            yaml_template += "    timeout: {{ .Values.timeout }}\n"
+            values_content += "timeout: {0}\n".format(timeout)
+
+    if file == "-":
+        import sys
+        for s in sys.stdin.readlines():
+            yaml_template += s
+
+    if not yaml_template:
+        import os
+        if os.path.exists(file):
+            f = open(file, 'r')
+            for line in f:
+                yaml_template += line
+        else:
+            raise CLIError("{0} does not exist.".format(file))
+
+    return yaml_template, values_content
+
+
 def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, username=None, password=None):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry

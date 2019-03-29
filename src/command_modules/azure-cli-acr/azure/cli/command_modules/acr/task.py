@@ -12,7 +12,8 @@ from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
     get_validate_platform,
-    get_custom_registry_credentials
+    get_custom_registry_credentials,
+    get_yaml_and_values
 )
 from ._stream_utils import stream_logs
 
@@ -34,7 +35,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     context_path,
-                    file='acb.yaml',
+                    file=None,
                     cmd_value=None,
                     git_access_token=None,
                     image_names=None,
@@ -73,32 +74,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         raise CLIError("If source control trigger is enabled [--commit-trigger-enabled] or "
                        "[--pull-request-trigger-enabled] --git-access-token must be provided.")
 
-    yaml_template = ""
-    if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
-        values_content = "command: {0}\n".format(cmd_value)
+    if cmd_value and file:
+        raise CLIError("Task can be created with either a contextless command or from a stream definition, but not both.")
 
-    if file == "-":
-        import sys
-        for s in sys.stdin.readlines():
-            yaml_template += s
-        values_content = ""
-
-    if yaml_template and timeout:
-        yaml_template += "    timeout: {{ .Values.timeout }}\n"
-        values_content += "timeout: {0}\n".format(timeout)
-
-    if yaml_template:
-        import base64
-        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
-        step = EncodedTaskStep(
-            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
-            context_path=context_path,
-            context_access_token=git_access_token,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
-        )
-    else:
+    if context_path:
         if file.endswith(ALLOWED_TASK_FILE_TYPES):
             FileTaskStep = cmd.get_models('FileTaskStep')
             step = FileTaskStep(
@@ -120,6 +99,17 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 context_access_token=git_access_token,
                 target=target
             )
+    else:
+        yaml_template, values_content = get_yaml_and_values(cmd_value, timeout, file)
+        import base64
+        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
+        step = EncodedTaskStep(
+            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
+            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
+            context_path=context_path,
+            context_access_token=git_access_token,
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+        )
 
     SourceControlType, SourceTriggerEvent = cmd.get_models('SourceControlType', 'SourceTriggerEvent')
     source_control_type = SourceControlType.visual_studio_team_service.value

@@ -11,7 +11,7 @@ from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials
+from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials, get_yaml_and_values
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -25,7 +25,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             client,
             registry_name,
             source_location,
-            file='acb.yaml',
+            file=None,
             values=None,
             set_value=None,
             set_secret=None,
@@ -41,6 +41,9 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
+
+    if cmd_value and file:
+        raise CLIError("Azure Container Registry can either run a contextless command or from a stream definition, but not both.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
@@ -71,31 +74,15 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    yaml_template = ""
-    if file == "-":
-        import sys
-        for s in sys.stdin.readlines():
-            yaml_template += s
-        values_content = ""
-
-    if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
-        values_content = "command: {0}\n".format(cmd_value)
-
-    if yaml_template and timeout:
-        yaml_template += "    timeout: {{ .Values.timeout }}\n"
-        values_content += "timeout: {0}\n".format(timeout)
-
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
-    if yaml_template:
-        import base64
-        request = EncodedTaskRunRequest(
-            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
+    if source_location:
+        request = FileTaskRunRequest(
+            task_file_path=file,
+            values_file_path=values,
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
@@ -110,9 +97,11 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             )
         )
     else:
-        request = FileTaskRunRequest(
-            task_file_path=file,
-            values_file_path=values,
+        yaml_template, values_content = get_yaml_and_values(cmd_value, timeout, file)
+        import base64
+        request = EncodedTaskRunRequest(
+            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
+            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
