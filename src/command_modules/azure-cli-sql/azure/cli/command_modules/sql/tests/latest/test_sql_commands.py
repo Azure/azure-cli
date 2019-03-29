@@ -2575,7 +2575,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         user = admin_login
 
-        # test create sql managed_instance with minimal required parameters
+        # test create sql managed_instance
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
                                       '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
                                       .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override),
