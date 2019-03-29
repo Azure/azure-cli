@@ -84,11 +84,11 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             yaml_template += s
         values_content = ""
 
-    if len(yaml_template) > 0 and timeout:
+    if yaml_template and timeout:
         yaml_template += "    timeout: {{ .Values.timeout }}\n"
         values_content += "timeout: {0}\n".format(timeout)
 
-    if len(yaml_template) > 0:
+    if yaml_template:
         import base64
         EncodedTaskStep = cmd.get_models('EncodedTaskStep')
         step = EncodedTaskStep(
