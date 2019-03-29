@@ -31,6 +31,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-network==2.6.0',
     'azure-mgmt-privatedns==0.1.0',
     'azure-cli-core',
 ]
