@@ -14,7 +14,7 @@ from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
 from azure.storage.blob import BlockBlobService
 from ._azure_utils import get_blob_info
-from ._constants import TASK_VALID_VSTS_URLS, INVALID_REMOTE_SOURCE_LOCATION
+from ._constants import TASK_VALID_VSTS_URLS
 
 logger = get_logger(__name__)
 
@@ -214,13 +214,10 @@ def check_remote_source_code(source_location):
             return source_location
         elif not lower_source_location.startswith("github.com/"):
             # Others are tarball
-            try:
-                if requests.head(source_location, timeout=5).status_code < 400:
-                    return source_location
-                else:
-                    raise CLIError("'{}' doesn't exist.".format(source_location))
-            except requests.exceptions.Timeout as e:
-                raise CLIError(e)
+            if requests.head(source_location).status_code < 400:
+                return source_location
+            else:
+                raise CLIError("'{}' doesn't exist.".format(source_location))
 
     raise CLIError(
-        INVALID_REMOTE_SOURCE_LOCATION.format(source_location))
+        "[Errno 2] No such file or directory: '{0}'".format(source_location))
