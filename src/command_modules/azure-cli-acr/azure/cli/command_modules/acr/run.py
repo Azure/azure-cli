@@ -11,7 +11,12 @@ from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials, get_yaml_and_values
+from ._utils import (
+    validate_managed_registry,
+    get_validate_platform,
+    get_custom_registry_credentials,
+    get_yaml_and_values
+)
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -43,7 +48,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
     if cmd_value and file:
-        raise CLIError("Azure Container Registry can either run a contextless command or from a stream definition, but not both.")
+        raise CLIError(
+            "Azure Container Registry can either run a contextless command or from a stream definition, but not both.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 

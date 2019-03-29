@@ -412,7 +412,7 @@ examples:
   - name: Queue a run with the task definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr run -r MyRegistry -f - /dev/null
-  - name: Queue a piped run.
+  - name: Queue a run to execute the tasks passed through the pipe.
     text: >
         cat task.yaml | az acr run -r MyRegistry -f - /dev/null
   - name: Queue a local context, pushed to ACR with streaming logs.
@@ -471,7 +471,7 @@ examples:
   - name: Create a task with the definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
-  - name: Create a piped task.
+  - name: Create a task with the definition from the pipe.
     text: >
         cat task.yaml | az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers
