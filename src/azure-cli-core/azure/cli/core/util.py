@@ -89,23 +89,27 @@ def _update_latest_from_pypi(versions):
 
     success = False
 
-    if not check_connectivity():
+    if not check_connectivity(max_retries=0):
         return versions, success
 
-    cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
-    logger.debug('Running: %s', cmd)
-    log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
-    success = True
-    for line in log_output.splitlines():
-        if not line.startswith(CLI_PACKAGE_NAME):
-            continue
-        comps = line.split()
-        mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
-        version = comps[1].replace('(', '').replace(')', '')
-        try:
-            versions[mod]['pypi'] = version
-        except KeyError:
-            pass
+    try:
+        cmd = [sys.executable] + \
+            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
+        logger.debug('Running: %s', cmd)
+        log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
+        success = True
+        for line in log_output.splitlines():
+            if not line.startswith(CLI_PACKAGE_NAME):
+                continue
+            comps = line.split()
+            mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
+            version = comps[1].replace('(', '').replace(')', '')
+            try:
+                versions[mod]['pypi'] = version
+            except KeyError:
+                pass
+    except CalledProcessError:
+        pass
     return versions, success
 
 
@@ -462,7 +466,7 @@ def find_child_collection(parent, *args, **kwargs):
     return collection
 
 
-def check_connectivity(url='https://example.org', max_retries=0, timeout=1):
+def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     import requests
     import timeit
     start = timeit.default_timer()
