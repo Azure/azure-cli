@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.3.3
++++++
+* `storage blob generate-sas`: add `--full-uri` to create the full uri for the blob with sas
+
 2.3.2
 +++++
 * `storage file download-batch`: add `--snapshot` to download from a share snapshot
