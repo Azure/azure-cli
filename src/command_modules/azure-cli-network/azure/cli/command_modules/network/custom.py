@@ -1923,7 +1923,7 @@ def create_express_route_port(cmd, resource_group_name, express_route_port_name,
 
 def update_express_route_port(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
-        c.update_param('tags', tags, True)
+        c.set_param('tags', tags, True)
     return instance
 
 
