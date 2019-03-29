@@ -82,7 +82,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
         values_content = "command: {0}\n".format(cmd_value)
 
-    if len(yaml_template) > 0 and timeout:
+    if yaml_template and timeout:
         yaml_template += "    timeout: {{ .Values.timeout }}\n"
         values_content += "timeout: {0}\n".format(timeout)
 
@@ -91,7 +91,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
-    if len(yaml_template) > 0:
+    if yaml_template:
         import base64
         request = EncodedTaskRunRequest(
             encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
