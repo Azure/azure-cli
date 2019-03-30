@@ -49,7 +49,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if cmd_value and file:
         raise CLIError(
-            "Azure Container Registry can either run with "
+            "Azure Container Registry can run with either "
             "--cmd myCommand /dev/null or "
             "-f myFile mySourceLocation, but not both.")
 
