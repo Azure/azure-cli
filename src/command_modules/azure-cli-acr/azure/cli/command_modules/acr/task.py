@@ -76,7 +76,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     if cmd_value and file:
         raise CLIError(
-            "Task can be created with either a contextless command or from a stream definition, but not both.")
+            "Task can be created with either "
+            "--cmd myCommand -c /dev/null or "
+            "-f myFile -c myContext, but not both.")
 
     if context_path:
         if file.endswith(ALLOWED_TASK_FILE_TYPES):
