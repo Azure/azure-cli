@@ -49,7 +49,9 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if cmd_value and file:
         raise CLIError(
-            "Azure Container Registry can either run a contextless command or from a stream definition, but not both.")
+            "Azure Container Registry can either run with "
+            "--cmd myCommand /dev/null or "
+            "-f myFile mySourceLocation, but not both.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
