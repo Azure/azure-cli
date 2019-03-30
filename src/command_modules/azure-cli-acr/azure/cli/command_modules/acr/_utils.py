@@ -390,7 +390,7 @@ def get_yaml_and_values(cmd_value, timeout, file):
             yaml_template += "    timeout: {{ .Values.timeout }}\n"
             values_content += "timeout: {0}\n".format(timeout)
     else:
-        if file == None:
+        if not file:
             file = "acb.yml"
 
         if file == "-":
