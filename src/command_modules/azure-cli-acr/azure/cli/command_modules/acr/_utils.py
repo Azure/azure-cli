@@ -389,20 +389,25 @@ def get_yaml_and_values(cmd_value, timeout, file):
         if timeout:
             yaml_template += "    timeout: {{ .Values.timeout }}\n"
             values_content += "timeout: {0}\n".format(timeout)
+    else:
+        if file == None:
+            file = "acb.yml"
 
-    if file == "-":
-        import sys
-        for s in sys.stdin.readlines():
-            yaml_template += s
+        if file == "-":
+            import sys
+            for s in sys.stdin.readlines():
+                yaml_template += s
+        else:
+            import os
+            if os.path.exists(file):
+                f = open(file, 'r')
+                for line in f:
+                    yaml_template += line
+            else:
+                raise CLIError("{0} does not exist.".format(file))
 
     if not yaml_template:
-        import os
-        if os.path.exists(file):
-            f = open(file, 'r')
-            for line in f:
-                yaml_template += line
-        else:
-            raise CLIError("{0} does not exist.".format(file))
+        raise CLIError("Failed to initialize yaml template.")
 
     return yaml_template, values_content
 
