@@ -140,7 +140,7 @@ def load_arguments(self, _):
     # endregion
 
     # region Image Templates
-    with self.argument_context('image-builder') as c:
+    with self.argument_context('image template') as c:
         ib_output_name_help = "Name of the image builder run output."
 
         c.argument('location', get_location_type(self.cli_ctx))
@@ -154,7 +154,7 @@ def load_arguments(self, _):
         c.argument('output_name', help=ib_output_name_help)
         c.ignore('destinations_lists', 'scripts_list', 'source_dict')
 
-    with self.argument_context('image-builder output') as c:
+    with self.argument_context('image template output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
         ib_img_location_help = "Location where the customized image will be created."
 
@@ -164,7 +164,7 @@ def load_arguments(self, _):
         c.argument('managed_image', arg_group="Managed Image", help="Name or ID of the customized managed image to be created,")
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help)
 
-    with self.argument_context('image-builder output add') as c:
+    with self.argument_context('image template output add') as c:
         ib_default_loc_help = " Defaults to resource group's location."
         c.argument('output_name', help= ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)

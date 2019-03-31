@@ -1,176 +1,294 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-02-26T07:35:14Z"}}'
+      "date": "2019-03-31T22:42:55Z"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--location --name --tag]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '110'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","name":"img_tmpl_basic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-26T07:35:14Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","name":"img_tmpl_basic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-31T22:42:55Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:35:17 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:42:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [role assignment create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--assignee --role --scope]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-authorization/0.50.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role assignment create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --assignee --role --scope
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-authorization/0.50.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Contributor%27&api-version=2018-01-01-preview
   response:
-    body: {string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
-        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2019-02-05T21:24:38.4580610Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'}
+    body:
+      string: '{"value":[{"properties":{"roleName":"Contributor","type":"BuiltInRole","description":"Lets
+        you manage everything except access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":["Microsoft.Authorization/*/Delete","Microsoft.Authorization/*/Write","Microsoft.Authorization/elevateAccess/Action","Microsoft.Blueprint/blueprintAssignments/write","Microsoft.Blueprint/blueprintAssignments/delete"],"dataActions":[],"notDataActions":[]}],"createdOn":"2015-02-02T21:55:09.8806423Z","updatedOn":"2019-02-05T21:24:38.4580610Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","type":"Microsoft.Authorization/roleDefinitions","name":"b24988ac-6180-42a0-ab88-20f7382dd24c"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['832']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:35:18 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [x-ms-gateway-slice=production; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-request-charge: ['1']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:43:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      set-cookie:
+      - x-ms-gateway-slice=Production; path=/; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-request-charge:
+      - '1'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [role assignment create]
-      Connection: [keep-alive]
-      ParameterSetName: [--assignee --role --scope]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-graphrbac/0.53.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --assignee --role --scope
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27cf32a0cc-373c-47c9-9156-0db11f6a6dfc%27%29&api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"ef511139-6170-438e-a6e1-763dc31bdf74","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"Azure
-        Virtual Machine Image Builder","appId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","appOwnerTenantId":"f8cdef31-a31e-4b4a-93e4-5f571e91255a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"Azure
-        Virtual Machine Image Builder","errorUrl":null,"homepage":null,"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft
-        Services","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["cf32a0cc-373c-47c9-9156-0db11f6a6dfc"],"servicePrincipalType":"Application","signInAudience":"AzureADMultipleOrgs","tags":[],"tokenEncryptionKeyId":null}]}'}
+    body:
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"ef511139-6170-438e-a6e1-763dc31bdf74","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"Azure
+        Virtual Machine Image Builder","appId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","applicationTemplateId":null,"appOwnerTenantId":"f8cdef31-a31e-4b4a-93e4-5f571e91255a","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"Azure
+        Virtual Machine Image Builder","errorUrl":null,"homepage":null,"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"keyCredentials":[],"logoutUrl":null,"notificationEmailAddresses":[],"oauth2Permissions":[],"passwordCredentials":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyEndDateTime":null,"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft
+        Services","replyUrls":[],"samlMetadataUrl":null,"samlSingleSignOnSettings":null,"servicePrincipalNames":["cf32a0cc-373c-47c9-9156-0db11f6a6dfc"],"servicePrincipalType":"Application","signInAudience":"AzureADMultipleOrgs","tags":[],"tokenEncryptionKeyId":null}]}'
     headers:
-      access-control-allow-origin: ['*']
-      cache-control: [no-cache]
-      content-length: ['1109']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Tue, 26 Feb 2019 07:35:20 GMT']
-      duration: ['1135652']
-      expires: ['-1']
-      ocp-aad-diagnostics-server-name: [CLBFhp12uVA5Nnh6MG2VC8aF6kYj6BwyK0Y6WAoeTzc=]
-      ocp-aad-session-key: [OcoBlSolPCjA_axAYI0essHPPBNb71xN26EIuspjNeGZzXYVzdbVk-kefzIsyj_Nr35127onXmJMXjtm4VYcEWUSu75ZTuGxH0XU3s2pv0MGmLv01lG7VOyvsGZKGPWJ.tZ1G-zEtL-GV48X50wEwMq2oyPY-vGcTtAIe9PSZwy4]
-      pragma: [no-cache]
-      request-id: [20fb6a98-a982-4758-8f9e-9fa8ff78de99]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-dirapi-data-contract-version: ['1.6']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '1278'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Sun, 31 Mar 2019 22:43:02 GMT
+      duration:
+      - '737206'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - oi9XMYqRsHd5ZQSxIzkIjFq6as38XTrETSJ9U1cLD+4=
+      ocp-aad-session-key:
+      - g7CI1qkeYbjbpd3NocB5WysiuzRLoy5j9N9a4ufSyljVw7z6nwBorwtqiWyBB-3SCULBEPjf70PP5nZLvRDg7GvAGMFbATbJT_RBJXKMvaUsqnHtJ_rGzeFkvn2lgubD.Ib6BsQd-X3oSLmuIjxImWm4cLshlBGB_Utz9aInB2MM
+      pragma:
+      - no-cache
+      request-id:
+      - 59169717-2771-48df-8b6f-ec1fa15e524b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
       "principalId": "ef511139-6170-438e-a6e1-763dc31bdf74"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [role assignment create]
-      Connection: [keep-alive]
-      Content-Length: ['233']
-      Content-Type: [application/json; charset=utf-8]
-      Cookie: [x-ms-gateway-slice=production]
-      ParameterSetName: [--assignee --role --scope]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-authorization/0.50.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - role assignment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '233'
+      Content-Type:
+      - application/json; charset=utf-8
+      Cookie:
+      - x-ms-gateway-slice=Production
+      ParameterSetName:
+      - --assignee --role --scope
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-authorization/0.50.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Authorization/roleAssignments/efaeb82e-3738-407f-b88b-892c70e9d32b?api-version=2018-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Authorization/roleAssignments/cc38d441-206b-4ea3-8d5b-207db3cd189e?api-version=2018-01-01-preview
   response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"ef511139-6170-438e-a6e1-763dc31bdf74","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","createdOn":"2019-02-26T07:35:21.5132218Z","updatedOn":"2019-02-26T07:35:21.5132218Z","createdBy":null,"updatedBy":"d12dc20d-54ce-4951-abd5-5f531f1dbca2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Authorization/roleAssignments/efaeb82e-3738-407f-b88b-892c70e9d32b","type":"Microsoft.Authorization/roleAssignments","name":"efaeb82e-3738-407f-b88b-892c70e9d32b"}'}
+    body:
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"ef511139-6170-438e-a6e1-763dc31bdf74","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","createdOn":"2019-03-31T22:43:03.6099986Z","updatedOn":"2019-03-31T22:43:03.6099986Z","createdBy":null,"updatedBy":"d12dc20d-54ce-4951-abd5-5f531f1dbca2"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Authorization/roleAssignments/cc38d441-206b-4ea3-8d5b-207db3cd189e","type":"Microsoft.Authorization/roleAssignments","name":"cc38d441-206b-4ea3-8d5b-207db3cd189e"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['903']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:35:23 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [x-ms-gateway-slice=production; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-ms-request-charge: ['3']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '903'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:43:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      set-cookie:
+      - x-ms-gateway-slice=Production; path=/; secure; HttpOnly
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-ms-request-charge:
+      - '3'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","name":"img_tmpl_basic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-26T07:35:14Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","name":"img_tmpl_basic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-31T22:42:55Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:35:24 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:43:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2016-06-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
         Asia","longitude":"114.188","latitude":"22.267"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia","name":"southeastasia","displayName":"Southeast
         Asia","longitude":"103.833","latitude":"1.283"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus","name":"centralus","displayName":"Central
         US","longitude":"-93.6208","latitude":"41.5908"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus","name":"eastus","displayName":"East
@@ -200,170 +318,323 @@ interactions:
         Central","longitude":"2.3730","latitude":"46.3772"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth","name":"francesouth","displayName":"France
         South","longitude":"2.1972","latitude":"43.8345"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral","name":"australiacentral","displayName":"Australia
         Central","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2","name":"australiacentral2","displayName":"Australia
-        Central 2","longitude":"149.1244","latitude":"-35.3075"}]}'}
+        Central 2","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth","name":"southafricanorth","displayName":"South
+        Africa North","longitude":"28.218370","latitude":"-25.731340"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest","name":"southafricawest","displayName":"South
+        Africa West","longitude":"18.843266","latitude":"-34.075691"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['5269']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:35:24 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '5660'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:43:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"location": "westus", "properties": {"source": {"type": "PlatformImage",
       "publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version":
-      "18.04.201808140"}, "customize": [{"name": "customizeScript.sh", "type": "shell",
+      "18.04.201808140"}, "customize": [{"name": "customizeScript.sh", "type": "Shell",
       "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"},
-      {"name": "customizeScript.sh", "type": "shell", "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"}],
+      {"name": "customizeScript.sh", "type": "Shell", "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"}],
       "distribute": []}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      Content-Length: ['553']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g --scripts --image-source]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '553'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --scripts --image-source
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template01\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   },\n   {\n    \"name\": \"customizeScript.sh\"\
-        ,\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"provisioningState\": \"Creating\"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   },\n   {\n    \"inline\": null,\n    \"name\"\
+        : \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"provisioningState\": \"Creating\"\
         \n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/2ff5eae4-253e-47d8-b0e3-90f6667e5553?api-version=2018-02-01-preview']
-      cache-control: [no-cache]
-      content-length: ['958']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:35:27 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/c5814a24-12d2-4b95-9f21-5dcbda118816?api-version=2019-02-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '998'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:43:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/2ff5eae4-253e-47d8-b0e3-90f6667e5553?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/c5814a24-12d2-4b95-9f21-5dcbda118816?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"2FF5EAE4-253E-47D8-B0E3-90F6667E5553\",\n \"status\"\
-        : \"Succeeded\",\n \"startTime\": \"2019-02-26T07:35:28.0379833Z\",\n \"endTime\"\
-        : \"2019-02-26T07:35:56.6844787Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"C5814A24-12D2-4B95-9F21-5DCBDA118816\",\n \"status\"\
+        : \"InProgress\",\n \"startTime\": \"2019-03-31T22:43:10.3913515Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['165']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:35:58 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:43:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/c5814a24-12d2-4b95-9f21-5dcbda118816?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
+    body:
+      string: "{\n \"name\": \"C5814A24-12D2-4B95-9F21-5DCBDA118816\",\n \"status\"\
+        : \"Succeeded\",\n \"startTime\": \"2019-03-31T22:43:10.3913515Z\",\n \"endTime\"\
+        : \"2019-03-31T22:43:41.5858537Z\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '165'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:44:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-02-01-preview
+  response:
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template01\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   },\n   {\n    \"name\": \"customizeScript.sh\"\
-        ,\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   },\n   {\n    \"inline\": null,\n    \"name\"\
+        : \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\"\
         \n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['959']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:35:59 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '999'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:44:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source --managed-image-destinations]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source --managed-image-destinations
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","name":"img_tmpl_basic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-26T07:35:14Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001","name":"img_tmpl_basic000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-31T22:42:55Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:36:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:44:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source --managed-image-destinations]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source --managed-image-destinations
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2016-06-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
         Asia","longitude":"114.188","latitude":"22.267"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia","name":"southeastasia","displayName":"Southeast
         Asia","longitude":"103.833","latitude":"1.283"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus","name":"centralus","displayName":"Central
         US","longitude":"-93.6208","latitude":"41.5908"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus","name":"eastus","displayName":"East
@@ -393,155 +664,241 @@ interactions:
         Central","longitude":"2.3730","latitude":"46.3772"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth","name":"francesouth","displayName":"France
         South","longitude":"2.1972","latitude":"43.8345"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral","name":"australiacentral","displayName":"Australia
         Central","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2","name":"australiacentral2","displayName":"Australia
-        Central 2","longitude":"149.1244","latitude":"-35.3075"}]}'}
+        Central 2","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth","name":"southafricanorth","displayName":"South
+        Africa North","longitude":"28.218370","latitude":"-25.731340"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest","name":"southafricawest","displayName":"South
+        Africa West","longitude":"18.843266","latitude":"-34.075691"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['5269']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:36:00 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '5660'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:44:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: 'b''{"location": "westus", "properties": {"source": {"type": "PlatformImage",
       "publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version":
-      "18.04.201808140"}, "customize": [{"name": "customizeScript.sh", "type": "shell",
+      "18.04.201808140"}, "customize": [{"name": "customizeScript.sh", "type": "Shell",
       "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"}],
-      "distribute": [{"runOutputName": "img_1", "type": "managedImage", "imageId":
+      "distribute": [{"runOutputName": "img_1", "type": "ManagedImage", "imageId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/img_1",
-      "location": "westus"}, {"runOutputName": "img_2", "type": "managedImage", "imageId":
+      "location": "westus"}, {"runOutputName": "img_2", "type": "ManagedImage", "imageId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/img_2",
       "location": "centralus"}]}}'''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      Content-Length: ['926']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g --scripts --image-source --managed-image-destinations]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '926'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --scripts --image-source --managed-image-destinations
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02\"\
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template02\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
         imageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/img_1\"\
         ,\n    \"location\": \"westus\",\n    \"runOutputName\": \"img_1\",\n    \"\
-        tags\": {},\n    \"type\": \"managedImage\"\n   },\n   {\n    \"imageId\"\
+        tags\": {},\n    \"type\": \"ManagedImage\"\n   },\n   {\n    \"imageId\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/img_2\"\
         ,\n    \"location\": \"centralus\",\n    \"runOutputName\": \"img_2\",\n \
-        \   \"tags\": {},\n    \"type\": \"managedImage\"\n   }\n  ],\n  \"provisioningState\"\
+        \   \"tags\": {},\n    \"type\": \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\"\
         : \"Creating\"\n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/9a2df9b1-1ab4-4d6b-b09e-ef136a069b8d?api-version=2018-02-01-preview']
-      cache-control: [no-cache]
-      content-length: ['1415']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:36:02 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/f7a42fc9-9b07-4d17-bee3-5a775be392b9?api-version=2019-02-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1435'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:44:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source --managed-image-destinations]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source --managed-image-destinations
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/9a2df9b1-1ab4-4d6b-b09e-ef136a069b8d?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/f7a42fc9-9b07-4d17-bee3-5a775be392b9?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"9A2DF9B1-1AB4-4D6B-B09E-EF136A069B8D\",\n \"status\"\
-        : \"Succeeded\",\n \"startTime\": \"2019-02-26T07:36:02.8350413Z\",\n \"endTime\"\
-        : \"2019-02-26T07:36:29.7837153Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"F7A42FC9-9B07-4D17-BEE3-5A775BE392B9\",\n \"status\"\
+        : \"Succeeded\",\n \"startTime\": \"2019-03-31T22:44:15.313782Z\",\n \"endTime\"\
+        : \"2019-03-31T22:44:46.0047111Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['165']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:36:33 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '164'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:44:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder template create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --scripts --image-source --managed-image-destinations]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --scripts --image-source --managed-image-destinations
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02\"\
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template02\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template02\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
         imageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/img_1\"\
         ,\n    \"location\": \"westus\",\n    \"runOutputName\": \"img_1\",\n    \"\
-        tags\": {},\n    \"type\": \"managedImage\"\n   },\n   {\n    \"imageId\"\
+        tags\": {},\n    \"type\": \"ManagedImage\"\n   },\n   {\n    \"imageId\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/img_2\"\
         ,\n    \"location\": \"centralus\",\n    \"runOutputName\": \"img_2\",\n \
-        \   \"tags\": {},\n    \"type\": \"managedImage\"\n   }\n  ],\n  \"provisioningState\"\
+        \   \"tags\": {},\n    \"type\": \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\"\
         : \"Succeeded\"\n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['1416']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:36:34 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1436'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:44:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        subscriptionclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2016-06-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia","name":"eastasia","displayName":"East
         Asia","longitude":"114.188","latitude":"22.267"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia","name":"southeastasia","displayName":"Southeast
         Asia","longitude":"103.833","latitude":"1.283"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus","name":"centralus","displayName":"Central
         US","longitude":"-93.6208","latitude":"41.5908"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus","name":"eastus","displayName":"East
@@ -571,342 +928,564 @@ interactions:
         Central","longitude":"2.3730","latitude":"46.3772"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth","name":"francesouth","displayName":"France
         South","longitude":"2.1972","latitude":"43.8345"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral","name":"australiacentral","displayName":"Australia
         Central","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2","name":"australiacentral2","displayName":"Australia
-        Central 2","longitude":"149.1244","latitude":"-35.3075"}]}'}
+        Central 2","longitude":"149.1244","latitude":"-35.3075"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth","name":"southafricanorth","displayName":"South
+        Africa North","longitude":"28.218370","latitude":"-25.731340"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest","name":"southafricawest","displayName":"South
+        Africa West","longitude":"18.843266","latitude":"-34.075691"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['5269']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Feb 2019 07:36:35 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '5660'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 31 Mar 2019 22:44:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template01\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   },\n   {\n    \"name\": \"customizeScript.sh\"\
-        ,\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   },\n   {\n    \"inline\": null,\n    \"name\"\
+        : \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"provisioningState\": \"Succeeded\"\
         \n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['959']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:36:35 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '999'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:44:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-02-01-preview
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/8258c2b9-c5b5-4b73-9136-b2cd73cd83f5?api-version=2018-02-01-preview']
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Tue, 26 Feb 2019 07:36:37 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/8258c2b9-c5b5-4b73-9136-b2cd73cd83f5?api-version=2018-02-01-preview']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/51d6701c-dffb-49bf-bc0b-c5375e489b98?api-version=2019-02-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 31 Mar 2019 22:44:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/51d6701c-dffb-49bf-bc0b-c5375e489b98?api-version=2019-02-01-preview
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/8258c2b9-c5b5-4b73-9136-b2cd73cd83f5?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/51d6701c-dffb-49bf-bc0b-c5375e489b98?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"8258C2B9-C5B5-4B73-9136-B2CD73CD83F5\",\n \"status\"\
-        : \"InProgress\",\n \"startTime\": \"2019-02-26T07:36:37.8195669Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"51D6701C-DFFB-49BF-BC0B-C5375E489B98\",\n \"status\"\
+        : \"InProgress\",\n \"startTime\": \"2019-03-31T22:44:49.6888963Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['122']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:37:07 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:45:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/8258c2b9-c5b5-4b73-9136-b2cd73cd83f5?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/51d6701c-dffb-49bf-bc0b-c5375e489b98?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"8258C2B9-C5B5-4B73-9136-B2CD73CD83F5\",\n \"status\"\
-        : \"InProgress\",\n \"startTime\": \"2019-02-26T07:36:37.8195669Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"51D6701C-DFFB-49BF-BC0B-C5375E489B98\",\n \"status\"\
+        : \"InProgress\",\n \"startTime\": \"2019-03-31T22:44:49.6888963Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['122']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:37:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:45:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/8258c2b9-c5b5-4b73-9136-b2cd73cd83f5?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/51d6701c-dffb-49bf-bc0b-c5375e489b98?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"8258C2B9-C5B5-4B73-9136-B2CD73CD83F5\",\n \"status\"\
-        : \"InProgress\",\n \"startTime\": \"2019-02-26T07:36:37.8195669Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"51D6701C-DFFB-49BF-BC0B-C5375E489B98\",\n \"status\"\
+        : \"InProgress\",\n \"startTime\": \"2019-03-31T22:44:49.6888963Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['122']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:38:09 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:46:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/8258c2b9-c5b5-4b73-9136-b2cd73cd83f5?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/51d6701c-dffb-49bf-bc0b-c5375e489b98?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"8258C2B9-C5B5-4B73-9136-B2CD73CD83F5\",\n \"status\"\
-        : \"Succeeded\",\n \"startTime\": \"2019-02-26T07:36:37.8195669Z\",\n \"endTime\"\
-        : \"2019-02-26T07:38:13.0585056Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"51D6701C-DFFB-49BF-BC0B-C5375E489B98\",\n \"status\"\
+        : \"Succeeded\",\n \"startTime\": \"2019-03-31T22:44:49.6888963Z\",\n \"endTime\"\
+        : \"2019-03-31T22:46:45.0658776Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['165']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:38:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '165'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:46:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: 'b''{"location": "westus", "tags": {}, "properties": {"source": {"type":
       "PlatformImage", "publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS",
       "version": "18.04.201808140"}, "customize": [{"name": "customizeScript.sh",
-      "type": "shell", "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"},
-      {"name": "customizeScript.sh", "type": "shell", "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"}],
-      "distribute": [{"runOutputName": "new_img", "type": "managedImage", "imageId":
+      "type": "Shell", "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"},
+      {"name": "customizeScript.sh", "type": "Shell", "script": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"}],
+      "distribute": [{"runOutputName": "new_img", "type": "ManagedImage", "imageId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/new_img",
       "location": "southcentralus"}]}}'''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      Content-Length: ['847']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '847'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template01\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   },\n   {\n    \"name\": \"customizeScript.sh\"\
-        ,\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   },\n   {\n    \"inline\": null,\n    \"name\"\
+        : \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
         imageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/new_img\"\
         ,\n    \"location\": \"southcentralus\",\n    \"runOutputName\": \"new_img\"\
-        ,\n    \"tags\": {},\n    \"type\": \"managedImage\"\n   }\n  ],\n  \"provisioningState\"\
+        ,\n    \"tags\": {},\n    \"type\": \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\"\
         : \"Creating\"\n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/68ba0bf7-0025-4e4c-8edd-2b063196fd65?api-version=2018-02-01-preview']
-      cache-control: [no-cache]
-      content-length: ['1304']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:38:42 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/347d872e-e349-41b4-8062-fb98be17be1e?api-version=2019-02-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1344'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:46:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/68ba0bf7-0025-4e4c-8edd-2b063196fd65?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/347d872e-e349-41b4-8062-fb98be17be1e?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"name\": \"68BA0BF7-0025-4E4C-8EDD-2B063196FD65\",\n \"status\"\
-        : \"Succeeded\",\n \"startTime\": \"2019-02-26T07:38:42.4764929Z\",\n \"endTime\"\
-        : \"2019-02-26T07:39:10.2447813Z\"\n}"}
+    body:
+      string: "{\n \"name\": \"347D872E-E349-41B4-8062-FB98BE17BE1E\",\n \"status\"\
+        : \"Succeeded\",\n \"startTime\": \"2019-03-31T22:46:53.9084348Z\",\n \"endTime\"\
+        : \"2019-03-31T22:47:21.5937772Z\"\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['165']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:39:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '165'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:47:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [image-builder output add]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --managed-image --managed-image-location]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image template output add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-image --managed-image-location
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        azure-mgmt-imagebuilder/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2018-02-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2019-02-01-preview
   response:
-    body: {string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
+    body:
+      string: "{\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\"\
         ,\n \"location\": \"westus\",\n \"name\": \"template01\",\n \"properties\"\
         : {\n  \"source\": {\n   \"offer\": \"UbuntuServer\",\n   \"publisher\": \"\
         Canonical\",\n   \"sku\": \"18.04-LTS\",\n   \"type\": \"PlatformImage\",\n\
         \   \"version\": \"18.04.201808140\"\n  },\n  \"customize\": [\n   {\n   \
-        \ \"name\": \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   },\n   {\n    \"name\": \"customizeScript.sh\"\
-        ,\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
-        ,\n    \"type\": \"shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
+        \ \"inline\": null,\n    \"name\": \"customizeScript.sh\",\n    \"script\"\
+        : \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   },\n   {\n    \"inline\": null,\n    \"name\"\
+        : \"customizeScript.sh\",\n    \"script\": \"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh\"\
+        ,\n    \"type\": \"Shell\"\n   }\n  ],\n  \"distribute\": [\n   {\n    \"\
         imageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_basic000001/providers/Microsoft.Compute/images/new_img\"\
         ,\n    \"location\": \"southcentralus\",\n    \"runOutputName\": \"new_img\"\
-        ,\n    \"tags\": {},\n    \"type\": \"managedImage\"\n   }\n  ],\n  \"provisioningState\"\
+        ,\n    \"tags\": {},\n    \"type\": \"ManagedImage\"\n   }\n  ],\n  \"provisioningState\"\
         : \"Succeeded\"\n },\n \"tags\": {},\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\"\
-        \n}"}
+        \n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['1305']
-      content-type: [application/json]
-      date: ['Tue, 26 Feb 2019 07:39:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [nginx]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1345'
+      content-type:
+      - application/json
+      date:
+      - Sun, 31 Mar 2019 22:47:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.59]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.6.5 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_basic000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Tue, 26 Feb 2019 07:39:15 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1JTUc6NUZUTVBMOjVGQkFTSUM2STdEQVY1T0gzNldLMlBJN0dSSldBNVFJQjdLWHwyQzlGMEZEMEEzMzFGNTAyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 31 Mar 2019 22:47:27 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1JTUc6NUZUTVBMOjVGQkFTSUNKQTcyR1lCTFJPUzVUMkdRRjVPNU1LWDdSN0NZWHwyMEM4MDdFOUM5RTFGQzlCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 version: 1

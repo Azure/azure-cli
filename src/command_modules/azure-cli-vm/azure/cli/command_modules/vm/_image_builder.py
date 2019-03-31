@@ -20,7 +20,6 @@ from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_
 
 import copy
 from msrest.exceptions import ClientException, ValidationError
-from azure.mgmt.imagebuilder.models import ImageTemplate
 
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -42,7 +41,7 @@ def image_builder_client_factory(cli_ctx, _):
     return get_mgmt_service_client(cli_ctx, ImageBuilderClient)
 
 def cf_img_bldr_image_templates(cli_ctx, _):
-    return image_builder_client_factory(cli_ctx, _).virtual_machine_image_template
+    return image_builder_client_factory(cli_ctx, _).virtual_machine_image_templates
 
 # endregion
 
@@ -287,32 +286,25 @@ def create_image_template(client, resource_group_name, image_template_name, sour
             logger.info("No applicable destination found for destination {}".format(tuple([dest_type, id, loc_info])))
 
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations, location=location)
-    return sdk_no_wait(no_wait, client.virtual_machine_image_template.create_or_update, image_template, resource_group_name, image_template_name)
+    return sdk_no_wait(no_wait, client.virtual_machine_image_templates.create_or_update, image_template, resource_group_name, image_template_name)
 
 
 def list_image_templates(client, resource_group_name=None):
     if resource_group_name:
-        return client.virtual_machine_image_template.list_by_resource_group(resource_group_name)
-    return client.virtual_machine_image_template.list()
-
-
-def build_image_template(client, resource_group_name, image_template_name, no_wait=False):
-    # bug we need to specify utf8 in headers. Todo: remove when bug fixed.
-    header = {'Content-Type' : 'application/json'}
-    return sdk_no_wait(no_wait, client.virtual_machine_image_template.run, resource_group_name, image_template_name, custom_headers=header)
-
+        return client.virtual_machine_image_templates.list_by_resource_group(resource_group_name)
+    return client.virtual_machine_image_templates.list()
 
 def show_build_output(client, resource_group_name, image_template_name, output_name=None):
     if output_name:
-        return client.virtual_machine_image_template.get_run_output(resource_group_name, image_template_name, output_name)
-    return client.virtual_machine_image_template.get_run_outputs(resource_group_name, image_template_name)
+        return client.virtual_machine_image_templates.get_run_output(resource_group_name, image_template_name, output_name)
+    return client.virtual_machine_image_templates.get_run_outputs(resource_group_name, image_template_name)
 
 # TODO: add when new whl file generated. support tags for create and here.
 def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
                         managed_image=None, managed_image_location=None, output_name=None):
     from azure.mgmt.imagebuilder.models import ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor
-    existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
     old_template_copy = copy.deepcopy(existing_image_template)
 
     if managed_image:
@@ -336,7 +328,7 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
     return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
 
 def remove_template_output(cmd, client, resource_group_name, image_template_name, output_name):
-    existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
     old_template_copy = copy.deepcopy(existing_image_template)
 
     if not existing_image_template.distribute:
@@ -357,7 +349,7 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
 
 def clear_template_output(cmd, client, resource_group_name, image_template_name):
-    existing_image_template = client.virtual_machine_image_template.get(resource_group_name, image_template_name)
+    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
 
     old_template_copy = copy.deepcopy(existing_image_template)
 
@@ -371,13 +363,13 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 
 
 def _update_image_template(cmd, client, resource_group_name, image_template_name, new_template, old_template):
-    LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.delete(resource_group_name, image_template_name))
+    LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.delete(resource_group_name, image_template_name))
     try:
-        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.create_or_update(new_template, resource_group_name, image_template_name))
+        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.create_or_update(new_template, resource_group_name, image_template_name))
     except (ClientException) as e:
         logger.warning("Failed to create updated template.\nError: %s.\nRe-creating old template", e)
         old_template.distribute = old_template.distribute or []
         old_template.customize = old_template.customize or []
-        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_template.create_or_update(old_template, resource_group_name, image_template_name))
+        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.create_or_update(old_template, resource_group_name, image_template_name))
 
 # endregion
