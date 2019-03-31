@@ -1953,75 +1953,69 @@ type: command
 short-summary: Update a proximity placement group
 """
 
-helps['image-builder'] = """
+helps['image template'] = """
     type: group
     short-summary: Manage and build image builder templates. 
 """
 
-helps['image-builder output'] = """
+helps['image template output'] = """
     type: group
     short-summary: Manage image builder template output distributors. 
     long-summary: A customized image can be distributed as a managed image or a shared image in a shared image gallery (SIG). 
 """
 
-helps['image-builder template'] = """
-    type: group
-    short-summary: Manage image builder templates.
-"""
-
-
-helps['image-builder output add'] = """
+helps['image template output add'] = """
     type: command
     short-summary: Add an image builder output distributor. The output distributor will be a managed image or a gallery image.
     examples:
     - name: Add a managed image output to an existing template. Optionally specify the run output name.
-      text: az image-builder output add -n mytemplate -g my-group --managed-image my_desired_image_name --output-name managed_image_run_01
+      text: az image template output add -n mytemplate -g my-group --managed-image my_desired_image_name --output-name managed_image_run_01
     - name: Add a shared image gallery output to an existing template. Optionally specify its replication regions.
       text: |
-            az image-builder output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
+            az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
             --gallery-image-definition linux_image_def --gallery-replication-regions westus brazilsouth 
 
 """
 
-helps['image-builder output remove'] = """
+helps['image template output remove'] = """
     type: command
     short-summary: Remove an image builder output distributor. 
 """
 
-helps['image-builder output clear'] = """
+helps['image template output clear'] = """
     type: command
     short-summary: Remove all image builder output distributors. 
 """
 
-helps['image-builder run'] = """
+helps['image template run'] = """
     type: command
     short-summary: Build an image builder template. 
     examples:
     - name: Start a template build run and then wait for it to finish.
       text: |
-        az image-builder run -n mytemplate -g my-group --no-wait
+        az image template run -n mytemplate -g my-group --no-wait
         
-        az image-builder template wait -n mytemplate -g aibmdi \\
+        az image template wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
         
-        az image-builder show -n mytemplate -g my-group
+        az image template show -n mytemplate -g my-group
 """
 
-helps['image-builder show'] = """
+helps['image template show'] = """
     type: command
     short-summary: Show an image builder template's run outputs.
     examples:
     - name: Run a template build run and then view its run outputs.
       text: |
-        az image-builder run -n mytemplate -g my-group --no-wait
+        az image template run -n mytemplate -g my-group --no-wait
         
-        az image-builder template wait -n mytemplate -g aibmdi \\
+        az image template wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
         
-        az image-builder show -n mytemplate -g my-group
+        az image template show -n mytemplate -g my-group
 """
 
-helps['image-builder template create'] = """
+helps['image template create'] = """
     type: command
     short-summary: Create an image builder template.
     parameters:
@@ -2036,7 +2030,7 @@ helps['image-builder template create'] = """
             scripts="https://my-script-url.com/customize_script.sh"
             imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
             
-            az image-builder template create --image-source $imagesource -n mytemplate -g my-group \\ 
+            az image template create --image-source $imagesource -n mytemplate -g my-group \\ 
                 --scripts $scripts --managed-image-destinations image_1=westus \\
                 --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
         
@@ -2046,43 +2040,43 @@ helps['image-builder template create'] = """
             scripts="https://my-script-url.com/customize_script.sh"
             imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
             
-            az image-builder template create --image-source $imagesource -n mytemplate \\
+            az image template create --image-source $imagesource -n mytemplate \\
                 -g my-group --scripts $scripts
             
-            az image-builder output add -n mytemplate -g my-group \\
+            az image template output add -n mytemplate -g my-group \\
                 --managed-image my_desired_image_name --managed-image-location eastus
             
-            az image-builder output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
+            az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
                 --gallery-image-definition linux_image_def \\ 
                 --gallery-replication-regions westus brazilsouth 
 """
 
-helps['image-builder template list'] = """
+helps['image template list'] = """
     type: command
     short-summary: List image builder templates.
 """
 
-helps['image-builder template delete'] = """
+helps['image template delete'] = """
     type: command
     short-summary: Delete image builder template.
 """
 
-helps['image-builder template show'] = """
+helps['image template show'] = """
     type: command
     short-summary: Show an image builder template.
 """
 
-helps['image-builder template wait'] = """
+helps['image template wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the image builder template is met.
     examples:
         - name: Start a template build run and then wait for it to finish.
           text: |
-            az image-builder run -n mytemplate -g my-group --no-wait
+            az image template run -n mytemplate -g my-group --no-wait
             
-            az image-builder template wait -n mytemplate -g aibmdi \\
+            az image template wait -n mytemplate -g aibmdi \\
                 --custom "lastRunStatus.runState!='running'"
             
-            az image-builder show -n mytemplate -g my-group
+            az image template show -n mytemplate -g my-group
                 
 """

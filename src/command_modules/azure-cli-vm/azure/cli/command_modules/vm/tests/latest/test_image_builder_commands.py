@@ -48,21 +48,21 @@ class ImageTemplateTest(ScenarioTest):
         })
 
         # test template creation works.
-        self.cmd('image-builder template create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src}',
+        self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src}',
                  checks=[
                      self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
                      self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
                      self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
                      self.check('source.type', 'PlatformImage'),
                      self.check('length(customize)', 2),
-                     self.check('customize[0].name', 'customizeScript.sh'), self.check('customize[0].script', TEST_SCRIPT), self.check('customize[0].type', 'shell'),
-                     self.check('customize[1].name', 'customizeScript.sh'), self.check('customize[1].script', TEST_SCRIPT), self.check('customize[1].type', 'shell'),
+                     self.check('customize[0].name', 'customizeScript.sh'), self.check('customize[0].script', TEST_SCRIPT), self.check('customize[0].type', 'Shell'),
+                     self.check('customize[1].name', 'customizeScript.sh'), self.check('customize[1].script', TEST_SCRIPT), self.check('customize[1].type', 'Shell'),
                      self.check('distribute', None)
                  ])
 
         # test that outputs can be set through create command.
         out_2 = "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2=centralus"
-        self.cmd('image-builder template create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
+        self.cmd('image template create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
                  '--managed-image-destinations img_1=westus ' + out_2,
                  checks=[
                      self.check('name', '{tmpl_02}'), self.check('provisioningState', 'Succeeded'),
@@ -70,11 +70,11 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('distribute[0].imageId', '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_1'),
                      self.check('distribute[0].location', 'westus'),
                      self.check('distribute[0].runOutputName', 'img_1'),
-                     self.check('distribute[0].type', 'managedImage'),
+                     self.check('distribute[0].type', 'ManagedImage'),
                      self.check('distribute[1].imageId', '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2'),
                      self.check('distribute[1].location', 'centralus'),
                      self.check('distribute[1].runOutputName', 'img_2'),
-                     self.check('distribute[1].type', 'managedImage'),
+                     self.check('distribute[1].type', 'ManagedImage'),
 
                  ])
 
@@ -83,13 +83,13 @@ class ImageTemplateTest(ScenarioTest):
             'new_loc': 'southcentralus'
         })
         out_3 = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/images/{}".format(subscription_id, resource_group, 'new_img')
-        self.cmd('image-builder output add -n {tmpl_01} -g {rg} --managed-image {new_img} --managed-image-location {new_loc}',
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {new_img} --managed-image-location {new_loc}',
                  checks=[
                      self.check('name', '{tmpl_01}'),
                      self.check('distribute[0].imageId', out_3),
                      self.check('distribute[0].location', '{new_loc}'),
                      self.check('distribute[0].runOutputName', '{new_img}'),
-                     self.check('distribute[0].type', 'managedImage')
+                     self.check('distribute[0].type', 'ManagedImage')
                  ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
@@ -102,7 +102,7 @@ class ImageTemplateTest(ScenarioTest):
             'img_src': IMAGE_SOURCE,
             'script': TEST_SCRIPT,
             'sub': subscription_id,
-            'gallery': 'gallery1',
+            'gallery': self.create_random_name("sig1", 10),
             'sig1': 'image1'
         })
 
@@ -114,7 +114,7 @@ class ImageTemplateTest(ScenarioTest):
         # Test that sig output can be set through output.
 
         self.kwargs['sig_out'] = "{}/{}=westus,eastus".format(self.kwargs['gallery'], self.kwargs['sig1'])
-        output = self.cmd('image-builder template create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} '
+        output = self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} '
                  '--shared-image-destinations {sig_out}',
                  checks=[
                      self.check('distribute[0].replicationRegions[0]', 'westus'),
@@ -142,11 +142,11 @@ class ImageTemplateTest(ScenarioTest):
         })
 
         # create and build image template
-        self.cmd('image-builder template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --managed-image-destinations {img}={loc}')
-        self.cmd('image-builder run -n {tmpl} -g {rg}')
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --managed-image-destinations {img}={loc}')
+        self.cmd('image template run -n {tmpl} -g {rg}')
 
         # get the run output
-        output = self.cmd('image-builder show -n {tmpl} -g {rg} --output-name {img}',
+        output = self.cmd('image template show -n {tmpl} -g {rg} --output-name {img}',
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
 
@@ -163,7 +163,7 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs.update({
             'img_src': IMAGE_SOURCE,
-            'gallery': 'gallery1',
+            'gallery': self.create_random_name("sig2", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
             'script': TEST_SCRIPT,
@@ -174,17 +174,17 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
 
-        self.cmd('image-builder template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src}')
-        self.cmd('image-builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} --gallery-replication-regions westus',
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src}')
+        self.cmd('image template output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} --gallery-replication-regions westus',
                  checks=[
                      self.check('distribute[0].replicationRegions[0]', 'westus'),
                      self.check('distribute[0].runOutputName', '{sig1}')
                  ])
 
         # Takes a long time to build a SIG based image template.
-        self.cmd('image-builder run -n {tmpl} -g {rg}')
+        self.cmd('image template run -n {tmpl} -g {rg}')
 
-        output = self.cmd('image-builder show -n {tmpl} -g {rg} --output-name {sig1}',
+        output = self.cmd('image template show -n {tmpl} -g {rg} --output-name {sig1}',
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
         self.kwargs['image_id'] = output['artifactId']
