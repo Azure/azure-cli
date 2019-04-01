@@ -2,9 +2,13 @@
 
 Release History
 ===============
-2.1.10
+2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)
+
+2.2.0
++++++
+* Minor fixes
 
 2.1.9
 +++++

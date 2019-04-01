@@ -326,7 +326,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=('--source', '-s'))
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
-        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.argument('lease_id', help='The active lease id for the blob.')
 
     with self.argument_context('storage blob lease') as c:
         c.argument('lease_duration', type=int)
@@ -379,9 +379,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('container_name', container_name_type, options_list=('--name', '-n'))
         c.argument('public_access', validator=validate_container_public_access,
                    arg_type=get_enum_type(get_container_access_type_names()),
-                   help='Specifies whether data in the container may be accessed publically. By default, container '
-                        'data is private ("off") to the account owner. Use "blob" to allow public read access for '
-                        'blobs. Use "container" to allow public read and list access to the entire container.')
+                   help='Specifies whether data in the container may be accessed publicly.')
 
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
