@@ -2629,7 +2629,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
-        #test update proxyOverride and publicDataEndpointEnabled
+        # test update proxyOverride and publicDataEndpointEnabled
         self.cmd('sql mi update -g {} -n {} --proxy-override {} --public-data-endpoint-enabled {}'
                  .format(resource_group_1, managed_instance_name_1, proxy_override_update, public_data_endpoint_enabled_update),
                  checks=[
