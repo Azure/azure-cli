@@ -1086,6 +1086,7 @@ def add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name,
             print(ex)
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
+
 def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_name=None, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
     Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)

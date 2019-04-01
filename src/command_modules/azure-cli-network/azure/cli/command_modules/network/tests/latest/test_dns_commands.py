@@ -179,13 +179,12 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns record-set ns show -n {record_set_name} -g {rg} --zone-name {parent_zone_name}',
                  checks=self.check('length(nsRecords)', child_name_server_count))
 
-        #clean up by deleting the created resources
+        # clean up by deleting the created resources
         self.cmd('network dns zone delete -g {rg} -n {parent_zone_name} -y',
                  checks=self.is_empty())
 
         self.cmd('network dns zone delete -g {rg} -n {child_zone_name} -y',
                  checks=self.is_empty())
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns')
     def test_private_dns(self, resource_group):
