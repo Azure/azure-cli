@@ -1985,7 +1985,6 @@ def managed_instance_create(
         virtual_network_subnet_id,
         assign_identity=False,
         sku=None,
-        public_data_endpoint_enabled=False,
         **kwargs):
     '''
     Creates a managed instance.
@@ -1993,9 +1992,6 @@ def managed_instance_create(
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
-
-    if public_data_endpoint_enabled:
-        kwargs['public_data_endpoint_enabled'] = public_data_endpoint_enabled
 
     kwargs['location'] = location
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
@@ -2052,8 +2048,8 @@ def managed_instance_update(
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
 
-    if public_data_endpoint_enabled == "True" or public_data_endpoint_enabled == "False":
-        instance.public_data_endpoint_enabled = public_data_endpoint_enabled == "True"
+    if public_data_endpoint_enabled is not None:
+        instance.public_data_endpoint_enabled = public_data_endpoint_enabled == True
 
     return instance
 

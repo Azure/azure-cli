@@ -2592,7 +2592,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('identity', None),
                                           JMESPathCheck('collation', collation),
                                           JMESPathCheck('proxyOverride', proxy_override),
-                                          JMESPathCheck('publicDataEndpointEnabled', 'true')]).get_output_in_json()
+                                          JMESPathCheck('publicDataEndpointEnabled', 'True')]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -2636,7 +2636,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('proxyOverride', proxy_override_update),
-                     JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update.lower())])
+                     JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update)])
 
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
@@ -2655,7 +2655,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('identity.type', 'SystemAssigned'),
                      JMESPathCheck('collation', collation),
                      JMESPathCheck('proxyOverride', proxy_override),
-                     JMESPathCheck('publicDataEndpointEnabled', 'true')])
+                     JMESPathCheck('publicDataEndpointEnabled', 'True')])
 
         # test show sql managed instance 2
         self.cmd('sql mi show -g {} -n {}'

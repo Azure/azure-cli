@@ -1081,6 +1081,7 @@ def load_arguments(self, _):
                    help='The connection type used for connecting to the instance.')
 
         c.argument('public_data_endpoint_enabled',
+                   arg_type=get_three_state_flag(),
                    help='Whether or not the public data endpoint is enabled for the instance.')
 
     with self.argument_context('sql mi create') as c:
@@ -1095,6 +1096,7 @@ def load_arguments(self, _):
                 'storage_size_in_gb',
                 'collation',
                 'proxy_override',
+                'public_data_endpoint_enabled',
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
