@@ -5,14 +5,14 @@
 
 import os
 
-from knack.log import get_logger
-from knack.util import CLIError
-
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+
+from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 UA_AGENT = "AZURECLI/{}".format(core_version)
@@ -166,8 +166,7 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
-        else:
-            raise CLIError('Unable to obtain data client. Check your connection parameters.')
+        raise CLIError('Unable to obtain data client. Check your connection parameters.')
     # TODO: enable Fiddler
     client.request_callback = _get_add_headers_callback(cli_ctx)
     return client

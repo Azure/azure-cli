@@ -151,11 +151,11 @@ def _get_sku_object(cmd, sku):
     return sku
 
 
-def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk):
+def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level):
     AccessLevel = cmd.get_models('AccessLevel')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
-    return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
+    return op.grant_access(resource_group_name, name, access_level or AccessLevel.read, duration_in_seconds)
 
 
 def _is_linux_os(vm):
@@ -243,13 +243,13 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 
 
 # region Disks (Managed)
-def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
+def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals
                         size_gb=None, sku='Premium_LRS', os_type=None,
-                        source=None,  # pylint: disable=unused-argument
+                        source=None, for_upload=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
-                        disk_iops_read_write=None, disk_mbps_read_write=None):
+                        disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None):
     Disk, CreationData, DiskCreateOption = cmd.get_models('Disk', 'CreationData', 'DiskCreateOption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -257,6 +257,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+    elif for_upload:
+        option = DiskCreateOption.upload
     else:
         option = DiskCreateOption.empty
 
@@ -265,10 +267,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id)
 
-    if size_gb is None and option == DiskCreateOption.empty:
+    if size_gb is None and (option == DiskCreateOption.empty or for_upload):
         raise CLIError('usage error: --size-gb required to create an empty disk')
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
                 sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type)
+
+    if hyper_v_generation:
+        disk.hyper_vgeneration = hyper_v_generation
+
     if zone:
         disk.zones = zone
     if disk_iops_read_write is not None:
@@ -280,8 +286,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
     return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
 
 
-def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds):
-    return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, True)
+def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None):
+    return _grant_access(cmd, resource_group_name, disk_name, duration_in_seconds, is_disk=True,
+                         access_level=access_level)
 
 
 def list_managed_disks(cmd, resource_group_name=None):
@@ -353,6 +360,12 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
     return client.images.create_or_update(resource_group_name, name, image)
 
 
+def update_image(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+
 def list_images(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
@@ -363,10 +376,10 @@ def list_images(cmd, resource_group_name=None):
 
 # region Snapshots
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None,  # pylint: disable=unused-argument
+                    source=None, for_upload=None,  # pylint: disable=unused-argument
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
-                    tags=None, no_wait=False):
+                    hyper_v_generation=None, tags=None, no_wait=False):
     Snapshot, CreationData, DiskCreateOption = cmd.get_models('Snapshot', 'CreationData', 'DiskCreateOption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -374,6 +387,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+    elif for_upload:
+        option = DiskCreateOption.upload
     else:
         option = DiskCreateOption.empty
 
@@ -384,15 +399,18 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
-
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
                         sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    if hyper_v_generation:
+        snapshot.hyper_vgeneration = hyper_v_generation
+
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
-def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds):
-    return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, False)
+def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None):
+    return _grant_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, is_disk=False,
+                         access_level=access_level)
 
 
 def list_snapshots(cmd, resource_group_name=None):
@@ -812,7 +830,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
                        'directly.')
-    elif not nic_ids:
+    if not nic_ids:
         raise CLIError("No NIC associated with VM '{}'".format(vm_name))
 
     # get existing NSG or create a new one

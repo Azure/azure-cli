@@ -63,6 +63,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
+    show_password = False
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -86,7 +87,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     if not msa_app_id:
 
         logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
-
+        show_password = True
         msa_app_id, password = ConvergedApp.provision(resource_name)
         logger.info('Microsoft application provisioning successful. Application Id: %s.', msa_app_id)
 
@@ -99,7 +100,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
         # Registration bot specific validation
         if not endpoint:
-            raise CLIError('Endpoint is required for creating a registration bot.')
+            endpoint = ''
         if not msa_app_id:
             raise CLIError('Microsoft application id is required for creating a registration bot.')
 
@@ -118,11 +119,14 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         logger.info('Bot parameters client side validation successful.')
         logger.info('Creating bot.')
 
-        return client.bots.create(
+        result = client.bots.create(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             parameters=parameters
-        )
+        ).as_dict()
+        if show_password:
+            result['password'] = password
+        return result
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
@@ -469,6 +473,43 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
     shutil.rmtree(download_path['downloadPath'])
 
     logger.info('Bot prepare publish completed successfully.')
+
+
+def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
+    if not code_dir:
+        code_dir = os.getcwd()
+        logger.info('--code-dir not provided, defaulting to current working directory: %s\n'
+                    'For more information, run "az bot prepare-deploy -h"', code_dir)
+    elif not os.path.exists(code_dir):
+        raise CLIError('Provided --code-dir value ({0}) does not exist'.format(code_dir))
+
+    def does_file_exist(file_name):
+        if os.path.exists(os.path.join(code_dir, file_name)):
+            raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
+                           'prepare-deploy"' % (file_name, code_dir, file_name))
+
+    if language != 'Csharp':
+        if proj_file_path:
+            raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
+        does_file_exist('web.config')
+
+        BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, {'lang': language,
+                                                                             'has_web_config': False,
+                                                                             'has_iisnode_yml': True})
+    else:
+        if not proj_file_path:
+            raise CLIError('--proj-file-path must be provided if language is Csharp')
+        does_file_exist('.deployment')
+        csproj_file = os.path.join(code_dir, proj_file_path)
+        if not os.path.exists(csproj_file):
+            raise CLIError('{0} file not found\nPlease verify the relative path to the .csproj file from the '
+                           '--code-dir'.format(csproj_file))
+
+        with open(os.path.join(code_dir, '.deployment'), 'w') as f:
+            f.write('[config]\n')
+            proj_file = proj_file_path.lower()
+            proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+            f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
 
 
 def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements

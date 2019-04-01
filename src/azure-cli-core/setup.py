@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.60"
+VERSION = "2.0.61"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -71,7 +71,7 @@ DEPENDENCIES = [
     'requests>=2.20.0',
     'six',
     'tabulate>=0.7.7',
-    'wheel',
+    'wheel==0.30.0',
     'azure-mgmt-resource==2.1.0'
 ]
 

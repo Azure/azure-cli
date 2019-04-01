@@ -405,8 +405,8 @@ def _get_displayable_name(graph_object):
     return graph_object.display_name or ''
 
 
-def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
-                            resource_group_name=None, scope=None, include_inherited=False):
+def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
+                            scope=None, include_inherited=False, yes=None):
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -417,6 +417,11 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
         for i in ids:
             assignments_client.delete_by_id(i)
         return
+    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
+        from knack.prompting import prompt_y_n
+        msg = 'This will delete all role assignments under the subscription. Are you sure?'
+        if not prompt_y_n(msg, default="n"):
+            return
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
@@ -675,13 +680,12 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                        credential_description=None, app_roles=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
+    if not identifier_uris:
+        identifier_uris = []
     if native_app:
         if identifier_uris:
             raise CLIError("'--identifier-uris' is not required for creating a native application")
-        identifier_uris = ['http://{}'.format(_gen_guid())]  # we will create a temporary one and remove it later
     else:
-        if not identifier_uris:
-            raise CLIError("'--identifier-uris' is required for creating an application")
         password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage,
                                                              start_date, end_date, credential_description)
 
@@ -715,8 +719,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
         # AAD graph doesn't have the API to create a native app, aka public client, the recommended hack is
         # to create a web app first, then convert to a native one
         # pylint: disable=protected-access
-        app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
-        app_patch_param.public_client = True
+        app_patch_param = ApplicationUpdateParameters(public_client=True)
         graph_client.applications.patch(result.object_id, app_patch_param)
         result = graph_client.applications.get(result.object_id)
 
@@ -805,6 +808,34 @@ def delete_permission(cmd, identifier, api):
     existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
     return graph_client.applications.patch(application.object_id, update_parameter)
+
+
+def admin_consent(cmd, identifier):
+    import requests
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import UA_AGENT
+    from azure.cli.core.util import should_disable_connection_verify
+    if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
+        raise CLIError('This command is not yet supported on sovereign clouds')
+    # we will leverage portal endpoints to get admin consent done
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    url = 'https://main.iam.ad.ext.azure.com/api/RegisteredApplications/{}/Consent?onBehalfOfAll=true'.format(
+        application.app_id)
+    profile = Profile()
+
+    # the key is to get the access token to the portal resource:
+    access_token = profile.get_raw_token('74658136-14ec-4630-ad9b-26e160ff0fc6')
+    headers = {
+        'Authorization': "Bearer " + access_token[0][1],
+        'Accept-Encoding': 'gzip, deflate, br',
+        'x-ms-client-request-id': str(uuid.uuid4()),
+        'User-Agent': UA_AGENT
+    }
+    response = requests.post(url, headers=headers, verify=not should_disable_connection_verify())
+    if not response.ok:
+        raise CLIError(response.reason)
 
 
 def grant_application(cmd, identifier, api, consent_type=None, principal_id=None,

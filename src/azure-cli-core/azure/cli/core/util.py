@@ -88,8 +88,13 @@ def _update_latest_from_pypi(versions):
     from subprocess import check_output, STDOUT, CalledProcessError
 
     success = False
+
+    if not check_connectivity(max_retries=0):
+        return versions, success
+
     try:
-        cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir'.split()
+        cmd = [sys.executable] + \
+            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
         logger.debug('Running: %s', cmd)
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
         success = True
@@ -417,3 +422,64 @@ def get_default_admin_username():
         return getpass.getuser()
     except KeyError:
         return None
+
+
+def _find_child(parent, *args, **kwargs):
+    # tuple structure (path, key, dest)
+    path = kwargs.get('path', None)
+    key_path = kwargs.get('key_path', None)
+    comps = zip(path.split('.'), key_path.split('.'), args)
+    current = parent
+    for path, key, val in comps:
+        current = getattr(current, path, None)
+        if current is None:
+            raise CLIError("collection '{}' not found".format(path))
+        match = next((x for x in current if getattr(x, key).lower() == val.lower()), None)
+        if match is None:
+            raise CLIError("item '{}' not found in {}".format(val, path))
+        current = match
+    return current
+
+
+def find_child_item(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    if len(args) != len(path.split('.')) != len(key_path.split('.')):
+        raise CLIError('command authoring error: args, path and key_path must have equal number of components.')
+    return _find_child(parent, *args, path=path, key_path=key_path)
+
+
+def find_child_collection(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    arg_len = len(args)
+    key_len = len(key_path.split('.'))
+    path_len = len(path.split('.'))
+    if arg_len != key_len and path_len != arg_len + 1:
+        raise CLIError('command authoring error: args and key_path must have equal number of components, and '
+                       'path must have one extra component (the path to the collection of interest.')
+    parent = _find_child(parent, *args, path=path, key_path=key_path)
+    collection_path = path.split('.')[-1]
+    collection = getattr(parent, collection_path, None)
+    if collection is None:
+        raise CLIError("collection '{}' not found".format(collection_path))
+    return collection
+
+
+def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+    import requests
+    import timeit
+    start = timeit.default_timer()
+    success = None
+    try:
+        s = requests.Session()
+        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+        s.head(url, timeout=timeout)
+        success = True
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
+        logger.info('Connectivity problem detected.')
+        logger.debug(ex)
+        success = False
+    stop = timeit.default_timer()
+    logger.debug('Connectivity check: %s sec', stop - start)
+    return success

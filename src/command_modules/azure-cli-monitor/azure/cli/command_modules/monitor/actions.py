@@ -5,11 +5,12 @@
 
 import argparse
 import antlr4
-from knack.util import CLIError
 
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_operator_map,
     get_autoscale_aggregation_map, get_autoscale_scale_direction_map)
+
+from knack.util import CLIError
 
 
 def timezone_name_type(value):

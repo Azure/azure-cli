@@ -146,6 +146,7 @@ def load_command_table(self, _):
         g.custom_command('permission add', 'add_permission')
         g.custom_command('permission delete', 'delete_permission')
         g.custom_command('permission list-grants', 'list_permission_grants')
+        g.custom_command('permission admin-consent', 'admin_consent')
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,
                                  getter_name='show_application', getter_type=role_custom,
                                  custom_func_name='update_application', custom_func_type=role_custom)

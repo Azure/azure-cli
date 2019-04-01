@@ -3,6 +3,14 @@
 Release History
 ===============
 
+* `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
+* `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
+* `express-route port update`: Fixed an issue where updating link state on an express-route port would throw an unknown attribute exception.
+
+2.3.5
++++++
+* `application-gateway`: Add `rewrite-rule` command group.
+
 2.3.4
 +++++
 * `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.

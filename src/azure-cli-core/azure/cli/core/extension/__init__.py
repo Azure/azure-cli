@@ -8,10 +8,10 @@ import traceback
 import json
 import re
 
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+
 from knack.config import CLIConfig
 from knack.log import get_logger
-
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
 _CUSTOM_EXT_DIR = az_config.get('extension', 'dir', None)
@@ -127,9 +127,10 @@ class WheelExtension(Extension):
 
         for dist_info_dirname in info_dirs:
             parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
-            if parsed_dist_info_dir:
-                parsed_dist_info_dir = parsed_dist_info_dir.groupdict().get('name')
+            if not parsed_dist_info_dir:
+                continue
 
+            parsed_dist_info_dir = parsed_dist_info_dir.groupdict().get('name')
             if os.path.split(parsed_dist_info_dir)[-1] == self.name.replace('-', '_'):
                 whl_metadata_filepath = os.path.join(dist_info_dirname, WHL_METADATA_FILENAME)
                 if os.path.isfile(whl_metadata_filepath):
