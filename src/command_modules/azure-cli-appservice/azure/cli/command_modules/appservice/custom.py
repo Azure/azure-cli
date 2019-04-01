@@ -390,9 +390,9 @@ def validate_plan_switch_compatibility(client, src_functionapp_instance, dest_pl
                                                  src_parse_result['name'])
     if src_plan_info is None:
         raise CLIError('Could not determine the current plan of the functionapp')
-    elif not (is_plan_consumption(src_plan_info) or is_plan_Elastic_Premium(src_plan_info)):
+    elif not (is_plan_consumption(src_plan_info) or is_plan_elastic_premium(src_plan_info)):
         raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
-    if not (is_plan_consumption(dest_plan_instance) or is_plan_Elastic_Premium(dest_plan_instance)):
+    if not (is_plan_consumption(dest_plan_instance) or is_plan_elastic_premium(dest_plan_instance)):
         raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
                        general_switch_msg)
 
@@ -669,8 +669,8 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 def update_site_configs(cmd, resource_group_name, name, slot=None,
-                        linux_fx_version=None, windows_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
-                        net_framework_version=None,  # pylint: disable=unused-argument
+                        linux_fx_version=None, windows_fx_version=None, reserved_instance_count=None, php_version=None,  # pylint: disable=unused-argument
+                        python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
@@ -687,14 +687,21 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
         else:
             delete_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
 
+    if reserved_instance_count is not None:
+        reserved_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', reserved_instance_count,
+                                                             min_val=0, max_val=20)
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
                   'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
+    int_flags = ['reserved_instance_count']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+
     for arg in args[3:]:
+        if arg in int_flags and values[arg] is not None:
+            values[arg] = validate_and_convert_to_int(arg, values[arg])
         if arg != 'generic_configurations' and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
@@ -1190,6 +1197,19 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
         sku_def.capacity = number_of_workers
     instance.sku = sku_def
     return instance
+
+
+def update_functionapp_app_service_plan(instance, sku=None, number_of_workers=None, max_burst=None):
+    instance = update_app_service_plan(instance, sku, number_of_workers)
+    if max_burst is not None:
+        if not is_plan_elastic_premium(instance):
+            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
+        max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
+        instance.maximum_elastic_worker_count = max_burst
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
+                                                       number_of_workers, min_val=0, max_val=20)
+    return update_app_service_plan(instance, sku, number_of_workers)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
@@ -1925,10 +1945,24 @@ def get_app_insights_key(cli_ctx, resource_group, name):
 
 
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku,
-                                        number_of_workers=None, location=None, tags=None):
-    # This command merely shadows 'az appservice plan create' except with a few parameters
-    return create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v=None,
-                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+                                        number_of_workers=None, max_burst=None, location=None, tags=None):
+    sku = _normalize_sku(sku)
+    tier = get_sku_name(sku)
+    if max_burst is not None:
+        if tier.lower() != "elasticpremium":
+            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
+        max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
+                                                       number_of_workers, min_val=0, max_val=20)
+    client = web_client_factory(cmd.cli_ctx)
+    if location is None:
+        location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    sku_def = SkuDescription(tier=tier, name=sku, capacity=number_of_workers)
+    plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
+                              reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
+                              hyper_v=None, name=name)
+    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
 def is_plan_consumption(plan_info):
@@ -1938,11 +1972,26 @@ def is_plan_consumption(plan_info):
     return False
 
 
-def is_plan_Elastic_Premium(plan_info):
+def is_plan_elastic_premium(plan_info):
     if isinstance(plan_info, AppServicePlan):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier == 'ElasticPremium'
     return False
+
+
+def validate_and_convert_to_int(flag, val):
+    try:
+        return int(val)
+    except ValueError:
+        raise CLIError("Usage error: {} is expected to have an int value.".format(flag))
+
+
+def validate_range_of_int_flag(flag_name, value, min_val, max_val):
+    value = validate_and_convert_to_int(flag_name, value)
+    if min_val > value or value > max_val:
+        raise CLIError("Usage error: {} is expected to be between {} and {} (inclusive)".format(flag_name, min_val,
+                                                                                                max_val))
+    return value
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
@@ -2030,7 +2079,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
 
-    if consumption_plan_location is None and not is_plan_Elastic_Premium(plan_info):
+    if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
         site_config.always_on = True
     else:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',

@@ -70,6 +70,7 @@ def load_arguments(self, _):
                    configured_default='appserviceplan', id_part='name')
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.', deprecate_info=c.deprecate(expiration='0.2.17'))
+        c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
@@ -205,6 +206,9 @@ def load_arguments(self, _):
             c.argument('windows_fx_version', help="(Preview) a docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
+            c.argument('reserved_instance_count', options_list=['--prewarmed-instance-count'], help="Number of pre-warmed instances a function app has")
+            if scope == 'webapp':
+                c.ignore('reserved_instance_count')
             c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
@@ -392,13 +396,21 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
-        c.argument('sku', required=True, help='The SKU of the app service plan.')
-        c.argument('number_of_workers', help='The number of workers for the app service plan.')
         c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False, help='host function app on Linux worker')
+        c.argument('number_of_workers', options_list=['--number-of-workers', '--min-instances'],
+                   help='The number of workers for the app service plan.')
+        c.argument('max_burst',
+                   help='The maximum number of elastic workers for the plan.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('functionapp update') as c:
         c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
+
+    with self.argument_context('functionapp plan create') as c:
+        c.argument('sku', required=True, help='The SKU of the app service plan.')
+
+    with self.argument_context('functionapp plan update') as c:
+        c.argument('sku', required=False, help='The SKU of the app service plan.')
 
     with self.argument_context('functionapp devops-build create') as c:
         c.argument('functionapp_name', help="Name of the Azure Function App that you want to use", required=False)
