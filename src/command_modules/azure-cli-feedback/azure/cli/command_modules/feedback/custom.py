@@ -16,7 +16,7 @@ from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core.util import get_az_version_string
-from azure.cli.core.azlogging import UNKNOWN_COMMAND, CMD_LOG_LINE_PREFIX
+from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 from azure.cli.core.util import open_page_in_browser
 import pyperclip
 
@@ -209,7 +209,7 @@ class CommandLogFile(object):
             _, file_name = os.path.split(self._log_file_path)
             poss_date, poss_time, poss_command, poss_pid, _ = file_name.split(".")
             date_time_stamp = datetime.datetime.strptime("{}-{}".format(poss_date, poss_time), "%Y-%m-%d-%H-%M-%S")
-            command = "az " + poss_command.replace("_", " ") if poss_command != UNKNOWN_COMMAND else "Unknown"
+            command = "az " + poss_command.replace("_", " ") if poss_command != _UNKNOWN_COMMAND else "Unknown"
         except ValueError as e:
             logger.debug("Could not load metadata from file name %s.", self._log_file_path)
             logger.debug(e)
@@ -334,10 +334,10 @@ class CommandLogFile(object):
         :return: returned parsed line information or None
         """
 
-        if not line.startswith(CMD_LOG_LINE_PREFIX):
+        if not line.startswith(_CMD_LOG_LINE_PREFIX):
             return None
 
-        line = line[len(CMD_LOG_LINE_PREFIX):]
+        line = line[len(_CMD_LOG_LINE_PREFIX):]
         parts = line.split("|", 4)
 
         if len(parts) != 5:  # there must be 5 items
@@ -358,6 +358,9 @@ def _build_issue_info_tup(command_log_file=None):
         import psutil
         parent = psutil.Process(os.getpid()).parent()
         if parent:
+            #  powershell.exe launches cmd.exe to launch the cli.
+            if parent.parent() and parent.name().lower().startswith("powershell"):
+                return parent.parent().name()
             return parent.name()
         return None
 

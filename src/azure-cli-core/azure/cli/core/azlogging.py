@@ -32,8 +32,8 @@ from knack.util import ensure_dir
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
 
-UNKNOWN_COMMAND = "unknown_command"
-CMD_LOG_LINE_PREFIX = "CMD-LOG-LINE-BEGIN"
+_UNKNOWN_COMMAND = "unknown_command"
+_CMD_LOG_LINE_PREFIX = "CMD-LOG-LINE-BEGIN"
 
 
 class AzCliLogging(CLILogging):
@@ -52,9 +52,16 @@ class AzCliLogging(CLILogging):
     @staticmethod
     def init_command_file_logging(cli_ctx, **kwargs):
         def _delete_old_logs(log_dir):
+            """
+            Periodically delete the 5 oldest command log files, ensuring that only the history of the last
+            25 commands (or less) are kept.
+            """
+
+            # get log file names and sort them from newest to oldest file.
             log_file_names = [file for file in os.listdir(log_dir) if file.endswith(".log")]
             sorted_files = sorted(log_file_names, reverse=True)
 
+            # if we have too many files, delete the 5 last / oldest command log files.
             if len(sorted_files) > 25:
                 for file in sorted_files[5:]:
                     try:
@@ -76,7 +83,7 @@ class AzCliLogging(CLILogging):
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
         ensure_dir(self.command_log_dir)
-        command = self.cli_ctx.invocation._rudimentary_get_command(args) or UNKNOWN_COMMAND  # pylint: disable=protected-access, line-too-long
+        command = self.cli_ctx.invocation._rudimentary_get_command(args) or _UNKNOWN_COMMAND  # pylint: disable=protected-access, line-too-long
         command = command.replace(" ", "_")
         if command == "feedback":
             return
@@ -91,7 +98,7 @@ class AzCliLogging(CLILogging):
 
         logfile_handler = logging.FileHandler(log_file_path)
 
-        lfmt = logging.Formatter(CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')  # pylint: disable=line-too-long
+        lfmt = logging.Formatter(_CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')  # pylint: disable=line-too-long
         logfile_handler.setFormatter(lfmt)
         logfile_handler.setLevel(logging.DEBUG)
         command_metadata_logger.addHandler(logfile_handler)

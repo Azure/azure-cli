@@ -75,13 +75,6 @@ class TestCommandLogFile(ScenarioTest):
 
     # There must be only one test fixture for this class. This is because the commands in setup must be run only once.
     def test_feedback(self):
-
-        for file in os.listdir(self.temp_command_log_dir):
-            with open(os.path.join(self.temp_command_log_dir, file), "r") as f:
-                print("File contents:\n%s", f.read())
-
-        print("temp dir contents: %s", os.listdir(self.temp_command_log_dir))
-
         self._helper_test_log_metadata_correct()
         self._helper_test_log_contents_correct()
         self._helper_test_build_issue_info()
@@ -184,7 +177,8 @@ class TestCommandLogFile(ScenarioTest):
 
         result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
-        # manually handle error logging as azure.cli.core.util's handle_exception function is mocked in testsdk / patches
+        # manually handle error logging as azure.cli.core.util's handle_exception function is mocked out in testsdk / patches
+        # this logged error tests that we can properly parse errors from command log file.
         with CommandLoggerContext(logger):
             if result.exit_code != 0:
                 logger.error("There was an error during execution.")
