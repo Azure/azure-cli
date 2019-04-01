@@ -1074,7 +1074,19 @@ def list_ddos_plans(cmd, resource_group_name=None):
 
 
 # region DNS Commands
-def create_dns_zone(cmd, client, resource_group_name, zone_name, tags=None,
+# add delegation name server record for the created child  zone in it's parent zone.
+def add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name):
+    import sys
+    if all(v is not None for v in [parent_zone_name, zone_name, created_zone]) and zone_name.endswith(parent_zone_name):
+        record_set_name = zone_name.replace('.' + parent_zone_name, '')
+        try:
+            for dname in created_zone.name_servers:
+                add_dns_ns_record(cmd, resource_group_name, parent_zone_name, record_set_name, dname)
+        except (Exception, SystemExit) as ex:
+            print(ex)
+            print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
+
+def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_name=None, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
     Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
     zone = Zone(location='global', tags=tags)
@@ -1084,7 +1096,11 @@ def create_dns_zone(cmd, client, resource_group_name, zone_name, tags=None,
         zone.registration_virtual_networks = registration_vnets
         zone.resolution_virtual_networks = resolution_vnets
 
-    return client.create_or_update(resource_group_name, zone_name, zone, if_none_match='*' if if_none_match else None)
+    created_zone = client.create_or_update(resource_group_name, zone_name, zone, if_none_match='*' if if_none_match else None)
+
+    if parent_zone_name is not None:
+        add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
+    return created_zone
 
 
 def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
