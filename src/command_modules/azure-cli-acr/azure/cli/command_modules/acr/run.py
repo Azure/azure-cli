@@ -89,7 +89,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if source_location:
         request = FileTaskRunRequest(
-            task_file_path=file,
+            task_file_path=file if file else "acb.yaml",
             values_file_path=values,
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
