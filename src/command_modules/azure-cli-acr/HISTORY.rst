@@ -3,13 +3,9 @@
 Release History
 ===============
 
-2.2.3
-+++++
-* Support running image without context.
-* Minor fixes
-
 2.2.2
 +++++
+* Support running an image contextlessly
 * Fix redundant sources in image import.
 * Add '--auth-mode' for 'az acr build', 'az acr run', 'az acr task create', and 'az acr task update' commands.
 * Add 'acr task credential' command group for managing credentials for a Task.
