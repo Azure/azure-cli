@@ -95,6 +95,7 @@ def _validate_whl_extension(ext_file):
 
 
 def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
+    from humanfriendly import AutomaticSpinner
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -115,7 +116,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
         try:
-            _whl_download_from_url(url_parse_result, ext_file)
+            with AutomaticSpinner(label="Downloading wheel", show_time=False):
+                _whl_download_from_url(url_parse_result, ext_file)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
             raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
         logger.debug('Downloaded to %s', ext_file)
@@ -136,7 +138,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
             raise CLIError("The checksum of the extension does not match the expected value. "
                            "Use --debug for more information.")
     try:
-        _validate_whl_extension(ext_file)
+        with AutomaticSpinner(label="Validating wheel", show_time=False):
+            _validate_whl_extension(ext_file)
     except AssertionError:
         logger.debug(traceback.format_exc())
         raise CLIError('The extension is invalid. Use --debug for more information.')
@@ -145,28 +148,29 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
-    # Install with pip
-    extension_path = get_extension_path(extension_name)
-    pip_args = ['install', '--target', extension_path, ext_file]
+    with AutomaticSpinner(label="Installing extension", show_time=False):
+        # Install with pip
+        extension_path = get_extension_path(extension_name)
+        pip_args = ['install', '--target', extension_path, ext_file]
 
-    if pip_proxy:
-        pip_args = pip_args + ['--proxy', pip_proxy]
-    if pip_extra_index_urls:
-        for extra_index_url in pip_extra_index_urls:
-            pip_args = pip_args + ['--extra-index-url', extra_index_url]
+        if pip_proxy:
+            pip_args = pip_args + ['--proxy', pip_proxy]
+        if pip_extra_index_urls:
+            for extra_index_url in pip_extra_index_urls:
+                pip_args = pip_args + ['--extra-index-url', extra_index_url]
 
-    logger.debug('Executing pip with args: %s', pip_args)
-    with HomebrewPipPatch():
-        pip_status_code = _run_pip(pip_args)
-    if pip_status_code > 0:
-        logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
-        shutil.rmtree(extension_path, ignore_errors=True)
-        raise CLIError('An error occurred. Pip failed with status code {}. '
-                       'Use --debug for more information.'.format(pip_status_code))
-    # Save the whl we used to install the extension in the extension dir.
-    dst = os.path.join(extension_path, whl_filename)
-    shutil.copyfile(ext_file, dst)
-    logger.debug('Saved the whl to %s', dst)
+        logger.debug('Executing pip with args: %s', pip_args)
+        with HomebrewPipPatch():
+            pip_status_code = _run_pip(pip_args)
+        if pip_status_code > 0:
+            logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
+            shutil.rmtree(extension_path, ignore_errors=True)
+            raise CLIError('An error occurred. Pip failed with status code {}. '
+                           'Use --debug for more information.'.format(pip_status_code))
+        # Save the whl we used to install the extension in the extension dir.
+        dst = os.path.join(extension_path, whl_filename)
+        shutil.copyfile(ext_file, dst)
+        logger.debug('Saved the whl to %s', dst)
 
 
 def is_valid_sha256sum(a_file, expected_sum):
