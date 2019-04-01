@@ -2049,7 +2049,7 @@ def managed_instance_update(
         proxy_override or instance.proxy_override)
 
     if public_data_endpoint_enabled is not None:
-        instance.public_data_endpoint_enabled = public_data_endpoint_enabled == True
+        instance.public_data_endpoint_enabled = public_data_endpoint_enabled
 
     return instance
 
