@@ -262,7 +262,7 @@ class AzureDevopsBuildInteractive(object):
         except GitOperationException as goe:
             self.adbp.remove_git_remote(self.organization_name, self.project_name, self.repository_name)
             raise CLIError("Failed to push your local repository to {url}{ls}"
-                "Please check your credentials and ensure you have sufficient permissions.".format(url=remote_url, ls=os.linesep))
+                "Please check your credentials and ensure you are a contributor to the repository.".format(url=remote_url, ls=os.linesep))
 
         print("Local branches has been pushed to {url}".format(url=remote_url))
 
@@ -424,7 +424,7 @@ class AzureDevopsBuildInteractive(object):
                 "2. If you are logged in as the right account please check the subscription you are using. Run 'az account show' and view the name.{ls}"
                 "   If you need to set the subscription run 'az account set --subscription {SUBSCRIPTION_NAME}'{ls}"
                 "3. If you do not have a function app please create one".format(ls=os.linesep))
-        choice_index = prompt_choice_list('Please choose the functionapp: ', functionapp_names)
+        choice_index = prompt_choice_list('Please select the target function app: ', functionapp_names)
         functionapp = [functionapp for functionapp in functionapps
                        if functionapp.name == functionapp_names[choice_index]][0]
         self.logger.info("Selected functionapp %s", functionapp.name)
