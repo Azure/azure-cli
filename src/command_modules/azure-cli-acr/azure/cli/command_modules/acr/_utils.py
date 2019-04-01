@@ -391,7 +391,7 @@ def get_yaml_and_values(cmd_value, timeout, file):
             values_content += "timeout: {0}\n".format(timeout)
     else:
         if not file:
-            file = "acb.yml"
+            file = "acb.yaml"
 
         if file == "-":
             import sys
