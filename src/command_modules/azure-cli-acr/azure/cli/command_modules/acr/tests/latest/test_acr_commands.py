@@ -383,4 +383,3 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr run -r {registry_name} --timeout {timeout} --cmd {command} {source_location}')
         # Run from task definition file
         self.cmd('acr run -r {registry_name} -f {file} {source_location}')
-

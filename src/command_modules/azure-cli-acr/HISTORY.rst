@@ -6,6 +6,7 @@ Release History
 2.2.3
 +++++
 * Support running image without context.
+* Minor fixes
 
 2.2.2
 +++++
