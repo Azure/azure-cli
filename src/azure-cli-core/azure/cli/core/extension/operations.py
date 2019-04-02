@@ -195,7 +195,6 @@ def _augment_telemetry_with_ext_info(extension_name):
 
 def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None):
-    cmd.cli_ctx.get_progress_controller().add(message='Analysing')
     ext_sha256 = None
     if extension_name:
         ext = None
