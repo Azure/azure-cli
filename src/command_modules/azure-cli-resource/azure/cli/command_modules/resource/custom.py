@@ -21,10 +21,6 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
 
-from knack.log import get_logger
-from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from knack.util import CLIError
-
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.locks.models import ManagementLockObject
@@ -40,6 +36,10 @@ from azure.cli.command_modules.resource._client_factory import (
     _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
+from knack.log import get_logger
+from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
+from knack.util import CLIError
+
 from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
@@ -51,7 +51,7 @@ def _process_parameters(template_param_defs, parameter_lists):
         try:
             parsed = shell_safe_json_parse(value)
             return parsed.get('parameters', parsed)
-        except CLIError:
+        except Exception:  # pylint: disable=broad-except
             return None
 
     def _try_load_file_object(value):
@@ -104,7 +104,11 @@ def _process_parameters(template_param_defs, parameter_lists):
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item) or _try_parse_json_object(item) or _try_load_uri(item)
+            param_obj = _try_load_file_object(item)
+            if param_obj is None:
+                param_obj = _try_parse_json_object(item)
+            if param_obj is None:
+                param_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
@@ -612,8 +616,7 @@ def create_application(cmd, resource_group_name,
                 plan_publisher is None and plan_version is None):
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
-        else:
-            application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
+        application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
 
     applicationParameters = None
 
@@ -665,14 +668,12 @@ def create_applicationdefinition(cmd, resource_group_name,
     from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
-    elif package_file_uri:
+    if package_file_uri:
         if create_ui_definition or main_template:
-            raise CLIError('usage error: must not specify \
-            --create-ui-definition --main-template')
-    elif not package_file_uri:
+            raise CLIError('usage error: must not specify --create-ui-definition --main-template')
+    if not package_file_uri:
         if not create_ui_definition or not main_template:
-            raise CLIError('usage error: must specify \
-            --create-ui-definition --main-template')
+            raise CLIError('usage error: must specify --create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
