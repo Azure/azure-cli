@@ -592,12 +592,10 @@ examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \\
-            client components and selecting a new or existing dev space 'my-space'.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \\ client components and selecting a new or existing dev space 'my-space'.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\
-            'develop/my-space' without prompting for confirmation.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\ 'develop/my-space' without prompting for confirmation.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
 """
