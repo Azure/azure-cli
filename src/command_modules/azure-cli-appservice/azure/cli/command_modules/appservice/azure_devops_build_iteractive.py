@@ -122,7 +122,7 @@ class AzureDevopsBuildInteractive(object):
     def pre_checks(self):
         if not os.path.exists('host.json'):
             raise CLIError("There is no host.json in the current directory.{ls}"
-                "Functionapps must contain a host.json in their root.".format(ls=os.linesep))
+                           "Functionapps must contain a host.json in their root.".format(ls=os.linesep))
 
         if not self.adbp.check_git():
             raise CLIError("The program requires git source control to operate, please install git.")
@@ -229,8 +229,11 @@ class AzureDevopsBuildInteractive(object):
         has_local_git_remote = self.adbp.check_git_remote(self.organization_name, self.project_name, self.repository_name)
         if has_local_git_remote:
             raise CLIError("There's a git remote bound to {url}.{ls}"
-                "To update the repository and trigger an Azure Devops build, please use 'git push {remote} master'".format(
-                    url=expected_remote_url, remote=expected_remote_name, ls=os.linesep))
+                           "To update the repository and trigger an Azure Devops build, please use 'git push {remote} master'".format(
+                               url=expected_remote_url,
+                               remote=expected_remote_name,
+                               ls=os.linesep)
+                           )
 
         # Setup a local git repository and create a new commit on top of this context
         try:
@@ -262,7 +265,7 @@ class AzureDevopsBuildInteractive(object):
         except GitOperationException as goe:
             self.adbp.remove_git_remote(self.organization_name, self.project_name, self.repository_name)
             raise CLIError("Failed to push your local repository to {url}{ls}"
-                "Please check your credentials and ensure you are a contributor to the repository.".format(url=remote_url, ls=os.linesep))
+                           "Please check your credentials and ensure you are a contributor to the repository.".format(url=remote_url, ls=os.linesep))
 
         print("Local branches has been pushed to {url}".format(url=remote_url))
 
@@ -284,8 +287,8 @@ class AzureDevopsBuildInteractive(object):
             except RoleAssignmentException:
                 self.adbp.remove_git_remote(self.organization_name, self.project_name, self.repository_name)
                 raise CLIError("To use the Azure DevOps Pipeline Build,{ls}"
-                    "We need to assign a contributor role to the Azure Functions release service principle.{ls}"
-                    "Please ensure you are the owner of the subscription, or have role assignment write permission.".format(ls=os.linesep))
+                               "We need to assign a contributor role to the Azure Functions release service principle.{ls}"
+                               "Please ensure you are the owner of the subscription, or have role assignment write permission.".format(ls=os.linesep))
         else:
             service_endpoint = service_endpoints[0]
             self.logger.warning("Detected service endpoint {name}".format(name=service_endpoint.name))
@@ -313,22 +316,24 @@ class AzureDevopsBuildInteractive(object):
         else:
             self.logger.warning("Detected build definition {name}".format(name=self.build_definition_name))
 
-        self.build = self.adbp.create_build_object(self.organization_name, self.project_name,
-                                              self.build_definition_name, self.build_pool_name)
+        self.build = self.adbp.create_build_object(
+            self.organization_name,
+            self.project_name,
+            self.build_definition_name,
+            self.build_pool_name
+        )
 
         url = "https://dev.azure.com/{org}/{proj}/_build/results?buildId={build_id}".format(org=self.organization_name, proj=self.project_name, build_id=self.build.id)
         print("To follow the build process go to {url}".format(url=url))
 
     def process_release(self):
         # wait for artifacts / build to complete
-        artifacts = []
         counter = 0
         build = None
         while build is None or build.result is None:
             time.sleep(5)
             build = self._get_build_by_id(self.organization_name, self.project_name, self.build.id)
             print("building artifacts ... {counter}s ({status})".format(counter=counter, status=build.status))
-            artifacts = self.adbp.list_artifacts(self.organization_name, self.project_name, self.build.id)
             counter += 5
 
         if build.result == 'failed':
@@ -338,7 +343,7 @@ class AzureDevopsBuildInteractive(object):
                 build_id=build.id
             )
             raise CLIError("Sorry, your build has failed in Azure Devops.{ls}"
-                "To view details on why your build has failed please visit {url}".format(url=url, ls=os.linesep))
+                           "To view details on why your build has failed please visit {url}".format(url=url, ls=os.linesep))
         elif build.result == 'succeeded':
             print("You build has completed. Composing a release definitions...")
 
@@ -358,7 +363,7 @@ class AzureDevopsBuildInteractive(object):
                                                 self.resource_group_name, self.settings)
         else:
             self.logger.warning("Detected release definition {name}".format(name=self.release_definition_name))
-        
+
         # The build artifact takes some time to propagate
         print("Prepare to release the artifact...")
         time.sleep(5)
@@ -368,7 +373,7 @@ class AzureDevopsBuildInteractive(object):
         except ReleaseErrorException:
             url = "https://dev.azure.com/{org}/{proj}/_release".format(org=self.organization_name, proj=self.project_name)
             raise CLIError("Sorry, your release has failed in Azure Devops.{ls}"
-                "To view details on why your release has failed please visit {url}".format(url=url, ls=os.linesep))
+                           "To view details on why your release has failed please visit {url}".format(url=url, ls=os.linesep))
 
         url = "https://dev.azure.com/{org}/{proj}/_releaseProgress?_a=release-environment-logs&releaseId={release_id}".format(
             org=self.organization_name,
@@ -420,10 +425,10 @@ class AzureDevopsBuildInteractive(object):
         functionapp_names = sorted([functionapp.name for functionapp in functionapps])
         if len(functionapp_names) < 1:
             raise CLIError("You do not have any existing function apps associated with this account subscription.{ls}"
-                "1. Please make sure you are logged into the right azure account by running 'az account show' and checking the user.{ls}"
-                "2. If you are logged in as the right account please check the subscription you are using. Run 'az account show' and view the name.{ls}"
-                "   If you need to set the subscription run 'az account set --subscription {SUBSCRIPTION_NAME}'{ls}"
-                "3. If you do not have a function app please create one".format(ls=os.linesep))
+                           "1. Please make sure you are logged into the right azure account by running 'az account show' and checking the user.{ls}"
+                           "2. If you are logged in as the right account please check the subscription you are using. Run 'az account show' and view the name.{ls}"
+                           "   If you need to set the subscription run 'az account set --subscription {SUBSCRIPTION_NAME}'{ls}"
+                           "3. If you do not have a function app please create one".format(ls=os.linesep))
         choice_index = prompt_choice_list('Please select the target function app: ', functionapp_names)
         functionapp = [functionapp for functionapp in functionapps
                        if functionapp.name == functionapp_names[choice_index]][0]
@@ -451,9 +456,9 @@ class AzureDevopsBuildInteractive(object):
                 if language_str != local_language:
                     # We should not deploy if the local runtime language is not the same as that of their functionapp
                     raise CLIError("The local language you are using ({local}) does not match the language of your function app ({functionapps}){ls}"
-                        "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json and in your application settings on your function app in Azure.".format(
-                            local=local_language, functionapps=language_str, ls=os.linesep
-                        ))
+                                   "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json"
+                                   " and in your application settings on your function app in Azure.".format(
+                                       local=local_language, functionapps=language_str, ls=os.linesep))
                 if language_str == "python":
                     self.logger.info("detected that language used by functionapp is python")
                     language = PYTHON
@@ -463,9 +468,6 @@ class AzureDevopsBuildInteractive(object):
                 elif language_str == "dotnet":
                     self.logger.info("detected that language used by functionapp is .net")
                     language = DOTNET
-                #elif language_str == "java":
-                #    self.logger.info("detected that language used by functionapp is java")
-                #    language = JAVA
                 else:
                     raise LanguageNotSupportException(language_str)
             if app_setting['name'] == "AzureWebJobsStorage":

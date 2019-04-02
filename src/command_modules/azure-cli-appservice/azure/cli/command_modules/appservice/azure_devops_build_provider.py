@@ -106,7 +106,7 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
 
     def check_git_credential_manager(self):
         return RepositoryManager.check_git_credential_manager()
-    
+
     def check_git_remote(self, organization_name, project_name, repository_name):
         """Check if local git remote name does exist"""
         repository_manager = RepositoryManager(organization_name=organization_name,
@@ -146,7 +146,6 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
         repository_manager = RepositoryManager(organization_name=organization_name,
                                                project_name=project_name, creds=self._creds)
         return repository_manager.get_azure_devops_repository_branches(repository_name)
-
 
     def push_local_to_azure_devops_repository(self, organization_name, project_name, repository_name, force=False):
         """Push local context to Azure Devops repository"""
