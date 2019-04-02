@@ -120,11 +120,11 @@ class AzCliCommand(CLICommand):
         self.confirmation = kwargs.get('confirmation', False)
         self.command_kwargs = kwargs
 
-    def _resolve_default_value_from_cfg_file(self, arg, overrides):
+    def _resolve_default_value_from_config_file(self, arg, overrides):
         # same blunt mechanism like we handled id-parts, for create command, no name default
         if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
             return
-        super(AzCliCommand, self)._resolve_default_value_from_cfg_file(arg, overrides)
+        super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
