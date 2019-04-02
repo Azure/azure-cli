@@ -360,3 +360,22 @@ class AcrCommandsTests(ScenarioTest):
 
         # Case 9: Import image from an Azure Container Registry with personal access token
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
+
+    @ResourceGroupPreparer()
+    def test_acr_run(self, resource_group):
+        self.kwargs.update({
+            'rg_loc': 'westcentralus',
+            'sku': 'Standard',
+            'registry_name': self.create_random_name('runreg', 20),
+            'command': '"docker ps"',
+            'timeout': 400,
+            'source_location': '/dev/null'
+        })
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+        # Run a contextless command
+        self.cmd('acr run -r {registry_name} --timeout {timeout} --cmd {command} {source_location}')
