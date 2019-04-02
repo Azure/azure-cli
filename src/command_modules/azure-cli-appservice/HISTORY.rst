@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* functionapp: add support for linux functions plan creation
+
 0.2.16
 ++++++
 * webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly

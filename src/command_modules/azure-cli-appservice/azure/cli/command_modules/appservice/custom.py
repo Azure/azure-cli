@@ -1899,10 +1899,10 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
-def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku,
                                         number_of_workers=None, location=None, tags=None):
     # This command merely shadows 'az appservice plan create' except with a few parameters
-    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
+    return create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v=None,
                                    sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
 
 
