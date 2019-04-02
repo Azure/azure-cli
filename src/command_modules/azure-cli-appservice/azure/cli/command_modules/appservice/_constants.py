@@ -19,7 +19,7 @@ NETCORE_VERSIONS = ['1.0', '1.1', '2.0', '2.1', '2.2']
 DOTNET_VERSIONS = ['3.5', '4.7']
 LINUX_SKU_DEFAULT = "P1V2"
 RUNTIME_TO_IMAGE = {
-    'node': 'mcr.microsoft.com/azure-functions/node:2.0',
-    'dotnet': 'mcr.microsoft.com/azure-functions/dotnet:2.0',
-    'python': 'mcr.microsoft.com/azure-functions/python:2.0'
+    'node': 'mcr.microsoft.com/azure-functions/node:2.0-node8-appservice',
+    'dotnet': 'mcr.microsoft.com/azure-functions/dotnet:2.0-appservice',
+    'python': 'mcr.microsoft.com/azure-functions/python:2.0-python3.6-appservice'
 }
