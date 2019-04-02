@@ -71,7 +71,7 @@ class IotHubCertificateTest(ScenarioTest):
         hub = self.create_random_name(prefix='iot-hub-for-cert-test', length=48)
 
         self.cmd('iot hub create -n {0} -g {1} --sku S1'.format(hub, resource_group),
-                 checks=[self.check('resourceGroup', resource_group),
+                 checks=[self.check('resourcegroup', resource_group),
                          self.check('name', hub),
                          self.check('sku.name', 'S1')])
 
