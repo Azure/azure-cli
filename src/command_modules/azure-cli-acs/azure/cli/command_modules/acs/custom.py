@@ -1912,7 +1912,7 @@ def _install_dev_spaces_extension(cmd, extension_name):
 
 def _update_dev_spaces_extension(cmd, extension_name, extension_module):
     from azure.cli.core.extension import ExtensionNotInstalledException
-    try: 
+    try:
         from azure.cli.core.extension import operations
         operations.update_extension(cmd=cmd, extension_name=extension_name)
         operations.reload_extension(extension_name=extension_name)
