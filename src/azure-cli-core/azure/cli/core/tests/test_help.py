@@ -519,7 +519,7 @@ class TestHelpLoads(unittest.TestCase):
         ex_dict = {
             'summary': "Example to test supported-profiles",
             'command': "Az foo bar",
-            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest "
+            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
         }
 
         # example should be included in all profiles (implicit)
@@ -528,8 +528,8 @@ class TestHelpLoads(unittest.TestCase):
             self.assertTrue(mock_help_file._should_include_example(ex_dict))
 
         ex_dict.update({
-            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest ",
-            'unsupported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest "
+            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest ",
+            'unsupported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
         })
         # Assert that an help authoring exception is raised when both types of fields are used.
         with self.assertRaises(HelpAuthoringException):
@@ -562,7 +562,7 @@ class TestHelpLoads(unittest.TestCase):
         ex_dict = {
             'summary': "Example to test supported-profiles",
             'command': "Az foo bar",
-            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest "
+            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
         }
 
         # example should be included in all profiles (explicit)
@@ -610,7 +610,7 @@ class TestHelpLoads(unittest.TestCase):
         ex_dict = {
             'summary': "Example to test supported-profiles",
             'command': "Az foo bar",
-            'unsupported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, latest "
+            'unsupported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
         }
 
         # example should be excluded from all profiles (explicit)

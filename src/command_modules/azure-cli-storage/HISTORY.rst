@@ -5,6 +5,8 @@ Release History
 2.3.3
 +++++
 * `storage blob generate-sas`: add `--full-uri` to create the full uri for the blob with sas
+* `storage file copy start`: add `--file-snapshot` to copy file from snapshot
+* BREAKING CHANGE: `storage blob delete`: remove the return result of command
 
 2.3.2
 +++++

@@ -420,7 +420,6 @@ def _parse_management_group_reference(name):
 def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
     from msrest.exceptions import HttpOperationError
     from msrestazure.azure_exceptions import CloudError
-    ErrorResponseException = cmd.get_models('ErrorResponseException')
     policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
 
     if cmd.supported_api_version(min_api='2018-03-01'):
@@ -435,7 +434,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
             if management_group:
                 return policy_operations.get_at_management_group(name, management_group)
         return policy_operations.get(name)
-    except (CloudError, HttpOperationError, ErrorResponseException) as ex:
+    except (CloudError, HttpOperationError) as ex:
         status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
         if status_code == 404:
             return policy_operations.get_built_in(name)

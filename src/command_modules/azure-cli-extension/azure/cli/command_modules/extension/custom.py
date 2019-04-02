@@ -11,9 +11,9 @@ from azure.cli.core.extension.operations import (
 logger = get_logger(__name__)
 
 
-def add_extension_cmd(source=None, extension_name=None, index_url=None, yes=None,
+def add_extension_cmd(cmd, source=None, extension_name=None, index_url=None, yes=None,
                       pip_extra_index_urls=None, pip_proxy=None):
-    return add_extension(source=source, extension_name=extension_name, index_url=index_url, yes=yes,
+    return add_extension(cmd=cmd, source=source, extension_name=extension_name, index_url=index_url, yes=yes,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
 
 
@@ -29,8 +29,8 @@ def show_extension_cmd(extension_name):
     return show_extension(extension_name)
 
 
-def update_extension_cmd(extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
-    return update_extension(extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls,
+def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+    return update_extension(cmd, extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls,
                             pip_proxy=pip_proxy)
 
 
