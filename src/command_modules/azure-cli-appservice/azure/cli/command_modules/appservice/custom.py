@@ -1149,8 +1149,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None,
-                            admin_site_name=None):  # remove deprectated argument with 0.2.18 release
+def update_app_service_plan(instance, sku=None, number_of_workers=None):
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
