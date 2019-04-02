@@ -332,5 +332,6 @@ class TestExtensionCommands(unittest.TestCase):
         cmd.cli_ctx = DummyCli()
         return cmd
 
+
 if __name__ == '__main__':
     unittest.main()
