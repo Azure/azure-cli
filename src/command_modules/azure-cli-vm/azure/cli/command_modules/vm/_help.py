@@ -115,13 +115,13 @@ short-summary: List custom VM images.
 """
 
 helps['image update'] = """
-    type: command
-    short-summary: Update custom VM images.
-    examples:
-        - name: Add or update tags.
-          text: az image update -n ImageName -g ResourceGroup --tags tag1=val1 tag2=val2
-        - name: Remove all tags.
-          text: az image update -n ImageName -g resourceGroup --tags
+type: command
+short-summary: Update custom VM images.
+examples:
+  - name: Add or update tags.
+    text: az image update -n ImageName -g ResourceGroup --tags tag1=val1 tag2=val2
+  - name: Remove all tags.
+    text: az image update -n ImageName -g resourceGroup --tags
 """
 
 helps['sig'] = """
