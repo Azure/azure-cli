@@ -29,7 +29,7 @@ def show_extension_cmd(extension_name):
     return show_extension(extension_name)
 
 
-def update_extension_cmd(extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension_cmd(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     return update_extension(extension_name, index_url=index_url, pip_extra_index_urls=pip_extra_index_urls,
                             pip_proxy=pip_proxy)
 
