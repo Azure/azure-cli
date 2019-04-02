@@ -377,8 +377,10 @@ def _build_issue_info_tup(command_log_file=None):
         parent = psutil.Process(os.getpid()).parent()
         if parent:
             #  powershell.exe launches cmd.exe to launch the cli.
-            if parent.parent() and parent.name().lower().startswith("powershell"):
-                return parent.parent().name()
+            grandparent = parent.parent()
+            if grandparent and grandparent.name().lower().startswith("powershell"):
+                return grandparent.name()
+            # if powershell is not the grandparent, simply return the parent's name.
             return parent.name()
         return None
 
