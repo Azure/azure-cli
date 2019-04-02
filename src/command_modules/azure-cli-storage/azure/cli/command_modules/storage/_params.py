@@ -533,9 +533,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--destination-share', '-s'),
                    help='Name of the destination share. The share must exist.')
 
-    with self.argument_context('storage file copy start') as c:
-        c.register_path_argument(options_list=('--destination-path', '-p'))
-
     with self.argument_context('storage file copy cancel') as c:
         c.register_path_argument(options_list=('--destination-path', '-p'))
 
@@ -633,7 +630,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file copy start') as c:
         from azure.cli.command_modules.storage._validators import validate_source_uri
 
+        c.register_path_argument(options_list=('--destination-path', '-p'))
         c.register_source_uri_arguments(validator=validate_source_uri)
+        c.extra('file_snapshot', default=None, arg_group='Copy Source',
+                help='The file snapshot for the source storage account.')
 
     with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
         from ._validators import get_source_file_or_blob_service_client
