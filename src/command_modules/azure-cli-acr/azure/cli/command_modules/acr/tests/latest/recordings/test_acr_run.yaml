@@ -1,0 +1,402 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2019-04-02T18:53:13Z"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      ParameterSetName: [--location --name --tag]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-02T18:53:13Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['384']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"location": "westcentralus", "sku": {"name": "Standard"}, "properties":
+      {"adminUserEnabled": false}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acr create]
+      Connection: [keep-alive]
+      Content-Length: ['101']
+      Content-Type: [application/json; charset=utf-8]
+      ParameterSetName: [-n -g -l --sku]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          containerregistrymanagementclient/2.7.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002?api-version=2017-10-01
+  response:
+    body: {string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002","name":"runreg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"runreg000002.azurecr.io","creationDate":"2019-04-02T18:53:16.8788007Z","provisioningState":"Succeeded","adminUserEnabled":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['546']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:20 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acr run]
+      Connection: [keep-alive]
+      ParameterSetName: [-r --timeout --cmd]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2018-05-01
+  response:
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002","name":"runreg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgzfpvdt6xqyhe45d4kffujmyggwi6unj5l5ufazpdmwnhuu5s47pmfvjnnz525illq/providers/Microsoft.ContainerRegistry/registries/targetregistry6k7sjl","name":"targetregistry6k7sjl","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourcegroupsamesub/providers/Microsoft.ContainerRegistry/registries/sourceregistrysamesubaw3arpiifnlopaewct4","name":"sourceregistrysamesubaw3arpiifnlopaewct4","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yugong/providers/Microsoft.ContainerRegistry/registries/NatalieTask","name":"NatalieTask","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westcentralus","tags":{}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1419']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:22 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acr run]
+      Connection: [keep-alive]
+      ParameterSetName: [-r --timeout --cmd]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          containerregistrymanagementclient/2.7.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002?api-version=2017-10-01
+  response:
+    body: {string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002","name":"runreg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"runreg000002.azurecr.io","creationDate":"2019-04-02T18:53:16.8788007Z","provisioningState":"Succeeded","adminUserEnabled":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['546']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:22 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"isArchiveEnabled": false, "type": "EncodedTaskRunRequest", "encodedTaskContent":
+      "c3RlcHM6IAogIC0gY21kOiB7eyAuVmFsdWVzLmNvbW1hbmQgfX0KICAgIHRpbWVvdXQ6IHt7IC5WYWx1ZXMudGltZW91dCB9fQo=",
+      "encodedValuesContent": "Y29tbWFuZDogZG9ja2VyIHBzCnRpbWVvdXQ6IDQwMAo=", "values":
+      [], "timeout": 400, "platform": {"os": "linux", "architecture": "amd64"}, "credentials":
+      {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acr run]
+      Connection: [keep-alive]
+      Content-Length: ['361']
+      Content-Type: [application/json; charset=utf-8]
+      ParameterSetName: [-r --timeout --cmd]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          containerregistrymanagementclient/2.7.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002/scheduleRun?api-version=2018-09-01
+  response:
+    body: {string: '{"type":"Microsoft.ContainerRegistry/registries/runs","properties":{"runId":"da1","status":"Queued","lastUpdatedTime":"2019-04-02T18:53:23+00:00","provisioningState":"Succeeded","isArchiveEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002/runs/da1","name":"da1"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['446']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx/1.13.9]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [acr run]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      ParameterSetName: [-r --timeout --cmd]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          containerregistrymanagementclient/2.7.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/runreg000002/runs/da1/listLogSasUrl?api-version=2018-09-01
+  response:
+    body: {string: '{"logLink":"https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['230']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx/1.13.9]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-1.3.1 (Python CPython 3.6.4; Windows 10)]
+      x-ms-date: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl
+  response:
+    body: {string: ''}
+    headers:
+      date: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-error-code: [BlobNotFound]
+      x-ms-version: ['2018-03-28']
+    status: {code: 404, message: The specified blob does not exist.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-1.3.1 (Python CPython 3.6.4; Windows 10)]
+      x-ms-date: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl
+  response:
+    body: {string: ''}
+    headers:
+      accept-ranges: [bytes]
+      content-disposition: ['']
+      content-encoding: [utf-8]
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      etag: ['"0x8D6B79C7C4951EF"']
+      last-modified: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Hot]
+      x-ms-access-tier-inferred: ['true']
+      x-ms-blob-committed-block-count: ['0']
+      x-ms-blob-type: [AppendBlob]
+      x-ms-creation-time: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-1.3.1 (Python CPython 3.6.4; Windows 10)]
+      x-ms-date: ['Tue, 02 Apr 2019 18:53:27 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl
+  response:
+    body: {string: ''}
+    headers:
+      accept-ranges: [bytes]
+      content-disposition: ['']
+      content-encoding: [utf-8]
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:26 GMT']
+      etag: ['"0x8D6B79C7C4951EF"']
+      last-modified: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Hot]
+      x-ms-access-tier-inferred: ['true']
+      x-ms-blob-committed-block-count: ['0']
+      x-ms-blob-type: [AppendBlob]
+      x-ms-creation-time: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-1.3.1 (Python CPython 3.6.4; Windows 10)]
+      x-ms-date: ['Tue, 02 Apr 2019 18:53:30 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl
+  response:
+    body: {string: ''}
+    headers:
+      accept-ranges: [bytes]
+      content-disposition: ['']
+      content-encoding: [utf-8]
+      content-length: ['1343']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:29 GMT']
+      etag: ['"0x8D6B79C7F207885"']
+      last-modified: ['Tue, 02 Apr 2019 18:53:29 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Hot]
+      x-ms-access-tier-inferred: ['true']
+      x-ms-blob-committed-block-count: ['3']
+      x-ms-blob-type: [AppendBlob]
+      x-ms-creation-time: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-meta-complete: [successful]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-1.3.1 (Python CPython 3.6.4; Windows 10)]
+      x-ms-date: ['Tue, 02 Apr 2019 18:53:30 GMT']
+      x-ms-range: [bytes=0-4095]
+      x-ms-version: ['2018-03-28']
+    method: GET
+    uri: https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl
+  response:
+    body: {string: "2019/04/02 18:53:25 Using acb_vol_03216cee-14dd-4e0c-9587-83d0354e0432\
+        \ as the home volume\n2019/04/02 18:53:25 Creating Docker network: acb_default_network,\
+        \ driver: 'bridge'\n2019/04/02 18:53:25 Successfully set up Docker network:\
+        \ acb_default_network\n2019/04/02 18:53:25 Setting up Docker configuration...\n\
+        2019/04/02 18:53:26 Successfully set up Docker configuration\n2019/04/02 18:53:26\
+        \ Logging in to registry: runreg000002.azurecr.io\n2019/04/02 18:53:27 Successfully\
+        \ logged into runreg000002.azurecr.io\r\n2019/04/02 18:53:27 Executing step\
+        \ ID: acb_step_0. Working directory: '', Network: 'acb_default_network'\n\
+        2019/04/02 18:53:27 Launching container with name: acb_step_0\nCONTAINER ID\
+        \        IMAGE               COMMAND                  CREATED            \
+        \ STATUS                  PORTS               NAMES\nd1f1310e39e2        docker\
+        \              \"docker-entrypoint.s\u2026\"   1 second ago        Up Less\
+        \ than a second                       acb_step_0\nb5af67067623        acb\
+        \                 \"acb exec --registry\u2026\"   4 seconds ago       Up 3\
+        \ seconds                                acr_builder_7c8b772c-3a41-44a9-bb76-f77e7653e82f\n\
+        2019/04/02 18:53:29 Successfully executed container: acb_step_0\n2019/04/02\
+        \ 18:53:29 Step ID: acb_step_0 marked as successful (elapsed time in seconds:\
+        \ 1.121007)\n\r\nRun ID: da1 was successful after 5s\r\n"}
+    headers:
+      accept-ranges: [bytes]
+      content-disposition: ['']
+      content-encoding: [utf-8]
+      content-length: ['1343']
+      content-range: [bytes 0-1342/1343]
+      content-type: [text/plain; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:29 GMT']
+      etag: ['"0x8D6B79C7F207885"']
+      last-modified: ['Tue, 02 Apr 2019 18:53:29 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-blob-committed-block-count: ['3']
+      x-ms-blob-type: [AppendBlob]
+      x-ms-creation-time: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-meta-complete: [successful]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 206, message: Partial Content}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-1.3.1 (Python CPython 3.6.4; Windows 10)]
+      x-ms-date: ['Tue, 02 Apr 2019 18:53:30 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://wcusmanaged33.blob.core.windows.net/2e60db3460664cc98c016cbb0f46cc37-387rjobrug/logs/da1/rawtext.log?sv=2018-03-28&sr=b&sig=ESydCxgcpYei51zS%2BHz%2FTUOPRAAfWao68J2UlLHLkAM%3D&se=2019-04-02T19%3A53%3A24Z&sp=rl
+  response:
+    body: {string: ''}
+    headers:
+      accept-ranges: [bytes]
+      content-disposition: ['']
+      content-encoding: [utf-8]
+      content-length: ['1343']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Tue, 02 Apr 2019 18:53:30 GMT']
+      etag: ['"0x8D6B79C7F207885"']
+      last-modified: ['Tue, 02 Apr 2019 18:53:29 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Hot]
+      x-ms-access-tier-inferred: ['true']
+      x-ms-blob-committed-block-count: ['3']
+      x-ms-blob-type: [AppendBlob]
+      x-ms-creation-time: ['Tue, 02 Apr 2019 18:53:24 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-meta-complete: [successful]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      ParameterSetName: [--name --yes --no-wait]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
+          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.61]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Tue, 02 Apr 2019 18:53:31 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdENTVWMzJHU0lOUVZDNVhQWFhBV0w3NlEyTjVYQlRUMlVZSHwyMjVFNUM1RDc0OEJBRjRDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 202, message: Accepted}
+version: 1
