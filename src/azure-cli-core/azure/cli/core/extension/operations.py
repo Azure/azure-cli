@@ -94,8 +94,7 @@ def _validate_whl_extension(ext_file):
     _validate_whl_cli_compat(azext_metadata)
 
 
-def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
-    from humanfriendly import AutomaticSpinner
+def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -116,8 +115,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
         try:
-            with AutomaticSpinner(label="Downloading wheel", show_time=False):
-                _whl_download_from_url(url_parse_result, ext_file)
+            cmd.cli_ctx.get_progress_controller().add(message='Downloading')
+            _whl_download_from_url(url_parse_result, ext_file)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
             raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
         logger.debug('Downloaded to %s', ext_file)
@@ -138,8 +137,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
             raise CLIError("The checksum of the extension does not match the expected value. "
                            "Use --debug for more information.")
     try:
-        with AutomaticSpinner(label="Validating wheel", show_time=False):
-            _validate_whl_extension(ext_file)
+        cmd.cli_ctx.get_progress_controller().add(message='Validating')
+        _validate_whl_extension(ext_file)
     except AssertionError:
         logger.debug(traceback.format_exc())
         raise CLIError('The extension is invalid. Use --debug for more information.')
@@ -148,29 +147,29 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
-    with AutomaticSpinner(label="Installing extension", show_time=False):
-        # Install with pip
-        extension_path = get_extension_path(extension_name)
-        pip_args = ['install', '--target', extension_path, ext_file]
+    cmd.cli_ctx.get_progress_controller().add(message='Installing')
+    # Install with pip
+    extension_path = get_extension_path(extension_name)
+    pip_args = ['install', '--target', extension_path, ext_file]
 
-        if pip_proxy:
-            pip_args = pip_args + ['--proxy', pip_proxy]
-        if pip_extra_index_urls:
-            for extra_index_url in pip_extra_index_urls:
-                pip_args = pip_args + ['--extra-index-url', extra_index_url]
+    if pip_proxy:
+        pip_args = pip_args + ['--proxy', pip_proxy]
+    if pip_extra_index_urls:
+        for extra_index_url in pip_extra_index_urls:
+            pip_args = pip_args + ['--extra-index-url', extra_index_url]
 
-        logger.debug('Executing pip with args: %s', pip_args)
-        with HomebrewPipPatch():
-            pip_status_code = _run_pip(pip_args)
-        if pip_status_code > 0:
-            logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
-            shutil.rmtree(extension_path, ignore_errors=True)
-            raise CLIError('An error occurred. Pip failed with status code {}. '
-                           'Use --debug for more information.'.format(pip_status_code))
-        # Save the whl we used to install the extension in the extension dir.
-        dst = os.path.join(extension_path, whl_filename)
-        shutil.copyfile(ext_file, dst)
-        logger.debug('Saved the whl to %s', dst)
+    logger.debug('Executing pip with args: %s', pip_args)
+    with HomebrewPipPatch():
+        pip_status_code = _run_pip(pip_args)
+    if pip_status_code > 0:
+        logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
+        shutil.rmtree(extension_path, ignore_errors=True)
+        raise CLIError('An error occurred. Pip failed with status code {}. '
+                        'Use --debug for more information.'.format(pip_status_code))
+    # Save the whl we used to install the extension in the extension dir.
+    dst = os.path.join(extension_path, whl_filename)
+    shutil.copyfile(ext_file, dst)
+    logger.debug('Saved the whl to %s', dst)
 
 
 def is_valid_sha256sum(a_file, expected_sum):
@@ -194,8 +193,9 @@ def _augment_telemetry_with_ext_info(extension_name):
         pass
 
 
-def add_extension(source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None):
+    cmd.cli_ctx.get_progress_controller().add(message='Analysing')
     ext_sha256 = None
     if extension_name:
         ext = None
@@ -213,7 +213,7 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
+    _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
     try:
         if extension_name and get_extension(extension_name).preview:
