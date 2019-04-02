@@ -395,6 +395,7 @@ def load_arguments(self, _):
                    configured_default='appserviceplan', id_part='name')
         c.argument('sku', required=True, help='The SKU of the app service plan.')
         c.argument('number_of_workers', help='The number of workers for the app service plan.')
+        c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False, help='host function app on Linux worker')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('functionapp devops-build create') as c:
