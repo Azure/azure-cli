@@ -14,6 +14,11 @@ from azure_functions_devops_build.builder.builder_manager import BuilderManager
 from azure_functions_devops_build.artifact.artifact_manager import ArtifactManager
 from azure_functions_devops_build.release.release_manager import ReleaseManager
 
+from azure_functions_devops_build.yaml.github_yaml_manager import GithubYamlManager
+from azure_functions_devops_build.repository.github_repository_manager import GithubRepositoryManager
+from azure_functions_devops_build.user.github_user_manager import GithubUserManager
+from azure_functions_devops_build.service_endpoint.github_service_endpoint_manager import GithubServiceEndpointManager
+
 from azure.cli.core._profile import Profile
 
 
@@ -186,12 +191,12 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
         extension_manager = ExtensionManager(organization_name=organization_name, creds=self._creds)
         return extension_manager.list_extensions()
 
-    def create_build_definition(self, organization_name, project_name, repository_name,
-                                build_definition_name, pool_name):
+    def create_devops_build_definition(self, organization_name, project_name, repository_name,
+                                       build_definition_name, pool_name):
         """Create a definition for an azure devops build"""
         builder_manager = BuilderManager(organization_name=organization_name, project_name=project_name,
                                          repository_name=repository_name, creds=self._creds)
-        return builder_manager.create_definition(build_definition_name=build_definition_name, pool_name=pool_name)
+        return builder_manager.create_devops_build_definition(build_definition_name=build_definition_name, pool_name=pool_name)
 
     def list_build_definitions(self, organization_name, project_name):
         """List the azure devops build definitions within a project"""
@@ -246,8 +251,43 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
                                          project_name=project_name, creds=self._creds)
         return release_manager.list_releases()
 
-    def list_github_repositories(self, organization_name, project_name):
-        """List the github repositories that we are connected to"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
-        return repository_manager.list_github_repositories()
+    def get_github_service_endpoints(self, organization_name, project_name, github_repository):
+        service_endpoint_manager = GithubServiceEndpointManager(organization_name=organization_name, project_name=project_name, creds=self._creds)
+        return service_endpoint_manager.get_github_service_endpoints(github_repository)
+
+    def create_github_service_endpoint(self, organization_name, project_name, github_repository, github_pat):
+        service_endpoint_manager = GithubServiceEndpointManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
+        return service_endpoint_manager.create_github_service_endpoint(github_repository, github_pat)
+
+    def create_github_build_definition(self, organization_name, project_name, github_repository, build_definition_name, pool_name):
+        builder_manager = BuilderManager(organization_name=organization_name, project_name=project_name, creds=self._creds)
+        return builder_manager.create_github_build_definition(build_definition_name, pool_name, github_repository)
+
+    def check_github_pat(self, github_pat):
+        github_user_manager = GithubUserManager()
+        return github_user_manager.check_github_pat(github_pat)
+
+    def check_github_repository(self, pat, repository_fullname):
+        github_repository_manager = GithubRepositoryManager(pat=pat)
+        return github_repository_manager.check_github_repository(repository_fullname)
+
+    def check_github_file(self, pat, repository_fullname, filepath):
+        github_repository_manager = GithubRepositoryManager(pat=pat)
+        return github_repository_manager.check_github_file(repository_fullname, filepath)
+
+    def get_github_content(self, pat, repository_fullname, filepath):
+        github_repository_manager = GithubRepositoryManager(pat=pat)
+        return github_repository_manager.get_content(repository_fullname, filepath, get_metadata=False)
+
+    def create_github_yaml(self, pat, language, app_type, repository_fullname, overwrite=False):
+        github_repository_manager = GithubYamlManager(
+            language=language,
+            app_type=app_type,
+            github_pat=pat,
+            github_repository=repository_fullname
+        )
+        return github_repository_manager.create_yaml(overwrite)

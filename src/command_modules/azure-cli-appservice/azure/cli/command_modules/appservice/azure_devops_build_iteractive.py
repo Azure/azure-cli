@@ -10,27 +10,29 @@ import json
 from knack.prompting import prompt_choice_list, prompt_y_n, prompt
 from knack.util import CLIError
 from azure_functions_devops_build.constants import (LINUX_CONSUMPTION, LINUX_DEDICATED, WINDOWS,
-                                                    PYTHON, NODE, DOTNET, JAVA)
+                                                    PYTHON, NODE, DOTNET)
 from azure_functions_devops_build.exceptions import (
     GitOperationException,
     RoleAssignmentException,
     LanguageNotSupportException,
-    ReleaseErrorException
+    ReleaseErrorException,
+    GithubContentNotFound,
+    GithubUnauthorizedError,
+    GithubIntegrationRequestError
 )
 from .azure_devops_build_provider import AzureDevopsBuildProvider
 from .custom import list_function_app, show_webapp, get_app_settings
+from .utils import str2bool
 
 # pylint: disable=too-many-instance-attributes
 
-
-def str2bool(v):
-    if v == 'true':
-        retval = True
-    elif v == 'false':
-        retval = False
-    else:
-        retval = None
-    return retval
+SUPPORTED_SCENARIOS = ['AZURE_DEVOPS', 'GITHUB_INTEGRATION']
+SUPPORTED_SOURCECODE_LOCATIONS = ['Current Directory', 'Github']
+SUPPORTED_LANGUAGES = {
+    'python': PYTHON,
+    'node': NODE,
+    'dotnet': DOTNET,
+}
 
 
 class AzureDevopsBuildInteractive(object):
@@ -42,7 +44,7 @@ class AzureDevopsBuildInteractive(object):
     """
 
     def __init__(self, cmd, logger, functionapp_name, organization_name, project_name, repository_name,
-                 overwrite_yaml, allow_force_push, use_local_settings):
+                 overwrite_yaml, allow_force_push, use_local_settings, github_pat, github_repository):
         self.adbp = AzureDevopsBuildProvider(cmd.cli_ctx)
         self.cmd = cmd
         self.logger = logger
@@ -55,6 +57,11 @@ class AzureDevopsBuildInteractive(object):
         self.organization_name = organization_name
         self.project_name = project_name
         self.repository_name = repository_name
+
+        self.github_pat = github_pat
+        self.github_repository = github_repository
+        self.github_service_endpoint_name = None
+
         self.repository_remote_name = None
         self.service_endpoint_name = None
         self.build_definition_name = None
@@ -67,6 +74,7 @@ class AzureDevopsBuildInteractive(object):
         self.build = None
         self.release = None
         # These are used to tell if we made new objects
+        self.scenario = None  # see SUPPORTED_SCENARIOS
         self.created_organization = False
         self.created_project = False
         self.overwrite_yaml = str2bool(overwrite_yaml)
@@ -75,73 +83,151 @@ class AzureDevopsBuildInteractive(object):
 
     def interactive_azure_devops_build(self):
         """Main interactive flow which is the only function that should be used outside of this
-        class (the rest are helpers)
-        """
-        self.pre_checks()
+        class (the rest are helpers)"""
+
+        scenario = self.check_scenario()
+        if scenario == 'AZURE_DEVOPS':
+            return self.azure_devops_flow()
+        elif scenario == 'GITHUB_INTEGRATION':
+            return self.github_flow()
+        raise CLIError('Unknown scenario')
+
+    def azure_devops_flow(self):
         self.process_functionapp()
+        self.pre_checks_azure_devops()
         self.process_organization()
         self.process_project()
-
-        # Generate Azure pipenline build yaml
-        self.process_yaml()
-
-        # Allow user to choose the uploading destination
+        self.process_yaml_local()
         self.process_local_repository()
         self.process_remote_repository()
-
-        # Set up the default names for the rest of the things we need to create
-        self.process_service_endpoint()
+        self.process_functionapp_service_endpoint('AZURE_DEVOPS')
         self.process_extensions()
-
-        # Start build process and release artifacts to azure functions app
-        self.process_build_and_release_definition_name()
-        self.process_build()
+        self.process_build_and_release_definition_name('AZURE_DEVOPS')
+        self.process_build('AZURE_DEVOPS')
         self.process_release()
+        self.logger.warning("To trigger a function build again, please use 'git push {remote} master'".format(
+            remote=self.repository_remote_name
+        ))
+        return {
+            'source_location': 'local',
+            'functionapp_name': self.functionapp_name,
+            'storage_name': self.storage_name,
+            'resource_group_name': self.resource_group_name,
+            'functionapp_language': self.functionapp_language,
+            'functionapp_type': self.functionapp_type,
+            'organization_name': self.organization_name,
+            'project_name': self.project_name,
+            'repository_name': self.repository_name,
+            'service_endpoint_name': self.service_endpoint_name,
+            'build_definition_name': self.build_definition_name,
+            'release_definition_name': self.release_definition_name
+        }
 
-        # Advise user to reuse the pipeline build and release by pushing to remote
-        self.logger.warning("To trigger a function build again, please use")
-        self.logger.warning("'git push {remote} master'".format(remote=self.repository_remote_name))
+    def github_flow(self):
+        self.process_github_personal_access_token()
+        self.process_github_repository()
+        self.process_functionapp()
+        self.pre_checks_github()
+        self.process_organization()
+        self.process_project()
+        self.process_yaml_github()
+        self.process_functionapp_service_endpoint('GITHUB_INTEGRATION')
+        self.process_github_service_endpoint()
+        self.process_extensions()
+        self.process_build_and_release_definition_name('GITHUB_INTEGRATION')
+        self.process_build('GITHUB_INTEGRATION')
+        self.process_release()
+        self.logger.warning("Setup continuous integration between {github_repo} and Azure DevOps pipelines".format(
+            github_repo=self.github_repository
+        ))
+        return {
+            'source_location': 'Github',
+            'functionapp_name': self.functionapp_name,
+            'storage_name': self.storage_name,
+            'resource_group_name': self.resource_group_name,
+            'functionapp_language': self.functionapp_language,
+            'functionapp_type': self.functionapp_type,
+            'organization_name': self.organization_name,
+            'project_name': self.project_name,
+            'repository_name': self.github_repository,
+            'service_endpoint_name': self.service_endpoint_name,
+            'build_definition_name': self.build_definition_name,
+            'release_definition_name': self.release_definition_name
+        }
 
-        return_dict = {}
-        return_dict['functionapp_name'] = self.functionapp_name
-        return_dict['storage_name'] = self.storage_name
-        return_dict['resource_group_name'] = self.resource_group_name
-        return_dict['functionapp_language'] = self.functionapp_language
-        return_dict['functionapp_type'] = self.functionapp_type
-        return_dict['organization_name'] = self.organization_name
-        return_dict['project_name'] = self.project_name
-        return_dict['repository_name'] = self.repository_name
-        return_dict['service_endpoint_name'] = self.service_endpoint_name
-        return_dict['build_definition_name'] = self.build_definition_name
-        return_dict['release_definition_name'] = self.release_definition_name
+    def check_scenario(self):
+        if self.repository_name:
+            self.scenario = 'AZURE_DEVOPS'
+        elif self.github_pat or self.github_repository:
+            self.scenario = 'GITHUB_INTEGRATION'
+        else:
+            choice_index = prompt_choice_list(
+                'Please choose Azure function source code location: ',
+                SUPPORTED_SOURCECODE_LOCATIONS
+            )
+            self.scenario = SUPPORTED_SCENARIOS[choice_index]
+        return self.scenario
 
-        return return_dict
-
-    def pre_checks(self):
-        if not os.path.exists('host.json'):
-            raise CLIError("There is no host.json in the current directory.{ls}"
-                           "Functionapps must contain a host.json in their root.".format(ls=os.linesep))
-
+    def pre_checks_azure_devops(self):
         if not self.adbp.check_git():
             raise CLIError("The program requires git source control to operate, please install git.")
+
+        if not os.path.exists('host.json'):
+            raise CLIError("There is no host.json in the current directory.{ls}"
+                           "Functionapps must contain a host.json in their root".format(ls=os.linesep))
+
+        if not os.path.exists('local.settings.json'):
+            raise CLIError("There is no local.settings.json in the current directory.{ls}"
+                           "Functionapps must contain a local.settings.json in their root".format(ls=os.linesep))
+
+        local_runtime_language = self._find_local_repository_runtime_language()
+        if local_runtime_language != self.functionapp_language:
+            raise CLIError("The local language ({setting}) does not match your function app runtime language ({functionapp}).{ls}"
+                           "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json "
+                           "and in your application settings on your functionapp in Azure.".format(
+                               setting=local_runtime_language,
+                               functionapp=self.functionapp_language,
+                               ls=os.linesep,
+                           ))
+
+    def pre_checks_github(self):
+        if not self.adbp.check_github_file(self.github_pat, self.github_repository, 'host.json'):
+            raise CLIError("There is no host.json in Github repository {repo}.{ls}"
+                           "Functionapps repository must contain a host.json in their root.{ls}"
+                           "Please ensure you have read permission to the repository.".format(
+                               repo=self.github_repository,
+                               ls=os.linesep,
+                           ))
+
+        github_runtime_language = self._find_github_repository_runtime_language()
+        if github_runtime_language is not None and github_runtime_language != self.functionapp_language:
+            raise CLIError("The repository language ({setting}) does not match your function app runtime language ({functionapp}).{ls}"
+                           "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json"
+                           " and in your application settings on your functionapp in Azure.".format(
+                               setting=github_runtime_language,
+                               functionapp=self.functionapp_language,
+                               ls=os.linesep,
+                           ))
 
     def process_functionapp(self):
         """Helper to retrieve information about a functionapp"""
         if self.functionapp_name is None:
             functionapp = self._select_functionapp()
-            # We now know the functionapp name so can set it
             self.functionapp_name = functionapp.name
         else:
             functionapp = self.cmd_selector.cmd_functionapp(self.functionapp_name)
 
         kinds = show_webapp(self.cmd, functionapp.resource_group, functionapp.name).kind.split(',')
+
+        # Get functionapp settings in Azure
         app_settings = get_app_settings(self.cmd, functionapp.resource_group, functionapp.name)
 
         self.resource_group_name = functionapp.resource_group
         self.functionapp_type = self._find_type(kinds)
 
         try:
-            self.functionapp_language, self.storage_name = self._find_language_and_storage_name(app_settings)
+            self.functionapp_language = self._get_functionapp_runtime_language(app_settings)
+            self.storage_name = self._get_functionapp_storage_name(app_settings)
         except LanguageNotSupportException as lnse:
             raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
 
@@ -171,7 +257,7 @@ class AzureDevopsBuildInteractive(object):
         else:
             self.cmd_selector.cmd_project(self.organization_name, self.project_name)
 
-    def process_yaml(self):
+    def process_yaml_local(self):
         """Helper to create the local azure-pipelines.yml file"""
         # Try and get what the app settings are
         with open('local.settings.json') as f:
@@ -195,17 +281,61 @@ class AzureDevopsBuildInteractive(object):
 
         if os.path.exists('azure-pipelines.yml'):
             if self.overwrite_yaml is None:
-                self.logger.warning("There is already an azure pipelines yaml file.")
-                self.logger.warning("If you are using a yaml file that was not configured through this command this process may fail.")  # pylint: disable=line-too-long
+                self.logger.warning("There is already an azure-pipelines.yml file in your local repository.")
+                self.logger.warning("If you are using a yaml file that was not configured through this command this process may fail.")
                 response = prompt_y_n("Do you want to delete it and create a new one? ")
             else:
                 response = self.overwrite_yaml
+
         if (not os.path.exists('azure-pipelines.yml')) or response:
             self.logger.warning('Creating new azure-pipelines.yml')
             try:
                 self.adbp.create_yaml(self.functionapp_language, self.functionapp_type)
             except LanguageNotSupportException as lnse:
                 raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
+
+    def process_yaml_github(self):
+        does_yaml_file_exist = self.adbp.check_github_file(self.github_pat, self.github_repository, "azure-pipelines.yml")
+        if does_yaml_file_exist and self.overwrite_yaml is None:
+            self.logger.warning("There is already an azure-pipelines.yml file in your Github repository.")
+            self.logger.warning("If you are using a yaml file that was not configured through this command this process may fail.")
+            self.overwrite_yaml = prompt_y_n("Do you want to generate a new one? (will commit to master branch) ")
+
+        # Create and commit the new yaml file to Github without asking
+        if not does_yaml_file_exist:
+            if self.github_repository:
+                self.logger.warning("Creating new azure-pipelines.yml for Github repository")
+            try:
+                return self.adbp.create_github_yaml(
+                    pat=self.github_pat,
+                    language=self.functionapp_language,
+                    app_type=self.functionapp_type,
+                    repository_fullname=self.github_repository
+                )
+            except LanguageNotSupportException as lnse:
+                raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
+            except GithubContentNotFound:
+                raise CLIError("Sorry, your repository does not exist or you do not have sufficient permission to commit to the repository.")
+            except GithubUnauthorizedError:
+                raise CLIError("Sorry, you do not have sufficient permission to commit azure-pipelines.yml to your Github repository.")
+
+        # Overwrite yaml file
+        if does_yaml_file_exist and self.overwrite_yaml:
+            self.logger.warning("Overwrite azure-pipelines.yml file in Github repository")
+            try:
+                return self.adbp.create_github_yaml(
+                    pat=self.github_pat,
+                    language=self.functionapp_language,
+                    app_type=self.functionapp_type,
+                    repository_fullname=self.github_repository,
+                    overwrite=True
+                )
+            except LanguageNotSupportException as lnse:
+                raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
+            except GithubContentNotFound:
+                raise CLIError("Sorry, the repository does not exist or you do not have sufficient permission to contribute to it.")
+            except GithubUnauthorizedError:
+                raise CLIError("Sorry, you do not have sufficient permission to overwrite azure-pipelines.yml in your Github repository.")
 
     def process_local_repository(self):
         has_local_git_repository = self.adbp.check_git_local_repository()
@@ -267,29 +397,75 @@ class AzureDevopsBuildInteractive(object):
 
         self.logger.warning("Local branches has been pushed to {url}".format(url=remote_url))
 
-    def process_build_and_release_definition_name(self):
-        self.build_definition_name = self.repository_remote_name.replace("_azuredevops_", "_build_", 1)[0:256]
-        self.release_definition_name = self.repository_remote_name.replace("_azuredevops_", "_release_", 1)[0:256]
+    def process_github_personal_access_token(self):
+        if not self.github_pat:
+            self.logger.warning("If you need to create a Github Personal Access Token, please follow the following steps:")
+            self.logger.warning("https://help.github.com/en/articles/"
+                                "creating-a-personal-access-token-for-the-command-line{ls}".format(
+                                    ls=os.linesep
+                                ))
+            self.logger.warning("The required Personal Access Token permission can be found here:")
+            self.logger.warning("https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/github"
+                                "?view=azure-devops#repository-permissions-for-personal-access-token-pat-authentication{ls}".format(
+                                    ls=os.linesep
+                                ))
 
-    def process_service_endpoint(self):
+        while not self.github_pat or not self.adbp.check_github_pat(self.github_pat):
+            self.github_pat = prompt(msg="Github Personal Access Token: ")
+        self.logger.warning("Successfully validate Github personal access token.")
+
+    def process_github_repository(self):
+        while not self.github_repository or not self.adbp.check_github_repository(self.github_pat, self.github_repository):
+            self.github_repository = prompt(msg="Github Repository (e.g. Azure/azure-cli): ")
+        self.logger.warning("Successfully validate Github repository.")
+
+    def process_build_and_release_definition_name(self, scenario):
+        if scenario == 'AZURE_DEVOPS':
+            self.build_definition_name = self.repository_remote_name.replace("_azuredevops_", "_build_", 1)[0:256]
+            self.release_definition_name = self.repository_remote_name.replace("_azuredevops_", "_release_", 1)[0:256]
+        if scenario == 'GITHUB_INTEGRATION':
+            self.build_definition_name = "_build_github_" + self.github_repository.replace("/", "_", 1)[0:256]
+            self.release_definition_name = "_release_github_" + self.github_repository.replace("/", "_", 1)[0:256]
+
+    def process_github_service_endpoint(self):
+        service_endpoints = self.adbp.get_github_service_endpoints(
+            self.organization_name, self.project_name, self.github_repository
+        )
+
+        if not service_endpoints:
+            service_endpoint = self.adbp.create_github_service_endpoint(
+                self.organization_name, self.project_name, self.github_repository, self.github_pat
+            )
+        else:
+            service_endpoint = service_endpoints[0]
+            self.logger.warning("Detected Github service endpoint {name}".format(name=service_endpoint.name))
+
+        self.github_service_endpoint_name = service_endpoint.name
+
+    def process_functionapp_service_endpoint(self, scenario):
+        repository = self.repository_name if scenario == "AZURE_DEVOPS" else self.github_repository
         service_endpoints = self.adbp.get_service_endpoints(
-            self.organization_name, self.project_name, self.repository_name
+            self.organization_name, self.project_name, repository
         )
 
         # If there is no matching service endpoint, we need to create a new one
         if not service_endpoints:
             try:
                 service_endpoint = self.adbp.create_service_endpoint(
-                    self.organization_name, self.project_name, self.repository_name
+                    self.organization_name, self.project_name, repository
                 )
             except RoleAssignmentException:
-                self.adbp.remove_git_remote(self.organization_name, self.project_name, self.repository_name)
+                if scenario == "AZURE_DEVOPS":
+                    self.adbp.remove_git_remote(self.organization_name, self.project_name, repository)
                 raise CLIError("To use the Azure DevOps Pipeline Build,{ls}"
                                "We need to assign a contributor role to the Azure Functions release service principle.{ls}"
-                               "Please ensure you are the owner of the subscription, or have role assignment write permission.".format(ls=os.linesep))
+                               "Please ensure that:{ls}"
+                               "1. You are the owner of the subscription, or have role assignment (write) permission.{ls}"
+                               "2. You can perform app registration in https://ms.portal.azure.com/#blade/Microsoft_AAD_IAM/ApplicationsListBlade{ls}"
+                               "3. The length of the organization name, project name and repository name concatenation is under 68 characters.".format(ls=os.linesep))
         else:
             service_endpoint = service_endpoints[0]
-            self.logger.warning("Detected service endpoint {name}".format(name=service_endpoint.name))
+            self.logger.warning("Detected functionapp service endpoint {name}".format(name=service_endpoint.name))
 
         self.service_endpoint_name = service_endpoint.name
 
@@ -299,7 +475,7 @@ class AzureDevopsBuildInteractive(object):
             self.adbp.create_extension(self.organization_name, 'AzureAppServiceSetAppSettings', 'hboelman')
             self.adbp.create_extension(self.organization_name, 'PascalNaber-Xpirit-CreateSasToken', 'pascalnaber')
 
-    def process_build(self):
+    def process_build(self, scenario):
         # need to check if the build definition already exists
         build_definitions = self.adbp.list_build_definitions(self.organization_name, self.project_name)
         build_definition_match = [
@@ -308,9 +484,30 @@ class AzureDevopsBuildInteractive(object):
         ]
 
         if not build_definition_match:
-            self.adbp.create_build_definition(self.organization_name, self.project_name,
-                                              self.repository_name, self.build_definition_name,
-                                              self.build_pool_name)
+            if scenario == "AZURE_DEVOPS":
+                self.adbp.create_devops_build_definition(self.organization_name, self.project_name,
+                                                         self.repository_name, self.build_definition_name,
+                                                         self.build_pool_name)
+            elif scenario == "GITHUB_INTEGRATION":
+                try:
+                    self.adbp.create_github_build_definition(self.organization_name, self.project_name,
+                                                             self.github_repository, self.build_definition_name,
+                                                             self.build_pool_name)
+                except GithubIntegrationRequestError as gire:
+                    raise CLIError("{error}{ls}{ls}"
+                                   "Please ensure your Github personal access token has sufficient permissions.{ls}{ls}"
+                                   "You may visit https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/"
+                                   "github?view=azure-devops#repository-permissions-for-personal-access-token-pat-authentication"
+                                   " for more information.".format(
+                                       error=gire.message, ls=os.linesep
+                                   ))
+                except GithubContentNotFound:
+                    raise CLIError("Failed to create a webhook for your Github repository or your repository cannot be accessed.{ls}{ls}"
+                                   "You may visit https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/"
+                                   "github?view=azure-devops#repository-permissions-for-personal-access-token-pat-authentication"
+                                   " for more information.".format(
+                                       ls=os.linesep
+                                   ))
         else:
             self.logger.warning("Detected build definition {name}".format(name=self.build_definition_name))
 
@@ -343,7 +540,7 @@ class AzureDevopsBuildInteractive(object):
             raise CLIError("Sorry, your build has failed in Azure Devops.{ls}"
                            "To view details on why your build has failed please visit {url}".format(url=url, ls=os.linesep))
         elif build.result == 'succeeded':
-            self.logger.warning("Your build has completed. Composing a release definitions...")
+            self.logger.warning("Your build has completed. Composing a release definition...")
 
         # need to check if the release definition already exists
         release_definitions = self.adbp.list_release_definitions(self.organization_name, self.project_name)
@@ -433,45 +630,59 @@ class AzureDevopsBuildInteractive(object):
         self.logger.info("Selected functionapp %s", functionapp.name)
         return functionapp
 
-    def _find_local_language(self):
+    def _find_local_repository_runtime_language(self):
         # We want to check that locally the language that they are using matches the type of application they
         # are deploying to
         with open('local.settings.json') as f:
             settings = json.load(f)
-        try:
-            local_language = settings['Values']['FUNCTIONS_WORKER_RUNTIME']
-        except KeyError:
-            raise CLIError("The app 'FUNCTIONS_WORKER_RUNTIME' setting is not set in the local.settings.json file")
-        if local_language == '':
-            raise CLIError("The app 'FUNCTIONS_WORKER_RUNTIME' setting is not set in the local.settings.json file")
-        return local_language
 
-    def _find_language_and_storage_name(self, app_settings):
-        local_language = self._find_local_language()
-        for app_setting in app_settings:
-            if app_setting['name'] == "FUNCTIONS_WORKER_RUNTIME":
-                language_str = app_setting['value']
-                if language_str != local_language:
-                    # We should not deploy if the local runtime language is not the same as that of their functionapp
-                    raise CLIError("The local language you are using ({local}) does not match the language of your function app ({functionapps}){ls}"
-                                   "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json"
-                                   " and in your application settings on your function app in Azure.".format(
-                                       local=local_language, functionapps=language_str, ls=os.linesep))
-                if language_str == "python":
-                    self.logger.info("detected that language used by functionapp is python")
-                    language = PYTHON
-                elif language_str == "node":
-                    self.logger.info("detected that language used by functionapp is node")
-                    language = NODE
-                elif language_str == "dotnet":
-                    self.logger.info("detected that language used by functionapp is .net")
-                    language = DOTNET
-                else:
-                    raise LanguageNotSupportException(language_str)
-            if app_setting['name'] == "AzureWebJobsStorage":
-                storage_name = app_setting['value'].split(';')[1].split('=')[1]
-                self.logger.info("detected that storage used by the functionapp is %s", storage_name)
-        return language, storage_name
+        runtime_language = settings.get('Values', {}).get('FUNCTIONS_WORKER_RUNTIME')
+        if not runtime_language:
+            raise CLIError("The 'FUNCTIONS_WORKER_RUNTIME' setting is not defined in the local.settings.json file")
+
+        if SUPPORTED_LANGUAGES.get(runtime_language) is not None:
+            return runtime_language
+        else:
+            raise LanguageNotSupportException(runtime_language)
+
+    def _find_github_repository_runtime_language(self):
+        try:
+            github_file_content = self.adbp.get_github_content(self.github_pat, self.github_repository, "local.settings.json")
+        except GithubContentNotFound:
+            self.logger.warning("The local.settings.json is not commited to Github repository {repo}".format(repo=self.github_repository))
+            self.logger.warning("Set azure-pipeline.yml language to: {language}".format(language=self.functionapp_language))
+            return None
+
+        runtime_language = github_file_content.get('Values', {}).get('FUNCTIONS_WORKER_RUNTIME')
+        if not runtime_language:
+            raise CLIError("The 'FUNCTIONS_WORKER_RUNTIME' setting is not defined in the local.settings.json file")
+
+        if SUPPORTED_LANGUAGES.get(runtime_language) is not None:
+            return runtime_language
+        else:
+            raise LanguageNotSupportException(runtime_language)
+
+    def _get_functionapp_runtime_language(self, app_settings):
+        functions_worker_runtime = [
+            setting['value'] for setting in app_settings if setting['name'] == "FUNCTIONS_WORKER_RUNTIME"
+        ]
+
+        if functions_worker_runtime:
+            functionapp_language = functions_worker_runtime[0]
+            if SUPPORTED_LANGUAGES.get(functionapp_language) is not None:
+                return SUPPORTED_LANGUAGES[functionapp_language]
+            else:
+                raise LanguageNotSupportException(functionapp_language)
+        return None
+
+    def _get_functionapp_storage_name(self, app_settings):
+        functions_worker_runtime = [
+            setting['value'] for setting in app_settings if setting['name'] == "AzureWebJobsStorage"
+        ]
+
+        if functions_worker_runtime:
+            return functions_worker_runtime[0].split(';')[1].split('=')[1]
+        return None
 
     def _find_type(self, kinds):  # pylint: disable=no-self-use
         if 'linux' in kinds:
