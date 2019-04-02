@@ -72,7 +72,7 @@ DEPENDENCIES = [
     'six',
     'tabulate>=0.7.7',
     'wheel==0.30.0',
-    'azure-mgmt-resource==2.1.0'
+    'azure-mgmt-resource==2.1.0',
     'pyperclip>=1.7.0',
     'psutil>=5.6.1'
 ]
