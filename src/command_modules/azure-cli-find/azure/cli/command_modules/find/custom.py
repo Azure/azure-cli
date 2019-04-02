@@ -57,7 +57,7 @@ def process_query(cli_term):
                 current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
                 current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
                 print(style_message(current_title))
-                print(current_snippet+'\n')
+                print(current_snippet + '\n')
 
 
 def style_message(msg):
