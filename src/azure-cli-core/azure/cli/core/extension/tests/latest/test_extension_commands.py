@@ -14,6 +14,7 @@ from azure.cli.core.extension.operations import (list_extensions, add_extension,
                                                  remove_extension, update_extension,
                                                  list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION, OUT_KEY_METADATA)
 from azure.cli.core.extension._resolve import NoExtensionCandidatesError
+from azure.cli.core.mock import DummyCli
 
 
 def _get_test_data_file(filename):
@@ -40,6 +41,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.ext_dir = tempfile.mkdtemp()
         self.patcher = mock.patch('azure.cli.core.extension.EXTENSIONS_DIR', self.ext_dir)
         self.patcher.start()
+        self.cmd = self._setup_cmd()
 
     def tearDown(self):
         self.patcher.stop()
@@ -55,7 +57,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(len(actual), 0)
 
     def test_add_list_show_remove_extension(self):
-        add_extension(MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         actual = list_extensions()
         self.assertEqual(len(actual), 1)
         ext = show_extension(MY_EXT_NAME)
@@ -65,7 +67,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(num_exts, 0)
 
     def test_add_list_show_remove_extension_with_dashes(self):
-        add_extension(MY_SECOND_EXT_SOURCE_DASHES)
+        add_extension(cmd=self.cmd, source=MY_SECOND_EXT_SOURCE_DASHES)
         actual = list_extensions()
         self.assertEqual(len(actual), 1)
         ext = show_extension(MY_SECOND_EXT_NAME_DASHES)
@@ -77,27 +79,29 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(num_exts, 0)
 
     def test_add_extension_twice(self):
-        add_extension(MY_EXT_SOURCE)
+        import pdb
+        pdb.set_trace()
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         num_exts = len(list_extensions())
         self.assertEqual(num_exts, 1)
         with self.assertRaises(CLIError):
-            add_extension(MY_EXT_SOURCE)
+            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
 
     def test_add_extension_invalid(self):
         with self.assertRaises(ValueError):
-            add_extension(MY_BAD_EXT_SOURCE)
+            add_extension(cmd=self.cmd, source=MY_BAD_EXT_SOURCE)
         actual = list_extensions()
         self.assertEqual(len(actual), 0)
 
     def test_add_extension_invalid_whl_name(self):
         with self.assertRaises(CLIError):
-            add_extension(os.path.join('invalid', 'ext', 'path', 'file.whl'))
+            add_extension(cmd=self.cmd, source=os.path.join('invalid', 'ext', 'path', 'file.whl'))
         actual = list_extensions()
         self.assertEqual(len(actual), 0)
 
     def test_add_extension_valid_whl_name_filenotfound(self):
         with self.assertRaises(CLIError):
-            add_extension(_get_test_data_file('mywheel-0.0.3+dev-py2.py3-none-any.whl'))
+            add_extension(cmd=self.cmd, source=_get_test_data_file('mywheel-0.0.3+dev-py2.py3-none-any.whl'))
         actual = list_extensions()
         self.assertEqual(len(actual), 0)
 
@@ -109,7 +113,7 @@ class TestExtensionCommands(unittest.TestCase):
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
                 mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
-            add_extension(extension_name=extension_name, pip_proxy=proxy_endpoint)
+            add_extension(cmd=self.cmd, extension_name=extension_name, pip_proxy=proxy_endpoint)
             args = check_output.call_args
             pip_cmd = args[0][0]
             proxy_index = pip_cmd.index(proxy_param)
@@ -121,7 +125,7 @@ class TestExtensionCommands(unittest.TestCase):
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
                 mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
-            add_extension(extension_name=extension_name)
+            add_extension(cmd=self.cmd, extension_name=extension_name)
             args = check_output.call_args
             pip_cmd = args[0][0]
             if '--proxy' in pip_cmd:
@@ -131,7 +135,7 @@ class TestExtensionCommands(unittest.TestCase):
         extension_name = MY_EXT_NAME
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
-            add_extension(extension_name=extension_name)
+            add_extension(cmd=self.cmd, extension_name=extension_name)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_NAME], MY_EXT_NAME)
 
@@ -140,33 +144,33 @@ class TestExtensionCommands(unittest.TestCase):
         bad_sha256 = 'thishashisclearlywrong'
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, bad_sha256)):
             with self.assertRaises(CLIError) as err:
-                add_extension(extension_name=extension_name)
+                add_extension(cmd=self.cmd, extension_name=extension_name)
             self.assertTrue('The checksum of the extension does not match the expected value.' in str(err.exception))
 
     def test_add_extension_with_name_source_not_whl(self):
         extension_name = 'myextension'
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=('{}.notwhl'.format(extension_name), None)):
             with self.assertRaises(ValueError) as err:
-                add_extension(extension_name=extension_name)
+                add_extension(cmd=self.cmd, extension_name=extension_name)
             self.assertTrue('Unknown extension type. Only Python wheels are supported.' in str(err.exception))
 
     def test_add_extension_with_name_but_it_already_exists(self):
         # Add extension without name first
-        add_extension(source=MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_NAME], MY_EXT_NAME)
         # Now add using name
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)):
             with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
-                add_extension(extension_name=MY_EXT_NAME)
+                add_extension(cmd=self.cmd, extension_name=MY_EXT_NAME)
                 call_args = mock_logger.warning.call_args
                 self.assertEqual("Extension '%s' is already installed.", call_args[0][0])
                 self.assertEqual(MY_EXT_NAME, call_args[0][1])
                 self.assertEqual(mock_logger.warning.call_count, 1)
 
     def test_update_extension(self):
-        add_extension(source=MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
@@ -177,7 +181,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
 
     def test_update_extension_with_pip_proxy(self):
-        add_extension(source=MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
@@ -198,7 +202,7 @@ class TestExtensionCommands(unittest.TestCase):
             assert pip_cmd[proxy_index + 1] == proxy_endpoint
 
     def test_update_extension_verify_no_pip_proxy(self):
-        add_extension(source=MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
@@ -222,7 +226,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(str(err.exception), 'The extension {} is not installed.'.format(MY_EXT_NAME))
 
     def test_update_extension_no_updates(self):
-        add_extension(source=MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         with mock.patch('azure.cli.core.extension.operations.resolve_from_index', side_effect=NoExtensionCandidatesError()):
@@ -231,7 +235,7 @@ class TestExtensionCommands(unittest.TestCase):
             self.assertTrue("No updates available for '{}'.".format(MY_EXT_NAME) in str(err.exception))
 
     def test_update_extension_exception_in_update_and_rolled_back(self):
-        add_extension(source=MY_EXT_SOURCE)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
@@ -299,7 +303,7 @@ class TestExtensionCommands(unittest.TestCase):
         """
         extra_index_urls = ['https://testpypi.python.org/simple', 'https://pypi.python.org/simple']
 
-        add_extension(source=MY_EXT_SOURCE, pip_extra_index_urls=extra_index_urls)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, pip_extra_index_urls=extra_index_urls)
         actual = list_extensions()
         self.assertEqual(len(actual), 1)
         ext = show_extension(MY_EXT_NAME)
@@ -315,7 +319,7 @@ class TestExtensionCommands(unittest.TestCase):
         """
         extra_index_urls = ['https://testpypi.python.org/simple', 'https://pypi.python.org/simple']
 
-        add_extension(source=MY_EXT_SOURCE, pip_extra_index_urls=extra_index_urls)
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE, pip_extra_index_urls=extra_index_urls)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
@@ -325,6 +329,10 @@ class TestExtensionCommands(unittest.TestCase):
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
 
+    def _setup_cmd(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        return cmd
 
 if __name__ == '__main__':
     unittest.main()
