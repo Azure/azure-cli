@@ -69,7 +69,7 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
-        c.argument('admin_site_name', help='The name of the admin web app.')
+        c.argument('admin_site_name', help='The name of the admin web app.', deprecate_info=c.deprecate(expiration='0.2.17'))
 
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
