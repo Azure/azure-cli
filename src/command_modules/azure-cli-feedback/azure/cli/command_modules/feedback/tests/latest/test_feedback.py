@@ -93,7 +93,7 @@ class TestCommandLogFile(ScenarioTest):
             self.assertTrue(time_ago < 300)
             self.assertEqual(log_file.metadata_tup.p_id, p_id)
             self.assertTrue(os.path.basename(path), self.temp_command_log_dir)
-            self.assertEqual(log_file.metadata_tup.cmd, log_file.get_command_name())
+            self.assertEqual(log_file.metadata_tup.cmd, log_file.get_command_name_str())
 
         self.assertEqual("az extension remove", command_log_files[0].metadata_tup.cmd)
         self.assertEqual("az extension add", command_log_files[1].metadata_tup.cmd)
@@ -118,18 +118,18 @@ class TestCommandLogFile(ScenarioTest):
         data_dict = command_log_files[0].command_data_dict
         self.assertTrue(data_dict["success"] is False)
         self.assertEqual("There was an error during execution.", data_dict["errors"][0])
-        self.assertEqual(data_dict["command_args"], "extension remove -n alias")
+        self.assertEqual(data_dict["command_args"], "extension remove -n {}")
 
         # check successful cli command
         data_dict = command_log_files[1].command_data_dict
         self.assertTrue(data_dict["success"] is True)
-        self.assertEqual(data_dict["command_args"], "extension add -n alias")
+        self.assertEqual(data_dict["command_args"], "extension add -n {}")
 
         # check unsuccessful extension command
         data_dict = command_log_files[2].command_data_dict
         self.assertTrue(data_dict["success"] is False)
         self.assertTrue("errors" in data_dict)
-        self.assertEqual(data_dict["command_args"], "alias create -n foo123 -c bar123")
+        self.assertEqual(data_dict["command_args"], "alias create -n {} -c {}")
 
         # check successful extension command
         data_dict = command_log_files[3].command_data_dict
@@ -160,7 +160,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertTrue(log_file.command_data_dict["extension_version"] in issue_body)
 
         for log_file, issue_body in items:
-            self.assertTrue(log_file.get_command_name() in issue_body)
+            self.assertTrue(log_file.get_command_name_str() in issue_body)
             self.assertTrue(log_file.get_command_duration_str() in issue_body)
             self.assertTrue(log_file.command_data_dict["command_args"] in issue_body)
             self.assertTrue(log_file.command_data_dict["errors"][0] in issue_body)

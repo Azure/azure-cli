@@ -6,7 +6,8 @@ Release History
 2.2.0
 +++++
 * `az feedback` now shows metadata on recently run commands
-* `az feedback` generates command and system related information to improve issue creation process
+* `az feedback` prompts user to assist in issue creation process. Opens browser to issue url and copies auto-generated issue
+  text containing command and system related information to clipboard. Prints out issue body when run with '--verbose'
 
 2.1.4
 +++++

@@ -63,7 +63,7 @@ class AzCliLogging(CLILogging):
 
             # if we have too many files, delete the 5 last / oldest command log files.
             if len(sorted_files) > 25:
-                for file in sorted_files[5:]:
+                for file in sorted_files[-5:]:
                     try:
                         os.remove(os.path.join(log_dir, file))
                     except OSError:  # FileNotFoundError introduced in Python 3
@@ -82,17 +82,18 @@ class AzCliLogging(CLILogging):
             _delete_old_logs(self.command_log_dir)
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
+
         ensure_dir(self.command_log_dir)
         command = self.cli_ctx.invocation._rudimentary_get_command(args) or _UNKNOWN_COMMAND  # pylint: disable=protected-access, line-too-long
-        command = command.replace(" ", "_")
-        if command == "feedback":
+        command_str = command.replace(" ", "_")
+        if command_str.lower() == "feedback":
             return
 
         date_str = str(datetime.datetime.now().date())
         time = datetime.datetime.now().time()
         time_str = "{:02}-{:02}-{:02}".format(time.hour, time.minute, time.second)
 
-        log_name = "{}.{}.{}.{}.{}".format(date_str, time_str, command, os.getpid(), "log")
+        log_name = "{}.{}.{}.{}.{}".format(date_str, time_str, command_str, os.getpid(), "log")
 
         log_file_path = os.path.join(self.command_log_dir, log_name)
 
@@ -106,7 +107,60 @@ class AzCliLogging(CLILogging):
         self.command_logger_handler = logfile_handler
         self.command_metadata_logger = command_metadata_logger
 
+        args = AzCliLogging._get_clean_args(command if command != _UNKNOWN_COMMAND else None, args)
         command_metadata_logger.info("command args: %s", " ".join(args))
+
+    @staticmethod
+    def _get_clean_args(command, args):  # TODO: add test for this function
+        # based on AzCliCommandInvoker._extract_parameter_names(args)
+        # note: name start with more than 2 '-' will be treated as value e.g. certs in PEM format
+
+        # if no command provided, try to guess the intended command. This does not work for positionals
+        if not command:
+            command_list = []
+            for arg in args:
+                if arg.startswith('-') and not arg.startswith('---') and len(arg) > 1:
+                    break
+                command_list.append(arg)
+            command = " ".join(command_list)
+
+        command = command.split()
+        cleaned_args = []
+        placeholder = "{}"
+        for i, arg in enumerate(args):
+            # while this token a part of the command add it.
+            # Note: if 'command' is none first positional would be captured.
+            if i < len(command):
+                cleaned_args.append(arg)
+                continue
+
+            # if valid optional name
+            if arg.startswith('-') and not arg.startswith('---') and len(arg) > 1:
+
+                # if short option with or without "="
+                if not arg.startswith("--"):
+                    opt = arg[:2]  # get opt
+
+                    opt = opt + "=" if len(arg) > 2 and arg[2] == "=" else opt  # append '=' if necessary
+                    opt = opt + placeholder if (len(arg) > 2 and arg[2] != "=") or len(
+                        arg) > 3 else opt  # append placeholder if argument with optional
+                    cleaned_args.append(opt)
+                    continue
+
+                # otherwise if long option with "="
+                if "=" in arg:
+                    opt, _ = arg.split('=', 1)
+                    cleaned_args.append(opt + "=" + placeholder)
+                    continue
+
+                cleaned_args.append(arg)
+                continue
+
+            # else if positional or optional argument / value
+            else:
+                cleaned_args.append(placeholder)
+
+        return cleaned_args
 
     def log_cmd_metadata_extension_info(self, extension_name, extension_version):
         if self.command_metadata_logger:
