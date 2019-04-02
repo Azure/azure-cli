@@ -362,6 +362,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr import -n {registry_name} --source {resource_imageV2} -p {token}')
 
     @ResourceGroupPreparer()
+    @record_only()
     def test_acr_run(self, resource_group):
         self.kwargs.update({
             'rg_loc': 'westcentralus',
