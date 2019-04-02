@@ -79,8 +79,6 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(num_exts, 0)
 
     def test_add_extension_twice(self):
-        import pdb
-        pdb.set_trace()
         add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         num_exts = len(list_extensions())
         self.assertEqual(num_exts, 1)
