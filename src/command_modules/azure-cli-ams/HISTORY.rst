@@ -2,6 +2,18 @@
 
 Release History
 ===============
+0.4.4
++++++
+* New encryption parameters support in `ams streaming-policy create` command added.
+* New paramter `filters` added to ams streaming-locator create.
+* The `account-filter` and `asset-filter` parameter `bitrate` is renamed to `firstQuality`.
+*    `bitrate` will be removed in a future release.
+* Minor fixes
+
+0.4.3
++++++
+* Minor fixes.
+
 0.4.1
 +++++
 * ams streaming-endpoint [start | stop | create | update] : added 'wait' command

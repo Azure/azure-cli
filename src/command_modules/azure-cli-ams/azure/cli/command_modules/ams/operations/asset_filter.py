@@ -13,13 +13,18 @@ from azure.mgmt.media.models import (AssetFilter, FilterTrackSelection, FilterTr
 
 def create_asset_filter(client, account_name, resource_group_name, asset_name, filter_name,
                         start_timestamp=None, end_timestamp=None, presentation_window_duration=None,
-                        live_backoff_duration=None, timescale=None, force_end_timestamp=False, bitrate=None,
+                        live_backoff_duration=None, timescale=None, force_end_timestamp=False,
+                        bitrate=None, firstQuality=None,
                         tracks=None):
     first_quality = None
     presentation_time_range = None
 
-    if bitrate:
-        first_quality = FirstQuality(bitrate=bitrate)
+    if firstQuality is None:
+        if bitrate is not None:
+            firstQuality = bitrate
+
+    if firstQuality is not None:
+        first_quality = FirstQuality(bitrate=firstQuality)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale]):
