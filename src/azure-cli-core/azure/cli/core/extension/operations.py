@@ -165,7 +165,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
         shutil.rmtree(extension_path, ignore_errors=True)
         raise CLIError('An error occurred. Pip failed with status code {}. '
-                        'Use --debug for more information.'.format(pip_status_code))
+                       'Use --debug for more information.'.format(pip_status_code))
     # Save the whl we used to install the extension in the extension dir.
     dst = os.path.join(extension_path, whl_filename)
     shutil.copyfile(ext_file, dst)
@@ -213,7 +213,8 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
+    _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls,
+                 pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
     try:
         if extension_name and get_extension(extension_name).preview:
