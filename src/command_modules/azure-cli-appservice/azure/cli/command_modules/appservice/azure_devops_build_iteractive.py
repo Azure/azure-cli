@@ -262,7 +262,7 @@ class AzureDevopsBuildInteractive(object):
         # If the repository exists, we will do a force push
         try:
             self.adbp.push_local_to_azure_devops_repository(self.organization_name, self.project_name, self.repository_name, force=is_force_push)
-        except GitOperationException as goe:
+        except GitOperationException:
             self.adbp.remove_git_remote(self.organization_name, self.project_name, self.repository_name)
             raise CLIError("Failed to push your local repository to {url}{ls}"
                            "Please check your credentials and ensure you are a contributor to the repository.".format(url=remote_url, ls=os.linesep))

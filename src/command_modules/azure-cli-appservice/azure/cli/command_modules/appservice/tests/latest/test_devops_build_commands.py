@@ -54,7 +54,7 @@ class DevopsBuildCommandsTest(ScenarioTest):
             self.assertEqual(result['organization_name'], self.azure_devops_organization)
             self.assertEqual(result['project_name'], self.azure_devops_project)
             self.assertEqual(result['repository_name'], self.azure_devops_repository)
-        except CLIError as ce:
+        except CLIError:
             raise unittest.SkipTest('You must be the owner of the subscription')
         finally:
             self._tearDownDevopsEnvironment()
