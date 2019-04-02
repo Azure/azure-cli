@@ -99,10 +99,8 @@ class AzureDevopsBuildInteractive(object):
         self.process_release()
 
         # Advise user to reuse the pipeline build and release by pushing to remote
-        print()
-        print("To trigger a function build again, please use")
-        print("'git push {remote} master'".format(remote=self.repository_remote_name))
-        print()
+        self.logger.warning("To trigger a function build again, please use")
+        self.logger.warning("'git push {remote} master'".format(remote=self.repository_remote_name))
 
         return_dict = {}
         return_dict['functionapp_name'] = self.functionapp_name
@@ -203,7 +201,7 @@ class AzureDevopsBuildInteractive(object):
             else:
                 response = self.overwrite_yaml
         if (not os.path.exists('azure-pipelines.yml')) or response:
-            print('Creating new azure-pipelines.yml')
+            self.logger.warning('Creating new azure-pipelines.yml')
             try:
                 self.adbp.create_yaml(self.functionapp_language, self.functionapp_type)
             except LanguageNotSupportException as lnse:
@@ -242,7 +240,7 @@ class AzureDevopsBuildInteractive(object):
             raise CLIError("Failed to setup local git repository.")
 
         self.repository_remote_name = expected_remote_name
-        print("Added git remote {remote}".format(remote=expected_remote_name))
+        self.logger.warning("Added git remote {remote}".format(remote=expected_remote_name))
 
     def process_remote_repository(self):
         # Create remote repository if it does not exist
@@ -267,7 +265,7 @@ class AzureDevopsBuildInteractive(object):
             raise CLIError("Failed to push your local repository to {url}{ls}"
                            "Please check your credentials and ensure you are a contributor to the repository.".format(url=remote_url, ls=os.linesep))
 
-        print("Local branches has been pushed to {url}".format(url=remote_url))
+        self.logger.warning("Local branches has been pushed to {url}".format(url=remote_url))
 
     def process_build_and_release_definition_name(self):
         self.build_definition_name = self.repository_remote_name.replace("_azuredevops_", "_build_", 1)[0:256]
@@ -297,7 +295,7 @@ class AzureDevopsBuildInteractive(object):
 
     def process_extensions(self):
         if self.functionapp_type == LINUX_CONSUMPTION:
-            print("Installing the required extensions for the build and release")
+            self.logger.warning("Installing the required extensions for the build and release")
             self.adbp.create_extension(self.organization_name, 'AzureAppServiceSetAppSettings', 'hboelman')
             self.adbp.create_extension(self.organization_name, 'PascalNaber-Xpirit-CreateSasToken', 'pascalnaber')
 
@@ -324,7 +322,7 @@ class AzureDevopsBuildInteractive(object):
         )
 
         url = "https://dev.azure.com/{org}/{proj}/_build/results?buildId={build_id}".format(org=self.organization_name, proj=self.project_name, build_id=self.build.id)
-        print("To follow the build process go to {url}".format(url=url))
+        self.logger.warning("To follow the build process go to {url}".format(url=url))
 
     def process_release(self):
         # wait for artifacts / build to complete
@@ -333,7 +331,7 @@ class AzureDevopsBuildInteractive(object):
         while build is None or build.result is None:
             time.sleep(5)
             build = self._get_build_by_id(self.organization_name, self.project_name, self.build.id)
-            print("building artifacts ... {counter}s ({status})".format(counter=counter, status=build.status))
+            self.logger.warning("building artifacts ... {counter}s ({status})".format(counter=counter, status=build.status))
             counter += 5
 
         if build.result == 'failed':
@@ -345,7 +343,7 @@ class AzureDevopsBuildInteractive(object):
             raise CLIError("Sorry, your build has failed in Azure Devops.{ls}"
                            "To view details on why your build has failed please visit {url}".format(url=url, ls=os.linesep))
         elif build.result == 'succeeded':
-            print("You build has completed. Composing a release definitions...")
+            self.logger.warning("Your build has completed. Composing a release definitions...")
 
         # need to check if the release definition already exists
         release_definitions = self.adbp.list_release_definitions(self.organization_name, self.project_name)
@@ -365,7 +363,7 @@ class AzureDevopsBuildInteractive(object):
             self.logger.warning("Detected release definition {name}".format(name=self.release_definition_name))
 
         # The build artifact takes some time to propagate
-        print("Prepare to release the artifact...")
+        self.logger.warning("Prepare to release the artifact...")
         time.sleep(5)
 
         try:
@@ -380,7 +378,7 @@ class AzureDevopsBuildInteractive(object):
             proj=self.project_name,
             release_id=release.id
         )
-        print("To follow the release process go to {url}".format(url=url))
+        self.logger.warning("To follow the release process go to {url}".format(url=url))
         self.release = release
 
     def _check_if_force_push_required(self, remote_url, remote_branches):
