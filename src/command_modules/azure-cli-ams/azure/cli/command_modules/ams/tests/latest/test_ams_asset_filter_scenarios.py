@@ -43,7 +43,7 @@ class AmsAssetFilterTests(ScenarioTest):
 
         self.kwargs.update({
             'filter_name': filter_name,
-            'bitrate': 420,
+            'firstQuality': 420,
             'endTimestamp': 100000000,
             'liveBackoffDuration': 60,
             'presentationWindowDuration': 1200000000,
@@ -52,8 +52,8 @@ class AmsAssetFilterTests(ScenarioTest):
             'tracks': '@' + _get_test_data_file('filterTracks.json'),
         })
 
-        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
-            self.check('firstQuality.bitrate', '{bitrate}'),
+        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --firstQuality {firstQuality} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
+            self.check('firstQuality.bitrate', '{firstQuality}'),
             self.check('name', '{filter_name}'),
             self.check('presentationTimeRange.endTimestamp', '{endTimestamp}'),
             self.check('presentationTimeRange.liveBackoffDuration', '{liveBackoffDuration}'),
