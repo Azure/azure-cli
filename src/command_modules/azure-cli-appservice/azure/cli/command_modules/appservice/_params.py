@@ -397,6 +397,9 @@ def load_arguments(self, _):
         c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False, help='host function app on Linux worker')
         c.argument('tags', arg_type=tags_type)
 
+    with self.argument_context('functionapp update') as c:
+        c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
+
     with self.argument_context('functionapp devops-build create') as c:
         c.argument('functionapp_name', help="Name of the Azure Function App that you want to use", required=False)
         c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)

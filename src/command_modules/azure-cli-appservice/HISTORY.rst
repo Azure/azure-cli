@@ -11,6 +11,7 @@ Release History
 * functionapp: add support for linux functions plan creation
 * webapp, functionapp: Updating to use the new Python SDK version
 * appservice: adminSiteName property of SKU object is deprecated
+* functionapp: add ability to switch a plan underneath a function app using `az functionapp update --plan`
 
 0.2.16
 ++++++
