@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (process_image_template_create_namespace,
-    process_img_tmpl_output_add_namespace, image_builder_client_factory, cf_img_bldr_image_templates)
+    process_img_tmpl_output_add_namespace, process_img_tmpl_customizer_add_namespace, image_builder_client_factory, cf_img_bldr_image_templates)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
@@ -174,7 +174,12 @@ def load_command_table(self, _):
         # g.generic_update_command('update', 'list_image_templates') todo when supported by service
         g.wait_command('wait')
         g.command('run', 'run', supports_no_wait=True)
-        g.custom_command('show', 'show_build_output')
+        g.custom_command('show-runs', 'show_build_output')
+
+    with self.command_group('image template customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_template_customizer', validator=process_img_tmpl_customizer_add_namespace)
+        g.custom_command('remove', 'remove_template_customizer')
+        g.custom_command('clear', 'clear_template_customizer')
 
     with self.command_group('image template output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_output', validator=process_img_tmpl_output_add_namespace)

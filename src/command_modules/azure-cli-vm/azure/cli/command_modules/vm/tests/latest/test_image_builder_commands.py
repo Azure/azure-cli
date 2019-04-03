@@ -12,8 +12,12 @@ from msrestazure.tools import parse_resource_id
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
-TEST_SCRIPT="https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
-IMAGE_SOURCE="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
+#todo: store a local copy of this.
+TEST_SHELL_SCRIPT = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
+TEST_PWSH_SCRIPT = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"
+
+LINUX_IMAGE_SOURCE = "Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
+WIN_IMAGE_SOURCE = "MicrosoftWindowsServer:WindowsServer:2019-Datacenter:2019.0.20190214"
 
 class ImageTemplateTest(ScenarioTest):
     def _assign_ib_permissions(self, rg):   # need to manually give IB service permission to add image to grou
@@ -42,8 +46,8 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs.update({
             'tmpl_01': 'template01',
             'tmpl_02': 'template02',
-            'img_src': IMAGE_SOURCE,
-            'script': TEST_SCRIPT,
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT,
             'sub': subscription_id,
         })
 
@@ -55,8 +59,8 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
                      self.check('source.type', 'PlatformImage'),
                      self.check('length(customize)', 2),
-                     self.check('customize[0].name', 'customizeScript.sh'), self.check('customize[0].script', TEST_SCRIPT), self.check('customize[0].type', 'Shell'),
-                     self.check('customize[1].name', 'customizeScript.sh'), self.check('customize[1].script', TEST_SCRIPT), self.check('customize[1].type', 'Shell'),
+                     self.check('customize[0].name', 'customizeScript.sh'), self.check('customize[0].script', TEST_SHELL_SCRIPT), self.check('customize[0].type', 'Shell'),
+                     self.check('customize[1].name', 'customizeScript.sh'), self.check('customize[1].script', TEST_SHELL_SCRIPT), self.check('customize[1].type', 'Shell'),
                      self.check('distribute', None)
                  ])
 
@@ -99,8 +103,8 @@ class ImageTemplateTest(ScenarioTest):
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
             'tmpl_01': 'template01',
-            'img_src': IMAGE_SOURCE,
-            'script': TEST_SCRIPT,
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT,
             'sub': subscription_id,
             'gallery': self.create_random_name("sig1", 10),
             'sig1': 'image1'
@@ -134,8 +138,8 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs.update({
             'tmpl': 'template01',
-            'img_src': IMAGE_SOURCE,
-            'script': TEST_SCRIPT,
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT,
             'loc': resource_group_location,
             'vm': 'testvm',
             'img': 'img_1'
@@ -162,11 +166,11 @@ class ImageTemplateTest(ScenarioTest):
         self._assign_ib_permissions(resource_group)
 
         self.kwargs.update({
-            'img_src': IMAGE_SOURCE,
+            'img_src': LINUX_IMAGE_SOURCE,
             'gallery': self.create_random_name("sig2", 10),
             'sig1': 'image1',
             'tmpl': 'template01',
-            'script': TEST_SCRIPT,
+            'script': TEST_SHELL_SCRIPT,
             'vm': 'custom-vm'
         })
 
@@ -193,4 +197,63 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
+    @ResourceGroupPreparer(name_prefix='img_tmpl_managed_win')
+    def test_image_build_managed_image_win(self, resource_group, resource_group_location):
+        self._assign_ib_permissions(resource_group)
 
+        self.kwargs.update({
+            'tmpl': 'template01',
+            'img_src': WIN_IMAGE_SOURCE,
+            'script': TEST_PWSH_SCRIPT,
+            'loc': resource_group_location,
+            'vm': 'testvm',
+            'img': 'img_1',
+            'pwsh_name': 'powershell_script',
+            'win_restart_name': 'windows_restart_name',
+            'win_restart_check_cmd': 'echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt'
+        })
+
+        # create and build image template
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --managed-image-destinations {img}={loc}',
+                 checks=[
+                     self.check('customize[0].name', self.kwargs['script'].rsplit("/", 1)[1]),
+                     self.check('customize[0].script', '{script}'),
+                     self.check('customize[0].type', 'PowerShell')
+                 ])
+
+        # Test customizer add, remove and clear..
+
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name} --type powershell -e 0 1 2 --script {script}',
+                 checks=[
+                     self.check('customize[1].name', '{pwsh_name}'),
+                     self.check('customize[1].script', '{script}'),
+                     # self.check('customize[1].valid_exit_codes', '[0,1,2]'), not working due to sdk / service bug.
+                     self.check('customize[1].type', 'PowerShell')
+                 ])
+
+
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {win_restart_name} -t windows-restart --restart-check-command "{win_restart_check_cmd}"',
+                 checks=[
+                     self.check('customize[2].name', '{win_restart_name}'),
+                     self.check('customize[2].restartCheckCommand', '{win_restart_check_cmd}'),
+                     self.check('customize[2].restartTimeout', '5m'),
+                     self.check('customize[2].type', 'WindowsRestart')
+                 ])
+
+        self.cmd('image template show -n {tmpl} -g {rg}')
+
+        # todo test customizer / distributor remove and clear commands / test win source.
+
+
+        # self.cmd('image template run -n {tmpl} -g {rg}')
+        #
+        # # get the run output
+        # output = self.cmd('image template show -n {tmpl} -g {rg} --output-name {img}',
+        #                   checks=self.check('provisioningState', 'Succeeded')
+        #                   ).get_output_in_json()
+        #
+        # self.kwargs['image_id'] = output['artifactId']
+        #
+        # # check that vm successfully created from template.
+        # self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
+        # self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
