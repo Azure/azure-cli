@@ -96,7 +96,7 @@ class AmsStreamingLocatorTests(ScenarioTest):
             'bitrate': 420,
         })
 
-        self.cmd('az ams asset-filter create -a {amsname} --asset-name {assetName} -g {rg} -n {filter_name} --bitrate {bitrate} ', checks=[
+        self.cmd('az ams asset-filter create -a {amsname} --asset-name {assetName} -g {rg} -n {filter_name} --first-quality {bitrate} ', checks=[
             self.check('firstQuality.bitrate', '{bitrate}'),
             self.check('name', '{filter_name}'),
         ])
