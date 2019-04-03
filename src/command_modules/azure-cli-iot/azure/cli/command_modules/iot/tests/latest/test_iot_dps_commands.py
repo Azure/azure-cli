@@ -18,7 +18,7 @@ class IoTDpsTest(ScenarioTest):
         hub_name = self.create_random_name('iot', 20)
 
         self.cmd('iot hub create -n {} -g {} --sku S1'.format(hub_name, group_name),
-                 checks=[self.check('resourceGroup', group_name),
+                 checks=[self.check('resourcegroup', group_name),
                          self.check('name', hub_name),
                          self.check('sku.name', 'S1')])
 
