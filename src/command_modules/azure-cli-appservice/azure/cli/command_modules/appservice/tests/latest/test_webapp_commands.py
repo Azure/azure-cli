@@ -935,6 +935,45 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
+class FunctionUpdatePlan(ScenarioTest):
+    @ResourceGroupPreparer(location='centralus')
+    @StorageAccountPreparer()
+    def test_move_plan_to_elastic(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappelastic', 40)
+        ep_plan_name = self.create_random_name('somerandomplan', 40)
+        second_plan_name = self.create_random_name('secondplan', 40)
+        s1_plan_name = self.create_random_name('ab1planname', 40)
+
+        plan_result = self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name), checks=[
+            JMESPathCheck('sku.name', 'EP1')
+        ]).get_output_in_json()
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, second_plan_name), checks=[
+            JMESPathCheck('sku.name', 'EP1')
+        ]).get_output_in_json()
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, s1_plan_name), checks=[
+            JMESPathCheck('sku.name', 'S1')
+        ])
+
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'
+                 .format(resource_group, functionapp_name, second_plan_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp update -g {} -n {} --plan {}'
+                 .format(resource_group, functionapp_name, ep_plan_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('serverFarmId', plan_result['id']),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        # Moving to and from an App Service plan (not Elastic Premium) is not allowed right now
+        self.cmd('functionapp update -g {} -n {} --plan {}'
+                 .format(resource_group, functionapp_name, s1_plan_name), expect_failure=True)
+
+
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location='westus')
     @StorageAccountPreparer()
