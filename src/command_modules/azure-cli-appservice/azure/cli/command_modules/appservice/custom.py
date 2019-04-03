@@ -1149,8 +1149,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None,
-                            admin_site_name=None):
+def update_app_service_plan(instance, sku=None, number_of_workers=None):
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -1159,11 +1158,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
 
     if number_of_workers is not None:
         sku_def.capacity = number_of_workers
-
     instance.sku = sku_def
-    instance.sku = sku_def
-    if admin_site_name is not None:
-        instance.admin_site_name = admin_site_name
     return instance
 
 
