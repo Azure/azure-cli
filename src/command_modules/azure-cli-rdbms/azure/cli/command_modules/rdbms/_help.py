@@ -164,6 +164,14 @@ examples:
     text: az mariadb server list -g testgroup
 """
 
+helps['mariadb server restart'] = """
+type: command
+short-summary: Restart a server.
+examples:
+  - name: Restart a server.
+    text: az mariadb server restart -g testgroup -n testsvr
+"""
+
 helps['mariadb server restore'] = """
 type: command
 short-summary: Restore a server from backup.
@@ -440,6 +448,14 @@ examples:
     text: az mysql server replica stop -g testgroup -n testreplsvr
 """
 
+helps['mysql server restart'] = """
+type: command
+short-summary: Restart a server.
+examples:
+  - name: Restart a server.
+    text: az mysql server restart -g testgroup -n testsvr
+"""
+
 helps['mysql server restore'] = """
 type: command
 short-summary: Restore a server from backup.
@@ -685,6 +701,47 @@ examples:
     text: az postgres server list
   - name: List all PostgreSQL servers in a resource group.
     text: az postgres server list -g testgroup
+"""
+
+helps['postgres server replica'] = """
+type: group
+short-summary: Manage read replicas.
+"""
+
+helps['postgres server replica create'] = """
+type: command
+short-summary: Create a read replica for a server.
+examples:
+  - name: Create a read replica 'testreplsvr' for 'testsvr'.
+    text: az postgres server replica create -n testreplsvr -g testgroup -s testsvr
+  - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
+    text: |
+        az postgres server replica create -n testreplsvr -g testgroup \\
+            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforPostgreSQL/servers/testsvr2"
+"""
+
+helps['postgres server replica list'] = """
+type: command
+short-summary: List all read replicas for a given server.
+examples:
+  - name: List all read replicas for master server 'testsvr'.
+    text: az postgres server replica list -g testgroup -s testsvr
+"""
+
+helps['postgres server replica stop'] = """
+type: command
+short-summary: Stop replication to a read replica and make it a read/write server.
+examples:
+  - name: Stop replication to 'testreplsvr' and make it a read/write server.
+    text: az postgres server replica stop -g testgroup -n testreplsvr
+"""
+
+helps['postgres server restart'] = """
+type: command
+short-summary: Restart a server.
+examples:
+  - name: Restart a server.
+    text: az postgres server restart -g testgroup -n testsvr
 """
 
 helps['postgres server restore'] = """

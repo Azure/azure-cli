@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.3.5
++++++
+* `application-gateway`: Add `rewrite-rule` command group.
 
 2.3.4
 +++++

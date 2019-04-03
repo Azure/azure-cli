@@ -601,6 +601,48 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
 
 
+class NetworkAppGatewayRewriteRuleset(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_rewrite_rulesets')
+    def test_network_app_gateway_rewrite_rulesets(self, resource_group):
+
+        self.kwargs.update({
+            'gw': 'gw1',
+            'ip': 'pip1',
+            'set': 'ruleset1',
+            'rule': 'rule1',
+            'var': 'http_req_Authorization'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gw} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {gw} --exists')
+
+        # create ruleset
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {gw} -n {set} --no-wait')
+        self.cmd('network application-gateway rewrite-rule set show -g {rg} --gateway-name {gw} -n {set}')
+
+        # manage rewrite rules
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --sequence 123 --request-headers foo=bar --response-headers cat=hat --no-wait')
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --sequence 321 --request-headers bar=foo --response-headers hat=cat --no-wait')
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
+        self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule}')
+        self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
+
+        # manage rewrite rule conditions
+        self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition update -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearers" --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition show -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var}')
+        self.cmd('network application-gateway rewrite-rule condition list -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule}')
+        self.cmd('network application-gateway rewrite-rule condition delete -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition list -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule}')
+
+        self.cmd('network application-gateway rewrite-rule delete -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --no-wait')
+        self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
+
+        self.cmd('network application-gateway rewrite-rule set delete -g {rg} --gateway-name {gw} -n {set} --no-wait')
+        self.cmd('network application-gateway rewrite-rule set list -g {rg} --gateway-name {gw}')
+
+
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_public_ip')
