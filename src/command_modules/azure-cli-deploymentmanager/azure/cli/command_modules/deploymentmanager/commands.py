@@ -33,38 +33,51 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.deploymentmanager.operations#RolloutsOperations.{}',
         client_factory=cf_rollouts)
 
+    custom_tmpl = 'azure.cli.command_modules.deploymentmanager.custom#{}'
+    deployment_manager_custom = CliCommandType(operations_tmpl=custom_tmpl)
+
     with self.command_group('deploymentmanager artifactsource', artifact_sources) as g:
         g.custom_command('create', 'cli_artifact_source_create')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
-        g.generic_update_command('update', setter_name='update', custom_func_name='cli_redis_update')
+        g.generic_update_command(
+            'update',
+            custom_func_name='cli_artifact_source_update')
 
     with self.command_group('deploymentmanager servicetopology', service_topologies) as g:
         g.command('create', 'create_or_update')
-        g.command('update', 'create_or_update')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.generic_update_command(
+            'update',
+            custom_func_name='cli_service_topology_update')
 
     with self.command_group('deploymentmanager service', services) as g:
         g.command('create', 'create_or_update')
-        g.command('update', 'create_or_update')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.generic_update_command(
+            'update',
+            custom_func_name='cli_service_update')
 
     with self.command_group('deploymentmanager serviceunit', service_units) as g:
         g.command('create', 'create_or_update')
-        g.command('update', 'create_or_update')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.generic_update_command(
+            'update',
+            custom_func_name='cli_service_unit_update')
 
     with self.command_group('deploymentmanager step', steps) as g:
         g.command('create', 'create_or_update')
-        g.command('update', 'create_or_update')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.generic_update_command(
+            'update',
+            custom_func_name='cli_step_update')
 
     with self.command_group('deploymentmanager rollout', rollouts) as g:
         g.command('show', 'get')
-        g.command('stop', 'stop')
+        g.command('cancel', 'cancel')
         g.command('restart', 'restart')
         g.command('delete', 'delete')
