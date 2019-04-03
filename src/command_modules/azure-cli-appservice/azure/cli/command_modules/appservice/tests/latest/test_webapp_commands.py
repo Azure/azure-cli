@@ -178,9 +178,9 @@ class WebappQuickCreateTest(ScenarioTest):
         time.sleep(45)  # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        if 'Hello world' not in str(r.content):
+        if 'Your App Service app is up and running' not in str(r.content):
             # dump out more info for diagnose
-            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
+            self.fail("'Your App Service app is up and running' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -1186,10 +1186,6 @@ class WebappImplictIdentityTest(ScenarioTest):
             self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
                 self.check('principalId', result['principalId'])
             ])
-        self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
-            JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].roleDefinitionName', role)
-        ])
 
         self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.check('principalId', result['principalId']))
         self.cmd('webapp identity remove -g {} -n {}'.format(resource_group, webapp_name))
@@ -1205,7 +1201,6 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
-
     @record_only()
     @ResourceGroupPreparer()
     def test_webapp_triggeredWebjob_list(self, resource_group):
