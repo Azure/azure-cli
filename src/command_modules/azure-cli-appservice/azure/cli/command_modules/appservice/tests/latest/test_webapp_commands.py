@@ -562,22 +562,6 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
-class LinuxWebappSSHScenarioTest(ScenarioTest):
-    @record_only()
-    @ResourceGroupPreparer(location='japanwest')
-    def test_linux_webapp_ssh(self, resource_group):
-        runtime = 'node|8.11'
-        plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
-        webapp = self.create_random_name(prefix='webapp-ssh', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
-        time.sleep(30)
-        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
-        time.sleep(30)
-        self.cmd('webapp ssh -g {} -n {}'.format(resource_group, webapp))
-        time.sleep(30)
-
-
 class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp_multicontainer_slot(self, resource_group):
