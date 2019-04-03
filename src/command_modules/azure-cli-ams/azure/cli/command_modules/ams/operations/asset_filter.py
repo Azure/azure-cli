@@ -19,12 +19,8 @@ def create_asset_filter(client, account_name, resource_group_name, asset_name, f
 
     presentation_time_range = None
 
-    if first_quality is None:
-        if bitrate is not None:
-            first_quality = bitrate
-
-    if first_quality is not None:
-        first_quality = FirstQuality(bitrate=first_quality)
+    if first_quality or bitrate:
+        first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale]):
@@ -53,12 +49,8 @@ def update_asset_filter(instance, start_timestamp=None, end_timestamp=None, pres
     if not instance:
         raise CLIError('The asset filter resource was not found.')
 
-    if first_quality is None:
-        if bitrate is not None:
-            first_quality = bitrate
-
-    if first_quality is not None:
-        first_quality = FirstQuality(bitrate=first_quality)
+    if first_quality or bitrate:
+        first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale, force_end_timestamp is not None]):

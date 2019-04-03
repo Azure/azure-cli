@@ -150,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Applies to all timestamps and durations in a Presentation Time Range, specified as the number of increments in one second.Default is 10000000 - ten million increments in one second, where each increment would be 100 nanoseconds long. For example, if you want to set a startTimestamp at 30 seconds, you would use a value of 300000000 when using the default timescale.')
         c.argument('force_end_timestamp', arg_group='Presentation Time Range', arg_type=get_three_state_flag(),
                    help='Applies to Live Streaming only. Indicates whether the endTimestamp property must be present. If true, endTimestamp must be specified or a bad request code is returned. Allowed values: false, true.')
-        c.argument('bitrate', help='The first quality bitrate.', deprecate_info=c.deprecate(target='bitrate', redirect='first-quality', hide=True))
+        c.argument('bitrate', help='The first quality bitrate.', deprecate_info=c.deprecate(target='--bitrate', redirect='--first-quality', hide=True))
         c.argument('first_quality', help='The first quality (lowest) bitrate to include in the manifest.')
         c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/assetfilters/assetfilters_createorupdate#filtertrackselection')
 
@@ -385,7 +385,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Applies to all timestamps and durations in a Presentation Time Range, specified as the number of increments in one second. Default is 10000000 - ten million increments in one second, where each increment would be 100 nanoseconds long. For example, if you want to set a startTimestamp at 30 seconds, you would use a value of 300000000 when using the default timescale.')
         c.argument('force_end_timestamp', arg_group='Presentation Time Range', arg_type=get_three_state_flag(),
                    help='Applies to Live Streaming only. Indicates whether the endTimestamp property must be present. If true, endTimestamp must be specified or a bad request code is returned. Allowed values: false, true.')
-        c.argument('bitrate', help='The first quality bitrate.', deprecate_info=c.deprecate(target='bitrate', redirect='first-quality', hide=True))
+        c.argument('bitrate', help='The first quality bitrate.', deprecate_info=c.deprecate(target='--bitrate', redirect='--first-quality', hide=True))
         c.argument('first_quality', help='The first quality (lowest) bitrate to include in the manifest.')
         c.argument('tracks', help='The JSON representing the track selections. Use @{file} to load from a file. For further information about the JSON structure please refer to swagger documentation on https://docs.microsoft.com/en-us/rest/api/media/accountfilters/createorupdate#filtertrackselection')
 
