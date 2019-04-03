@@ -91,6 +91,7 @@ DEPENDENCIES = [
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-policyinsights',
+    'azure-cli-privatedns',
     'azure-cli-profile',
     'azure-cli-rdbms',
     'azure-cli-redis',
