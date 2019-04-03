@@ -1958,15 +1958,36 @@ helps['image template'] = """
     short-summary: Manage and build image builder templates. 
 """
 
+helps['image template customizer'] = """
+    type: group
+    short-summary: Manage image builder template customizers. 
+"""
+
 helps['image template output'] = """
     type: group
     short-summary: Manage image builder template output distributors. 
     long-summary: A customized image can be distributed as a managed image or a shared image in a shared image gallery (SIG). 
 """
 
+helps['image template customizer add'] = """
+    type: command
+    short-summary: Add an image builder customizer to an image builder template.
+"""
+
+helps['image template customizer remove'] = """
+    type: command
+    short-summary: Remove an image builder customizer from an image builder template. 
+"""
+
+helps['image template customizer clear'] = """
+    type: command
+    short-summary: Remove all image builder customizers from an image builder template. 
+"""
+
+
 helps['image template output add'] = """
     type: command
-    short-summary: Add an image builder output distributor. The output distributor will be a managed image or a gallery image.
+    short-summary: Add an image builder output distributor to an image builder template. The output distributor will be a managed image or a gallery image.
     examples:
     - name: Add a managed image output to an existing template. Optionally specify the run output name.
       text: az image template output add -n mytemplate -g my-group --managed-image my_desired_image_name --output-name managed_image_run_01
@@ -1979,12 +2000,12 @@ helps['image template output add'] = """
 
 helps['image template output remove'] = """
     type: command
-    short-summary: Remove an image builder output distributor. 
+    short-summary: Remove an image builder output distributor from an image builder template. 
 """
 
 helps['image template output clear'] = """
     type: command
-    short-summary: Remove all image builder output distributors. 
+    short-summary: Remove all image builder output distributors from an image builder template. 
 """
 
 helps['image template run'] = """
@@ -2001,7 +2022,7 @@ helps['image template run'] = """
         az image template show -n mytemplate -g my-group
 """
 
-helps['image template show'] = """
+helps['image template show-runs'] = """
     type: command
     short-summary: Show an image builder template's run outputs.
     examples:
@@ -2012,7 +2033,7 @@ helps['image template show'] = """
         az image template wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
         
-        az image template show -n mytemplate -g my-group
+        az image template show-runs -n mytemplate -g my-group
 """
 
 helps['image template create'] = """

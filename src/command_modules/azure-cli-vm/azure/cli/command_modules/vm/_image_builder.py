@@ -5,7 +5,8 @@
 import re
 import os
 from enum import Enum
-from azure.cli.core.commands import LongRunningOperation
+import copy
+
 
 try:
     from urllib.parse import urlparse
@@ -13,13 +14,13 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
-import copy
-from msrest.exceptions import ClientException, ValidationError
+from msrest.exceptions import ClientException
 
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -32,6 +33,11 @@ class _SourceType(Enum):
 class _DestType(Enum):
     MANAGED_IMAGE = 1
     SHARED_IMAGE_GALLERY = 2
+
+class ScriptType(Enum):
+    SHELL = "shell"
+    POWERSHELL = "powershell"
+    WINDOWS_RESTART = "windows-restart"
 
 # region Client Factories
 
@@ -47,7 +53,7 @@ def cf_img_bldr_image_templates(cli_ctx, _):
 
 def _parse_script(script_str):
     script_name = script_str
-    script = {"script": script_str, "name": script_name}
+    script = {"script": script_str, "name": script_name, "type": None}
     if urlparse(script_str).scheme and "://" in script_str:
         logger.info("{} appears to be a url.".format(script_str))
         if "/" in script_str:
@@ -55,11 +61,18 @@ def _parse_script(script_str):
             script["name"] = script_name
         script["is_url"] = True
     else:
-        logger.info("{} does not look like a url. Assuming it is a file.".format(script_str))
-        script["is_url"] = False
-        if not os.path.isfile(script_str):
-            raise CLIError("Script file {} does not exist.".format(script_str))
-        raise CLIError("Script file found, however, uploading to a storage account is not yet supported on the CLI.")
+        # logger.info("{} does not look like a url. Assuming it is a file.".format(script_str))
+        # script["is_url"] = False
+        # if not os.path.isfile(script_str):
+        #     raise CLIError("Script file {} does not exist.".format(script_str))
+        # raise CLIError("Script file found. Please provide a publicly accessible url instead.")
+        raise CLIError("Expected a url, got: {}", script_str)
+
+    if script_str.lower().endswith(".sh"):
+        script["type"] = ScriptType.SHELL
+    elif script_str.lower().endswith(".ps1"):
+        script["type"] = ScriptType.POWERSHELL
+
     return script
 
 def _no_white_space_or_err(words):
@@ -173,6 +186,11 @@ def process_image_template_create_namespace(cmd, namespace):
             'type': _SourceType.PLATFORM_IMAGE
         }
 
+        if "windows" not in source["offer"].lower() and "windows" not in source["sku"].lower():
+            likely_linux = True
+        else:
+            likely_linux = False
+
     # 2 - check if source is a Redhat iso uri. If so a checksum must be provided.
     elif urlparse(namespace.source).scheme and "://" in namespace.source and ".iso" in namespace.source.lower():
         if not namespace.checksum:
@@ -182,6 +200,8 @@ def process_image_template_create_namespace(cmd, namespace):
             'sha256_checksum': namespace.checksum,
             'type': _SourceType.ISO_URI
         }
+        likely_linux = True
+
     # 3 - check if source is a urn alias from the vmImageAliasDoc endpoint. See "az cloud show"
     else:
         from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
@@ -196,15 +216,36 @@ def process_image_template_create_namespace(cmd, namespace):
                 'type': _SourceType.PLATFORM_IMAGE
             }
 
+        if "windows" not in source["offer"].lower() and "windows" not in source["sku"].lower():
+            likely_linux = True
+
     if not source:
         err = 'Invalid image "{}". Use a valid image URN, ISO URI, or pick a platform image alias from {}.\n' \
               'See vm create -h for more information on specifying an image.'
         raise CLIError(err.format(namespace.source, ", ".join([x['urnAlias'] for x in images])))
 
+    for script in scripts:
+        if script["type"] == None:
+            try:
+                script["type"] = ScriptType.SHELL if likely_linux else ScriptType.POWERSHELL
+                logger.info("For script {}, likely linux is {}".format(script["script"], likely_linux))
+            except NameError:
+                raise CLIError("Unable to infer the type of script {}".format(script["script"]))
 
     namespace.source_dict = source
     namespace.scripts_list = scripts
     namespace.destinations_lists = destinations
+
+def process_img_tmpl_customizer_add_namespace(cmd, namespace):
+
+    if namespace.customizer_type.lower() in [ScriptType.SHELL.value.lower(), ScriptType.POWERSHELL.value.lower()]:
+        if not namespace.script:
+            raise CLIError("A script must be provided if type is one of: {} {}".format(ScriptType.SHELL.value, ScriptType.POWERSHELL.value))
+
+    elif namespace.customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
+        if namespace.script:
+            logger.warning("Ignoring the supplied script as scripts are not used for Windows Restart.")
+
 
 def process_img_tmpl_output_add_namespace(cmd, namespace):
     from azure.cli.core.commands.parameters import get_subscription_locations
@@ -259,8 +300,9 @@ def create_image_template(client, resource_group_name, image_template_name, sour
                           checksum=None, location=None, no_wait=False,
                           managed_image_destinations=None, shared_image_destinations=None,
                           source_dict=None, scripts_list=None, destinations_lists=None):
-    from azure.mgmt.imagebuilder.models import ImageTemplate, ImageTemplatePlatformImageSource, ImageTemplateIsoSource,\
-        ImageTemplateShellCustomizer, ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor
+    from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplatePlatformImageSource, ImageTemplateIsoSource,
+                                                ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
+                                                ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  #pylint: disable=line-too-long
 
     template_source, template_scripts, template_destinations = None, [], []
 
@@ -271,9 +313,18 @@ def create_image_template(client, resource_group_name, image_template_name, sour
         template_source = ImageTemplateIsoSource(**source_dict)
 
     # create image template customizer settings
+    # Script structure can be found in _parse_script's function definition
     for script in scripts_list:
         script.pop("is_url")
-        template_scripts.append(ImageTemplateShellCustomizer(**script))
+
+        if script["type"] == ScriptType.SHELL:
+            template_scripts.append(ImageTemplateShellCustomizer(**script))
+        elif script["type"] == ScriptType.POWERSHELL:
+            template_scripts.append(ImageTemplatePowerShellCustomizer(**script))
+        else:  # Should never happen
+            logger.debug("Script {} has type {}".format(script["script"], script["type"]))
+            raise CLIError("Script {} has an invalid type.".format(script["script"]))
+
 
     # create image template distribution / destination settings
     for dest_type, id, loc_info in destinations_lists:
@@ -297,7 +348,7 @@ def list_image_templates(client, resource_group_name=None):
 def show_build_output(client, resource_group_name, image_template_name, output_name=None):
     if output_name:
         return client.virtual_machine_image_templates.get_run_output(resource_group_name, image_template_name, output_name)
-    return client.virtual_machine_image_templates.get_run_outputs(resource_group_name, image_template_name)
+    return client.virtual_machine_image_templates.list_run_outputs(resource_group_name, image_template_name)
 
 # TODO: add when new whl file generated. support tags for create and here.
 def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,
@@ -320,7 +371,7 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
         existing_image_template.distribute = []
     else:
         for existing_distributor in existing_image_template.distribute:
-            if existing_distributor.run_output_name.lower() == distributor.run_output_name.lower():
+            if existing_distributor.run_output_name == distributor.run_output_name:
                 raise CLIError("Output with output name {} already exists in image template {}.".format(distributor.run_output_name.lower(), image_template_name))
 
     existing_image_template.distribute.append(distributor)
@@ -338,7 +389,7 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
     for existing_distributor in existing_image_template.distribute:
         if existing_distributor.run_output_name.lower() == output_name.lower():
             continue
-        new_distribute.append(new_distribute)
+        new_distribute.append(existing_distributor)
 
     if len(new_distribute) == len(existing_image_template.distribute):
         raise CLIError("Output with output name {} not in image template distribute list.".format(output_name))
@@ -361,15 +412,92 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
     return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
 
 
-
 def _update_image_template(cmd, client, resource_group_name, image_template_name, new_template, old_template):
+    if new_template.distribute is None:
+        new_template.distribute = []
+
+    if new_template.customize is None:
+        new_template.customize = []
+
+
     LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.delete(resource_group_name, image_template_name))
     try:
         return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.create_or_update(new_template, resource_group_name, image_template_name))
     except (ClientException) as e:
-        logger.warning("Failed to create updated template.\nError: %s.\nRe-creating old template", e)
+        logger.error("Failed to create updated template.\nError: %s.\nRe-creating old template", e)
         old_template.distribute = old_template.distribute or []
         old_template.customize = old_template.customize or []
-        return LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.create_or_update(old_template, resource_group_name, image_template_name))
+        LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_image_templates.create_or_update(old_template, resource_group_name, image_template_name))
+        logger.warning("Template {} was created.".format(old_template.id))
+        raise CLIError("Update Operation failed.")
+
+# todo: prevent customizers with the same name
+
+def add_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name, customizer_type,
+                            script=None, valid_exit_codes=None,
+                            restart_command=None, restart_check_command=None, restart_timeout=None):
+    from azure.mgmt.imagebuilder.models import ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer, ImageTemplateRestartCustomizer
+    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
+    old_template_copy = copy.deepcopy(existing_image_template)
+
+
+    if existing_image_template.customize is None:
+        existing_image_template.customize = []
+    else:
+        for existing_customizer in existing_image_template.customize:
+            if existing_customizer.name == customizer_name:
+                raise CLIError("Output with output name {} already exists in image template {}.".format(customizer_name, image_template_name))
+
+
+    new_customizer = None
+
+    if customizer_type.lower() == ScriptType.SHELL.value.lower():
+        new_customizer = ImageTemplateShellCustomizer(name=customizer_name, script=script)
+    elif customizer_type.lower() == ScriptType.POWERSHELL.value.lower():
+        new_customizer = ImageTemplatePowerShellCustomizer(name=customizer_name, script=script, valid_exit_codes=valid_exit_codes)
+    elif customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
+        new_customizer = ImageTemplateRestartCustomizer(name=customizer_name, restart_command=restart_command,
+                                                           restart_check_command=restart_check_command,
+                                                           restart_timeout=restart_timeout)
+
+    if not new_customizer:
+        raise CLIError("Cannot determine customizer from type {}.".format(customizer_type))
+
+    existing_image_template.customize.append(new_customizer)
+    # Work around of not having update method. delete then create.
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+
+
+def remove_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name):
+    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
+    old_template_copy = copy.deepcopy(existing_image_template)
+
+    if not existing_image_template.customize:
+        raise CLIError("No customizers to remove.")
+
+    new_customize = []
+    for existing_customizer in existing_image_template.customize:
+        if existing_customizer.name == customizer_name:
+            continue
+        new_customize.append(existing_customizer)
+
+    if len(new_customize) == len(existing_image_template.customize):
+        raise CLIError("Customizer with name {} not in image template customizer list.".format(customizer_name))
+
+    existing_image_template.customize = new_customize
+
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+
+def clear_template_customizer(cmd, client, resource_group_name, image_template_name):
+    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
+
+    old_template_copy = copy.deepcopy(existing_image_template)
+
+    if not existing_image_template.customize:
+        raise CLIError("No customizers to remove.")
+
+    existing_image_template.customize = []
+
+    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
 
 # endregion

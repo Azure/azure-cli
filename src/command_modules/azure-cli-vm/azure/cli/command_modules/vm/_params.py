@@ -23,8 +23,8 @@ from azure.cli.command_modules.vm._validators import (
     validate_asg_names_or_ids, validate_keyvault, validate_proximity_placement_group,
     process_gallery_image_version_namespace)
 
-from ._vm_utils import MSI_LOCAL_ID
-
+from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
+from azure.cli.command_modules.vm._image_builder import ScriptType
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
@@ -144,7 +144,9 @@ def load_arguments(self, _):
         ib_output_name_help = "Name of the image builder run output."
 
         c.argument('location', get_location_type(self.cli_ctx))
-        c.argument('scripts', nargs='+', help="Space-separated list of scripts to customize the image with. Each script must be a publicly accessible URL or a path to an existing file. If a file path is given, the script will be uploaded to a storage account.")
+        c.argument('scripts', nargs='+', help="Space-separated list of scripts to customize the image with. Each script must be a publicly accessible URL."
+                                              #"Or a path to an existing file. If a file path is given, the script will be uploaded to a storage account."
+                                              " Infers type of script from file extension ('.sh' or'.ps1') or from source type. More more flexibility, see: 'az image template customizer add'")
         c.argument('source', options_list="--image-source", help="The base image to customize. Must be a valid platform image URN, platform image alias, or Red Hat ISO image URI.")
         c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
         c.argument('checksum', help="The SHA256 checksum of the Red Hat ISO image")
@@ -169,8 +171,22 @@ def load_arguments(self, _):
         c.argument('output_name', help= ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
-
         c.ignore('location')
+
+    with self.argument_context('image template customizer') as c:
+        win_restart_type = CLIArgumentType(arg_group="Windows Restart")
+
+        c.argument('customizer_name', help="Name of the customizer to be added to the image template.")
+        c.argument('customizer_type', options_list=['--type', '-t'], help="Type of customizer to be added to the image template.", arg_type=get_enum_type(ScriptType))
+        c.argument('script', help="Script to customize the image with. The script must be a publicly accessible URL.")
+
+        # Powershell Specific Args
+        c.argument('valid_exit_codes', options_list=['--exit-codes', '-e'], arg_group="PowerShell", nargs='+', help="Space-separated list of valid exit codes, as intergers")
+
+        # Windows Restart Specific Args
+        c.argument('restart_command', arg_type=win_restart_type, help="Command to execute the restart operation.")
+        c.argument('restart_check_command', arg_type=win_restart_type, help="Command to verify that restart succeeded.")
+        c.argument('restart_timeout', arg_type=win_restart_type, help="Restart timeout specified as a string consisting of a magnitude and unit, e.g. '5m' (5 minutes) or '2h' (2 hours)", default="5m")
 
     # endregion
 
