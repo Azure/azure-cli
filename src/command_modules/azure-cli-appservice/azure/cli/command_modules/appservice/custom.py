@@ -367,6 +367,36 @@ def update_webapp(instance, client_affinity_enabled=None, https_only=None):
     return instance
 
 
+def update_functionapp(cmd, instance, plan=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if plan is not None:
+        if is_valid_resource_id(plan):
+            dest_parse_result = parse_resource_id(plan)
+            dest_plan_info = client.app_service_plans.get(dest_parse_result['resource_group'],
+                                                          dest_parse_result['name'])
+        else:
+            dest_plan_info = client.app_service_plans.get(instance.resource_group, plan)
+        if dest_plan_info is None:
+            raise CLIError("The plan '{}' doesn't exist".format(plan))
+        validate_plan_switch_compatibility(client, instance, dest_plan_info)
+        instance.server_farm_id = dest_plan_info.id
+    return instance
+
+
+def validate_plan_switch_compatibility(client, src_functionapp_instance, dest_plan_instance):
+    general_switch_msg = 'Currently the switch is only allowed between a Consumption or an Elastic Premium plan.'
+    src_parse_result = parse_resource_id(src_functionapp_instance.server_farm_id)
+    src_plan_info = client.app_service_plans.get(src_parse_result['resource_group'],
+                                                 src_parse_result['name'])
+    if src_plan_info is None:
+        raise CLIError('Could not determine the current plan of the functionapp')
+    elif not (is_plan_consumption(src_plan_info) or is_plan_Elastic_Premium(src_plan_info)):
+        raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
+    if not (is_plan_consumption(dest_plan_instance) or is_plan_Elastic_Premium(dest_plan_instance)):
+        raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
+                       general_switch_msg)
+
+
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
     if 'function' not in instance.kind:
@@ -1899,6 +1929,13 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     # This command merely shadows 'az appservice plan create' except with a few parameters
     return create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v=None,
                                    sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+
+
+def is_plan_consumption(plan_info):
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'dynamic'
+    return False
 
 
 def is_plan_Elastic_Premium(plan_info):
