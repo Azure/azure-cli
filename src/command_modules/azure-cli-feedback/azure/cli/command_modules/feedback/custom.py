@@ -114,6 +114,7 @@ class CommandLogFile(object):
         if not os.path.isfile(log_file_path):
             raise ValueError("File {} is not an existing file.".format(log_file_path))
 
+        self._command_name = None
         self._log_file_path = log_file_path
 
         if time_now is None:
@@ -123,8 +124,6 @@ class CommandLogFile(object):
 
         self._metadata = self._get_command_metadata_from_file()
         self._data = None
-
-        self.cli_ctx = None
 
     @property
     def metadata_tup(self):
@@ -137,13 +136,11 @@ class CommandLogFile(object):
         return self._data
 
     def get_command_name_str(self):
+        if self._command_name is not None:
+            return self._command_name  # attempt to return cached command name
+
         if not self.metadata_tup:
             return ""
-
-        try:
-            return self._command_name  # attempt to return cached result
-        except AttributeError:
-            pass
 
         args = self.command_data_dict.get("command_args", "")
 
