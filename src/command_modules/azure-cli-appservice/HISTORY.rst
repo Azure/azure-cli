@@ -2,6 +2,30 @@
 
 Release History
 ===============
+
+0.2.17
+++++++
+* functionapp: fix `az functionapp devops-build create` command azure-pipelines.yml generation issues
+* functionapp: improve `az functionapp devops-build create` error handlings and error indications
+* functionapp: remove `--local_git` flag in devops-build command, local git detection and handling are compulsory for creating Azure DevOps pipelines
+* functionapp: add support for linux functions plan creation
+* webapp, functionapp: Updating to use the new Python SDK version
+* appservice: adminSiteName property of SKU object is deprecated
+
+0.2.16
+++++++
+* webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly
+* webapp, functionapp: az webapp config ssl bind command was failing for slots
+
+0.2.15
+++++++
+* webapp, functionapp: az webapp/functionapp deployment list-publishing-credentials, get the Kudu (scm) url and its credentials
+* Remove erroneous print statement for `az webapp auth update`
+* functionapp: fix setting the correct image for runtime in Linux App Service plans
+* webapp: remove preview tag for az webapp up and other improvements to the command
+
+0.2.14
+++++++
 * functionapp: az functionapp devops-build, new command created
 
 0.2.13

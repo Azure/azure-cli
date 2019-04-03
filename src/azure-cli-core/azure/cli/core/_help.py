@@ -5,14 +5,16 @@
 
 from __future__ import print_function
 import argparse
+
+from azure.cli.core.commands import ExtensionCommandSource
+
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
                         HelpExample as KnackHelpExample, HelpParameter as KnackHelpParameter,
-                        _print_indent, CLIHelp)
+                        _print_indent, CLIHelp, HelpAuthoringException)
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.commands import ExtensionCommandSource
 
 logger = get_logger(__name__)
 
@@ -138,6 +140,12 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         HelpObject._normalize_text = new_normalize_text  # pylint: disable=protected-access
 
         self._register_help_loaders()
+        self._name_to_content = {}
+
+    # override
+    def show_help(self, cli_name, nouns, parser, is_group):
+        self.update_loaders_with_help_file_contents(nouns)
+        super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
@@ -157,6 +165,25 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
         self.versioned_loaders = versioned_loaders
 
+    def update_loaders_with_help_file_contents(self, nouns):
+        loader_file_names_dict = {}
+        file_name_set = set()
+        for ldr_cls_name, loader in self.versioned_loaders.items():
+            new_file_names = loader.get_noun_help_file_names(nouns) or []
+            loader_file_names_dict[ldr_cls_name] = new_file_names
+            file_name_set.update(new_file_names)
+
+        for file_name in file_name_set:
+            if file_name not in self._name_to_content:
+                with open(file_name, 'r') as f:
+                    self._name_to_content[file_name] = f.read()
+
+        for ldr_cls_name, file_names in loader_file_names_dict.items():
+            file_contents = {}
+            for name in file_names:
+                file_contents[name] = self._name_to_content[name]
+            self.versioned_loaders[ldr_cls_name].update_file_contents(file_contents)
+
 
 class CliHelpFile(KnackHelpFile):
 
@@ -166,15 +193,24 @@ class CliHelpFile(KnackHelpFile):
         self.links = []
 
     def _should_include_example(self, ex):
-        min_profile = ex.get('min_profile')
-        max_profile = ex.get('max_profile')
-        if min_profile or max_profile:
-            from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-            # yaml will load this as a datetime if it's a date, we need a string.
-            min_profile = str(min_profile) if min_profile else None
-            max_profile = str(max_profile) if max_profile else None
-            return supported_api_version(self.help_ctx.cli_ctx, resource_type=PROFILE_TYPE,
-                                         min_api=min_profile, max_api=max_profile)
+        supported_profiles = ex.get('supported-profiles')
+        unsupported_profiles = ex.get('unsupported-profiles')
+
+        if all((supported_profiles, unsupported_profiles)):
+            raise HelpAuthoringException("An example cannot have both supported-profiles and unsupported-profiles.")
+
+        if 'min_profile' in ex or 'max_profile' in ex:
+            raise HelpAuthoringException("Help entry fields 'min_profile' and 'max_profile' are no longer supported. "
+                                         "Please use 'supported-profiles' or 'unsupported-profiles'.")
+
+        if supported_profiles:
+            supported_profiles = [profile.strip() for profile in supported_profiles.split(',')]
+            return self.help_ctx.cli_ctx.cloud.profile in supported_profiles
+
+        if unsupported_profiles:
+            unsupported_profiles = [profile.strip() for profile in unsupported_profiles.split(',')]
+            return self.help_ctx.cli_ctx.cloud.profile not in unsupported_profiles
+
         return True
 
     # Needs to override base implementation to exclude unsupported examples.
@@ -297,8 +333,8 @@ class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
         self.text = _data.get('command', '') if _data.get('command', '') else self.text
 
         self.long_summary = _data.get('description', '')
-        self.min_profile = _data.get('min_profile', '')
-        self.max_profile = _data.get('max_profile', '')
+        self.supported_profiles = _data.get('supported-profiles', None)
+        self.unsupported_profiles = _data.get('unsupported-profiles', None)
 
     # alias old params with new
     @property

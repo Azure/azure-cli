@@ -2,6 +2,17 @@
 
 Release History
 ===============
+* Fix issue where some extensions showed a version of "Unknown" and could not be updated.
+
+2.0.61
+++++++
+* Fix issues with dev extension incompatibility.
+* Error handling now points customers to issues page.
+
+2.0.60
+++++++
+* cloud set: fix a bogus error about subscription not found
+
 2.0.59
 ++++++
 * Fix issue where in some instances using `--subscription NAME` would throw an exception.

@@ -18,13 +18,14 @@ def start_shell(cmd, update=None, style=None):
         get_extension(INTERACTIVE_EXTENSION_NAME)
         if update:
             logger.warning("Updating the Interactive extension to the latest available..")
-            update_extension(INTERACTIVE_EXTENSION_NAME)
+            update_extension(cmd, INTERACTIVE_EXTENSION_NAME)
             reload_extension(INTERACTIVE_EXTENSION_NAME)
     except ExtensionNotInstalledException:
         logger.warning("Installing the Interactive extension..")
-        add_extension(extension_name=INTERACTIVE_EXTENSION_NAME)
+        add_extension(cmd, extension_name=INTERACTIVE_EXTENSION_NAME)
 
-    add_extension_to_path(INTERACTIVE_EXTENSION_NAME)
-    interactive_module = get_extension_modname(ext_name=INTERACTIVE_EXTENSION_NAME)
+    ext_path = get_extension(INTERACTIVE_EXTENSION_NAME).path
+    add_extension_to_path(INTERACTIVE_EXTENSION_NAME, ext_dir=ext_path)
+    interactive_module = get_extension_modname(ext_name=INTERACTIVE_EXTENSION_NAME, ext_dir=ext_path)
     azext_interactive = import_module(interactive_module)
     azext_interactive.start_shell(cmd, style=style)

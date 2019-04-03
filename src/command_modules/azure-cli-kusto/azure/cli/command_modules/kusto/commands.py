@@ -13,11 +13,11 @@ def load_command_table(self, _):
     from azure.cli.core.commands import CliCommandType
 
     clusters_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.kusto.operations.clusters_operations#ClustersOperations.{}',
+        operations_tmpl='azure.mgmt.kusto.operations#ClustersOperations.{}',
         client_factory=cf_cluster)
 
     database_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.kusto.operations.databases_operations#DatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.kusto.operations#DatabasesOperations.{}',
         client_factory=cf_database)
 
     with self.command_group('kusto cluster',

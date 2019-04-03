@@ -10,7 +10,8 @@ from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     Location,
-    DatabaseAccountKind
+    DatabaseAccountKind,
+    VirtualNetworkRule
 )
 
 logger = get_logger(__name__)
@@ -188,10 +189,8 @@ def cli_cosmosdb_update(client,
 
     if enable_multiple_write_locations is None:
         enable_multiple_write_locations = existing.enable_multiple_write_locations
-    elif enable_multiple_write_locations != existing.enable_multiple_write_locations and \
-            enable_multiple_write_locations:
-        raise CLIError("Cannot convert account from single master to multi master")
-    elif enable_multiple_write_locations != existing.enable_multiple_write_locations:
+    elif enable_multiple_write_locations != existing.enable_multiple_write_locations \
+            and not enable_multiple_write_locations:
         logger.warning("Updating the account from multi master to single master will take 24 hours to complete.")
 
     params = DatabaseAccountCreateUpdateParameters(
@@ -219,6 +218,123 @@ def cli_cosmosdb_list(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
 
     return client.list()
+
+
+def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
+    """ Lists the virtual network accounts associated with a Cosmos DB account """
+    cosmos_db_account = client.get(resource_group_name, account_name)
+    return cosmos_db_account.virtual_network_rules
+
+
+def _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if not is_valid_resource_id(subnet):
+        if virtual_network is None:
+            raise CLIError("usage error: --subnet ID | --subnet NAME --vnet-name NAME")
+        subnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network', type='virtualNetworks',
+            name=virtual_network, child_type_1='subnets', child_name_1=subnet
+        )
+    return subnet
+
+
+def cli_cosmosdb_network_rule_add(cmd,
+                                  client,
+                                  resource_group_name,
+                                  account_name,
+                                  subnet,
+                                  virtual_network=None,
+                                  ignore_missing_vnet_service_endpoint=False):
+    """ Adds a virtual network rule to an existing Cosmos DB database account """
+    subnet = _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network)
+    existing = client.get(resource_group_name, account_name)
+
+    virtual_network_rules = []
+    rule_already_exists = False
+    for rule in existing.virtual_network_rules:
+        virtual_network_rules.append(
+            VirtualNetworkRule(id=rule.id,
+                               ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+        if rule.id == subnet:
+            rule_already_exists = True
+            logger.warning("The rule exists and will be overwritten")
+
+    if not rule_already_exists:
+        virtual_network_rules.append(
+            VirtualNetworkRule(id=subnet,
+                               ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
+
+    locations = []
+    for loc in existing.read_locations:
+        locations.append(
+            Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+
+    params = DatabaseAccountCreateUpdateParameters(
+        location=existing.location,
+        locations=locations,
+        tags=existing.tags,
+        kind=existing.kind,
+        consistency_policy=existing.consistency_policy,
+        ip_range_filter=existing.ip_range_filter,
+        enable_automatic_failover=existing.enable_automatic_failover,
+        capabilities=existing.capabilities,
+        is_virtual_network_filter_enabled=True,
+        virtual_network_rules=virtual_network_rules,
+        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+
+    async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
+    docdb_account = async_docdb_create.result()
+    docdb_account = client.get(resource_group_name, account_name)  # Workaround
+    return docdb_account
+
+
+def cli_cosmosdb_network_rule_remove(cmd,
+                                     client,
+                                     resource_group_name,
+                                     account_name,
+                                     subnet,
+                                     virtual_network=None):
+    """ Adds a virtual network rule to an existing Cosmos DB database account """
+    subnet = _get_virtual_network_id(cmd, resource_group_name, subnet, virtual_network)
+    existing = client.get(resource_group_name, account_name)
+
+    virtual_network_rules = []
+    rule_removed = False
+    for rule in existing.virtual_network_rules:
+        if rule.id != subnet:
+            virtual_network_rules.append(
+                VirtualNetworkRule(id=rule.id,
+                                   ignore_missing_vnet_service_endpoint=rule.ignore_missing_vnet_service_endpoint))
+        else:
+            rule_removed = True
+    if not rule_removed:
+        raise CLIError("This rule does not exist for the Cosmos DB account")
+
+    locations = []
+    for loc in existing.read_locations:
+        locations.append(
+            Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+
+    params = DatabaseAccountCreateUpdateParameters(
+        location=existing.location,
+        locations=locations,
+        tags=existing.tags,
+        kind=existing.kind,
+        consistency_policy=existing.consistency_policy,
+        ip_range_filter=existing.ip_range_filter,
+        enable_automatic_failover=existing.enable_automatic_failover,
+        capabilities=existing.capabilities,
+        is_virtual_network_filter_enabled=True,
+        virtual_network_rules=virtual_network_rules,
+        enable_multiple_write_locations=existing.enable_multiple_write_locations)
+
+    async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
+    docdb_account = async_docdb_create.result()
+    docdb_account = client.get(resource_group_name, account_name)  # Workaround
+    return docdb_account
 
 
 ######################

@@ -223,7 +223,7 @@ helps['monitor metrics alert create'] = """
         - name: --condition
           short-summary: The condition which triggers the rule.
           long-summary: |
-            Usage:  --conditon {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+            Usage:  --conditon {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
                                [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                                [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
@@ -258,7 +258,7 @@ helps['monitor metrics alert update'] = """
         - name: --add-condition
           short-summary: Add a condition which triggers the rule.
           long-summary: |
-            Usage:  --add-conditon {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
+            Usage:  --add-conditon {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD
                                    [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                                    [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 

@@ -16,13 +16,13 @@ from copy import deepcopy
 from enum import Enum
 from six.moves import BaseHTTPServer
 
-from knack.log import get_logger
-from knack.util import CLIError
-
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+
+from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -418,6 +418,9 @@ class Profile(object):
         s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
         return s or subscriptions[0]
 
+    def is_tenant_level_account(self):
+        return self.get_subscription()[_SUBSCRIPTION_NAME] == _TENANT_LEVEL_ACCOUNT_NAME
+
     def set_active_subscription(self, subscription):  # take id or name
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         active_cloud = self.cli_ctx.cloud
@@ -479,9 +482,9 @@ class Profile(object):
         if not result and subscription:
             raise CLIError("Subscription '{}' not found. "
                            "Check the spelling and casing and try again.".format(subscription))
-        elif not result and not subscription:
+        if not result and not subscription:
             raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
-        elif len(result) > 1:
+        if len(result) > 1:
             raise CLIError("Multiple subscriptions with the name '{}' found. "
                            "Specify the subscription ID.".format(subscription))
         return result[0]
@@ -676,7 +679,7 @@ class Profile(object):
                     result['clientCertificate'] = sp_auth.certificate_file
                 result['subscriptionId'] = account[_SUBSCRIPTION_ID]
             else:
-                raise CLIError('SDK Auth file is only applicable on service principals')
+                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
 
         result[_TENANT_ID] = account[_TENANT_ID]
         endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
@@ -1068,7 +1071,7 @@ class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write(html_file.read())
 
     def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        return  # this prevent http server from dumping messages to stdout
+        pass  # this prevent http server from dumping messages to stdout
 
 
 def _get_authorization_code_worker(authority_url, resource, results):

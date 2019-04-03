@@ -16,6 +16,9 @@ cache: pip
 jobs:
   include:
     - stage: precheck
+      env: PURPOSE='Reject PRs to master'
+      script: ./scripts/ci/reject_master_prs.sh
+    - stage: precheck
       env: PURPOSE='PEP8'
       script: ./scripts/ci/precheck_pep8.sh
       python: 3.6

@@ -5,7 +5,10 @@
 import json
 import mock
 import unittest
+import datetime
+import dateutil
 import dateutil.parser
+from msrest.serialization import TZ_UTC
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
@@ -88,6 +91,15 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         except Exception:
             self.cmd('ad app delete --id {id}')
 
+    def test_web_app_no_identifier_uris_other_tenants_create_scenario(self):
+        self.kwargs = {
+            'web_app_name': self.create_random_name('cli-web-', 20)
+        }
+
+        self.cmd("ad app create --display-name {web_app_name} --available-to-other-tenants true", checks=[
+            self.exists('appId')
+        ])
+
 
 class ApplicationSetScenarioTest(ScenarioTest):
 
@@ -109,9 +121,13 @@ class ApplicationSetScenarioTest(ScenarioTest):
             ])
         })
 
-        # crerate app through general option
+        # create app through general option
         self.cmd('ad app create --display-name {name} --homepage {app} --identifier-uris {app}',
                  checks=self.check('identifierUris[0]', '{app}'))
+
+        # set app password
+        result = self.cmd('ad app credential reset --id {app} --append --password "test" --years 2').get_output_in_json()
+        self.assertTrue(result['appId'])
 
         # show/list app
         self.cmd('ad app show --id {app}',
@@ -311,7 +327,8 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
         self.kwargs = {
-            'app': "http://" + self.create_random_name('cli-app-', 15)
+            'app': "http://" + self.create_random_name('cli-app-', 15),
+            'app2': "http://" + self.create_random_name('cli-app-', 15)
         }
         app_id = None
         try:
@@ -342,12 +359,28 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('ad app credential delete --id {app} --key-id ' + key_id)
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
+            # try use --end-date
+            self.cmd('ad sp credential reset -n {app} --password verySecert123 --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
+            self.cmd('ad app credential reset --id {app} --password verySecert123 --end-date "2100-12-31" --credential-description newCred4')
+
             # ensure we can update other properties #7728
             self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
             self.cmd('ad app show --id {app}', checks=self.check('groupMembershipClaims', 'All'))
+
+            # ensure we can update SP's properties #5948
+            self.cmd('az ad sp update --id {app} --set appRoleAssignmentRequired=true')
+            self.cmd('az ad sp show --id {app}')
+
+            result = self.cmd('ad sp create-for-rbac --name {app2} --skip-assignment --years 10').get_output_in_json()
+            app_id2 = result['appId']
+            result = self.cmd('ad sp credential list --id {app2}', checks=self.check('length([*])', 1)).get_output_in_json()
+            diff = dateutil.parser.parse(result[0]['endDate']).replace(tzinfo=None) - datetime.datetime.utcnow()
+            self.assertTrue(diff.days > 9.9 * 365)
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)
+            if app_id2:
+                self.cmd('ad app delete --id ' + app_id2)
 
 
 class GraphAppRequiredAccessScenarioTest(ScenarioTest):
@@ -358,7 +391,8 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
         self.kwargs = {
             'app': "http://" + self.create_random_name('cli-app-', 15),
             'graph_resource': '00000002-0000-0000-c000-000000000000',
-            'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a'
+            'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a',
+            'target_api2': '311a71cc-e848-46a1-bdf8-97ff7156d8e6'
         }
         app_id = None
         try:
@@ -369,7 +403,12 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             permissions = self.cmd('ad app permission list --id {app_id}', checks=[
                 self.check('length([*])', 1)
             ]).get_output_in_json()
-            self.assertTrue(dateutil.parser.parse(permissions[0]['grantedTime']))  # verify it is a time
+            self.assertTrue(dateutil.parser.parse(permissions[0]['expiryTime']))  # verify it is a time
+            self.cmd('ad app permission list-grants --id {app_id}', checks=self.check('length([*])', 1))
+            self.cmd('ad app permission list-grants --id {app_id} --show-resource-name',
+                     checks=self.check('[0].resourceDisplayName', "Windows Azure Active Directory"))
+            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api2}=Scope')
+            self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
             self.cmd('ad app permission delete --id {app_id} --api {graph_resource}')
             self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
         finally:

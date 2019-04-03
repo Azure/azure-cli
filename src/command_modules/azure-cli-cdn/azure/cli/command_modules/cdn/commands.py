@@ -36,36 +36,36 @@ def load_command_table(self, _):
     )
 
     cdn_endpoints_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations.endpoints_operations#EndpointsOperations.{}',
+        operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
         client_factory=cf_endpoints,
         exception_handler=_not_found(endpoint_not_found_msg)
     )
 
     cdn_profiles_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations.profiles_operations#ProfilesOperations.{}',
+        operations_tmpl='azure.mgmt.cdn.operations#ProfilesOperations.{}',
         client_factory=cf_profiles,
         exception_handler=_not_found(profile_not_found_msg)
     )
 
     cdn_domain_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations.custom_domains_operations#CustomDomainsOperations.{}',
+        operations_tmpl='azure.mgmt.cdn.operations#CustomDomainsOperations.{}',
         client_factory=cf_custom_domain,
         exception_handler=_not_found(cd_not_found_msg)
     )
 
     cdn_origin_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations.origins_operations#OriginsOperations.{}',
+        operations_tmpl='azure.mgmt.cdn.operations#OriginsOperations.{}',
         client_factory=cf_origins,
         exception_handler=_not_found(origin_not_found_msg)
     )
 
     cdn_edge_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations.edge_nodes_operations#EdgeNodesOperations.{}',
+        operations_tmpl='azure.mgmt.cdn.operations#EdgeNodesOperations.{}',
         client_factory=cf_edge_nodes
     )
 
     cdn_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.cdn.operations.resource_usage_operations#ResourceUsageOperations.{}',
+        operations_tmpl='azure.mgmt.cdn.operations#ResourceUsageOperations.{}',
         client_factory=cf_resource_usage
     )
 
@@ -77,17 +77,19 @@ def load_command_table(self, _):
 
     with self.command_group('cdn endpoint', cdn_endpoints_sdk) as g:
         for name in ['start', 'stop', 'delete']:
-            g.command(name, name)
+            g.command(name, name, supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_profile')
-        g.command('load', 'load_content')
-        g.command('purge', 'purge_content')
+        g.command('load', 'load_content', supports_no_wait=True)
+        g.command('purge', 'purge_content', supports_no_wait=True)
         g.command('validate-custom-domain', 'validate_custom_domain')
         g.custom_command('create', 'create_endpoint', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint',
+                         supports_no_wait=True)
         g.generic_update_command('update', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='update_endpoint',
-                                 doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters')
+                                 doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
+                                 supports_no_wait=True)
 
     with self.command_group('cdn profile', cdn_profiles_sdk) as g:
         g.show_command('show', 'get')

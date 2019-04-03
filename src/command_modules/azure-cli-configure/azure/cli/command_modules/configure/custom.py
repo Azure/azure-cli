@@ -129,12 +129,12 @@ def _handle_global_configuration(config):
 
 def handle_configure(cmd, defaults=None):
     if defaults:
-        from azure.cli.core._config import DEFAULTS_SECTION
+        defaults_section = cmd.cli_ctx.config.defaults_section_name
         for default in defaults:
             parts = default.split('=', 1)
             if len(parts) == 1:
                 raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
-            cmd.cli_ctx.config.set_value(DEFAULTS_SECTION, parts[0], _normalize_config_value(parts[1]))
+            cmd.cli_ctx.config.set_value(defaults_section, parts[0], _normalize_config_value(parts[1]))
         return
 
     # if nothing supplied, we go interactively

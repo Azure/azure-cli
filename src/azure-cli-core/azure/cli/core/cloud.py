@@ -7,12 +7,12 @@ import os
 from pprint import pformat
 from six.moves import configparser
 
+from azure.cli.core.profiles import API_PROFILES
+from azure.cli.core._config import GLOBAL_CONFIG_DIR
+
 from knack.log import get_logger
 from knack.util import CLIError
 from knack.config import get_config_parser
-
-from azure.cli.core.profiles import API_PROFILES
-from azure.cli.core._config import GLOBAL_CONFIG_DIR
 
 logger = get_logger(__name__)
 
@@ -233,6 +233,7 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 def _set_active_cloud(cli_ctx, cloud_name):
     cli_ctx.config.set_value('cloud', 'name', cloud_name)
+    cli_ctx.cloud = get_cloud(cli_ctx, cloud_name)
 
 
 def get_active_cloud_name(cli_ctx):
@@ -254,6 +255,10 @@ def cloud_is_registered(cli_ctx, cloud_name):
 def get_custom_clouds(cli_ctx):
     known_cloud_names = [c.name for c in KNOWN_CLOUDS]
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
+
+
+def _get_cloud_name(cli_ctx, cloud_name):
+    return next((x.name for x in get_clouds(cli_ctx) if x.name.lower() == cloud_name.lower()), cloud_name)
 
 
 def get_clouds(cli_ctx):

@@ -68,6 +68,11 @@ def load_arguments(self, _):
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
+            if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
+                c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
+                c.argument('for_upload', arg_type=get_three_state_flag(),
+                           help='Create the {0} for uploading blobs later on through storage commands. Run "az {0} grant-access --access-level Write" to retrieve the {0}\'s SAS token.'.format(scope))
+                c.argument('hyper_v_generation', help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only. Possible values include: "V1", "V2"')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -99,6 +104,7 @@ def load_arguments(self, _):
     with self.argument_context('image') as c:
         c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']))
         c.argument('image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
+        c.argument('tags', tags_type)
 
     with self.argument_context('image create') as c:
         # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
@@ -199,6 +205,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        # Place aad arguments in their own group
+        aad_arguments = 'Azure Active Directory'
+        c.argument('aad_client_id', arg_group=aad_arguments)
+        c.argument('aad_client_secret', arg_group=aad_arguments)
+        c.argument('aad_client_cert_thumbprint', arg_group=aad_arguments)
 
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
@@ -485,9 +496,9 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('volume_type', help='Type of volume that the encryption operation is performed on', arg_type=get_enum_type(['DATA', 'OS', 'ALL']))
             c.argument('force', action='store_true', help='continue by ignoring client side validation errors')
-            c.argument('disk_encryption_keyvault', help='The key vault where the generated encryption key will be placed.')
+            c.argument('disk_encryption_keyvault', help='Name or ID of the key vault where the generated encryption key will be placed.')
             c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
-            c.argument('key_encryption_keyvault', help='The key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
+            c.argument('key_encryption_keyvault', help='Name or ID of the key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
 
     for scope in ['vm extension', 'vmss extension']:
         with self.argument_context(scope) as c:
@@ -518,7 +529,11 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm update', 'vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
-            c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+            license_msg = "Specifies that the Windows image or disk was licensed on-premises. " \
+                          "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
+                          "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
+                          "For more information see the Azure Windows VM online docs."
+            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')

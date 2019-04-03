@@ -3,11 +3,27 @@
 Release History
 ===============
 
+* `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
+* `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
+* `express-route port update`: Fixed an issue where updating link state on an express-route port would throw an unknown attribute exception.
+
+2.3.5
++++++
+* `application-gateway`: Add `rewrite-rule` command group.
+
+2.3.4
++++++
+* `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
+
+2.3.3
++++++
 * `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
 * `express-route`: Port command groups from `express-route` extensions.
 * `express-route`: Added `express-route gateway` and `express-route port` command groups.
 * `express-route peering create/update`: Added argument `--legacy-mode`.
 * `express-route create/update`: Added argument `--allow-classic-operations` and `--express-route-port`.
+* `vnet-gateway create/update`: Add `--gateway-default-site` argument.
+* `vnet-gateway`: Added `ipsec-policy` commands.
 
 2.3.2
 +++++

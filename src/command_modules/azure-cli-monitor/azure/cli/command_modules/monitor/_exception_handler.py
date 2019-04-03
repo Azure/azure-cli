@@ -21,12 +21,10 @@ def monitor_exception_handler(ex):
             message = '{}.'.format(error_payload['message']) if error_payload['message'] else 'Operation failed.'
             code = '[Code: "{}"]'.format(error_payload['code']) if error_payload['code'] else ''
             raise CLIError('{} {}'.format(message, code))
-        else:
-            raise CLIError(ex)
-    else:
-        import sys
-        from six import reraise
-        reraise(*sys.exc_info())
+        raise CLIError(ex)
+    import sys
+    from six import reraise
+    reraise(*sys.exc_info())
 
 
 def missing_resource_handler(exception):
@@ -35,5 +33,4 @@ def missing_resource_handler(exception):
 
     if isinstance(exception, HttpOperationError) and exception.response.status_code == 404:
         raise CLIError('Can\'t find the resource.')
-    else:
-        raise CLIError(exception.message)
+    raise CLIError(exception.message)

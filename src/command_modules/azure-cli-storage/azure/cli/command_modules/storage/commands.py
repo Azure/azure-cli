@@ -18,7 +18,7 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-statements
     storage_account_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.storage.operations.storage_accounts_operations#StorageAccountsOperations.{}',
+        operations_tmpl='azure.mgmt.storage.operations#StorageAccountsOperations.{}',
         client_factory=cf_sa,
         resource_type=ResourceType.MGMT_STORAGE
     )
@@ -102,13 +102,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('list', 'list_blobs', transform=transform_storage_list_output,
                                 table_transformer=transform_blob_output)
         g.storage_command_oauth('download', 'get_blob_to_path', table_transformer=transform_blob_output)
-        g.storage_command_oauth('generate-sas', 'generate_blob_shared_access_signature')
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri', transform=transform_url)
         g.storage_custom_command_oauth('url', 'create_blob_url', transform=transform_url)
         g.storage_command_oauth('snapshot', 'snapshot_blob')
         g.storage_command_oauth('update', 'set_blob_properties')
         g.storage_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command_oauth('delete', 'delete_blob', transform=create_boolean_result_output_transformer('deleted'),
-                                table_transformer=transform_boolean_for_table)
+        g.storage_command_oauth('delete', 'delete_blob')
         g.storage_command_oauth('undelete', 'undelete_blob',
                                 transform=create_boolean_result_output_transformer('undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')

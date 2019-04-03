@@ -2,7 +2,16 @@
 
 Release History
 ===============
+2.3.20
+++++++
+* Minor fixes.
 
+2.3.19
+++++++
+* ignore listen-address argument to "az aks browse" if kubectl doesn't support it
+
+2.3.18
+++++++
 * add listen-address option to "az aks port-forward"
 
 2.3.17

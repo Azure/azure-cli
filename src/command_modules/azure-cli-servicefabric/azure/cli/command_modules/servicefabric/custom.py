@@ -8,7 +8,6 @@
 import os
 import time
 
-from knack.log import get_logger
 from OpenSSL import crypto
 
 try:
@@ -60,6 +59,8 @@ from azure.mgmt.compute.models import (VaultCertificate,
                                        UpgradeMode)
 from azure.mgmt.storage.models import StorageAccountCreateParameters
 
+from knack.log import get_logger
+
 from ._client_factory import (resource_client_factory,
                               keyvault_client_factory,
                               compute_client_factory,
@@ -103,7 +104,7 @@ os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
 def list_cluster(client, resource_group_name=None):
     cluster_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
-    return list(cluster_list)
+    return cluster_list
 
 
 # pylint:disable=too-many-locals, too-many-statements, too-many-boolean-expressions, too-many-branches
@@ -1216,8 +1217,7 @@ def _get_resource_group_name(cli_ctx, resource_group_name):
         error = getattr(ex, 'Azure Error', ex)
         if error != 'ResourceGroupNotFound':
             return None
-        else:
-            raise
+        raise
 
 
 def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
@@ -1729,11 +1729,10 @@ def _get_object_id_from_subscription(graph_client, subscription):
     if subscription['user']:
         if subscription['user']['type'] == 'user':
             return _get_object_id_by_upn(graph_client, subscription['user']['name'])
-        elif subscription['user']['type'] == 'servicePrincipal':
+        if subscription['user']['type'] == 'servicePrincipal':
             return _get_object_id_by_spn(graph_client, subscription['user']['name'])
-        else:
-            logger.warning("Unknown user type '%s'",
-                           subscription['user']['type'])
+        logger.warning("Unknown user type '%s'",
+                       subscription['user']['type'])
     else:
         logger.warning('Current credentials are not from a user or service principal. '
                        'Azure Key Vault does not work with certificate credentials.')

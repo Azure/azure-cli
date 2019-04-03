@@ -20,6 +20,10 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # pylint: disable=line-too-long
 
+# In the future, for any reasons the repository get removed, the source code is under "sample-repo-for-deployment-test"
+# you can use to rebuild the repository
+TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
+
 
 class WebappBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -87,6 +91,9 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name)
         ])
+        # show publishing credentials
+        result = self.cmd('webapp deployment list-publishing-credentials -g {} -n {}'.format(resource_group, webapp_name)).get_output_in_json()
+        self.assertTrue('scm' in result['scmUri'])
 
 
 class WebappQuickCreateTest(ScenarioTest):
@@ -119,7 +126,8 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|6.12"'.format(
+            resource_group, webapp_name, plan, TEST_REPO_URL))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name))
         # verify the web page
@@ -165,13 +173,14 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-linux-cd', length=24)
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u https://github.com/yugangw-msft/azure-site-test.git -r "node|6.11"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|6.11"'.format(resource_group, webapp_name,
+                                                                                   plan, TEST_REPO_URL))
         time.sleep(45)  # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        if 'Hello world' not in str(r.content):
+        if 'Your App Service app is up and running' not in str(r.content):
             # dump out more info for diagnose
-            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
+            self.fail("'Your App Service app is up and running' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -192,7 +201,8 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url https://github.com/yugangw-msft/azure-site-test.git -r "node|6.12"'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|6.12"'.format(
+            resource_group, webapp_name, plan, TEST_REPO_URL))
         time.sleep(30)  # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
 
         # sanity check the traces
@@ -1039,7 +1049,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),  # this weird field means it is a linux
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp, plan, storage_account), checks=[
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
         result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
@@ -1047,6 +1057,10 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('[0].name', functionapp)
         ]).get_output_in_json()
         self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0')])
+
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
@@ -1056,6 +1070,16 @@ class FunctionAppServicePlan(ScenarioTest):
         plan = self.create_random_name(prefix='funcappplan', length=24)
         self.cmd('functionapp plan create -g {} -n {} --sku S1' .format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1')
+        ])
+
+
+class FunctionAppServicePlanLinux(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    def test_functionapp_app_service_plan_linux(self, resource_group):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+            JMESPathCheck('kind', 'linux')
         ])
 
 
@@ -1162,10 +1186,6 @@ class WebappImplictIdentityTest(ScenarioTest):
             self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
                 self.check('principalId', result['principalId'])
             ])
-        self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
-            JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].roleDefinitionName', role)
-        ])
 
         self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=self.check('principalId', result['principalId']))
         self.cmd('webapp identity remove -g {} -n {}'.format(resource_group, webapp_name))
@@ -1181,7 +1201,6 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
 
 
 class WebappTriggeredWebJobListTest(ScenarioTest):
-
     @record_only()
     @ResourceGroupPreparer()
     def test_webapp_triggeredWebjob_list(self, resource_group):

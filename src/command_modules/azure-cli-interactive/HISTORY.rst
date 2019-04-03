@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.4.2
++++++
+* Fix incompatibility with Interactive extension installed through azdev.
 
 0.4.1
 +++++

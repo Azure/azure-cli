@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.1.1
++++++
+* `az cloud set`: support cloud name case insensitive
 
 2.1.0
 +++++

@@ -11,9 +11,7 @@ def managementgroups_exception_handler(ex):
     if isinstance(ex, ErrorResponseException):
         if ex.error.error:
             raise CLIError(ex.error.error)
-        else:
-            raise CLIError(ex.error)
-    else:
-        import sys
-        from six import reraise
-        reraise(*sys.exc_info())
+        raise CLIError(ex.error)
+    import sys
+    from six import reraise
+    reraise(*sys.exc_info())

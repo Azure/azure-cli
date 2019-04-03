@@ -127,7 +127,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('encryption_key_vault', help='The Uri of the KeyVault')
         c.extra('encryption_key_version', help='The version of the KeyVault key')
         c.argument('encryption_key_source',
-                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault'], 'Microsoft.Storage'),
+                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault']),
                    help='The default encryption service',
                    validator=validate_encryption_source)
         c.ignore('encryption_key_vault_properties')
@@ -216,6 +216,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
         c.register_sas_arguments()
+        c.extra('full_uri')
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('full_uri', action='store_true',
+                   help='Indicates that this command return the full blob URI and the shared access signature token.')
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
@@ -326,7 +339,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('source', options_list=('--source', '-s'))
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots.')
-        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.argument('lease_id', help='The active lease id for the blob.')
 
     with self.argument_context('storage blob lease') as c:
         c.argument('lease_duration', type=int)
@@ -379,9 +392,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('container_name', container_name_type, options_list=('--name', '-n'))
         c.argument('public_access', validator=validate_container_public_access,
                    arg_type=get_enum_type(get_container_access_type_names()),
-                   help='Specifies whether data in the container may be accessed publically. By default, container '
-                        'data is private ("off") to the account owner. Use "blob" to allow public read access for '
-                        'blobs. Use "container" to allow public read and list access to the entire container.')
+                   help='Specifies whether data in the container may be accessed publicly.')
 
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
@@ -522,9 +533,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--destination-share', '-s'),
                    help='Name of the destination share. The share must exist.')
 
-    with self.argument_context('storage file copy start') as c:
-        c.register_path_argument(options_list=('--destination-path', '-p'))
-
     with self.argument_context('storage file copy cancel') as c:
         c.register_path_argument(options_list=('--destination-path', '-p'))
 
@@ -622,7 +630,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file copy start') as c:
         from azure.cli.command_modules.storage._validators import validate_source_uri
 
+        c.register_path_argument(options_list=('--destination-path', '-p'))
         c.register_source_uri_arguments(validator=validate_source_uri)
+        c.extra('file_snapshot', default=None, arg_group='Copy Source',
+                help='The file snapshot for the source storage account.')
 
     with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
         from ._validators import get_source_file_or_blob_service_client

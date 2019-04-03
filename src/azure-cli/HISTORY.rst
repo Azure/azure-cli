@@ -2,9 +2,17 @@
 
 Release History
 ===============
+2.0.61
+++++++
+* Minor fixes.
+
+2.0.60
+++++++
+* Minor fixes.
+
 2.0.59
 ++++++
-* TODO
+* Minor fixes.
 
 2.0.58
 ++++++

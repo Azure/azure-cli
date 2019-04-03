@@ -11,7 +11,6 @@ def reservations_exception_handler(ex):
     if isinstance(ex, Error):
         message = ex.error.error.message
         raise CLIError(message)
-    else:
-        import sys
-        from six import reraise
-        reraise(*sys.exc_info())
+    import sys
+    from six import reraise
+    reraise(*sys.exc_info())

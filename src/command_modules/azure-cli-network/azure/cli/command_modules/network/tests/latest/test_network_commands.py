@@ -601,6 +601,51 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
 
 
+class NetworkAppGatewayRewriteRuleset(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_rewrite_rulesets')
+    def test_network_app_gateway_rewrite_rulesets(self, resource_group):
+
+        self.kwargs.update({
+            'gw': 'gw1',
+            'ip': 'pip1',
+            'set': 'ruleset1',
+            'rule': 'rule1',
+            'var': 'http_req_Authorization'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gw} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {gw} --exists')
+
+        # create ruleset
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {gw} -n {set} --no-wait')
+        self.cmd('network application-gateway rewrite-rule set show -g {rg} --gateway-name {gw} -n {set}')
+
+        # manage rewrite rules
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --sequence 123 --request-headers foo=bar --response-headers cat=hat --no-wait')
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --sequence 321 --request-headers bar=foo --response-headers hat=cat --no-wait')
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
+        self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule}')
+        self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
+        self.cmd('network application-gateway rewrite-rule list-request-headers')
+        self.cmd('network application-gateway rewrite-rule list-response-headers')
+
+        # manage rewrite rule conditions
+        self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition update -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearers" --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition show -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var}')
+        self.cmd('network application-gateway rewrite-rule condition list -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule}')
+        self.cmd('network application-gateway rewrite-rule condition delete -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --no-wait')
+        self.cmd('network application-gateway rewrite-rule condition list -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule}')
+        self.cmd('network application-gateway rewrite-rule condition list-server-variables')
+
+        self.cmd('network application-gateway rewrite-rule delete -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule} --no-wait')
+        self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
+
+        self.cmd('network application-gateway rewrite-rule set delete -g {rg} --gateway-name {gw} -n {set} --no-wait')
+        self.cmd('network application-gateway rewrite-rule set list -g {rg} --gateway-name {gw}')
+
+
 class NetworkAppGatewayPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_public_ip')
@@ -1864,6 +1909,27 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+
+
+class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_gateway_ipsec')
+    def test_network_vnet_gateway_ipsec(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'ip': 'pip1',
+            'gw': 'gw1',
+            'gw_sku': 'VpnGw2',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} --gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol IkeV2 SSTP --radius-secret 111_aaa --radius-server 30.1.1.15')
+        self.cmd('network vnet-gateway ipsec-policy add -g {rg} --gateway-name {gw} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
+        self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway ipsec-policy clear -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}')
 
 
 class NetworkSubnetScenarioTests(ScenarioTest):

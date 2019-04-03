@@ -23,7 +23,7 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub create'
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4'.format(hub, rg),
-                 checks=[self.check('resourceGroup', rg),
+                 checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
                          self.check('sku.name', 'S1'),
@@ -45,7 +45,7 @@ class IoTHubTest(ScenarioTest):
         property_to_update = 'properties.operationsMonitoringProperties.events.DeviceTelemetry'
         updated_value = 'Error, Information'
         self.cmd('iot hub update -n {0} --set {1}="{2}"'.format(hub, property_to_update, updated_value),
-                 checks=[self.check('resourceGroup', rg),
+                 checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
                          self.check('sku.name', 'S1'),
@@ -53,7 +53,7 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
-            self.check('resourceGroup', rg),
+            self.check('resourcegroup', rg),
             self.check('location', location),
             self.check('name', hub),
             self.check('sku.name', 'S1'),
@@ -63,7 +63,7 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub list'
         self.cmd('iot hub list -g {0}'.format(rg), checks=[
             self.check('length([*])', 1),
-            self.check('[0].resourceGroup', rg),
+            self.check('[0].resourcegroup', rg),
             self.check('[0].location', location),
             self.check('[0].name', hub),
             self.check('[0].sku.name', 'S1')

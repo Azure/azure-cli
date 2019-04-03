@@ -15,14 +15,6 @@ import copy
 from importlib import import_module
 import six
 
-from knack.arguments import CLICommandArgument
-from knack.commands import CLICommand, CommandGroup
-from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
-from knack.invocation import CommandInvoker
-from knack.log import get_logger
-from knack.util import CLIError, CommandResultItem, todict
-from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
-
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -32,6 +24,14 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 import azure.cli.core.telemetry as telemetry
+
+from knack.arguments import CLICommandArgument
+from knack.commands import CLICommand, CommandGroup
+from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
+from knack.invocation import CommandInvoker
+from knack.log import get_logger
+from knack.util import CLIError, CommandResultItem, todict
+from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 
 logger = get_logger(__name__)
 
@@ -120,24 +120,11 @@ class AzCliCommand(CLICommand):
         self.confirmation = kwargs.get('confirmation', False)
         self.command_kwargs = kwargs
 
-    def _resolve_default_value_from_cfg_file(self, arg, overrides):
-        from azure.cli.core._config import DEFAULTS_SECTION
-        from azure.cli.core.commands.validators import DefaultStr
-
-        if not hasattr(arg.type, 'required_tooling'):
-            required = arg.type.settings.get('required', False)
-            setattr(arg.type, 'required_tooling', required)
-        if 'configured_default' in overrides.settings:
-            def_config = overrides.settings.pop('configured_default', None)
-            setattr(arg.type, 'default_name_tooling', def_config)
-            # same blunt mechanism like we handled id-parts, for create command, no name default
-            if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
-                return
-            config_value = self.cli_ctx.config.get(DEFAULTS_SECTION, def_config, None)
-            if config_value:
-                logger.info("Configured default '%s' for arg %s", config_value, arg.name)
-                overrides.settings['default'] = DefaultStr(config_value)
-                overrides.settings['required'] = False
+    def _resolve_default_value_from_config_file(self, arg, overrides):
+        # same blunt mechanism like we handled id-parts, for create command, no name default
+        if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
+            return
+        super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
@@ -153,19 +140,6 @@ class AzCliCommand(CLICommand):
                      CLICommandArgument(no_wait_param_dest, options_list=['--no-wait'], action='store_true',
                                         help='Do not wait for the long-running operation to finish.')))
             self.arguments.update(cmd_args)
-
-    def update_argument(self, param_name, argtype):
-        from azure.cli.core.commands.validators import DefaultStr, DefaultInt
-        arg = self.arguments[param_name]
-        self._resolve_default_value_from_cfg_file(arg, argtype)
-        arg.type.update(other=argtype)
-        arg_default = arg.type.settings.get('default', None)
-        if isinstance(arg_default, str):
-            arg_default = DefaultStr(arg_default)
-        elif isinstance(arg_default, int):
-            arg_default = DefaultInt(arg_default)
-        if arg_default:
-            arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
         return self.handler(*args, **kwargs)
@@ -188,6 +162,29 @@ class AzCliCommand(CLICommand):
         operation_group = kwargs.get('operation_group', self.command_kwargs.get('operation_group', None))
         return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models',
                                    operation_group=operation_group)
+
+    def update_context(self, obj_inst):
+        class UpdateContext(object):
+            def __init__(self, instance):
+                self.instance = instance
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            def set_param(self, prop, value, allow_clear=True, curr_obj=None):
+                curr_obj = curr_obj or self.instance
+                if '.' in prop:
+                    prop, path = prop.split('.', 1)
+                    curr_obj = getattr(curr_obj, prop)
+                    self.set_param(path, value, allow_clear=allow_clear, curr_obj=curr_obj)
+                elif value == '' and allow_clear:
+                    setattr(curr_obj, prop, None)
+                elif value is not None:
+                    setattr(curr_obj, prop, value)
+        return UpdateContext(obj_inst)
 
 
 # pylint: disable=too-few-public-methods
@@ -326,7 +323,7 @@ class AzCliCommandInvoker(CommandInvoker):
         if len(exceptions) == 1 and not results:
             ex, id_arg = exceptions[0]
             raise ex
-        elif exceptions:
+        if exceptions:
             for exception, id_arg in exceptions:
                 logger.warning('%s: "%s"', id_arg, str(exception))
             if not results:

@@ -22,6 +22,7 @@ cmd /c az batch application package --help
 cmd /c az batch application package create --help
 cmd /c az batch application package delete --help
 cmd /c az batch application package show --help
+cmd /c az batch application package list --help
 cmd /c az batch application package activate --help
 cmd /c az batch application summary --help
 cmd /c az batch application summary list --help
@@ -47,8 +48,6 @@ cmd /c az batch pool reset --help
 cmd /c az batch pool resize --help
 cmd /c az batch pool node-agent-skus --help
 cmd /c az batch pool node-agent-skus list --help
-cmd /c az batch pool os --help
-cmd /c az batch pool os upgrade --help
 cmd /c az batch pool usage-metrics --help
 cmd /c az batch pool usage-metrics list --help
 cmd /c az batch pool all-statistics --help

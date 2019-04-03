@@ -18,6 +18,14 @@ supported_languages = ['Csharp', 'Node']
 
 # pylint: disable=line-too-long,too-many-statements
 def load_arguments(self, _):
+    with self.argument_context('bot prepare-deploy') as c:
+        c.argument('code_dir', options_list=['--code-dir'], help='The directory to place the generated deployment '
+                                                                 'files in. Defaults to the current directory the '
+                                                                 'command is called from.')
+        c.argument('language', options_list=['--lang'], help='The language or runtime of the bot.',
+                   arg_type=get_enum_type(supported_languages))
+        c.argument('proj_file_path', help='The path to the .csproj file relative to --code-dir.')
+
     with self.argument_context('bot') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('resource_name', options_list=['--name', '-n'],
@@ -51,6 +59,8 @@ def load_arguments(self, _):
         c.argument('keep_node_modules', help='Keep node_modules folder and do not run `npm install` on the App Service.'
                                              ' This can greatly speed up publish commands for Node.js SDK bots.',
                    arg_type=get_three_state_flag())
+        c.argument('timeout', options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the '
+                                                                     'status of deployment.')
 
     with self.argument_context('bot download') as c:
         c.argument('file_save_path', options_list=['--save-path'], help='The directory to download bot code to.')

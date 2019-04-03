@@ -141,8 +141,22 @@ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
 
 ### Edge Builds
 
-If you want to get the latest build from the `dev` branch, you can use our "edge" builds feed. Here's an example of
-installing edge dev builds with pip in a virtual environment.
+If you want to get the latest build from the `dev` branch, you can use our "edge" builds.
+
+You can download the latest builds by following the links below:
+
+| Platform  | Link                                       |
+| :-------: | :----------------------------------------- |
+| Windows   | https://aka.ms/InstallAzureCliWindowsEdge  |
+| Homebrew  | https://aka.ms/InstallAzureCliHomebrewEdge |
+
+You can easily install the latest Homebrew edge build with the following command:
+
+```bash
+brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
+```
+
+Here's an example of installing edge dev builds with pip in a virtual environment.
 
 ```bash
 $ virtualenv env
@@ -172,24 +186,6 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 If you would like to become an active contributor to this project please
 follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.io/guidelines.html).
-
-## License
-
-```
-Azure CLI
-
-Copyright (c) Microsoft Corporation
-
-All rights reserved.
-
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
 
 ## Automation
 
