@@ -34,6 +34,52 @@ def datetime_format(value):
     return datetime_obj
 
 
+def validate_archive_window_length(ns):
+    """Validate the correct format of a datetime string and deserialize."""
+    if ns.archive_window_length is not None:
+        from msrest.serialization import Deserializer
+        from msrest.exceptions import DeserializationError
+
+        try:
+            datetime_obj = Deserializer.deserialize_duration(ns.archive_window_length)
+        except DeserializationError:
+            message = "archive-window-length {} is not a valid ISO-8601 duration format"
+            raise ValueError(message.format(ns.archive_window_length))
+
+        minwindow = Deserializer.deserialize_duration("PT5M")
+        maxwindow = Deserializer.deserialize_duration("PT25H")
+
+        if datetime_obj < minwindow or datetime_obj > maxwindow:
+            message = "archive-window-length '{}' is not in the range of PT5M and PT25H"\
+                .format(ns.archive_window_length)
+            raise ValueError(message)
+
+        ns.archive_window_length = datetime_obj
+
+
+def validate_key_frame_interval_duration(ns):
+    """Validate the correct format of a datetime string and deserialize."""
+    if ns.key_frame_interval_duration is not None:
+        from msrest.serialization import Deserializer
+        from msrest.exceptions import DeserializationError
+
+        try:
+            datetime_obj = Deserializer.deserialize_duration(ns.key_frame_interval_duration)
+        except DeserializationError:
+            message = "key-frame-interval-duration {} is not a valid ISO-8601 duration format"
+            raise ValueError(message.format(ns.key_frame_interval_duration))
+
+        minwindow = Deserializer.deserialize_duration("PT1S")
+        maxwindow = Deserializer.deserialize_duration("PT30S")
+
+        if datetime_obj < minwindow or datetime_obj > maxwindow:
+            message = "key-frame-interval-duration '{}' is not in the range of PT1S and PT30S"\
+                .format(ns.key_frame_interval_duration)
+            raise ValueError(message)
+
+        ns.key_frame_interval_duration = datetime_obj
+
+
 def validate_correlation_data(ns):
     """ Extracts multiple space-separated correlation data in key[=value] format """
     if isinstance(ns.correlation_data, list):

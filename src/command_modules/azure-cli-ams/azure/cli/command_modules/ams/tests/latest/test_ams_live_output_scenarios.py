@@ -31,7 +31,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'assetName': assetName,
             'liveOutputName': live_output_name,
-            'archiveWindowLength': 'PT2S',
+            'archiveWindowLength': 'PT5M',
             'manifestName': manifest_name,
             'description': 'testDescription',
             'fragments': 5,
@@ -41,7 +41,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
 
         live_output = self.cmd('az ams live-output create -a {amsname} -n {liveOutputName} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName} --description {description} --fragments-per-ts-segment {fragments} --output-snap-time {outputSnapTime}', checks=[
-            self.check('archiveWindowLength', '0:00:02'),
+            self.check('archiveWindowLength', '0:05:00'),
             self.check('assetName', '{assetName}'),
             self.check('manifestName', '{manifestName}'),
             self.check('name', '{liveOutputName}'),
@@ -79,7 +79,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'assetName': assetName,
             'liveOutputName': live_output_name,
-            'archiveWindowLength': 'PT2S',
+            'archiveWindowLength': 'PT5M',
             'manifestName': manifest_name
         })
 
@@ -115,7 +115,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.kwargs.update({
             'assetName': assetName,
             'liveOutputName': live_output_name,
-            'archiveWindowLength': 'PT2S',
+            'archiveWindowLength': 'PT5M',
             'manifestName': manifest_name
         })
 
@@ -124,7 +124,7 @@ class AmsLiveOutputTests(ScenarioTest):
         self.cmd('az ams live-output create -a {amsname} -n {liveOutputName} -g {rg} --asset-name {assetName} --live-event-name {liveEventName} --archive-window-length {archiveWindowLength} --manifest-name {manifestName}')
 
         self.cmd('az ams live-output show -a {amsname} -n {liveOutputName} -g {rg} --live-event-name {liveEventName}', checks=[
-            self.check('archiveWindowLength', '0:00:02'),
+            self.check('archiveWindowLength', '0:05:00'),
             self.check('assetName', '{assetName}'),
             self.check('manifestName', '{manifestName}'),
             self.check('name', '{liveOutputName}'),
@@ -158,7 +158,7 @@ class AmsLiveOutputTests(ScenarioTest):
             'assetName': assetName,
             'liveOutputName1': live_output_name1,
             'liveOutputName2': live_output_name2,
-            'archiveWindowLength': 'PT2S',
+            'archiveWindowLength': 'PT5M',
             'manifestName1': manifest_name1,
             'manifestName2': manifest_name2
         })
