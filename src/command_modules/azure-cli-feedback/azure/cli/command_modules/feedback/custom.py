@@ -390,7 +390,8 @@ def _build_issue_info_tup(command_log_file=None):
     formatted_issues_url = issues_url
     if not formatted_issues_url.startswith("http"):
         formatted_issues_url = "https://" + formatted_issues_url
-    new_placeholder = urlencode({'body': "The issue has been copied to your clipboard. Paste it here!\nTo print out the issue body locally, run `az feedback --verbose`"})
+    new_placeholder = urlencode({'body': "The issue has been copied to your clipboard. Paste it here!"
+                                         "\nTo print out the issue body locally, run `az feedback --verbose`"})
     formatted_issues_url = "{}?{}".format(formatted_issues_url, new_placeholder)
 
     return _ISSUES_TEMPLATE_PREFIX.format(issues_url), _ISSUES_TEMPLATE.format(**format_dict), formatted_issues_url
