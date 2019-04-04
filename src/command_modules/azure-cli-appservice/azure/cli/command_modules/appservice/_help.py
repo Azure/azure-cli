@@ -1203,7 +1203,7 @@ short-summary: Display the current distribution of traffic across slots.
 
 helps['webapp up'] = """
 type: command
-short-summary: Create a webapp and deploy code from a local workspace to the app. The command needs to run from the folder where the code is present. Supports running the command in preview mode using --dryrun parameter. Current supports includes Node (detected by package.json), Python (detected by requirements.txt), .NET Core and ASP.NET (detected by *.csproj), staticHtml (detected by *.html). Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command is run from an empty folder, an empty windows web app is created.
+short-summary: Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder where the code is present. Current support includes Node, Python, .NET Core and ASP.NET, staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command is run from an empty folder, an empty windows web app is created.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
@@ -1218,7 +1218,7 @@ examples:
     text: >
         az webapp up -n MyUniqueAppName -l locationName
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
-   text: >
+    text: >
         az webapp up -n MyUniqueAppName --logs
 """
 
