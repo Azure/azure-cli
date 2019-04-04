@@ -412,6 +412,15 @@ helps['acr run'] = """
 type: command
 short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
 examples:
+  - name: Queue a run to execute a container command.
+    text: >
+        az acr run -r MyRegistry --cmd MyImage /dev/null
+  - name: Queue a run with the task definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
+    text: >
+        az acr run -r MyRegistry -f - /dev/null
+  - name: Queue a run to execute the tasks passed through the pipe.
+    text: >
+        cat task.yaml | az acr run -r MyRegistry -f - /dev/null
   - name: Queue a local context, pushed to ACR with streaming logs.
     text: >
         az acr run -r MyRegistry -f bash-echo.yaml .
@@ -462,6 +471,15 @@ helps['acr task create'] = """
 type: command
 short-summary: Creates a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
 examples:
+  - name: Create a task without the source location.
+    text: >
+        az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null
+  - name: Create a task with the definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
+    text: >
+        az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
+  - name: Create a task with the definition from the pipe.
+    text: >
+        cat task.yaml | az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers
     text: >
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false

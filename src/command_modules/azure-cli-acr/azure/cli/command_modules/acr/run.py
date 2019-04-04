@@ -11,11 +11,17 @@ from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
 from ._stream_utils import stream_logs
-from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials
+from ._utils import (
+    validate_managed_registry,
+    get_validate_platform,
+    get_custom_registry_credentials,
+    get_yaml_and_values
+)
 from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 
 RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
+NULL_SOURCE_LOCATION = "/dev/null"
 
 logger = get_logger(__name__)
 
@@ -24,10 +30,11 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             client,
             registry_name,
             source_location,
-            file='acb.yaml',
+            file=None,
             values=None,
             set_value=None,
             set_secret=None,
+            cmd_value=None,
             no_format=False,
             no_logs=False,
             no_wait=False,
@@ -40,9 +47,17 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
+    if cmd_value and file:
+        raise CLIError(
+            "Azure Container Registry can run with either "
+            "--cmd myCommand /dev/null or "
+            "-f myFile mySourceLocation, but not both.")
+
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
-    if os.path.exists(source_location):
+    if source_location.lower() == NULL_SOURCE_LOCATION:
+        source_location = None
+    elif os.path.exists(source_location):
         if not os.path.isdir(source_location):
             raise CLIError(
                 "Source location should be a local directory path or remote URL.")
@@ -69,23 +84,45 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
-    FileTaskRunRequest, PlatformProperties = cmd.get_models('FileTaskRunRequest', 'PlatformProperties')
-    request = FileTaskRunRequest(
-        task_file_path=file,
-        values_file_path=values,
-        values=(set_value if set_value else []) + (set_secret if set_secret else []),
-        source_location=source_location,
-        timeout=timeout,
-        platform=PlatformProperties(
-            os=platform_os,
-            architecture=platform_arch,
-            variant=platform_variant
-        ),
-        credentials=get_custom_registry_credentials(
-            cmd=cmd,
-            auth_mode=auth_mode
+    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
+
+    if source_location:
+        request = FileTaskRunRequest(
+            task_file_path=file if file else "acb.yaml",
+            values_file_path=values,
+            values=(set_value if set_value else []) + (set_secret if set_secret else []),
+            source_location=source_location,
+            timeout=timeout,
+            platform=PlatformProperties(
+                os=platform_os,
+                architecture=platform_arch,
+                variant=platform_variant
+            ),
+            credentials=get_custom_registry_credentials(
+                cmd=cmd,
+                auth_mode=auth_mode
+            )
         )
-    )
+    else:
+        yaml_template, values_content = get_yaml_and_values(cmd_value, timeout, file)
+        import base64
+        request = EncodedTaskRunRequest(
+            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
+            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
+            values=(set_value if set_value else []) + (set_secret if set_secret else []),
+            source_location=source_location,
+            timeout=timeout,
+            platform=PlatformProperties(
+                os=platform_os,
+                architecture=platform_arch,
+                variant=platform_variant
+            ),
+            credentials=get_custom_registry_credentials(
+                cmd=cmd,
+                auth_mode=auth_mode
+            )
+        )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
