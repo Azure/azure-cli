@@ -1094,7 +1094,7 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
         parent_subscription_id = id_parts['subscription']
         parent_zone_name = id_parts['name']
 
-    if all(v is not None for v in [parent_zone_name, parent_rg, child_zone_name, child_zone]) and child_zone_name.endswith(parent_zone_name):
+    if all([parent_zone_name, parent_rg, child_zone_name, child_zone]) and child_zone_name.endswith(parent_zone_name):
         record_set_name = child_zone_name.replace('.' + parent_zone_name, '')
         try:
             for dname in child_zone.name_servers:
