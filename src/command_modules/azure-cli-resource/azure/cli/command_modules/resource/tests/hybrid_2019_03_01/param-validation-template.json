@@ -1,0 +1,50 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "stringParam": {
+      "type": "string"
+    },
+    "intParam": {
+      "type": "int"
+    },
+    "secureParam": {
+      "type": "securestring"
+    },
+    "boolParam": {
+      "type": "bool"
+    },
+    "enumParam": {
+      "type": "string",
+      "allowedValues": [ "value1", "value2" ]
+    },
+    "arrayParam": {
+      "type": "array"
+    },
+    "objectParam": {
+      "type": "object"
+    },
+    "secretReference": {
+      "type": "string"
+    },
+    "defaultString": {
+      "type": "string",
+      "defaultValue": "default"
+    },
+    "defaultNull": {
+      "type": "string",
+      "defaultValue": null
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "dependsOn": [ ],
+      "location": "westus",
+      "name": "vnet",
+      "properties": {
+      },
+      "type": "Microsoft.Network/virtualNetworks"
+    }
+  ]
+}
