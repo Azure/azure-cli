@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.1.13
+++++++
 * `deployment create`/`group deployment create`: Fixed issue where parameters file with an empty set of parameters would not work.
 
 

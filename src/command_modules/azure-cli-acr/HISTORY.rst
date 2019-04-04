@@ -2,10 +2,13 @@
 
 Release History
 ===============
+2.2.4
++++++
+* Support running an image contextlessly.
+
 2.2.3
 +++++
 * Minor fixes
-* Support running an image contextlessly.
 
 2.2.2
 +++++
