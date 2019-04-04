@@ -736,9 +736,11 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
 
 def show_exception_handler(ex):
     if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
-        logger.error(getattr(ex, 'message', ex))
         import sys
-        sys.exit(3)
+        from azure.cli.core.azlogging import CommandLoggerContext
+        with CommandLoggerContext(logger):
+            logger.error(getattr(ex, 'message', ex))
+            sys.exit(3)
     raise ex
 
 

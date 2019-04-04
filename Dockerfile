@@ -34,7 +34,7 @@ LABEL maintainer="Microsoft" \
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
 RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
- && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev \
+ && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
  && update-ca-certificates
 
 ARG JP_VERSION="0.1.3"
