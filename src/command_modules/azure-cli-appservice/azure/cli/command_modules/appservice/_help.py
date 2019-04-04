@@ -1217,7 +1217,7 @@ examples:
   - name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
-  -name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
+  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
    text: >
         az webapp up -n MyUniqueAppName --logs
 """
