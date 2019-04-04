@@ -441,6 +441,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')
+        c.argument('subscription_id', options_list=['--subscriptionid', '-s'], help='Subscription id to add name server record')
 
     with self.argument_context('network dns record-set ptr') as c:
         c.argument('dname', options_list=['--ptrdname', '-d'], help='PTR target domain name.')
