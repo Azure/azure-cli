@@ -2280,7 +2280,6 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!!')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
     def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
