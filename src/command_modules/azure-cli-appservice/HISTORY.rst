@@ -12,6 +12,7 @@ Release History
 * webapp, functionapp: Updating to use the new Python SDK version
 * appservice: adminSiteName property of SKU object is deprecated
 * functionapp: add ability to switch a plan underneath a function app using `az functionapp update --plan`
+* functionapp: add support for azure functions premium plan scale out settings
 
 0.2.16
 ++++++

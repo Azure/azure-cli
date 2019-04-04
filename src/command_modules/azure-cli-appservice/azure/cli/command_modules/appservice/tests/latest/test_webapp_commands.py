@@ -696,6 +696,23 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
+class FunctionAppReservedInstanceTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_functionapp_reserved_instance(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwithreservedinstance', 40)
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+        self.cmd('functionapp config set -g {} -n {} --prewarmed-instance-count 4'
+                 .format(resource_group, functionapp_name)).assert_with_checks([
+                     JMESPathCheck('reservedInstanceCount', 4)])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
 class WebappGitScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_git(self, resource_group):
@@ -1110,6 +1127,26 @@ class FunctionAppServicePlan(ScenarioTest):
         self.cmd('functionapp plan create -g {} -n {} --sku S1' .format(resource_group, plan), checks=[
             JMESPathCheck('sku.name', 'S1')
         ])
+
+    @ResourceGroupPreparer(location='centralus')
+    def test_functionapp_elastic_plan(self, resource_group):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --min-instances 4 --max-burst 12' .format(resource_group, plan), checks=[
+            JMESPathCheck('maximumElasticWorkerCount', 12),
+            JMESPathCheck('sku.name', 'EP1'),
+            JMESPathCheck('sku.capacity', 4)
+        ])
+        self.cmd('functionapp plan update -g {} -n {} --min-instances 5 --max-burst 11' .format(resource_group, plan), checks=[
+            JMESPathCheck('maximumElasticWorkerCount', 11),
+            JMESPathCheck('sku.name', 'EP1'),
+            JMESPathCheck('sku.capacity', 5)
+        ])
+        self.cmd('functionapp plan show -g {} -n {} '.format(resource_group, plan), checks=[
+            JMESPathCheck('maximumElasticWorkerCount', 11),
+            JMESPathCheck('sku.name', 'EP1'),
+            JMESPathCheck('sku.capacity', 5)
+        ])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, plan))
 
 
 class FunctionAppServicePlanLinux(ScenarioTest):
