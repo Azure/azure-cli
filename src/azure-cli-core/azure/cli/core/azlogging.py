@@ -167,10 +167,8 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger.info("extension name: %s", extension_name)
             self.command_metadata_logger.info("extension version: %s", extension_version)
 
-    def end_cmd_metadata_logging(self, exit_code, elapsed_time=None):
+    def end_cmd_metadata_logging(self, exit_code):
         if self.command_metadata_logger:
-            if elapsed_time:
-                self.command_metadata_logger.info("command ran in %.3f seconds.", elapsed_time)
             self.command_metadata_logger.info("exit code: %s", exit_code)
 
             # We have finished metadata logging, remove handler and set command_metadata_handler to None.

@@ -7,7 +7,6 @@ import datetime
 import logging
 import os
 import time
-import timeit
 import unittest
 
 from azure.cli.core.azlogging import CommandLoggerContext
@@ -138,7 +137,6 @@ class TestCommandLogFile(ScenarioTest):
 
         ext_version = self.cmd("az extension show -n alias").get_output_in_json()["version"]
         for i, log_file in enumerate(command_log_files):
-            self.assertTrue("duration" in data_dict)
             if i >= 2:
                 self.assertEqual(data_dict["extension_name"], "alias")
                 self.assertEqual(data_dict["extension_version"], ext_version)
@@ -161,7 +159,6 @@ class TestCommandLogFile(ScenarioTest):
 
         for log_file, issue_body in items:
             self.assertTrue(log_file.get_command_name_str() in issue_body)
-            self.assertTrue(log_file.get_command_duration_str() in issue_body)
             self.assertTrue(log_file.command_data_dict["command_args"] in issue_body)
             self.assertTrue(log_file.command_data_dict["errors"][0] in issue_body)
 
@@ -170,8 +167,6 @@ class TestCommandLogFile(ScenarioTest):
         return ext in [ext.name for ext in get_extensions()]
 
     def _run_cmd(self, command, checks=None, expect_failure=False):
-        start_time = timeit.default_timer()
-
         cli_ctx = get_dummy_cli()
         cli_ctx.logging.command_log_dir = self.temp_command_log_dir
 
@@ -183,8 +178,7 @@ class TestCommandLogFile(ScenarioTest):
             if result.exit_code != 0:
                 logger.error("There was an error during execution.")
 
-        elapsed_time = timeit.default_timer() - start_time
-        cli_ctx.logging.end_cmd_metadata_logging(result.exit_code, elapsed_time)
+        cli_ctx.logging.end_cmd_metadata_logging(result.exit_code)
 
         return result
 
