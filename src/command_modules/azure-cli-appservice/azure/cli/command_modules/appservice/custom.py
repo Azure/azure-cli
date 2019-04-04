@@ -2079,7 +2079,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='10.14.1'))
 
     if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
         site_config.always_on = True
