@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-NODE_VERSION_DEFAULT = "8.11"
+NODE_VERSION_DEFAULT = "10.14"
 NETCORE_VERSION_DEFAULT = "2.0"
 DOTNET_VERSION_DEFAULT = "4.7"
 PYTHON_VERSION_DEFAULT = "3.7"
