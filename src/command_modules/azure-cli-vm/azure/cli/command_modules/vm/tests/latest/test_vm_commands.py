@@ -2797,9 +2797,9 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         self.cmd('vmss run-command list -l {loc}')
         self.cmd('vmss run-command show --command-id RunShellScript -l {loc}')
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1 --generate-ssh-keys').get_output_in_json()
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1 --instance-count 1 --generate-ssh-keys').get_output_in_json()
 
-        # get load balancer and allow trafic to scale sets.
+        # get load balancer and allow trafic to scale set.
         lb = self.cmd('network lb list -g {rg}').get_output_in_json()[0]
         self.kwargs.update({
             'lb_name': lb['name'],
@@ -2810,11 +2810,9 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         self.cmd('az network lb rule create -g {rg} --name allowTrafficRule --lb-name {lb_name} --backend-pool-name {lb_backend} --frontend-ip-name {lb_frontend} --backend-port 80 --frontend-port 80 --protocol tcp')
         public_ip = self.cmd('az network public-ip show --ids {lb_ip_id}').get_output_in_json()['ipAddress']
 
-        instance_ids = self.cmd('az vmss list-instances -n {vmss} -g {rg} --query "[].id"').get_output_in_json()
+        self.kwargs['instance_ids'] = " ".join(self.cmd('az vmss list-instances -n {vmss} -g {rg} --query "[].id"').get_output_in_json())
 
-        for instance_ids in sorted(instance_ids):
-            self.kwargs['instance_id'] = instance_ids
-            self.cmd('vmss run-command invoke --ids {instance_id} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
+        self.cmd('vmss run-command invoke --ids {instance_ids} --command-id RunShellScript --script "sudo apt-get update && sudo apt-get install -y nginx"')
 
         time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
 
