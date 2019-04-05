@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 
 # pylint: disable=line-too-long
-from ._client_factory import (cf_artifact_sources, cf_service_topologies, cf_services, cf_service_units, cf_steps, cf_rollouts)
+from azure.cli.command_modules.deploymentmanager._client_factory import (cf_artifact_sources, cf_service_topologies, cf_services, cf_service_units, cf_steps, cf_rollouts)
 
 def load_command_table(self, _):
     service_topologies = CliCommandType(
@@ -36,45 +36,55 @@ def load_command_table(self, _):
     custom_tmpl = 'azure.cli.command_modules.deploymentmanager.custom#{}'
     deployment_manager_custom = CliCommandType(operations_tmpl=custom_tmpl)
 
-    with self.command_group('deploymentmanager artifactsource', artifact_sources) as g:
+    with self.command_group('deploymentmanager artifact-source', artifact_sources) as g:
         g.custom_command('create', 'cli_artifact_source_create')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.generic_update_command(
             'update',
-            custom_func_name='cli_artifact_source_update')
+            setter_arg_name='artifact_source_info',
+            custom_func_name='cli_artifact_source_update',
+            custom_func_type=deployment_manager_custom)
 
-    with self.command_group('deploymentmanager servicetopology', service_topologies) as g:
-        g.command('create', 'create_or_update')
+    with self.command_group('deploymentmanager service-topology', service_topologies) as g:
+        g.custom_command('create', 'cli_service_topology_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.generic_update_command(
             'update',
-            custom_func_name='cli_service_topology_update')
+            setter_arg_name='service_topology_info',
+            custom_func_name='cli_service_topology_update',
+            custom_func_type=deployment_manager_custom)
 
     with self.command_group('deploymentmanager service', services) as g:
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'cli_service_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.generic_update_command(
             'update',
-            custom_func_name='cli_service_update')
+            setter_arg_name='service_info',
+            custom_func_name='cli_service_update',
+            custom_func_type=deployment_manager_custom)
 
-    with self.command_group('deploymentmanager serviceunit', service_units) as g:
-        g.command('create', 'create_or_update')
+    with self.command_group('deploymentmanager service-unit', service_units) as g:
+        g.custom_command('create', 'cli_service_unit_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.generic_update_command(
             'update',
-            custom_func_name='cli_service_unit_update')
+            setter_arg_name='service_unit_info',
+            custom_func_name='cli_service_unit_update',
+            custom_func_type=deployment_manager_custom)
 
     with self.command_group('deploymentmanager step', steps) as g:
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'cli_step_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.generic_update_command(
             'update',
-            custom_func_name='cli_step_update')
+            setter_arg_name='step_info',
+            custom_func_name='cli_step_update',
+            custom_func_type=deployment_manager_custom)
 
     with self.command_group('deploymentmanager rollout', rollouts) as g:
         g.command('show', 'get')

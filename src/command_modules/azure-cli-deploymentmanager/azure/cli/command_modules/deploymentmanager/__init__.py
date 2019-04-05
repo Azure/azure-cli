@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 
-from azure.cli.command_modules.deploymentmanager._help import helps  # pylint: disable=unused-import
+import azure.cli.command_modules.deploymentmanager._help # pylint: disable=unused-import
 
 class DeploymentManagerCommandsLoader(AzCommandsLoader):
 

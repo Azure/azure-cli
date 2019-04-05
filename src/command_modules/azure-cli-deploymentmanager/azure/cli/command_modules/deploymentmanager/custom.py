@@ -5,25 +5,271 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
+from msrestazure.tools import parse_resource_id
 
-from azure.mgmt.deploymentmanager.models import (SasAuthentication, ArtifactSource)
+from azure.cli.command_modules.deploymentmanager._client_factory import (
+    cf_artifact_sources, 
+    cf_service_topologies, 
+    cf_services, 
+    cf_service_units, 
+    cf_steps, 
+    cf_rollouts)
+
+from azure.mgmt.deploymentmanager.models import (
+    SasAuthentication, 
+    ArtifactSource, 
+    ServiceTopologyResource, 
+    ServiceResource, 
+    ServiceUnitResource, 
+    ServiceUnitArtifacts,
+    StepResource,
+    WaitStepProperties,
+    WaitStepAttributes)
 
 logger = get_logger(__name__)
 
-allowed_c_family_sizes = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6']
-allowed_p_family_sizes = ['p1', 'p2', 'p3', 'p4', 'p5']
-wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
-                              'For Standard Sku : (C0, C1, C2, C3, C4, C5, C6), '
-                              'for Premium Sku : (P1, P2, P3, P4, P5)')
-
 # pylint: disable=unused-argument
 def cli_artifact_source_create(
-    cmd,
-    client,
-    resource_group_name,
-    location,
-    artifact_source_name,
-    sas_uri,
-    artifact_root=None,
+    cmd, 
+    resource_group_name, 
+    location, 
+    artifact_source_name, 
+    sas_uri, 
+    artifact_root=None, 
     tags=None):
-    pass
+    sasAuthentication = SasAuthentication(sas_uri=sas_uri)
+    artifact_source = ArtifactSource(
+        source_type="AzureStorage",
+        artifact_root=artifact_root,
+        authentication=sasAuthentication,
+        location=location,
+        tags=tags)
+
+    client = cf_artifact_sources(cmd.cli_ctx)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        artifact_source_name=artifact_source_name,
+        artifact_source_info=artifact_source)
+
+def cli_artifact_source_update(
+    cmd,
+    instance, 
+    sas_uri=None, 
+    artifact_root=None, 
+    tags=None):
+
+    if sas_uri:
+        sasAuthentication = SasAuthentication(sas_uri=sas_uri)
+        instance.authentication = sasAuthentication
+
+    instance.artifact_root = artifact_root
+    instance.tags = tags
+
+    return instance
+
+def cli_service_topology_create(
+    cmd, 
+    resource_group_name, 
+    location, 
+    service_topology_name, 
+    artifact_source_id=None, 
+    tags=None):
+
+    service_topology = ServiceTopologyResource(
+        artifact_source_id=artifact_source_id,
+        location=location,
+        tags=tags)
+    client = cf_service_topologies(cmd.cli_ctx)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        service_topology_name=service_topology_name,
+        service_topology_info=service_topology)
+
+def cli_service_topology_update(
+    cmd,
+    instance, 
+    artifact_source_id=None, 
+    tags=None):
+
+    if artifact_source_id is not None:
+        instance.artifact_source_id = artifact_source_id
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+def cli_service_create(
+    cmd, 
+    resource_group_name, 
+    location, 
+    service_name,
+    target_location,
+    target_subscription_id,
+    service_topology_name=None, 
+    service_topology_resource_id=None, 
+    tags=None):
+
+    if all([service_topology_resource_id, service_topology_name]):
+        raise CLIError('usage error: specify either "--service-topology-name" or "--service-topology-resource-id"')
+
+    if service_topology_resource_id is not None:
+        service_topology_name = parse_resource_id(service_topology_resource_id)['name']
+
+    service = ServiceResource(
+        target_location=target_location,
+        target_subscription_id=target_subscription_id,
+        location=location,
+        tags=tags)
+    client = cf_services(cmd.cli_ctx)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        service_topology_name=service_topology_name,
+        service_name=service_name,
+        service_info=service)
+
+def cli_service_update(
+    cmd,
+    instance, 
+    target_location=None,
+    target_subscription_id=None,
+    tags=None):
+
+    if target_location is not None:
+        instance.target_location = target_location
+
+    if target_subscription_id is not None:
+        instance.target_subscription_id = target_subscription_id
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+def cli_service_unit_create(
+    cmd, 
+    resource_group_name, 
+    location, 
+    service_unit_name,
+    target_resource_group,
+    deployment_mode,
+    parameters_artifact_source_relative_path=None,
+    template_artifact_source_relative_path=None,
+    parameters_uri=None,
+    template_uri=None,
+    service_name=None, 
+    service_id=None, 
+    service_topology_name=None, 
+    service_topology_id=None, 
+    tags=None):
+
+    if all([service_topology_id, service_topology_name]):
+        raise CLIError('usage error: specify either "--service-topology-name" or "--service-topology-resource-id"')
+
+    if all([service_id, service_name]):
+        raise CLIError('usage error: specify either "--service-name" or "--service-resource-id"')
+
+    if all([template_artifact_source_relative_path, template_uri]):
+        raise CLIError('usage error: specify either "--template-uri" or "--template-artifact-source-relative-path"')
+
+    if all([parameters_artifact_source_relative_path, parameters_uri]):
+        raise CLIError('usage error: specify either "--parameters-uri" or "--parameters-artifact-source-relative-path"')
+
+    if service_topology_id is not None:
+        service_topology_name = parse_resource_id(service_topology_id)['name']
+
+    if service_id is not None:
+        service_topology_name = parse_resource_id(service_id)['name']
+        service_name = parse_resource_id(service_id)['child_name_1']
+        if service_topology_name is None or service_name is None:
+            raise CLIError('usage error: "--service-resource-id" is not a valid service resource identifier.')
+
+    service_unit_artifacts = ServiceUnitArtifacts(
+        parameters_uri=parameters_uri,
+        template_uri=template_uri,
+        parameters_artifact_source_relative_path=parameters_artifact_source_relative_path,
+        template_artifact_source_relative_path=template_artifact_source_relative_path)
+
+    service_unit = ServiceUnitResource(
+        target_resource_group=target_resource_group,
+        deployment_mode=deployment_mode,
+        artifacts=service_unit_artifacts,
+        location=location,
+        tags=tags)
+
+    client = cf_service_units(cmd.cli_ctx)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        service_topology_name=service_topology_name,
+        service_name=service_name,
+        service_unit_name=service_unit_name,
+        service_unit_info=service_unit)
+
+def cli_service_unit_update(
+    cmd,
+    instance, 
+    target_resource_group=None,
+    deployment_mode=None,
+    parameters_artifact_source_relative_path=None,
+    template_artifact_source_relative_path=None,
+    parameters_uri=None,
+    template_uri=None,
+    tags=None):
+
+    if target_resource_group is not None:
+        instance.target_resource_group = target_resource_group
+
+    if deployment_mode is not None:
+        instance.deployment_mode = deployment_mode
+
+    if parameters_artifact_source_relative_path is not None:
+        instance.parameters_artifact_source_relative_path = parameters_artifact_source_relative_path
+
+    if template_artifact_source_relative_path  is not None:
+        instance.template_artifact_source_relative_path = template_artifact_source_relative_path
+
+    if parameters_uri is not None:
+        instance.parameters_uri = parameters_uri
+
+    if template_uri is not None:
+        instance.template_uri = template_uri
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+
+def cli_step_create(
+    cmd, 
+    resource_group_name, 
+    location, 
+    step_name, 
+    duration, 
+    tags=None):
+
+    waitStepProperties = WaitStepProperties(
+        attributes = WaitStepAttributes(duration=duration))
+
+    step = StepResource(
+        properties=waitStepProperties,
+        location=location,
+        tags=tags)
+
+    client = cf_steps(cmd.cli_ctx)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        step_name=step_name,
+        step_info=step)
+
+def cli_step_update(
+    cmd,
+    instance, 
+    duration,
+    tags=None):
+
+    instance.duration = duration
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
