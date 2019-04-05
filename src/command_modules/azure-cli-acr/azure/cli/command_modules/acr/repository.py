@@ -297,7 +297,7 @@ def acr_repository_update(cmd,
         registry_name=registry_name,
         http_method='patch' if json_payload else 'get',
         json_payload=json_payload,
-        permission='push' if json_payload else 'pull',
+        permission='push,pull' if json_payload else 'pull',
         repository=repository,
         image=image,
         tenant_suffix=tenant_suffix,
@@ -432,7 +432,7 @@ def acr_repository_delete(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission='pull,delete')
+        permission='delete,pull')
 
     if tag or manifest:
         manifest = _delete_manifest_confirmation(
