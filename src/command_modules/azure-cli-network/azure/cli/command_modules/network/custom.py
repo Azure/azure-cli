@@ -1118,7 +1118,7 @@ def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_nam
     created_zone = client.create_or_update(resource_group_name, zone_name, zone,
                                            if_none_match='*' if if_none_match else None)
 
-    if parent_zone_name is not None:
+    if cmd.supported_api_version(min_api='2016-04-01') and parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
@@ -1450,7 +1450,8 @@ def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dnam
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, subscription_id=subscription_id)
+    return _add_save_record(cmd, record, record_type, record_set_name,
+                            resource_group_name, zone_name, subscription_id=subscription_id)
 
 
 def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
@@ -1603,7 +1604,8 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, subscription_id=subscription_id).record_sets
+    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
+                                  subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
