@@ -5,7 +5,6 @@ Release History
 0.5.1
 +++++
 * Bug fix for asset and account filters update.
-* Minor pylint changes
 
 0.5.0
 +++++
