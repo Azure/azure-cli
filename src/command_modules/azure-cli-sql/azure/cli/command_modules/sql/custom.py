@@ -1034,8 +1034,6 @@ def db_update(
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
-    # from msrestazure.tools import parse_resource_id
-
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
