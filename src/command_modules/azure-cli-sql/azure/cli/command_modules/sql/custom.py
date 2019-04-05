@@ -1022,6 +1022,8 @@ def db_list(
 def db_update(
         cmd,
         instance,
+        server_name,
+        resource_group_name,
         elastic_pool_id=None,
         max_size_bytes=None,
         service_objective=None,
@@ -1032,6 +1034,7 @@ def db_update(
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
+    # from msrestazure.tools import parse_resource_id
 
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
@@ -1053,12 +1056,18 @@ def db_update(
                        ' unspecified or equal \'{}\'.'.format(
                            ServiceObjectiveName.elastic_pool.value))
 
-    # Update instance pool and service objective. The service treats these properties like PATCH,
+    # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
     # except if pool is null/empty and service objective is a standalone SLO value (e.g. 'S0',
     # 'S1', etc), in which case the pool being null/empty is meaningful - it means remove from
     # pool.
-    instance.elastic_pool_id = elastic_pool_id
+
+    # Validate elastic pool id
+    instance.elastic_pool_id = _validate_elastic_pool_id(
+        cmd.cli_ctx,
+        elastic_pool_id,
+        server_name,
+        resource_group_name)
 
     # Update sku
     _db_elastic_pool_update_sku(
