@@ -2797,7 +2797,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         self.cmd('vmss run-command list -l {loc}')
         self.cmd('vmss run-command show --command-id RunShellScript -l {loc}')
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1 --instance-count 1 --generate-ssh-keys').get_output_in_json()
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username clitest1 --instance-count 1 --generate-ssh-keys --disable-overprovision').get_output_in_json()
 
         # get load balancer and allow trafic to scale set.
         lb = self.cmd('network lb list -g {rg}').get_output_in_json()[0]
