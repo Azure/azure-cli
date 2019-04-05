@@ -13,6 +13,8 @@ from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
 from azure.cli.command_modules.feedback.custom import (_get_command_log_files, _build_issue_info_tup,
                                                        _CLI_ISSUES_URL, _EXTENSIONS_ISSUES_URL)
+from azure.cli.core.commands import AzCliCommand
+
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
@@ -46,6 +48,10 @@ class TestCommandLogFile(ScenarioTest):
 
     @classmethod
     def tearDownClass(cls):
+        class DummyCMD(object):
+            def __init__(self, cli_ctx):
+                self.cli_ctx = cli_ctx
+
         super(TestCommandLogFile, cls).tearDownClass()
 
         for ext_name in [ext.name for ext in get_extensions() if isinstance(ext, WheelExtension) and ext.name not in cls.original_extensions]:
@@ -53,7 +59,8 @@ class TestCommandLogFile(ScenarioTest):
             logger.warning("Removing ext %s, as it was not in the original list of installed wheel extensions..", ext_name)
 
         for ext_name in cls.original_extensions:
-            add_extension(extension_name=ext_name)
+            cmd = DummyCMD(get_dummy_cli())
+            add_extension(cmd, extension_name=ext_name)
             logger.warning("Adding whl ext %s", ext_name)
 
     # using setup to benefit from self.cmd(). There should be only one test fixture in this class
