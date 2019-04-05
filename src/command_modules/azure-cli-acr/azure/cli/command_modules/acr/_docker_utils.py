@@ -35,7 +35,7 @@ logger = get_logger(__name__)
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
-ACCESS_TOKEN_PERMISSION = ['*', 'pull']
+ACCESS_TOKEN_PERMISSION = ['push', 'pull', 'delete', 'pull,delete']
 
 AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
@@ -266,7 +266,7 @@ def get_access_credentials(cmd,
     :param str password: The password used to log into the container registry
     :param str repository: Repository for which the access token is requested
     :param str artifact_repository: Artifact repository for which the access token is requested
-    :param str permission: The requested permission on the repository, '*' or 'pull'
+    :param str permission: The requested permission on the repository
     """
     return _get_credentials(cmd,
                             registry_name,

@@ -88,7 +88,7 @@ def acr_helm_delete(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='*')
+        permission='delete')
 
     return request_data_from_registry(
         http_method='delete',
@@ -119,7 +119,7 @@ def acr_helm_push(cmd,
         username=username,
         password=password,
         artifact_repository=repository,
-        permission='*')
+        permission='push')
 
     path = _get_blobs_path(repository, basename(chart_package))
 
