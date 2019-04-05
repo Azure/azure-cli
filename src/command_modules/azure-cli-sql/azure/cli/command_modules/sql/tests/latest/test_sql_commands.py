@@ -1439,13 +1439,13 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags', {})])
 
         # create a second pool with minimal params
-        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-                 .format(rg, server, pool_name2),
-                 checks=[
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', pool_name2),
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('state', 'Ready')])
+        elastic_pool_2 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+                                  .format(rg, server, pool_name2),
+                                  checks=[
+                                      JMESPathCheck('resourceGroup', rg),
+                                      JMESPathCheck('name', pool_name2),
+                                      JMESPathCheck('location', resource_group_location),
+                                      JMESPathCheck('state', 'Ready')]).get_output_in_json()
 
         self.cmd('sql elastic-pool list -g {} -s {}'.format(rg, server),
                  checks=[JMESPathCheck('length(@)', 2)])
@@ -1459,6 +1459,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolId', elastic_pool_1['id']),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
@@ -1466,7 +1467,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  .format(rg, server, database_name, self.pool_name),
                  checks=[JMESPathCheck('elasticPoolName', self.pool_name)])
 
-        # Move database to second pool. Specify service objective just for fun
+        # Move database to second pool by specifying pool name.
+        # Also specify service objective just for fun.
         # Note that 'elasticPoolName' is populated in transform
         # func which only runs after `show`/`list` commands.
         self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
@@ -1475,6 +1477,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolId', elastic_pool_2['id']),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
@@ -1492,15 +1495,16 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
                      JMESPathCheck('status', 'Online')])
 
-        # Move database back into pool
+        # Move database back into pool by specifying pool id.
         # Note that 'elasticPoolName' is populated in transform
         # func which only runs after `show`/`list` commands.
         self.cmd('sql db update -g {} -s {} -n {} --elastic-pool {}'
                  ' --service-objective ElasticPool'
-                 .format(rg, server, database_name, self.pool_name),
+                 .format(rg, server, database_name, elastic_pool_1['id']),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolId', elastic_pool_1['id']),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
 
@@ -1509,6 +1513,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolId', elastic_pool_1['id']),
                      JMESPathCheck('elasticPoolName', self.pool_name),
                      JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
                      JMESPathCheck('status', 'Online')])
