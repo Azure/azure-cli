@@ -2364,6 +2364,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
         create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
         logger.warning("Webapp creation complete")
         _set_build_app_setting = True
+        # Configure default logging
+        _configure_default_logging(cmd, rg_name, name)
         if _show_too_many_apps_warn:
             logger.warning("There are sites that have been deployed to the same hosting "
                            "VM of this region, to prevent performance impact please "
@@ -2414,7 +2416,6 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
         except OSError:
             pass
     if logs:
-        logger.waring("Configure logging for a web app")
         _configure_default_logging(cmd, rg_name, name)
     logger.warning("All done. Launching the app in your default browser.")
     return view_in_browser(cmd, rg_name, name, None, logs)

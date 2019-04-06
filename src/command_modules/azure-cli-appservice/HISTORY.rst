@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* webapp: az webapp up --logs was failing with a error and updating default .NETCORE version to 2.1
+
 0.2.17
 ++++++
 * webapp: Adding --logs support to az webapp up and other improvements to the up command
