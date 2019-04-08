@@ -56,7 +56,7 @@ jobs:
       env:
       - PURPOSE='Automation'
       - REDUCE_SDK='True'
-      - AZURE_CLI_TEST_TARGET_PROFILE='2017-03-09'
+      - AZURE_CLI_TEST_TARGET_PROFILE='2019-03-01'
       script: ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify
@@ -64,7 +64,7 @@ jobs:
       - PURPOSE='Automation'
       - AZURE_CLI_TEST_TARGET_PROFILE='2018-03-01'
       script: ./scripts/ci/test_automation.sh
-      python: 2.7
+      python: 3.6
     - stage: verify
       script: ./scripts/ci/test_static.sh
       env: PURPOSE='Static Check'
