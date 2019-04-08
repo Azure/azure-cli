@@ -169,3 +169,30 @@ helps['deploymentmanager service-unit update'] = """
           text: >
             az deploymentmanager service-unit update -g rg1 -location centralus --service-topology-name contosoServiceTopology --service-name contosoService1 --service-unit-name ContosoService1Storage --target-resource-group service1ResourceGroupUpdated
 """
+
+helps['deploymentmanager step create'] = """
+    type: command
+    short-summary: Creates the step.
+    examples:
+        - name: Creates a step.
+          text: >
+            az deploymentmanager step create -g rg1 -location centralus --step-name contosoServiceWaitStep --duration PT30M
+"""
+
+helps['deploymentmanager step show'] = """
+    type: command
+    short-summary: Get the details of the step.
+    examples:
+        - name: Get the step.
+          text: >
+            az deploymentmanager step show -g rg1 -n contosoServiceWaitStep 
+"""
+
+helps['deploymentmanager step update'] = """
+    type: command
+    short-summary: Updates the step.
+    examples:
+        - name: Updates a step.
+          text: >
+            az deploymentmanager step create -g rg1 -n contosoServiceWaitStep --duration PT20M
+"""

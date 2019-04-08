@@ -103,18 +103,11 @@ def cli_service_create(
     cmd, 
     resource_group_name, 
     location, 
+    service_topology_name, 
     service_name,
     target_location,
     target_subscription_id,
-    service_topology_name=None, 
-    service_topology_resource_id=None, 
     tags=None):
-
-    if all([service_topology_resource_id, service_topology_name]):
-        raise CLIError('usage error: specify either "--service-topology-name" or "--service-topology-resource-id"')
-
-    if service_topology_resource_id is not None:
-        service_topology_name = parse_resource_id(service_topology_resource_id)['name']
 
     service = ServiceResource(
         target_location=target_location,
@@ -150,6 +143,8 @@ def cli_service_unit_create(
     cmd, 
     resource_group_name, 
     location, 
+    service_topology_name, 
+    service_name, 
     service_unit_name,
     target_resource_group,
     deployment_mode,
@@ -157,32 +152,13 @@ def cli_service_unit_create(
     template_artifact_source_relative_path=None,
     parameters_uri=None,
     template_uri=None,
-    service_name=None, 
-    service_id=None, 
-    service_topology_name=None, 
-    service_topology_id=None, 
     tags=None):
-
-    if all([service_topology_id, service_topology_name]):
-        raise CLIError('usage error: specify either "--service-topology-name" or "--service-topology-resource-id"')
-
-    if all([service_id, service_name]):
-        raise CLIError('usage error: specify either "--service-name" or "--service-resource-id"')
 
     if all([template_artifact_source_relative_path, template_uri]):
         raise CLIError('usage error: specify either "--template-uri" or "--template-artifact-source-relative-path"')
 
     if all([parameters_artifact_source_relative_path, parameters_uri]):
         raise CLIError('usage error: specify either "--parameters-uri" or "--parameters-artifact-source-relative-path"')
-
-    if service_topology_id is not None:
-        service_topology_name = parse_resource_id(service_topology_id)['name']
-
-    if service_id is not None:
-        service_topology_name = parse_resource_id(service_id)['name']
-        service_name = parse_resource_id(service_id)['child_name_1']
-        if service_topology_name is None or service_name is None:
-            raise CLIError('usage error: "--service-resource-id" is not a valid service resource identifier.')
 
     service_unit_artifacts = ServiceUnitArtifacts(
         parameters_uri=parameters_uri,
@@ -267,9 +243,21 @@ def cli_step_update(
     duration,
     tags=None):
 
-    instance.duration = duration
+    instance.properties.attributes.duration = duration
 
     if tags is not None:
         instance.tags = tags
 
     return instance
+
+def cli_rollout_restart(
+    cmd,
+    resource_group_name,
+    rollout_name,
+    skip_succeeded):
+
+    client = cf_rollouts(cmd.cli_ctx)
+    return client.restart(
+        resource_group_name=resource_group_name,
+        rollout_name=rollout_name,
+        skip_succeeded=skip_succeeded)

@@ -38,7 +38,7 @@ def load_command_table(self, _):
 
     with self.command_group('deploymentmanager artifact-source', artifact_sources) as g:
         g.custom_command('create', 'cli_artifact_source_create')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'delete', confirmation="There might be rollouts referencing the artifact source. Do you want to delete?")
         g.command('show', 'get')
         g.generic_update_command(
             'update',
@@ -88,6 +88,9 @@ def load_command_table(self, _):
 
     with self.command_group('deploymentmanager rollout', rollouts) as g:
         g.command('show', 'get')
-        g.command('cancel', 'cancel')
-        g.command('restart', 'restart')
+        g.command('stop', 'cancel', confirmation="Do you want to cancel the rollout?")
+        g.command(
+            'restart', 
+            'restart', 
+            confirmation="Are you sure you want to restart the rollout and re-run all the steps from the start? If you want to skip all the steps that succeeded on the previous attempt, enter n and pass the '--skip-succeeded true' option.")
         g.command('delete', 'delete')

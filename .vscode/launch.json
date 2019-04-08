@@ -23,12 +23,12 @@
             "name": "Azure CLI Debug (External Console)",
             "type": "python",
             "request": "launch",
-            "stopOnEntry": true,
+            "stopOnEntry": false,
             "pythonPath": "${config:python.pythonPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
-                "--help"
+                "deploymentmanager step update -g ev2test-devesh --step-name waitStep1 --duration PT10M"
             ],
             "console": "externalTerminal",
             "debugOptions": [
@@ -44,7 +44,7 @@
             "program": "${workspaceRoot}/tools/automation/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
-                "--help"
+                "test deploymentmanager"
             ],
             "console": "integratedTerminal",
             "debugOptions": [

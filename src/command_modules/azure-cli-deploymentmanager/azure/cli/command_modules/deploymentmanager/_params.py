@@ -26,11 +26,9 @@ def load_arguments(self, _):
         DeploymentMode)
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    service_topology_name_type = CLIArgumentType(options_list='--service-topology-name', metavar='NAME')
+    service_topology_name_type = CLIArgumentType(options_list='--service-topology-name', metavar='NAME', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/servicetopologies'))
     service_name_type = CLIArgumentType(options_list='--service-name', metavar='NAME')
     service_unit_name_type = CLIArgumentType(options_list='--service-unit-name', metavar='NAME')
-    service_topology_id_type = CLIArgumentType(options_list='--service-topology-id', metavar='NAME')
-    service_id_type = CLIArgumentType(options_list='--service-id', metavar='NAME')
     artifact_source_id_type = CLIArgumentType(options_list='--artifact-source-id', metavar='NAME')
 
     with self.argument_context('deploymentmanager artifact-source') as c:
@@ -73,7 +71,6 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('location', get_location_type(self.cli_ctx), required=True)
         c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
-        c.argument('service_topology_id', service_topology_id_type, help='The identifier of the service topology')
         c.argument('service_name', options_list=['--service-name', '--name', '-n'], help='The name of the service')
         c.argument('target_location', options_list='--target-location', help='The location where the resources in the service should be deployed to.')
         c.argument('target_subscription_id', options_list='--target-subscription-id', help='The subscription to which the resources in the service should be deployed to.')
@@ -81,7 +78,6 @@ def load_arguments(self, _):
 
     with self.argument_context('deploymentmanager service create') as c:
         c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
-        c.argument('service_topology_id', service_topology_id_type, help='The identifier of the service topology')
         c.argument('service_name', options_list=['--service-name', '--name', '-n'], help='The name of the service')
         c.argument('target_location', options_list='--target-location', help='The location where the resources in the service should be deployed to.')
         c.argument('target_subscription_id', options_list='--target-subscription-id', help='The subscription to which the resources in the service should be deployed to.')
@@ -103,9 +99,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
-        c.argument('service_topology_id', service_topology_id_type, help='The identifier of the service topology')
         c.argument('service_name', service_name_type, help='The name of the service')
-        c.argument('service_id', service_topology_id_type, help='The identifier of the service')
         c.argument('service_unit_name', service_unit_name_type, help='The name of the service unit')
         c.argument('target_resource_group', target_resource_type)
         c.argument('deployment-mode', deployment_mode_type)
@@ -118,29 +112,6 @@ def load_arguments(self, _):
     with self.argument_context('deploymentmanager service-unit create', arg_group='Named') as c:
         c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
         c.argument('service_name', service_name_type, help='The name of the service')
-        c.argument('service_unit_name', options_list=['--service-unit-name', '--name', '-n'], help='The name of the service unit')
-        c.argument('target_resource_group', target_resource_type)
-        c.argument('deployment-mode', deployment_mode_type)
-        c.argument('template_uri', template_uri_type)
-        c.argument('parameters_uri', parameters_uri_type)
-        c.argument('parameters_artifact_source_relative_path', parameters_artifact_source_relative_path_type)
-        c.argument('template_artifact_source_relative_path', template_artifact_source_relative_path_type)
-        c.argument('tags', tags_type)
-
-    with self.argument_context('deploymentmanager service-unit create', arg_group='ServiceTopologyId') as c:
-        c.argument('service_topology_id', service_topology_id_type, help='The identifier of the service topology')
-        c.argument('service_name', service_name_type, help='The name of the service')
-        c.argument('service_unit_name', options_list=['--service-unit-name', '--name', '-n'], help='The name of the service unit')
-        c.argument('target_resource_group', target_resource_type)
-        c.argument('deployment-mode', deployment_mode_type)
-        c.argument('template_uri', template_uri_type)
-        c.argument('parameters_uri', parameters_uri_type)
-        c.argument('parameters_artifact_source_relative_path', parameters_artifact_source_relative_path_type)
-        c.argument('template_artifact_source_relative_path', template_artifact_source_relative_path_type)
-        c.argument('tags', tags_type)
-
-    with self.argument_context('deploymentmanager service-unit create', arg_group='ServiceId') as c:
-        c.argument('service_id', service_id_type, help='The identifier of the service')
         c.argument('service_unit_name', options_list=['--service-unit-name', '--name', '-n'], help='The name of the service unit')
         c.argument('target_resource_group', target_resource_type)
         c.argument('deployment-mode', deployment_mode_type)
@@ -168,17 +139,52 @@ def load_arguments(self, _):
         c.argument('service_unit_name', options_list=['--service-unit-name', '--name', '-n'], help='The name of the service unit')
         c.argument('tags', tags_type)
 
+    duration_type = CLIArgumentType(options_list='--duration', help='The duration of the wait step.')
+    step_name_type = CLIArgumentType(options_list=['--step-name', '--name', '-n'], help='The name of the step', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/steps'))
+
     with self.argument_context('deploymentmanager step') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('location', get_location_type(self.cli_ctx), required=True)
-        c.argument('step_name', options=['--step-name', '--name', '-n'], help='The name of the step')
-        c.argument('duration', options='--duration', help='The duration for the wait step.')
+        c.argument('step_name', step_name_type)
+        c.argument('duration', duration_type)
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager step create') as c:
-        c.argument('duration', options='--duration', help='The duration for the wait step.')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('location', get_location_type(self.cli_ctx), required=True)
+        c.argument('step_name', step_name_type)
+        c.argument('duration', duration_type)
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager step update') as c:
-        c.argument('duration', options='--duration', help='The duration for the wait step.')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('step_name', step_name_type)
+        c.argument('duration', duration_type)
         c.argument('tags', tags_type)
+
+    with self.argument_context('deploymentmanager step show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('step_name', step_name_type)
+
+    with self.argument_context('deploymentmanager step delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('step_name', step_name_type)
+
+    rollout_name_type = CLIArgumentType(options_list=['--rollout-name', '--name', '-n'], help='The name of the rollout', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/rollouts'))
+
+    with self.argument_context('deploymentmanager rollout show') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('rollout_name', rollout_name_type)
+
+    with self.argument_context('deploymentmanager rollout delete') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('rollout_name', rollout_name_type)
+
+    with self.argument_context('deploymentmanager rollout stop') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('rollout_name', rollout_name_type)
+
+    with self.argument_context('deploymentmanager rollout restart') as c:
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('rollout_name', rollout_name_type)
+        c.argument('skip_succeeded', options_list="--skip-succeeded", help="Skips all the steps that have succeeded in the previous retries of this rollout.")
