@@ -150,7 +150,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image template run -n {tmpl} -g {rg}')
 
         # get the run output
-        output = self.cmd('image template show -n {tmpl} -g {rg} --output-name {img}',
+        output = self.cmd('image template show-runs -n {tmpl} -g {rg} --output-name {img}',
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
 
@@ -188,7 +188,7 @@ class ImageTemplateTest(ScenarioTest):
         # Takes a long time to build a SIG based image template.
         self.cmd('image template run -n {tmpl} -g {rg}')
 
-        output = self.cmd('image template show -n {tmpl} -g {rg} --output-name {sig1}',
+        output = self.cmd('image template show-runs -n {tmpl} -g {rg} --output-name {sig1}',
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
         self.kwargs['image_id'] = output['artifactId']
