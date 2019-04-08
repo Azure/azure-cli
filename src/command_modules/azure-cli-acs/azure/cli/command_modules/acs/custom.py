@@ -2254,9 +2254,14 @@ def _ensure_osa_aad(cli_ctx,
         # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
         resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
                                          additional_properties=None, type="Scope")
-        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access],
+        # Read directory permissions on Windows Azure Active Directory API
+        directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
+                                         additional_properties=None, type="Scope")
+        
+        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
                                                          additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
+        
         list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
                                                                .format(reply_url)))
         if update:
@@ -2502,7 +2507,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='infra',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(2),
+        count=int(3),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.infra,
