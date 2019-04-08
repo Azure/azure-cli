@@ -2594,7 +2594,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('collation', collation),
                                           JMESPathCheck('proxyOverride', proxy_override),
                                           JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                                          JMESPathCheck('timezoneId', timezone_id),]).get_output_in_json()
+                                          JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
