@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.2
++++++
+* Support for custom time zone on managed instance.
+
 2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)

@@ -1084,6 +1084,9 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(),
                    help='Whether or not the public data endpoint is enabled for the instance.')
 
+        c.argument('timezone_id',
+                   help='The time zone id for the instance to set. A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
+
     with self.argument_context('sql mi create') as c:
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1097,6 +1100,7 @@ def load_arguments(self, _):
                 'collation',
                 'proxy_override',
                 'public_data_endpoint_enabled',
+                'timezone_id',
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
