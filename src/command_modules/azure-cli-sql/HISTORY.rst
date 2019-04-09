@@ -3,6 +3,9 @@
 Release History
 ===============
 
+* `sql server create/update`: Added `--no-wait` support.
+* `sql server`: Added new command `wait`.
+
 2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)
