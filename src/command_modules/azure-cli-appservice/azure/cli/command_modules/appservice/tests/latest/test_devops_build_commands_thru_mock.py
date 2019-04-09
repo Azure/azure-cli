@@ -13,10 +13,11 @@ from azure.cli.command_modules.appservice.azure_devops_build_iteractive import (
 
 
 def interactive_patch_path(iteractive_module):
-    return 'azure.cli.command_modules.appservice.azure_devops_build_iteractive.{}'.format(iteractive_module)
+    return "azure.cli.command_modules.appservice.azure_devops_build_iteractive.{}".format(iteractive_module)
 
 
 class TestDevopsBuildCommandsMocked(unittest.TestCase):
+    @patch("azure.cli.command_modules.appservice.azure_devops_build_iteractive.AzureDevopsBuildProvider", new=MagicMock())
     def setUp(self):
         mock_logger = MagicMock()
         mock_cmd = MagicMock()

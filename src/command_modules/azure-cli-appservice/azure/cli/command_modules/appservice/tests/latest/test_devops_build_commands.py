@@ -8,7 +8,6 @@ import uuid
 import os
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure_functions_devops_build.exceptions import RoleAssignmentException
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 
