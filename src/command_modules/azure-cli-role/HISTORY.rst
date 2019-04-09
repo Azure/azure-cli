@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+2.5.0
++++++
 * create-for-rbac: handle --years correctly
 * [BREAKING CHANGE] `role assignment delete`: prompt when delete all assignments under the subscription unconditionally
 

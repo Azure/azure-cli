@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.2.18
+++++++
+* Minor fixes
+
 2.2.17
 ++++++
 * Added `image update` command.
