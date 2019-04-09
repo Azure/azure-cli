@@ -48,7 +48,7 @@ def update_account_filter(instance, start_timestamp=None, end_timestamp=None,
         raise CLIError('The account filter resource was not found.')
 
     if first_quality or bitrate:
-        first_quality = FirstQuality(bitrate=first_quality or bitrate)
+        instance.first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale, force_end_timestamp is not None]):
