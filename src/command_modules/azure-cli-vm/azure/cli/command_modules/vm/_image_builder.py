@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 import re
-import os
 from enum import Enum
 import copy
 
@@ -13,14 +13,18 @@ try:
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
+from knack.util import CLIError
+from msrestazure.azure_exceptions import CloudError
+from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+from msrest.exceptions import ClientException
+
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
-from msrest.exceptions import ClientException
+from azure.cli.command_modules.vm._client_factory import _compute_client_factory
+from azure.cli.command_modules.vm._validators import _get_resource_id
 
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -29,6 +33,7 @@ logger = get_logger(__name__)
 class _SourceType(Enum):
     PLATFORM_IMAGE = "PlatformImage"
     ISO_URI = "ISO"
+    MANAGED_IMAGE = "ManagedImage"
 
 class _DestType(Enum):
     MANAGED_IMAGE = 1
@@ -177,7 +182,7 @@ def process_image_template_create_namespace(cmd, namespace):
     # Validate and parse source image
     # 1 - check if source is a URN. A urn e.g "Canonical:UbuntuServer:18.04-LTS:latest"
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.source)
-    if urn_match: # if platform image urn
+    if urn_match:  # if platform image urn
         source = {
             'publisher': urn_match.group(1),
             'offer': urn_match.group(2),
@@ -191,7 +196,18 @@ def process_image_template_create_namespace(cmd, namespace):
         else:
             likely_linux = False
 
-    # 2 - check if source is a Redhat iso uri. If so a checksum must be provided.
+        logger.info("{} looks like a platform image URN".format(namespace.source))
+
+    # 2 - check if a fully-qualified ID (assumes it is an image ID)
+    elif is_valid_resource_id(namespace.source):
+        source = {
+            'image_id': namespace.source,
+            'type': _SourceType.MANAGED_IMAGE
+        }
+
+        logger.info("{} looks like a managed image id.".format(namespace.source))
+
+    # 3 - check if source is a Redhat iso uri. If so a checksum must be provided.
     elif urlparse(namespace.source).scheme and "://" in namespace.source and ".iso" in namespace.source.lower():
         if not namespace.checksum:
             raise CLIError("Must provide a checksum for source uri.", )
@@ -202,8 +218,10 @@ def process_image_template_create_namespace(cmd, namespace):
         }
         likely_linux = True
 
-    # 3 - check if source is a urn alias from the vmImageAliasDoc endpoint. See "az cloud show"
-    else:
+        logger.info("{} looks like a RedHat iso uri.".format(namespace.source))
+
+    # 4 - check if source is a urn alias from the vmImageAliasDoc endpoint. See "az cloud show"
+    if not source:
         from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
         images = load_images_from_aliases_doc(cmd.cli_ctx)
         matched = next((x for x in images if x['urnAlias'].lower() == namespace.source.lower()), None)
@@ -219,9 +237,28 @@ def process_image_template_create_namespace(cmd, namespace):
         if "windows" not in source["offer"].lower() and "windows" not in source["sku"].lower():
             likely_linux = True
 
+        logger.info("{} looks like a platform image alias.".format(namespace.source))
+
+    # 5 - check if source is an existing managed disk image resource
     if not source:
-        err = 'Invalid image "{}". Use a valid image URN, ISO URI, or pick a platform image alias from {}.\n' \
-              'See vm create -h for more information on specifying an image.'
+        compute_client = _compute_client_factory(cmd.cli_ctx)
+        try:
+            image_name = namespace.source
+            compute_client.images.get(namespace.resource_group_name, namespace.source)
+            namespace.source = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
+                                               'images', 'Microsoft.Compute')
+            source = {
+                'image_id': namespace.source,
+                'type': _SourceType.MANAGED_IMAGE
+            }
+
+            logger.info("{} looks like a managed image name. Using resource ID: {}".format(image_name, namespace.source))  #pylint: disable=line-too-long
+        except CloudError:
+            pass
+
+    if not source:
+        err = 'Invalid image "{}". Use a valid image URN, managed image name or ID, ISO URI, ' \
+              'or pick a platform image alias from {}.\nSee vm create -h for more information on specifying an image.'
         raise CLIError(err.format(namespace.source, ", ".join([x['urnAlias'] for x in images])))
 
     for script in scripts:
@@ -300,7 +337,8 @@ def create_image_template(client, resource_group_name, image_template_name, sour
                           checksum=None, location=None, no_wait=False,
                           managed_image_destinations=None, shared_image_destinations=None,
                           source_dict=None, scripts_list=None, destinations_lists=None):
-    from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplatePlatformImageSource, ImageTemplateIsoSource,
+    from azure.mgmt.imagebuilder.models import (ImageTemplate,
+                                                ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  #pylint: disable=line-too-long
 
@@ -311,6 +349,8 @@ def create_image_template(client, resource_group_name, image_template_name, sour
         template_source = ImageTemplatePlatformImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.ISO_URI:
         template_source = ImageTemplateIsoSource(**source_dict)
+    elif source_dict['type'] == _SourceType.MANAGED_IMAGE:
+        template_source = ImageTemplateManagedImageSource(**source_dict)
 
     # create image template customizer settings
     # Script structure can be found in _parse_script's function definition
