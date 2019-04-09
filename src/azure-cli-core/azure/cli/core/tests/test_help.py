@@ -507,6 +507,7 @@ class TestHelpLoads(unittest.TestCase):
             f.write(data)
             return f.name
 
+
 class TestHelpSupportedProfiles(unittest.TestCase):
     def setUp(self):
         from azure.cli.core.profiles._shared import AZURE_API_PROFILES
