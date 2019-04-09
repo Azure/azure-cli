@@ -68,6 +68,11 @@ def load_arguments(self, _):
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
+            if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
+                c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
+                c.argument('for_upload', arg_type=get_three_state_flag(),
+                           help='Create the {0} for uploading blobs later on through storage commands. Run "az {0} grant-access --access-level Write" to retrieve the {0}\'s SAS token.'.format(scope))
+                c.argument('hyper_v_generation', help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only. Possible values include: "V1", "V2"')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:

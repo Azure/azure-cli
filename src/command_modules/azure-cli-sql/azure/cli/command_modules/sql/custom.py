@@ -2025,7 +2025,9 @@ def managed_instance_update(
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
-        assign_identity=False):
+        assign_identity=False,
+        proxy_override=None,
+        public_data_endpoint_enabled=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2043,6 +2045,11 @@ def managed_instance_update(
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.proxy_override = (
+        proxy_override or instance.proxy_override)
+
+    if public_data_endpoint_enabled is not None:
+        instance.public_data_endpoint_enabled = public_data_endpoint_enabled
 
     return instance
 

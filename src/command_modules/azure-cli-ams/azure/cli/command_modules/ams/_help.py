@@ -221,7 +221,7 @@ helps['ams asset-filter create'] = """
     examples:
         - name: Create an asset filter with filter track selections.
           text: >
-            az ams asset-filter create -a amsAccount -g resourceGroup -n filterName --force-end-timestamp=False --end-timestamp 200000 --start-timestamp 100000 --live-backoff-duration 60 --presentation-window-duration 600000 --timescale 1000 --bitrate 720 --asset-name assetName --tracks @C:\\tracks.json
+            az ams asset-filter create -a amsAccount -g resourceGroup -n filterName --force-end-timestamp=False --end-timestamp 200000 --start-timestamp 100000 --live-backoff-duration 60 --presentation-window-duration 600000 --timescale 1000 --first-quality 720 --asset-name assetName --tracks @C:\\tracks.json
 """
 
 helps['ams asset-filter update'] = """
@@ -568,7 +568,7 @@ helps['ams account-filter create'] = """
     examples:
         - name: Create an asset filter with filter track selections.
           text: >
-            az ams account-filter create -a amsAccount -g resourceGroup -n filterName --force-end-timestamp=False --end-timestamp 200000 --start-timestamp 100000 --live-backoff-duration 60 --presentation-window-duration 600000 --timescale 1000 --bitrate 720 --tracks @C:\\tracks.json
+            az ams account-filter create -a amsAccount -g resourceGroup -n filterName --force-end-timestamp=False --end-timestamp 200000 --start-timestamp 100000 --live-backoff-duration 60 --presentation-window-duration 600000 --timescale 1000 --first-quality 720 --tracks @C:\\tracks.json
 """
 
 helps['ams account-filter update'] = """

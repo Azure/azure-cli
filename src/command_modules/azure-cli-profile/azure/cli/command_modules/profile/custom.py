@@ -183,7 +183,7 @@ def check_cli(cmd):
 
     print('Retrieving all help...')
     try:
-        get_all_help(cmd.cli_ctx)
+        get_all_help(cmd.cli_ctx, skip=False)
         print('Help loaded OK.\n')
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_help'] = ex

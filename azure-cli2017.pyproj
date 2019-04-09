@@ -11,10 +11,9 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|env1|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>group deployment list -g tjp-rg --top 1</CommandLineArguments>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
@@ -248,8 +247,11 @@
     <Compile Include="command_modules\azure-cli-ams\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-ams\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-ams\setup.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\azure_devops_build_iteractive.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\azure_devops_build_provider.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\custom.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_devops_build_commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands_thru_mock.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tunnel.py">
@@ -668,6 +670,23 @@
     <Compile Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\_validators.py" />
     <Compile Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\__init__.py" />
     <Compile Include="command_modules\azure-cli-policyinsights\setup.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\commands.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\custom.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\test_privatedns_commands.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\_test_data_generator.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_format.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_help.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_params.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_validators.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure_bdist_wheel.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\setup.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\tests\latest\test_profile_custom.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\_format.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\_help.py">
@@ -975,6 +994,7 @@
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\" />
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\" />
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\" />
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\" />
     <Folder Include="command_modules\azure-cli-backup\" />
     <Folder Include="command_modules\azure-cli-backup\azure\" />
@@ -1203,6 +1223,13 @@
     <Folder Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\" />
     <Folder Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\tests\" />
     <Folder Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-privatedns\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\" />
     <Folder Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\tests\" />
     <Folder Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\tests\latest\" />
     <Folder Include="command_modules\azure-cli-rdbms\" />
@@ -1470,6 +1497,11 @@
     <Content Include="command_modules\azure-cli-ams\MANIFEST.in" />
     <Content Include="command_modules\azure-cli-ams\README.rst" />
     <Content Include="command_modules\azure-cli-ams\setup.cfg" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\.gitignore" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\host.json" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\HttpTrigger.cs" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\local.settings.json" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\sample_dotnet_function.csproj" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\.gitignore" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\package.json" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\server.js" />
@@ -1622,6 +1654,10 @@
     <Content Include="command_modules\azure-cli-network\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-network\linter_exclusions.yml" />
     <Content Include="command_modules\azure-cli-policyinsights\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-privatedns\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-privatedns\MANIFEST.in" />
+    <Content Include="command_modules\azure-cli-privatedns\README.rst" />
+    <Content Include="command_modules\azure-cli-privatedns\setup.cfg" />
     <Content Include="command_modules\azure-cli-profile\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-rdbms\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-rdbms\MANIFEST.in" />
@@ -1687,6 +1723,15 @@
     <InterpreterReference Include="Global|PythonCore|3.6" />
   </ItemGroup>
   <ItemGroup>
+    <Interpreter Include="..\..\env\">
+      <Id>env1</Id>
+      <Version>3.7</Version>
+      <Description>env (Python 3.7 (32-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
     <Interpreter Include="..\env\">
       <Id>env</Id>
       <Version>3.6</Version>

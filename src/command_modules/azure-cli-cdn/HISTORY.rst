@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.2
++++++
+* Add support for Microsoft_Standard and Standard_ChinaCdn
+
 0.2.1
 +++++
 * `cdn endpoint create/update/start/stop/delete/load/purge`: Added support for `--no-wait`.

@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.62
+++++++
+* Fix issue where some extensions showed a version of "Unknown" and could not be updated.
+
 2.0.61
 ++++++
 * Fix issues with dev extension incompatibility.

@@ -2,6 +2,14 @@
 
 Release History
 ===============
+
+2.4.0
++++++
+* BREAKING CHANGE: `storage blob delete`: remove the return result of command
+* `storage blob generate-sas`: add `--full-uri` to create the full uri for the blob with sas
+* `storage file copy start`: add `--file-snapshot` to copy file from snapshot
+* `storage blob copy cancel` - only show the error instead of exception for NoPendingCopyOperation.
+
 2.3.2
 +++++
 * `storage file download-batch`: add `--snapshot` to download from a share snapshot

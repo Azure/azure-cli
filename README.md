@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
+[![Build Status](https://dev.azure.com/azure-public/azcli/_apis/build/status/azcli-CI?branchName=dev)](https://dev.azure.com/azure-public/azcli/_build/latest?definitionId=18&branchName=dev)
 [![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
@@ -141,8 +142,22 @@ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
 
 ### Edge Builds
 
-If you want to get the latest build from the `dev` branch, you can use our "edge" builds feed. Here's an example of
-installing edge dev builds with pip in a virtual environment.
+If you want to get the latest build from the `dev` branch, you can use our "edge" builds.
+
+You can download the latest builds by following the links below:
+
+| Platform  | Link                                       |
+| :-------: | :----------------------------------------- |
+| Windows   | https://aka.ms/InstallAzureCliWindowsEdge  |
+| Homebrew  | https://aka.ms/InstallAzureCliHomebrewEdge |
+
+You can easily install the latest Homebrew edge build with the following command:
+
+```bash
+brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
+```
+
+Here's an example of installing edge dev builds with pip in a virtual environment.
 
 ```bash
 $ virtualenv env

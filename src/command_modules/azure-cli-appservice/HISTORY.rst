@@ -2,6 +2,19 @@
 
 Release History
 ===============
+
+0.2.17
+++++++
+* webapp: Adding --logs support to az webapp up and other improvements to the up command
+* functionapp: fix `az functionapp devops-build create` command azure-pipelines.yml generation issues
+* functionapp: improve `az functionapp devops-build create` error handlings and error indications
+* functionapp: remove `--local_git` flag in devops-build command, local git detection and handling are compulsory for creating Azure DevOps pipelines
+* functionapp: add support for linux functions plan creation
+* webapp, functionapp: Updating to use the new Python SDK version
+* appservice: adminSiteName property of SKU object is deprecated
+* functionapp: add ability to switch a plan underneath a function app using `az functionapp update --plan`
+* functionapp: add support for azure functions premium plan scale out settings
+
 0.2.16
 ++++++
 * webapp: az webapp up was not handling running from empty directory or unknown code scenario correctly

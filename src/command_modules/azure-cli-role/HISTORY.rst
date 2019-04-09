@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.5.0
++++++
+* create-for-rbac: handle --years correctly
+* [BREAKING CHANGE] `role assignment delete`: prompt when delete all assignments under the subscription unconditionally
+
 2.4.3
 +++++
 * `ad app/sp credential reset`: support --end-date
