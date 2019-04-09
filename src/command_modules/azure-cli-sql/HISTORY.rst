@@ -2,9 +2,11 @@
 
 Release History
 ===============
+
 2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)
+* Allow elastic pool name (as an alternative to elastic pool id) to be specified for az sql db update.
 
 2.2.0
 +++++

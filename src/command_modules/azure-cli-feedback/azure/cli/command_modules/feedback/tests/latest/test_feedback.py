@@ -13,6 +13,8 @@ from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
 from azure.cli.command_modules.feedback.custom import (_get_command_log_files, _build_issue_info_tup,
                                                        _CLI_ISSUES_URL, _EXTENSIONS_ISSUES_URL)
+from azure.cli.core.commands import AzCliCommand
+
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
@@ -31,35 +33,21 @@ class TestCommandLogFile(ScenarioTest):
         self.disable_recording = True
         self.is_live = True
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestCommandLogFile, cls).setUpClass()
-        cls.ext_to_add_post_test = None
-
-        # ensure that after tests are run we return to original extensions' state.
-
-        cls.original_extensions = [ext.name for ext in get_extensions() if isinstance(ext, WheelExtension)]
-
-        for ext_name in cls.original_extensions:
-            remove_extension(ext_name)
-            logger.warning("Removing ext %s, will reinstall it afterwards if it is a published whl extension.", ext_name)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(TestCommandLogFile, cls).tearDownClass()
-
-        for ext_name in [ext.name for ext in get_extensions() if isinstance(ext, WheelExtension) and ext.name not in cls.original_extensions]:
-            remove_extension(ext_name)
-            logger.warning("Removing ext %s, as it was not in the original list of installed wheel extensions..", ext_name)
-
-        for ext_name in cls.original_extensions:
-            add_extension(extension_name=ext_name)
-            logger.warning("Adding whl ext %s", ext_name)
-
     # using setup to benefit from self.cmd(). There should be only one test fixture in this class
     def setUp(self):
+        def _add_alias(self, command_log_dir, logger):
+            self.cli_ctx.logging.command_log_dir = command_log_dir
+            self.cmd("az extension add -n alias")
+            logger.warning("Adding whl ext alias")
+
         super(TestCommandLogFile, self).setUp()
         self.temp_command_log_dir = self.create_temp_dir()
+
+        # if alias is installed as a wheel extension. Remove it for now and re-install it later.
+        if "alias" in [ext.name for ext in get_extensions() if isinstance(ext, WheelExtension)]:
+            logger.warning("Removing whl ext alias, will reinstall it afterwards if it is a published whl extension.")
+            self.cmd("az extension remove -n alias")
+            self.addCleanup(_add_alias, self, self.cli_ctx.logging.command_log_dir, logger)
 
         self.cli_ctx.logging.command_log_dir = self.temp_command_log_dir
 

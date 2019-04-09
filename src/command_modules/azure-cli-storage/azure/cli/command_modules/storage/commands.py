@@ -50,7 +50,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.show_command('show', 'get_properties')
         g.custom_command('list', 'list_storage_accounts')
         g.custom_command('show-usage', 'show_storage_account_usage', min_api='2018-02-01')
-        g.custom_command('show-usage', 'show_storage_account_usage_no_location', max_api='2016-01-01')
+        g.custom_command('show-usage', 'show_storage_account_usage_no_location', max_api='2017-10-01')
         g.custom_command('show-connection-string', 'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
