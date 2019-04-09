@@ -507,9 +507,16 @@ class TestHelpLoads(unittest.TestCase):
             f.write(data)
             return f.name
 
-    def test_example_inclusion_basic(self):
-        from azure.cli.core._help import CliHelpFile, HelpExample
+
+class TestHelpSupportedProfiles(unittest.TestCase):
+    def setUp(self):
         from azure.cli.core.profiles._shared import AZURE_API_PROFILES
+        self.test_cli = DummyCli()
+        self.all_profiles = AZURE_API_PROFILES
+        self.all_profiles_str = " {} ".format(" , ".join(AZURE_API_PROFILES.keys()))
+
+    def test_example_inclusion_basic(self):
+        from azure.cli.core._help import CliHelpFile
 
         cli_ctx = self.test_cli
         cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
@@ -519,17 +526,17 @@ class TestHelpLoads(unittest.TestCase):
         ex_dict = {
             'summary': "Example to test supported-profiles",
             'command': "Az foo bar",
-            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
+            'supported-profiles': self.all_profiles_str
         }
 
         # example should be included in all profiles (implicit)
-        for profile in AZURE_API_PROFILES.keys():
+        for profile in self.all_profiles.keys():
             mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
             self.assertTrue(mock_help_file._should_include_example(ex_dict))
 
         ex_dict.update({
-            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest ",
-            'unsupported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
+            'supported-profiles': self.all_profiles_str,
+            'unsupported-profiles': self.all_profiles_str
         })
         # Assert that an help authoring exception is raised when both types of fields are used.
         with self.assertRaises(HelpAuthoringException):
@@ -550,8 +557,7 @@ class TestHelpLoads(unittest.TestCase):
             mock_help_file._should_include_example(ex_dict)
 
     def test_example_supported_profiles(self):
-        from azure.cli.core._help import CliHelpFile, HelpExample
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
+        from azure.cli.core._help import CliHelpFile
 
         cli_ctx = self.test_cli
         cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx,
@@ -562,17 +568,17 @@ class TestHelpLoads(unittest.TestCase):
         ex_dict = {
             'summary': "Example to test supported-profiles",
             'command': "Az foo bar",
-            'supported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
+            'supported-profiles': self.all_profiles_str
         }
 
         # example should be included in all profiles (explicit)
-        for profile in AZURE_API_PROFILES.keys():
+        for profile in self.all_profiles:
             mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
             self.assertTrue(mock_help_file._should_include_example(ex_dict))
 
         # example should be included in all filtered profiles but not excluded profile
-        for excluded_profile in AZURE_API_PROFILES.keys():
-            filtered_profiles = [profile for profile in AZURE_API_PROFILES.keys() if profile != excluded_profile]
+        for excluded_profile in self.all_profiles:
+            filtered_profiles = [profile for profile in self.all_profiles if profile != excluded_profile]
             ex_dict['supported-profiles'] = ", ".join(filtered_profiles)
 
             # excluded profile is not in supported-profiles list and example should be excluded
@@ -585,11 +591,11 @@ class TestHelpLoads(unittest.TestCase):
                 self.assertTrue(mock_help_file._should_include_example(ex_dict))
 
         # example should be included in the sole supported profile
-        for sole_profile in AZURE_API_PROFILES.keys():
+        for sole_profile in self.all_profiles:
             mock_help_file.help_ctx.cli_ctx.cloud.profile = sole_profile
 
             # try different supported profiles settings in example and handle accordingly
-            for profile in AZURE_API_PROFILES.keys():
+            for profile in self.all_profiles:
                 ex_dict['supported-profiles'] = " {} ".format(profile)
                 should_include_example = mock_help_file._should_include_example(ex_dict)
                 if profile == sole_profile:
@@ -598,8 +604,7 @@ class TestHelpLoads(unittest.TestCase):
                     self.assertFalse(should_include_example)
 
     def test_example_unsupported_profiles(self):
-        from azure.cli.core._help import CliHelpFile, HelpExample
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
+        from azure.cli.core._help import CliHelpFile
 
         cli_ctx = self.test_cli
         cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx,
@@ -610,17 +615,17 @@ class TestHelpLoads(unittest.TestCase):
         ex_dict = {
             'summary': "Example to test supported-profiles",
             'command': "Az foo bar",
-            'unsupported-profiles': " 2017-03-09-profile, 2018-03-01-hybrid, 2019-03-01-hybrid, latest "
+            'unsupported-profiles': self.all_profiles_str
         }
 
         # example should be excluded from all profiles (explicit)
-        for profile in AZURE_API_PROFILES.keys():
+        for profile in self.all_profiles:
             mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
             self.assertFalse(mock_help_file._should_include_example(ex_dict))
 
         # example should be excluded in all filtered profiles
-        for included in AZURE_API_PROFILES.keys():
-            filtered_profiles = [profile for profile in AZURE_API_PROFILES.keys() if profile != included]
+        for included in self.all_profiles:
+            filtered_profiles = [profile for profile in self.all_profiles if profile != included]
             ex_dict['unsupported-profiles'] = ", ".join(filtered_profiles)
 
             # included profile is not in unsupported-profiles list and example should be included
@@ -633,11 +638,11 @@ class TestHelpLoads(unittest.TestCase):
                 self.assertFalse(mock_help_file._should_include_example(ex_dict))
 
         # example should be excluded in the sole unsupported profile
-        for sole_profile in AZURE_API_PROFILES.keys():
+        for sole_profile in self.all_profiles:
             mock_help_file.help_ctx.cli_ctx.cloud.profile = sole_profile
 
             # try different unsupported profiles settings in example and handle accordingly
-            for profile in AZURE_API_PROFILES.keys():
+            for profile in self.all_profiles:
                 ex_dict['unsupported-profiles'] = " {} ".format(profile)
                 should_include_example = mock_help_file._should_include_example(ex_dict)
                 if profile == sole_profile:
