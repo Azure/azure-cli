@@ -60,8 +60,12 @@ def get_runtime_version_details(file_path, lang_name):
         version_detected = parse_dotnet_version(file_path)
         version_to_create = detect_dotnet_version_tocreate(version_detected)
     elif lang_name.lower() == NODE_RUNTIME_NAME:
-        version_detected = parse_node_version(file_path)[0]
-        version_to_create = detect_node_version_tocreate(version_detected)
+        if file_path == '':
+            version_detected = "-"
+            version_to_create = NODE_VERSION_DEFAULT
+        else:
+            version_detected = parse_node_version(file_path)[0]
+            version_to_create = detect_node_version_tocreate(version_detected)
     elif lang_name.lower() == PYTHON_RUNTIME_NAME:
         version_detected = "-"
         version_to_create = PYTHON_VERSION_DEFAULT
@@ -135,9 +139,9 @@ def get_lang_from_content(src_path):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_python_file
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
-    elif os.path.isfile(package_json_file):
+    elif os.path.isfile(package_json_file) or os.path.isfile('server.js') or os.path.isfile('index.js'):
         runtime_details_dict['language'] = NODE_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = package_json_file
+        runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netlang_glob:
         package_netcore_file = os.path.join(src_path, package_netlang_glob[0])

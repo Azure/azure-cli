@@ -516,6 +516,13 @@ helps['network application-gateway rewrite-rule'] = """
 helps['network application-gateway rewrite-rule create'] = """
     short-summary: Create a rewrite rule.
     type: command
+    parameters:
+      - name: --request-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-request-headers
+      - name: --response-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-response-headers
 """
 
 helps['network application-gateway rewrite-rule delete'] = """
@@ -536,6 +543,13 @@ helps['network application-gateway rewrite-rule show'] = """
 helps['network application-gateway rewrite-rule update'] = """
     short-summary: Update a rewrite rule.
     type: command
+    parameters:
+      - name: --request-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-request-headers
+      - name: --response-headers
+        populator-commands:
+          - az network application-gateway rewrite-rule list-response-headers
 """
 
 helps['network application-gateway rewrite-rule set'] = """
@@ -576,6 +590,10 @@ helps['network application-gateway rewrite-rule condition'] = """
 helps['network application-gateway rewrite-rule condition create'] = """
     short-summary: Create a rewrite rule condition.
     type: command
+    parameters:
+      - name: --variable
+        populator-commands:
+          - az network application-gateway rewrite-rule condition list-server-variables
 """
 
 helps['network application-gateway rewrite-rule condition delete'] = """
@@ -596,6 +614,10 @@ helps['network application-gateway rewrite-rule condition show'] = """
 helps['network application-gateway rewrite-rule condition update'] = """
     short-summary: Update a rewrite rule condition.
     type: command
+    parameters:
+      - name: --variable
+        populator-commands:
+          - az network application-gateway rewrite-rule condition list-server-variables
 """
 # endregion
 
@@ -1806,6 +1828,12 @@ helps['network dns zone create'] = """
         - name: Create a DNS zone using a fully qualified domain name.
           text: >
             az network dns zone create -g MyResourceGroup -n www.mysite.com
+        - name: Create a DNS zone with delegation in the parent within the same subscription and resource group
+          text: >
+            az network dns zone create -g MyResourceGroup -n books.mysite.com -p mysite.com
+        - name: Create a DNS zone with delegation in the parent in different subscription
+          text: >
+            az network dns zone create -g MyResourceGroup -n books.mysite.com -p "/subscriptions/**67e2/resourceGroups/OtherRg/providers/Microsoft.Network/dnszones/mysite.com"
 """
 
 helps['network dns zone delete'] = """

@@ -13,13 +13,14 @@ from azure.mgmt.media.models import (AssetFilter, FilterTrackSelection, FilterTr
 
 def create_asset_filter(client, account_name, resource_group_name, asset_name, filter_name,
                         start_timestamp=None, end_timestamp=None, presentation_window_duration=None,
-                        live_backoff_duration=None, timescale=None, force_end_timestamp=False, bitrate=None,
+                        live_backoff_duration=None, timescale=None, force_end_timestamp=False,
+                        bitrate=None, first_quality=None,
                         tracks=None):
-    first_quality = None
+
     presentation_time_range = None
 
-    if bitrate:
-        first_quality = FirstQuality(bitrate=bitrate)
+    if first_quality or bitrate:
+        first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale]):
@@ -42,13 +43,14 @@ def create_asset_filter(client, account_name, resource_group_name, asset_name, f
 
 
 def update_asset_filter(instance, start_timestamp=None, end_timestamp=None, presentation_window_duration=None,
-                        live_backoff_duration=None, timescale=None, bitrate=None,
+                        live_backoff_duration=None, timescale=None, bitrate=None, first_quality=None,
                         tracks=None, force_end_timestamp=None):
+
     if not instance:
         raise CLIError('The asset filter resource was not found.')
 
-    if bitrate:
-        instance.first_quality = FirstQuality(bitrate=bitrate)
+    if first_quality or bitrate:
+        instance.first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale, force_end_timestamp is not None]):

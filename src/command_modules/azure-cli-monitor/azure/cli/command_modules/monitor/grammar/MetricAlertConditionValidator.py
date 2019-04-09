@@ -20,7 +20,8 @@ agg_conversion = {
     'avg': 'Average',
     'min': 'Minimum',
     'max': 'Maximum',
-    'total': 'Total'
+    'total': 'Total',
+    'count': 'Count'
 }
 
 dim_op_conversion = {

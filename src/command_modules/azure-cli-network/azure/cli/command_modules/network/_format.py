@@ -267,10 +267,10 @@ def transform_effective_nsg(result):
                 ('NIC', nic if print_names else ' '),
                 ('Subnet', subnet if print_names else ' '),
                 ('NSG', nsg if print_names else ' '),
-                ('Rule Name', rule['name']),
-                ('Protocol', rule['protocol']),
-                ('Direction', rule['direction']),
-                ('Access', rule['access'])
+                ('Rule Name', rule.get('name', '')),
+                ('Protocol', rule.get('protocol', '')),
+                ('Direction', rule.get('direction', '')),
+                ('Access', rule.get('access', ''))
             ]))
             print_names = False
     return transformed
@@ -280,12 +280,12 @@ def transform_vnet_gateway_routes_table(result):
     transformed = []
     for item in result.get('value', []):
         transformed.append(OrderedDict([
-            ('Network', item['network']),
-            ('NextHop', item['nextHop']),
-            ('Origin', item['origin']),
-            ('SourcePeer', item['sourcePeer'] or ''),
-            ('AsPath', item['asPath'] or ''),
-            ('Weight', item['weight'])
+            ('Network', item.get('network', '')),
+            ('NextHop', item.get('nextHop', '')),
+            ('Origin', item.get('origin', '')),
+            ('SourcePeer', item.get('sourcePeer', '')),
+            ('AsPath', item.get('asPath', '')),
+            ('Weight', item.get('weight', ''))
         ]))
     return transformed
 
@@ -294,12 +294,12 @@ def transform_vnet_gateway_bgp_peer_table(result):
     transformed = []
     for item in result.get('value', []):
         transformed.append(OrderedDict([
-            ('Neighbor', item['neighbor'] or ''),
-            ('ASN', item['asn'] or ''),
-            ('State', item['state'] or ''),
-            ('ConnectedDuration', item['connected_duration'] or ''),
-            ('RoutesReceived', item['routes_received'] or ''),
-            ('MessagesSent', item['messages_sent'] or ''),
-            ('MessagesReceived', item['messages_received'] or '')
+            ('Neighbor', item.get('neighbor', '')),
+            ('ASN', item.get('asn', '')),
+            ('State', item.get('state', '')),
+            ('ConnectedDuration', item.get('connectedDuration', '')),
+            ('RoutesReceived', item.get('routesReceived', '')),
+            ('MessagesSent', item.get('messagesSent', '')),
+            ('MessagesReceived', item.get('messagesReceived', ''))
         ]))
     return transformed

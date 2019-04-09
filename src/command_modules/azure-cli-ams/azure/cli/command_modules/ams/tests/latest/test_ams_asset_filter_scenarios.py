@@ -43,7 +43,7 @@ class AmsAssetFilterTests(ScenarioTest):
 
         self.kwargs.update({
             'filter_name': filter_name,
-            'bitrate': 420,
+            'firstQuality': 420,
             'endTimestamp': 100000000,
             'liveBackoffDuration': 60,
             'presentationWindowDuration': 1200000000,
@@ -52,8 +52,8 @@ class AmsAssetFilterTests(ScenarioTest):
             'tracks': '@' + _get_test_data_file('filterTracks.json'),
         })
 
-        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
-            self.check('firstQuality.bitrate', '{bitrate}'),
+        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --first-quality {firstQuality} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
+            self.check('firstQuality.bitrate', '{firstQuality}'),
             self.check('name', '{filter_name}'),
             self.check('presentationTimeRange.endTimestamp', '{endTimestamp}'),
             self.check('presentationTimeRange.liveBackoffDuration', '{liveBackoffDuration}'),
@@ -112,7 +112,7 @@ class AmsAssetFilterTests(ScenarioTest):
             'tracks': '@' + _get_test_data_file('filterTracks.json'),
         })
 
-        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
+        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --first-quality {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
 
         self.cmd('az ams asset-filter show -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name}', checks=[
             self.check('firstQuality.bitrate', '{bitrate}'),
@@ -175,12 +175,13 @@ class AmsAssetFilterTests(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name1} --bitrate {bitrate1}')
+        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name1} --first-quality {bitrate1}')
 
         self.cmd('az ams asset-filter list -a {amsname} --asset-name {asset_name} -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
 
+        # Use deprecated --bitrate parameter to see the deprecation message. Update when fully deprecated.
         self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name2} --bitrate {bitrate2}')
 
         self.cmd('az ams asset-filter list -a {amsname} --asset-name {asset_name} -g {rg}', checks=[
@@ -240,8 +241,9 @@ class AmsAssetFilterTests(ScenarioTest):
             'newTrackValue': 'EC-3'
         })
 
-        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
+        self.cmd('az ams asset-filter create -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --first-quality {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
 
+        # Use deprecated --bitrate parameter to see the deprecation message. Update when fully deprecated.
         self.cmd('az ams asset-filter update -a {amsname} --asset-name {asset_name} -g {rg} -n {filter_name} --bitrate {newBitrate} --start-timestamp {newStartTimestamp} --end-timestamp {newEndTimestamp} --set tracks[1].trackSelections[0].operation={newTrackOperation} tracks[1].trackSelections[0].property={newTrackProperty} tracks[1].trackSelections[0].value={newTrackValue}', checks=[
             self.check('firstQuality.bitrate', '{newBitrate}'),
             self.check('name', '{filter_name}'),

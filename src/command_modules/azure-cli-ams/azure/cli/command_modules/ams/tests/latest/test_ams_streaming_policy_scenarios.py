@@ -122,6 +122,82 @@ class AmsStreamingPolicyTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_policy_cenc_default_drm(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        streamingPolicyName = self.create_random_name(prefix='spn', length=10)
+
+        self.kwargs.update({
+            'streamingPolicyName': streamingPolicyName,
+            'protocols': 'HLS SmoothStreaming',
+            'clearTracks': '@' + _get_test_data_file('clearTracks.json'),
+            'keyToTrackMappings': '@' + _get_test_data_file('keyToTrackMappings.json'),
+            'label': 'label',
+            'playReadyUrlTemplate': 'playReadyTemplate.foo.bar',
+            'playReadyAttributes': 'awesomeAttributes'
+        })
+
+        self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cenc-protocols {protocols} --cenc-clear-tracks "{clearTracks}" --cenc-key-to-track-mappings "{keyToTrackMappings}" --cenc-default-key-label {label}', checks=[
+            self.check('name', '{streamingPolicyName}'),
+            self.check('commonEncryptionCenc.enabledProtocols.hls', True),
+            self.check('commonEncryptionCenc.enabledProtocols.smoothStreaming', True),
+            self.check('commonEncryptionCenc.contentKeys.defaultKey.label', '{label}'),
+            self.check('commonEncryptionCenc.drm.playReady.customLicenseAcquisitionUrlTemplate', None),
+            self.check('commonEncryptionCenc.drm.playReady.playReadyCustomAttributes', None),
+            self.check('commonEncryptionCenc.drm.widevine.customLicenseAcquisitionUrlTemplate', None),
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_policy_cenc_disable_widevine(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        streamingPolicyName = self.create_random_name(prefix='spn', length=10)
+
+        self.kwargs.update({
+            'streamingPolicyName': streamingPolicyName,
+            'protocols': 'HLS SmoothStreaming',
+            'clearTracks': '@' + _get_test_data_file('clearTracks.json'),
+            'keyToTrackMappings': '@' + _get_test_data_file('keyToTrackMappings.json'),
+            'label': 'label',
+            'playReadyUrlTemplate': 'playReadyTemplate.foo.bar',
+            'playReadyAttributes': 'awesomeAttributes'
+        })
+
+        self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cenc-protocols {protocols} --cenc-clear-tracks "{clearTracks}" --cenc-key-to-track-mappings "{keyToTrackMappings}" --cenc-default-key-label {label} --cenc-disable-widevine', checks=[
+            self.check('name', '{streamingPolicyName}'),
+            self.check('commonEncryptionCenc.enabledProtocols.hls', True),
+            self.check('commonEncryptionCenc.enabledProtocols.smoothStreaming', True),
+            self.check('commonEncryptionCenc.contentKeys.defaultKey.label', '{label}'),
+            self.check('commonEncryptionCenc.drm.playReady.customLicenseAcquisitionUrlTemplate', None),
+            self.check('commonEncryptionCenc.drm.playReady.playReadyCustomAttributes', None),
+            self.check('commonEncryptionCenc.drm.widevine.customLicenseAcquisitionUrlTemplate', None),
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_policy_cbcs(self, resource_group, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
 
@@ -152,5 +228,40 @@ class AmsStreamingPolicyTests(ScenarioTest):
             self.check('commonEncryptionCbcs.enabledProtocols.dash', True),
             self.check('commonEncryptionCbcs.contentKeys.defaultKey.label', '{label}'),
             self.check('commonEncryptionCbcs.drm.fairPlay.customLicenseAcquisitionUrlTemplate', '{urlTemplate}'),
+            self.check('commonEncryptionCbcs.drm.fairPlay.allowPersistentLicense', True),
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_policy_cbcs_default_drm(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'canadacentral'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'Canada Central')
+        ])
+
+        streamingPolicyName = self.create_random_name(prefix='spn', length=10)
+
+        self.kwargs.update({
+            'streamingPolicyName': streamingPolicyName,
+            'protocols': 'HLS SmoothStreaming Dash',
+            'label': 'label',
+            'urlTemplate': 'xyz.foo.bar',
+        })
+
+        self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cbcs-protocols {protocols} --cbcs-default-key-label {label} ', checks=[
+            self.check('name', '{streamingPolicyName}'),
+            self.check('commonEncryptionCbcs.enabledProtocols.hls', True),
+            self.check('commonEncryptionCbcs.enabledProtocols.smoothStreaming', True),
+            self.check('commonEncryptionCbcs.enabledProtocols.dash', True),
+            self.check('commonEncryptionCbcs.contentKeys.defaultKey.label', '{label}'),
+            self.check('commonEncryptionCbcs.drm.fairPlay.customLicenseAcquisitionUrlTemplate', None),
             self.check('commonEncryptionCbcs.drm.fairPlay.allowPersistentLicense', True),
         ])

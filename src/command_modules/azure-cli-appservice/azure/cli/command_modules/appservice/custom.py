@@ -53,7 +53,8 @@ from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
                            should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
                            get_lang_from_content, get_num_apps_in_asp)
-from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME, RUNTIME_TO_IMAGE)
+from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME,
+                         RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
 
@@ -78,7 +79,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
-    node_default_version = '8.11.1'
+    node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
@@ -288,7 +289,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         logger.warning("Starting zip deployment")
         requests.post(zip_url, data=zip_content, headers=headers)
     # check the status of async deployment
-    response = _check_zip_deployment_status(deployment_status_url, authorization, timeout)
+    response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                            authorization, timeout)
     return response
 
 
@@ -365,6 +367,36 @@ def update_webapp(instance, client_affinity_enabled=None, https_only=None):
         instance.https_only = https_only == 'true'
 
     return instance
+
+
+def update_functionapp(cmd, instance, plan=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if plan is not None:
+        if is_valid_resource_id(plan):
+            dest_parse_result = parse_resource_id(plan)
+            dest_plan_info = client.app_service_plans.get(dest_parse_result['resource_group'],
+                                                          dest_parse_result['name'])
+        else:
+            dest_plan_info = client.app_service_plans.get(instance.resource_group, plan)
+        if dest_plan_info is None:
+            raise CLIError("The plan '{}' doesn't exist".format(plan))
+        validate_plan_switch_compatibility(client, instance, dest_plan_info)
+        instance.server_farm_id = dest_plan_info.id
+    return instance
+
+
+def validate_plan_switch_compatibility(client, src_functionapp_instance, dest_plan_instance):
+    general_switch_msg = 'Currently the switch is only allowed between a Consumption or an Elastic Premium plan.'
+    src_parse_result = parse_resource_id(src_functionapp_instance.server_farm_id)
+    src_plan_info = client.app_service_plans.get(src_parse_result['resource_group'],
+                                                 src_parse_result['name'])
+    if src_plan_info is None:
+        raise CLIError('Could not determine the current plan of the functionapp')
+    elif not (is_plan_consumption(src_plan_info) or is_plan_elastic_premium(src_plan_info)):
+        raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
+    if not (is_plan_consumption(dest_plan_instance) or is_plan_elastic_premium(dest_plan_instance)):
+        raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
+                       general_switch_msg)
 
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
@@ -639,8 +671,8 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 def update_site_configs(cmd, resource_group_name, name, slot=None,
-                        linux_fx_version=None, windows_fx_version=None, php_version=None, python_version=None,  # pylint: disable=unused-argument
-                        net_framework_version=None,  # pylint: disable=unused-argument
+                        linux_fx_version=None, windows_fx_version=None, reserved_instance_count=None, php_version=None,  # pylint: disable=unused-argument
+                        python_version=None, net_framework_version=None,  # pylint: disable=unused-argument
                         java_version=None, java_container=None, java_container_version=None,  # pylint: disable=unused-argument
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
@@ -657,14 +689,21 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
         else:
             delete_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE"])
 
+    if reserved_instance_count is not None:
+        reserved_instance_count = validate_range_of_int_flag('--prewarmed-instance-count', reserved_instance_count,
+                                                             min_val=0, max_val=20)
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
                   'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
+    int_flags = ['reserved_instance_count']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
+
     for arg in args[3:]:
+        if arg in int_flags and values[arg] is not None:
+            values[arg] = validate_and_convert_to_int(arg, values[arg])
         if arg != 'generic_configurations' and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
@@ -1149,8 +1188,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None,
-                            admin_site_name=None):
+def update_app_service_plan(instance, sku=None, number_of_workers=None):
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -1159,12 +1197,21 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
 
     if number_of_workers is not None:
         sku_def.capacity = number_of_workers
-
     instance.sku = sku_def
-    instance.sku = sku_def
-    if admin_site_name is not None:
-        instance.admin_site_name = admin_site_name
     return instance
+
+
+def update_functionapp_app_service_plan(instance, sku=None, number_of_workers=None, max_burst=None):
+    instance = update_app_service_plan(instance, sku, number_of_workers)
+    if max_burst is not None:
+        if not is_plan_elastic_premium(instance):
+            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
+        max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
+        instance.maximum_elastic_worker_count = max_burst
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
+                                                       number_of_workers, min_val=0, max_val=20)
+    return update_app_service_plan(instance, sku, number_of_workers)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
@@ -1899,18 +1946,54 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
-def create_functionapp_app_service_plan(cmd, resource_group_name, name, sku,
-                                        number_of_workers=None, location=None, tags=None):
-    # This command merely shadows 'az appservice plan create' except with a few parameters
-    return create_app_service_plan(cmd, resource_group_name, name, is_linux=None, hyper_v=None,
-                                   sku=sku, number_of_workers=number_of_workers, location=location, tags=tags)
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku,
+                                        number_of_workers=None, max_burst=None, location=None, tags=None):
+    sku = _normalize_sku(sku)
+    tier = get_sku_name(sku)
+    if max_burst is not None:
+        if tier.lower() != "elasticpremium":
+            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
+        max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
+    if number_of_workers is not None:
+        number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
+                                                       number_of_workers, min_val=0, max_val=20)
+    client = web_client_factory(cmd.cli_ctx)
+    if location is None:
+        location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    sku_def = SkuDescription(tier=tier, name=sku, capacity=number_of_workers)
+    plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
+                              reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
+                              hyper_v=None, name=name)
+    return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
 
 
-def is_plan_Elastic_Premium(plan_info):
+def is_plan_consumption(plan_info):
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'dynamic'
+    return False
+
+
+def is_plan_elastic_premium(plan_info):
     if isinstance(plan_info, AppServicePlan):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier == 'ElasticPremium'
     return False
+
+
+def validate_and_convert_to_int(flag, val):
+    try:
+        return int(val)
+    except ValueError:
+        raise CLIError("Usage error: {} is expected to have an int value.".format(flag))
+
+
+def validate_range_of_int_flag(flag_name, value, min_val, max_val):
+    value = validate_and_convert_to_int(flag_name, value)
+    if min_val > value or value > max_val:
+        raise CLIError("Usage error: {} is expected to be between {} and {} (inclusive)".format(flag_name, min_val,
+                                                                                                max_val))
+    return value
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
@@ -1996,9 +2079,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='8.11.1'))
+    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='10.14.1'))
 
-    if consumption_plan_location is None and not is_plan_Elastic_Premium(plan_info):
+    if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
         site_config.always_on = True
     else:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
@@ -2095,25 +2178,29 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def _check_zip_deployment_status(deployment_status_url, authorization, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
     import requests
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization)
+        time.sleep(2)
         res_dict = response.json()
         num_trials = num_trials + 1
         if res_dict.get('status', 0) == 3:
-            raise CLIError("Zip deployment failed. {}".format(res_dict))
+            _configure_default_logging(cmd, rg_name, name)
+            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
+                           -n {} -g {}""".format(res_dict, name, rg_name))
         elif res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        raise CLIError("""Deployment is taking longer than expected. Please verify
-                            status at '{}' beforing launching the app""".format(deployment_status_url))
+        _configure_default_logging(cmd, rg_name, name)
+        raise CLIError("""Timeout reached by the command, however, the deployment operation
+                       is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
 
 
@@ -2173,11 +2260,14 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # pylint: disable=too-many-statements
+def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # pylint: disable=too-many-statements, too-many-branches
     import os
+    from azure.cli.core._profile import Profile
     client = web_client_factory(cmd.cli_ctx)
     # the code to deploy is expected to be the current directory the command is running from
     src_dir = os.getcwd()
+    user = Profile().get_current_account_user()
+    user = user.split('@', 1)[0]
     # if dir is empty, show a message in dry run
     do_deployment = False if os.listdir(src_dir) == [] else True
     _create_new_rg = True
@@ -2216,8 +2306,8 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
-    asp = "appsvc_asp_{}_{}".format(os_val, loc_name)
-    rg_name = "appsvc_rg_{}_{}".format(os_val, loc_name)
+    asp = "{}_asp_{}_{}".format(user, os_val, loc_name)
+    rg_name = "{}_asp_{}_{}".format(user, os_val, loc_name)
     # Resource group: check if default RG is set
     default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
     _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
@@ -2267,12 +2357,15 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
         logger.warning("App service plan '%s' already exists.", asp)
         _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
         _create_new_app = should_create_new_app(cmd, rg_name, name)
+
     # create the app
     if _create_new_app:
-        logger.warning("Creating app '%s' ....", name)
+        logger.warning("Creating app '%s' ...", name)
         create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
         logger.warning("Webapp creation complete")
         _set_build_app_setting = True
+        # Configure default logging
+        _configure_default_logging(cmd, rg_name, name)
         if _show_too_many_apps_warn:
             logger.warning("There are sites that have been deployed to the same hosting "
                            "VM of this region, to prevent performance impact please "
@@ -2292,17 +2385,17 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
                            site_config.windows_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
 
-        if do_deployment and not is_skip_build:
-            _set_build_app_setting = True
-            # setting the appsettings causes a app restart so we avoid if not needed
-            application_settings = client.web_apps.list_application_settings(rg_name, name)
-            _app_settings = application_settings.properties
-            for key, value in _app_settings.items():
-                if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT' and value.upper() == "FALSE":
-                    _set_build_app_setting = False
+    if do_deployment and not is_skip_build:
+        _set_build_app_setting = True
+        # setting the appsettings causes a app restart so we avoid if not needed
+        application_settings = client.web_apps.list_application_settings(rg_name, name)
+        _app_settings = application_settings.properties
+        for key, value in _app_settings.items():
+            if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT' and value.upper() == "FALSE":
+                _set_build_app_setting = False
+                break
 
     # update create_json to include the app_url
-    url = _get_url(cmd, rg_name, name)
     if _set_build_app_setting:
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
@@ -2322,13 +2415,14 @@ def create_deploy_webapp(cmd, name, location=None, sku=None, dryrun=False):  # p
             os.remove(zip_file_path)
         except OSError:
             pass
-    create_json.update({'app_url': url})
-    logger.warning("All done.")
-    return create_json
+    if logs:
+        _configure_default_logging(cmd, rg_name, name)
+    logger.warning("All done. Launching the app in your default browser.")
+    return view_in_browser(cmd, rg_name, name, None, logs)
 
 
 def _ping_scm_site(cmd, resource_group, name):
-    #  wakeup kudu, by making an SCM call
+    #  wake up kudu, by making an SCM call
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group, name)
@@ -2436,10 +2530,16 @@ def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=to
 
 
 def create_devops_build(cmd, functionapp_name=None, organization_name=None, project_name=None,
-                        overwrite_yaml=None, use_local_settings=None, local_git=None):
+                        repository_name=None, overwrite_yaml=None, allow_force_push=None, use_local_settings=None):
     from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
     azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
-                                                                 organization_name, project_name,
-                                                                 overwrite_yaml, use_local_settings,
-                                                                 local_git)
+                                                                 organization_name, project_name, repository_name,
+                                                                 overwrite_yaml, allow_force_push, use_local_settings)
     return azure_devops_build_interactive.interactive_azure_devops_build()
+
+
+def _configure_default_logging(cmd, rg_name, name):
+    logger.warning("Configuring default logging for the app, if not already enabled")
+    return config_diagnostics(cmd, rg_name, name,
+                              application_logging=True, web_server_logging='filesystem',
+                              docker_container_logging='true')

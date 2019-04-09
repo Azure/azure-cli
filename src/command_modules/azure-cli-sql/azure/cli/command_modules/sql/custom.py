@@ -1022,6 +1022,8 @@ def db_list(
 def db_update(
         cmd,
         instance,
+        server_name,
+        resource_group_name,
         elastic_pool_id=None,
         max_size_bytes=None,
         service_objective=None,
@@ -1032,7 +1034,6 @@ def db_update(
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
-
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -1053,12 +1054,18 @@ def db_update(
                        ' unspecified or equal \'{}\'.'.format(
                            ServiceObjectiveName.elastic_pool.value))
 
-    # Update instance pool and service objective. The service treats these properties like PATCH,
+    # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
     # except if pool is null/empty and service objective is a standalone SLO value (e.g. 'S0',
     # 'S1', etc), in which case the pool being null/empty is meaningful - it means remove from
     # pool.
-    instance.elastic_pool_id = elastic_pool_id
+
+    # Validate elastic pool id
+    instance.elastic_pool_id = _validate_elastic_pool_id(
+        cmd.cli_ctx,
+        elastic_pool_id,
+        server_name,
+        resource_group_name)
 
     # Update sku
     _db_elastic_pool_update_sku(
@@ -2025,7 +2032,9 @@ def managed_instance_update(
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
-        assign_identity=False):
+        assign_identity=False,
+        proxy_override=None,
+        public_data_endpoint_enabled=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2043,6 +2052,11 @@ def managed_instance_update(
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.proxy_override = (
+        proxy_override or instance.proxy_override)
+
+    if public_data_endpoint_enabled is not None:
+        instance.public_data_endpoint_enabled = public_data_endpoint_enabled
 
     return instance
 

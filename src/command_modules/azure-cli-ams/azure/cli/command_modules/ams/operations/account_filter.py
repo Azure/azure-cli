@@ -14,13 +14,12 @@ from azure.mgmt.media.models import (AccountFilter, FilterTrackSelection,
 
 def create_account_filter(client, account_name, resource_group_name, filter_name, start_timestamp=None,
                           end_timestamp=None, presentation_window_duration=None, live_backoff_duration=None,
-                          timescale=None, force_end_timestamp=False, bitrate=None, tracks=None):
+                          timescale=None, force_end_timestamp=False, bitrate=None, first_quality=None, tracks=None):
 
-    first_quality = None
     presentation_time_range = None
 
-    if bitrate is not None:
-        first_quality = FirstQuality(bitrate=bitrate)
+    if first_quality or bitrate:
+        first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale]):
@@ -43,13 +42,13 @@ def create_account_filter(client, account_name, resource_group_name, filter_name
 
 def update_account_filter(instance, start_timestamp=None, end_timestamp=None,
                           presentation_window_duration=None, live_backoff_duration=None,
-                          timescale=None, bitrate=None, tracks=None, force_end_timestamp=None):
+                          timescale=None, bitrate=None, first_quality=None, tracks=None, force_end_timestamp=None):
 
     if not instance:
         raise CLIError('The account filter resource was not found.')
 
-    if bitrate:
-        instance.first_quality = FirstQuality(bitrate=bitrate)
+    if first_quality or bitrate:
+        instance.first_quality = FirstQuality(bitrate=first_quality or bitrate)
 
     if any([start_timestamp, end_timestamp, presentation_window_duration,
             live_backoff_duration, timescale, force_end_timestamp is not None]):

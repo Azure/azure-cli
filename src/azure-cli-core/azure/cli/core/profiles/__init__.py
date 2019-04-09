@@ -88,7 +88,8 @@ def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
 API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
     '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile'],
-    '2018-03-01-hybrid': AZURE_API_PROFILES['2018-03-01-hybrid']
+    '2018-03-01-hybrid': AZURE_API_PROFILES['2018-03-01-hybrid'],
+    '2019-03-01-hybrid': AZURE_API_PROFILES['2019-03-01-hybrid']
 }
 
 

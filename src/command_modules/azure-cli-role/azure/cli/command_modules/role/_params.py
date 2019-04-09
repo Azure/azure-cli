@@ -87,7 +87,7 @@ def load_arguments(self, _):
         with self.argument_context('ad sp {}'.format(item)) as c:
             c.argument('name', name_arg_type)
             c.argument('cert', arg_group='Credential', validator=validate_cert)
-            c.argument('years', default=None, arg_group='Credential')
+            c.argument('years', type=int, default=None, arg_group='Credential')
             c.argument('end_date', default=None, arg_group='Credential',
                        help="Finer grain of expiry time if '--years' is insufficient, e.g. '2020-12-31T11:59:59+00:00' or '2299-12-31'")
             c.argument('create_cert', action='store_true', arg_group='Credential')
@@ -181,6 +181,9 @@ def load_arguments(self, _):
     with self.argument_context('role assignment list-changelogs') as c:
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
+
+    with self.argument_context('role assignment delete') as c:
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Continue to delete all assignments under the subscription')
 
     with self.argument_context('role definition') as c:
         c.argument('role_definition_id', options_list=['--name', '-n'], help='the role definition name')

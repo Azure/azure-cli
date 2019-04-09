@@ -35,7 +35,8 @@ from azure.cli.command_modules.network._validators import (
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer)
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
+    get_sdk_completer)
 from azure.cli.core.util import get_json_object
 
 
@@ -215,13 +216,13 @@ def load_arguments(self, _):
         c.argument('rule_name', rewrite_rule_name_type, options_list=['--name', '-n'])
         c.argument('rule_set_name', rewrite_rule_set_name_type)
         c.argument('application_gateway_name', app_gateway_name_type)
-        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'))
-        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'))
+        c.argument('response_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('response_headers'), completer=get_sdk_completer('application_gateways', 'list_available_response_headers'))
+        c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'), completer=get_sdk_completer('application_gateways', 'list_available_request_headers'))
         c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
 
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
         c.argument('rule_name', rewrite_rule_name_type)
-        c.argument('variable', help='The variable whose value is being evaluated.')
+        c.argument('variable', help='The variable whose value is being evaluated.', completer=get_sdk_completer('application_gateways', 'list_available_server_variables'))
         c.argument('pattern', help='The pattern, either fixed string or regular expression, that evaluates the truthfulness of the condition')
         c.argument('ignore_case', arg_type=get_three_state_flag(), help='Make comparison case-insensitive.')
         c.argument('negate', arg_type=get_three_state_flag(), help='Check the negation of the condition.')
@@ -393,6 +394,9 @@ def load_arguments(self, _):
     with self.argument_context('network dns zone update') as c:
         c.ignore('if_none_match')
 
+    with self.argument_context('network dns zone create') as c:
+        c.argument('parent_zone_name', options_list=['--parent-name', '-p'], help='Specify if parent zone exists for this zone and delegation for the child zone in the parent is to be added.')
+
     with self.argument_context('network dns record-set') as c:
         c.argument('target_resource', min_api='2018-05-01', help='ID of an Azure resource from which the DNS resource value is taken.')
         for item in ['record_type', 'record_set_type']:
@@ -437,6 +441,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')
+        c.argument('subscription_id', options_list=['--subscriptionid', '-s'], help='Subscription id to add name server record')
 
     with self.argument_context('network dns record-set ptr') as c:
         c.argument('dname', options_list=['--ptrdname', '-d'], help='PTR target domain name.')

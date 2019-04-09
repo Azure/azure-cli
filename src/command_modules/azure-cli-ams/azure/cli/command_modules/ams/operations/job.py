@@ -15,11 +15,11 @@ def create_job(client, resource_group_name, account_name, transform_name, job_na
     if input_asset_name:
         job_input = JobInputAsset(asset_name=input_asset_name, files=files, label=label)
     else:
-        if base_uri is None and files is None:
+        if base_uri is not None and files is not None:
+            job_input = JobInputHttp(files=files, base_uri=base_uri, label=label)
+        else:
             raise CLIError("Missing required arguments.\nEither --input-asset-name, "
                            "or both --files or --base-uri must be specified.")
-        else:
-            job_input = JobInputHttp(files=files, base_uri=base_uri, label=label)
 
     job_outputs = output_assets
 

@@ -20,7 +20,7 @@ class AmsAccountFilterTests(ScenarioTest):
             'storageAccount': storage_account_for_create,
             'location': 'northcentralus',
             'filterName': filter_name,
-            'bitrate': 420,
+            'firstQuality': 420,
             'endTimestamp': 100000000,
             'liveBackoffDuration': 60,
             'presentationWindowDuration': 1200000000,
@@ -31,8 +31,8 @@ class AmsAccountFilterTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
-            self.check('firstQuality.bitrate', '{bitrate}'),
+        self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName} --first-quality {firstQuality} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"', checks=[
+            self.check('firstQuality.bitrate', '{firstQuality}'),
             self.check('name', '{filterName}'),
             self.check('presentationTimeRange.endTimestamp', '{endTimestamp}'),
             self.check('presentationTimeRange.liveBackoffDuration', '{liveBackoffDuration}'),
@@ -51,7 +51,7 @@ class AmsAccountFilterTests(ScenarioTest):
         ])
 
         self.cmd('az ams account-filter show -a {amsname} -g {rg} -n {filterName}', checks=[
-            self.check('firstQuality.bitrate', '{bitrate}'),
+            self.check('firstQuality.bitrate', '{firstQuality}'),
             self.check('name', '{filterName}'),
             self.check('presentationTimeRange.endTimestamp', '{endTimestamp}'),
             self.check('presentationTimeRange.liveBackoffDuration', '{liveBackoffDuration}'),
@@ -98,13 +98,14 @@ class AmsAccountFilterTests(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
+        # Use deprecated --bitrate parameter to see the deprecation message. Update when fully deprecated.
         self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName1} --bitrate {bitrate1} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
 
         self.cmd('az ams account-filter list -a {amsname} -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
 
-        self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName2} --bitrate {bitrate2} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
+        self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName2} --first-quality {bitrate2} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
 
         self.cmd('az ams account-filter list -a {amsname} -g {rg}', checks=[
             self.check('length(@)', 2)
@@ -127,7 +128,7 @@ class AmsAccountFilterTests(ScenarioTest):
             'storageAccount': storage_account_for_update,
             'location': 'northeurope',
             'filterName': filter_name,
-            'bitrate': 420,
+            'firstQuality': 420,
             'endTimestamp': 100000000,
             'liveBackoffDuration': 60,
             'presentationWindowDuration': 1200000000,
@@ -143,8 +144,9 @@ class AmsAccountFilterTests(ScenarioTest):
         })
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName} --bitrate {bitrate} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
+        self.cmd('az ams account-filter create -a {amsname} -g {rg} -n {filterName} --first-quality {firstQuality} --end-timestamp {endTimestamp} --live-backoff-duration {liveBackoffDuration} --presentation-window-duration {presentationWindowDuration} --start-timestamp {startTimestamp} --timescale {timescale} --tracks "{tracks}"')
 
+        # Use deprecated --bitrate parameter to see the deprecation message. Update when fully deprecated.
         self.cmd('az ams account-filter update -a {amsname} -g {rg} -n {filterName} --bitrate {newBitrate} --start-timestamp {newStartTimestamp} --end-timestamp {newEndTimestamp} --set tracks[1].trackSelections[0].operation={newTrackOperation} tracks[1].trackSelections[0].property={newTrackProperty} tracks[1].trackSelections[0].value={newTrackValue}', checks=[
             self.check('firstQuality.bitrate', '{newBitrate}'),
             self.check('name', '{filterName}'),
