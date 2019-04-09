@@ -21,22 +21,24 @@ from msrestazure.azure_exceptions import CloudError
 location = 'CentralUS'
 name_prefix = 'cliadm'
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+curr_dir = os.path.dirname(os.path.realpath(__file__))
 
-createRolloutTemplate = ".\CreateRollout.json"
-failureCreateRolloutTemplate = ".\CreateRollout_FailureRollout.json"
+create_rollout_template = os.path.join(curr_dir, "CreateRollout.json").replace('\\', '\\\\')
+failure_create_rollout_template = os.path.join(curr_dir, "CreateRollout_FailureRollout.json").replace('\\', '\\\\')
 
-parametersFileName = "Storage.Parameters.json"
-invalidParametersFileName = "Storage_Invalid.Parameters.json"
-templateFileName = "Storage.Template.json"
-parametersCopyFileName = "Storage.Copy.Parameters.json"
-templateCopyFileName = "Storage.Copy.Template.json"
-rootPath = "ArtifactRoot\\" 
+parameters_file_name = "Storage.Parameters.json"
+invalid_parameters_file_name = "Storage_Invalid.Parameters.json"
+template_file_name = "Storage.Template.json"
+params_copy_file_name = "Storage.Copy.Parameters.json"
+template_copy_file_name = "Storage.Copy.Template.json"
+path_to_tests = ".\\azure\cli\command_modules\deploymentmanager\\tests\latest\\" 
+artifact_root = "artifactroot" 
 
-parametersArtifactSourceRelativePath = rootPath + parametersFileName
-templateArtifactSourceRelativePath = rootPath + templateFileName
-invalidParametersArtifactSourceRelativePath = rootPath + invalidParametersFileName
-parametersCopyArtifactSourceRelativePath = rootPath + parametersCopyFileName
-templateCopyArtifactSourceRelativePath = rootPath + templateCopyFileName
+parametersArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, parameters_file_name)
+templateArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, template_file_name)
+invalidParametersArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, invalid_parameters_file_name)
+parametersCopyArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, params_copy_file_name)
+templateCopyArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, template_copy_file_name)
 
 class DeploymentManagerTests(ScenarioTest):
 
@@ -44,7 +46,8 @@ class DeploymentManagerTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix=name_prefix, location='centralus')
     def test_deploymentmanager_scenario(self, resource_group, storage_account):
 
-        subscription_id = self.get_subscription_id()
+        # subscription_id = self.get_subscription_id()
+        subscription_id = "53012dcb-5039-4e96-8e6c-5d913da1cdb5"
         artifact_source_name = resource_group + "ArtifactSource"
         updated_artifact_source_name = resource_group + "ArtifactSourceUpdated"
 
@@ -62,7 +65,7 @@ class DeploymentManagerTests(ScenarioTest):
             location, 
             True)
 
-        self.test_service_topology(
+        self.service_topology_test(
             subscription_id,
             resource_group,
             location,
@@ -74,7 +77,7 @@ class DeploymentManagerTests(ScenarioTest):
         delete_artifact_source(resource_group, updated_artifact_source_name)
 
     
-    def test_service_topology(
+    def service_topology_test(
         self, 
         subscription_id, 
         resource_group_name, 
@@ -92,7 +95,7 @@ class DeploymentManagerTests(ScenarioTest):
             'as_id': artifact_source_id,
         }
 
-        self.cmd('az deploymentmanager service-topology create -g {rg} -n {st_name} -l {location} --artifact-source-id {as_id}', checks[
+        self.cmd('az deploymentmanager service-topology create -g {rg} -n {st_name} -l {location} --artifact-source-id {as_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
             self.check('name', topology_name),
             self.check('provisioningState', 'Succeeded'),
@@ -100,7 +103,7 @@ class DeploymentManagerTests(ScenarioTest):
 
         service_topology_id = self.cmd('az deploymentmanager service-topology show -g {rg} -n {st_name}').get_output_in_json()['id']
         
-        self.test_services(
+        self.services_test(
             resource_group_name,
             location,
             artifact_source_id,
@@ -123,7 +126,7 @@ class DeploymentManagerTests(ScenarioTest):
             'as_id': updated_artifact_source_id,
         }
 
-        self.cmd('az deploymentmanager service-topology update -g {rg} -n {st_name} --artifact-source-id {as_id}', checks[
+        self.cmd('az deploymentmanager service-topology update -g {rg} -n {st_name} --artifact-source-id {as_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
             self.check('name', topology_name),
             self.check('provisioningState', 'Succeeded'),
@@ -133,7 +136,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('az deploymentmanager service-topology show -n {st_name} -g {rg}')
 
-    def test_services(
+    def services_test(
         self,
         resource_group_name,
         location,
@@ -153,14 +156,14 @@ class DeploymentManagerTests(ScenarioTest):
             't_sub_id': subscription_id
         }
 
-        self.cmd('az deploymentmanager service create -g {rg} --service-topology-name {st_name} -n {s_name} -l {location} --target-location {t_l} --target-subscription-id {t_sub_id}', checks[
+        self.cmd('az deploymentmanager service create -g {rg} --service-topology-name {st_name} -n {s_name} -l {location} --target-location {t_l} --target-subscription-id {t_sub_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies/services'),
             self.check('name', service_name),
             self.check('provisioningState', 'Succeeded'),
             self.check('targetSubscriptionId', subscription_id),
             self.check('targetLocation', location)])
         
-        self.test_service_units(
+        self.service_units_test(
             resource_group_name,
             location,
             artifact_source_id,
@@ -180,7 +183,7 @@ class DeploymentManagerTests(ScenarioTest):
             't_sub_id': updated_target_subscription_id
         }
 
-        self.cmd('az deploymentmanager service update -g {rg} --service-topology-name {st_name} -n {s_name} --target-subscription-id {t_sub_id}', checks[
+        self.cmd('az deploymentmanager service update -g {rg} --service-topology-name {st_name} -n {s_name} --target-subscription-id {t_sub_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies/services'),
             self.check('name', service_name),
             self.check('provisioningState', 'Succeeded'),
@@ -190,7 +193,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('az deploymentmanager service show --service-topology-name {st_name} -n {s_name}')
 
-    def test_service_units(
+    def service_units_test(
         self,
         resource_group_name,
         location,
@@ -209,16 +212,16 @@ class DeploymentManagerTests(ScenarioTest):
             's_name': service_name,
             'su_name': service_unit_name,
             'd_mode':deployment_mode ,
-            'p_path': parametersFileName,
-            't_path': templateFileName 
+            'p_path': parameters_file_name,
+            't_path': template_file_name 
         }
 
-        self.cmd('az deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l {location} --target-resource-group {rg} --deployment-mode {d_mode} --parameters-artifact-source-relative-path {p_path} --template-artifact-source-relative-path {t_path}', checks[
+        self.cmd('az deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l {location} --target-resource-group {rg} --deployment-mode {d_mode} --parameters-artifact-source-relative-path {p_path} --template-artifact-source-relative-path {t_path}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies/services/serviceUnits'),
             self.check('name', service_unit_name),
             self.check('provisioningState', 'Succeeded'),
-            self.check('artifacts.parametersArtifactSourceRelativePath', parametersFileName),
-            self.check('artifacts.templateArtifactSourceRelativePath', templateFileName),
+            self.check('artifacts.parametersArtifactSourceRelativePath', parameters_file_name),
+            self.check('artifacts.templateArtifactSourceRelativePath', template_file_name),
             self.check('deploymentMode', deployment_mode),
             self.check('targetResourceGroup', resource_group_name)])
 
@@ -234,22 +237,22 @@ class DeploymentManagerTests(ScenarioTest):
             's_name': service_name,
             'su_name': invalid_service_unit_name,
             'd_mode':deployment_mode ,
-            'p_path': invalidParametersFileName,
-            't_path': templateFileName 
+            'p_path': invalid_parameters_file_name,
+            't_path': template_file_name 
         }
 
-        self.cmd('az deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l {location} --target-resource-group {rg} --deployment-mode {d_mode} --parameters-artifact-source-relative-path {p_path} --template-artifact-source-relative-path {t_path}', checks[
+        self.cmd('az deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l {location} --target-resource-group {rg} --deployment-mode {d_mode} --parameters-artifact-source-relative-path {p_path} --template-artifact-source-relative-path {t_path}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies/services/serviceUnits'),
             self.check('name', invalid_service_unit_name),
             self.check('provisioningState', 'Succeeded'),
-            self.check('artifacts.parametersArtifactSourceRelativePath', invalidParametersFileName),
-            self.check('artifacts.templateArtifactSourceRelativePath', templateFileName),
+            self.check('artifacts.parametersArtifactSourceRelativePath', invalid_parameters_file_name),
+            self.check('artifacts.templateArtifactSourceRelativePath', template_file_name),
             self.check('deploymentMode', deployment_mode),
             self.check('targetResourceGroup', resource_group_name)])
 
         invalid_service_unit_id = self.cmd('az deploymentmanager service show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}').get_output_in_json()['id']
         
-        self.test_steps(
+        self.steps_test(
             resource_group_name,
             location,
             artifact_source_id,
@@ -266,11 +269,11 @@ class DeploymentManagerTests(ScenarioTest):
             's_name': service_name,
             'su_name': service_unit_name,
             'd_mode': deployment_mode,
-            'p_path': parametersFileName,
-            't_path': templateFileName 
+            'p_path': parameters_file_name,
+            't_path': template_file_name 
         }
 
-        self.cmd('az deploymentmanager service-unit update -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} --deployment-mode {d_mode}', checks[
+        self.cmd('az deploymentmanager service-unit update -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} --deployment-mode {d_mode}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies/services'),
             self.check('name', service_unit_name),
             self.check('provisioningState', 'Succeeded'),
@@ -291,7 +294,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('az deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
-    def test_steps(
+    def steps_test(
         self,
         resource_group_name,
         location,
@@ -312,7 +315,7 @@ class DeploymentManagerTests(ScenarioTest):
             'duration': duration
         }
 
-        self.cmd('az deploymentmanager step create -g {rg} -l {location} -n {step_name} --duration {duration}', checks[
+        self.cmd('az deploymentmanager step create -g {rg} -l {location} -n {step_name} --duration {duration}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/steps'),
             self.check('name', step_name),
             self.check('provisioningState', 'Succeeded'),
@@ -320,7 +323,7 @@ class DeploymentManagerTests(ScenarioTest):
 
         step_id = self.cmd('az deploymentmanager step create -g {rg} -n {step_name}').get_output_in_json()['id']
 
-        self.test_rollouts(
+        self.rollouts_test(
             resource_group_name,
             location,
             artifact_source_id,
@@ -337,7 +340,7 @@ class DeploymentManagerTests(ScenarioTest):
             'duration': updated_duration
         }
 
-        self.cmd('az deploymentmanager step update -g {rg} -n {step_name} --duration {duration}', checks[
+        self.cmd('az deploymentmanager step update -g {rg} -n {step_name} --duration {duration}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/steps'),
             self.check('name', step_name),
             self.check('provisioningState', 'Succeeded'),
@@ -347,7 +350,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('az deploymentmanager step show -g {rg} -n {step_name}')
 
-    def test_rollouts(
+    def rollouts_test(
         self,
         resource_group_name,
         location,
@@ -366,7 +369,7 @@ class DeploymentManagerTests(ScenarioTest):
             artifact_source_id,
             step_id,
             service_unit_id,
-            createRolloutTemplate
+            create_rollout_template
         )
 
         self.replace_rollout_placeholders(
@@ -375,23 +378,23 @@ class DeploymentManagerTests(ScenarioTest):
             artifact_source_id,
             step_id,
             invalid_service_unit_id,
-            failureCreateRolloutTemplate 
+            failure_create_rollout_template 
         )
         
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
-            't_path': createRolloutTemplate,
-            'invalid_t_path': failureCreateRolloutTemplate,
+            't_path': create_rollout_template,
+            'invalid_t_path': failure_create_rollout_template,
             'rollout_name': rollout_name,
             'failed_rollout_name': failed_rollout_name 
         }
 
-        self.cmd('az deployment create -g {rg} -l {location} --template-file {t_path}', checks[
+        self.cmd('az deployment create -g {rg} -l {location} --template-file {t_path}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/deployments'),
             self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('az deploymentmanager rollout show -g {rg} -n {rollout_name}', checks[
+        self.cmd('az deploymentmanager rollout show -g {rg} -n {rollout_name}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/rollouts'),
             self.check('status', 'Running'),
             self.check('totalRetryAttempts', '0'),
@@ -399,23 +402,23 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('artifactSourceId', artifact_source_id),
             self.check('targetServiceTopologyId', service_topology_id)])
 
-        self.cmd('az deploymentmanager rollout stop -g {rg} -n {rollout_name} --yes', checks[
+        self.cmd('az deploymentmanager rollout stop -g {rg} -n {rollout_name} --yes', checks=[
             self.check('type', 'Microsoft.DeploymentManager/rollouts'),
             self.check('status', 'Canceling')])
 
         while True:
-            self.test_sleep(120)  
+            self.sleep(120)  
             rollout = self.cmd('az deploymentmanager rollout show -g {rg} -n {rollout_name}').get_output_in_json()
             if (rollout['status'] != 'Canceling'):
                 break
 
         self.assertEqual('Canceled', rollout['status'])
 
-        self.cmd('az deployment create -g {rg} -l {location} --template-file {invalid_t_path}', checks[
+        self.cmd('az deployment create -g {rg} -l {location} --template-file {invalid_t_path}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/deployments'),
             self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('az deploymentmanager rollout show -g {rg} -n {failed_rollout_name}', checks[
+        self.cmd('az deploymentmanager rollout show -g {rg} -n {failed_rollout_name}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/rollouts'),
             self.check('status', 'Running'),
             self.check('totalRetryAttempts', '0'),
@@ -425,27 +428,27 @@ class DeploymentManagerTests(ScenarioTest):
 
         # Now validate that the rollout expected to fail has failed.
         while True:
-            self.test_sleep(120)  
+            self.sleep(120)  
             rollout = self.cmd('az deploymentmanager rollout show -g {rg} -n {failed_rollout_name}').get_output_in_json()
             if (rollout['status'] != 'Running'):
                 break
 
         self.assertEqual('Failed', rollout['status'])
 
-        self.cmd('az deploymentmanager rollout restart -g {rg} -n {failed_rollout_name} --skip-succeeded True --yes', checks[
+        self.cmd('az deploymentmanager rollout restart -g {rg} -n {failed_rollout_name} --skip-succeeded True --yes', checks=[
             self.check('type', 'Microsoft.DeploymentManager/rollouts'),
             self.check('operationInfo.retryAttempt', '1'),
             self.check('operationInfo.skipSucceededOnRetry', True),
             self.check('status', 'Running')])
 
-        self.cmd('az deploymentmanager rollout stop -g {rg} -n {failed_rollout_name} --yes', checks[
+        self.cmd('az deploymentmanager rollout stop -g {rg} -n {failed_rollout_name} --yes', checks=[
             self.check('type', 'Microsoft.DeploymentManager/rollouts'),
             self.check('operationInfo.retryAttempt', '1'),
             self.check('operationInfo.skipSucceededOnRetry', True),
             self.check('status', 'Canceling')])
 
         while True:
-            self.test_sleep(120)  
+            self.sleep(120)  
             rollout = self.cmd('az deploymentmanager rollout show -g {rg} -n {failed_rollout_name}').get_output_in_json()
             if (rollout['status'] != 'Canceling'):
                 break
@@ -471,7 +474,7 @@ class DeploymentManagerTests(ScenarioTest):
             identity = self.cmd('az identity create -n {name} -g {rg}').get_output_in_json()
             identityId = identity['id']
 
-            self.test_sleep(120)  
+            self.sleep(120)  
 
             self.kwargs = {
                 'rg': resource_group_name,
@@ -480,12 +483,12 @@ class DeploymentManagerTests(ScenarioTest):
                 'scope': "/subscriptions/{0}".format(subscription_id),
             }
 
-            roleAssignment = self.cmd('az role assignment create -assignee {principalId} -role {role} --scope {scope}').get_output_in_json()
+            roleAssignment = self.cmd('az role assignment create --assignee {principalId} --role {role} --scope {scope}').get_output_in_json()
 
-            self.test_sleep(30)
+            self.sleep(30)
 
-            self.replace_string("__USER_ASSIGNED_IDENTITY__", identityId, createRolloutTemplate)
-            self.replace_string("__USER_ASSIGNED_IDENTITY__", identityId, failureCreateRolloutTemplate)
+            self.replace_string("__USER_ASSIGNED_IDENTITY__", identityId, create_rollout_template)
+            self.replace_string("__USER_ASSIGNED_IDENTITY__", identityId, failure_create_rollout_template)
 
             return identityId
         
@@ -517,7 +520,7 @@ class DeploymentManagerTests(ScenarioTest):
             'artifactroot': artifact_root,
         }
 
-        self.cmd('az deploymentmanager artifact-source create -g {rg} -n {as_name} -l {location} --sas-uri {sas} --artifact-root {artifactroot}', checks[
+        self.cmd('az deploymentmanager artifact-source create -g {rg} -n {as_name} -l {location} --sas-uri {sas} --artifact-root {artifactroot}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/artifactSources'),
             self.check('name', artifact_source_name),
             self.check('provisioningState', 'Succeeded'),
@@ -539,7 +542,7 @@ class DeploymentManagerTests(ScenarioTest):
         is_playback = os.path.exists(self.recording_file)
         if not is_playback:
             if setup_container:
-                self.setup_artifacts_container(storage_account_name, storage_container_name) 
+                self.setup_artifacts_container(resource_group_name, storage_account_name, storage_container_name) 
 
             sas_key = self.create_sas_key_for_container(storage_account_name, storage_container_name)
 
@@ -565,18 +568,16 @@ class DeploymentManagerTests(ScenarioTest):
         storageAcountReplacementSymbol = "__STORAGEACCOUNTNAME__"
 
         self.replace_string(storageAcountReplacementSymbol, stgAcctForTemplate, parametersArtifactSourceRelativePath)
-        self.replace_string(storageAcountReplacementSymbol, stgAcctForTemplate, templateArtifactSourceRelativePath)
         self.replace_string(storageAcountReplacementSymbol, stgAcctForTemplate, parametersCopyArtifactSourceRelativePath)
-        self.replace_string(storageAcountReplacementSymbol, stgAcctForTemplate, templateCopyArtifactSourceRelativePath)
 
         storage_account_info = self.get_stg_account_info(resource_group_name, storage_account_name)
         storage_container = self.create_container(storage_account_info)
 
-        self.upload_blob(storage_account_info, storage_container, parametersArtifactSourceRelativePath)
-        self.upload_blob(storage_account_info, storage_container, parametersCopyArtifactSourceRelativePath)
-        self.upload_blob(storage_account_info, storage_container, templateArtifactSourceRelativePath)
-        self.upload_blob(storage_account_info, storage_container, templateCopyArtifactSourceRelativePath)
-        self.upload_blob(storage_account_info, storage_container, invalidParametersArtifactSourceRelativePath)
+        self.upload_blob(storage_account_info, storage_container, parametersArtifactSourceRelativePath, parameters_file_name)
+        self.upload_blob(storage_account_info, storage_container, parametersCopyArtifactSourceRelativePath, params_copy_file_name)
+        self.upload_blob(storage_account_info, storage_container, templateArtifactSourceRelativePath, template_file_name)
+        self.upload_blob(storage_account_info, storage_container, templateCopyArtifactSourceRelativePath, template_copy_file_name)
+        self.upload_blob(storage_account_info, storage_container, invalidParametersArtifactSourceRelativePath, invalid_parameters_file_name)
 
     def delete_artifact_source(self, resource_group_name, artifact_source_name):
         self.kwargs = {
@@ -588,10 +589,11 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('az deploymentmanager artifact-source show -n {name} -g {rg}')
 
-    def upload_blob(self, storage_account_info, storage_container_info, file_path):
-        # blobPath = os.path.join(TEST_DIR, file_path)
-        self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', storage_account_info,
-                    storage_container_info, parametersArtifactSourceRelativePath)
+    def upload_blob(self, storage_account_info, storage_container_info, file_path, file_name):
+        abs_file_path = os.path.join(TEST_DIR, file_path).replace('\\', '\\\\')
+        blob_path = artifact_root + file_name
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}" -t page', storage_account_info,
+                    storage_container_info, blob_path, abs_file_path)
 
     def get_stg_account_key(self, group, name):
         if self.get_current_profile() == '2017-03-09-profile':
@@ -601,9 +603,14 @@ class DeploymentManagerTests(ScenarioTest):
 
         return self.cmd(template.format(name, group)).output
 
+    def get_current_profile(self):
+        if not self.profile:
+            self.profile = self.cmd('cloud show --query profile -otsv').output
+        return self.profile
+
     def get_stg_account_info(self, group, name):
         """Returns the storage account name and key in a tuple"""
-        return name, self.get_account_key(group, name)
+        return name, self.get_stg_account_key(group, name)
 
     def create_container(self, account_info, container_name):
         self.storage_cmd('storage container create -n {}', account_info, container_name)
@@ -638,7 +645,7 @@ class DeploymentManagerTests(ScenarioTest):
             self.replace_string("__STEP_ID__", step_id, file_path)
             self.replace_string("__SERVICE_UNIT_ID__", service_unit_id, file_path)
 
-    def test_sleep(self, duration):
+    def sleep(self, duration):
         is_playback = os.path.exists(self.recording_file)
         if not is_playback:
             time.sleep(duration)
