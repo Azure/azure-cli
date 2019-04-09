@@ -571,7 +571,7 @@ class DeploymentManagerTests(ScenarioTest):
         self.replace_string(storageAcountReplacementSymbol, stgAcctForTemplate, parametersCopyArtifactSourceRelativePath)
 
         storage_account_info = self.get_stg_account_info(resource_group_name, storage_account_name)
-        storage_container = self.create_container(storage_account_info)
+        storage_container = self.create_container(storage_account_info, container_name)
 
         self.upload_blob(storage_account_info, storage_container, parametersArtifactSourceRelativePath, parameters_file_name)
         self.upload_blob(storage_account_info, storage_container, parametersCopyArtifactSourceRelativePath, params_copy_file_name)
@@ -596,17 +596,9 @@ class DeploymentManagerTests(ScenarioTest):
                     storage_container_info, blob_path, abs_file_path)
 
     def get_stg_account_key(self, group, name):
-        if self.get_current_profile() == '2017-03-09-profile':
-            template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
-        else:
-            template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
 
+        template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
         return self.cmd(template.format(name, group)).output
-
-    def get_current_profile(self):
-        if not self.profile:
-            self.profile = self.cmd('cloud show --query profile -otsv').output
-        return self.profile
 
     def get_stg_account_info(self, group, name):
         """Returns the storage account name and key in a tuple"""
