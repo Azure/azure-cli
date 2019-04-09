@@ -85,78 +85,118 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
 
     def create_repository(self, organization_name, project_name, repository_name):
         """Create devops repository"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.create_repository(repository_name)
 
     def list_repositories(self, organization_name, project_name):
         """List devops repository"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.list_repositories()
 
     def list_commits(self, organization_name, project_name, repository_name):
         """List devops commits"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.list_commits(repository_name)
 
-    def check_git(self):
+    @staticmethod
+    def check_git():
         """Check if git command does exist"""
         return RepositoryManager.check_git()
 
-    def check_git_local_repository(self):
+    @staticmethod
+    def check_git_local_repository():
         """Check if local git repository does exist"""
         return RepositoryManager.check_git_local_repository()
 
-    def check_git_credential_manager(self):
+    @staticmethod
+    def check_git_credential_manager():
         return RepositoryManager.check_git_credential_manager()
 
     def check_git_remote(self, organization_name, project_name, repository_name):
         """Check if local git remote name does exist"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.check_git_remote(repository_name, remote_prefix="azuredevops")
 
     def remove_git_remote(self, organization_name, project_name, repository_name):
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.remove_git_remote(repository_name, remote_prefix="azuredevops")
 
     def get_local_git_remote_name(self, organization_name, project_name, repository_name):
         """Get the local git remote name for current repository"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.get_local_git_remote_name(repository_name, remote_prefix="azuredevops")
 
     def get_azure_devops_repository(self, organization_name, project_name, repository_name):
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.get_azure_devops_repository(repository_name)
 
     def get_azure_devops_repo_url(self, organization_name, project_name, repository_name):
         """Get the azure devops repository url"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.get_azure_devops_repo_url(repository_name)
 
     def setup_local_git_repository(self, organization_name, project_name, repository_name):
         """Setup a repository locally and push to devops"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.setup_local_git_repository(repository_name, remote_prefix="azuredevops")
 
     def get_azure_devops_repository_branches(self, organization_name, project_name, repository_name):
         """Get Azure Devops repository branches"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return repository_manager.get_azure_devops_repository_branches(repository_name)
 
     def push_local_to_azure_devops_repository(self, organization_name, project_name, repository_name, force=False):
         """Push local context to Azure Devops repository"""
-        repository_manager = RepositoryManager(organization_name=organization_name,
-                                               project_name=project_name, creds=self._creds)
-        return repository_manager.push_local_to_azure_devops_repository(repository_name, remote_prefix="azuredevops", force=force)
+        repository_manager = RepositoryManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
+        return repository_manager.push_local_to_azure_devops_repository(
+            repository_name,
+            remote_prefix="azuredevops",
+            force=force
+        )
 
     def list_pools(self, organization_name, project_name):
         """List the devops pool resources"""
@@ -165,20 +205,29 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
 
     def get_service_endpoints(self, organization_name, project_name, repository_name):
         """Query a service endpoint detail"""
-        service_endpoint_manager = ServiceEndpointManager(organization_name=organization_name,
-                                                          project_name=project_name, creds=self._creds)
+        service_endpoint_manager = ServiceEndpointManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return service_endpoint_manager.get_service_endpoints(repository_name)
 
     def create_service_endpoint(self, organization_name, project_name, repository_name):
         """Create a service endpoint to allow authentication via ARM service principal"""
-        service_endpoint_manager = ServiceEndpointManager(organization_name=organization_name,
-                                                          project_name=project_name, creds=self._creds)
+        service_endpoint_manager = ServiceEndpointManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return service_endpoint_manager.create_service_endpoint(repository_name)
 
     def list_service_endpoints(self, organization_name, project_name):
         """List the different service endpoints in a project"""
-        service_endpoint_manager = ServiceEndpointManager(organization_name=organization_name,
-                                                          project_name=project_name, creds=self._creds)
+        service_endpoint_manager = ServiceEndpointManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return service_endpoint_manager.list_service_endpoints()
 
     def create_extension(self, organization_name, extension_name, publisher_name):
@@ -194,40 +243,62 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
     def create_devops_build_definition(self, organization_name, project_name, repository_name,
                                        build_definition_name, pool_name):
         """Create a definition for an azure devops build"""
-        builder_manager = BuilderManager(organization_name=organization_name, project_name=project_name,
-                                         repository_name=repository_name, creds=self._creds)
-        return builder_manager.create_devops_build_definition(build_definition_name=build_definition_name, pool_name=pool_name)
+        builder_manager = BuilderManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            repository_name=repository_name,
+            creds=self._creds
+        )
+        return builder_manager.create_devops_build_definition(
+            build_definition_name=build_definition_name,
+            pool_name=pool_name
+        )
 
     def list_build_definitions(self, organization_name, project_name):
         """List the azure devops build definitions within a project"""
-        builder_manager = BuilderManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        builder_manager = BuilderManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return builder_manager.list_definitions()
 
     def create_build_object(self, organization_name, project_name, build_definition_name, pool_name):
         """Create an azure devops build based off a previous definition"""
-        builder_manager = BuilderManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        builder_manager = BuilderManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return builder_manager.create_build(build_definition_name, pool_name)
 
     def list_build_objects(self, organization_name, project_name):
         """List already running and builds that have already run in an azure devops project"""
-        builder_manager = BuilderManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        builder_manager = BuilderManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return builder_manager.list_builds()
 
     def list_artifacts(self, organization_name, project_name, build_id):
         """List the azure devops artifacts from a build"""
-        artifact_manager = ArtifactManager(organization_name=organization_name,
-                                           project_name=project_name, creds=self._creds)
+        artifact_manager = ArtifactManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return artifact_manager.list_artifacts(build_id)
 
     def create_release_definition(self, organization_name, project_name, build_name, artifact_name,
                                   pool_name, service_endpoint_name, release_definition_name, app_type,
                                   functionapp_name, storage_name, resource_name, settings):
         """Create a release definition for azure devops that is for azure functions"""
-        release_manager = ReleaseManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        release_manager = ReleaseManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return release_manager.create_release_definition(build_name, artifact_name, pool_name,
                                                          service_endpoint_name, release_definition_name,
                                                          app_type, functionapp_name, storage_name,
@@ -235,24 +306,37 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
 
     def list_release_definitions(self, organization_name, project_name):
         """List the release definitions for azure devops"""
-        release_manager = ReleaseManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        release_manager = ReleaseManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return release_manager.list_release_definitions()
 
     def create_release(self, organization_name, project_name, release_definition_name):
         """Create a release based off a previously defined release definition"""
-        release_manager = ReleaseManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        release_manager = ReleaseManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return release_manager.create_release(release_definition_name)
 
     def list_releases(self, organization_name, project_name):
         """List the releases of an azure devops project"""
-        release_manager = ReleaseManager(organization_name=organization_name,
-                                         project_name=project_name, creds=self._creds)
+        release_manager = ReleaseManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return release_manager.list_releases()
 
     def get_github_service_endpoints(self, organization_name, project_name, github_repository):
-        service_endpoint_manager = GithubServiceEndpointManager(organization_name=organization_name, project_name=project_name, creds=self._creds)
+        service_endpoint_manager = GithubServiceEndpointManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return service_endpoint_manager.get_github_service_endpoints(github_repository)
 
     def create_github_service_endpoint(self, organization_name, project_name, github_repository, github_pat):
@@ -261,29 +345,48 @@ class AzureDevopsBuildProvider(object):  # pylint: disable=too-many-public-metho
             project_name=project_name,
             creds=self._creds
         )
-        return service_endpoint_manager.create_github_service_endpoint(github_repository, github_pat)
+        return service_endpoint_manager.create_github_service_endpoint(
+            github_repository,
+            github_pat
+        )
 
-    def create_github_build_definition(self, organization_name, project_name, github_repository, build_definition_name, pool_name):
-        builder_manager = BuilderManager(organization_name=organization_name, project_name=project_name, creds=self._creds)
+    def create_github_build_definition(
+            self,
+            organization_name,
+            project_name,
+            github_repository,
+            build_definition_name,
+            pool_name
+    ):
+        builder_manager = BuilderManager(
+            organization_name=organization_name,
+            project_name=project_name,
+            creds=self._creds
+        )
         return builder_manager.create_github_build_definition(build_definition_name, pool_name, github_repository)
 
-    def check_github_pat(self, github_pat):
+    @staticmethod
+    def check_github_pat(github_pat):
         github_user_manager = GithubUserManager()
         return github_user_manager.check_github_pat(github_pat)
 
-    def check_github_repository(self, pat, repository_fullname):
+    @staticmethod
+    def check_github_repository(pat, repository_fullname):
         github_repository_manager = GithubRepositoryManager(pat=pat)
         return github_repository_manager.check_github_repository(repository_fullname)
 
-    def check_github_file(self, pat, repository_fullname, filepath):
+    @staticmethod
+    def check_github_file(pat, repository_fullname, filepath):
         github_repository_manager = GithubRepositoryManager(pat=pat)
         return github_repository_manager.check_github_file(repository_fullname, filepath)
 
-    def get_github_content(self, pat, repository_fullname, filepath):
+    @staticmethod
+    def get_github_content(pat, repository_fullname, filepath):
         github_repository_manager = GithubRepositoryManager(pat=pat)
         return github_repository_manager.get_content(repository_fullname, filepath, get_metadata=False)
 
-    def create_github_yaml(self, pat, language, app_type, repository_fullname, overwrite=False):
+    @staticmethod
+    def create_github_yaml(pat, language, app_type, repository_fullname, overwrite=False):
         github_repository_manager = GithubYamlManager(
             language=language,
             app_type=app_type,
