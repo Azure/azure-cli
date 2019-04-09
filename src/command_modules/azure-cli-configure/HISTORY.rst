@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.21
+++++++
+* Minor fixes
+
 2.0.20
 ++++++
 * Add 'none' as a configurable output format.
