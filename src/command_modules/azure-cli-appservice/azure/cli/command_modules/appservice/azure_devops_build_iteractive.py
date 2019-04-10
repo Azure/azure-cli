@@ -559,12 +559,14 @@ class AzureDevopsBuildInteractive(object):
                 except GithubIntegrationRequestError as gire:
                     raise CLIError("{error}{ls}{ls}"
                                    "Please ensure your Github personal access token has sufficient permissions.{ls}{ls}"
-                                   "You may visit https://aka.ms/azure-devops-source-repos for more information.".format(
+                                   "You may visit https://aka.ms/azure-devops-source-repos for more "
+                                   "information.".format(
                                        error=gire.message, ls=os.linesep))
                 except GithubContentNotFound:
                     raise CLIError("Failed to create a webhook for the provided Github repository or "
                                    "your repository cannot be accessed.{ls}{ls}"
-                                   "You may visit https://aka.ms/azure-devops-source-repos for more information.".format(
+                                   "You may visit https://aka.ms/azure-devops-source-repos for more "
+                                   "information.".format(
                                        ls=os.linesep))
         else:
             self.logger.warning("Detected a build definition already exists: {name}".format(
