@@ -25,10 +25,8 @@ def load_arguments(self, _):
     from azure.mgmt.deploymentmanager.models import (
         DeploymentMode)
 
-    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     service_topology_name_type = CLIArgumentType(options_list='--service-topology-name', metavar='NAME', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/servicetopologies'))
     service_name_type = CLIArgumentType(options_list='--service-name', metavar='NAME')
-    service_unit_name_type = CLIArgumentType(options_list='--service-unit-name', metavar='NAME')
     artifact_source_id_type = CLIArgumentType(options_list='--artifact-source-id', metavar='NAME')
 
     with self.argument_context('deploymentmanager artifact-source') as c:
@@ -92,15 +90,15 @@ def load_arguments(self, _):
     deployment_mode_type = CLIArgumentType(options_list='--deployment-mode', arg_type=get_enum_type(DeploymentMode), default=DeploymentMode.incremental, help='The type of depoyment mode to be used when deploying the service unit. Possible values: Incremental, Complete')
     template_uri_type = CLIArgumentType(options_list='--template-uri', help='The SAS Uri of the Resource Manager template')
     parameters_uri_type = CLIArgumentType(options_list='--parameters-uri', help='The SAS Uri of the Resource Manager parameters file')
-    parameters_artifact_source_relative_path_type = CLIArgumentType(options_list='--template-artifact-source-relative-path', help='The relative path of the ARM parameters file from the artifact source for this topology')
-    template_artifact_source_relative_path_type = CLIArgumentType(options_list='--parameters-artifact-source-relative-path', help='The relative path of the ARM template file from the artifact source for this topology')
+    parameters_artifact_source_relative_path_type = CLIArgumentType(options_list='--parameters-artifact-source-relative-path', help='The relative path of the ARM parameters file from the artifact source for this topology')
+    template_artifact_source_relative_path_type = CLIArgumentType(options_list='--template-artifact-source-relative-path', help='The relative path of the ARM template file from the artifact source for this topology')
 
     with self.argument_context('deploymentmanager service-unit') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
         c.argument('service_name', service_name_type, help='The name of the service')
-        c.argument('service_unit_name', service_unit_name_type, help='The name of the service unit')
+        c.argument('service_unit_name', options_list=['--service-unit-name', '--name', '-n'], help='The name of the service unit')
         c.argument('target_resource_group', target_resource_type)
         c.argument('deployment-mode', deployment_mode_type)
         c.argument('template_uri', template_uri_type)
@@ -131,12 +129,6 @@ def load_arguments(self, _):
         c.argument('parameters_uri', parameters_uri_type)
         c.argument('parameters_artifact_source_relative_path', parameters_artifact_source_relative_path_type)
         c.argument('template_artifact_source_relative_path', template_artifact_source_relative_path_type)
-        c.argument('tags', tags_type)
-
-    with self.argument_context('deploymentmanager service-unit show') as c:
-        c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
-        c.argument('service_name', service_name_type, help='The name of the service')
-        c.argument('service_unit_name', options_list=['--service-unit-name', '--name', '-n'], help='The name of the service unit')
         c.argument('tags', tags_type)
 
     duration_type = CLIArgumentType(options_list='--duration', help='The duration of the wait step.')
