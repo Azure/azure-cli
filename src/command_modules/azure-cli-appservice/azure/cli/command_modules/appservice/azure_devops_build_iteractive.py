@@ -462,9 +462,7 @@ class AzureDevopsBuildInteractive(object):
             self.logger.warning("https://help.github.com/en/articles/"
                                 "creating-a-personal-access-token-for-the-command-line{ls}".format(ls=os.linesep))
             self.logger.warning("The required Personal Access Token permissions can be found here:")
-            self.logger.warning("https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/github"
-                                "?view=azure-devops#repository-permissions-for-personal-"
-                                "access-token-pat-authentication{ls}".format(ls=os.linesep))
+            self.logger.warning("https://aka.ms/azure-devops-source-repos")
 
         while not self.github_pat or not AzureDevopsBuildProvider.check_github_pat(self.github_pat):
             self.github_pat = prompt(msg="Github Personal Access Token: ").strip()
@@ -561,16 +559,12 @@ class AzureDevopsBuildInteractive(object):
                 except GithubIntegrationRequestError as gire:
                     raise CLIError("{error}{ls}{ls}"
                                    "Please ensure your Github personal access token has sufficient permissions.{ls}{ls}"
-                                   "You may visit https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/"
-                                   "github?view=azure-devops#repository-permissions-for-personal-"
-                                   "access-token-pat-authentication for more information.".format(
+                                   "You may visit https://aka.ms/azure-devops-source-repos for more information.".format(
                                        error=gire.message, ls=os.linesep))
                 except GithubContentNotFound:
                     raise CLIError("Failed to create a webhook for the provided Github repository or "
                                    "your repository cannot be accessed.{ls}{ls}"
-                                   "You may visit https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/"
-                                   "github?view=azure-devops#repository-permissions-for-personal-"
-                                   "access-token-pat-authentication for more information.".format(
+                                   "You may visit https://aka.ms/azure-devops-source-repos for more information.".format(
                                        ls=os.linesep))
         else:
             self.logger.warning("Detected a build definition already exists: {name}".format(
