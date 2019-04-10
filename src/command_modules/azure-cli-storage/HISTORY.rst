@@ -2,11 +2,13 @@
 
 Release History
 ===============
-2.3.3
+
+2.4.0
 +++++
+* BREAKING CHANGE: `storage blob delete`: remove the return result of command
 * `storage blob generate-sas`: add `--full-uri` to create the full uri for the blob with sas
 * `storage file copy start`: add `--file-snapshot` to copy file from snapshot
-* BREAKING CHANGE: `storage blob delete`: remove the return result of command
+* `storage blob copy cancel` - only show the error instead of exception for NoPendingCopyOperation.
 
 2.3.2
 +++++
@@ -14,7 +16,6 @@ Release History
 * `storage blob download-batch/upload-batch`- adjust progress bar to be less verbose and indicate current blob
 * `storage account update`- Fix faulty logic for updating of encryption parameters.
 * `storage blob show`- Fix failing command when using oauth (`--auth-mode=login`).
-* `storage blob copy cancel` - only show the error instead of exception for NoPendingCopyOperation.
 
 2.3.1
 +++++

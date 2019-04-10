@@ -2,6 +2,12 @@
 
 Release History
 ===============
+2.2.2
++++++
+* Support for custom time zone on managed instance.
+
+* `sql server create/update`: Added `--no-wait` support.
+* `sql server`: Added new command `wait`.
 
 2.2.1
 +++++

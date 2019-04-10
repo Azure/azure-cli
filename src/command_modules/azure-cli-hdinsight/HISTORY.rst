@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.3
++++++
+* Minor fixes.
+
 0.3.2
 +++++
 * `create`: added the `--storage-account-managed-identity` parameter to support ADLS Gen2 MSI.

@@ -2,17 +2,17 @@
 
 Release History
 ===============
-0.5.1
+
+0.4.5
 +++++
 * Bug fix for asset and account filters update.
 
-0.5.0
+0.4.4
 +++++
+* The `account-filter` and `asset-filter` parameter `--bitrate` has been deprecated and will be removed in a future release. 
+  It has been renamed to `--first-quality`.
 * New encryption parameters support in `ams streaming-policy create` command added.
 * New paramter `filters` added to ams streaming-locator create.
-* BREAKING CHANGE: The `account-filter` and `asset-filter` parameter `bitrate` is renamed to `firstQuality`.
-*    `bitrate` will be removed in a future release.
-* Minor fixes
 
 0.4.3
 +++++
