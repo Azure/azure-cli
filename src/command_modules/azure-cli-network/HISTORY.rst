@@ -3,9 +3,13 @@
 Release History
 ===============
 
+2.3.6
++++++
+* `vnet-gateway list-bgp-peer-status`: Fix table format not displaying.
 * `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
 * `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
 * `express-route port update`: Fixed an issue where updating link state on an express-route port would throw an unknown attribute exception.
+* `dns zone create`: Add auto name server delegation in parent during child zone creation 
 
 2.3.5
 +++++

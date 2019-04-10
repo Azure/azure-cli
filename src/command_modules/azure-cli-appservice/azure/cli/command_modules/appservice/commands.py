@@ -73,7 +73,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
-        g.custom_command('up', 'create_deploy_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
@@ -270,9 +270,9 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_cors')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
-        g.custom_command('create', 'create_functionapp_app_service_plan')
+        g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
         g.generic_update_command('update', custom_func_name='update_functionapp_app_service_plan',
-                                 setter_arg_name='app_service_plan')
+                                 setter_arg_name='app_service_plan', exception_handler=ex_handler_factory())
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.show_command('show', 'get')

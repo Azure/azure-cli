@@ -1022,6 +1022,8 @@ def db_list(
 def db_update(
         cmd,
         instance,
+        server_name,
+        resource_group_name,
         elastic_pool_id=None,
         max_size_bytes=None,
         service_objective=None,
@@ -1032,7 +1034,6 @@ def db_update(
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
-
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -1053,12 +1054,18 @@ def db_update(
                        ' unspecified or equal \'{}\'.'.format(
                            ServiceObjectiveName.elastic_pool.value))
 
-    # Update instance pool and service objective. The service treats these properties like PATCH,
+    # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
     # except if pool is null/empty and service objective is a standalone SLO value (e.g. 'S0',
     # 'S1', etc), in which case the pool being null/empty is meaningful - it means remove from
     # pool.
-    instance.elastic_pool_id = elastic_pool_id
+
+    # Validate elastic pool id
+    instance.elastic_pool_id = _validate_elastic_pool_id(
+        cmd.cli_ctx,
+        elastic_pool_id,
+        server_name,
+        resource_group_name)
 
     # Update sku
     _db_elastic_pool_update_sku(
@@ -1638,6 +1645,7 @@ def server_create(
         resource_group_name,
         server_name,
         assign_identity=False,
+        no_wait=False,
         **kwargs):
     '''
     Creates a server.
@@ -1647,10 +1655,10 @@ def server_create(
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     # Create
-    return client.create_or_update(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        parameters=kwargs)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=server_name,
+                       resource_group_name=resource_group_name,
+                       parameters=kwargs)
 
 
 def server_list(

@@ -2,16 +2,24 @@
 
 Release History
 ===============
-2.2.2
+2.2.3
 +++++
 * Added new commands for Virtual Cluster:
     * az sql virtual-cluster show
     * az sql virtual-cluster list
     * az sql virtual-cluster delete
 
+2.2.2
++++++
+* Support for custom time zone on managed instance.
+
+* `sql server create/update`: Added `--no-wait` support.
+* `sql server`: Added new command `wait`.
+
 2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)
+* Allow elastic pool name (as an alternative to elastic pool id) to be specified for az sql db update.
 
 2.2.0
 +++++

@@ -372,6 +372,10 @@ helps['sql server update'] = """
     type: command
     short-summary: Update a server.
     """
+helps['sql server wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the SQL server is met.
+    """
 helps['sql server conn-policy'] = """
     type: group
     short-summary: Manage a server's connection policy.

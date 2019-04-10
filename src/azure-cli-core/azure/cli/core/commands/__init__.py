@@ -296,6 +296,7 @@ class AzCliCommandInvoker(CommandInvoker):
                                       extension_name=extension_name, extension_version=extension_version)
         if extension_name:
             self.data['command_extension_name'] = extension_name
+            self.cli_ctx.logging.log_cmd_metadata_extension_info(extension_name, extension_version)
 
         self.resolve_warnings(cmd, parsed_args)
         self.resolve_confirmation(cmd, parsed_args)

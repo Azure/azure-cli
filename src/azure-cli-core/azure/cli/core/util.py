@@ -20,48 +20,42 @@ CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
 
-def handle_exception(ex, cli_ctx=None):
+def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError
-    if isinstance(ex, (CLIError, CloudError)):
-        logger.error(ex.args[0])
-        return ex.args[1] if len(ex.args) >= 2 else 1
-    if isinstance(ex, KeyboardInterrupt):
+    from azure.cli.core.azlogging import CommandLoggerContext
+
+    with CommandLoggerContext(logger):
+
+        if isinstance(ex, (CLIError, CloudError)):
+            logger.error(ex.args[0])
+            return ex.args[1] if len(ex.args) >= 2 else 1
+        if isinstance(ex, KeyboardInterrupt):
+            return 1
+        if isinstance(ex, HttpOperationError):
+            try:
+                response_dict = json.loads(ex.response.text)
+                error = response_dict['error']
+
+                # ARM should use ODATA v4. So should try this first.
+                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+                if isinstance(error, dict):
+                    code = "{} - ".format(error.get('code', 'Unknown Code'))
+                    message = error.get('message', ex)
+                    logger.error("%s%s", code, message)
+                else:
+                    logger.error(error)
+
+            except (ValueError, KeyError):
+                logger.error(ex)
+            return 1
+
+        logger.error("The command failed with an unexpected error. Here is the traceback:\n")
+        logger.exception(ex)
+        logger.warning("\nTo open an issue, please run: 'az feedback'")
+
         return 1
-    if isinstance(ex, HttpOperationError):
-        try:
-            response_dict = json.loads(ex.response.text)
-            error = response_dict['error']
-
-            # ARM should use ODATA v4. So should try this first.
-            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
-            if isinstance(error, dict):
-                code = "{} - ".format(error.get('code', 'Unknown Code'))
-                message = error.get('message', ex)
-                logger.error("%s%s", code, message)
-            else:
-                logger.error(error)
-
-        except (ValueError, KeyError):
-            logger.error(ex)
-        return 1
-
-    # Otherwise, unhandled exception. Direct users to create an issue.
-    is_extension = False
-    if cli_ctx:
-        try:
-            if cli_ctx.invocation.data['command_extension_name']:
-                is_extension = True
-        except (AttributeError, KeyError):
-            pass
-
-    issue_url = "https://aka.ms/azcli/ext/issues" if is_extension else "https://aka.ms/azcli/issues"
-    logger.error("The command failed with an unexpected error. Here is the traceback:\n")
-    logger.exception(ex)
-    logger.warning("\nTo open an issue, please visit: %s", issue_url)
-
-    return 1
 
 
 # pylint: disable=inconsistent-return-statements
@@ -351,7 +345,7 @@ def open_page_in_browser(url):
     if _is_wsl(platform_name, release):   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
-        except FileNotFoundError:  # WSL might be too old
+        except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
         # handle 2 things:

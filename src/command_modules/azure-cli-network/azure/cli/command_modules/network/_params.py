@@ -394,6 +394,9 @@ def load_arguments(self, _):
     with self.argument_context('network dns zone update') as c:
         c.ignore('if_none_match')
 
+    with self.argument_context('network dns zone create') as c:
+        c.argument('parent_zone_name', options_list=['--parent-name', '-p'], help='Specify if parent zone exists for this zone and delegation for the child zone in the parent is to be added.')
+
     with self.argument_context('network dns record-set') as c:
         c.argument('target_resource', min_api='2018-05-01', help='ID of an Azure resource from which the DNS resource value is taken.')
         for item in ['record_type', 'record_set_type']:
@@ -438,6 +441,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')
+        c.argument('subscription_id', options_list=['--subscriptionid', '-s'], help='Subscription id to add name server record')
 
     with self.argument_context('network dns record-set ptr') as c:
         c.argument('dname', options_list=['--ptrdname', '-d'], help='PTR target domain name.')

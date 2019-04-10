@@ -438,7 +438,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         try:
             shutil.copyfile(os.path.join(download_path['downloadPath'], 'PostDeployScripts', 'deploy.cmd.template'),
                             'deploy.cmd')
-        except FileNotFoundError as error:
+        except OSError as error:  # FileNotFoundError introduced in Python 3
             logger.error('"deploy.cmd.template" not found. This may be due to calling \'az bot prepare-publish\' on a '
                          'v4 bot. To prepare and publish a v4 bot, please instead use \'az bot publish\'.')
             raise CLIError(error)

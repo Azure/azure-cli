@@ -273,6 +273,7 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp log tail') as c:
         c.argument('provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
+
     with self.argument_context('webapp log download') as c:
         c.argument('log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
@@ -363,6 +364,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
