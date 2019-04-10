@@ -181,10 +181,11 @@ class AzureDevopsBuildInteractive(object):
 
         local_runtime_language = self._find_local_repository_runtime_language()
         if local_runtime_language != self.functionapp_language:
-            raise CLIError("The local language ({setting}) does not match "
-                           "your function app runtime language ({functionapp}).{ls}"
-                           "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json "
-                           "and in your application settings on your functionapp in Azure.".format(
+            raise CLIError("The language stack setting found in your local repository ({setting}) does not match "
+                           "the language stack of your function app in Azure ({functionapp}).{ls}"
+                           "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
+                           "and in your application settings on your function app in Azure, "
+                           "and ensure they match.".format(
                                setting=local_runtime_language,
                                functionapp=self.functionapp_language,
                                ls=os.linesep,
@@ -192,8 +193,8 @@ class AzureDevopsBuildInteractive(object):
 
     def pre_checks_github(self):
         if not AzureDevopsBuildProvider.check_github_file(self.github_pat, self.github_repository, 'host.json'):
-            raise CLIError("There is no host.json in Github repository {repo}.{ls}"
-                           "Functionapps repository must contain a host.json in their root.{ls}"
+            raise CLIError("There is no host.json file in the provided Github repository {repo}.{ls}"
+                           "Each function app must contain a host.json in their root.{ls}"
                            "Please ensure you have read permission to the repository.".format(
                                repo=self.github_repository,
                                ls=os.linesep,
@@ -201,10 +202,11 @@ class AzureDevopsBuildInteractive(object):
 
         github_runtime_language = self._find_github_repository_runtime_language()
         if github_runtime_language is not None and github_runtime_language != self.functionapp_language:
-            raise CLIError("The repository language ({setting}) does not match "
-                           "your function app runtime language ({functionapp}).{ls}"
-                           "Please look at the FUNCTIONS_WORKER_RUNTIME both in your local.settings.json"
-                           " and in your application settings on your functionapp in Azure.".format(
+            raise CLIError("The language stack setting found in the provided repository ({setting}) does not match "
+                           "the language stack of your function app in Azure ({functionapp}).{ls}"
+                           "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
+                           "and in your application settings on your function app in Azure, "
+                           "and ensure they match.".format(
                                setting=github_runtime_language,
                                functionapp=self.functionapp_language,
                                ls=os.linesep,
@@ -304,10 +306,11 @@ class AzureDevopsBuildInteractive(object):
             "azure-pipelines.yml"
         )
         if does_yaml_file_exist and self.overwrite_yaml is None:
-            self.logger.warning("There is already an azure-pipelines.yml file in your Github repository.")
+            self.logger.warning("There is already an azure-pipelines.yml file in the provided Github repository.")
             self.logger.warning("If you are using a yaml file that was not configured "
                                 "through this command this process may fail.")
-            self.overwrite_yaml = prompt_y_n("Do you want to generate a new one? (will commit to master branch) ")
+            self.overwrite_yaml = prompt_y_n("Do you want to generate a new one? "
+                                             "(It will be committed to the master branch of the provided repository)")
 
         # Create and commit the new yaml file to Github without asking
         if not does_yaml_file_exist:
@@ -321,17 +324,20 @@ class AzureDevopsBuildInteractive(object):
                     repository_fullname=self.github_repository
                 )
             except LanguageNotSupportException as lnse:
-                raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
+                raise CLIError("Sorry, currently this command does not support {language}. To proceed, "
+                               "you'll need to configure your build manually at dev.azure.com".format(
+                                   language=lnse.message))
             except GithubContentNotFound:
-                raise CLIError("Sorry, your repository does not exist or you do not "
-                               "have sufficient permission to commit to the repository.")
+                raise CLIError("Sorry, the repository you provided does not exist or "
+                               "you do not have sufficient permission to write to the repository. "
+                               "Please provide an access token with the proper permissions.")
             except GithubUnauthorizedError:
                 raise CLIError("Sorry, you do not have sufficient permission to commit "
                                "azure-pipelines.yml to your Github repository.")
 
         # Overwrite yaml file
         if does_yaml_file_exist and self.overwrite_yaml:
-            self.logger.warning("Overwrite azure-pipelines.yml file in Github repository")
+            self.logger.warning("Overwrite azure-pipelines.yml file in the provided Github repository")
             try:
                 AzureDevopsBuildProvider.create_github_yaml(
                     pat=self.github_pat,
@@ -341,10 +347,13 @@ class AzureDevopsBuildInteractive(object):
                     overwrite=True
                 )
             except LanguageNotSupportException as lnse:
-                raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
+                raise CLIError("Sorry, currently this command does not support {language}. To proceed, "
+                               "you'll need to configure your build manually at dev.azure.com".format(
+                                   language=lnse.message))
             except GithubContentNotFound:
-                raise CLIError("Sorry, the repository does not exist or you do not "
-                               "have sufficient permission to contribute to it.")
+                raise CLIError("Sorry, the repository you provided does not exist or "
+                               "you do not have sufficient permission to write to the repository. "
+                               "Please provide an access token with the proper permissions.")
             except GithubUnauthorizedError:
                 raise CLIError("Sorry, you do not have sufficient permission to overwrite "
                                "azure-pipelines.yml in your Github repository.")
@@ -352,7 +361,7 @@ class AzureDevopsBuildInteractive(object):
     def process_local_repository(self):
         has_local_git_repository = AzureDevopsBuildProvider.check_git_local_repository()
         if has_local_git_repository:
-            self.logger.warning("Detected local git repository.")
+            self.logger.warning("Detected a local Git repository already exists.")
 
         # Collect repository name on Azure Devops
         if not self.repository_name:
@@ -446,25 +455,25 @@ class AzureDevopsBuildInteractive(object):
     def process_github_personal_access_token(self):
         if not self.github_pat:
             self.logger.warning("If you need to create a Github Personal Access Token, "
-                                "please follow the following steps:")
+                                "please follow the steps found at the following link:")
             self.logger.warning("https://help.github.com/en/articles/"
                                 "creating-a-personal-access-token-for-the-command-line{ls}".format(ls=os.linesep))
-            self.logger.warning("The required Personal Access Token permission can be found here:")
+            self.logger.warning("The required Personal Access Token permissions can be found here:")
             self.logger.warning("https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/github"
                                 "?view=azure-devops#repository-permissions-for-personal-"
                                 "access-token-pat-authentication{ls}".format(ls=os.linesep))
 
         while not self.github_pat or not AzureDevopsBuildProvider.check_github_pat(self.github_pat):
             self.github_pat = prompt(msg="Github Personal Access Token: ").strip()
-        self.logger.warning("Successfully validate Github personal access token.")
+        self.logger.warning("Successfully validated Github personal access token.")
 
     def process_github_repository(self):
         while (
                 not self.github_repository or
                 not AzureDevopsBuildProvider.check_github_repository(self.github_pat, self.github_repository)
         ):
-            self.github_repository = prompt(msg="Github Repository (e.g. Azure/azure-cli): ").strip()
-        self.logger.warning("Successfully validate Github repository.")
+            self.github_repository = prompt(msg="Github Repository Path (e.g. Azure/azure-cli): ").strip()
+        self.logger.warning("Successfully found Github repository.")
 
     def process_build_and_release_definition_name(self, scenario):
         if scenario == 'AZURE_DEVOPS':
@@ -485,7 +494,8 @@ class AzureDevopsBuildInteractive(object):
             )
         else:
             service_endpoint = service_endpoints[0]
-            self.logger.warning("Detected Github service endpoint {name}".format(name=service_endpoint.name))
+            self.logger.warning("Detected a Github service endpoint already exists: {name}".format(
+                                name=service_endpoint.name))
 
         self.github_service_endpoint_name = service_endpoint.name
 
@@ -504,18 +514,20 @@ class AzureDevopsBuildInteractive(object):
             except RoleAssignmentException:
                 if scenario == "AZURE_DEVOPS":
                     self.adbp.remove_git_remote(self.organization_name, self.project_name, repository)
-                raise CLIError("To use the Azure DevOps Pipeline Build,{ls}"
-                               "We need to assign a contributor role to the Azure Functions "
-                               "release service principle.{ls}"
+                raise CLIError("To create a build through Azure Pipelines,{ls}"
+                               "we need to assign a contributor role to the "
+                               "Azure Functions release service principle.{ls}"
                                "Please ensure that:{ls}"
-                               "1. You are the owner of the subscription, or have role assignment write permission.{ls}"
-                               "2. You can perform app registration in https://ms.portal.azure.com/"
-                               "#blade/Microsoft_AAD_IAM/ApplicationsListBlade{ls}"
-                               "3. The length of the organization name, project name and "
-                               "repository name concatenation is under 68 characters.".format(ls=os.linesep))
+                               "1. You are the owner of the subscription, "
+                               "or have roleAssignments/write permissions.{ls}"
+                               "2. You can perform app registration in https://ms.portal.azure.com/#blade/"
+                               "Microsoft_AAD_IAM/ApplicationsListBlade{ls}"
+                               "3. The combined length of your organization name, project name and repository name "
+                               "is under 68 characters.".format(ls=os.linesep))
         else:
             service_endpoint = service_endpoints[0]
-            self.logger.warning("Detected functionapp service endpoint {name}".format(name=service_endpoint.name))
+            self.logger.warning("Detected a functionapp service endpoint already exists: {name}".format(
+                                name=service_endpoint.name))
 
         self.service_endpoint_name = service_endpoint.name
 
@@ -549,18 +561,17 @@ class AzureDevopsBuildInteractive(object):
                                    "You may visit https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/"
                                    "github?view=azure-devops#repository-permissions-for-personal-"
                                    "access-token-pat-authentication for more information.".format(
-                                       error=gire.message, ls=os.linesep
-                                   ))
+                                       error=gire.message, ls=os.linesep))
                 except GithubContentNotFound:
-                    raise CLIError("Failed to create a webhook for your Github repository or "
+                    raise CLIError("Failed to create a webhook for the provided Github repository or "
                                    "your repository cannot be accessed.{ls}{ls}"
                                    "You may visit https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/"
                                    "github?view=azure-devops#repository-permissions-for-personal-"
                                    "access-token-pat-authentication for more information.".format(
-                                       ls=os.linesep
-                                   ))
+                                       ls=os.linesep))
         else:
-            self.logger.warning("Detected build definition {name}".format(name=self.build_definition_name))
+            self.logger.warning("Detected a build definition already exists: {name}".format(
+                                name=self.build_definition_name))
 
         self.build = self.adbp.create_build_object(
             self.organization_name,
@@ -617,7 +628,8 @@ class AzureDevopsBuildInteractive(object):
                                                 self.functionapp_name, self.storage_name,
                                                 self.resource_group_name, self.settings)
         else:
-            self.logger.warning("Detected release definition {name}".format(name=self.release_definition_name))
+            self.logger.warning("Detected a release definition already exists: {name}".format(
+                                name=self.release_definition_name))
 
         # The build artifact takes some time to propagate
         self.logger.warning("Prepare to release the artifact...")
