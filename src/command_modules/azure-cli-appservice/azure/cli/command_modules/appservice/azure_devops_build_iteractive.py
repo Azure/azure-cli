@@ -182,9 +182,9 @@ class AzureDevopsBuildInteractive(object):
         local_runtime_language = self._find_local_repository_runtime_language()
         if local_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in your local repository ({setting}) does not match "
-                           "the language stack of your Azure Function app in Azure ({functionapp}).{ls}"
+                           "the language stack of your Azure function app in Azure ({functionapp}).{ls}"
                            "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
-                           "and in your Azure Function app's application settings, "
+                           "and in your Azure function app's application settings, "
                            "and ensure they match.".format(
                                setting=local_runtime_language,
                                functionapp=self.functionapp_language,
@@ -203,9 +203,9 @@ class AzureDevopsBuildInteractive(object):
         github_runtime_language = self._find_github_repository_runtime_language()
         if github_runtime_language is not None and github_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in the provided repository ({setting}) does not match "
-                           "the language stack your Azure Function app ({functionapp}).{ls}"
+                           "the language stack your Azure function app ({functionapp}).{ls}"
                            "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
-                           "and in your Azure Function app's application settings, "
+                           "and in your Azure function app's application settings, "
                            "and ensure they match.".format(
                                setting=github_runtime_language,
                                functionapp=self.functionapp_language,
@@ -404,7 +404,7 @@ class AzureDevopsBuildInteractive(object):
             self.adbp.setup_local_git_repository(self.organization_name, self.project_name, self.repository_name)
         except GitOperationException as goe:
             raise CLIError("Failed to setup local git repository when running '{message}'{ls}"
-                           "Please ensure you have setup Git user.email and user.name".format(
+                           "Please ensure you have setup git user.email and user.name".format(
                                message=goe.message, ls=os.linesep
                            ))
 
@@ -519,7 +519,7 @@ class AzureDevopsBuildInteractive(object):
                     self.adbp.remove_git_remote(self.organization_name, self.project_name, repository)
                 raise CLIError("To create a build through Azure Pipelines,{ls}"
                                "The command will assign a contributor role to the "
-                               "Azure Function app release service principle.{ls}"
+                               "Azure function app release service principle.{ls}"
                                "Please ensure that:{ls}"
                                "1. You are the owner of the subscription, "
                                "or have roleAssignments/write permission.{ls}"
