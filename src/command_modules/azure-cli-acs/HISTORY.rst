@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.20
+++++++
+* adding customer-admin-group-id flag to az osa create
+
 2.3.19
 ++++++
 * ignore listen-address argument to "az aks browse" if kubectl doesn't support it
