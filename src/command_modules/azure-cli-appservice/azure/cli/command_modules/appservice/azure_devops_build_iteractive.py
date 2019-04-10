@@ -182,9 +182,9 @@ class AzureDevopsBuildInteractive(object):
         local_runtime_language = self._find_local_repository_runtime_language()
         if local_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in your local repository ({setting}) does not match "
-                           "the language stack of your function app in Azure ({functionapp}).{ls}"
+                           "the language stack of your Azure Function app in Azure ({functionapp}).{ls}"
                            "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
-                           "and in your application settings on your function app in Azure, "
+                           "and in your Azure Function app's application settings, "
                            "and ensure they match.".format(
                                setting=local_runtime_language,
                                functionapp=self.functionapp_language,
@@ -203,9 +203,9 @@ class AzureDevopsBuildInteractive(object):
         github_runtime_language = self._find_github_repository_runtime_language()
         if github_runtime_language is not None and github_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in the provided repository ({setting}) does not match "
-                           "the language stack of your function app in Azure ({functionapp}).{ls}"
+                           "the language stack your Azure Function app ({functionapp}).{ls}"
                            "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
-                           "and in your application settings on your function app in Azure, "
+                           "and in your Azure Function app's application settings, "
                            "and ensure they match.".format(
                                setting=github_runtime_language,
                                functionapp=self.functionapp_language,
@@ -287,7 +287,7 @@ class AzureDevopsBuildInteractive(object):
             if self.overwrite_yaml is None:
                 self.logger.warning("There is already an azure-pipelines.yml file in your local repository.")
                 self.logger.warning("If you are using a yaml file that was not configured "
-                                    "through this command this process may fail.")
+                                    "through this command, this command may fail.")
                 response = prompt_y_n("Do you want to delete it and create a new one? ")
             else:
                 response = self.overwrite_yaml
@@ -308,7 +308,7 @@ class AzureDevopsBuildInteractive(object):
         if does_yaml_file_exist and self.overwrite_yaml is None:
             self.logger.warning("There is already an azure-pipelines.yml file in the provided Github repository.")
             self.logger.warning("If you are using a yaml file that was not configured "
-                                "through this command this process may fail.")
+                                "through this command, this command may fail.")
             self.overwrite_yaml = prompt_y_n("Do you want to generate a new one? "
                                              "(It will be committed to the master branch of the provided repository)")
 
@@ -329,10 +329,10 @@ class AzureDevopsBuildInteractive(object):
                                    language=lnse.message))
             except GithubContentNotFound:
                 raise CLIError("Sorry, the repository you provided does not exist or "
-                               "you do not have sufficient permission to write to the repository. "
+                               "you do not have sufficient permissions to write to the repository. "
                                "Please provide an access token with the proper permissions.")
             except GithubUnauthorizedError:
-                raise CLIError("Sorry, you do not have sufficient permission to commit "
+                raise CLIError("Sorry, you do not have sufficient permissions to commit "
                                "azure-pipelines.yml to your Github repository.")
 
         # Overwrite yaml file
@@ -352,10 +352,10 @@ class AzureDevopsBuildInteractive(object):
                                    language=lnse.message))
             except GithubContentNotFound:
                 raise CLIError("Sorry, the repository you provided does not exist or "
-                               "you do not have sufficient permission to write to the repository. "
+                               "you do not have sufficient permissions to write to the repository. "
                                "Please provide an access token with the proper permissions.")
             except GithubUnauthorizedError:
-                raise CLIError("Sorry, you do not have sufficient permission to overwrite "
+                raise CLIError("Sorry, you do not have sufficient permissions to overwrite "
                                "azure-pipelines.yml in your Github repository.")
 
     def process_local_repository(self):
@@ -515,11 +515,11 @@ class AzureDevopsBuildInteractive(object):
                 if scenario == "AZURE_DEVOPS":
                     self.adbp.remove_git_remote(self.organization_name, self.project_name, repository)
                 raise CLIError("To create a build through Azure Pipelines,{ls}"
-                               "we need to assign a contributor role to the "
-                               "Azure Functions release service principle.{ls}"
+                               "The command will assign a contributor role to the "
+                               "Azure Function app release service principle.{ls}"
                                "Please ensure that:{ls}"
                                "1. You are the owner of the subscription, "
-                               "or have roleAssignments/write permissions.{ls}"
+                               "or have roleAssignments/write permission.{ls}"
                                "2. You can perform app registration in https://ms.portal.azure.com/#blade/"
                                "Microsoft_AAD_IAM/ApplicationsListBlade{ls}"
                                "3. The combined length of your organization name, project name and repository name "
