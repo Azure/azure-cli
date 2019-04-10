@@ -45,6 +45,7 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_server_usages_operations,
     get_sql_subscription_usages_operations,
+    get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
 )
 
@@ -479,3 +480,19 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+
+    ###############################################
+    #                sql virtual cluster         #
+    ###############################################
+
+    virtual_clusters_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#VirtualClustersOperations.{}',
+        client_factory=get_sql_virtual_clusters_operations)
+
+    with self.command_group('sql virtual-cluster',
+                            virtual_clusters_operations,
+                            client_factory=get_sql_virtual_clusters_operations) as g:
+
+        g.command('delete', 'delete', supports_no_wait=True)
+        g.show_command('show', 'get')
+        g.custom_command('list', 'virtual_cluster_list')

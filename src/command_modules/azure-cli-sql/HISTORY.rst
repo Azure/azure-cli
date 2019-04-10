@@ -2,6 +2,13 @@
 
 Release History
 ===============
+2.2.2
++++++
+* Added new commands for Virtual Cluster:
+    * az sql virtual-cluster show
+    * az sql virtual-cluster list
+    * az sql virtual-cluster delete
+
 2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)

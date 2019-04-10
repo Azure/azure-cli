@@ -2998,3 +2998,89 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('length(@)', 0)
                  ])
+
+
+class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
+
+    def test_sql_virtual_cluster_mgmt(self):
+        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        is_playback = os.path.exists(self.recording_file)
+        if is_playback:
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RG_MIPlayground/providers/Microsoft.Network/virtualNetworks/VNET_MIPlayground/subnets/VCReservedSubnet1'
+        else:
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/RG_MIPlayground/providers/Microsoft.Network/virtualNetworks/VNET_MIPlayground/subnets/VCReservedSubnet1'
+
+        license_type = 'LicenseIncluded'
+        loc = 'eastus'
+        v_cores = 8
+        storage_size_in_gb = '32'
+        edition = 'GeneralPurpose'
+        family = 'Gen5'
+        resource_group = "RG_MIPlayground"
+        collation = "Serbian_Cyrillic_100_CS_AS"
+        proxy_override = "Proxy"
+
+        user = admin_login
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {} -n {} -l {} '
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
+                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.capacity', v_cores),
+                     JMESPathCheck('identity', None),
+                     JMESPathCheck('collation', collation),
+                     JMESPathCheck('proxyOverride', proxy_override),
+                     JMESPathCheck('publicDataEndpointEnabled', 'True')])
+
+        # test list sql virtual cluster in the subscription, should be at least 1
+        virtual_clusters = self.cmd('sql virtual-cluster list',
+                                    checks=[
+                                        JMESPathCheckGreaterThan('length(@)', 0),
+                                        JMESPathCheck('length([?subnetId == \'{}\'])'.format(subnet), 1),
+                                        JMESPathCheck('[?subnetId == \'{}\'].location | [0]'.format(subnet), loc),
+                                        JMESPathCheck('[?subnetId == \'{}\'].resourceGroup | [0]'.format(subnet), resource_group)])
+
+        # test list sql virtual cluster in the resource group, should be at least 1
+        virtual_clusters = self.cmd('sql virtual-cluster list -g {}'
+                                    .format(resource_group),
+                                    checks=[
+                                        JMESPathCheckGreaterThan('length(@)', 0),
+                                        JMESPathCheck('length([?subnetId == \'{}\'])'.format(subnet), 1),
+                                        JMESPathCheck('[?subnetId == \'{}\'].location | [0]'.format(subnet), loc),
+                                        JMESPathCheck('[?subnetId == \'{}\'].resourceGroup | [0]'.format(subnet), resource_group)]).get_output_in_json()
+
+        virtual_cluster = next(vc for vc in virtual_clusters if vc['subnetId'] == subnet)
+
+        # test show sql virtual cluster
+        self.cmd('sql virtual-cluster show -g {} -n {}'
+                 .format(resource_group, virtual_cluster['name']),
+                 checks=[
+                     JMESPathCheck('location', loc),
+                     JMESPathCheck('name', virtual_cluster['name']),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('subnetId', subnet)])
+
+        # delete sql managed instance
+        self.cmd('sql mi delete -g {} -n {} --yes'
+                 .format(resource_group, managed_instance_name), checks=NoneCheck())
+
+        # test delete sql virtual cluster
+        self.cmd('sql virtual-cluster delete -g {} -n {}'
+                 .format(resource_group, virtual_cluster['name']), checks=NoneCheck())
+
+        # test show sql virtual cluster doesn't return anything
+        self.cmd('sql virtual-cluster show -g {} -n {}'
+                 .format(resource_group, virtual_cluster['name']),
+                 expect_failure=True)

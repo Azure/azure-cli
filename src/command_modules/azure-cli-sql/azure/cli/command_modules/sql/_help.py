@@ -557,3 +557,30 @@ helps['sql midb delete'] = """
         - name: Delete a managed database
           text: az sql midb delete -g mygroup --mi myinstance -n mymanageddb --yes
     """
+helps['sql virtual-cluster'] = """
+    type: group
+    short-summary: Manage SQL virtual cluster.
+    """
+helps['sql virtual-cluster list'] = """
+    type: command
+    short-summary: List available virtual clusters.
+    examples:
+        - name: List all virtual clusters in the current subscription.
+          text: az sql virtual-cluster list
+        - name: List all virtual clusters in a resource group.
+          text: az sql virtual-cluster list -g mygroup
+    """
+helps['sql virtual-cluster show'] = """
+    type: command
+    short-summary: Get the details for a virtual cluster.
+    examples:
+        - name: Get the details for a virtual cluster
+          text: az sql virtual-cluster show -g mygroup -n mycluster
+    """
+helps['sql virtual-cluster delete'] = """
+    type: command
+    short-summary: Delete a virtual cluster.
+    examples:
+        - name: Delete a virtual cluster
+          text: az sql virtual-cluster delete -g mygroup -n mycluster
+    """

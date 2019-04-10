@@ -1211,3 +1211,17 @@ def load_arguments(self, _):
 
     with self.argument_context('sql midb list') as c:
         c.argument('managed_instance_name', id_part=None)
+
+    ###############################################
+    #                sql virtual cluster          #
+    ###############################################
+    with self.argument_context('sql virtual-cluster') as c:
+        c.argument('virtual_cluster_name',
+                   help='The virtual cluster name',
+                   options_list=['--name', '-n'],
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
+
+        c.argument('resource_group_name',
+                   help='Name of the resource group containing the virtual cluster',
+                   options_list=['--resource-group', '-g'])
