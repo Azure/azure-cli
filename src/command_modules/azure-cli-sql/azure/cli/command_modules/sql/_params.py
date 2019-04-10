@@ -1086,7 +1086,7 @@ def load_arguments(self, _):
 
         c.argument('timezone_id',
                    help='The time zone id for the instance to set. '
-                    'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
+                   'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
 
     with self.argument_context('sql mi create') as c:
         # Create args that will be used to build up the ManagedInstance object
