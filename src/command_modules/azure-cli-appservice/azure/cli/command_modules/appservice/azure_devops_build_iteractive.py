@@ -402,8 +402,11 @@ class AzureDevopsBuildInteractive(object):
         # Setup a local git repository and create a new commit on top of this context
         try:
             self.adbp.setup_local_git_repository(self.organization_name, self.project_name, self.repository_name)
-        except GitOperationException:
-            raise CLIError("Failed to setup local git repository.")
+        except GitOperationException as goe:
+            raise CLIError("Failed to setup local git repository when running '{message}'{ls}"
+                           "Please ensure you have setup Git user.email and user.name".format(
+                               message=goe.message, ls=os.linesep
+                           ))
 
         self.repository_remote_name = expected_remote_name
         self.logger.warning("Added git remote {remote}".format(remote=expected_remote_name))
