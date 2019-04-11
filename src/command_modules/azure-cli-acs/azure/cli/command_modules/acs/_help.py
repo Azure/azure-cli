@@ -650,7 +650,7 @@ parameters:
     short-summary: The CIDR used on the Subnet into which to deploy the cluster.
   - name: --customer-admin-group-id
     type: string
-    short-summary: The ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified no cluster admin access will be granted
+    short-summary: The ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
 
 
 examples:
