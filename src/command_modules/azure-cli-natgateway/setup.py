@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.3.6"
+VERSION = "0.1.0"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -43,7 +43,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 setup(
     name='azure-cli-natgateway',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools Network Command Module',
+    description='Microsoft Azure Command-Line Tools NatGateway Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
