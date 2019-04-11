@@ -223,7 +223,7 @@ class ImageTemplateTest(ScenarioTest):
 
         # Test customizer add, remove and clear..
 
-        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name} --type powershell -e 0 1 2 --script {script}',
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name} --type powershell -e 0 1 2 --script-url {script}',
                  checks=[
                      self.check('customize[1].name', '{pwsh_name}'),
                      self.check('customize[1].script', '{script}'),
@@ -257,3 +257,11 @@ class ImageTemplateTest(ScenarioTest):
         # # check that vm successfully created from template.
         # self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
         # self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
+
+
+
+    def test_image_template_managed_image_source(self):
+        pass
+
+    def test_image_template_customizers(self):
+        pass
