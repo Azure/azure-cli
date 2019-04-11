@@ -563,7 +563,7 @@ helps['sql midb delete'] = """
     """
 helps['sql virtual-cluster'] = """
     type: group
-    short-summary: Manage SQL virtual cluster.
+    short-summary: Manage SQL virtual clusters.
     """
 helps['sql virtual-cluster list'] = """
     type: command
