@@ -364,7 +364,7 @@ def _build_issue_info_tup(command_log_file=None):
                 extension_info = "\nExtension Name: {}. Version: {}.".format(extension_name, extension_version)
                 is_ext = True
 
-            format_dict["errors_string"] = errors
+            format_dict["errors_string"] = "```\n{}\n```".format(errors)
             format_dict["executed_command"] = "az " + executed_command if executed_command else executed_command
             format_dict["command_name"] += extension_info
 
