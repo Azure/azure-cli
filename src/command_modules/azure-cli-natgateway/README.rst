@@ -1,7 +1,5 @@
-Microsoft Azure CLI 'network' Command Module
+Microsoft Azure CLI 'natgateway' Command Module
 ============================================
 
-This package is for the 'network natgateway' module.
+This package is for the 'natgateway' module.
 i.e. 'az network natgateway'
-
-
