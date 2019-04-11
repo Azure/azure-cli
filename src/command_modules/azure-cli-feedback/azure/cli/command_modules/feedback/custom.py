@@ -70,14 +70,14 @@ _ISSUES_TEMPLATE = """
 {errors_string}
 
 ## To Reproduce:
-Steps to reproduce the behavior. Note: Command arguments have been redacted.
+Steps to reproduce the behavior. Note that argument values have been redacted. You may manually
+add them if you feel they are relevant and do not contain sensitive information.
 
-- `Fill in additional info here`
-- `Run: {executed_command}`
+- _Put as many pre-requisite steps here as needed..._
+- `{executed_command}`
 
 ## Expected Behavior
-
-A clear and concise description of what you expected to happen.
+Clear and concise description of what you expected to happen.
 
 ## Environment Summary
 ```
@@ -363,15 +363,6 @@ def _build_issue_info_tup(command_log_file=None):
             if extension_name:
                 extension_info = "\nExtension Name: {}. Version: {}.".format(extension_name, extension_version)
                 is_ext = True
-
-            if errors:
-                num_lines = errors.count("\n")
-                reaction = ":confused:"
-                if num_lines >= 100:
-                    reaction = ":expressionless:"
-                elif num_lines >= 15:
-                    reaction = ":open_mouth:"
-                errors = "\n{}\n\n```{}```".format(reaction, errors)
 
             format_dict["errors_string"] = errors
             format_dict["executed_command"] = "az " + executed_command if executed_command else executed_command
