@@ -7,10 +7,10 @@ class NatGatewayLoader(AzCommandsLoader):
       from azure.cli.core.commands import CliCommandType
 
       natgateway_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.maps#NatGatewayOperations.{}',
+        operations_tmpl='azure.cli.command_modules.natgateway.custom#{}',
       )
 
-      with self.command_group('network natgateway', natgateway_custom) as g:
+      with self.command_group('network nat-gateway', natgateway_custom) as g:
         g.command('create', 'create_natgateway')
 
 COMMAND_LOADER_CLS = NatGatewayLoader

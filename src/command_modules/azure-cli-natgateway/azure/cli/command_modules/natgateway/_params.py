@@ -28,4 +28,4 @@ def load_arguments(self, _):
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), arg_group='Network')
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
         c.argument('idle_timeout_in_minutes', help='Idle timeout in minutes.', type=int)
-        c.argument('sku', min_api='2017-08-01', help='Nat Gateway SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='standard'))
+        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='standard'))

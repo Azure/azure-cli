@@ -41,7 +41,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-network',
+    name='azure-cli-natgateway',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Network Command Module',
     long_description=README + '\n\n' + HISTORY,
@@ -54,8 +54,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.network',
-        'azure.cli.command_modules.network.zone_file'
+        'azure.cli.command_modules.natgateway'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
