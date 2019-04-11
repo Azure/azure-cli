@@ -2256,12 +2256,12 @@ def _ensure_osa_aad(cli_ctx,
                                          additional_properties=None, type="Scope")
         # Read directory permissions on Windows Azure Active Directory API
         directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
-                                         additional_properties=None, type="Role")
-        
+                                          additional_properties=None, type="Role")
+
         required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
                                                          additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
-        
+
         list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
                                                                .format(reply_url)))
         if update:
