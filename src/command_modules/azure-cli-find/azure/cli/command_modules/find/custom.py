@@ -34,7 +34,7 @@ def process_query(cli_term):
         if (platform.system() == 'Windows' and should_enable_styling()):
             colorama.init(convert=True)
 
-        answer_list = json.loads(response.content)
+        answer_list = json.loads(response.content.decode(response.encoding))
         if (not answer_list or answer_list[0]['source'] == 'bing'):
             print("\nSorry I am not able to help with [" + cli_term + "]."
                   "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
@@ -57,7 +57,7 @@ def process_query(cli_term):
                 current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
                 current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
                 print(style_message(current_title))
-                print(current_snippet)
+                print(current_snippet + '\n')
 
 
 def style_message(msg):

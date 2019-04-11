@@ -95,7 +95,7 @@ class MetricAlertConditionAction(argparse._AppendAction):
         from azure.cli.command_modules.monitor.grammar import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
 
-        usage = 'usage error: --condition {avg,min,max,total} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
+        usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
                 '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
 

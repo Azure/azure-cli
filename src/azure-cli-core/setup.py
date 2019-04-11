@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.60"
+VERSION = "2.0.62"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -59,7 +59,7 @@ DEPENDENCIES = [
     'colorama>=0.3.9',
     'humanfriendly>=4.7',
     'jmespath',
-    'knack>=0.5.3',
+    'knack~=0.5.4',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
     'paramiko>=2.0.8',
@@ -71,8 +71,10 @@ DEPENDENCIES = [
     'requests>=2.20.0',
     'six',
     'tabulate>=0.7.7',
-    'wheel',
-    'azure-mgmt-resource==2.1.0'
+    'wheel==0.30.0',
+    'azure-mgmt-resource==2.1.0',
+    'pyperclip>=1.7.0',
+    'psutil>=5.6.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

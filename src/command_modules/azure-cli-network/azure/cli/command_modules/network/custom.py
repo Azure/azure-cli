@@ -1074,7 +1074,38 @@ def list_ddos_plans(cmd, resource_group_name=None):
 
 
 # region DNS Commands
-def create_dns_zone(cmd, client, resource_group_name, zone_name, tags=None,
+# add delegation name server record for the created child zone in it's parent zone.
+def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
+    """
+     :param child_zone: the zone object corresponding to the child that is created.
+     :param parent_zone: the parent zone name / FQDN of the parent zone.
+                         if parent zone name is mentioned, assume current subscription and resource group.
+     :param child_rg: resource group of the child zone
+     :param child_zone_name: name of the child zone
+    """
+    import sys
+    parent_rg = child_rg
+    parent_subscription_id = None
+    parent_zone_name = parent_zone
+
+    if is_valid_resource_id(parent_zone):
+        id_parts = parse_resource_id(parent_zone)
+        parent_rg = id_parts['resource_group']
+        parent_subscription_id = id_parts['subscription']
+        parent_zone_name = id_parts['name']
+
+    if all([parent_zone_name, parent_rg, child_zone_name, child_zone]) and child_zone_name.endswith(parent_zone_name):
+        record_set_name = child_zone_name.replace('.' + parent_zone_name, '')
+        try:
+            for dname in child_zone.name_servers:
+                add_dns_ns_record(cmd, parent_rg, parent_zone_name, record_set_name, dname, parent_subscription_id)
+            print('Delegation added succesfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
+        except CloudError as ex:
+            logger.error(ex)
+            print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
+
+
+def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_name=None, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
     Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
     zone = Zone(location='global', tags=tags)
@@ -1084,7 +1115,13 @@ def create_dns_zone(cmd, client, resource_group_name, zone_name, tags=None,
         zone.registration_virtual_networks = registration_vnets
         zone.resolution_virtual_networks = resolution_vnets
 
-    return client.create_or_update(resource_group_name, zone_name, zone, if_none_match='*' if if_none_match else None)
+    created_zone = client.create_or_update(resource_group_name, zone_name, zone,
+                                           if_none_match='*' if if_none_match else None)
+
+    if cmd.supported_api_version(min_api='2016-04-01') and parent_zone_name is not None:
+        logger.info('Attempting to add delegation in the parent zone')
+        add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
+    return created_zone
 
 
 def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
@@ -1409,11 +1446,12 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
 
 
-def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname):
+def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname, subscription_id=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name,
+                            resource_group_name, zone_name, subscription_id=subscription_id)
 
 
 def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
@@ -1565,8 +1603,9 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                     is_list=True):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
+                     is_list=True, subscription_id=None):
+    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
+                                  subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
@@ -1923,7 +1962,7 @@ def create_express_route_port(cmd, resource_group_name, express_route_port_name,
 
 def update_express_route_port(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
-        c.update_param('tags', tags, True)
+        c.set_param('tags', tags, True)
     return instance
 
 

@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.2.4
++++++
+* Support running an image contextlessly.
+
+2.2.3
++++++
+* Minor fixes
+
 2.2.2
 +++++
 * Fix redundant sources in image import.

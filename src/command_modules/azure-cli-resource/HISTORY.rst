@@ -2,6 +2,15 @@
 
 Release History
 ===============
+
+* `resource delete`: Fix issue where deleting using a resource ID could crash on error.
+
+2.1.13
+++++++
+* `deployment create`/`group deployment create`: Fixed issue where parameters file with an empty set of parameters would not work.
+
+2.1.12
+++++++
 * `deployment create/list/show`: improve table output
 * `deployment create/validate`: fix issue where type secureObject was not recognized.
 

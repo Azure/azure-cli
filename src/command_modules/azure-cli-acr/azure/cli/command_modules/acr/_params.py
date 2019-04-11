@@ -67,6 +67,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('platform', help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
+        # Overwrite default shorthand of cmd to make availability for acr usage
+        c.argument('cmd', options_list=['--__cmd__'])
+        c.argument('cmd_value', help="Commands to execute.", options_list=['--cmd'])
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
@@ -132,8 +135,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
-        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
-        c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context.")
+        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())
+        c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context. It can be '-' to pipe a file from the standard input.")
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
@@ -153,14 +156,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('with_secure_properties', help="Indicates whether the secure properties of a task should be returned.", action='store_true')
 
         # DockerBuildStep, FileTaskStep parameters
-        c.argument('file', options_list=['--file', '-f'], help="The relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml'.")
+        c.argument('file', options_list=['--file', '-f'], help="The relative path of the the task/docker file to the source code root folder. Task files must be suffixed with '.yaml' or piped from the standard input using '-'.")
         c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", arg_type=get_three_state_flag())
         c.argument('no_cache', help='Indicates whether the image cache is enabled.', arg_type=get_three_state_flag())
         c.argument('values', help="The task values/parameters file path relative to the source context.")
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
-        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo).")
+        c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo). If '/dev/null' is specified, the value will be set to None and ignored.")
         c.argument('arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
         c.argument('secret_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
         c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format.", action='append', validator=validate_set)

@@ -331,7 +331,8 @@ def load_command_table(self, _):
                             client_factory=get_sql_servers_operations) as g:
 
         g.custom_command('create', 'server_create',
-                         table_transformer=server_table_format)
+                         table_transformer=server_table_format,
+                         supports_no_wait=True)
         g.command('delete', 'delete',
                   confirmation=True)
         g.show_command('show', 'get',
@@ -339,7 +340,9 @@ def load_command_table(self, _):
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
         g.generic_update_command('update',
-                                 custom_func_name='server_update')
+                                 custom_func_name='server_update',
+                                 supports_no_wait=True)
+        g.wait_command('wait')
 
     server_usages_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerUsagesOperations.{}',

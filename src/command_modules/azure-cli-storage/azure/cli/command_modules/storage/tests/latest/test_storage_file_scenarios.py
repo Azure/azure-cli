@@ -106,6 +106,46 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage share delete -n {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('deleted', True))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_file_copy_snapshot_scenario(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        s1 = self.create_share(account_info)
+        s2 = self.create_share(account_info)
+        d1 = 'dir1'
+        d2 = 'dir2'
+
+        self.storage_cmd('storage directory create --share-name {} -n {}', account_info, s1, d1)
+        self.storage_cmd('storage directory create --share-name {} -n {}', account_info, s2, d2)
+
+        local_file = self.create_temp_file(512, full_random=False)
+        src_file = os.path.join(d1, 'source_file.txt')
+        dst_file = os.path.join(d2, 'destination_file.txt')
+
+        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
+                         src_file, s1, local_file)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src_file, s1) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
+        snapshot = self.storage_cmd('storage share snapshot -n {}', account_info,
+                                    s1).get_output_in_json()['snapshot']
+
+        # remove the source file from share
+        self.storage_cmd('storage file delete --share-name {} -p "{}"',
+                         account_info, s1, src_file)
+        self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src_file, s1) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        copy_id = self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" --file-snapshot {}',
+                                   account_info, s2, dst_file, s1, src_file, snapshot) \
+            .assert_with_checks(JMESPathCheck('status', 'success')) \
+            .get_output_in_json()['id']
+
+        self.storage_cmd('storage file show --share-name {} -p "{}"', account_info, s2, dst_file) \
+            .assert_with_checks(JMESPathCheck('name', os.path.basename(dst_file)),
+                                JMESPathCheck('properties.copy.id', copy_id),
+                                JMESPathCheck('properties.copy.status', 'success'))
+
     def validate_directory_scenario(self, account_info, share):
         directory = self.create_random_name('dir', 16)
         self.storage_cmd('storage directory create --share-name {} --name {} --fail-on-exist',
