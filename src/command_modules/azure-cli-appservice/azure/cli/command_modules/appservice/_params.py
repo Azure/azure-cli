@@ -30,7 +30,6 @@ FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
-EXISTING_GIT_OPTIONS = ['AddRemote', 'AddNewRepository', 'UseExisting']
 
 # pylint: disable=too-many-statements
 
@@ -70,7 +69,8 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
-        c.argument('admin_site_name', help='The name of the admin web app.')
+        c.argument('admin_site_name', help='The name of the admin web app.', deprecate_info=c.deprecate(expiration='0.2.17'))
+        c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
@@ -206,6 +206,9 @@ def load_arguments(self, _):
             c.argument('windows_fx_version', help="(Preview) a docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
+            c.argument('reserved_instance_count', options_list=['--prewarmed-instance-count'], help="Number of pre-warmed instances a function app has")
+            if scope == 'webapp':
+                c.ignore('reserved_instance_count')
             c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
             c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
             c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
@@ -270,6 +273,7 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp log tail') as c:
         c.argument('provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
+
     with self.argument_context('webapp log download') as c:
         c.argument('log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 
@@ -360,6 +364,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
@@ -393,16 +399,27 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
-        c.argument('sku', required=True, help='The SKU of the app service plan.')
-        c.argument('number_of_workers', help='The number of workers for the app service plan.')
+        c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False, help='host function app on Linux worker')
+        c.argument('number_of_workers', options_list=['--number-of-workers', '--min-instances'],
+                   help='The number of workers for the app service plan.')
+        c.argument('max_burst',
+                   help='The maximum number of elastic workers for the plan.')
         c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('functionapp update') as c:
+        c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
+
+    with self.argument_context('functionapp plan create') as c:
+        c.argument('sku', required=True, help='The SKU of the app service plan.')
+
+    with self.argument_context('functionapp plan update') as c:
+        c.argument('sku', required=False, help='The SKU of the app service plan.')
 
     with self.argument_context('functionapp devops-build create') as c:
         c.argument('functionapp_name', help="Name of the Azure Function App that you want to use", required=False)
         c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
         c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
+        c.argument('repository_name', help="Name of the Azure Devops repository that you want to use", required=False)
         c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('allow_force_push', help="If Azure Devops repository is not clean, should it overwrite remote content?", arg_type=get_three_state_flag(return_label=True), required=False)
         c.argument('use_local_settings', help="Use your local settings in your functionapp settings?", arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('local_git', help="If you want have a local git repository in this folder, what should we do? Adding a remote will preserve your local repository and use a remote to reference the build repository. "
-                                     "Adding a new repository will remove your local git and create a new repostiory erase your current repository and create a new one. Use existing will attempt to use your local repository if it is an azure repository"
-                                     " otherwise it will fail", arg_type=get_enum_type(EXISTING_GIT_OPTIONS), required=False)

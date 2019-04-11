@@ -393,6 +393,10 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
+        if if_modified_since:
+            logger.warning('--if-modified-since argument is ignored when using --dry-run.')
+        if if_unmodified_since:
+            logger.warning('--if-unmodified-since argument is ignored when using --dry-run.')
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -406,6 +410,20 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
+
+
+def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
+                          expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+                          protocol=None, cache_control=None, content_disposition=None,
+                          content_encoding=None, content_language=None,
+                          content_type=None, full_uri=False):
+    sas_token = client.generate_blob_shared_access_signature(
+        container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+        content_encoding=content_encoding, content_language=content_language, content_type=content_type)
+    if full_uri:
+        return client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token)
+    return sas_token
 
 
 def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):

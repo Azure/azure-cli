@@ -1828,6 +1828,12 @@ helps['network dns zone create'] = """
         - name: Create a DNS zone using a fully qualified domain name.
           text: >
             az network dns zone create -g MyResourceGroup -n www.mysite.com
+        - name: Create a DNS zone with delegation in the parent within the same subscription and resource group
+          text: >
+            az network dns zone create -g MyResourceGroup -n books.mysite.com -p mysite.com
+        - name: Create a DNS zone with delegation in the parent in different subscription
+          text: >
+            az network dns zone create -g MyResourceGroup -n books.mysite.com -p "/subscriptions/**67e2/resourceGroups/OtherRg/providers/Microsoft.Network/dnszones/mysite.com"
 """
 
 helps['network dns zone delete'] = """

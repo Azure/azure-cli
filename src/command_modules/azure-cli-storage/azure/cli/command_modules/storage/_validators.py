@@ -236,6 +236,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # source as file
     share = ns.pop('source_share', None)
     path = ns.pop('source_path', None)
+    file_snapshot = ns.pop('file_snapshot', None)
 
     # source credential clues
     source_account_name = ns.pop('source_account_name', None)
@@ -245,7 +246,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # source in the form of an uri
     uri = ns.get('copy_source', None)
     if uri:
-        if any([container, blob, snapshot, share, path, source_account_name,
+        if any([container, blob, snapshot, share, path, file_snapshot, source_account_name,
                 source_account_key]):
             raise ValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
@@ -256,7 +257,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         return
 
     # ensure either a file or blob source is specified
-    valid_blob_source = container and blob and not share and not path
+    valid_blob_source = container and blob and not share and not path and not file_snapshot
     valid_file_source = share and path and not container and not blob and not snapshot
 
     if not valid_blob_source and not valid_file_source:
@@ -304,6 +305,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         query_params.append(source_sas.lstrip('?'))
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
+    if file_snapshot:
+        query_params.append('sharesnapshot={}'.format(file_snapshot))
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,

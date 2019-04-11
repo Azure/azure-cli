@@ -44,10 +44,10 @@ def add_mediaservice_secondary_storage(client, resource_group_name, account_name
 def remove_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account):
     ams = client.get(resource_group_name, account_name)
 
-    storage_accounts_filtered = list(filter(lambda s: storage_account not in s.id and 'Secondary' in s.type.value,
+    storage_accounts_filtered = list(filter(lambda s: storage_account not in s.id and 'Secondary' in s.type,
                                             ams.storage_accounts))
 
-    primary_storage_account = list(filter(lambda s: 'Primary' in s.type.value, ams.storage_accounts))[0]
+    primary_storage_account = list(filter(lambda s: 'Primary' in s.type, ams.storage_accounts))[0]
     storage_accounts_filtered.append(primary_storage_account)
 
     return create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts_filtered,

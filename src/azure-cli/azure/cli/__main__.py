@@ -5,6 +5,7 @@
 
 import sys
 import uuid
+import timeit
 
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
@@ -35,6 +36,7 @@ telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
 try:
     telemetry.start()
+    start_time = timeit.default_timer()
 
     exit_code = cli_main(az_cli, sys.argv[1:])
 
@@ -43,9 +45,29 @@ try:
     else:
         telemetry.set_success()
 
+    elapsed_time = timeit.default_timer() - start_time
+
+    az_cli.logging.end_cmd_metadata_logging(exit_code)
     sys.exit(exit_code)
+
 except KeyboardInterrupt:
     telemetry.set_user_fault('keyboard interrupt')
     sys.exit(1)
+except SystemExit as ex:  # some code directly call sys.exit, this is to make sure command metadata is logged
+    exit_code = ex.code if ex.code is not None else 1
+
+    try:
+        elapsed_time = timeit.default_timer() - start_time
+    except NameError:
+        pass
+
+    az_cli.logging.end_cmd_metadata_logging(exit_code)
+    raise ex
+
 finally:
     telemetry.conclude()
+
+    try:
+        logger.info("command ran in %.3f seconds.", elapsed_time)
+    except NameError:
+        pass
