@@ -156,8 +156,9 @@ def process_image_template_create_namespace(cmd, namespace):
         get_default_location_from_resource_group(cmd, namespace)
 
     # Validate and parse scripts
-    for ns_script in namespace.scripts:
-        scripts.append(_parse_script(ns_script))
+    if namespace.scripts:
+        for ns_script in namespace.scripts:
+            scripts.append(_parse_script(ns_script))
 
 
     # Validate and parse destination and locations
@@ -276,11 +277,14 @@ def process_image_template_create_namespace(cmd, namespace):
 def process_img_tmpl_customizer_add_namespace(cmd, namespace):
 
     if namespace.customizer_type.lower() in [ScriptType.SHELL.value.lower(), ScriptType.POWERSHELL.value.lower()]:
-        if not namespace.script:
-            raise CLIError("A script must be provided if type is one of: {} {}".format(ScriptType.SHELL.value, ScriptType.POWERSHELL.value))
+        if not (namespace.script_url or namespace.inline_script):
+            raise CLIError("A script must be provided if the customizer type is one of: {} {}".format(ScriptType.SHELL.value, ScriptType.POWERSHELL.value))
+
+        if namespace.script_url and namespace.inline_script:
+            raise CLIError("Cannot supply both script url and inline script.")
 
     elif namespace.customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
-        if namespace.script:
+        if namespace.script_url or namespace.inline_script:
             logger.warning("Ignoring the supplied script as scripts are not used for Windows Restart.")
 
 
@@ -333,7 +337,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(client, resource_group_name, image_template_name, source, scripts,
+def create_image_template(client, resource_group_name, image_template_name, source, scripts=None,
                           checksum=None, location=None, no_wait=False,
                           managed_image_destinations=None, shared_image_destinations=None,
                           source_dict=None, scripts_list=None, destinations_lists=None):
@@ -474,7 +478,7 @@ def _update_image_template(cmd, client, resource_group_name, image_template_name
 # todo: prevent customizers with the same name
 
 def add_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name, customizer_type,
-                            script=None, valid_exit_codes=None,
+                            script_url=None, inline_script=None, valid_exit_codes=None,
                             restart_command=None, restart_check_command=None, restart_timeout=None):
     from azure.mgmt.imagebuilder.models import ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer, ImageTemplateRestartCustomizer
     existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
@@ -488,13 +492,12 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
             if existing_customizer.name == customizer_name:
                 raise CLIError("Output with output name {} already exists in image template {}.".format(customizer_name, image_template_name))
 
-
     new_customizer = None
 
     if customizer_type.lower() == ScriptType.SHELL.value.lower():
-        new_customizer = ImageTemplateShellCustomizer(name=customizer_name, script=script)
+        new_customizer = ImageTemplateShellCustomizer(name=customizer_name, script=script_url, inline=inline_script)
     elif customizer_type.lower() == ScriptType.POWERSHELL.value.lower():
-        new_customizer = ImageTemplatePowerShellCustomizer(name=customizer_name, script=script, valid_exit_codes=valid_exit_codes)
+        new_customizer = ImageTemplatePowerShellCustomizer(name=customizer_name, script=script_url, inline=inline_script, valid_exit_codes=valid_exit_codes)
     elif customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
         new_customizer = ImageTemplateRestartCustomizer(name=customizer_name, restart_command=restart_command,
                                                            restart_check_command=restart_check_command,

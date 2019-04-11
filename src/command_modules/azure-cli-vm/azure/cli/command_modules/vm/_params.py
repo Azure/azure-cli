@@ -178,7 +178,8 @@ def load_arguments(self, _):
 
         c.argument('customizer_name', help="Name of the customizer to be added to the image template.")
         c.argument('customizer_type', options_list=['--type', '-t'], help="Type of customizer to be added to the image template.", arg_type=get_enum_type(ScriptType))
-        c.argument('script', help="Script to customize the image with. The script must be a publicly accessible URL.")
+        c.argument('script_url', help="URL of script to customize the image with. The URL must be publicly accessible.")
+        c.argument('inline_script', nargs='+', help="Space-separated list of inline script lines to customize the image with.")
 
         # Powershell Specific Args
         c.argument('valid_exit_codes', options_list=['--exit-codes', '-e'], arg_group="PowerShell", nargs='+', help="Space-separated list of valid exit codes, as intergers")
