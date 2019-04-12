@@ -2241,17 +2241,13 @@ def _ensure_aks_service_principal(cli_ctx,
     store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
     return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
+
 def _ensure_osa_aad(cli_ctx,
                     aad_client_app_id=None,
                     aad_client_app_secret=None,
                     aad_tenant_id=None,
                     identifier=None,
                     name=None, create=False):
-    """Create or Update the OSA AAD.
-    If identifer is None, reply_url is not set 
-    If identifier passed reply_url is set
-    This function will be called twice, before and after OSA cluster creation
-    """
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if create:
         # This reply_url is temporary set since Azure need one to create the AAD.
@@ -2272,13 +2268,13 @@ def _ensure_osa_aad(cli_ctx,
             # Updating reply_url with the correct FQDN information returned by the RP
             reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
             update_application(client=rbac_client.applications,
-                                object_id=list_aad_filtered[0].object_id,
-                                display_name=name,
-                                identifier_uris=[app_id_name],
-                                reply_urls=[reply_url],
-                                homepage=app_id_name,
-                                password=aad_client_app_secret,
-                                required_resource_accesses=[required_osa_aad_access])
+                               object_id=list_aad_filtered[0].object_id,
+                               display_name=name,
+                               identifier_uris=[app_id_name],
+                               reply_urls=[reply_url],
+                               homepage=app_id_name,
+                               password=aad_client_app_secret,
+                               required_resource_accesses=[required_osa_aad_access])
             logger.info('Updated AAD: %s', aad_client_app_id)
         else:
             result = create_application(client=rbac_client.applications,
@@ -2573,7 +2569,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     try:
         # long_running_operation_timeout=300
         result = sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+                             resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
         result = LongRunningOperation(cmd.cli_ctx)(result)
         instance = client.get(resource_group_name, name)
         _ensure_osa_aad(cmd.cli_ctx,
@@ -2583,7 +2579,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                         name=name, create=True)
     except CloudError as ex:
         raise ex
-    
+
 
 def openshift_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
