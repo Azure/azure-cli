@@ -30,6 +30,9 @@ _ONE_MIN_IN_SECS = 60
 
 _ONE_HR_IN_SECS = 3600
 
+# see: https://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+_MAX_URL_LENGTH = 2035
+
 
 logger = get_logger(__name__)
 
@@ -530,17 +533,17 @@ def _build_issue_info_tup(command_log_file=None):
     original_issue_body = _ISSUES_TEMPLATE.format(**format_dict)
 
     # First try
-    capacity = 2000  # some browsers support a max of roughly 2000 characters
+    capacity = _MAX_URL_LENGTH  # some browsers support a max of roughly 2000 characters
     res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, capacity)
     formatted_issues_url, minified_issue_body = res
-    capacity = capacity - (len(formatted_issues_url) - 2000)
+    capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
 
     # while formatted issue to long, minify to new capacity
-    while len(formatted_issues_url) > 2000:
+    while len(formatted_issues_url) > _MAX_URL_LENGTH:
         # reduce capacity by difference if formatted_issues_url is too long because of url escaping
         res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, capacity)
         formatted_issues_url, minified_issue_body = res
-        capacity = capacity - (len(formatted_issues_url) - 2000)
+        capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
 
     logger.info("Total minified issue length is %s", len(minified_issue_body))
     logger.info("Total formatted url length is %s", len(formatted_issues_url))
