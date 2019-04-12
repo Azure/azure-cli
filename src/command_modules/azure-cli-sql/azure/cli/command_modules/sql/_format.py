@@ -177,6 +177,7 @@ def _db_edition_table_format(editions):
             sku = slo['sku']
             yield OrderedDict([
                 ('serviceObjective', slo['name']),
+                ('sku', sku['name']),
                 ('edition', e['name']),
                 # Dummy ' ' value ensures that value is not skipped, which
                 # would cause the column to not show up in the correct order
@@ -269,6 +270,7 @@ def _elastic_pool_edition_table_format(editions):
         for slo in e['supportedElasticPoolPerformanceLevels']:
             sku = slo['sku']
             yield OrderedDict([
+                ('sku', sku['name']),
                 ('edition', e['name']),
                 # Dummy ' ' value ensures that value is not skipped, which
                 # would cause the column to not show up in the correct order
