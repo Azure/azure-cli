@@ -134,3 +134,93 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
             instance.capture_description.skip_empty_archives = skip_empty_archives
 
     return instance
+
+
+# NetwrokRuleSet Region
+def cli_networkruleset_createupdate(client, resource_group_name, namespace_name, defaultaction="Deny", virtual_network_rules=None, ip_rules=None):
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules, NetworkRuleSet, Subnet
+    netwrokruleset = NetworkRuleSet()
+    netwrokruleset.default_action=defaultaction
+    netwrokruleset.virtual_network_rules = NWRuleSetVirtualNetworkRules()
+    netwrokruleset.virtual_network_rules = virtual_network_rules
+    netwrokruleset.ip_rules = NWRuleSetIpRules()
+    netwrokruleset.ip_rules=ip_rules
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name,netwrokruleset)
+
+
+def cli_networkruleset_delete(client, resource_group_name, namespace_name):
+    from azure.mgmt.eventhub.v2017_04_01.models import NetworkRuleSet
+    netwrokruleset = NetworkRuleSet()
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_virtualnetwrokrule_add(client, resource_group_name, namespace_name, subnet, ignore_missing_vnet_service_endpoint=None):
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NetworkRuleSet, Subnet
+
+    netwrokruleset = NetworkRuleSet()
+    netwrokruleset.ip_rules = []
+    netwrokruleset.virtual_network_rules = []
+
+    if subnet is None:
+        subnet = ""
+    if ignore_missing_vnet_service_endpoint is None:
+        ignore_missing_vnet_service_endpoint = False
+
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+    netwrokruleset.virtual_network_rules.append(NWRuleSetVirtualNetworkRules(subnet=Subnet(id=subnet),ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_virtualnetwrokrule_list(client, resource_group_name, namespace_name):
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+    return netwrokruleset.virtual_network_rules
+
+
+def cli_virtualnetwrokrule_delete(client, resource_group_name, namespace_name, subnet, ignore_missing_vnet_service_endpoint=None):
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
+
+    if subnet is None:
+        subnet = ""
+    if ignore_missing_vnet_service_endpoint is None:
+        ignore_missing_vnet_service_endpoint = False
+
+    getnetworkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+
+def cli_iprule_add(client, resource_group_name, namespace_name, ip_mask, action=None):
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetIpRules
+
+    if ip_mask is None:
+        ip_mask = ""
+    if action is None:
+        action = "Allow"
+
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+    netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action="Allow"))
+
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+    return netwrokruleset.ip_rules
+
+
+def cli_iprule_list(client, resource_group_name, namespace_name):
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+    return netwrokruleset.ip_rules
+
+
+def cli_iprule_delete(client, resource_group_name, namespace_name, ipmask):
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetIpRules
+
+    if ipmask is None:
+        ipmask = ""
+
+    getnetworkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    ipruletodelete=NWRuleSetIpRules()
+    ipruletodelete.ip_mask = ipmask
+    ipruletodelete.action = "Allow"
+
+    if ipruletodelete in getnetworkruleset.ip_rules:
+        getnetworkruleset.ip_rules.remove(ipruletodelete)
+
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name, getnetworkruleset)

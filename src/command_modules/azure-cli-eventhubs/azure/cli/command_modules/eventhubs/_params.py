@@ -12,7 +12,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 # pylint: disable=line-too-long
 def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.eventhub.models import KeyType, AccessRights, SkuName
+    from azure.mgmt.eventhub.v2017_04_01.models import KeyType, AccessRights, SkuName, Subnet, NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
     from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
 
@@ -155,3 +155,25 @@ def load_arguments_eh(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+
+# Region Namespace NetworkRuleSet
+    with self.argument_context('eventhubs namespace network-ruleset create')as c:
+        c.argument('default_action', arg_type=get_enum_type(['Allow', 'Deny']), help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
+        c.argument('virtual_network_rules', help='List VirtualNetwork Rules objects')
+        c.argument('ip_rules', help='List of IpRules objects')
+
+    for scope in ['eventhubs namespace network-ruleset virtualnetworkrule add', 'eventhubs namespace network-ruleset virtualnetworkrule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('subnet', help='Resource ID of Virtual Network Subnet')
+
+    with self.argument_context('eventhubs namespace network-ruleset virtualnetworkrule add') as c:
+        c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-vnet-service-endpoint'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether to ignore missing VNet Service Endpoint')
+
+    for scope in ['eventhubs namespace network-ruleset iprule add', 'eventhubs namespace network-ruleset iprule remove']:
+        with self.argument_context('') as c:
+            c.argument('ip_mask', help='IP Mask')
+
+    with self.argument_context('eventhubs namespace network-ruleset iprule add') as c:
+        c.argument('action', arg_type=get_enum_type(['Allow']),
+                   help='The IP Filter Action. Possible values include: Allow')

@@ -13,22 +13,37 @@ helps['eventhubs'] = """
 
 helps['eventhubs namespace'] = """
     type: group
-    short-summary: Manage Azure Event Hubs namespace and Authorizationrule
+    short-summary: Manage Azure EventHubs namespace and Authorizationrule
 """
 
 helps['eventhubs namespace authorization-rule'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorizationrule for Namespace
+    short-summary: Manage Azure EventHubs Authorizationrule for Namespace
 """
 
 helps['eventhubs namespace authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorizationrule connection strings for Namespace
+    short-summary: Manage Azure EventHubs Authorizationrule connection strings for Namespace
+"""
+
+helps['eventhubs namespace network-ruleset'] = """
+    type: group
+    short-summary: Manage Azure EventHubs NetwrokruleSet for Namespace
+"""
+
+helps['eventhubs namespace network-ruleset virtualnetworkrule'] = """
+    type: group
+    short-summary: Manage Azure EventHubs VirtualNetworkRule of NetwrokruleSet for Namespace
+"""
+
+helps['eventhubs namespace network-ruleset iprule'] = """
+    type: group
+    short-summary: Manage Azure EventHubs IPRule of NetwrokruleSet for Namespace
 """
 
 helps['eventhubs eventhub'] = """
     type: group
-    short-summary: Manage Azure Event Hubs eventhub and authorization-rule
+    short-summary: Manage Azure EventHubs eventhub and authorization-rule
 """
 
 helps['eventhubs eventhub authorization-rule'] = """
@@ -48,12 +63,12 @@ helps['eventhubs eventhub consumer-group'] = """
 
 helps['eventhubs georecovery-alias'] = """
     type:  group
-    short-summary: Manage Azure Event Hubs Geo Recovery configuration Alias
+    short-summary: Manage Azure EventHubs Geo Recovery configuration Alias
 """
 
 helps['eventhubs georecovery-alias authorization-rule'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorizationrule for Geo Recovery configuration Alias
+    short-summary: Manage Azure EventHubs Authorizationrule for Geo Recovery configuration Alias
 """
 
 helps['eventhubs georecovery-alias authorization-rule keys'] = """
@@ -71,7 +86,7 @@ helps['eventhubs namespace exists'] = """
 
 helps['eventhubs namespace create'] = """
     type: command
-    short-summary: Creates the Event Hubs Namespace
+    short-summary: Creates the EventHubs Namespace
     examples:
         - name: Creates a new namespace.
           text: az eventhubs namespace create --resource-group myresourcegroup --name mynamespace --location westus
@@ -80,7 +95,7 @@ helps['eventhubs namespace create'] = """
 
 helps['eventhubs namespace update'] = """
     type: command
-    short-summary: Updates the Event Hubs Namespace
+    short-summary: Updates the EventHubs Namespace
     examples:
         - name: Update a new namespace.
           text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
@@ -96,7 +111,7 @@ helps['eventhubs namespace show'] = """
 
 helps['eventhubs namespace list'] = """
     type: command
-    short-summary: Lists the Event Hubs Namespaces
+    short-summary: Lists the EventHubs Namespaces
     examples:
         - name: List the Event Hubs Namespaces by resource group.
           text: az eventhubs namespace list --resource-group myresourcegroup
@@ -171,7 +186,7 @@ helps['eventhubs namespace authorization-rule delete'] = """
 
 helps['eventhubs eventhub create'] = """
     type: command
-    short-summary: Creates the Event Hubs Eventhub
+    short-summary: Creates the EventHubs Eventhub
     examples:
         - name: Create a new Eventhub.
           text: az eventhubs eventhub create --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 4 --partition-count 15
@@ -179,7 +194,7 @@ helps['eventhubs eventhub create'] = """
 
 helps['eventhubs eventhub update'] = """
     type: command
-    short-summary: Updates the Event Hubs Eventhub
+    short-summary: Updates the EventHubs Eventhub
     examples:
         - name: Updates a new Eventhub.
           text: az eventhubs eventhub update --resource-group myresourcegroup --namespace-name mynamespace --name myeventhub --message-retention 3 --partition-count 12
@@ -333,23 +348,23 @@ helps['eventhubs georecovery-alias show'] = """
 
 helps['eventhubs georecovery-alias authorization-rule show'] = """
     type: command
-    short-summary: Show properties of Event Hubs Geo-Disaster Recovery Configuration Alias and Namespace Authorizationrule
+    short-summary: Show properties of EventHubs Geo-Disaster Recovery Configuration Alias and Namespace Authorizationrule
     examples:
-        - name: Show properties Authorizationrule by Event Hubs Namespace
+        - name: Show properties Authorizationrule by EventHubs Namespace
           text: az eventhubs georecovery-alias authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['eventhubs georecovery-alias authorization-rule list'] = """
     type: command
-    short-summary: List of Authorizationrule by Event Hubs Namespace
+    short-summary: List of Authorizationrule by EventHubs Namespace
     examples:
-        - name: List of Authorizationrule by Event Hubs Namespace
+        - name: List of Authorizationrule by EventHubs Namespace
           text: az eventhubs georecovery-alias authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the keys and connection strings of Authorizationrule for the Event Hubs Namespace
+    short-summary: Shows the keys and connection strings of Authorizationrule for the EventHubs Namespace
     examples:
         - name: Shows the keys and connection strings of Authorizationrule for the namespace.
           text: az eventhubs georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --alias myaliasname
@@ -377,4 +392,76 @@ helps['eventhubs georecovery-alias delete'] = """
     examples:
         - name: Delete Geo-Disaster Recovery Configuration Alias
           text: az eventhubs georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+"""
+
+helps['eventhubs namespace network-ruleset update'] = """
+    type: command
+    short-summary: Set a NetworkruleSet for a Namespace
+    examples:
+        - name: set a networkruleset for a namespace
+          text: az eventhubs network-ruleset set --resource-group myresourcegroup --namespace-name mynamespace --networkruleset mynetwrokruleset
+"""
+
+helps['eventhubs namespace network-ruleset show'] = """
+    type: command
+    short-summary: Show properties of NetworkruleSet of the given Namespace
+    examples:
+        - name: Show properties of NetworkruleSet of the given Namespace
+          text: az eventhubs network-ruleset show --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['eventhubs namespace network-ruleset delete'] = """
+    type: command
+    short-summary: Delete NetworkruleSet of the given Namespace
+    examples:
+        - name: Delete NetworkruleSet of the given Namespace
+          text: az eventhubs network-ruleset delete --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['eventhubs namespace network-ruleset virtualnetworkrule add'] = """
+    type: command
+    short-summary: Adds a VirtualNetworkRule to NetworkruleSet for the given Namespace
+    examples:
+        - name: Adds a VirtualNetworkRule to NetworkruleSet for the given Namespace
+          text: az eventhubs network-ruleset virtualnetworkrule add --resource-group myresourcegroup --namespace-name mynamespace --subnet-id mysubnetid --ignore-missing-vnet-serviceendpoint true/false
+"""
+
+helps['eventhubs namespace network-ruleset virtualnetworkrule list'] = """
+    type: command
+    short-summary: List all VirtualNetworkRule of NetworkruleSet for the given Namespace
+    examples:
+        - name: List all VirtualNetworkRule of NetworkruleSet for the given Namespace
+          text: az eventhubs network-ruleset virtualnetworkrule list --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['eventhubs namespace network-ruleset virtualnetworkrule remove'] = """
+    type: command
+    short-summary: Deletes the specified VirtualNetworkRule of NetworkruleSet for the given Namespace
+    examples:
+        - name: Deletes the specified VirtualNetworkRule of NetworkruleSet for the given Namespace
+          text: az eventhubs network-ruleset virtualnetworkrule delete --resource-group myresourcegroup --namespace-name mynamespace --subnet-id mysubnetid
+"""
+
+helps['eventhubs namespace network-ruleset iprule add'] = """
+    type: command
+    short-summary: Adds a IPRule to NetworkruleSet for the given Namespace
+    examples:
+        - name: Adds a IPRule to NetworkruleSet for the given Namespace
+          text: az eventhubs namespace network-ruleset iprule add --resource-group myresourcegroup --namespace-name mynamespace --ipmask myipmask --action allow
+"""
+
+helps['eventhubs namespace network-ruleset iprule list'] = """
+    type: command
+    short-summary: List all IPRule of NetworkruleSet for the given Namespace
+    examples:
+        - name: List all IPRule of NetworkruleSet for the given Namespace
+          text: az eventhubs namespace network-ruleset iprule list --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['eventhubs namespace network-ruleset iprule remove'] = """
+    type: command
+    short-summary: Adds a IPRule to NetworkruleSet for the given Namespace
+    examples:
+        - name: Adds a IPRule to NetworkruleSet for the given Namespace
+          text: az eventhubs namespace network-ruleset iprule --resource-group myresourcegroup --namespace-name mynamespace --ipmask myipmask
 """

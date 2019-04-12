@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.5
++++++
+* added netwrokruleset commands
+
 0.3.4
 +++++
 * eventhubs eventhub create/update: Added --skip-empty-archives flag to support empty archives in capture.
