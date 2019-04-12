@@ -137,7 +137,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-            '--insights-location "West US 2"',
+            '--insights-location "West US 2" -v v3',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -156,7 +156,7 @@ class BotTests(ScenarioTest):
         self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
 
         # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v3', checks=[
             self.check('active', True)
         ])
 
@@ -226,7 +226,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-            '--insights-location "West US 2" --lang Node',
+            '--insights-location "West US 2" --lang Node -v v3',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -246,7 +246,7 @@ class BotTests(ScenarioTest):
         # TODO implement
 
         # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v3', checks=[
             self.check('active', True)
         ])
         # clean up the folder
@@ -452,7 +452,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Node -v v3',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -512,7 +512,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password}',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v3',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),

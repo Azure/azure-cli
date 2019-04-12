@@ -1,58 +1,97 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-03-07T01:35:40Z"}}'
+      "date": "2019-04-12T19:46:20Z"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--location --name --tag]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '110'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-07T01:35:40Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-12T19:46:20Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['274']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:35:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '274'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:46:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-g -n]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-botservice/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      date: ['Thu, 07 Mar 2019 01:35:41 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
-    status: {code: 204, message: No Content}
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 12 Apr 2019 19:46:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 204
+      message: No Content
 - request:
     body: 'b''b\''{"properties": {"template": {"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"botEnv": {"type": "string", "defaultValue":
@@ -182,8 +221,8 @@ interactions:
       parameters(\\\''siteName\\\''))]", "[resourceId(\\\''microsoft.insights/components/\\\'',
       variables(\\\''insightsName\\\''))]"]}]}, "parameters": {"location": {"value":
       "westus"}, "kind": {"value": "sdk"}, "sku": {"value": "F0"}, "siteName": {"value":
-      "cli000002"}, "appId": {"value": "0137c646-ba88-48d9-9472-c188ddc8f15e"}, "appSecret":
-      {"value": "3882986d-c8d0-4482-8d9a-806a4ede3d7e"}, "storageAccountResourceId":
+      "cli000002"}, "appId": {"value": "4de46aa8-801a-4bbf-b79e-35327cbf02da"}, "appSecret":
+      {"value": "3a00d015-d54d-4f82-a096-615e0eba96a8"}, "storageAccountResourceId":
       {"value": ""}, "serverFarmId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},
       "zipUrl": {"value": "https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip"},
       "createNewStorage": {"value": true}, "storageAccountName": {"value": "cli000002"},
@@ -192,319 +231,549 @@ interactions:
       {"value": "westus"}, "azureWebJobsBotFrameworkDirectLineSecret": {"value": ""},
       "botId": {"value": "cli000002"}}, "mode": "Incremental"}}\'''''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      Content-Length: ['11679']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '11679'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"11415730151069052336","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"0137c646-ba88-48d9-9472-c188ddc8f15e"},"appSecret":{"type":"String","value":"3882986d-c8d0-4482-8d9a-806a4ede3d7e"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"westus2"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-03-07T01:35:44.4651916Z","duration":"PT1.0910149S","correlationId":"4ed5982e-3de1-4ce8-9397-5ef986044e0d","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]},{"resourceType":"sites/config","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["westus2"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n","resourceType":"microsoft.insights/components","resourceName":"cli000002gfh24n","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002","resourceType":"Microsoft.Web/Sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/extensions/MSDeploy","resourceType":"Microsoft.Web/Sites/extensions","resourceName":"cli000002/MSDeploy"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/logs","resourceType":"Microsoft.Web/sites/config","resourceName":"cli000002/logs"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n","resourceType":"microsoft.insights/components","resourceName":"cli000002gfh24n"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n","resourceType":"microsoft.insights/components","resourceName":"cli000002gfh24n","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"9716771193260356336","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"4de46aa8-801a-4bbf-b79e-35327cbf02da"},"appSecret":{"type":"String","value":"3a00d015-d54d-4f82-a096-615e0eba96a8"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"westus2"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2019-04-12T19:46:27.5146373Z","duration":"PT1.4836614S","correlationId":"cfd8a529-db3d-44d0-a2b2-bc5cf19fffce","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]},{"resourceType":"sites/config","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["westus2"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie","resourceType":"microsoft.insights/components","resourceName":"cli000002nzd3ie","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002","resourceType":"Microsoft.Web/Sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/extensions/MSDeploy","resourceType":"Microsoft.Web/Sites/extensions","resourceName":"cli000002/MSDeploy"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/logs","resourceType":"Microsoft.Web/sites/config","resourceName":"cli000002/logs"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie","resourceType":"microsoft.insights/components","resourceName":"cli000002nzd3ie"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie","resourceType":"microsoft.insights/components","resourceName":"cli000002nzd3ie","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}]}}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586496843421035053?api-version=2018-05-01']
-      cache-control: [no-cache]
-      content-length: ['7955']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:35:44 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002/operationStatuses/08586465084994466991?api-version=2018-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '7954'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:46:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496843421035053?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586465084994466991?api-version=2018-05-01
   response:
-    body: {string: '{"status":"Running"}'}
+    body:
+      string: '{"status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:36:14 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:46:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496843421035053?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586465084994466991?api-version=2018-05-01
   response:
-    body: {string: '{"status":"Running"}'}
+    body:
+      string: '{"status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:36:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:47:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496843421035053?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586465084994466991?api-version=2018-05-01
   response:
-    body: {string: '{"status":"Running"}'}
+    body:
+      string: '{"status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:37:15 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:47:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586496843421035053?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586465084994466991?api-version=2018-05-01
   response:
-    body: {string: '{"status":"Succeeded"}'}
+    body:
+      string: '{"status":"Succeeded"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['22']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:37:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:48:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"11415730151069052336","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"0137c646-ba88-48d9-9472-c188ddc8f15e"},"appSecret":{"type":"String","value":"3882986d-c8d0-4482-8d9a-806a4ede3d7e"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"westus2"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-03-07T01:37:16.4321104Z","duration":"PT1M33.0579337S","correlationId":"4ed5982e-3de1-4ce8-9397-5ef986044e0d","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]},{"resourceType":"sites/config","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["westus2"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n","resourceType":"microsoft.insights/components","resourceName":"cli000002gfh24n","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002","resourceType":"Microsoft.Web/Sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/extensions/MSDeploy","resourceType":"Microsoft.Web/Sites/extensions","resourceName":"cli000002/MSDeploy"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/logs","resourceType":"Microsoft.Web/sites/config","resourceName":"cli000002/logs"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n","resourceType":"microsoft.insights/components","resourceName":"cli000002gfh24n"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n","resourceType":"microsoft.insights/components","resourceName":"cli000002gfh24n","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/nosuch"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002gfh24n"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/logs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy"}]}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/cli000002","name":"cli000002","properties":{"templateHash":"9716771193260356336","parameters":{"botEnv":{"type":"String","value":"prod"},"botId":{"type":"String","value":"cli000002"},"description":{"type":"String","value":""},"location":{"type":"String","value":"westus"},"sku":{"type":"String","value":"F0"},"kind":{"type":"String","value":"sdk"},"siteName":{"type":"String","value":"cli000002"},"createNewStorage":{"type":"Bool","value":true},"storageAccountName":{"type":"String","value":"cli000002"},"storageAccountResourceId":{"type":"String","value":""},"appId":{"type":"String","value":"4de46aa8-801a-4bbf-b79e-35327cbf02da"},"appSecret":{"type":"String","value":"3a00d015-d54d-4f82-a096-615e0eba96a8"},"azureWebJobsBotFrameworkDirectLineSecret":{"type":"String","value":""},"zipUrl":{"type":"String","value":"https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip"},"proactiveZipUrl":{"type":"String","value":""},"useAppInsights":{"type":"Bool","value":true},"appInsightsLocation":{"type":"String","value":"westus2"},"serverFarmId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},"createServerFarm":{"type":"Bool","value":true},"serverFarmLocation":{"type":"String","value":"westus"},"serverFarmSku":{"type":"Object","value":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}},"endpoint":{"type":"String","value":""},"luisApiLocation":{"type":"String","value":"Global"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2019-04-12T19:48:05.035269Z","duration":"PT1M39.0042931S","correlationId":"cfd8a529-db3d-44d0-a2b2-bc5cf19fffce","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["westus"]},{"resourceType":"sites","locations":["westus"]},{"resourceType":"sites/Extensions","locations":[null]},{"resourceType":"sites/config","locations":[null]}]},{"namespace":"microsoft.insights","resourceTypes":[{"resourceType":"components","locations":["westus2"]}]},{"namespace":"Microsoft.BotService","resourceTypes":[{"resourceType":"botServices","locations":["global"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie","resourceType":"microsoft.insights/components","resourceName":"cli000002nzd3ie","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002","resourceType":"Microsoft.Web/Sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/Sites/cli000002/extensions/MSDeploy","resourceType":"Microsoft.Web/Sites/extensions","resourceName":"cli000002/MSDeploy"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/logs","resourceType":"Microsoft.Web/sites/config","resourceName":"cli000002/logs"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002","actionName":"listkeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function","resourceType":"Microsoft.Web/sites","resourceName":"cli000002-function"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy","resourceType":"Microsoft.Web/sites/Extensions","resourceName":"cli000002-function/MSDeploy"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","resourceType":"Microsoft.Web/serverfarms","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","resourceType":"Microsoft.Web/sites","resourceName":"cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie","resourceType":"microsoft.insights/components","resourceName":"cli000002nzd3ie"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie","resourceType":"microsoft.insights/components","resourceName":"cli000002nzd3ie","apiVersion":"2015-05-01"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","resourceType":"Microsoft.BotService/botServices","resourceName":"cli000002"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/nosuch"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/cli000002nzd3ie"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/logs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/Extensions/MSDeploy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002-function/Extensions/MSDeploy"}]}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['9536']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:37:46 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '9534'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:48:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot create]
-      Connection: [keep-alive]
-      ParameterSetName: [-k -g -n --appid -p --location --insights-location --lang]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -k -g -n --appid -p --location --insights-location --lang -v
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-botservice/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"0d00557d-0000-0000-0000-5c8075b00000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"0137c646-ba88-48d9-9472-c188ddc8f15e","developerAppInsightKey":"ae3dff17-ed9e-4aa3-bed5-12a5a2d55083","developerAppInsightsApplicationId":"cli000002gfh24n","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"12006c94-0000-0000-0000-5cb0eb500000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"4de46aa8-801a-4bbf-b79e-35327cbf02da","developerAppInsightKey":"61fbc0a6-670a-4226-afb1-61eaed69e30b","developerAppInsightsApplicationId":"cli000002nzd3ie","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1038']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:37:46 GMT']
-      etag: ['"0d00557d-0000-0000-0000-5c8075b00000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:48:32 GMT
+      etag:
+      - '"12006c94-0000-0000-0000-5cb0eb500000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot download]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot download
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-botservice/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"0d00557d-0000-0000-0000-5c8075b00000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"0137c646-ba88-48d9-9472-c188ddc8f15e","developerAppInsightKey":"ae3dff17-ed9e-4aa3-bed5-12a5a2d55083","developerAppInsightsApplicationId":"cli000002gfh24n","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"12006c94-0000-0000-0000-5cb0eb500000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"4de46aa8-801a-4bbf-b79e-35327cbf02da","developerAppInsightKey":"61fbc0a6-670a-4226-afb1-61eaed69e30b","developerAppInsightsApplicationId":"cli000002nzd3ie","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1038']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:37:47 GMT']
-      etag: ['"0d00557d-0000-0000-0000-5c8075b00000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:48:33 GMT
+      etag:
+      - '"12006c94-0000-0000-0000-5cb0eb500000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot download]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-g -n]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot download
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.41.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/publishingcredentials/list?api-version=2018-02-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/publishingcredentials/$cli000002","name":"cli000002","type":"Microsoft.Web/sites/publishingcredentials","location":"West
-        US","properties":{"name":null,"publishingUserName":"$cli000002","publishingPassword":"RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$cli000002:RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP@cli000002.scm.azurewebsites.net"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/publishingcredentials/$cli000002","name":"cli000002","type":"Microsoft.Web/sites/publishingcredentials","location":"West
+        US","properties":{"name":null,"publishingUserName":"$cli000002","publishingPassword":"Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$cli000002:Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid@cli000002.scm.azurewebsites.net"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['662']
-      content-type: [application/json]
-      date: ['Thu, 07 Mar 2019 01:37:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '662'
+      content-type:
+      - application/json
+      date:
+      - Fri, 12 Apr 2019 19:48:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot download]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot download
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.41.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002?api-version=2018-02-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","name":"cli000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"cli000002","state":"Running","hostNames":["cli000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/cli000002","repositorySiteName":"cli000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["cli000002.azurewebsites.net","cli000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"cli000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"cli000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-07T01:37:12","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"cli000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"cli000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","name":"cli000002","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"cli000002","state":"Running","hostNames":["cli000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-123.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/cli000002","repositorySiteName":"cli000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["cli000002.azurewebsites.net","cli000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"cli000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"cli000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-04-12T19:47:50.7433333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"cli000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.112.243.0,13.91.46.203,40.112.255.35,13.91.41.7,13.91.40.30","possibleOutboundIpAddresses":"40.112.243.0,13.91.46.203,40.112.255.35,13.91.41.7,13.91.40.30,40.112.164.63,40.83.181.150,40.112.248.128","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-123","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"cli000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['2933']
-      content-type: [application/json]
-      date: ['Thu, 07 Mar 2019 01:37:49 GMT']
-      etag: ['"1D4D486493C9400"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2948'
+      content-type:
+      - application/json
+      date:
+      - Fri, 12 Apr 2019 19:48:34 GMT
+      etag:
+      - '"1D4F1689CA36375"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/octet-stream]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/octet-stream
     method: GET
     uri: https://cli000002.scm.azurewebsites.net/api/zip/site/clirepo/
   response:
-    body: {string: '{"Message":"''D:\\home\\site\\clirepo\\'' not found."}'}
+    body:
+      string: '{"Message":"''D:\\home\\site\\clirepo\\'' not found."}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['52']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:37:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 404, message: Not Found}
+      cache-control:
+      - no-cache
+      content-length:
+      - '52'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:48:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
 - request:
-    body: '{"command": "PostDeployScripts\\prepareSrc.cmd RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP",
+    body: '{"command": "PostDeployScripts\\prepareSrc.cmd Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid",
       "dir": "site\\wwwroot"}'
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['133']
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/json]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '133'
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/json
     method: POST
     uri: https://cli000002.scm.azurewebsites.net/api/command
   response:
-    body: {string: '{"Output":"\r\nD:\\home\\site\\wwwroot>rem @echo off \r\n\r\nD:\\home\\site\\wwwroot>setlocal\r\n\r\nD:\\home\\site\\wwwroot>SET
-        password=RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP \r\n\r\nD:\\home\\site\\wwwroot>SET
+    body:
+      string: '{"Output":"\r\nD:\\home\\site\\wwwroot>rem @echo off \r\n\r\nD:\\home\\site\\wwwroot>setlocal\r\n\r\nD:\\home\\site\\wwwroot>SET
+        password=Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid \r\n\r\nD:\\home\\site\\wwwroot>SET
         repoName=srcRepo \r\n\r\nD:\\home\\site\\wwwroot>SET repoUrl=file:///D/home/site/srcRepo
         \r\n\r\nD:\\home\\site\\wwwroot>SET download=bot-src \r\n\r\nD:\\home\\site\\wwwroot>echo
         file:///D/home/site/srcRepo \r\nfile:///D/home/site/srcRepo\r\n\r\nD:\\home\\site\\wwwroot>rem
@@ -514,7 +783,7 @@ interactions:
         git config user.name \"botframework\" \r\n\r\nD:\\home\\site\\wwwroot>call
         git config user.email \"util@botframework.com\" \r\n\r\nD:\\home\\site\\wwwroot>call
         git add . \r\n\r\nD:\\home\\site\\wwwroot>call git commit -m \"prepare to
-        download source\" \r\n[master (root-commit) 18138e2] prepare to download source\r\n
+        download source\" \r\n[master (root-commit) 67deb6f] prepare to download source\r\n
         13 files changed, 407 insertions(+)\r\n create mode 100644 .gitignore\r\n
         create mode 100644 PostDeployScripts/githubProject.json.template\r\n create
         mode 100644 PostDeployScripts/prepareSrc.cmd\r\n create mode 100644 PostDeployScripts/publish.js.template\r\n
@@ -535,7 +804,7 @@ interactions:
         .git \r\n\r\nD:\\home\\site>cd bot-src \r\n\r\nD:\\home\\site\\bot-src>call
         rm -r -f .git \r\n\r\nD:\\home\\site\\bot-src>popd\r\n\r\nD:\\home\\site\\wwwroot>rem
         prepare for publish \r\n\r\nD:\\home\\site\\wwwroot>type PostDeployScripts\\publish.js.template   |
-        sed -e s/\\{WEB_SITE_NAME\\}/cli000002/g   | sed -e s/\\{PASSWORD\\}/RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP/g  1>D:\\home\\site\\bot-src\\publish.js
+        sed -e s/\\{WEB_SITE_NAME\\}/cli000002/g   | sed -e s/\\{PASSWORD\\}/Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid/g  1>D:\\home\\site\\bot-src\\publish.js
         \r\n\r\nD:\\home\\site\\wwwroot>rem preare the zip file \r\n\r\nD:\\home\\site\\wwwroot>D:\\7zip\\7za
         a D:\\home\\site\\bot-src.zip D:\\home\\site\\bot-src\\* \r\n\r\n7-Zip (A)
         9.20  Copyright (c) 1999-2010 Igor Pavlov  2010-11-18\r\nScanning\r\n\r\nCreating
@@ -545,35 +814,53 @@ interactions:
         D:\\home\\site \r\n\r\nD:\\home\\site>call rm -r -f bot-src \r\n\r\nD:\\home\\site>call
         rm -r -f srcRepo \r\n\r\nD:\\home\\site>popd\r\n\r\nD:\\home\\site\\wwwroot>endlocal\r\n","Error":"To
         file:///D/home/site/srcRepo\r\n * [new branch]      master -> master\r\nCloning
-        into ''bot-src''...\r\n","ExitCode":0}'}
+        into ''bot-src''...\r\n","ExitCode":0}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['4590']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:11 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '4590'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:48:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/octet-stream]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/octet-stream
     method: GET
     uri: https://cli000002.scm.azurewebsites.net/api/vfs/site/bot-src.zip
   response:
     body:
       string: !!binary |
-        UEsDBAoAAAAAAMQMZ06zVIm5KgAAACoAAAAKAAAALmdpdGlnbm9yZW5vZGVfbW9kdWxlcy8NCiou
-        anMubWFwDQpwYWNrYWdlLWxvY2suanNvblBLAwQUAAAACADEDGdO4UOPauECAABEBwAABgAAAGFw
+        UEsDBAoAAAAAABuejE6zVIm5KgAAACoAAAAKAAAALmdpdGlnbm9yZW5vZGVfbW9kdWxlcy8NCiou
+        anMubWFwDQpwYWNrYWdlLWxvY2suanNvblBLAwQUAAAACAAbnoxO4UOPauECAABEBwAABgAAAGFw
         cC5qc7VUzU7bQBC+R8o7TJGQHerYhx7aEnEIQUhUUChQoaqqqo09SVa1d93ddVL+3r2zu84mBrUn
         sKLInvnmf+bL9oYv+fR7Y9C8qksEzBcSptLATCowC4Qzniup5czAIUmPFatwJdWvFPq94Us+e1m/
         1+8tmQKF2vDZLRzQ2++GK4yjVhQNRh4ybXhZoNqGUM6tNKA2op/srlG4Bd/Z6IZOt0NGFD/L4ApN
@@ -587,19 +874,19 @@ interactions:
         Z1ZZyrDMYjcoalnF0YVry6TkVIs/g2dkk46f4OLgNNle1e+RA97g9JOc6nbE0Y/BaCuTVvrfSNSp
         Fhbfw/yO10fuKGas1AiPybO0bYAtbghL4TmABTrye5UjX2L3WuySuYsJZPuEEL4KslGalZRaHK7G
         xrW7p5FuS7flJp06LcSDCs4c+WXRNj9qSoNe1jQJ7Te5FEUcfZMN7RwvIIK3QdVmnhr8Q5U7MvgL
-        UEsDBAoAAAAAAMQMZ06YS7LbRgAAAEYAAAALAAAAaWlzbm9kZS55bWxub2RlUHJvY2Vzc0NvbW1h
+        UEsDBAoAAAAAABuejE6YS7LbRgAAAEYAAAALAAAAaWlzbm9kZS55bWxub2RlUHJvY2Vzc0NvbW1h
         bmRMaW5lOiAiRDpcUHJvZ3JhbSBGaWxlcyAoeDg2KVxub2RlanNcNi45LjFcbm9kZS5leGUiUEsD
-        BBQAAAAIAMQMZ06qTDzU/AAAANMBAAAMAAAAcGFja2FnZS5qc29uXVC7bsMwDNwD5B8IDZlqwe4D
+        BBQAAAAIABuejE6qTDzU/AAAANMBAAAMAAAAcGFja2FnZS5qc29uXVC7bsMwDNwD5B8IDZlqwe4D
         KLK2HTp3DQLIMg2zcCRVj6BN0X+vJCtKEIALj8e7I3/XKwCmxAHZFtiE86wbOQkvtVIovbbsLjOO
         aB1plUgdb3lb4AGdtGR8GRX0ICi3whj+6Qq4EF3Es2dEPDqfaCgnDTv2Zq22W1Aa0gCcQUkj4bBj
         sNkAfpOHLmotu+IULDYm9DO5KYkoPSCUPpkm3t/iLIKf4iGXfDNJVC5f/P7xUk8xqAZUkvA6ZK99
         H2geMAvsH3gXK67cTpucqHBa/lgpNh5D40+ePKXXLdHOpsfXG9+69hXKf/b3/Dk+vSqeyDSjrpG6
-        i+h6FesfUEsDBBQAAAAAAMQMZ04AAAAAAAAAAAAAAAASAAAAUG9zdERlcGxveVNjcmlwdHMvUEsD
-        BBQAAAAIAMQMZ07gz3m4kQAAANwAAAAtAAAAUG9zdERlcGxveVNjcmlwdHMvZ2l0aHViUHJvamVj
+        i+h6FesfUEsDBBQAAAAAABuejE4AAAAAAAAAAAAAAAASAAAAUG9zdERlcGxveVNjcmlwdHMvUEsD
+        BBQAAAAIABuejE7gz3m4kQAAANwAAAAtAAAAUG9zdERlcGxveVNjcmlwdHMvZ2l0aHViUHJvamVj
         dC5qc29uLnRlbXBsYXRlbYwxD4IwEEZ3E/7DpbORnQ0Mg4MumDiSWk44Fdr0rphI+O8q6WCi6/ve
         +6ZkBaAG3aPKQE2nsqir3bGsD/m+nNV6WRtk48kJ2eGPBPkzeITCClToRzIIW9tgbDvbo9Pt8t6J
-        OM7StCXpwnljbB8l52nU8nEu+s4YS801MQfkNxcfvrDz9opGfocH3SjCZDW/AFBLAwQUAAAACADE
-        DGdOiFQYgxECAADRBAAAIAAAAFBvc3REZXBsb3lTY3JpcHRzL3ByZXBhcmVTcmMuY21kfVRNb6Mw
+        OM7StCXpwnljbB8l52nU8nEu+s4YS801MQfkNxcfvrDz9opGfocH3SjCZDW/AFBLAwQUAAAACAAb
+        noxOiFQYgxECAADRBAAAIAAAAFBvc3REZXBsb3lTY3JpcHRzL3ByZXBhcmVTcmMuY21kfVRNb6Mw
         FLwj8R+sSFxWC2xPK0XKqlkFqT20jZLs9oJUOfiRuLWxZRtF3Y/+9n2GEGDT9AL28zCemWdjQJJr
         KPaKqLIMAwtOqIKKMFhnG6KptQdl2Cy6agsGtLqnEmbWFCsc99UfRsxKLmCapml083CXLVa3P7Pp
         25fPV1FbWM43N9M3nFnuII06qqjlYOpQCUXZbKtcjOxhEAaNrOjIHvmKV1sw4hTRRj1D4YhRyoWB
@@ -609,7 +896,7 @@ interactions:
         ibr0opaKgQBMLGm7zgbrRxIjSWxIXDaQsYyuJ6UyaGEruN2HgXvVQJbKugVooV7XheHa2fy4njzb
         xIHUguKmf4gFRmJ0kua/H7PvT+vbTfZ0P7/L8r9phAU/74tRuht/spyv148Pq4VHd3fPg74Ns8h7
         RwMRAwvNqdoD+cU18VcyDE4XEim+YhkflNALpAkCLu33qW8Y0KrWTUesq8vy/Dh8GPd5i/+Df9C3
-        /tfR00HFjv+tf1BLAwQUAAAACADEDGdOaolPdRsCAAAGBQAAJQAAAFBvc3REZXBsb3lTY3JpcHRz
+        /tfR00HFjv+tf1BLAwQUAAAACAAbnoxOaolPdRsCAAAGBQAAJQAAAFBvc3REZXBsb3lTY3JpcHRz
         L3B1Ymxpc2guanMudGVtcGxhdGV1VF1v2jAUfa/Ef/DQ1CQSddC2p7BOYh2T+rCuKpUq7aUyyWVY
         GNvzR1GL+O+zjR1C2Hghuefcc8892LwQhd6o/C5YAwpdIwV/LFWQZ654tQzVrJgMLjxPErPqUvx7
         Cy51F1rqBIQaaNNFYylQIkkIkzyEOViBFuzFkXGgRZ/3Duozjr0jlGFc7p5mX5/nt4+z57vpj9ke
@@ -619,13 +906,13 @@ interactions:
         nDlQujNqeCO4AW6uHl8lDCs0JFIyWhMjuE9zGPv9174o/BcW3J8PLQXXkI1Qyib3tSIK0yUK71gb
         Yqy+EQ2gL9fow3iMLi9RH/mMPo7HRTIVwrScUb5uI5wkKMWec8tYKu8RMA3/G/opaPcFDnYn3f2O
         64FSQnV3c4WocVQIxdDoZfYn50TaBaN61Tslx3t8ciXikmfjjlG+6xbQP07haRIHZt9rb9loOTk9
-        n30+uXY/uWCAmfidZ71rlFYOFzkZ6TeGXN1/D6EMGmREakI9MRd9NBzsuoD/AlBLAwQUAAAACADE
-        DGdOWggGTOIAAAAuAgAAHQAAAFBvc3REZXBsb3lTY3JpcHRzL3J1bkd1bHAuY21kjZBBbsMgEEX3
+        n30+uXY/uWCAmfidZ71rlFYOFzkZ6TeGXN1/D6EMGmREakI9MRd9NBzsuoD/AlBLAwQUAAAACAAb
+        noxOWggGTOIAAAAuAgAAHQAAAFBvc3REZXBsb3lTY3JpcHRzL3J1bkd1bHAuY21kjZBBbsMgEEX3
         SNzhbyLZlezcIOqix8jGgiGmwQwCLLe3L1iJm6hNFHbMvJn//7yTGhlsjBSJsmM1OCmksAb0ZVNG
         3x+XZYnM+RgGdR5O1H8m9mikAMKcRn2D1Nq6z4cJ1qc8OIeuC5H1rLJlXwFVik+BwEFL0VYbhiP2
         GrudLjSaGzNvLTSjATZNNZI6V3Rzdv1sYf4meMHvC45bkEt0v5Hv1QzPXtfuyl9j4pJzHYmkOGpo
-        Co6/J/IZ2U5UFKcghR4yYZ9xONR7/zK945MUBXzYvWzv/n3PJj62Yjm1p+rzB1BLAwQUAAAACADE
-        DGdOoegHQ4YCAABDBgAAKwAAAFBvc3REZXBsb3lTY3JpcHRzL3NldHVwR2l0aHViUmVtb3RlUmVw
+        Co6/J/IZ2U5UFKcghR4yYZ9xONR7/zK945MUBXzYvWzv/n3PJj62Yjm1p+rzB1BLAwQUAAAACAAb
+        noxOoegHQ4YCAABDBgAAKwAAAFBvc3REZXBsb3lTY3JpcHRzL3NldHVwR2l0aHViUmVtb3RlUmVw
         by5jbWS1VcFu2zAMvQfIPxAGhKwH29h2C5Ah6RZgPbQNmqwb0BSDKtONW9nUJBlB0fXfJ1lx7KDN
         bs1Bliny8fGJjKcoNgSU58OBQStJcDkcaCwhfrdfwHfZanVt6ApLsniFiuBGN/sfBvUt3CjUhiou
         Z0KgMSt6xMpbNT1c8BKfSdnCH7/cBjyhkVsEXmWgSNXSv1wvL+G+sKA9ek4a7AZhdroEQRlCURnL
@@ -637,7 +924,7 @@ interactions:
         DFwpWQjuxyv13hHENRxTB+IMoumbmXaxv2Bx6fp5j6AlS/1opU1P78au/B9ZN8/ZcBCeu2H3U7Pv
         9CDma3mDb1EV1k9WKNrvnOngVVCVF/fNvCfNJEX9aqMjnoobsyXtyu/kOOqMJS8kRLUt5PSObK5d
         Ghf86LuqH8MzV8IBRlm6R1xCpJxeXKMrPPx3gqFaC/RprCbZR/FSANs1OIOSG4u603GnoUReORgf
-        YGyd568lDJD+dmINcQ6+zzsYrLLme/EPUEsDBBQAAAAIAMQMZ07nyEkF/wIAADIHAAAoAAAAUG9z
+        YGyd568lDJD+dmINcQ6+zzsYrLLme/EPUEsDBBQAAAAIABuejE7nyEkF/wIAADIHAAAoAAAAUG9z
         dERlcGxveVNjcmlwdHMvc2V0dXBWc29SZW1vdGVSZXBvLmNtZLVVWY/TMBB+r9T/MKpkLUgk5ZRQ
         pcJyVIIHoNqWQ2LRyjiTrsHJWLazFeL47YztdNOl7AMPVFViz3g+z3xz5BjVOQHV9XjkMRhS0oxH
         Dhso/tsv4/NtnX3n6QQbCniCluDjxW77Ka3fenSvZdPvlug8tdI8UQq9X9NXbFlhHX2JZ76TDTqq
@@ -652,281 +939,434 @@ interactions:
         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
-        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
+        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
-        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
-        ABQAAAAIAMQMZ05qiU91GwIAAAYFAAAlACQAAAAAAAAAIAAAAEcIAABQb3N0RGVwbG95U2NyaXB0
-        cy9wdWJsaXNoLmpzLnRlbXBsYXRlCgAgAAAAAAABABgAhpcoaobU1AFgNSZqhtTUAWA1JmqG1NQB
-        UEsBAj8AFAAAAAgAxAxnTloIBkziAAAALgIAAB0AJAAAAAAAAAAgAAAApQoAAFBvc3REZXBsb3lT
-        Y3JpcHRzL3J1bkd1bHAuY21kCgAgAAAAAAABABgAhpcoaobU1AGGlyhqhtTUAYaXKGqG1NQBUEsB
-        Aj8AFAAAAAgAxAxnTqHoB0OGAgAAQwYAACsAJAAAAAAAAAAgAAAAwgsAAFBvc3REZXBsb3lTY3Jp
-        cHRzL3NldHVwR2l0aHViUmVtb3RlUmVwby5jbWQKACAAAAAAAAEAGACGlyhqhtTUAYaXKGqG1NQB
-        hpcoaobU1AFQSwECPwAUAAAACADEDGdO58hJBf8CAAAyBwAAKAAkAAAAAAAAACAAAACRDgAAUG9z
-        dERlcGxveVNjcmlwdHMvc2V0dXBWc29SZW1vdGVSZXBvLmNtZAoAIAAAAAAAAQAYAOH5KmqG1NQB
-        4fkqaobU1AHh+SpqhtTUAVBLAQI/ABQAAAAIAMQMZ04ABermvwAAABwBAAAqACQAAAAAAAAAIAAA
-        ANYRAABQb3N0RGVwbG95U2NyaXB0cy92c29Qcm9qZWN0Lmpzb24udGVtcGxhdGUKACAAAAAAAAEA
-        GADh+SpqhtTUAeH5KmqG1NQB4fkqaobU1AFQSwECPwAUAAAACADFDGdOajXRLEICAAAFBQAACgAk
-        AAAAAAAAACAAAADdEgAAcHVibGlzaC5qcwoAIAAAAAAAAQAYAE9U7GqG1NQBZtW+aobU1AFm1b5q
-        htTUAVBLAQI/ABQAAAAIAMQMZ06HJlwgcAEAALMCAAAJACQAAAAAAAAAIAAAAEcVAAByZWFkbWUu
-        bWQKACAAAAAAAAEAGACVvi9qhtTUAYNdLWqG1NQBg10taobU1AFQSwECPwAUAAAACADEDGdOoouX
-        63kEAAAACgAACgAkAAAAAAAAACAAAADeFgAAd2ViLmNvbmZpZwoAIAAAAAAAAQAYAJW+L2qG1NQB
-        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
+        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
+        UG9zdERlcGxveVNjcmlwdHMvc2V0dXBWc29SZW1vdGVSZXBvLmNtZAoAIAAAAAAAAQAYAPz5NcFo
+        8dQB/Pk1wWjx1AH8+TXBaPHUAVBLAQI/ABQAAAAIABuejE4ABermvwAAABwBAAAqACQAAAAAAAAA
+        IAAAANYRAABQb3N0RGVwbG95U2NyaXB0cy92c29Qcm9qZWN0Lmpzb24udGVtcGxhdGUKACAAAAAA
+        AAEAGADAXDjBaPHUAcBcOMFo8dQBwFw4wWjx1AFQSwECPwAUAAAACAAcnoxOiA7TE0UCAAAFBQAA
+        CgAkAAAAAAAAACAAAADdEgAAcHVibGlzaC5qcwoAIAAAAAAAAQAYAJslxMJo8dQBDtxYwmjx1AEO
+        3FjCaPHUAVBLAQI/ABQAAAAIABuejE6HJlwgcAEAALMCAAAJACQAAAAAAAAAIAAAAEoVAAByZWFk
+        bWUubWQKACAAAAAAAAEAGAAVIz3BaPHUAeK/OsFo8dQB4r86wWjx1AFQSwECPwAUAAAACAAbnoxO
+        oouX63kEAAAACgAACgAkAAAAAAAAACAAAADhFgAAd2ViLmNvbmZpZwoAIAAAAAAAAQAYABUjPcFo
+        8dQBFSM9wWjx1AEVIz3BaPHUAVBLBQYAAAAADwAPADAGAACCGwAAAAA=
     headers:
-      cache-control: [no-cache]
-      content-length: ['8645']
-      content-type: [application/x-zip-compressed]
-      date: ['Thu, 07 Mar 2019 01:38:11 GMT']
-      etag: ['"4d95eb8d9da2d608"']
-      expires: ['-1']
-      last-modified: ['Thu, 07 Mar 2019 01:38:09 GMT']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '8648'
+      content-type:
+      - application/x-zip-compressed
+      date:
+      - Fri, 12 Apr 2019 19:48:58 GMT
+      etag:
+      - '"2a6903e67fbfd608"'
+      expires:
+      - '-1'
+      last-modified:
+      - Fri, 12 Apr 2019 19:48:56 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot publish]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n --code-dir]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-botservice/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot publish
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --code-dir
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-botservice/0.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"0d00557d-0000-0000-0000-5c8075b00000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"0137c646-ba88-48d9-9472-c188ddc8f15e","developerAppInsightKey":"ae3dff17-ed9e-4aa3-bed5-12a5a2d55083","developerAppInsightsApplicationId":"cli000002gfh24n","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"12006c94-0000-0000-0000-5cb0eb500000\"","location":"global","sku":{"name":"F0"},"kind":"sdk","tags":{},"properties":{"displayName":"cli000002","description":"","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://cli000002.azurewebsites.net/api/messages","msaAppId":"4de46aa8-801a-4bbf-b79e-35327cbf02da","developerAppInsightKey":"61fbc0a6-670a-4226-afb1-61eaed69e30b","developerAppInsightsApplicationId":"cli000002nzd3ie","luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1038']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:13 GMT']
-      etag: ['"0d00557d-0000-0000-0000-5c8075b00000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:00 GMT
+      etag:
+      - '"12006c94-0000-0000-0000-5cb0eb500000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot publish]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-g -n --code-dir]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot publish
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --code-dir
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.41.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/appsettings/list?api-version=2018-02-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;AccountName=cli000002;AccountKey=O3lD6+YEsvTL2Yeky2U8cIiluF14rqloKgSdrA1tAK65n8cXR0l9Ave2XiI7bIVBSWHSssdmlOMWosPb+oMFaw==;","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;AccountName=cli000002;AccountKey=O3lD6+YEsvTL2Yeky2U8cIiluF14rqloKgSdrA1tAK65n8cXR0l9Ave2XiI7bIVBSWHSssdmlOMWosPb+oMFaw==;","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","BotEnv":"prod","BotId":"cli000002","MicrosoftAppId":"0137c646-ba88-48d9-9472-c188ddc8f15e","MicrosoftAppPassword":"3882986d-c8d0-4482-8d9a-806a4ede3d7e","BotStateEndpoint":"","BotOpenIdMetadata":"","UseTableStorageForConversationState":"true","BotDevAppInsightsKey":"ae3dff17-ed9e-4aa3-bed5-12a5a2d55083","BotDevAppInsightsName":"cli000002gfh24n","BotDevAppInsightsAppId":"7e45d614-3326-40a6-b404-5d50e317b268","DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS":"1","WEBSITE_HTTPLOGGING_RETENTION_DAYS":"1"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{"AzureWebJobsStorage":"DefaultEndpointsProtocol=https;AccountName=cli000002;AccountKey=xNNBzNB8jUlWqL9JNrjupw//9Beq3ZGR+CUOty+sI/RPKAx8bfg42kxjD0WePgpL71Zd/4IaQeIyDL+MZ4EjsQ==;","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;AccountName=cli000002;AccountKey=xNNBzNB8jUlWqL9JNrjupw//9Beq3ZGR+CUOty+sI/RPKAx8bfg42kxjD0WePgpL71Zd/4IaQeIyDL+MZ4EjsQ==;","WEBSITE_NODE_DEFAULT_VERSION":"6.9.1","BotEnv":"prod","BotId":"cli000002","MicrosoftAppId":"4de46aa8-801a-4bbf-b79e-35327cbf02da","MicrosoftAppPassword":"3a00d015-d54d-4f82-a096-615e0eba96a8","BotStateEndpoint":"","BotOpenIdMetadata":"","UseTableStorageForConversationState":"true","BotDevAppInsightsKey":"61fbc0a6-670a-4226-afb1-61eaed69e30b","BotDevAppInsightsName":"cli000002nzd3ie","BotDevAppInsightsAppId":"8e7f9270-f868-4fe5-93d9-d311cd72f534","DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS":"1","WEBSITE_HTTPLOGGING_RETENTION_DAYS":"1"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1171']
-      content-type: [application/json]
-      date: ['Thu, 07 Mar 2019 01:38:14 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1171'
+      content-type:
+      - application/json
+      date:
+      - Fri, 12 Apr 2019 19:49:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot publish]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n --code-dir]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot publish
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --code-dir
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.41.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/slotConfigNames?api-version=2018-02-01
   response:
-    body: {string: '{"id":null,"name":"cli000002","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'}
+    body:
+      string: '{"id":null,"name":"cli000002","type":"Microsoft.Web/sites","location":"West
+        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['184']
-      content-type: [application/json]
-      date: ['Thu, 07 Mar 2019 01:38:14 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json
+      date:
+      - Fri, 12 Apr 2019 19:49:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot publish]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-g -n --code-dir]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot publish
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --code-dir
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.41.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/config/publishingcredentials/list?api-version=2018-02-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/publishingcredentials/$cli000002","name":"cli000002","type":"Microsoft.Web/sites/publishingcredentials","location":"West
-        US","properties":{"name":null,"publishingUserName":"$cli000002","publishingPassword":"RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$cli000002:RuAGyZcddmalJrZGNkrvXmxTif0R6jznjNPGPhqeClSWu8l6WFL5q1tAz1eP@cli000002.scm.azurewebsites.net"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002/publishingcredentials/$cli000002","name":"cli000002","type":"Microsoft.Web/sites/publishingcredentials","location":"West
+        US","properties":{"name":null,"publishingUserName":"$cli000002","publishingPassword":"Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$cli000002:Hitk4B5M36zu1Zdwjk5eDLXFg9HyRDxxDNzc6ufw6eNHt1w57AF28wXvMKid@cli000002.scm.azurewebsites.net"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['662']
-      content-type: [application/json]
-      date: ['Thu, 07 Mar 2019 01:38:15 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '662'
+      content-type:
+      - application/json
+      date:
+      - Fri, 12 Apr 2019 19:49:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [bot publish]
-      Connection: [keep-alive]
-      ParameterSetName: [-g -n --code-dir]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-web/0.40.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot publish
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --code-dir
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.41.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002?api-version=2018-02-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","name":"cli000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"cli000002","state":"Running","hostNames":["cli000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/cli000002","repositorySiteName":"cli000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["cli000002.azurewebsites.net","cli000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"cli000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"cli000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-07T01:37:12","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"cli000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"cli000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/cli000002","name":"cli000002","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"cli000002","state":"Running","hostNames":["cli000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-123.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/cli000002","repositorySiteName":"cli000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["cli000002.azurewebsites.net","cli000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"cli000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"cli000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-04-12T19:47:50.7433333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"cli000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.112.243.0,13.91.46.203,40.112.255.35,13.91.41.7,13.91.40.30","possibleOutboundIpAddresses":"40.112.243.0,13.91.46.203,40.112.255.35,13.91.41.7,13.91.40.30,40.112.164.63,40.83.181.150,40.112.248.128","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-123","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"cli000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['2933']
-      content-type: [application/json]
-      date: ['Thu, 07 Mar 2019 01:38:16 GMT']
-      etag: ['"1D4D486493C9400"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2948'
+      content-type:
+      - application/json
+      date:
+      - Fri, 12 Apr 2019 19:49:02 GMT
+      etag:
+      - '"1D4F1689CA36375"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"command": "rm -rf clirepo && mkdir clirepo", "dir": "site"}'
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['61']
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/json]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '61'
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/json
     method: POST
     uri: https://cli000002.scm.azurewebsites.net/api/command
   response:
-    body: {string: '{"Output":"","Error":"","ExitCode":0}'}
+    body:
+      string: '{"Output":"","Error":"","ExitCode":0}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['37']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:16 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '37'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: !!binary |
-      UEsDBBQAAAAAAMaMZk4AAAAAAAAAAAAAAAASAAAAUG9zdERlcGxveVNjcmlwdHMvUEsDBBQAAAAI
-      AMaMZk6zVIm5KwAAACoAAAAKAAAALmdpdGlnbm9yZcvLT0mNz81PKc1JLdbn5dLSyyrWy00s4OUq
-      SEzOTkxP1c3JT84GCubnAQBQSwMEFAAAAAgAxoxmTuFDj2rmAgAARAcAAAYAAABhcHAuanO1VNtq
+      UEsDBBQAAAAAAB1mjE4AAAAAAAAAAAAAAAASAAAAUG9zdERlcGxveVNjcmlwdHMvUEsDBBQAAAAI
+      AB1mjE6zVIm5KwAAACoAAAAKAAAALmdpdGlnbm9yZcvLT0mNz81PKc1JLdbn5dLSyyrWy00s4OUq
+      SEzOTkxP1c3JT84GCubnAQBQSwMEFAAAAAgAHWaMTuFDj2rmAgAARAcAAAYAAABhcHAuanO1VNtq
       20AQfTf4H6aBINl1pIc+tE3Ig+MQSEmaNE4JpZSylsb2UnlX3V3Zze3fO7NayZdCnlJhjLRzZnYu
       Z07aP3jNp9sZgpWLskDAbK5hoh1MtQE3R7iUmdFWTx2c0OmZEQtcafMrgW7nVXPop91Ot7MUBgxa
       J6f3cExvvytpMI7CUdQ7qiGTShY5mk0I5RxO16j26Kd4qAxuwPfWtgNv22OnbidNYYyuKuEmJDFG
@@ -940,186 +1380,224 @@ interactions:
       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
-      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
+      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
-      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
+      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
-      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
-      bWRQSwECFAAUAAAACADGjGZOoouX64QEAAAACgAACgAAAAAAAAAAAAAAtoEiCQAAd2ViLmNvbmZp
-      Z1BLAQIUABQAAAAIAMaMZk7gz3m4kQAAANwAAAAtAAAAAAAAAAAAAAC2gc4NAABQb3N0RGVwbG95
-      U2NyaXB0cy9naXRodWJQcm9qZWN0Lmpzb24udGVtcGxhdGVQSwECFAAUAAAACADGjGZOiFQYgxMC
-      AADRBAAAIAAAAAAAAAAAAAAA/4GqDgAAUG9zdERlcGxveVNjcmlwdHMvcHJlcGFyZVNyYy5jbWRQ
-      SwECFAAUAAAACADGjGZOaolPdR0CAAAGBQAAJQAAAAAAAAAAAAAAtoH7EAAAUG9zdERlcGxveVNj
-      cmlwdHMvcHVibGlzaC5qcy50ZW1wbGF0ZVBLAQIUABQAAAAIAMaMZk5aCAZM4QAAAC4CAAAdAAAA
-      AAAAAAAAAAD/gVsTAABQb3N0RGVwbG95U2NyaXB0cy9ydW5HdWxwLmNtZFBLAQIUABQAAAAIAMaM
-      Zk6h6AdDigIAAEMGAAArAAAAAAAAAAAAAAD/gXcUAABQb3N0RGVwbG95U2NyaXB0cy9zZXR1cEdp
-      dGh1YlJlbW90ZVJlcG8uY21kUEsBAhQAFAAAAAgAxoxmTufISQUIAwAAMgcAACgAAAAAAAAAAAAA
-      AP+BShcAAFBvc3REZXBsb3lTY3JpcHRzL3NldHVwVnNvUmVtb3RlUmVwby5jbWRQSwECFAAUAAAA
-      CADGjGZOAAXq5r8AAAAcAQAAKgAAAAAAAAAAAAAAtoGYGgAAUG9zdERlcGxveVNjcmlwdHMvdnNv
-      UHJvamVjdC5qc29uLnRlbXBsYXRlUEsFBgAAAAAPAA8AFAQAAJ8bAAAAAA==
+      UEsDBBQAAAAIAB1mjE6IDtMTRgIAAAUFAAAKAAAAcHVibGlzaC5qc3VUXU/bMBR976/wqokkUnEL
+      hW5rxyRGVRVtoIntAfFmkhvq1bU9fzS0U//77CQOaWEvln3vPefec2JnTRTaUjkTLAOFLpCCP5Yq
+      iCMXPM7LaJRMOmtXJolZtCv8OeRy3c7kOsR9CLRpJ+uQr6hKhDBNe8+JFWjB1q4UBxo3zI+q+17B
+      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
+      bWUubWRQSwECFAAUAAAACAAdZoxOoouX64QEAAAACgAACgAAAAAAAAAAAAAAtoElCQAAd2ViLmNv
+      bmZpZ1BLAQIUABQAAAAIAB1mjE7gz3m4kQAAANwAAAAtAAAAAAAAAAAAAAC2gdENAABQb3N0RGVw
+      bG95U2NyaXB0cy9naXRodWJQcm9qZWN0Lmpzb24udGVtcGxhdGVQSwECFAAUAAAACAAdZoxOiFQY
+      gxMCAADRBAAAIAAAAAAAAAAAAAAA/4GtDgAAUG9zdERlcGxveVNjcmlwdHMvcHJlcGFyZVNyYy5j
+      bWRQSwECFAAUAAAACAAdZoxOaolPdR0CAAAGBQAAJQAAAAAAAAAAAAAAtoH+EAAAUG9zdERlcGxv
+      eVNjcmlwdHMvcHVibGlzaC5qcy50ZW1wbGF0ZVBLAQIUABQAAAAIAB1mjE5aCAZM4QAAAC4CAAAd
+      AAAAAAAAAAAAAAD/gV4TAABQb3N0RGVwbG95U2NyaXB0cy9ydW5HdWxwLmNtZFBLAQIUABQAAAAI
+      AB1mjE6h6AdDigIAAEMGAAArAAAAAAAAAAAAAAD/gXoUAABQb3N0RGVwbG95U2NyaXB0cy9zZXR1
+      cEdpdGh1YlJlbW90ZVJlcG8uY21kUEsBAhQAFAAAAAgAHWaMTufISQUIAwAAMgcAACgAAAAAAAAA
+      AAAAAP+BTRcAAFBvc3REZXBsb3lTY3JpcHRzL3NldHVwVnNvUmVtb3RlUmVwby5jbWRQSwECFAAU
+      AAAACAAdZoxOAAXq5r8AAAAcAQAAKgAAAAAAAAAAAAAAtoGbGgAAUG9zdERlcGxveVNjcmlwdHMv
+      dnNvUHJvamVjdC5qc29uLnRlbXBsYXRlUEsFBgAAAAAPAA8AFAQAAKIbAAAAAA==
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['8137']
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/octet-stream]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '8140'
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/octet-stream
     method: PUT
     uri: https://cli000002.scm.azurewebsites.net/api/zip/site/clirepo
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Thu, 07 Mar 2019 01:38:17 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 12 Apr 2019 19:49:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"command": "rm -rf clirepo && mkdir clirepo", "dir": "site"}'
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['61']
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/json]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '61'
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/json
     method: POST
     uri: https://cli000002.scm.azurewebsites.net/api/command
   response:
-    body: {string: '{"Output":"","Error":"","ExitCode":0}'}
+    body:
+      string: '{"Output":"","Error":"","ExitCode":0}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['37']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:17 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '37'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: !!binary |
-      UEsDBBQAAAAAAMaMZk4AAAAAAAAAAAAAAAASAAAAUG9zdERlcGxveVNjcmlwdHMvUEsDBBQAAAAI
-      AMaMZk6zVIm5KwAAACoAAAAKAAAALmdpdGlnbm9yZcvLT0mNz81PKc1JLdbn5dLSyyrWy00s4OUq
-      SEzOTkxP1c3JT84GCubnAQBQSwMEFAAAAAgAxoxmTuFDj2rmAgAARAcAAAYAAABhcHAuanO1VNtq
+      UEsDBBQAAAAAAB1mjE4AAAAAAAAAAAAAAAASAAAAUG9zdERlcGxveVNjcmlwdHMvUEsDBBQAAAAI
+      AB1mjE6zVIm5KwAAACoAAAAKAAAALmdpdGlnbm9yZcvLT0mNz81PKc1JLdbn5dLSyyrWy00s4OUq
+      SEzOTkxP1c3JT84GCubnAQBQSwMEFAAAAAgAHWaMTuFDj2rmAgAARAcAAAYAAABhcHAuanO1VNtq
       20AQfTf4H6aBINl1pIc+tE3Ig+MQSEmaNE4JpZSylsb2UnlX3V3Zze3fO7NayZdCnlJhjLRzZnYu
       Z07aP3jNp9sZgpWLskDAbK5hoh1MtQE3R7iUmdFWTx2c0OmZEQtcafMrgW7nVXPop91Ot7MUBgxa
       J6f3cExvvytpMI7CUdQ7qiGTShY5mk0I5RxO16j26Kd4qAxuwPfWtgNv22OnbidNYYyuKuEmJDFG
@@ -1133,258 +1611,483 @@ interactions:
       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
-      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
+      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
-      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
+      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
-      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
-      bWRQSwECFAAUAAAACADGjGZOoouX64QEAAAACgAACgAAAAAAAAAAAAAAtoEiCQAAd2ViLmNvbmZp
-      Z1BLAQIUABQAAAAIAMaMZk7gz3m4kQAAANwAAAAtAAAAAAAAAAAAAAC2gc4NAABQb3N0RGVwbG95
-      U2NyaXB0cy9naXRodWJQcm9qZWN0Lmpzb24udGVtcGxhdGVQSwECFAAUAAAACADGjGZOiFQYgxMC
-      AADRBAAAIAAAAAAAAAAAAAAA/4GqDgAAUG9zdERlcGxveVNjcmlwdHMvcHJlcGFyZVNyYy5jbWRQ
-      SwECFAAUAAAACADGjGZOaolPdR0CAAAGBQAAJQAAAAAAAAAAAAAAtoH7EAAAUG9zdERlcGxveVNj
-      cmlwdHMvcHVibGlzaC5qcy50ZW1wbGF0ZVBLAQIUABQAAAAIAMaMZk5aCAZM4QAAAC4CAAAdAAAA
-      AAAAAAAAAAD/gVsTAABQb3N0RGVwbG95U2NyaXB0cy9ydW5HdWxwLmNtZFBLAQIUABQAAAAIAMaM
-      Zk6h6AdDigIAAEMGAAArAAAAAAAAAAAAAAD/gXcUAABQb3N0RGVwbG95U2NyaXB0cy9zZXR1cEdp
-      dGh1YlJlbW90ZVJlcG8uY21kUEsBAhQAFAAAAAgAxoxmTufISQUIAwAAMgcAACgAAAAAAAAAAAAA
-      AP+BShcAAFBvc3REZXBsb3lTY3JpcHRzL3NldHVwVnNvUmVtb3RlUmVwby5jbWRQSwECFAAUAAAA
-      CADGjGZOAAXq5r8AAAAcAQAAKgAAAAAAAAAAAAAAtoGYGgAAUG9zdERlcGxveVNjcmlwdHMvdnNv
-      UHJvamVjdC5qc29uLnRlbXBsYXRlUEsFBgAAAAAPAA8AFAQAAJ8bAAAAAA==
+      UEsDBBQAAAAIAB1mjE6IDtMTRgIAAAUFAAAKAAAAcHVibGlzaC5qc3VUXU/bMBR976/wqokkUnEL
+      hW5rxyRGVRVtoIntAfFmkhvq1bU9fzS0U//77CQOaWEvln3vPefec2JnTRTaUjkTLAOFLpCCP5Yq
+      iCMXPM7LaJRMOmtXJolZtCv8OeRy3c7kOsR9CLRpJ+uQr6hKhDBNe8+JFWjB1q4UBxo3zI+q+17B
+      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
+      bWUubWRQSwECFAAUAAAACAAdZoxOoouX64QEAAAACgAACgAAAAAAAAAAAAAAtoElCQAAd2ViLmNv
+      bmZpZ1BLAQIUABQAAAAIAB1mjE7gz3m4kQAAANwAAAAtAAAAAAAAAAAAAAC2gdENAABQb3N0RGVw
+      bG95U2NyaXB0cy9naXRodWJQcm9qZWN0Lmpzb24udGVtcGxhdGVQSwECFAAUAAAACAAdZoxOiFQY
+      gxMCAADRBAAAIAAAAAAAAAAAAAAA/4GtDgAAUG9zdERlcGxveVNjcmlwdHMvcHJlcGFyZVNyYy5j
+      bWRQSwECFAAUAAAACAAdZoxOaolPdR0CAAAGBQAAJQAAAAAAAAAAAAAAtoH+EAAAUG9zdERlcGxv
+      eVNjcmlwdHMvcHVibGlzaC5qcy50ZW1wbGF0ZVBLAQIUABQAAAAIAB1mjE5aCAZM4QAAAC4CAAAd
+      AAAAAAAAAAAAAAD/gV4TAABQb3N0RGVwbG95U2NyaXB0cy9ydW5HdWxwLmNtZFBLAQIUABQAAAAI
+      AB1mjE6h6AdDigIAAEMGAAArAAAAAAAAAAAAAAD/gXoUAABQb3N0RGVwbG95U2NyaXB0cy9zZXR1
+      cEdpdGh1YlJlbW90ZVJlcG8uY21kUEsBAhQAFAAAAAgAHWaMTufISQUIAwAAMgcAACgAAAAAAAAA
+      AAAAAP+BTRcAAFBvc3REZXBsb3lTY3JpcHRzL3NldHVwVnNvUmVtb3RlUmVwby5jbWRQSwECFAAU
+      AAAACAAdZoxOAAXq5r8AAAAcAQAAKgAAAAAAAAAAAAAAtoGbGgAAUG9zdERlcGxveVNjcmlwdHMv
+      dnNvUHJvamVjdC5qc29uLnRlbXBsYXRlUEsFBgAAAAAPAA8AFAQAAKIbAAAAAA==
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['8137']
-      User-Agent: [python-requests/2.21.0]
-      content-type: [application/octet-stream]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '8140'
+      User-Agent:
+      - python-requests/2.21.0
+      content-type:
+      - application/octet-stream
     method: POST
     uri: https://cli000002.scm.azurewebsites.net/api/zipdeploy?isAsync=true
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Thu, 07 Mar 2019 01:38:18 GMT']
-      expires: ['-1']
-      location: ['https://cli000002.scm.azurewebsites.net/api/deployments/latest?deployer=Push-Deployer&time=2019-03-07_01-38-19Z']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 12 Apr 2019 19:49:05 GMT
+      expires:
+      - '-1'
+      location:
+      - https://cli000002.scm.azurewebsites.net/api/deployments/latest?deployer=Push-Deployer&time=2019-04-12_19-49-05Z
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.21.0]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
     method: GET
     uri: https://cli000002.scm.azurewebsites.net/api/deployments/mock-deployment
   response:
-    body: {string: '{"id":"c3eccd8d99104ab599b4899ab36a7d06","status":1,"status_text":"Building
-        and Deploying ''c3eccd8d99104ab599b4899ab36a7d06''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
-        via a push deployment","progress":"Generating deployment script.","received_time":"2019-03-07T01:38:19.4505512Z","start_time":"2019-03-07T01:38:19.555478Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'}
+    body:
+      string: '{"id":"44c2a6923c1640fd965e02d7ce147d52","status":1,"status_text":"Building
+        and Deploying ''44c2a6923c1640fd965e02d7ce147d52''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"Generating deployment script.","received_time":"2019-04-12T19:49:05.8541618Z","start_time":"2019-04-12T19:49:05.9478803Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['558']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:21 GMT']
-      expires: ['-1']
-      location: ['https://cli000002.scm.azurewebsites.net/api/deployments/latest']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:08 GMT
+      expires:
+      - '-1'
+      location:
+      - https://cli000002.scm.azurewebsites.net/api/deployments/latest
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.21.0]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
     method: GET
     uri: https://cli000002.scm.azurewebsites.net/api/deployments/mock-deployment
   response:
-    body: {string: '{"id":"c3eccd8d99104ab599b4899ab36a7d06","status":1,"status_text":"Building
-        and Deploying ''c3eccd8d99104ab599b4899ab36a7d06''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
-        via a push deployment","progress":"Running deployment command...","received_time":"2019-03-07T01:38:19.4505512Z","start_time":"2019-03-07T01:38:19.555478Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'}
+    body:
+      string: '{"id":"44c2a6923c1640fd965e02d7ce147d52","status":1,"status_text":"Building
+        and Deploying ''44c2a6923c1640fd965e02d7ce147d52''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"Generating deployment script.","received_time":"2019-04-12T19:49:05.8541618Z","start_time":"2019-04-12T19:49:05.9478803Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['558']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:24 GMT']
-      expires: ['-1']
-      location: ['https://cli000002.scm.azurewebsites.net/api/deployments/latest']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:10 GMT
+      expires:
+      - '-1'
+      location:
+      - https://cli000002.scm.azurewebsites.net/api/deployments/latest
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.21.0]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
     method: GET
     uri: https://cli000002.scm.azurewebsites.net/api/deployments/mock-deployment
   response:
-    body: {string: '{"id":"c3eccd8d99104ab599b4899ab36a7d06","status":4,"status_text":"","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
-        via a push deployment","progress":"","received_time":"2019-03-07T01:38:19.4505512Z","start_time":"2019-03-07T01:38:19.555478Z","end_time":"2019-03-07T01:38:25.3734962Z","last_success_end_time":"2019-03-07T01:38:25.3734962Z","complete":true,"active":true,"is_temp":false,"is_readonly":true,"url":"https://cli000002.scm.azurewebsites.net/api/deployments/latest","log_url":"https://cli000002.scm.azurewebsites.net/api/deployments/latest/log","site_name":"cli000002","provisioningState":null}'}
+    body:
+      string: '{"id":"44c2a6923c1640fd965e02d7ce147d52","status":1,"status_text":"Building
+        and Deploying ''44c2a6923c1640fd965e02d7ce147d52''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"Generating deployment script.","received_time":"2019-04-12T19:49:05.8541618Z","start_time":"2019-04-12T19:49:05.9478803Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['657']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Mar 2019 01:38:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [ARRAffinity=198ec39e67446c7ab237bebbdedc1950277b0f1cadbcba0cc96efc4ee355205a;Path=/;HttpOnly;Domain=clid4zmzrorbkfm.scm.azurewebsites.net]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:12 GMT
+      expires:
+      - '-1'
+      location:
+      - https://cli000002.scm.azurewebsites.net/api/deployments/latest
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.60]
-      accept-language: [en-US]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
+    method: GET
+    uri: https://cli000002.scm.azurewebsites.net/api/deployments/mock-deployment
+  response:
+    body:
+      string: '{"id":"44c2a6923c1640fd965e02d7ce147d52","status":1,"status_text":"Building
+        and Deploying ''44c2a6923c1640fd965e02d7ce147d52''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"Generating deployment script.","received_time":"2019-04-12T19:49:05.8541618Z","start_time":"2019-04-12T19:49:05.9478803Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://cli000002.scm.azurewebsites.net/api/deployments/latest
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
+    method: GET
+    uri: https://cli000002.scm.azurewebsites.net/api/deployments/mock-deployment
+  response:
+    body:
+      string: '{"id":"44c2a6923c1640fd965e02d7ce147d52","status":1,"status_text":"Building
+        and Deploying ''44c2a6923c1640fd965e02d7ce147d52''.","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"Running deployment command...","received_time":"2019-04-12T19:49:05.8541618Z","start_time":"2019-04-12T19:49:05.9478803Z","end_time":null,"last_success_end_time":null,"complete":false,"active":false,"is_temp":false,"is_readonly":true,"url":null,"log_url":null,"site_name":"cli000002","provisioningState":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '559'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://cli000002.scm.azurewebsites.net/api/deployments/latest
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.21.0
+    method: GET
+    uri: https://cli000002.scm.azurewebsites.net/api/deployments/mock-deployment
+  response:
+    body:
+      string: '{"id":"44c2a6923c1640fd965e02d7ce147d52","status":4,"status_text":"","author_email":"N/A","author":"N/A","deployer":"Push-Deployer","message":"Created
+        via a push deployment","progress":"","received_time":"2019-04-12T19:49:05.8541618Z","start_time":"2019-04-12T19:49:05.9478803Z","end_time":"2019-04-12T19:49:19.6005628Z","last_success_end_time":"2019-04-12T19:49:19.6005628Z","complete":true,"active":true,"is_temp":false,"is_readonly":true,"url":"https://cli000002.scm.azurewebsites.net/api/deployments/latest","log_url":"https://cli000002.scm.azurewebsites.net/api/deployments/latest/log","site_name":"cli000002","provisioningState":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Apr 2019 19:49:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      set-cookie:
+      - ARRAffinity=d421e3ddf032f4beeac2fe72e1c577dede1300b6d761eb225c048c7df80cfeaa;Path=/;HttpOnly;Domain=cliptvyovf43t6m.scm.azurewebsites.net
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Thu, 07 Mar 2019 01:38:27 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdJQ1pTQVhKQ09XLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 12 Apr 2019 19:49:22 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdPS09PWUpYRUFTLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 202
+      message: Accepted
 version: 1

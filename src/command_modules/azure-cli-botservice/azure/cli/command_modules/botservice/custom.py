@@ -7,7 +7,6 @@ import json
 import os
 import shutil
 
-from azure.cli.command_modules.botservice.converged_app import ConvergedApp
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
@@ -28,10 +27,10 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,  # pylint: disable=too-many-locals
-           endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
+def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, description=None,  # pylint: disable=too-many-locals
+           display_name=None, endpoint=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation='South Central US',
-           language='Csharp', version='v3'):
+           language='Csharp', version='v4'):
     """Create a WebApp, Function, or Channels Registration Bot on Azure.
 
     This method is directly called via "bot create"
@@ -63,7 +62,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
-    show_password = False
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -82,14 +80,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         raise CLIError('Invalid Bot Parameter : kind. Valid kinds are \'registration\' for registration bots, '
                        '\'webapp\' for webapp bots and \'function\' for function bots. Run \'az bot create -h\' '
                        'for more information.')
-
-    # If a Microsoft application id was not provided, provision one for the user
-    if not msa_app_id:
-
-        logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
-        show_password = True
-        msa_app_id, password = ConvergedApp.provision(resource_name)
-        logger.info('Microsoft application provisioning successful. Application Id: %s.', msa_app_id)
 
     logger.info('Creating Azure Bot Service.')
 
@@ -119,14 +109,12 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         logger.info('Bot parameters client side validation successful.')
         logger.info('Creating bot.')
 
-        result = client.bots.create(
+        return client.bots.create(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             parameters=parameters
-        ).as_dict()
-        if show_password:
-            result['password'] = password
-        return result
+        )
+
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
@@ -512,7 +500,7 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
             f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v4',  # pylint:disable=too-many-statements
                 keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.
 
