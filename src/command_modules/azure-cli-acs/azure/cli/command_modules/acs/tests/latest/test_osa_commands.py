@@ -152,4 +152,4 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         ])
 
         # delete
-        self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()]
+        self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
