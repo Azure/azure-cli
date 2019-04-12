@@ -480,9 +480,15 @@ examples:
   - name: Create a task with the definition from the pipe.
     text: >
         cat task.yaml | az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers.
     text: >
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false
+   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers and uses a build argument.
+    text: >
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --arg HTTP_PROXY=http://10.20.30.2:1234
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers and uses a build argument whose value is propagated from a local environment variable.
+    text: >
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --arg HTTP_PROXY
   - name: Create a Linux task using a private GitHub repository which builds the hello-world image without triggers on Arm architecture (V7 variant)
     text: >
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
