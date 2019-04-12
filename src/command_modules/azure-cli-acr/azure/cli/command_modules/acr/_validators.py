@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 
 def validate_headers(namespace):
     """Extracts multiple space-separated headers in key[=value] format. """
@@ -60,6 +61,10 @@ def validate_task_value(string, is_secret):
         comps = string.split('=', 1)
         if len(comps) > 1:
             return {'type': 'SetValue', 'name': comps[0], 'value': comps[1], 'isSecret': is_secret}
+        #If no value, check if the argument exists as a local environment variable
+        local_value = os.environ.get(comps[0])
+        if local_value is not None:
+            return {'type': 'Argument', 'name': comps[0], 'value': local_value, 'isSecret': is_secret}
         return {'type': 'SetValue', 'name': comps[0], 'value': '', 'isSecret': is_secret}
     return None
 
@@ -70,5 +75,9 @@ def validate_task_argument(string, is_secret):
         comps = string.split('=', 1)
         if len(comps) > 1:
             return {'type': 'Argument', 'name': comps[0], 'value': comps[1], 'isSecret': is_secret}
+        #If no value, check if the argument exists as a local environment variable
+        local_value = os.environ.get(comps[0])
+        if local_value is not None:
+            return {'type': 'Argument', 'name': comps[0], 'value': local_value, 'isSecret': is_secret}
         return {'type': 'Argument', 'name': comps[0], 'value': '', 'isSecret': is_secret}
     return None
