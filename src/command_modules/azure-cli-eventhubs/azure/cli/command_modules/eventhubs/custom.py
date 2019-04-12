@@ -138,14 +138,14 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
 
 # NetwrokRuleSet Region
 def cli_networkruleset_createupdate(client, resource_group_name, namespace_name, defaultaction="Deny", virtual_network_rules=None, ip_rules=None):
-    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules, NetworkRuleSet, Subnet
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules, NetworkRuleSet
     netwrokruleset = NetworkRuleSet()
     netwrokruleset.default_action=defaultaction
     netwrokruleset.virtual_network_rules = NWRuleSetVirtualNetworkRules()
     netwrokruleset.virtual_network_rules = virtual_network_rules
     netwrokruleset.ip_rules = NWRuleSetIpRules()
-    netwrokruleset.ip_rules=ip_rules
-    client.create_or_update_network_rule_set(resource_group_name, namespace_name,netwrokruleset)
+    netwrokruleset.ip_rules = ip_rules
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_networkruleset_delete(client, resource_group_name, namespace_name):
@@ -183,8 +183,6 @@ def cli_virtualnetwrokrule_delete(client, resource_group_name, namespace_name, s
         subnet = ""
     if ignore_missing_vnet_service_endpoint is None:
         ignore_missing_vnet_service_endpoint = False
-
-    getnetworkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
 
 def cli_iprule_add(client, resource_group_name, namespace_name, ip_mask, action=None):
