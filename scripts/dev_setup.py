@@ -10,11 +10,13 @@ from __future__ import print_function
 import sys
 import os
 from subprocess import check_call, CalledProcessError
+from logging import getLogger
 
 root_dir = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..'))
+logger = getLogger(__name__)
 
 def print_support_message():
-    print('''
+    logger.warning('''
 
 *******************************************************************************
 
