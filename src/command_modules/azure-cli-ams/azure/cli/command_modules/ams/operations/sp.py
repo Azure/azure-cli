@@ -100,8 +100,10 @@ def _update_password_credentials(client, app_object_id, sp_password, years):
 def _get_displayable_name(graph_object):
     if getattr(graph_object, 'user_principal_name', None):
         return graph_object.user_principal_name
-    elif getattr(graph_object, 'service_principal_names', None):
+
+    if getattr(graph_object, 'service_principal_names', None):
         return graph_object.service_principal_names[0]
+
     return graph_object.display_name or ''
 
 
@@ -179,9 +181,11 @@ def _resolve_role_id(role, scope, definitions_client):
                 definitions_client.config.subscription_id, role)
         if not role_id:  # retrieve role id
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
                 raise CLIError(err.format(role, ids))

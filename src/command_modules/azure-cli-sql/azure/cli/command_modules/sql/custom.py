@@ -1645,6 +1645,7 @@ def server_create(
         resource_group_name,
         server_name,
         assign_identity=False,
+        no_wait=False,
         **kwargs):
     '''
     Creates a server.
@@ -1654,10 +1655,10 @@ def server_create(
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     # Create
-    return client.create_or_update(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        parameters=kwargs)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=server_name,
+                       resource_group_name=resource_group_name,
+                       parameters=kwargs)
 
 
 def server_list(

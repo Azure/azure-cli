@@ -2,11 +2,16 @@
 
 Release History
 ===============
+2.2.2
++++++
+* Support for custom time zone on managed instance.
+* Allow elastic pool name (as an alternative to elastic pool id) to be specified for az sql db update.
+* `sql server create/update`: Added `--no-wait` support.
+* `sql server`: Added new command `wait`.
 
 2.2.1
 +++++
 * Updating az sql mi create and update with two new properties (proxyOverride and publicDataEndpointEnabled)
-* Allow elastic pool name (as an alternative to elastic pool id) to be specified for az sql db update.
 
 2.2.0
 +++++

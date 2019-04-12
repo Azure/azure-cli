@@ -6,11 +6,13 @@
 import mock
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class AmsSpTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    @AllowLargeResponse()
     def test_ams_sp_create_reset(self, resource_group, storage_account_for_create):
         with mock.patch('azure.cli.command_modules.ams._utils._gen_guid', side_effect=self.create_guid):
             amsname = self.create_random_name(prefix='ams', length=12)
@@ -26,11 +28,13 @@ class AmsSpTests(ScenarioTest):
                 self.check('location', 'West US 2')
             ])
 
-            spPassword = self.create_random_name(prefix='spp', length=10)
+            spPassword = self.create_random_name(prefix='spp!', length=16)
+            spNewPassword = self.create_random_name(prefix='spp!', length=16)
 
             self.kwargs.update({
                 'spName': 'http://{}'.format(resource_group),
                 'spPassword': spPassword,
+                'spNewPassword': spNewPassword,
                 'role': 'Owner'
             })
 
@@ -41,8 +45,8 @@ class AmsSpTests(ScenarioTest):
                     self.check('AccountName', '{amsname}')
                 ])
 
-                self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p mynewpassword --role {role}', checks=[
-                    self.check('AadSecret', 'mynewpassword'),
+                self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p {spNewPassword} --role {role}', checks=[
+                    self.check('AadSecret', '{spNewPassword}'),
                     self.check('ResourceGroup', '{rg}'),
                     self.check('AccountName', '{amsname}')
                 ])

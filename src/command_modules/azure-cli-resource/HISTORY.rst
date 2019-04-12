@@ -4,8 +4,10 @@ Release History
 ===============
 
 * `resource delete`: Fix issue where deleting using a resource ID could crash on error.
-* `deployment create`/`group deployment create`: Fixed issue where parameters file with an empty set of parameters would not work.
 
+2.1.13
+++++++
+* `deployment create`/`group deployment create`: Fixed issue where parameters file with an empty set of parameters would not work.
 
 2.1.12
 ++++++
