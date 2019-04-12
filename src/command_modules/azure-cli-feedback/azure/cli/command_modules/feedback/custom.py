@@ -62,7 +62,7 @@ _ISSUES_TEMPLATE_PREFIX = """
 BEGIN TEMPLATE
 ===============
 **A browser has been opened to {} to create an issue.**
-**The issue template has been copied to your clipboard. You can also run `az feedback --verbose` to emit the output to stderr.**
+**You can also run `az feedback --verbose` to emit the output to stderr.**
 """
 
 _ISSUES_TEMPLATE = """
@@ -545,8 +545,8 @@ def _build_issue_info_tup(command_log_file=None):
         formatted_issues_url, minified_issue_body = res
         capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
 
-    logger.info("Total minified issue length is %s", len(minified_issue_body))
-    logger.info("Total formatted url length is %s", len(formatted_issues_url))
+    logger.debug("Total minified issue length is %s", len(minified_issue_body))
+    logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
     return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), _ISSUES_TEMPLATE.format(**format_dict), formatted_issues_url, original_issue_body
 
@@ -560,7 +560,7 @@ def _get_minified_issue_url(command_log_file, format_dict, is_ext, capacity):
     # get minified issue body
     format_dict["errors_string"] = minified_errors
     if hasattr(minified_errors, "set_capacity"):
-        logger.info("Length of issue body before errors added: %s", len(no_errors_issue_body))
+        logger.debug("Length of issue body before errors added: %s", len(no_errors_issue_body))
         minified_errors.set_capacity(
             capacity - len(no_errors_issue_body))  # factor in length of url and expansion of url escaped characters
     minified_issue_body = _ISSUES_TEMPLATE.format(**format_dict)
