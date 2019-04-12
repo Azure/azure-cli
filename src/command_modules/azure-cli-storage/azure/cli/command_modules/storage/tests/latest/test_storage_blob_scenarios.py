@@ -85,7 +85,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         sas = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                'r --https-only', account_info, blob_name, container, expiry).output
         self.assertTrue(sas)
-        self.assertIn('sig', sas)
+        self.assertIn('&sig=', sas)
 
         self.storage_cmd('storage blob update -n {} -c {} --content-type application/test-content',
                          account_info, blob_name, container)

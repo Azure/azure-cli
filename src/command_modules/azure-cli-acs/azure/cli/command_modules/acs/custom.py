@@ -1764,8 +1764,8 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-DEV_SPACES_EXTENSION_NAME = 'dev-spaces-preview'
-DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces_preview.custom'
+DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
+DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
 def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, prompt=False):
