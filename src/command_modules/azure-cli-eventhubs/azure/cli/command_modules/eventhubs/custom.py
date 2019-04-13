@@ -177,12 +177,13 @@ def cli_virtualnetwrokrule_list(client, resource_group_name, namespace_name):
 
 
 def cli_virtualnetwrokrule_delete(client, resource_group_name, namespace_name, subnet, ignore_missing_vnet_service_endpoint=None):
-    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
 
     if subnet is None:
         subnet = ""
     if ignore_missing_vnet_service_endpoint is None:
         ignore_missing_vnet_service_endpoint = False
+
+    client.get_network_rule_set(resource_group_name=resource_group_name, namespace_name=namespace_name)
 
 
 def cli_iprule_add(client, resource_group_name, namespace_name, ip_mask, action=None):
