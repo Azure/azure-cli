@@ -2452,12 +2452,10 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
-    host_name = name
 
-    if slot is not None:
-        host_name += "-" + slot
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
+    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password)
     _ping_scm_site(cmd, resource_group_name, name)
 
     _wait_for_webapp(tunnel_server)
