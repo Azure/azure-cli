@@ -2440,7 +2440,7 @@ def is_webapp_up(tunnel_server):
     return tunnel_server.is_webapp_up()
 
 
-def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None):
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -2456,12 +2456,10 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
-    host_name = name
 
-    if slot is not None:
-        host_name += "-" + slot
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
+    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password)
     _ping_scm_site(cmd, resource_group_name, name)
 
     _wait_for_webapp(tunnel_server)
@@ -2475,8 +2473,11 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     s.daemon = True
     s.start()
 
-    while s.isAlive() and t.isAlive():
-        time.sleep(5)
+    if timeout:
+        time.sleep(int(timeout))
+    else:
+        while s.isAlive() and t.isAlive():
+            time.sleep(5)
 
 
 def _wait_for_webapp(tunnel_server):
@@ -2525,12 +2526,12 @@ def _start_ssh_session(hostname, port, username, password):
         c.close()
 
 
-def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
+def ssh_webapp(cmd, resource_group_name, name, slot=None, timeout=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
-        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot)
+        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot, timeout=timeout)
 
 
 def create_devops_build(
