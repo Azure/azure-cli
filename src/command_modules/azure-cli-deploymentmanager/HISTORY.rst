@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.9.0
+0.1.0
 +++++++++++++++++++++
 
 * Preview release.

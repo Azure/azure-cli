@@ -17,6 +17,7 @@ def load_arguments(self, _):
     get_resource_name_completion_list,
     get_three_state_flag,
     get_location_type,
+    get_location_completion_list,
     get_enum_type,
     tags_type,
     name_type
@@ -27,7 +28,7 @@ def load_arguments(self, _):
 
     service_topology_name_type = CLIArgumentType(options_list='--service-topology-name', metavar='NAME', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/servicetopologies'))
     service_name_type = CLIArgumentType(options_list='--service-name', metavar='NAME')
-    artifact_source_id_type = CLIArgumentType(options_list='--artifact-source-id', metavar='NAME')
+    artifact_source_type = CLIArgumentType(options_list='--artifact-source', metavar='NAME')
 
     with self.argument_context('deploymentmanager artifact-source') as c:
         c.argument('resource_group_name', resource_group_name_type)
@@ -54,15 +55,15 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('location', get_location_type(self.cli_ctx), required=True)
         c.argument('service_topology_name', options_list=['--service-topology-name', '--name', '-n'], help='The name of the service topology')
-        c.argument('artifact_source_id', artifact_source_id_type, help='The resource identifier of the artifact source.')
+        c.argument('artifact_source', artifact_source_type, help='The name or resource identifier of the artifact source.')
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager service-topology create') as c:
-        c.argument('artifact_source_id', artifact_source_id_type, help='The resource identifier of the artifact source.', required=False)
+        c.argument('artifact_source', artifact_source_type, help='The name or resource identifier of the artifact source.', required=False)
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager service-topology update') as c:
-        c.argument('artifact_source_id', artifact_source_id_type, help='The resource identifier of the artifact source.', required=False)
+        c.argument('artifact_source', artifact_source_type, help='The name or resource identifier of the artifact source.', required=False)
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager service') as c:
@@ -71,7 +72,7 @@ def load_arguments(self, _):
         c.argument('service_topology_name', service_topology_name_type, help='The name of the service topology')
         c.argument('service_name', options_list=['--service-name', '--name', '-n'], help='The name of the service')
         c.argument('target_location', options_list='--target-location', help='The location where the resources in the service should be deployed to.')
-        c.argument('target_subscription_id', options_list='--target-subscription-id', help='The subscription to which the resources in the service should be deployed to.')
+        c.argument('target_subscription_id', options_list='--target-subscription-id', help='The Id of subscription to which the resources in the service should be deployed to.')
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager service create') as c:
@@ -131,7 +132,7 @@ def load_arguments(self, _):
         c.argument('template_artifact_source_relative_path', template_artifact_source_relative_path_type)
         c.argument('tags', tags_type)
 
-    duration_type = CLIArgumentType(options_list='--duration', help='The duration of the wait step.')
+    duration_type = CLIArgumentType(options_list='--duration', help='The duration of the wait step in ISO 8601 format.')
     step_name_type = CLIArgumentType(options_list=['--step-name', '--name', '-n'], help='The name of the step', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/steps'))
 
     with self.argument_context('deploymentmanager step') as c:

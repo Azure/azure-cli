@@ -33,7 +33,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-deploymentmanager==0.9.0',
+    'azure-mgmt-deploymentmanager~=0.9.0',
     'azure-cli-core',
 ]
 

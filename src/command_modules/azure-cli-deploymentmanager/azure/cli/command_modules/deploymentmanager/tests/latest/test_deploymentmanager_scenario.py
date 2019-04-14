@@ -92,7 +92,7 @@ class DeploymentManagerTests(ScenarioTest):
             'as_id': artifact_source_id,
         }
 
-        self.cmd('deploymentmanager service-topology create -g {rg} -n {st_name} -l \"{location}\" --artifact-source-id {as_id}', checks=[
+        self.cmd('deploymentmanager service-topology create -g {rg} -n {st_name} -l \"{location}\" --artifact-source {as_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
             self.check('name', topology_name),
             self.check('artifactSourceId', artifact_source_id)])
@@ -122,7 +122,7 @@ class DeploymentManagerTests(ScenarioTest):
             'as_id': updated_artifact_source_id,
         }
 
-        self.cmd('deploymentmanager service-topology update -g {rg} -n {st_name} --artifact-source-id {as_id}', checks=[
+        self.cmd('deploymentmanager service-topology update -g {rg} -n {st_name} --artifact-source {as_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
             self.check('name', topology_name),
             self.check('artifactSourceId', updated_artifact_source_id)])
@@ -209,7 +209,7 @@ class DeploymentManagerTests(ScenarioTest):
             't_path': template_file_name 
         }
 
-        self.cmd('deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l \"{location}\" --target-resource-group {rg} --deployment-mode {d_mode} --parameters-artifact-source-relative-path {p_path} --template-artifact-source-relative-path {t_path}', checks=[
+        self.cmd('deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l \"{location}\" --target-resource-group {rg} --deployment-mode {d_mode} --parameters-path {p_path} --template-path {t_path}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/serviceTopologies/services/serviceUnits'),
             self.check('name', service_unit_name),
             self.check('artifacts.parametersArtifactSourceRelativePath', parameters_file_name),
@@ -233,7 +233,7 @@ class DeploymentManagerTests(ScenarioTest):
             't_path': template_file_name 
         }
 
-        self.cmd('deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l \"{location}\" --target-resource-group {rg} --deployment-mode {d_mode} --parameters-artifact-source-relative-path {p_path} --template-artifact-source-relative-path {t_path}', checks=[
+        self.cmd('deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l \"{location}\" --target-resource-group {rg} --deployment-mode {d_mode} --parameters-path {p_path} --template-path {t_path}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/serviceTopologies/services/serviceUnits'),
             self.check('name', invalid_service_unit_name),
             self.check('artifacts.parametersArtifactSourceRelativePath', invalid_parameters_file_name),
