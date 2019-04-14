@@ -87,7 +87,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
             if len(matched) > 1:
                 raise CLIError('More than 2 definitions are found with the name of "{}"'.format(
                     role_definition['name']))
-            elif not matched:
+            if not matched:
                 raise CLIError('No definition was found with the name of "{}"'.format(role_definition['name']))
             role_id = role_definition['name'] = matched[0].name
             role_name = worker.get_role_property(matched[0], 'role_name')
@@ -495,7 +495,7 @@ def _resolve_role_id(role, scope, definitions_client):
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
                 raise CLIError(err.format(role, ids))
@@ -621,10 +621,19 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
 
 def create_group(cmd, display_name, mail_nickname):
     graph_client = _graph_client_factory(cmd.cli_ctx)
+    matches = list(graph_client.groups.list(filter="displayName eq '{}' and mailNickname eq '{}'".format(
+        display_name, mail_nickname)))
+
+    # workaround to ensure idempotent even AAD graph service doesn't support it
+    if matches:
+        if len(matches) > 1:
+            err = ('There are more than one groups with same display name and mail nick names: "{}". '
+                   'Please delete them first.')
+            raise CLIError(err.format(', '.join([x.object_id for x in matches])))
+        logger.warning('A group with the same display name and mail nickname already exists, returning.')
+        return matches[0]
     group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
                                                              mail_nickname=mail_nickname))
-    # TODO: uncomment once design reviewed with AAD team
-    # _set_owner(cmd.cli_ctx, graph_client, group.object_id, graph_client.groups.add_owner)
 
     return group
 
@@ -680,6 +689,28 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                        credential_description=None, app_roles=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
+    existing_apps = list_apps(cmd, display_name=display_name)
+    if existing_apps:
+        if identifier_uris:
+            existing_apps = [x for x in existing_apps if set(identifier_uris).issubset(set(x.identifier_uris))]
+        existing_apps = [x for x in existing_apps if x.display_name == display_name]
+        if native_app:
+            existing_apps = [x for x in existing_apps if x.public_client]
+        if len(existing_apps) > 1:
+            raise CLIError('More than one application have the same display name "{}", please remove '
+                           'them first'.format(', '.join([x.object_id for x in existing_apps])))
+        if len(existing_apps) == 1:
+            logger.warning('Found an existing application instance of "%s". We will patch it', existing_apps[0].app_id)
+            param = update_application(existing_apps[0], display_name=display_name, homepage=homepage,
+                                       identifier_uris=identifier_uris, password=password, reply_urls=reply_urls,
+                                       key_value=key_value, key_type=key_type, key_usage=key_usage,
+                                       start_date=start_date, end_date=end_date,
+                                       available_to_other_tenants=available_to_other_tenants,
+                                       oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                       required_resource_accesses=required_resource_accesses,
+                                       credential_description=credential_description, app_roles=app_roles)
+            patch_application(cmd, existing_apps[0].app_id, param)
+            return show_application(graph_client.applications, existing_apps[0].app_id)
     if not identifier_uris:
         identifier_uris = []
     if native_app:
@@ -885,11 +916,12 @@ def grant_application(cmd, identifier, api, consent_type=None, principal_id=None
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, app_roles=None):
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None,
+                       credential_description=None, app_roles=None):
     password_creds, key_creds, required_accesses = None, None, None
     if any([password, key_value]):
-        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                             key_usage, start_date, end_date)
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage, start_date,
+                                                             end_date, credential_description)
 
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
@@ -1196,8 +1228,7 @@ def create_service_principal_for_rbac(
     years = years or 1
     sp_oid = None
     _RETRY_TIMES = 36
-
-    app_display_name = None
+    app_display_name, existing_sps = None, None
     if name and '://' not in name:
         prefix = "http://"
         app_display_name = name
@@ -1207,10 +1238,10 @@ def create_service_principal_for_rbac(
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
-        aad_sps = list(graph_client.service_principals.list(filter=query_exp))
-        if aad_sps:
-            raise CLIError("'{}' already exists.".format(name))
-        app_display_name = name.split('://')[-1]
+        existing_sps = list(graph_client.service_principals.list(filter=query_exp))
+        if existing_sps:
+            app_display_name = existing_sps[0].display_name
+            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
@@ -1241,25 +1272,24 @@ def create_service_principal_for_rbac(
     app_id = aad_application.app_id
 
     # retry till server replication is done
-    for l in range(0, _RETRY_TIMES):
-        try:
-            aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
-            break
-        except Exception as ex:  # pylint: disable=broad-except
-            if l < _RETRY_TIMES and (
-                    ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
-                time.sleep(5)
-                logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
-            else:
-                logger.warning(
-                    "Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                    name, ex.response.headers if hasattr(ex,
-                                                         'response') else ex)  # pylint: disable=no-member
-                raise
+    aad_sp = existing_sps[0] if existing_sps else None
+    if not aad_sp:
+        for l in range(0, _RETRY_TIMES):
+            try:
+                aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
+                break
+            except Exception as ex:  # pylint: disable=broad-except
+                if l < _RETRY_TIMES and (
+                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                    time.sleep(5)
+                    logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                else:
+                    logger.warning(
+                        "Creating service principal failed for appid '%s'. Trace followed:\n%s",
+                        name, ex.response.headers if hasattr(ex,
+                                                             'response') else ex)  # pylint: disable=no-member
+                    raise
     sp_oid = aad_sp.object_id
-
-    # TODO: uncomment once design reviewed with AAD team
-    # _set_owner(cmd.cli_ctx, graph_client, aad_application.object_id, graph_client.applications.add_owner)
 
     # retry while server replication is done
     if not skip_assignment:
@@ -1274,6 +1304,9 @@ def create_service_principal_for_rbac(
                         logger.warning('Retrying role assignment creation: %s/%s', l + 1,
                                        _RETRY_TIMES)
                         continue
+                    elif getattr(ex, 'status_code', None) == 409:
+                        logger.warning('Role assignment already exits.\n')
+                        break
                     else:
                         # dump out history for diagnoses
                         logger.warning('Role assignment creation failed.\n')
