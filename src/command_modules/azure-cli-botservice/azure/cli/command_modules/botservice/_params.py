@@ -13,7 +13,10 @@ from azure.cli.core.commands.parameters import (
 
 name_arg_type = CLIArgumentType(metavar='NAME', configured_default='botname', id_part='Name')
 
-supported_languages = ['Csharp', 'Node']
+# supported_languages will be use with get_enum_type after the 'Node' value is completely removed from `az bot`
+# In custom.py we're still supporting 'Node' in __language_validator()
+supported_languages = ['Csharp', 'Javascript']
+SUPPORTED_LANGUAGES_MSG = '  Allowed values: Csharp, Javascript.'
 
 
 # pylint: disable=line-too-long,too-many-statements
@@ -22,8 +25,8 @@ def load_arguments(self, _):
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to place the generated deployment '
                                                                  'files in. Defaults to the current directory the '
                                                                  'command is called from.')
-        c.argument('language', options_list=['--lang'], help='The language or runtime of the bot.',
-                   arg_type=get_enum_type(supported_languages))
+        c.argument('language', options_list=['--lang'], help='The language or runtime of the bot.{0}'
+                   .format(SUPPORTED_LANGUAGES_MSG))
         c.argument('proj_file_path', help='The path to the .csproj file relative to --code-dir.')
 
     with self.argument_context('bot') as c:
@@ -43,7 +46,7 @@ def load_arguments(self, _):
         c.argument('password', options_list=['-p', '--password'], help='The Microsoft account (MSA) password for the bot.')
         c.argument('storageAccountName', options_list=['-s', '--storage'], help='Storage account name to be used with the bot. If not provided, a new account will be created.', arg_group='Web/Function bot Specific')
         c.argument('tags', arg_type=tags_type)
-        c.argument('language', help='The language to be used to create the bot.', options_list=['--lang'], arg_type=get_enum_type(supported_languages), arg_group='Web/Function bot Specific')
+        c.argument('language', help='The language to be used to create the bot.{0}'.format(SUPPORTED_LANGUAGES_MSG), options_list=['--lang'], arg_group='Web/Function bot Specific')
         c.argument('appInsightsLocation', help='The location for the app insights to be used with the bot.', options_list=['--insights-location'], arg_group='Web/Function bot Specific',
                    arg_type=get_enum_type(['South Central US', 'East US', 'West US 2', 'North Europe', 'West Europe', 'Southeast Asia']))
         c.argument('version', options_list=['-v', '--version'], help='The Microsoft Bot Builder SDK version to be used to create the bot', arg_type=get_enum_type(['v3', 'v4']), arg_group='Web/Function bot Specific')

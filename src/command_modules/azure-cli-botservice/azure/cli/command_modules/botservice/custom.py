@@ -26,11 +26,25 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+CSHARP = 'Csharp'
+JAVASCRIPT = 'Javascript'
+NODE = 'Node'
 
-def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, description=None,  # pylint: disable=too-many-locals
-           display_name=None, endpoint=None, tags=None, storageAccountName=None,
-           location='Central US', sku_name='F0', appInsightsLocation='South Central US',
-           language='Csharp', version='v4'):
+
+def __language_validator(language, command):
+    # EXPIRATION_VERSION = '2.0.80'
+    if language not in (CSHARP, JAVASCRIPT, NODE):
+        raise CLIError("az bot %s: '%s' is not a valid value for '--lang'. See 'az bot %s --help'."
+                       % (command, language, command))
+    if language == NODE:
+        logger.warning("Option `{0}` for `--lang` has been deprecated and will be removed in a future release. "
+                       "Use `Javascript` instead.".format(language))
+        language = JAVASCRIPT
+
+
+def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals
+           description=None, display_name=None, endpoint=None, tags=None, storageAccountName=None,
+           location='Central US', sku_name='F0', appInsightsLocation='South Central US', version='v4'):
     """Create a WebApp, Function, or Channels Registration Bot on Azure.
 
     This method is directly called via "bot create"
@@ -57,7 +71,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
 
     # Kind parameter validation
     kind = kind.lower()
-
     registration_kind = 'registration'
     bot_kind = 'bot'
     webapp_kind = 'webapp'
@@ -76,11 +89,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     if kind == registration_kind:
         kind = bot_kind
 
-    if kind not in (bot_kind, webapp_kind, function_kind):
-        raise CLIError('Invalid Bot Parameter : kind. Valid kinds are \'registration\' for registration bots, '
-                       '\'webapp\' for webapp bots and \'function\' for function bots. Run \'az bot create -h\' '
-                       'for more information.')
-
     logger.info('Creating Azure Bot Service.')
 
     # Registration bots: simply call ARM and create the bot
@@ -91,8 +99,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         # Registration bot specific validation
         if not endpoint:
             endpoint = ''
-        if not msa_app_id:
-            raise CLIError('Microsoft application id is required for creating a registration bot.')
 
         parameters = Bot(
             location='global',
@@ -118,6 +124,11 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
+
+        if not language:
+            raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
+                           .format(webapp_kind, function_kind))
+        __language_validator(language, 'create')
 
         creation_results = BotTemplateDeployer.create_app(
             cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
@@ -476,6 +487,8 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
             raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
                            'prepare-deploy"' % (file_name, code_dir, file_name))
 
+    __language_validator(language, 'prepare-deploy')
+
     if language != 'Csharp':
         if proj_file_path:
             raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
@@ -542,7 +555,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     # 1. We may not need to download the necessary web.config and iisnode.yml files to deploy a Node.js bot on IIS.
     # 2. We shouldn't delete their local web.config and issnode.yml files (if they exist).
     iis_publish_info = {
-        'lang': 'Csharp' if not os.path.exists(os.path.join(code_dir, 'package.json')) else 'Node',
+        'lang': CSHARP if not os.path.exists(os.path.join(code_dir, 'package.json')) else NODE,
         'has_web_config': True if os.path.exists(os.path.join(code_dir, 'web.config')) else False,
         'has_iisnode_yml': True if os.path.exists(os.path.join(code_dir, 'iisnode.yml')) else False
     }
@@ -594,7 +607,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
     # If the bot is a Node.js bot and did not initially have web.config, delete web.config and iisnode.yml.
-    if iis_publish_info['lang'] == 'Node':
+    if iis_publish_info['lang'] == NODE:
         if not iis_publish_info['has_web_config'] and os.path.exists(os.path.join(code_dir, 'web.config')):
             os.remove(os.path.join(code_dir, 'web.config'))
         if not iis_publish_info['has_iisnode_yml'] and os.path.exists(os.path.join(code_dir, 'iisnode.yml')):

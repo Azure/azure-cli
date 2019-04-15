@@ -84,12 +84,6 @@ class BotTemplateDeployer:
         :return:
         """
 
-        # Normalize language input and check if language is supported.
-        language = language.capitalize()
-        if language not in supported_languages:
-            raise CLIError(
-                'Invalid language provided for --lang parameter. Please choose one of the following supported '
-                'programming languages for your bot: "Csharp" or "Node"')
 
         # Based on sdk version, language and kind, select the appropriate zip url containing starter bot source
         if version == 'v3':
