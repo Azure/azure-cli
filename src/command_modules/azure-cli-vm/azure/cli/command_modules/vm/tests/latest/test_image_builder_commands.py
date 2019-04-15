@@ -49,6 +49,7 @@ class ImageTemplateTest(ScenarioTest):
             'img_src': LINUX_IMAGE_SOURCE,
             'script': TEST_SHELL_SCRIPT,
             'sub': subscription_id,
+            'vhd_out': "my_vhd_output",
         })
 
         # test template creation works.
@@ -94,6 +95,14 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('distribute[0].location', '{new_loc}'),
                      self.check('distribute[0].runOutputName', '{new_img}'),
                      self.check('distribute[0].type', 'ManagedImage')
+                 ])
+
+        # test vhd output
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd',
+                 checks=[
+                     self.check('name', '{tmpl_01}'),
+                     self.check('distribute[1].runOutputName', '{vhd_out}'),
+                     self.check('distribute[1].type', 'VHD')
                  ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")

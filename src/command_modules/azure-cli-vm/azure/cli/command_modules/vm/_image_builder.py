@@ -49,7 +49,11 @@ class ScriptType(Enum):
 def image_builder_client_factory(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.imagebuilder import ImageBuilderClient
-    return get_mgmt_service_client(cli_ctx, ImageBuilderClient)
+    client = get_mgmt_service_client(cli_ctx, ImageBuilderClient) # Needed until I get access to 2019-05-01 preview version
+    client.api_version = '2019-02-01-preview'
+    client.virtual_machine_image_templates.api_version = '2019-02-01-preview'
+
+    return client
 
 def cf_img_bldr_image_templates(cli_ctx, _):
     return image_builder_client_factory(cli_ctx, _).virtual_machine_image_templates
@@ -292,9 +296,13 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
     from azure.cli.core.commands.parameters import get_subscription_locations
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-    outputs = [namespace.managed_image, namespace.gallery_image_definition]
-    if not any(outputs) or all(outputs):
-        raise CLIError("Usage error: must supply only one managed image or shared image destination.")
+    num_true = 0
+    for output in [namespace.managed_image, namespace.gallery_image_definition, namespace.is_vhd]:
+        if output:
+            num_true += 1
+
+    if num_true != 1:
+        raise CLIError("Usage error: must supply exactly destination type to add.")
 
     if namespace.managed_image:
         if not is_valid_resource_id(namespace.managed_image):
@@ -308,7 +316,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
     if namespace.gallery_image_definition:
         if not is_valid_resource_id(namespace.gallery_image_definition):
             if not namespace.gallery_name:
-                raise CLIError("Usage error: gallery image definition is a name and not an ID..")
+                raise CLIError("Usage error: gallery image definition is a name and not an ID.")
 
             namespace.gallery_image_definition = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
@@ -316,6 +324,10 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
                 type='galleries', name=namespace.gallery_name,
                 child_type_1='images', child_name_1=namespace.gallery_image_definition
             )
+
+    if namespace.is_vhd and not namespace.output_name:
+            raise CLIError("Usage error: If --is-vhd is used, a run output name must be provided via --output-name.")
+
 
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
     location_names = [l.name for l in subscription_locations]
@@ -360,6 +372,7 @@ def create_image_template(client, resource_group_name, image_template_name, sour
     # Script structure can be found in _parse_script's function definition
     for script in scripts_list:
         script.pop("is_url")
+        script["script_uri"] = script.pop("script")
 
         if script["type"] == ScriptType.SHELL:
             template_scripts.append(ImageTemplateShellCustomizer(**script))
@@ -396,9 +409,11 @@ def show_build_output(client, resource_group_name, image_template_name, output_n
 
 # TODO: add when new whl file generated. support tags for create and here.
 def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,
+                        output_name=None, is_vhd=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
-                        managed_image=None, managed_image_location=None, output_name=None):
-    from azure.mgmt.imagebuilder.models import ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor
+                        managed_image=None, managed_image_location=None):
+    from azure.mgmt.imagebuilder.models import (ImageTemplateManagedImageDistributor, ImageTemplateVhdDistributor,
+                                                ImageTemplateSharedImageDistributor)
     existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
     old_template_copy = copy.deepcopy(existing_image_template)
 
@@ -410,6 +425,8 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
         parsed = parse_resource_id(gallery_image_definition)
         distributor = ImageTemplateSharedImageDistributor(run_output_name=output_name or parsed['child_name_1'],
                                                                gallery_image_id=gallery_image_definition, replication_regions=gallery_replication_regions or [location])
+    elif is_vhd:
+        distributor = ImageTemplateVhdDistributor(run_output_name=output_name)
 
     if existing_image_template.distribute is None:
         existing_image_template.distribute = []
@@ -495,9 +512,9 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
     new_customizer = None
 
     if customizer_type.lower() == ScriptType.SHELL.value.lower():
-        new_customizer = ImageTemplateShellCustomizer(name=customizer_name, script=script_url, inline=inline_script)
+        new_customizer = ImageTemplateShellCustomizer(name=customizer_name, script_uri=script_url, inline=inline_script)
     elif customizer_type.lower() == ScriptType.POWERSHELL.value.lower():
-        new_customizer = ImageTemplatePowerShellCustomizer(name=customizer_name, script=script_url, inline=inline_script, valid_exit_codes=valid_exit_codes)
+        new_customizer = ImageTemplatePowerShellCustomizer(name=customizer_name, script_uri=script_url, inline=inline_script, valid_exit_codes=valid_exit_codes)
     elif customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
         new_customizer = ImageTemplateRestartCustomizer(name=customizer_name, restart_command=restart_command,
                                                            restart_check_command=restart_check_command,
