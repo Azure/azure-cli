@@ -334,9 +334,10 @@ class AzCliCommand(CLICommand):
 def cached_get(cmd, operation, *args, **kwargs):
 
     def _get_operation():
+        result = None
         if args:
             result = operation(*args)
-        elif kwargs:
+        elif kwargs is not None:
             result = operation(**kwargs)
         return result
 
@@ -360,10 +361,11 @@ def cached_get(cmd, operation, *args, **kwargs):
 
 def cached_put(cmd, operation, parameters, *args, **kwargs):
     def _put_operation():
+        result = None
         if args:
             extended_args = args + (parameters,)
             result = operation(*extended_args)
-        elif kwargs:
+        elif kwargs is not None:
             result = operation(parameters=parameters, **kwargs)
         return result
 

@@ -156,15 +156,19 @@ def _normalize_config_value(value):
     return value
 
 
-def list_cache_contents(cmd):
+def _get_cache_directory(cli_ctx):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._environment import get_config_dir
-    from glob import glob
-    directory = os.path.join(
+    return os.path.join(
         get_config_dir(),
         'object_cache',
-        cmd.cli_ctx.cloud.name,
-        get_subscription_id(cmd.cli_ctx))
+        cli_ctx.cloud.name,
+        get_subscription_id(cli_ctx))
+
+
+def list_cache_contents(cmd):
+    from glob import glob
+    directory = _get_cache_directory(cmd.cli_ctx)
     contents = []
     rg_paths = glob(os.path.join(directory, '*'))
     for rg_path in rg_paths:
@@ -186,13 +190,7 @@ def list_cache_contents(cmd):
 
 
 def show_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._environment import get_config_dir
-    directory = os.path.join(
-        get_config_dir(),
-        'object_cache',
-        cmd.cli_ctx.cloud.name,
-        get_subscription_id(cmd.cli_ctx))
+    directory = _get_cache_directory(cmd.cli_ctx)
     item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
     try:
         with open(item_path, 'r') as cache_file:
@@ -203,13 +201,7 @@ def show_cache_contents(cmd, resource_group_name=None, item_name=None, resource_
 
 
 def delete_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core._environment import get_config_dir
-    directory = os.path.join(
-        get_config_dir(),
-        'object_cache',
-        cmd.cli_ctx.cloud.name,
-        get_subscription_id(cmd.cli_ctx))
+    directory = _get_cache_directory(cmd.cli_ctx)
     item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
     try:
         os.remove(item_path)

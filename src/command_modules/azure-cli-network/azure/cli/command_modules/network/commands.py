@@ -589,7 +589,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_lb_backend_address_pool')
 
     with self.command_group('network lb rule', network_lb_sdk) as g:
-        g.custom_command('create', 'create_lb_rule', supports_local_cache=True)
+        g.custom_command('create', 'create_lb_rule')
         g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
                                  custom_func_name='set_lb_rule')
 

@@ -2327,13 +2327,8 @@ def create_lb_rule(
         enable_tcp_reset=enable_tcp_reset,
         disable_outbound_snat=disable_outbound_snat)
     _upsert(lb, 'load_balancing_rules', new_rule, 'name')
-    try:
-        poller = cached_put(cmd, ncf.load_balancers.create_or_update, lb, resource_group_name, load_balancer_name)
-        return _get_property(poller.result().load_balancing_rules, item_name)
-    except AttributeError:
-        return poller
-    # poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    # return _get_property(poller.result().load_balancing_rules, item_name)
+    poller = cached_put(cmd, ncf.load_balancers.create_or_update, lb, resource_group_name, load_balancer_name)
+    return _get_property(poller.result().load_balancing_rules, item_name)
 
 
 def set_lb_rule(
