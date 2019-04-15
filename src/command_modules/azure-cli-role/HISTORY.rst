@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* [BREAKING CHANGE] 'group create'/'app create'/'sp create-for-rbac': supports idempotent, hence confliction error will not be surfaced
 
 2.5.0
 +++++
