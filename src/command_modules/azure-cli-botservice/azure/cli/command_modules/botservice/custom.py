@@ -511,6 +511,8 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
             proj_file = proj_file_path.lower()
             proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
             f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
+        logger.info('.deployment file successfully created.')
+    return True
 
 
 def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v4',  # pylint:disable=too-many-statements
