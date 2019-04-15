@@ -158,8 +158,10 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
+            # use display name to prevent CLI from generating uncontrolled random names that fail playback
+            display_name = name.split('://', 1)[-1]
             command = 'az ad sp create-for-rbac -n {}{}' \
-                .format(name, ' --skip-assignment' if self.skip_assignment else '')
+                .format(display_name, ' --skip-assignment' if self.skip_assignment else '')
             self.result = execute(self.cli_ctx, command).get_output_in_json()
             self.test_class_instance.kwargs[self.key] = name
             self.test_class_instance.kwargs['{}_pass'.format(self.key)] = self.parameter_password
