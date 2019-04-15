@@ -8,12 +8,20 @@ import time
 import json
 from knack.prompting import prompt_choice_list, prompt_y_n, prompt
 from knack.util import CLIError
-from azure_functions_devops_build.constants import (LINUX_CONSUMPTION, LINUX_DEDICATED, WINDOWS,
-                                                    PYTHON, NODE, DOTNET)
+from azure_functions_devops_build.constants import (
+    LINUX_CONSUMPTION,
+    LINUX_DEDICATED,
+    WINDOWS,
+    PYTHON,
+    NODE,
+    DOTNET,
+    POWERSHELL
+)
 from azure_functions_devops_build.exceptions import (
     GitOperationException,
     RoleAssignmentException,
     LanguageNotSupportException,
+    BuildErrorException,
     ReleaseErrorException,
     GithubContentNotFound,
     GithubUnauthorizedError,
@@ -31,6 +39,7 @@ SUPPORTED_LANGUAGES = {
     'python': PYTHON,
     'node': NODE,
     'dotnet': DOTNET,
+    'powershell': POWERSHELL,
 }
 
 
@@ -179,7 +188,11 @@ class AzureDevopsBuildInteractive(object):
             raise CLIError("There is no local.settings.json in the current directory.{ls}"
                            "Functionapps must contain a local.settings.json in their root".format(ls=os.linesep))
 
-        local_runtime_language = self._find_local_repository_runtime_language()
+        try:
+            local_runtime_language = self._find_local_repository_runtime_language()
+        except LanguageNotSupportException as lnse:
+            raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
+
         if local_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in your local repository ({setting}) does not match "
                            "the language stack of your Azure function app in Azure ({functionapp}).{ls}"
@@ -199,8 +212,11 @@ class AzureDevopsBuildInteractive(object):
                                repo=self.github_repository,
                                ls=os.linesep,
                            ))
+        try:
+            github_runtime_language = self._find_github_repository_runtime_language()
+        except LanguageNotSupportException as lnse:
+            raise CLIError("Sorry, currently we do not support {language}.".format(language=lnse.message))
 
-        github_runtime_language = self._find_github_repository_runtime_language()
         if github_runtime_language is not None and github_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in the provided repository ({setting}) does not match "
                            "the language stack your Azure function app ({functionapp}).{ls}"
@@ -515,7 +531,7 @@ class AzureDevopsBuildInteractive(object):
             except RoleAssignmentException:
                 if scenario == "AZURE_DEVOPS":
                     self.adbp.remove_git_remote(self.organization_name, self.project_name, repository)
-                raise CLIError("To create a build through Azure Pipelines,{ls}"
+                raise CLIError("{ls}To create a build through Azure Pipelines,{ls}"
                                "The command will assign a contributor role to the "
                                "Azure function app release service principle.{ls}"
                                "Please ensure that:{ls}"
@@ -572,12 +588,20 @@ class AzureDevopsBuildInteractive(object):
             self.logger.warning("Detected a build definition already exists: {name}".format(
                                 name=self.build_definition_name))
 
-        self.build = self.adbp.create_build_object(
-            self.organization_name,
-            self.project_name,
-            self.build_definition_name,
-            self.build_pool_name
-        )
+        try:
+            self.build = self.adbp.create_build_object(
+                self.organization_name,
+                self.project_name,
+                self.build_definition_name,
+                self.build_pool_name
+            )
+        except BuildErrorException as bee:
+            raise CLIError("{error}{ls}{ls}"
+                           "Please ensure your azure-pipelines.yml file matches Azure function app's "
+                           "runtime operating system and language.{ls}"
+                           "You may use 'az functionapp devops-build create --overwrite-yaml true' "
+                           "to force generating an azure-pipelines.yml specifically for your build".format(
+                               error=bee.message, ls=os.linesep))
 
         url = "https://dev.azure.com/{org}/{proj}/_build/results?buildId={build_id}".format(
             org=self.organization_name,
