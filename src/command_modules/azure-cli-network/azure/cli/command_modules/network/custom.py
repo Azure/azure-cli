@@ -3587,9 +3587,9 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
     vnet = cached_get(cmd, ncf.virtual_networks.get, resource_group_name, virtual_network_name)
     _upsert(vnet, 'subnets', subnet, 'name')
-    vnet = cached_put(cmd, ncf.virtual_networks.create_or_update, vnet, resource_group_name, virtual_network_name).result()
+    vnet = cached_put(
+        cmd, ncf.virtual_networks.create_or_update, vnet, resource_group_name, virtual_network_name).result()
     return _get_property(vnet.subnets, subnet_name)
-
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,

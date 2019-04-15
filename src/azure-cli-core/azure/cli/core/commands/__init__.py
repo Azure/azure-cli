@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
+
 from __future__ import print_function
 
 import argparse
@@ -51,7 +53,6 @@ def _explode_list_args(args):
         { a1:'x', a2:IterateValue(['y', 'z']) } => [{ a1:'x', a2:'y'),{ a1:'x', a2:'z'}]
     '''
     from azure.cli.core.commands.validators import IterateValue
-    import argparse
     list_args = {argname: argvalue for argname, argvalue in vars(args).items()
                  if isinstance(argvalue, IterateValue)}
     if not list_args:
@@ -130,7 +131,7 @@ class CacheObject(object):
             raise CLIError('expected 2 args, got {}: {}'.format(len(args), args))
         if len(copy_kwargs) > 1:
             raise CLIError('expected 1 kwarg, got {}: {}'.format(len(copy_kwargs), copy_kwargs))
-        
+
         try:
             resource_name = args[-1]
         except IndexError:
@@ -151,8 +152,34 @@ class CacheObject(object):
         return directory, filename
 
     def _get_model_type(self):
-        rt_regex = re.compile(r'.* (?P<rt>[a-zA-Z]*)sOperations.*')
-        return rt_regex.findall(str(self._operation))[0]
+        if sys.version_info[0] == 3:
+            rt_regex = re.compile(r'.* (?P<rt>[a-zA-Z]*)sOperations.*')
+            op_string = str(self._operation)
+            return rt_regex.findall(op_string)[0]
+
+        # python 2
+        import inspect
+        op_metadata = inspect.getmembers(self._operation)
+        op_string = None
+        for key, value in op_metadata:
+            if key == 'func_code':
+                op_string = str(value)
+                break
+            try:
+                if key == 'im_func':
+                    op_string = str(value.func_code)
+                    break
+            except TypeError:
+                continue
+        if not op_string:
+            raise CLIError('unable to resolve resource type for cache object')
+        rt_regex = re.compile(r'.*[\\/]operations[\\/](?P<rt>[a-zA-Z_]*)s_operations.*')
+        try:
+            print(op_string)
+            match_comps = rt_regex.findall(op_string)[0].split('_')
+        except IndexError:
+            raise CLIError('unable to resolve resource type for cache object')
+        return ''.join(comp.title() for comp in match_comps)
 
     def _dump_to_file(self, open_file):
         cache_obj_dump = json.dumps({
@@ -162,10 +189,12 @@ class CacheObject(object):
         open_file.write(cache_obj_dump)
 
     def load(self, args, kwargs):
-        cli_ctx = self._cmd.cli_ctx
         directory, filename = self._get_cached_object_path(args, kwargs)
         with open(os.path.join(directory, filename), 'r') as f:
-            logger.info("Loading %s '%s' from cache: %s", self._model_type, self._resource_name, os.path.join(directory, filename))
+            logger.info(
+                "Loading %s '%s' from cache: %s", self._model_type, self._resource_name,
+                os.path.join(directory, filename)
+            )
             obj_data = json.loads(f.read())
             self._payload = obj_data['_payload']
         # need to save the lastTouched metadata when retrieved
@@ -175,11 +204,13 @@ class CacheObject(object):
 
     def save(self, args, kwargs):
         from knack.util import ensure_dir
-        cli_ctx = self._cmd.cli_ctx
         directory, filename = self._get_cached_object_path(args, kwargs)
         ensure_dir(directory)
         with open(os.path.join(directory, filename), 'w') as f:
-            logger.info("Caching %s '%s' as: %s", self._model_type, self._resource_name, os.path.join(directory, filename))
+            logger.info(
+                "Caching %s '%s' as: %s", self._model_type, self._resource_name,
+                os.path.join(directory, filename)
+            )
             self._dump_to_file(f)
 
     def result(self):
@@ -196,6 +227,8 @@ class CacheObject(object):
     def __init__(self, cmd, payload, operation):
         self._cmd = cmd
         self._operation = operation
+        self._resource_group = None
+        self._resource_name = None
         self._model_type = self._get_model_type()
         self._payload = payload
         self._last_touched = str(datetime.datetime.now())
@@ -212,7 +245,6 @@ class CacheObject(object):
             return super(CacheObject, self).__setattr__(key, value)
         except AttributeError:
             return self._payload.__setattr__(key, value)
-
 
 
 class AzCliCommand(CLICommand):
@@ -317,23 +349,22 @@ def cached_get(cmd, operation, *args, **kwargs):
         cache_obj.load(args, kwargs)
         return cache_obj
     except FileNotFoundError:
-        logger.warning(
-            "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict()))
+        message = "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
+        logger.warning(message)
         return _get_operation()
     except t_JSONDecodeError:
-        logger.warning(
-            "{model} '{name}' found corrupt in cache. Retrieving from Azure...".format(**cache_obj.prod_dict()))
+        message = "{model} '{name}' found corrupt in cache. Retrieving from Azure...".format(**cache_obj.prod_dict())
+        logger.warning(message)
         return _get_operation()
 
 
 def cached_put(cmd, operation, parameters, *args, **kwargs):
-
     def _put_operation():
-        copy_kwargs = kwargs.copy()
         if args:
-            result = operation(*args, parameters)
+            extended_args = args + (parameters,)
+            result = operation(*extended_args)
         elif kwargs:
-            result = operation(**kwargs, parameters=parameters)
+            result = operation(parameters=parameters, **kwargs)
         return result
 
     cache_opt = cmd.cli_ctx.data.get('_cache', '')
@@ -345,6 +376,7 @@ def cached_put(cmd, operation, parameters, *args, **kwargs):
 
     cache_obj = CacheObject(cmd, parameters.serialize(), operation)
     cache_obj.save(args, kwargs)
+
     if not write_through:
         return cache_obj
     return _put_operation()

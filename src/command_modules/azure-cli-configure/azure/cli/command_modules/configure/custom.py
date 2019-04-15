@@ -160,8 +160,6 @@ def list_cache_contents(cmd):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._environment import get_config_dir
     from glob import glob
-    cloud = cmd.cli_ctx.cloud.name
-    subscription = get_subscription_id(cmd.cli_ctx)
     directory = os.path.join(
         get_config_dir(),
         'object_cache',
@@ -171,7 +169,7 @@ def list_cache_contents(cmd):
     rg_paths = glob(os.path.join(directory, '*'))
     for rg_path in rg_paths:
         rg_name = os.path.split(rg_path)[1]
-        for dir_name, subdir_list, file_list in os.walk(rg_path):
+        for dir_name, _, file_list in os.walk(rg_path):
             if not file_list:
                 continue
             resource_type = os.path.split(dir_name)[1]
@@ -190,9 +188,6 @@ def list_cache_contents(cmd):
 def show_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._environment import get_config_dir
-    from glob import glob
-    cloud = cmd.cli_ctx.cloud.name
-    subscription = get_subscription_id(cmd.cli_ctx)
     directory = os.path.join(
         get_config_dir(),
         'object_cache',
@@ -210,9 +205,6 @@ def show_cache_contents(cmd, resource_group_name=None, item_name=None, resource_
 def delete_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core._environment import get_config_dir
-    from glob import glob
-    cloud = cmd.cli_ctx.cloud.name
-    subscription = get_subscription_id(cmd.cli_ctx)
     directory = os.path.join(
         get_config_dir(),
         'object_cache',

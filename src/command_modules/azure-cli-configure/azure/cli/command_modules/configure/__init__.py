@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.configure._help  # pylint: disable=unused-import
 

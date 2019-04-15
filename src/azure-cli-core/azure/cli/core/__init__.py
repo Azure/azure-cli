@@ -418,7 +418,6 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
 
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
-        from knack.arguments import CLICommandArgument
         from knack.deprecation import Deprecated
 
         kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')

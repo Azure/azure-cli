@@ -1772,6 +1772,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
@@ -1799,7 +1800,6 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
         self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
             self.check('length(tags)', 3)
         ])
-
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
