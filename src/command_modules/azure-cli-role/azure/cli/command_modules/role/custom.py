@@ -619,19 +619,20 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname):
+def create_group(cmd, display_name, mail_nickname, force=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    matches = list(graph_client.groups.list(filter="displayName eq '{}' and mailNickname eq '{}'".format(
-        display_name, mail_nickname)))
 
     # workaround to ensure idempotent even AAD graph service doesn't support it
-    if matches:
-        if len(matches) > 1:
-            err = ('There are more than one groups with same display name and mail nick names: "{}". '
-                   'Please delete them first.')
-            raise CLIError(err.format(', '.join([x.object_id for x in matches])))
-        logger.warning('A group with the same display name and mail nickname already exists, returning.')
-        return matches[0]
+    if not force:
+        matches = list(graph_client.groups.list(filter="displayName eq '{}' and mailNickname eq '{}'".format(
+            display_name, mail_nickname)))
+        if matches:
+            if len(matches) > 1:
+                err = ('There is more than one group with the same display and nick names: "{}". '
+                       'Please delete them first.')
+                raise CLIError(err.format(', '.join([x.object_id for x in matches])))
+            logger.warning('A group with the same display name and mail nickname already exists, returning.')
+            return matches[0]
     group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
                                                              mail_nickname=mail_nickname))
 
