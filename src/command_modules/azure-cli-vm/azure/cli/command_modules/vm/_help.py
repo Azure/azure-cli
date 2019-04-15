@@ -1966,7 +1966,9 @@ helps['image template customizer'] = """
 helps['image template output'] = """
     type: group
     short-summary: Manage image builder template output distributors. 
-    long-summary: A customized image can be distributed as a managed image or a shared image in a shared image gallery (SIG). 
+    long-summary: >
+        A customized image can be distributed as a managed image,
+        a shared image in a shared image gallery (SIG), or as a VHD blob.
 """
 
 helps['image template customizer add'] = """
@@ -1987,7 +1989,8 @@ helps['image template customizer clear'] = """
 
 helps['image template output add'] = """
     type: command
-    short-summary: Add an image builder output distributor to an image builder template. The output distributor will be a managed image or a gallery image.
+    short-summary: Add an image builder output distributor to an image builder template.
+    long-summary: The output distributor can be a managed image, a gallery image, or as a VHD blob.
     examples:
     - name: Add a managed image output to an existing template. Optionally specify the run output name.
       text: az image template output add -n mytemplate -g my-group --managed-image my_desired_image_name --output-name managed_image_run_01
@@ -1995,6 +1998,9 @@ helps['image template output add'] = """
       text: |
             az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
             --gallery-image-definition linux_image_def --gallery-replication-regions westus brazilsouth 
+    - name: Add a VHD output to an existing template.
+      text: |
+            az image template output add -n mytemplate -g my-group --output-name my_vhd_image --is-vhd
 
 """
 

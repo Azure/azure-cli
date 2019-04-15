@@ -163,7 +163,7 @@ def load_arguments(self, _):
         c.argument('gallery_image_definition', arg_group="Shared Image Gallery", help="Name or ID of the existing SIG image definition to create the customized image version with.")
         c.argument('gallery_name', arg_group="Shared Image Gallery", help="Shared image gallery name, if image definition name and not ID was provided.")
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help)
-        c.argument('managed_image', arg_group="Managed Image", help="Name or ID of the customized managed image to be created,")
+        c.argument('managed_image', arg_group="Managed Image", help="Name or ID of the customized managed image to be created.")
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help)
 
     with self.argument_context('image template output add') as c:
@@ -171,6 +171,7 @@ def load_arguments(self, _):
         c.argument('output_name', help= ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
+        c.argument('is_vhd', arg_group="VHD", help="The output is a VHD distributor.", action='store_true')
         c.ignore('location')
 
     with self.argument_context('image template customizer') as c:
