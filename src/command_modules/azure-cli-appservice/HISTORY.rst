@@ -4,6 +4,7 @@ Release History
 ===============
 
 * webapp: az webapp up --logs was failing with a error and updating default .NETCORE version to 2.1
+* functionapp: remove unnecessary app settings while creating a function app with consumption plan
 
 0.2.17
 ++++++
