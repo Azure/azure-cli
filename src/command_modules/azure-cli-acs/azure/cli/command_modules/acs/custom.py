@@ -1003,19 +1003,31 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
 
 
 def _handle_merge(existing, addition, key, replace):
-    if addition[key]:
-        if existing[key] is None:
-            existing[key] = addition[key]
-            return
+    if not addition[key]:
+        return
+    if existing[key] is None:
+        existing[key] = addition[key]
+        return
 
-        for i in addition[key]:
-            for j in existing[key]:
-                if i['name'] == j['name']:
-                    if replace or i == j:
+    for i in addition[key]:
+        for j in existing[key]:
+            if i['name'] == j['name']:
+                if replace or i == j:
+                    existing[key].remove(j)
+                else:
+                    from knack.prompting import prompt_y_n, NoTTYException
+                    msg = 'A different object named {} already exists in your kubeconfig file.\nOverwrite?'
+                    overwrite = False
+                    try:
+                        overwrite = prompt_y_n(msg.format(i['name']))
+                    except NoTTYException:
+                        pass
+                    if overwrite:
                         existing[key].remove(j)
                     else:
-                        raise CLIError('A different object named {} already exists in {}'.format(i['name'], key))
-            existing[key].append(i)
+                        msg = 'A different object named {} already exists in {} in your kubeconfig file.'
+                        raise CLIError(msg.format(i['name'], key))
+        existing[key].append(i)
 
 
 def load_kubernetes_configuration(filename):
