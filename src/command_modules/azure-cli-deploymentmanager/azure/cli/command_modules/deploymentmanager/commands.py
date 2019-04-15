@@ -8,6 +8,7 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long
 from azure.cli.command_modules.deploymentmanager._client_factory import (cf_artifact_sources, cf_service_topologies, cf_services, cf_service_units, cf_steps, cf_rollouts)
 
+
 def load_command_table(self, _):
     service_topologies = CliCommandType(
         operations_tmpl='azure.mgmt.deploymentmanager.operations#ServiceTopologiesOperations.{}',
@@ -21,7 +22,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.deploymentmanager.operations#ServiceUnitsOperations.{}',
         client_factory=cf_service_units)
 
-    artifact_sources  = CliCommandType(
+    artifact_sources = CliCommandType(
         operations_tmpl='azure.mgmt.deploymentmanager.operations#ArtifactSourcesOperations.{}',
         client_factory=cf_artifact_sources)
 
@@ -89,8 +90,8 @@ def load_command_table(self, _):
     with self.command_group('deploymentmanager rollout', rollouts) as g:
         g.command('show', 'get')
         g.command('stop', 'cancel', confirmation="Do you want to cancel the rollout?")
-        g.command(
-            'restart', 
-            'restart', 
-            confirmation="Are you sure you want to restart the rollout and re-run all the steps from the start? If you want to skip all the steps that succeeded on the previous attempt, enter n and pass the '--skip-succeeded true' option.")
+        g.custom_command(
+            'restart',
+            'cli_rollout_restart',
+            confirmation="Are you sure you want to restart the rollout? If you want to skip all the steps that succeeded on the previous run, use '--skip-succeeded' option.")
         g.command('delete', 'delete')

@@ -5,22 +5,21 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import parse_resource_id
 
 from azure.cli.command_modules.deploymentmanager._client_factory import (
-    cf_artifact_sources, 
-    cf_service_topologies, 
-    cf_services, 
-    cf_service_units, 
-    cf_steps, 
+    cf_artifact_sources,
+    cf_service_topologies,
+    cf_services,
+    cf_service_units,
+    cf_steps,
     cf_rollouts)
 
 from azure.mgmt.deploymentmanager.models import (
-    SasAuthentication, 
-    ArtifactSource, 
-    ServiceTopologyResource, 
-    ServiceResource, 
-    ServiceUnitResource, 
+    SasAuthentication,
+    ArtifactSource,
+    ServiceTopologyResource,
+    ServiceResource,
+    ServiceUnitResource,
     ServiceUnitArtifacts,
     StepResource,
     WaitStepProperties,
@@ -28,18 +27,19 @@ from azure.mgmt.deploymentmanager.models import (
 
 logger = get_logger(__name__)
 
+
 # pylint: disable=unused-argument
 def cli_artifact_source_create(
-    cmd, 
-    resource_group_name, 
-    artifact_source_name, 
-    sas_uri, 
-    artifact_root=None, 
-    location=None, 
-    tags=None):
+        cmd,
+        resource_group_name,
+        artifact_source_name,
+        sas_uri,
+        artifact_root=None,
+        location=None,
+        tags=None):
 
     if location is None:
-        location = get_location_from_resource_group(resource_group_name)
+        location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     sasAuthentication = SasAuthentication(sas_uri=sas_uri)
     artifact_source = ArtifactSource(
@@ -55,12 +55,13 @@ def cli_artifact_source_create(
         artifact_source_name=artifact_source_name,
         artifact_source_info=artifact_source)
 
+
 def cli_artifact_source_update(
-    cmd,
-    instance, 
-    sas_uri=None, 
-    artifact_root=None, 
-    tags=None):
+        cmd,
+        instance,
+        sas_uri=None,
+        artifact_root=None,
+        tags=None):
 
     if sas_uri:
         sasAuthentication = SasAuthentication(sas_uri=sas_uri)
@@ -71,16 +72,17 @@ def cli_artifact_source_update(
 
     return instance
 
+
 def cli_service_topology_create(
-    cmd, 
-    resource_group_name, 
-    service_topology_name, 
-    artifact_source=None, 
-    location=None, 
-    tags=None):
+        cmd,
+        resource_group_name,
+        service_topology_name,
+        artifact_source=None,
+        location=None,
+        tags=None):
 
     if location is None:
-        location = get_location_from_resource_group(resource_group_name)
+        location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     if artifact_source is not None:
         from azure.cli.core.commands.client_factory import get_subscription_id
@@ -103,12 +105,13 @@ def cli_service_topology_create(
         service_topology_name=service_topology_name,
         service_topology_info=service_topology)
 
+
 def cli_service_topology_update(
-    cmd,
-    instance, 
-    resource_group_name,
-    artifact_source=None, 
-    tags=None):
+        cmd,
+        instance,
+        resource_group_name,
+        artifact_source=None,
+        tags=None):
 
     if artifact_source is not None:
 
@@ -129,18 +132,19 @@ def cli_service_topology_update(
 
     return instance
 
+
 def cli_service_create(
-    cmd, 
-    resource_group_name, 
-    service_topology_name, 
-    service_name,
-    target_location,
-    target_subscription_id,
-    location=None, 
-    tags=None):
+        cmd,
+        resource_group_name,
+        service_topology_name,
+        service_name,
+        target_location,
+        target_subscription_id,
+        location=None,
+        tags=None):
 
     if location is None:
-        location = get_location_from_resource_group(resource_group_name)
+        location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     service = ServiceResource(
         target_location=target_location,
@@ -154,12 +158,13 @@ def cli_service_create(
         service_name=service_name,
         service_info=service)
 
+
 def cli_service_update(
-    cmd,
-    instance, 
-    target_location=None,
-    target_subscription_id=None,
-    tags=None):
+        cmd,
+        instance,
+        target_location=None,
+        target_subscription_id=None,
+        tags=None):
 
     if target_location is not None:
         instance.target_location = target_location
@@ -172,42 +177,41 @@ def cli_service_update(
 
     return instance
 
+
 def cli_service_unit_create(
-    cmd, 
-    resource_group_name, 
-    service_topology_name, 
-    service_name, 
-    service_unit_name,
-    target_resource_group,
-    deployment_mode,
-    parameters_path,
-    template_path,
-    location=None, 
-    tags=None):
-
-
+        cmd,
+        resource_group_name,
+        service_topology_name,
+        service_name,
+        service_unit_name,
+        target_resource_group,
+        deployment_mode,
+        parameters_path,
+        template_path,
+        location=None,
+        tags=None):
     parameters_uri = None
     template_uri = None
     parameters_artifact_source_relative_path = None
     template_artifact_source_relative_path = None
 
-    if parameters_path is not None :
+    if parameters_path is not None:
         if parameters_path.startswith('http'):
             parameters_uri = parameters_path
         else:
             parameters_artifact_source_relative_path = parameters_path
 
-    if template_path is not None :
+    if template_path is not None:
         if template_path.startswith('http'):
             template_uri = template_path
         else:
             template_artifact_source_relative_path = template_path
 
     if (all([template_artifact_source_relative_path, parameters_uri]) or all([parameters_artifact_source_relative_path, template_uri])):  # pylint: disable=line-too-long
-        raise CLIError('usage error: specify both "--template-path" and "--parameters-path" either as relative URIs to artifact source or absolute SAS URIs.') # pylint: disable=line-too-long
+        raise CLIError('usage error: specify both "--template-path" and "--parameters-path" either as relative URIs to artifact source or absolute SAS URIs.')  # pylint: disable=line-too-long
 
     if location is None:
-        location = get_location_from_resource_group(resource_group_name)
+        location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     service_unit_artifacts = ServiceUnitArtifacts(
         parameters_uri=parameters_uri,
@@ -230,14 +234,15 @@ def cli_service_unit_create(
         service_unit_name=service_unit_name,
         service_unit_info=service_unit)
 
+
 def cli_service_unit_update(
-    cmd,
-    instance, 
-    target_resource_group=None,
-    deployment_mode=None,
-    parameters_path=None,
-    template_path=None,
-    tags=None):
+        cmd,
+        instance,
+        target_resource_group=None,
+        deployment_mode=None,
+        parameters_path=None,
+        template_path=None,
+        tags=None):
 
     if target_resource_group is not None:
         instance.target_resource_group = target_resource_group
@@ -245,36 +250,37 @@ def cli_service_unit_update(
     if deployment_mode is not None:
         instance.deployment_mode = deployment_mode
 
-    if parameters_path is not None :
+    if parameters_path is not None:
         if parameters_path.startswith('http'):
             instance.parameters_uri = parameters_path
         else:
             instance.parameters_artifact_source_relative_path = parameters_path
 
-    if template_path is not None :
+    if template_path is not None:
         if template_path.startswith('http'):
             instance.template_uri = template_path
         else:
-            instance.template_artifact_source_relative_path = template_artifact_source_relative_path
+            instance.template_artifact_source_relative_path = template_path
 
     if tags is not None:
         instance.tags = tags
 
     return instance
 
+
 def cli_step_create(
-    cmd, 
-    resource_group_name, 
-    step_name, 
-    duration, 
-    location = None, 
-    tags=None):
+        cmd,
+        resource_group_name,
+        step_name,
+        duration,
+        location=None,
+        tags=None):
 
     waitStepProperties = WaitStepProperties(
-        attributes = WaitStepAttributes(duration=duration))
+        attributes=WaitStepAttributes(duration=duration))
 
     if location is None:
-        location = get_location_from_resource_group(resource_group_name)
+        location = get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     step = StepResource(
         properties=waitStepProperties,
@@ -287,11 +293,12 @@ def cli_step_create(
         step_name=step_name,
         step_info=step)
 
+
 def cli_step_update(
-    cmd,
-    instance, 
-    duration,
-    tags=None):
+        cmd,
+        instance,
+        duration,
+        tags=None):
 
     instance.properties.attributes.duration = duration
 
@@ -300,17 +307,19 @@ def cli_step_update(
 
     return instance
 
+
 def cli_rollout_restart(
-    cmd,
-    resource_group_name,
-    rollout_name,
-    skip_succeeded):
+        cmd,
+        resource_group_name,
+        rollout_name,
+        skip_succeeded=False):
 
     client = cf_rollouts(cmd.cli_ctx)
     return client.restart(
         resource_group_name=resource_group_name,
         rollout_name=rollout_name,
-        skip_succeeded=skip_succeeded)
+        skip_succeeded=bool(skip_succeeded))
+
 
 def get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.mgmt.resource import ResourceManagementClient

@@ -24,7 +24,7 @@ helps['deploymentmanager artifact-source create'] = """
     short-summary: Creates an artifact source.
     examples:
         - name: Create a new artifact source.
-          text: az deploymentmanager artifact-source create -g rg1 -n contosoServiceArtifactSource -l centralus --sas-uri https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=f6Nx8en4sIJQryYFVVj%2B5BdU7bho96jAgOzLO40Twkg%3D
+          text: az deploymentmanager artifact-source create -g rg1 -n contosoServiceArtifactSource -l location --sas-uri https://myStorageAct.blob.azure.com/artifacts?st=2019-04-10T22%3A12Z&se=2019-04-11T09%3A12Z&sp=rl&sv=2018-03-28&sr=c&sig=f6Nx8en4sIJQryYFVVj%2B5BdU7bho96jAgOzLO40Twkg%3D
 """
 
 helps['deploymentmanager artifact-source show'] = """
@@ -60,7 +60,7 @@ helps['deploymentmanager service-topology create'] = """
     examples:
         - name: Create a new service topology.
           text: >
-            az deploymentmanager service-topology create -g rg1 -n contosoServiceTopology --artifact-source /subscriptions/mySub/resourcegroups/rg1/providers/Microsoft.DeploymentManager/artifactSources/contosoWebAppArtifactSource 
+            az deploymentmanager service-topology create -g rg1 -l topologyLocation -n contosoServiceTopology --artifact-source /subscriptions/mySub/resourcegroups/rg1/providers/Microsoft.DeploymentManager/artifactSources/contosoWebAppArtifactSource
 """
 
 helps['deploymentmanager service-topology'] = """
@@ -74,7 +74,7 @@ helps['deploymentmanager service-topology show'] = """
     examples:
         - name: Get the service topology.
           text: >
-            az deploymentmanager service-topology show -g rg1 -n contosoServiceTopology 
+            az deploymentmanager service-topology show -g rg1 -n contosoServiceTopology
 """
 
 helps['deploymentmanager service-topology delete'] = """
@@ -83,7 +83,7 @@ helps['deploymentmanager service-topology delete'] = """
     examples:
         - name: Deletes a service topology.
           text: >
-            az deploymentmanager service-topology delete -g rg1 -n contosoServiceTopology 
+            az deploymentmanager service-topology delete -g rg1 -n contosoServiceTopology
 """
 
 helps['deploymentmanager service-topology update'] = """
@@ -92,7 +92,7 @@ helps['deploymentmanager service-topology update'] = """
     examples:
         - name: Updates the service topology.
           text: >
-            az deploymentmanager service-topology update -g rg1 -n contosoServiceTopology --artifact-source /subscriptions/mySub/resourcegroups/rg1/providers/Microsoft.DeploymentManager/artifactSources/contosoWebAppArtifactSource 
+            az deploymentmanager service-topology update -g rg1 -n contosoServiceTopology --artifact-source /subscriptions/mySub/resourcegroups/rg1/providers/Microsoft.DeploymentManager/artifactSources/contosoWebAppArtifactSource
 """
 
 helps['deploymentmanager service'] = """
@@ -106,7 +106,7 @@ helps['deploymentmanager service create'] = """
     examples:
         - name: Create a new service under a service topology. Specify the service by its name, service topology it is in and the resource group name.
           text: >
-            az deploymentmanager service create -g rg1 -location centralus --service-topology-name contosoServiceTopology -n contosoService1 --target-location "East US" --target-subscription-id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+            az deploymentmanager service create -g rg1 -l serviceLocation --service-topology-name contosoServiceTopology -n contosoService1 --target-location "East US" --target-subscription-id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 """
 
 helps['deploymentmanager service show'] = """
@@ -148,18 +148,18 @@ helps['deploymentmanager service-unit create'] = """
     examples:
         - name: Create a new service unit using relative paths into the artifact source.
           description:
-            Specify the service unit by its name, the service and service topology it is in. 
+            Specify the service unit by its name, the service and service topology it is in.
             The template and parameters files are defined as relative paths into the artifact source location referenced in the specified service topology.
             The resources defined in this template are to be deployed into the target resource group service1ResourceGroup with the deployment mode set to 'Incremental'.
           text: >
-            az deploymentmanager service-unit create -g rg1 -location centralus --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage --target-resource-group service1ResourceGroup --deployment-mode Incremental --template-path "Templates/Service1.Storage.json" --parameters-path "Parameters/Service1.Storage.Parameters.json" 
+            az deploymentmanager service-unit create -g rg1 -l location --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage --target-resource-group service1ResourceGroup --deployment-mode Incremental --template-path "Templates/Service1.Storage.json" --parameters-path "Parameters/Service1.Storage.Parameters.json"
         - name: Create a new service unit using SAS Uri for template and parameters.
           description:
-            Specify the service unit by its name, the service and service topology it is in. 
+            Specify the service unit by its name, the service and service topology it is in.
             The template and parameters files are defined as SAS Uri's.
             The resources defined in this template are to be deployed into the target resource group service1ResourceGroup with the deployment mode set to 'Incremental'.
           text: >
-            az deploymentmanager service-unit create -g rg1 -location centralus --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage \\
+            az deploymentmanager service-unit create -g rg1 -l location --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage \\
                 --target-resource-group service1ResourceGroup --deployment-mode Incremental \\
                 --template-path "https://ContosoStorage.blob.core.windows.net/ContosoArtifacts/Templates/Service2.Storage.json?sasParameters" \\
                 --parameters-path "https://ContosoStorage.blob.core.windows.net/ContosoArtifacts/Parameters/Service2Storage.Parameters.json?sasParameters"
@@ -171,7 +171,7 @@ helps['deploymentmanager service-unit show'] = """
     examples:
         - name: Get the service unit.
           text: >
-            az deploymentmanager service-unit show -g rg1 -location centralus --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage
+            az deploymentmanager service-unit show -g rg1 --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage
 """
 
 helps['deploymentmanager service-unit delete'] = """
@@ -180,7 +180,7 @@ helps['deploymentmanager service-unit delete'] = """
     examples:
         - name: Deletes a service unit.
           text: >
-            az deploymentmanager service-unit delete -g rg1 -location centralus --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage
+            az deploymentmanager service-unit delete -g rg1 --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage
 """
 
 helps['deploymentmanager service-unit update'] = """
@@ -189,7 +189,7 @@ helps['deploymentmanager service-unit update'] = """
     examples:
         - name: Updates the service unit.
           text: >
-            az deploymentmanager service-unit update -g rg1 -location centralus --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage --target-resource-group service1ResourceGroupUpdated
+            az deploymentmanager service-unit update -g rg1 --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage --target-resource-group service1ResourceGroupUpdated
 """
 
 helps['deploymentmanager step'] = """
@@ -204,7 +204,7 @@ helps['deploymentmanager step create'] = """
     examples:
         - name: Creates a step.
           text: >
-            az deploymentmanager step create -g rg1 -location centralus -n contosoServiceWaitStep --duration PT30M
+            az deploymentmanager step create -g rg1 -l location -n contosoServiceWaitStep --duration PT30M
 """
 
 helps['deploymentmanager step show'] = """
@@ -213,7 +213,7 @@ helps['deploymentmanager step show'] = """
     examples:
         - name: Get the step.
           text: >
-            az deploymentmanager step show -g rg1 -n contosoServiceWaitStep 
+            az deploymentmanager step show -g rg1 -n contosoServiceWaitStep
 """
 
 helps['deploymentmanager step update'] = """
@@ -222,7 +222,7 @@ helps['deploymentmanager step update'] = """
     examples:
         - name: Updates a step.
           text: >
-            az deploymentmanager step create -g rg1 -n contosoServiceWaitStep --duration PT20M
+            az deploymentmanager step update -g rg1 -n contosoServiceWaitStep --duration PT20M
 """
 
 helps['deploymentmanager rollout'] = """
@@ -235,9 +235,9 @@ helps['deploymentmanager rollout show'] = """
     type: command
     short-summary: Gets the rollout.
     examples:
-        - name: Gets the rollout 
+        - name: Gets the rollout
           text: >
-            az deploymentmanager rollout show -g rg1 -n contosoServiceRollout 
+            az deploymentmanager rollout show -g rg1 -n contosoServiceRollout
         - name: Gets the specific retry attempt of a rollout. Shows the steps run during that attempt.
           text: >
             az deploymentmanager rollout show -g rg1 -n contosoServiceRollout --retry-attempt 1
@@ -247,20 +247,20 @@ helps['deploymentmanager rollout stop'] = """
     type: command
     short-summary: Stop the rollout.
     examples:
-        - name: Stops the rollout 
+        - name: Stops the rollout
           text: >
-            az deploymentmanager rollout stop -g rg1 -n contosoServiceRollout 
+            az deploymentmanager rollout stop -g rg1 -n contosoServiceRollout
 """
 
 helps['deploymentmanager rollout restart'] = """
     type: command
     short-summary: Restarts the rollout.
     examples:
-        - name: Restart the rollout 
+        - name: Restart the rollout
           text: >
-            az deploymentmanager restart -g rg1 -n contosoServiceRollout 
+            az deploymentmanager rollout restart -g rg1 -n contosoServiceRollout
 
         - name: Restart the rollout and skip all steps that have succeeded in the previous run
           text: >
-            az deploymentmanager restart -g rg1 -n contosoServiceRollout --skip-succeeded
+            az deploymentmanager rollout restart -g rg1 -n contosoServiceRollout --skip-succeeded
 """

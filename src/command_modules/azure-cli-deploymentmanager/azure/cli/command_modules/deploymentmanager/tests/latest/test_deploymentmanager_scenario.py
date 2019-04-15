@@ -12,8 +12,8 @@ import time
 import fileinput
 
 from azure.cli.testsdk import (
-    ScenarioTest, 
-    ResourceGroupPreparer, 
+    ScenarioTest,
+    ResourceGroupPreparer,
     StorageAccountPreparer)
 
 from msrestazure.azure_exceptions import CloudError
@@ -31,14 +31,15 @@ invalid_parameters_file_name = "Storage_Invalid.Parameters.json"
 template_file_name = "Storage.Template.json"
 params_copy_file_name = "Storage.Copy.Parameters.json"
 template_copy_file_name = "Storage.Copy.Template.json"
-path_to_tests = ".\\azure\cli\command_modules\deploymentmanager\\tests\latest\\" 
-artifact_root = "artifactroot" 
+path_to_tests = ".\\azure\\cli\\command_modules\\deploymentmanager\\tests\\latest\\"
+artifact_root = "artifactroot"
 
 parametersArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, parameters_file_name)
 templateArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, template_file_name)
 invalidParametersArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, invalid_parameters_file_name)
 parametersCopyArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, params_copy_file_name)
 templateCopyArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, template_copy_file_name)
+
 
 class DeploymentManagerTests(ScenarioTest):
 
@@ -50,16 +51,16 @@ class DeploymentManagerTests(ScenarioTest):
         subscription_id = "53012dcb-5039-4e96-8e6c-5d913da1cdb5"
         artifact_source_name = resource_group + "ArtifactSource"
         updated_artifact_source_name = resource_group + "ArtifactSourceUpdated"
-        location = resource_location 
+        location = resource_location
 
         self.assertFalse(location is None)
 
         self.set_managed_identity(subscription_id, resource_group)
 
         artifact_source_id = self.new_artifact_source(
-            resource_group, 
-            storage_account, 
-            artifact_source_name, 
+            resource_group,
+            storage_account,
+            artifact_source_name,
             location,
             True)
 
@@ -73,15 +74,15 @@ class DeploymentManagerTests(ScenarioTest):
 
         self.delete_artifact_source(resource_group, artifact_source_name)
         self.delete_artifact_source(resource_group, updated_artifact_source_name)
-    
+
     def service_topology_test(
-        self, 
-        subscription_id, 
-        resource_group_name, 
-        location, 
-        artifact_source_id, 
-        updated_artifact_source_name, 
-        storage_account_name):
+            self,
+            subscription_id,
+            resource_group_name,
+            location,
+            artifact_source_id,
+            updated_artifact_source_name,
+            storage_account_name):
 
         topology_name = resource_group_name + "ServiceTopology"
 
@@ -98,7 +99,6 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('artifactSourceId', artifact_source_id)])
 
         service_topology_id = self.cmd('deploymentmanager service-topology show -g {rg} -n {st_name}').get_output_in_json()['id']
-        
         self.services_test(
             resource_group_name,
             location,
@@ -109,10 +109,10 @@ class DeploymentManagerTests(ScenarioTest):
         )
 
         updated_artifact_source_id = self.new_artifact_source(
-            resource_group_name, 
-            storage_account_name, 
-            updated_artifact_source_name, 
-            location, 
+            resource_group_name,
+            storage_account_name,
+            updated_artifact_source_name,
+            location,
             False)
 
         self.kwargs = {
@@ -132,16 +132,15 @@ class DeploymentManagerTests(ScenarioTest):
             self.cmd('deploymentmanager service-topology show -n {st_name} -g {rg}')
 
     def services_test(
-        self,
-        resource_group_name,
-        location,
-        artifact_source_id,
-        service_topology_id,
-        service_topology_name,
-        subscription_id):
+            self,
+            resource_group_name,
+            location,
+            artifact_source_id,
+            service_topology_id,
+            service_topology_name,
+            subscription_id):
 
         service_name = resource_group_name + "Service"
-        
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
@@ -156,7 +155,6 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('name', service_name),
             self.check('targetSubscriptionId', subscription_id),
             self.check('targetLocation', location)])
-        
         self.service_units_test(
             resource_group_name,
             location,
@@ -167,7 +165,7 @@ class DeploymentManagerTests(ScenarioTest):
         )
 
         # dummy subscription id created for testing. No resources are created in this.
-        updated_target_subscription_id = "29843263-a568-4db8-899f-10977b9d5c7b" 
+        updated_target_subscription_id = "29843263-a568-4db8-899f-10977b9d5c7b"
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
@@ -187,26 +185,25 @@ class DeploymentManagerTests(ScenarioTest):
             self.cmd('deploymentmanager service show -g {rg} --service-topology-name {st_name} -n {s_name}')
 
     def service_units_test(
-        self,
-        resource_group_name,
-        location,
-        artifact_source_id,
-        service_topology_id,
-        service_topology_name,
-        service_name):
+            self,
+            resource_group_name,
+            location,
+            artifact_source_id,
+            service_topology_id,
+            service_topology_name,
+            service_name):
 
         service_unit_name = resource_group_name + "ServiceUnit"
         deployment_mode = "Incremental"
-        
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
             'st_name': service_topology_name,
             's_name': service_name,
             'su_name': service_unit_name,
-            'd_mode':deployment_mode ,
+            'd_mode': deployment_mode,
             'p_path': parameters_file_name,
-            't_path': template_file_name 
+            't_path': template_file_name
         }
 
         self.cmd('deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l \"{location}\" --target-resource-group {rg} --deployment-mode {d_mode} --parameters-path {p_path} --template-path {t_path}', checks=[
@@ -221,16 +218,15 @@ class DeploymentManagerTests(ScenarioTest):
 
         # Create a service unit that is invalid to test rollout failure operations
         invalid_service_unit_name = resource_group_name + "InvalidServiceUnit"
-        
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
             'st_name': service_topology_name,
             's_name': service_name,
             'su_name': invalid_service_unit_name,
-            'd_mode':deployment_mode ,
+            'd_mode': deployment_mode,
             'p_path': invalid_parameters_file_name,
-            't_path': template_file_name 
+            't_path': template_file_name
         }
 
         self.cmd('deploymentmanager service-unit create -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} -l \"{location}\" --target-resource-group {rg} --deployment-mode {d_mode} --parameters-path {p_path} --template-path {t_path}', checks=[
@@ -242,7 +238,6 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('targetResourceGroup', resource_group_name)])
 
         invalid_service_unit_id = self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}').get_output_in_json()['id']
-        
         self.steps_test(
             resource_group_name,
             location,
@@ -261,7 +256,7 @@ class DeploymentManagerTests(ScenarioTest):
             'su_name': service_unit_name,
             'd_mode': deployment_mode,
             'p_path': parameters_file_name,
-            't_path': template_file_name 
+            't_path': template_file_name
         }
 
         self.cmd('deploymentmanager service-unit update -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name} --deployment-mode {d_mode}', checks=[
@@ -285,14 +280,14 @@ class DeploymentManagerTests(ScenarioTest):
             self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
     def steps_test(
-        self,
-        resource_group_name,
-        location,
-        artifact_source_id,
-        service_topology_id,
-        service_topology_name,
-        service_unit_id,
-        invalid_service_unit_id):
+            self,
+            resource_group_name,
+            location,
+            artifact_source_id,
+            service_topology_id,
+            service_topology_name,
+            service_unit_id,
+            invalid_service_unit_id):
 
         step_name = resource_group_name + "WaitStep"
         duration = "PT5M"
@@ -340,14 +335,14 @@ class DeploymentManagerTests(ScenarioTest):
             self.cmd('deploymentmanager step show -g {rg} -n {step_name}')
 
     def rollouts_test(
-        self,
-        resource_group_name,
-        location,
-        artifact_source_id,
-        service_topology_id,
-        service_unit_id,
-        invalid_service_unit_id,
-        step_id):
+            self,
+            resource_group_name,
+            location,
+            artifact_source_id,
+            service_topology_id,
+            service_unit_id,
+            invalid_service_unit_id,
+            step_id):
 
         rollout_name = resource_group_name + "Rollout"
         failed_rollout_name = resource_group_name + "InvalidRollout"
@@ -367,16 +362,16 @@ class DeploymentManagerTests(ScenarioTest):
             artifact_source_id,
             step_id,
             invalid_service_unit_id,
-            failure_create_rollout_template 
+            failure_create_rollout_template
         )
-        
+
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
             't_path': create_rollout_template,
             'invalid_t_path': failure_create_rollout_template,
             'rollout_name': rollout_name,
-            'failed_rollout_name': failed_rollout_name 
+            'failed_rollout_name': failed_rollout_name
         }
 
         self.cmd('group deployment create -g {rg} --template-file {t_path}', checks=[
@@ -395,7 +390,7 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('status', 'Canceling')])
 
         while True:
-            self.sleep(120)  
+            self.sleep(120)
             rollout = self.cmd('deploymentmanager rollout show -g {rg} -n {rollout_name}').get_output_in_json()
             if (rollout['status'] != 'Canceling'):
                 break
@@ -414,14 +409,14 @@ class DeploymentManagerTests(ScenarioTest):
 
         # Now validate that the rollout expected to fail has failed.
         while True:
-            self.sleep(120)  
+            self.sleep(120)
             failed_rollout = self.cmd('deploymentmanager rollout show -g {rg} -n {failed_rollout_name}').get_output_in_json()
             if (failed_rollout['status'] != 'Running'):
                 break
 
         self.assertEqual('Failed', failed_rollout['status'])
 
-        self.cmd('deploymentmanager rollout restart -g {rg} -n {failed_rollout_name} --skip-succeeded True --yes', checks=[
+        self.cmd('deploymentmanager rollout restart -g {rg} -n {failed_rollout_name} --skip-succeeded --yes', checks=[
             self.check('type', 'Microsoft.DeploymentManager/rollouts'),
             self.check('operationInfo.retryAttempt', '1'),
             self.check('operationInfo.skipSucceededOnRetry', True),
@@ -434,7 +429,7 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('status', 'Canceling')])
 
         while True:
-            self.sleep(120)  
+            self.sleep(120)
             failed_rollout = self.cmd('deploymentmanager rollout show -g {rg} -n {failed_rollout_name}').get_output_in_json()
             if (failed_rollout['status'] != 'Canceling'):
                 break
@@ -452,7 +447,6 @@ class DeploymentManagerTests(ScenarioTest):
         is_playback = os.path.exists(self.recording_file)
         if not is_playback:
             identity_name = resource_group_name + "Identity"
-             
             self.kwargs = {
                 'rg': resource_group_name,
                 'name': identity_name,
@@ -460,7 +454,7 @@ class DeploymentManagerTests(ScenarioTest):
             identity = self.cmd('identity create -n {name} -g {rg}').get_output_in_json()
             identityId = identity['id']
 
-            self.sleep(120)  
+            self.sleep(120)
 
             self.kwargs = {
                 'rg': resource_group_name,
@@ -469,7 +463,7 @@ class DeploymentManagerTests(ScenarioTest):
                 'scope': "/subscriptions/{0}".format(subscription_id),
             }
 
-            roleAssignment = self.cmd('role assignment create --assignee {principalId} --role {role} --scope {scope}').get_output_in_json()
+            self.cmd('role assignment create --assignee {principalId} --role {role} --scope {scope}')
 
             self.sleep(30)
 
@@ -477,23 +471,23 @@ class DeploymentManagerTests(ScenarioTest):
             self.replace_string("__USER_ASSIGNED_IDENTITY__", identityId, failure_create_rollout_template)
 
             return identityId
-        
+
         return "dummyid"
-    
+
     def new_artifact_source(
-        self, 
-        resource_group_name, 
-        storage_account_name, 
-        artifact_source_name,
-        location, 
-        setup_container):
+            self,
+            resource_group_name,
+            storage_account_name,
+            artifact_source_name,
+            location,
+            setup_container):
 
         artifact_root = "artifactroot"
         container_name = "artifacts"
 
         sas_uri = self.get_sas_for_artifacts_container(
-            resource_group_name, 
-            storage_account_name, 
+            resource_group_name,
+            storage_account_name,
             container_name,
             artifact_root,
             setup_container)
@@ -515,17 +509,17 @@ class DeploymentManagerTests(ScenarioTest):
         return self.cmd('deploymentmanager artifact-source show -g {rg} -n {as_name}').get_output_in_json()['id']
 
     def get_sas_for_artifacts_container(
-        self,
-        resource_group_name,
-        storage_account_name,
-        storage_container_name,
-        artifact_root,
-        setup_container):
+            self,
+            resource_group_name,
+            storage_account_name,
+            storage_container_name,
+            artifact_root,
+            setup_container):
 
         is_playback = os.path.exists(self.recording_file)
         if not is_playback:
             if setup_container:
-                self.setup_artifacts_container(resource_group_name, storage_account_name, storage_container_name) 
+                self.setup_artifacts_container(resource_group_name, storage_account_name, storage_container_name)
 
             return self.create_sas_key_for_container(storage_account_name, storage_container_name)
 
@@ -539,17 +533,16 @@ class DeploymentManagerTests(ScenarioTest):
             'account': storage_account_name,
             'container': container_name,
             'expiry': expiry,
-            'start': start 
+            'start': start
         }
 
         sas = self.cmd('storage container generate-sas -n {container} --account-name {account} '
-                    '--permissions rl --start {start} --expiry {expiry} -otsv').output.strip()
+                       '--permissions rl --start {start} --expiry {expiry} -otsv').output.strip()
 
         full_uri = "https://" + storage_account_name + ".blob.core.windows.net/" + container_name + "?" + sas
         return full_uri
 
     def setup_artifacts_container(self, resource_group_name, storage_account_name, container_name):
-        		
         stgAcctForTemplate = resource_group_name + "stgtemplate"
         storageAcountReplacementSymbol = "__STORAGEACCOUNTNAME__"
 
@@ -579,7 +572,7 @@ class DeploymentManagerTests(ScenarioTest):
         abs_file_path = os.path.join(TEST_DIR, file_path).replace('\\', '\\\\')
         blob_path = artifact_root + "/" + file_name
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}" -t block', storage_account_info,
-                    storage_container_name, blob_path, abs_file_path)
+                         storage_container_name, blob_path, abs_file_path)
 
     def get_stg_account_key(self, group, name):
 

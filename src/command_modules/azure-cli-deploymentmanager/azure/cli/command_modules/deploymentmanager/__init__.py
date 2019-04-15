@@ -5,7 +5,8 @@
 
 from azure.cli.core import AzCommandsLoader
 
-import azure.cli.command_modules.deploymentmanager._help # pylint: disable=unused-import
+import azure.cli.command_modules.deploymentmanager._help  # pylint: disable=unused-import
+
 
 class DeploymentManagerCommandsLoader(AzCommandsLoader):
 
@@ -14,8 +15,8 @@ class DeploymentManagerCommandsLoader(AzCommandsLoader):
         deploymentmanager_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.deploymentmanager.custom#{}')
         super(DeploymentManagerCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                  min_profile='2017-03-10-profile',
-                                                  custom_command_type=deploymentmanager_custom)
+                                                              min_profile='2017-03-10-profile',
+                                                              custom_command_type=deploymentmanager_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.deploymentmanager.commands import load_command_table
