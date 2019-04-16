@@ -47,8 +47,7 @@ class DeploymentManagerTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix=name_prefix, location=resource_location)
     def test_deploymentmanager_scenario(self, resource_group, storage_account):
 
-        # subscription_id = self.get_subscription_id()
-        subscription_id = "53012dcb-5039-4e96-8e6c-5d913da1cdb5"
+        subscription_id = self.get_subscription_id()
         artifact_source_name = resource_group + "ArtifactSource"
         updated_artifact_source_name = resource_group + "ArtifactSourceUpdated"
         location = resource_location
