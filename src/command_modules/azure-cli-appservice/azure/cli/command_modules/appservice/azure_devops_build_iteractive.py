@@ -219,7 +219,7 @@ class AzureDevopsBuildInteractive(object):
 
         if github_runtime_language is not None and github_runtime_language != self.functionapp_language:
             raise CLIError("The language stack setting found in the provided repository ({setting}) does not match "
-                           "the language stack your Azure function app ({functionapp}).{ls}"
+                           "the language stack of your Azure function app ({functionapp}).{ls}"
                            "Please look at the FUNCTIONS_WORKER_RUNTIME setting both in your local.settings.json file "
                            "and in your Azure function app's application settings, "
                            "and ensure they match.".format(
@@ -537,8 +537,7 @@ class AzureDevopsBuildInteractive(object):
                                "Please ensure that:{ls}"
                                "1. You are the owner of the subscription, "
                                "or have roleAssignments/write permission.{ls}"
-                               "2. You can perform app registration in https://portal.azure.com/#blade/"
-                               "Microsoft_AAD_IAM/ApplicationsListBlade{ls}"
+                               "2. You can perform app registration in Azure Active Directory{ls}"
                                "3. The combined length of your organization name, project name and repository name "
                                "is under 68 characters.".format(ls=os.linesep))
         else:
