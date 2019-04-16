@@ -456,7 +456,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         # list Vnetrules
         self.cmd('eventhubs namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}')
 
-        #remove Vnetrule
+        # remove Vnetrule
         self.cmd(
             'eventhubs namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}')
 
