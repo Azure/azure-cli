@@ -19,11 +19,6 @@ import copy
 from importlib import import_module
 import six
 
-try:
-    t_JSONDecodeError = json.JSONDecodeError
-except AttributeError:  # in Python 2.7
-    t_JSONDecodeError = ValueError
-
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -41,6 +36,11 @@ from knack.invocation import CommandInvoker
 from knack.log import get_logger
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
+
+try:
+    t_JSONDecodeError = json.JSONDecodeError
+except AttributeError:  # in Python 2.7
+    t_JSONDecodeError = ValueError
 
 logger = get_logger(__name__)
 
@@ -235,16 +235,16 @@ class CacheObject(object):
 
     def __getattribute__(self, key):
         try:
-            return super(CacheObject, self).__getattribute__(key)
-        except AttributeError:
-            payload = self._payload
+            payload = object.__getattribute__(self, '_payload')
             return payload.__getattribute__(key)
+        except AttributeError:
+            return super(CacheObject, self).__getattribute__(key)
 
     def __setattr__(self, key, value):
         try:
-            return super(CacheObject, self).__setattr__(key, value)
-        except AttributeError:
             return self._payload.__setattr__(key, value)
+        except AttributeError:
+            return super(CacheObject, self).__setattr__(key, value)
 
 
 class AzCliCommand(CLICommand):
@@ -331,7 +331,7 @@ class AzCliCommand(CLICommand):
         return UpdateContext(obj_inst)
 
 
-def cached_get(cmd, operation, *args, **kwargs):
+def cached_get(cmd_obj, operation, *args, **kwargs):
 
     def _get_operation():
         result = None
@@ -341,11 +341,11 @@ def cached_get(cmd, operation, *args, **kwargs):
             result = operation(**kwargs)
         return result
 
-    cache_opt = cmd.cli_ctx.data.get('_cache', '')
+    cache_opt = cmd_obj.cli_ctx.data.get('_cache', '')
     if 'read' not in cache_opt:
         return _get_operation()
 
-    cache_obj = CacheObject(cmd, None, operation)
+    cache_obj = CacheObject(cmd_obj, None, operation)
     try:
         cache_obj.load(args, kwargs)
         return cache_obj
@@ -359,7 +359,7 @@ def cached_get(cmd, operation, *args, **kwargs):
         return _get_operation()
 
 
-def cached_put(cmd, operation, parameters, *args, **kwargs):
+def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
     def _put_operation():
         result = None
         if args:
@@ -369,14 +369,14 @@ def cached_put(cmd, operation, parameters, *args, **kwargs):
             result = operation(parameters=parameters, **kwargs)
         return result
 
-    cache_opt = cmd.cli_ctx.data.get('_cache', '')
+    cache_opt = cmd_obj.cli_ctx.data.get('_cache', '')
     write = 'write' in cache_opt
     write_through = 'write-through' in cache_opt
 
     if not write and not write_through:
         return _put_operation()
 
-    cache_obj = CacheObject(cmd, parameters.serialize(), operation)
+    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
     cache_obj.save(args, kwargs)
 
     if not write_through:

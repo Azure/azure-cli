@@ -802,6 +802,7 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
 class NetworkRouteFilterScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
     def test_network_route_filter(self, resource_group):
         self.kwargs['filter'] = 'filter1'

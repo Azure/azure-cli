@@ -549,7 +549,10 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             if no_wait_param:
                 setterargs[no_wait_param] = args[no_wait_param]
 
-        result = cached_put(cmd, setter, **setterargs)
+        if setter_arg_name == 'parameters':
+            result = cached_put(cmd, setter, **setterargs)
+        else:
+            result = cached_put(cmd, setter, setterargs[setter_arg_name], **setterargs)
 
         if supports_no_wait and no_wait_enabled:
             return None

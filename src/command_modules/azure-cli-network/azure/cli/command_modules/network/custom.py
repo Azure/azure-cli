@@ -44,7 +44,7 @@ def _get_from_collection(collection, value, key_name):
 
 
 def _upsert(parent, collection_name, obj_to_add, key_name, warn=True):
-    parent = getattr(parent, '_payload', parent)
+
     if not getattr(parent, collection_name, None):
         setattr(parent, collection_name, [])
     collection = getattr(parent, collection_name, None)
