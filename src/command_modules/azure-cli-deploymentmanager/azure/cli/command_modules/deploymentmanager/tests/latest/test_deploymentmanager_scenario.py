@@ -64,7 +64,7 @@ class DeploymentManagerTests(ScenarioTest):
             location,
             True)
 
-        self.service_topology_test(
+        self.service_topology_validations(
             subscription_id,
             resource_group,
             location,
@@ -75,7 +75,7 @@ class DeploymentManagerTests(ScenarioTest):
         self.delete_artifact_source(resource_group, artifact_source_name)
         self.delete_artifact_source(resource_group, updated_artifact_source_name)
 
-    def service_topology_test(
+    def service_topology_validations(
             self,
             subscription_id,
             resource_group_name,
@@ -99,7 +99,7 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('artifactSourceId', artifact_source_id)])
 
         service_topology_id = self.cmd('deploymentmanager service-topology show -g {rg} -n {st_name}').get_output_in_json()['id']
-        self.services_test(
+        self.services_validations(
             resource_group_name,
             location,
             artifact_source_id,
@@ -131,7 +131,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('deploymentmanager service-topology show -n {st_name} -g {rg}')
 
-    def services_test(
+    def services_validations(
             self,
             resource_group_name,
             location,
@@ -154,7 +154,7 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('type', 'Microsoft.DeploymentManager/serviceTopologies/services'),
             self.check('name', service_name),
             self.check('targetLocation', location)])
-        self.service_units_test(
+        self.service_units_validations(
             resource_group_name,
             location,
             artifact_source_id,
@@ -183,7 +183,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('deploymentmanager service show -g {rg} --service-topology-name {st_name} -n {s_name}')
 
-    def service_units_test(
+    def service_units_validations(
             self,
             resource_group_name,
             location,
@@ -237,7 +237,7 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('targetResourceGroup', resource_group_name)])
 
         invalid_service_unit_id = self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}').get_output_in_json()['id']
-        self.steps_test(
+        self.steps_validations(
             resource_group_name,
             location,
             artifact_source_id,
@@ -278,7 +278,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
-    def steps_test(
+    def steps_validations(
             self,
             resource_group_name,
             location,
@@ -307,7 +307,7 @@ class DeploymentManagerTests(ScenarioTest):
 
         step_id = self.cmd('deploymentmanager step show -g {rg} -n {step_name}').get_output_in_json()['id']
 
-        self.rollouts_test(
+        self.rollouts_validations(
             resource_group_name,
             location,
             artifact_source_id,
@@ -333,7 +333,7 @@ class DeploymentManagerTests(ScenarioTest):
         with self.assertRaisesRegexp(CloudError, 'not found'):
             self.cmd('deploymentmanager step show -g {rg} -n {step_name}')
 
-    def rollouts_test(
+    def rollouts_validations(
             self,
             resource_group_name,
             location,
