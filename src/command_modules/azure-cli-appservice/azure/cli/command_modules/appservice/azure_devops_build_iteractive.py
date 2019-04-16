@@ -537,7 +537,7 @@ class AzureDevopsBuildInteractive(object):
                                "Please ensure that:{ls}"
                                "1. You are the owner of the subscription, "
                                "or have roleAssignments/write permission.{ls}"
-                               "2. You can perform app registration in Azure Active Directory{ls}"
+                               "2. You can perform app registration in Azure Active Directory.{ls}"
                                "3. The combined length of your organization name, project name and repository name "
                                "is under 68 characters.".format(ls=os.linesep))
         else:

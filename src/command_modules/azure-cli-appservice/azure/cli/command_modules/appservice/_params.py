@@ -416,7 +416,7 @@ def load_arguments(self, _):
         c.argument('sku', required=False, help='The SKU of the app service plan.')
 
     with self.argument_context('functionapp devops-build create') as c:
-        c.argument('functionapp_name', help="Name of the Azure Function app that you want to use", required=False)
+        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False)
         c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
         c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
         c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
