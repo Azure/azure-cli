@@ -429,36 +429,36 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
                  checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Create NetworkRule
-        self.cmd('eventhubs namespace network-rule-set create --resource-group {rg} --name {namespacename} --default-action Deny')
+        self.cmd('eventhubs namespace network-rule create --resource-group {rg} --name {namespacename} --default-action Deny')
 
         # Get NetworkRule
-        self.cmd('eventhubs namespace network-rule-set list --resource-group {rg} --name {namespacename}')
+        self.cmd('eventhubs namespace network-rule list --resource-group {rg} --name {namespacename}')
 
         # add IP Rule
-        self.cmd('eventhubs namespace network-rule-set ip-rule add --resource-group {rg} --name {namespacename} --ip-mask {ipmask1} --action Allow')
+        self.cmd('eventhubs namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask1} --action Allow')
 
         # add IP Rule
         self.cmd(
-            'eventhubs namespace network-rule-set ip-rule add --resource-group {rg} --name {namespacename} --ip-mask {ipmask2} --action Allow')
+            'eventhubs namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask2} --action Allow')
 
         # Get list of IP rule
-        self.cmd('eventhubs namespace network-rule-set ip-rule list --resource-group {rg} --name {namespacename}')
+        self.cmd('eventhubs namespace network-rule ip-address-rule list --resource-group {rg} --name {namespacename}')
 
         # Remove IPRule
-        self.cmd('eventhubs namespace network-rule-set ip-rule remove --resource-group {rg} --name {namespacename} --ip-mask {ipmask2}')
+        self.cmd('eventhubs namespace network-rule ip-address-rule remove --resource-group {rg} --name {namespacename} --ip-address {ipmask2}')
 
         # add vnetrule
-        self.cmd('eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}')
+        self.cmd('eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}')
 
         # add vnetrule2
-        self.cmd('eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}')
+        self.cmd('eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}')
 
         # list Vnetrules
-        self.cmd('eventhubs namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}')
+        self.cmd('eventhubs namespace network-rule virtual-network-rule list --resource-group {rg} --name {namespacename}')
 
         # remove Vnetrule
         self.cmd(
-            'eventhubs namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}')
+            'eventhubs namespace network-rule virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}')
 
         # Delete Namespace list by ResourceGroup
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
