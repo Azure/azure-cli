@@ -140,6 +140,8 @@ def load_arguments(self, _):
 
     with self.argument_context('ad group create') as c:
         c.argument('mail_nickname', help='Mail nickname')
+        c.argument('force', arg_type=get_three_state_flag(),
+                   help='always create a new group instead of updating the one with same display and mail nickname')
 
     with self.argument_context('ad group show') as c:
         c.extra('cmd')
