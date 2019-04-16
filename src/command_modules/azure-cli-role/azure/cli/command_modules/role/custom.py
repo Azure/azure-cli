@@ -128,8 +128,14 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
                            scope=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
-    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
-                                   resolve_assignee=(not assignee_object_id))
+
+    try:
+        return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
+                                       resolve_assignee=(not assignee_object_id))
+    except Exception as ex:  # pylint: disable=broad-except
+        if _error_caused_by_role_assignment_exists(ex):  # for idempotent
+            return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
+        raise
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
@@ -1198,6 +1204,10 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
     return (password, public_cert_string, cert_file, cert_start_date, cert_end_date)
 
 
+def _error_caused_by_role_assignment_exists(ex):
+    return getattr(ex, 'status_code', None) == 409 and 'role assignment already exists' in ex.message
+
+
 def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date):
 
     if not cert_start_date and not cert_end_date:
@@ -1305,7 +1315,7 @@ def create_service_principal_for_rbac(
                         logger.warning('Retrying role assignment creation: %s/%s', l + 1,
                                        _RETRY_TIMES)
                         continue
-                    elif getattr(ex, 'status_code', None) == 409:
+                    elif _error_caused_by_role_assignment_exists(ex):
                         logger.warning('Role assignment already exits.\n')
                         break
                     else:

@@ -250,8 +250,11 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
                 # test role assignments on a resource group
                 self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
-                self.cmd('role assignment list -g {rg}',
-                         checks=self.check("length([])", 1))
+                # verify role assignment create is idempotent
+                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}',
+                         self.check("principalName", self.kwargs["upn"]))
+
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}', checks=[
                     self.check("length([])", 1),
                     self.check("[0].principalName", self.kwargs["upn"])
