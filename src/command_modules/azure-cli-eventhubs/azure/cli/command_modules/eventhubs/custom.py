@@ -140,7 +140,12 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
 def cli_networkruleset_createupdate(client, resource_group_name, namespace_name, default_action="Deny"):
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
     netwrokruleset.default_action = default_action
-    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_networkruleset_update(instance, default_action="Deny"):
+    instance.default_action = default_action
+    return instance
 
 
 def cli_networkruleset_delete(client, resource_group_name, namespace_name):
@@ -148,7 +153,7 @@ def cli_networkruleset_delete(client, resource_group_name, namespace_name):
     netwrokruleset = NetworkRuleSet()
     netwrokruleset.ip_rules = [NWRuleSetIpRules]
     netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
-    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_virtualnetwrokrule_add(client, resource_group_name, namespace_name, subnet, ignore_missing_vnet_service_endpoint=None):
@@ -163,7 +168,7 @@ def cli_virtualnetwrokrule_add(client, resource_group_name, namespace_name, subn
 
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
     netwrokruleset.virtual_network_rules.append(NWRuleSetVirtualNetworkRules(subnet=Subnet(id=subnet), ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
-    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_virtualnetwrokrule_list(client, resource_group_name, namespace_name):
@@ -185,7 +190,7 @@ def cli_virtualnetwrokrule_delete(client, resource_group_name, namespace_name, s
         if vnetruletodelete.subnet.id == subnet:
             netwrokruleset.virtual_network_rules.remove(vnetruletodelete)
 
-    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_iprule_add(client, resource_group_name, namespace_name, ip_mask, action=None):

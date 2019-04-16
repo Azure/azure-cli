@@ -157,22 +157,23 @@ def load_arguments_eh(self, _):
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
 # Region Namespace NetworkRuleSet
-    with self.argument_context('eventhubs namespace network-rule-set create')as c:
-        c.argument('default_action', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']), help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
+    for scope in ['eventhubs namespace network-rule create', 'eventhubs namespace network-rule update']:
+        with self.argument_context(scope)as c:
+            c.argument('default_action', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']), help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
 
-    for scope in ['eventhubs namespace network-rule-set virtual-network-rule add', 'eventhubs namespace network-ruleset virtualnetworkrule remove']:
+    for scope in ['eventhubs namespace network-rule virtual-network-rule add', 'eventhubs namespace network-ruleset virtualnetworkrule remove']:
         with self.argument_context(scope) as c:
             c.argument('subnet', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
 
-    with self.argument_context('eventhubs namespace network-rule-set virtual-network-rule add') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-vnet-service-endpoint'], arg_type=get_three_state_flag(),
+    with self.argument_context('eventhubs namespace network-rule virtual-network-rule add') as c:
+        c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.extra('vnet_name', options_list=['--vnet-name'], help='Name of the Virtual Network')
 
-    for scope in ['eventhubs namespace network-rule-set ip-rule add', 'eventhubs namespace network-rule-set ip-rule remove']:
+    for scope in ['eventhubs namespace network-rule ip-address-rule add', 'eventhubs namespace network-rule ip-address-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('ip_mask', help='IP Mask')
+            c.argument('ip_mask', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
 
-    with self.argument_context('eventhubs namespace network-rule-set ip-rule add') as c:
+    with self.argument_context('eventhubs namespace network-rule ip-address-rule add') as c:
         c.argument('action', arg_type=get_enum_type(['Allow']),
-                   help='The IP Filter Action. Possible values include: Allow')
+                   help='Action of the IP rule. Default: Allow')

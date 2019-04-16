@@ -95,17 +95,18 @@ def load_command_table(self, _):
         g.command('keys list', 'list_keys')
 
 # NetwrokRuleSet Region
-    with self.command_group('eventhubs namespace network-rule-set', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_networkruleset_createupdate')
+        g.generic_update_command('update', getter_name='get_network_rule_set', setter_name='create_or_update_network_rule_set', custom_func_name='cli_networkruleset_update')
         g.show_command('list', 'get_network_rule_set')
         g.custom_command('delete', 'cli_networkruleset_delete')
 
-    with self.command_group('eventhubs namespace network-rule-set virtual-network-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule virtual-network-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_virtualnetwrokrule_add', validator=validate_subnet)
         g.custom_command('list', 'cli_virtualnetwrokrule_list')
         g.custom_command('remove', 'cli_virtualnetwrokrule_delete')
 
-    with self.command_group('eventhubs namespace network-rule-set ip-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule ip-address-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_iprule_add')
         g.custom_command('list', 'cli_iprule_list')
         g.custom_command('remove', 'cli_iprule_delete')
