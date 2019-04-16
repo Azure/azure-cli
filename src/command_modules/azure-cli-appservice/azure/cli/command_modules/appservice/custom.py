@@ -283,11 +283,12 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     import requests
     import os
+    from azure.cli.core.util import should_disable_connection_verify
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment")
-        requests.post(zip_url, data=zip_content, headers=headers)
+        requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
