@@ -1603,13 +1603,14 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vmss': 'vm-ultrassd',
             'vmss2': 'vm-ultrassd2'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS '
+                 ' --data-disk-sizes-gb 4 --zone 2 --location eastus2 --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 2 --location eastus2 --vm-sku Standard_D2s_v3')
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -3123,7 +3124,9 @@ class VMGalleryImage(ScenarioTest):
                  checks=[
                      self.check('publishingProfile.replicaCount', 2),
                      self.check('length(publishingProfile.targetRegions)', 2),
-                     self.check('publishingProfile.targetRegions', [dict(name="West US 2", regionalReplicaCount=1), dict(name="East US 2", regionalReplicaCount=2)])
+                     self.check('publishingProfile.targetRegions',
+                                [dict(name="West US 2", regionalReplicaCount=1, storageAccountType='Standard_LRS'),
+                                 dict(name="East US 2", regionalReplicaCount=2, storageAccountType='Standard_LRS')])
                  ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))
