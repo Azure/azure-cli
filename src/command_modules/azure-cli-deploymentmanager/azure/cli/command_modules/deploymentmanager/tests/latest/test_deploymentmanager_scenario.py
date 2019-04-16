@@ -24,14 +24,14 @@ resource_location = 'centralus'
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 
-create_rollout_template = os.path.join(curr_dir, "CreateRollout.json").replace('\\', '\\\\')
-failure_create_rollout_template = os.path.join(curr_dir, "CreateRollout_FailureRollout.json").replace('\\', '\\\\')
+create_rollout_template = os.path.join(curr_dir, "createrollout.json").replace('\\', '\\\\')
+failure_create_rollout_template = os.path.join(curr_dir, "createrollout_failurerollout.json").replace('\\', '\\\\')
 
-parameters_file_name = "Storage.Parameters.json"
-invalid_parameters_file_name = "Storage_Invalid.Parameters.json"
-template_file_name = "Storage.Template.json"
-params_copy_file_name = "Storage.Copy.Parameters.json"
-template_copy_file_name = "Storage.Copy.Template.json"
+parameters_file_name = "storage.parameters.json"
+invalid_parameters_file_name = "storage_invalid.parameters.json"
+template_file_name = "storage.template.json"
+params_copy_file_name = "storage.copy.parameters.json"
+template_copy_file_name = "storage.copy.template.json"
 path_to_tests = ".\\azure\\cli\\command_modules\\deploymentmanager\\tests\\latest\\"
 artifact_root = "artifactroot"
 
