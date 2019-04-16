@@ -152,7 +152,6 @@ class DeploymentManagerTests(ScenarioTest):
         self.cmd('deploymentmanager service create -g {rg} --service-topology-name {st_name} -n {s_name} -l \"{location}\" --target-location \"{t_l}\" --target-subscription-id {t_sub_id}', checks=[
             self.check('type', 'Microsoft.DeploymentManager/serviceTopologies/services'),
             self.check('name', service_name),
-            self.check('targetSubscriptionId', subscription_id),
             self.check('targetLocation', location)])
         self.service_units_test(
             resource_group_name,
