@@ -219,5 +219,4 @@ def check_remote_source_code(source_location):
             else:
                 raise CLIError("'{}' doesn't exist.".format(source_location))
 
-    raise CLIError(
-        "[Errno 2] No such file or directory: '{0}'".format(source_location))
+    raise CLIError("'{}' doesn't exist.".format(source_location))
