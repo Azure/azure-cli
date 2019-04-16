@@ -1306,7 +1306,9 @@ long-summary: The VM will continue to be billed. To avoid this, you can dealloca
 examples:
   - name: Power off (stop) a running VM.
     text: az vm stop -g MyResourceGroup -n MyVm
-  - name: Stop all VMs in a resource group.
+  - name: Power off a running VM without shutting down.
+    text: az vm stop -g MyResourceGroup -n MyVm --skip-shutdown
+  - name: Power off VMs in a resource group.
     text: >
         az vm stop --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
