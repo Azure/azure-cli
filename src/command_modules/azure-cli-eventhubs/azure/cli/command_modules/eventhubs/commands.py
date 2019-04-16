@@ -31,6 +31,9 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory)
 
+    from ._validator import validate_subnet
+
+
 # Namespace Region
     custom_tmpl = 'azure.cli.command_modules.eventhubs.custom#{}'
     eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
@@ -92,17 +95,17 @@ def load_command_table(self, _):
         g.command('keys list', 'list_keys')
 
 # NetwrokRuleSet Region
-    with self.command_group('eventhubs namespace network-ruleset', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule-set', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('create', 'cli_networkruleset_createupdate')
-        g.show_command('show', 'get_network_rule_set')
+        g.show_command('list', 'get_network_rule_set')
         g.custom_command('delete', 'cli_networkruleset_delete')
 
-    with self.command_group('eventhubs namespace network-ruleset virtualnetworkrule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('add', 'cli_virtualnetwrokrule_add')
+    with self.command_group('eventhubs namespace network-rule-set virtual-network-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+        g.custom_command('add', 'cli_virtualnetwrokrule_add', validator=validate_subnet)
         g.custom_command('list', 'cli_virtualnetwrokrule_list')
         g.custom_command('remove', 'cli_virtualnetwrokrule_delete')
 
-    with self.command_group('eventhubs namespace network-ruleset iprule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule-set ip-rule', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_iprule_add')
         g.custom_command('list', 'cli_iprule_list')
         g.custom_command('remove', 'cli_iprule_delete')

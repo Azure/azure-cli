@@ -383,3 +383,82 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Delete Namespace - secondary
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacenamesecondary}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_eh_network')
+    def test_eh_network(self, resource_group):
+        self.kwargs.update({
+            'loc': 'westus',
+            'rg': resource_group,
+            'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
+            'namespacenamekafka': self.create_random_name(prefix='eventhubs-nscli1', length=20),
+            'tags': {'tag1=value1'},
+            'tags2': {'tag2=value2'},
+            'sku': 'Standard',
+            'tier': 'Standard',
+            'authoname': self.create_random_name(prefix='cliAutho', length=20),
+            'defaultauthorizationrule': 'RootManageSharedAccessKey',
+            'accessrights': 'Send',
+            'accessrights1': 'Listen',
+            'primary': 'PrimaryKey',
+            'secondary': 'SecondaryKey',
+            'isautoinflateenabled': 'True',
+            'maximumthroughputunits': 4,
+            'maximumthroughputunits_update': 5,
+            'varfalse': 'false',
+            'ipmask1': '1.1.1.1',
+            'ipmask2': '2.2.2.2',
+            'subnet1': '/subscriptions/854d368f-1828-428f-8f3c-f2affa9b2f7d/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default',
+            'subnet2': '/subscriptions/854d368f-1828-428f-8f3c-f2affa9b2f7d/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault'
+        })
+
+        # Check for the NameSpace name Availability
+        self.cmd('eventhubs namespace exists --name {namespacename}',
+                 checks=[self.check('nameAvailable', True)])
+
+        # Create kafka Namespace
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacenamekafka} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --enable-kafka {isautoinflateenabled}',
+                 checks=[self.check('kafkaEnabled', True)])
+
+        # Create Namespace
+        self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
+            checks=[self.check('sku.name', self.kwargs['sku'])])
+
+        # Get Created Namespace
+        self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}',
+                 checks=[self.check('sku.name', self.kwargs['sku'])])
+
+        # Create NetworkRule
+        self.cmd('eventhubs namespace network-rule-set create --resource-group {rg} --name {namespacename} --default-action Deny')
+
+        # Get NetworkRule
+        self.cmd('eventhubs namespace network-rule-set list --resource-group {rg} --name {namespacename}')
+
+        # add IP Rule
+        self.cmd('eventhubs namespace network-rule-set ip-rule add --resource-group {rg} --name {namespacename} --ip-mask {ipmask1} --action Allow')
+
+        # add IP Rule
+        self.cmd(
+            'eventhubs namespace network-rule-set ip-rule add --resource-group {rg} --name {namespacename} --ip-mask {ipmask2} --action Allow')
+
+        # Get list of IP rule
+        self.cmd('eventhubs namespace network-rule-set ip-rule list --resource-group {rg} --name {namespacename}')
+
+        # Remove IPRule
+        self.cmd('eventhubs namespace network-rule-set ip-rule remove --resource-group {rg} --name {namespacename} --ip-mask {ipmask2}')
+
+        # add vnetrule
+        self.cmd('eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}')
+
+        # add vnetrule2
+        self.cmd('eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}')
+
+        # list Vnetrules
+        self.cmd('eventhubs namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}')
+
+        #remove Vnetrule
+        self.cmd(
+            'eventhubs namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}')
+
+        # Delete Namespace list by ResourceGroup
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')

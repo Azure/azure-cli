@@ -26,17 +26,17 @@ helps['eventhubs namespace authorization-rule keys'] = """
     short-summary: Manage Azure EventHubs Authorizationrule connection strings for Namespace
 """
 
-helps['eventhubs namespace network-ruleset'] = """
+helps['eventhubs namespace network-rule-set'] = """
     type: group
     short-summary: Manage Azure EventHubs NetwrokruleSet for Namespace
 """
 
-helps['eventhubs namespace network-ruleset virtualnetworkrule'] = """
+helps['eventhubs namespace network-rule-set virtual-network-rule'] = """
     type: group
     short-summary: Manage Azure EventHubs VirtualNetworkRule of NetwrokruleSet for Namespace
 """
 
-helps['eventhubs namespace network-ruleset iprule'] = """
+helps['eventhubs namespace network-rule-set ip-rule'] = """
     type: group
     short-summary: Manage Azure EventHubs IPRule of NetwrokruleSet for Namespace
 """
@@ -394,23 +394,23 @@ helps['eventhubs georecovery-alias delete'] = """
           text: az eventhubs georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
 
-helps['eventhubs namespace network-ruleset update'] = """
+helps['eventhubs namespace network-rule-set create'] = """
     type: command
     short-summary: Set a NetworkruleSet for a Namespace
     examples:
         - name: set a networkruleset for a namespace
-          text: az eventhubs network-ruleset set --resource-group myresourcegroup --namespace-name mynamespace --networkruleset mynetwrokruleset
+          text: az eventhubs network-rule-set create --resource-group myresourcegroup --namespace-name mynamespace --networkruleset mynetwrokruleset
 """
 
-helps['eventhubs namespace network-ruleset show'] = """
+helps['eventhubs namespace network-rule-set list'] = """
     type: command
     short-summary: Show properties of NetworkruleSet of the given Namespace
     examples:
         - name: Show properties of NetworkruleSet of the given Namespace
-          text: az eventhubs network-ruleset show --resource-group myresourcegroup --namespace-name mynamespace
+          text: az eventhubs network-rule-set list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
-helps['eventhubs namespace network-ruleset delete'] = """
+helps['eventhubs namespace network-rule-set remove'] = """
     type: command
     short-summary: Delete NetworkruleSet of the given Namespace
     examples:
@@ -418,7 +418,7 @@ helps['eventhubs namespace network-ruleset delete'] = """
           text: az eventhubs network-ruleset delete --resource-group myresourcegroup --namespace-name mynamespace
 """
 
-helps['eventhubs namespace network-ruleset virtualnetworkrule add'] = """
+helps['eventhubs namespace network-rule-set virtual-network-rule add'] = """
     type: command
     short-summary: Adds a VirtualNetworkRule to NetworkruleSet for the given Namespace
     examples:
@@ -426,31 +426,31 @@ helps['eventhubs namespace network-ruleset virtualnetworkrule add'] = """
           text: az eventhubs network-ruleset virtualnetworkrule add --resource-group myresourcegroup --namespace-name mynamespace --subnet-id mysubnetid --ignore-missing-vnet-serviceendpoint true/false
 """
 
-helps['eventhubs namespace network-ruleset virtualnetworkrule list'] = """
+helps['eventhubs namespace network-rule-set virtual-network-rule list'] = """
     type: command
     short-summary: List all VirtualNetworkRule of NetworkruleSet for the given Namespace
     examples:
         - name: List all VirtualNetworkRule of NetworkruleSet for the given Namespace
-          text: az eventhubs network-ruleset virtualnetworkrule list --resource-group myresourcegroup --namespace-name mynamespace
+          text: az eventhubs network-rule-set virtual-network-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
-helps['eventhubs namespace network-ruleset virtualnetworkrule remove'] = """
+helps['eventhubs namespace network-rule-set virtual-network-rule remove'] = """
     type: command
     short-summary: Deletes the specified VirtualNetworkRule of NetworkruleSet for the given Namespace
     examples:
         - name: Deletes the specified VirtualNetworkRule of NetworkruleSet for the given Namespace
-          text: az eventhubs network-ruleset virtualnetworkrule delete --resource-group myresourcegroup --namespace-name mynamespace --subnet-id mysubnetid
+          text: az eventhubs network-rule-set virtual-network-rule delete --resource-group myresourcegroup --namespace-name mynamespace --subnet-id mysubnetid
 """
 
-helps['eventhubs namespace network-ruleset iprule add'] = """
+helps['eventhubs namespace network-rule-set ip-rule add'] = """
     type: command
     short-summary: Adds a IPRule to NetworkruleSet for the given Namespace
     examples:
         - name: Adds a IPRule to NetworkruleSet for the given Namespace
-          text: az eventhubs namespace network-ruleset iprule add --resource-group myresourcegroup --namespace-name mynamespace --ipmask myipmask --action allow
+          text: az eventhubs namespace network-rule-set ip-rule add --resource-group myresourcegroup --namespace-name mynamespace --ipmask myipmask --action allow
 """
 
-helps['eventhubs namespace network-ruleset iprule list'] = """
+helps['eventhubs namespace network-rule-set ip-rule list'] = """
     type: command
     short-summary: List all IPRule of NetworkruleSet for the given Namespace
     examples:
@@ -458,10 +458,10 @@ helps['eventhubs namespace network-ruleset iprule list'] = """
           text: az eventhubs namespace network-ruleset iprule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
-helps['eventhubs namespace network-ruleset iprule remove'] = """
+helps['eventhubs namespace network-rule-set ip-rule remove'] = """
     type: command
     short-summary: Adds a IPRule to NetworkruleSet for the given Namespace
     examples:
         - name: Adds a IPRule to NetworkruleSet for the given Namespace
-          text: az eventhubs namespace network-ruleset iprule --resource-group myresourcegroup --namespace-name mynamespace --ipmask myipmask
+          text: az eventhubs namespace network-rule-set ip-rule --resource-group myresourcegroup --namespace-name mynamespace --ipmask myipmask
 """

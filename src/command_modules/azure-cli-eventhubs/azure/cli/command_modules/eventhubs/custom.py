@@ -137,20 +137,17 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
 
 
 # NetwrokRuleSet Region
-def cli_networkruleset_createupdate(client, resource_group_name, namespace_name, defaultaction="Deny", virtual_network_rules=None, ip_rules=None):
-    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules, NetworkRuleSet
-    netwrokruleset = NetworkRuleSet()
-    netwrokruleset.default_action = defaultaction
-    netwrokruleset.virtual_network_rules = NWRuleSetVirtualNetworkRules()
-    netwrokruleset.virtual_network_rules = virtual_network_rules
-    netwrokruleset.ip_rules = NWRuleSetIpRules()
-    netwrokruleset.ip_rules = ip_rules
+def cli_networkruleset_createupdate(client, resource_group_name, namespace_name, default_action="Deny"):
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+    netwrokruleset.default_action = default_action
     client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_networkruleset_delete(client, resource_group_name, namespace_name):
-    from azure.mgmt.eventhub.v2017_04_01.models import NetworkRuleSet
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules, NetworkRuleSet
     netwrokruleset = NetworkRuleSet()
+    netwrokruleset.ip_rules = [NWRuleSetIpRules]
+    netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
     client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
@@ -161,8 +158,6 @@ def cli_virtualnetwrokrule_add(client, resource_group_name, namespace_name, subn
     netwrokruleset.ip_rules = []
     netwrokruleset.virtual_network_rules = []
 
-    if subnet is None:
-        subnet = ""
     if ignore_missing_vnet_service_endpoint is None:
         ignore_missing_vnet_service_endpoint = False
 
@@ -177,13 +172,20 @@ def cli_virtualnetwrokrule_list(client, resource_group_name, namespace_name):
 
 
 def cli_virtualnetwrokrule_delete(client, resource_group_name, namespace_name, subnet, ignore_missing_vnet_service_endpoint=None):
-
-    if subnet is None:
-        subnet = ""
+    from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetVirtualNetworkRules
     if ignore_missing_vnet_service_endpoint is None:
         ignore_missing_vnet_service_endpoint = False
 
-    client.get_network_rule_set(resource_group_name=resource_group_name, namespace_name=namespace_name)
+    netwrokruleset = client.get_network_rule_set(resource_group_name=resource_group_name, namespace_name=namespace_name)
+    virtualnetworkrule = NWRuleSetVirtualNetworkRules()
+    virtualnetworkrule.subnet = subnet
+    virtualnetworkrule.ignore_missing_vnet_service_endpoint = ignore_missing_vnet_service_endpoint
+
+    for vnetruletodelete in netwrokruleset.virtual_network_rules:
+        if vnetruletodelete.subnet.id == subnet:
+            netwrokruleset.virtual_network_rules.remove(vnetruletodelete)
+
+    client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_iprule_add(client, resource_group_name, namespace_name, ip_mask, action=None):
@@ -207,16 +209,12 @@ def cli_iprule_list(client, resource_group_name, namespace_name):
     return netwrokruleset.ip_rules
 
 
-def cli_iprule_delete(client, resource_group_name, namespace_name, ipmask):
+def cli_iprule_delete(client, resource_group_name, namespace_name, ip_mask):
     from azure.mgmt.eventhub.v2017_04_01.models import NWRuleSetIpRules
 
-    if ipmask is None:
-        ipmask = ""
-
     getnetworkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-
     ipruletodelete = NWRuleSetIpRules()
-    ipruletodelete.ip_mask = ipmask
+    ipruletodelete.ip_mask = ip_mask
     ipruletodelete.action = "Allow"
 
     if ipruletodelete in getnetworkruleset.ip_rules:
