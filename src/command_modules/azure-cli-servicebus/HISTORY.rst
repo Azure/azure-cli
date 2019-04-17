@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.3.5
++++++
+* added netwrokruleset commands
+
 0.3.4
 +++++
 * Minor fixes
