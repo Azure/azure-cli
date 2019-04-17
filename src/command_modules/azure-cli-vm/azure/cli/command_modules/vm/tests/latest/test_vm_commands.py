@@ -1565,10 +1565,10 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'disk3': 'd3',
             'disk4': 'd4'
         })
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk show -g {rg} -n {disk1}')
         self.cmd('disk create -g {rg} -n {disk2} --size-gb 4 --sku UltraSSD_LRS')
-        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --size Standard_D2s_v3 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --size Standard_D2s_v3 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 2 --location eastus2')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
 
@@ -1578,7 +1578,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'UltraSSD_LRS'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --size Standard_D2s_v3 --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --size Standard_D2s_v3 --ultra-ssd-enabled --zone 2 --location eastus2')
         self.cmd('vm disk attach -g {rg} --vm-name {vm2} --name {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1590,7 +1590,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.kwargs.update({
             'disk1': 'd1'
         })
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
             self.check('diskIopsReadWrite', 510),
             self.check('diskMbpsReadWrite', 10)

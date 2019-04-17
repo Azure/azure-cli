@@ -279,7 +279,7 @@ def load_arguments(self, _):
         c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availability zones")
         c.argument('show_all', options_list=['--all'], arg_type=get_three_state_flag(),
                    help="show all information including vm sizes not available under the current subscription")
-        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disk", etc')
+        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disks", etc')
 
     with self.argument_context('vm restart') as c:
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
