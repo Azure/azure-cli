@@ -2551,8 +2551,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 
 
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, managed_image,
-                         gallery_image_version, location=None, target_regions=None, end_of_life_date=None,
-                         exclude_from_latest=None, replica_count=None, tags=None):
+                         gallery_image_version, location=None, target_regions=None, storage_account_type=None,
+                         end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -2566,7 +2566,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
                                             target_regions=target_regions or [TargetRegion(name=location)],
-                                            source=source, replica_count=replica_count)
+                                            source=source, replica_count=replica_count,
+                                            storage_account_type=storage_account_type)
     image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,

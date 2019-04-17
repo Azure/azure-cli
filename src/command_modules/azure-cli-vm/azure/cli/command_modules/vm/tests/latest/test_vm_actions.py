@@ -19,13 +19,35 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi,
-                                                      _validate_vm_vmss_accelerated_networking)
+                                                      _validate_vm_vmss_accelerated_networking,
+                                                      process_gallery_image_version_namespace)
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info, update_disk_sku_info
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
 
 class TestActions(unittest.TestCase):
+
+    def _verify_username_with_ex(self, admin_username, is_linux, expected_err):
+        with self.assertRaises(CLIError) as context:
+            _validate_admin_username(admin_username, is_linux)
+        self.assertTrue(expected_err in str(context.exception))
+
+    def _verify_password_with_ex(self, admin_password, is_linux, expected_err):
+        with self.assertRaises(CLIError) as context:
+            _validate_admin_password(admin_password, is_linux)
+        self.assertTrue(expected_err in str(context.exception))
+
+    @staticmethod
+    def _get_compute_model(model_type):
+        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
+        from importlib import import_module
+
+        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
+        api_version = "v" + api_version.replace("-", "_")
+        result = getattr(import_module('azure.mgmt.compute.{}.models'.format(api_version)), model_type)
+        return result
+
     def test_generate_specfied_ssh_key_files(self):
         temp_dir_name = tempfile.mkdtemp(prefix="ssh_dir_")
 
@@ -163,16 +185,6 @@ class TestActions(unittest.TestCase):
 
         _validate_admin_password('Password22!!!', 'windows')
         _validate_admin_password('Pas' + '1' * 70, 'windows')
-
-    def _verify_username_with_ex(self, admin_username, is_linux, expected_err):
-        with self.assertRaises(CLIError) as context:
-            _validate_admin_username(admin_username, is_linux)
-        self.assertTrue(expected_err in str(context.exception))
-
-    def _verify_password_with_ex(self, admin_password, is_linux, expected_err):
-        with self.assertRaises(CLIError) as context:
-            _validate_admin_password(admin_password, is_linux)
-        self.assertTrue(expected_err in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_parse_image_argument(self, client_factory_mock):
@@ -347,13 +359,7 @@ class TestActions(unittest.TestCase):
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
     def test_normalize_disk_info(self):
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
-        from importlib import import_module
-
-        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
-        api_version = "v" + api_version.replace("-", "_")
-        CachingTypes = import_module('azure.mgmt.compute.{}.models'.format(api_version)).CachingTypes
-
+        CachingTypes = self._get_compute_model('CachingTypes')
         cmd = mock.MagicMock()
         cmd.get_models.return_value = CachingTypes
 
@@ -505,6 +511,52 @@ class TestActions(unittest.TestCase):
                     update_disk_sku_info(info_dict, dummy_expected)
             else:
                 self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
+
+    def test_process_gallery_image_version_namespace(self):
+        np = mock.MagicMock()
+        TargetRegion = self._get_compute_model('TargetRegion')
+        cmd = mock.MagicMock()
+        cmd.get_models.return_value = TargetRegion
+
+        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", "eastus2=standard_zrs=3"]
+        np.target_regions = target_regions_list
+
+        process_gallery_image_version_namespace(cmd, np)
+        target_regions_objs = np.target_regions
+
+        self.assertEqual(target_regions_objs[0], TargetRegion(name="southcentralus"))
+        self.assertEqual(target_regions_objs[1], TargetRegion(name="westus", regional_replica_count=1))
+        self.assertEqual(target_regions_objs[2], TargetRegion(name="westus2", storage_account_type="standard_zrs"))
+        self.assertEqual(target_regions_objs[3], TargetRegion(name="eastus", regional_replica_count=2, storage_account_type="standard_lrs"))
+        self.assertEqual(target_regions_objs[4], TargetRegion(name="eastus2", regional_replica_count=3, storage_account_type="standard_zrs"))
+
+        # handle invalid storage account / replica count
+        with self.assertRaises(CLIError):
+            target_regions_list = ["westus=f"]
+            np.target_regions = target_regions_list
+            process_gallery_image_version_namespace(cmd, np)
+
+        # handle invalid storage account
+        with self.assertRaises(CLIError):
+            target_regions_list = ["westus=foo=1"]
+            np.target_regions = target_regions_list
+            process_gallery_image_version_namespace(cmd, np)
+
+        with self.assertRaises(CLIError):
+            target_regions_list = ["westus=1=foo"]
+            np.target_regions = target_regions_list
+            process_gallery_image_version_namespace(cmd, np)
+
+        with self.assertRaises(CLIError):
+            target_regions_list = ["westus=1=1"]
+            np.target_regions = target_regions_list
+            process_gallery_image_version_namespace(cmd, np)
+
+        # handle invalid replica count
+        with self.assertRaises(CLIError):
+            target_regions_list = ["westus=standard_lrs=standard_zrs"]
+            np.target_regions = target_regions_list
+            process_gallery_image_version_namespace(cmd, np)
 
 
 if __name__ == '__main__':
