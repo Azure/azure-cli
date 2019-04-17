@@ -772,8 +772,8 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.assertEqual(netwrokruleset['defaultAction'], 'Deny')
 
         # Get NetworkRule
-        netwrokrulesetlst = self.cmd(
-            'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
+        self.cmd(
+            'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}')
 
         # add IP Rule
         iprule = self.cmd(
@@ -809,13 +809,13 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.assertEqual(len(vnetrule2), 2)
 
         # list Vnetrules
-        vnetrulelst = self.cmd(
-            'servicebus namespace network-rule virtual-network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
+        self.cmd(
+            'servicebus namespace network-rule virtual-network-rule list --resource-group {rg} --name {namespacename}')
 
         # remove Vnetrule
         vnetrulel = self.cmd(
             'servicebus namespace network-rule virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
-        self.assertEqual(len(vnetrule), 1)
+        self.assertEqual(len(vnetrulel), 1)
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

@@ -459,6 +459,7 @@ def return_valid_duration_create(update_value):
     else:
         return None
 
+
 # NetwrokRuleSet Region
 def cli_networkruleset_createupdate(client, resource_group_name, namespace_name, default_action="Deny"):
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
