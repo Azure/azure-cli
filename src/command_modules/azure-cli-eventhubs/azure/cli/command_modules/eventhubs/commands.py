@@ -16,7 +16,7 @@ def load_command_table(self, _):
                                                                      disaster_recovery_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.v2017_04_01.operations#NamespacesOperations.{}',
+        operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory)
 
     eh_event_hub_util = CliCommandType(
