@@ -6,6 +6,7 @@ Release History
 * functionapp: in `az functionapp devops-build create`, added `--github-pat` flag to accept Github personal access token
 * functionapp: in `az functionapp devops-build create`, added `--github-repository` flag to accept Github repository that contains a functionapp source code
 * webapp: az webapp up --logs was failing with a error and updating default .NETCORE version to 2.1
+* functionapp: remove unnecessary app settings while creating a function app with consumption plan
 
 0.2.17
 ++++++
