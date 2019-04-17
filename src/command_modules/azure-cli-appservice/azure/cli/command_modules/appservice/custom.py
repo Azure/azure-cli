@@ -2357,8 +2357,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         # and get FirstOrDefault
         selected_asp = next((a for a in data if isinstance(a.sku, SkuDescription) and
                              a.sku.tier.lower() == full_sku.lower() and
-                             (a.location.replace(" ", "").lower() == location
-                              or a.location == location)), None)
+                             (a.location.replace(" ", "").lower() == location or a.location == location)), None)
         if selected_asp is not None:
             asp = selected_asp.name
             _create_new_asp = False
