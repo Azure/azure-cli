@@ -1,4 +1,3 @@
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -8,6 +7,7 @@ import os
 import zipfile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.resource.resources.models import ResourceGroup
+from azure.mgmt.web.models import SkuDescription
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
                          DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
@@ -99,14 +99,15 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
     return True
 
 
-def should_create_new_asp(cmd, rg_name, asp_name, location):
-    # get all appservice plans from RG
-    client = web_client_factory(cmd.cli_ctx)
-    for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
-        if (item.name.lower() == asp_name.lower() and
-                item.location.replace(" ", "").lower() == location or
-                item.location == location):
+def should_create_new_asp(src_plan_info, location, sku):
+    if isinstance(src_plan_info.sku, SkuDescription):
+        if (src_plan_info.sku.tier.lower() == sku.lower() and
+                (src_plan_info.location.replace(" ", "").lower() == location or src_plan_info.location == location)):
             return False
+        elif src_plan_info.sku.tier.lower() != sku.lower():
+            return True
+        return True
+        # SKU is different we need to create a new ASP, but the default name needs to appended
     return True
 
 

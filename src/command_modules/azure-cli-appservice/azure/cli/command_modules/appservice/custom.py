@@ -2265,7 +2265,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # pylint: disable=too-many-statements, too-many-branches
+def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, launch_browser=False):  # pylint: disable=too-many-statements, too-many-branches
     import os
     from azure.cli.core._profile import Profile
     client = web_client_factory(cmd.cli_ctx)
@@ -2311,8 +2311,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
-    asp = "{}_asp_{}_{}".format(user, os_val, loc_name)
-    rg_name = "{}_asp_{}_{}".format(user, os_val, loc_name)
+    asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
+    rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
     # Resource group: check if default RG is set
     default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
     _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
@@ -2347,7 +2347,25 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _create_new_asp = should_create_new_asp(cmd, rg_name, asp, location)
+        _asp_generic = asp[:-len(asp.split("_")[4])]
+        data = (list(filter(lambda x: _asp_generic in x.name,
+                            client.app_service_plans.list_by_resource_group(rg_name))))
+        data_sorted = (sorted(data, key=lambda x: x.name))
+        num_asps = len(data)
+        if num_asps > 0:
+            # from the sorted data pick the last one & check if a new ASP needs to be created
+            # based on SKU or not
+            _plan_info = data_sorted[num_asps - 1]
+            # client.app_service_plans.get(rg_name, data_sorted[num_asps -1].name)
+            _is_asp_with_name_exists = True if _plan_info is not None else False
+            if _is_asp_with_name_exists:  # check if we need to create a new ASP based on the SKU
+                _create_new_asp = should_create_new_asp(_plan_info, location, full_sku)
+                if _create_new_asp:
+                    # append the number at the end
+                    _asp_num = int(_plan_info.name.split('_')[4]) + 1
+                    asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
+        else:
+            _create_new_asp = True
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
@@ -2371,6 +2389,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
         _set_build_app_setting = True
         # Configure default logging
         _configure_default_logging(cmd, rg_name, name)
+        # TODO: Set always on to true
         if _show_too_many_apps_warn:
             logger.warning("There are sites that have been deployed to the same hosting "
                            "VM of this region, to prevent performance impact please "
@@ -2392,11 +2411,13 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
 
     if do_deployment and not is_skip_build:
         _set_build_app_setting = True
-        # setting the appsettings causes a app restart so we avoid if not needed
+        # app settings causes an app recycle so we avoid if not needed
         application_settings = client.web_apps.list_application_settings(rg_name, name)
         _app_settings = application_settings.properties
         for key, value in _app_settings.items():
-            if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT' and value.upper() == "FALSE":
+            if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+                is_skip_build = True if value.upper() == "FALSE" else False
+                # if the value is already set just honor it
                 _set_build_app_setting = False
                 break
 
@@ -2422,8 +2443,13 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
             pass
     if logs:
         _configure_default_logging(cmd, rg_name, name)
-    logger.warning("All done. Launching the app in your default browser.")
-    return view_in_browser(cmd, rg_name, name, None, logs)
+    logger.warning("All done.")
+    if launch_browser:
+        logger.warning("Launching app using default browser")
+        return view_in_browser(cmd, rg_name, name, None, logs)
+    _url = _get_url(cmd, rg_name, name)
+    return logger.warning("Launch the created app '%s'. To redeploy the app run the command az webapp up -n %s -l %s",
+                          _url, name, location)
 
 
 def _ping_scm_site(cmd, resource_group, name):

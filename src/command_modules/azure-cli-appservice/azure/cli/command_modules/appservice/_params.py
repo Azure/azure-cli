@@ -365,6 +365,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('launch_browser', help="Launch the created app using the default browser", default=False, action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
