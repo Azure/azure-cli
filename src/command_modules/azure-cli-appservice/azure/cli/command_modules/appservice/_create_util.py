@@ -99,18 +99,6 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
     return True
 
 
-def should_create_new_asp(src_plan_info, location, sku):
-    if isinstance(src_plan_info.sku, SkuDescription):
-        if (src_plan_info.sku.tier.lower() == sku.lower() and
-                (src_plan_info.location.replace(" ", "").lower() == location or src_plan_info.location == location)):
-            return False
-        elif src_plan_info.sku.tier.lower() != sku.lower():
-            return True
-        return True
-        # SKU is different we need to create a new ASP, but the default name needs to appended
-    return True
-
-
 def should_create_new_app(cmd, rg_name, app_name):
     client = web_client_factory(cmd.cli_ctx)
     for item in list(client.web_apps.list_by_resource_group(rg_name)):

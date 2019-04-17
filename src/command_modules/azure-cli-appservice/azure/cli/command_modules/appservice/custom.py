@@ -51,7 +51,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
+                           should_create_new_rg, set_location, should_create_new_app,
                            get_lang_from_content, get_num_apps_in_asp)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME,
                          RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
