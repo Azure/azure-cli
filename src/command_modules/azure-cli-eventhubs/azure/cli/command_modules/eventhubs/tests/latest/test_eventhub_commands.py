@@ -389,8 +389,8 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': 'westus',
             'rg': resource_group,
-            'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
-            'namespacenamekafka': self.create_random_name(prefix='eventhubs-nscli1', length=20),
+            'namespacename': self.create_random_name(prefix='servicebus-cli', length=20),
+            'namespacenamekafka': self.create_random_name(prefix='servicebus-cli1', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
@@ -407,21 +407,24 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             'varfalse': 'false',
             'ipmask1': '1.1.1.1',
             'ipmask2': '2.2.2.2',
-            'subnet1': '/subscriptions/854d368f-1828-428f-8f3c-f2affa9b2f7d/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default',
-            'subnet2': '/subscriptions/854d368f-1828-428f-8f3c-f2affa9b2f7d/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault'
+            'subnet1': '',
+            'subnet2': ''
         })
+
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        # update sub ids
+        self.kwargs.update({'subnet1': '/subscriptions/' + get_subscription_id(
+            self.cli_ctx) + '/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default'})
+        self.kwargs.update({'subnet2': '/subscriptions/' + get_subscription_id(
+            self.cli_ctx) + '/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault'})
 
         # Check for the NameSpace name Availability
         self.cmd('eventhubs namespace exists --name {namespacename}',
                  checks=[self.check('nameAvailable', True)])
 
-        # Create kafka Namespace
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacenamekafka} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --enable-kafka {isautoinflateenabled}',
-                 checks=[self.check('kafkaEnabled', True)])
-
         # Create Namespace
         self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace
@@ -429,36 +432,42 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
                  checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Create NetworkRule
-        self.cmd('eventhubs namespace network-rule create --resource-group {rg} --name {namespacename} --default-action Deny')
+        netwrokruleset = self.cmd(
+            'eventhubs namespace network-rule create --resource-group {rg} --name {namespacename} --default-action Deny').get_output_in_json()
+        self.assertEqual(netwrokruleset['defaultAction'], 'Deny')
 
         # Get NetworkRule
-        self.cmd('eventhubs namespace network-rule list --resource-group {rg} --name {namespacename}')
+        netwrokrulesetlst = self.cmd(
+            'eventhubs namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
 
         # add IP Rule
-        self.cmd('eventhubs namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask1} --action Allow')
+        iprule = self.cmd(
+            'eventhubs namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask1} --action Allow').get_output_in_json()
+        self.assertEqual(len(iprule), 1)
 
         # add IP Rule
-        self.cmd(
-            'eventhubs namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask2} --action Allow')
+        iprule = self.cmd(
+            'eventhubs namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask2} --action Allow').get_output_in_json()
+        self.assertEqual(len(iprule), 2)
+        self.assertTrue(iprule[0]['ipMask'] == '1.1.1.1')
+        self.assertTrue(iprule[1]['ipMask'] == '2.2.2.2')
 
         # Get list of IP rule
-        self.cmd('eventhubs namespace network-rule ip-address-rule list --resource-group {rg} --name {namespacename}')
+        iprulelst = self.cmd(
+            'eventhubs namespace network-rule ip-address-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
+        self.assertEqual(len(iprulelst), 2)
 
         # Remove IPRule
-        self.cmd('eventhubs namespace network-rule ip-address-rule remove --resource-group {rg} --name {namespacename} --ip-address {ipmask2}')
+        iprule = self.cmd(
+            'eventhubs namespace network-rule ip-address-rule remove --resource-group {rg} --name {namespacename} --ip-address {ipmask2}').get_output_in_json()
+        self.assertEqual(len(iprule), 1)
+        self.assertTrue(iprule[0]['ipMask'] == '1.1.1.1')
 
         # add vnetrule
-        self.cmd('eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}')
+        vnetrule = self.cmd(
+            'eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}').get_output_in_json()
+        self.assertEqual(len(vnetrule), 1)
 
         # add vnetrule2
-        self.cmd('eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}')
-
-        # list Vnetrules
-        self.cmd('eventhubs namespace network-rule virtual-network-rule list --resource-group {rg} --name {namespacename}')
-
-        # remove Vnetrule
-        self.cmd(
-            'eventhubs namespace network-rule virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}')
-
-        # Delete Namespace list by ResourceGroup
-        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
+        vnetrule2 = self.cmd(
+            'eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
