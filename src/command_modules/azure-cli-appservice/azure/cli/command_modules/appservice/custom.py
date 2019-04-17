@@ -2348,24 +2348,26 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
         _asp_generic = asp[:-len(asp.split("_")[4])]
+        # get all asp in the RG
         data = (list(filter(lambda x: _asp_generic in x.name,
                             client.app_service_plans.list_by_resource_group(rg_name))))
         data_sorted = (sorted(data, key=lambda x: x.name))
         num_asps = len(data)
-        if num_asps > 0:
+        # check if any of these matches the SKU & location to be used
+        # and get FirstOrDefault
+        selected_asp = next((a for a in data if isinstance(a.sku, SkuDescription) and
+                             a.sku.tier.lower() == full_sku.lower() and
+                             (a.location.replace(" ", "").lower() == location
+                              or a.location == location)), None)
+        if selected_asp is not None:
+            asp = selected_asp.name
+            _create_new_asp = False
+        elif selected_asp is None and num_asps > 0:
             # from the sorted data pick the last one & check if a new ASP needs to be created
             # based on SKU or not
             _plan_info = data_sorted[num_asps - 1]
-            # client.app_service_plans.get(rg_name, data_sorted[num_asps -1].name)
-            _is_asp_with_name_exists = True if _plan_info is not None else False
-            if _is_asp_with_name_exists:  # check if we need to create a new ASP based on the SKU
-                _create_new_asp = should_create_new_asp(_plan_info, location, full_sku)
-                if _create_new_asp:
-                    # append the number at the end
-                    _asp_num = int(_plan_info.name.split('_')[4]) + 1
-                    asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
-        else:
-            _create_new_asp = True
+            _asp_num = int(_plan_info.name.split('_')[4]) + 1
+            asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
