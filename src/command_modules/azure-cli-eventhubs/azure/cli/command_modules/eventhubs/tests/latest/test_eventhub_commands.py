@@ -437,7 +437,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.assertEqual(netwrokruleset['defaultAction'], 'Deny')
 
         # Get NetworkRule
-        netwrokrulesetlst = self.cmd(
+        self.cmd(
             'eventhubs namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
 
         # add IP Rule
@@ -471,3 +471,16 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         # add vnetrule2
         vnetrule2 = self.cmd(
             'eventhubs namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
+        self.assertEqual(len(vnetrule2), 2)
+
+        # list Vnetrules
+        self.cmd(
+            'eventhubs namespace network-rule virtual-network-rule list --resource-group {rg} --name {namespacename}')
+
+        # remove Vnetrule
+        vnetrulel = self.cmd(
+            'eventhubs namespace network-rule virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
+        self.assertEqual(len(vnetrulel), 1)
+
+        # Delete Namespace list by ResourceGroup
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
