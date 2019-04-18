@@ -2,6 +2,14 @@
 
 Release History
 ===============
+* [Breaking Change]: The default value for `--version` is now `v4`, not `v3` (except for `az bot prepare-publish`).
+* [Breaking Change]: `--lang` no longer defaults to `Csharp`. If the command requires `--lang` and it is not provided, the command will error out.
+* [Breaking Change]: The `--appid` and `--password` args for `az bot create` are now required and can be created via `az ad app create`.
+* [Breaking Change]: `az bot create -v v4` does not create or use a Storage Account or Application Insights.
+* [Deprecation]: All --lang flags now accept and advise users to use `Javascript` instead of `Node`. `Node` as a --lang value is deprecated.
+* Add `Typescript` support to az bot prepare-deploy
+* `az bot prepare-deploy` returns `true` if successful and has helpful verbose logging.
+
 
 0.1.10
 ++++++

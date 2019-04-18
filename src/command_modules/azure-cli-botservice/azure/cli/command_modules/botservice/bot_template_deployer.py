@@ -13,23 +13,16 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
-from azure.cli.command_modules.botservice._params import supported_languages
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
-from azure.cli.command_modules.botservice import azure_region_mapper
+from azure.cli.command_modules.botservice.azure_region_mapper import AzureRegionMapper
 
 
 class BotTemplateDeployer:
     # Function App
     function_template_name = 'functionapp.template.json'
-    csharp_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-functions_emptybot.zip'  # pylint: disable=line-too-long
-    node_function_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-functions_emptybot_funcpack.zip'  # pylint: disable=line-too-long
     v3_webapp_template_name = 'webapp.template.json'
-    v3_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp_simpleechobot_precompiled.zip'  # pylint: disable=line-too-long
-    v3_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp_hello-chatconnector.zip'  # pylint: disable=line-too-long
 
     v4_webapp_template_name = 'webappv4.template.json'
-    v4_webapp_csharp_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/csharp-abs-webapp-v4_echobot_precompiled.zip'  # pylint: disable=line-too-long
-    v4_webapp_node_zip_url = 'https://connectorprod.blob.core.windows.net/bot-packages/node.js-abs-webapp-v4_echobot.zip'  # pylint: disable=line-too-long
 
     @staticmethod
     def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
@@ -83,61 +76,19 @@ class BotTemplateDeployer:
         :param version:
         :return:
         """
-
-
-        # Based on sdk version, language and kind, select the appropriate zip url containing starter bot source
-        if version == 'v3':
-            if kind == 'function':
-                template_name = BotTemplateDeployer.function_template_name
-                if language == 'Csharp':
-                    zip_url = BotTemplateDeployer.csharp_function_zip_url
-                else:
-                    zip_url = BotTemplateDeployer.node_function_zip_url
-
-            else:
-                kind = 'sdk'
-                template_name = BotTemplateDeployer.v3_webapp_template_name
-                if language == 'Csharp':
-                    zip_url = BotTemplateDeployer.v3_webapp_csharp_zip_url
-                else:
-                    zip_url = BotTemplateDeployer.v3_webapp_node_zip_url
-        elif version == 'v4':
-            if kind == 'function':
-                raise CLIError('Function bot creation is not supported for v4 bot sdk.')
-
-            else:
-                kind = 'sdk'
-                template_name = BotTemplateDeployer.v4_webapp_template_name
-                if language == 'Csharp':
-                    zip_url = BotTemplateDeployer.v4_webapp_csharp_zip_url
-                else:
-                    zip_url = BotTemplateDeployer.v4_webapp_node_zip_url
+        kind = 'sdk' if kind == 'webapp' else kind
+        (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(version, language, kind)
 
         logger.debug('Detected SDK version %s, kind %s and programming language %s. Using the following template: %s.',
                      version, kind, language, zip_url)
 
-        # Storage prep
-        # TODO: Review logic here. Why are we setting 'create_new_storage' to true when storageAccountname not provided?
-        create_new_storage = False
-        if not storageAccountName:
-            create_new_storage = True
-            storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24].lower())
-            site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40].lower())
+        site_name = re.sub(r'[^a-z0-9\-]', '', resource_name[:40].lower())
 
-            # The name of Azure Web Sites cannot end with "-", e.g. "testname-.azurewbesites.net" is invalid.
-            # The valid name would be "testname.azurewebsites.net"
-            while site_name[-1] == '-':
-                site_name = site_name[:-1]
-
-            logger.debug('Storage name not provided. If storage is to be created, name to be used is %s.',
-                         storageAccountName)
-            logger.debug('Web or Function app name to be used is %s.', site_name)
-
-        # Application insights prep
-        appInsightsLocation = azure_region_mapper.AzureRegionMapper\
-            .get_app_insights_location(appInsightsLocation.lower().replace(' ', ''))
-
-        logger.debug('Application insights location resolved to %s.', appInsightsLocation)
+        # The name of Azure Web Sites cannot end with "-", e.g. "testname-.azurewbesites.net" is invalid.
+        # The valid name would be "testname.azurewebsites.net"
+        while site_name[-1] == '-':
+            site_name = site_name[:-1]
+        logger.debug('Web or Function app name to be used is %s.', site_name)
 
         # ARM Template parameters
         paramsdict = {
@@ -147,15 +98,10 @@ class BotTemplateDeployer:
             "siteName": site_name,
             "appId": appid,
             "appSecret": password,
-            "storageAccountResourceId": "",
             "serverFarmId": "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/serverfarms/{2}".format(
                 client.config.subscription_id, resource_group_name, resource_name),
             "zipUrl": zip_url,
-            "createNewStorage": create_new_storage,
-            "storageAccountName": storageAccountName,
             "botEnv": "prod",
-            "useAppInsights": True,
-            "appInsightsLocation": appInsightsLocation,
             "createServerFarm": True,
             "serverFarmLocation": location.lower().replace(' ', ''),
             "azureWebJobsBotFrameworkDirectLineSecret": "",
@@ -164,13 +110,25 @@ class BotTemplateDeployer:
         if description:
             paramsdict['description'] = description
 
-        # TODO: Do we still encrypt this file? Should it be on a user-specified basis?
-        # If the bot is a v4 bot, generate an encryption key for the .bot file
-        if template_name == 'webappv4.template.json':
+        if version == 'v3':
+            # Storage prep
+            paramsdict['createNewStorage'] = False
+            paramsdict['storageAccountResourceId'] = ''
+            if not storageAccountName:
+                storageAccountName = re.sub(r'[^a-z0-9]', '', resource_name[:24].lower())
+                paramsdict['createNewStorage'] = True
 
-            logger.debug('Detected V4 bot. Adding bot encryption key to Azure parameters.')
+                logger.debug('Storage name not provided. If storage is to be created, name to be used is %s.',
+                             storageAccountName)
+            paramsdict['storageAccountName'] = storageAccountName
 
-            paramsdict['botFileEncryptionKey'] = BotTemplateDeployer.get_bot_file_encryption_key()
+            # Application insights prep
+            appInsightsLocation = AzureRegionMapper.get_app_insights_location(
+                appInsightsLocation.lower().replace(' ', ''))
+            paramsdict['useAppInsights'] = True
+            paramsdict['appInsightsLocation'] = appInsightsLocation
+            logger.debug('Application insights location resolved to %s.', appInsightsLocation)
+
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
         # Get and deploy ARM template
@@ -191,21 +149,6 @@ class BotTemplateDeployer:
 
         return BotJsonFormatter.create_bot_json(cmd, client, resource_group_name, resource_name, logger,
                                                 app_password=password)
-
-    @staticmethod
-    def get_bot_file_encryption_key():
-        """Perform call to https://dev.botframework.com to get a .bot file encryption key.
-
-        :return: string
-        """
-
-        # Pulled out of create_app, which is the only place that performs this call
-        response = requests.get('https://dev.botframework.com/api/misc/botFileEncryptionKey')
-
-        # Can't a user create a new secret and then re-encrypt the bot file?
-        if response.status_code not in [200]:
-            raise CLIError('Unable to provision a bot file encryption key. Please try again.')
-        return response.text[1:-1]
 
     @staticmethod
     def update(client, parameters, resource_group_name):
@@ -235,3 +178,36 @@ class BotTemplateDeployer:
                     parameters.update(param_obj)
 
         return parameters
+
+    @staticmethod
+    def __retrieve_bot_template_link(version, language, kind):
+        response = requests.get('https://dev.botframework.com/api/misc/bottemplateroot')
+        if response.status_code != 200:
+            raise CLIError('Unable to get bot code template from CDN. Please file an issue on {0}'.format(
+                'https://github.com/Microsoft/botbuilder-tools/issues'
+            ))
+        cdn_link = response.text.strip('"')
+        if version == 'v3':
+            if kind == 'function':
+                template_name = BotTemplateDeployer.function_template_name
+                if language == 'Csharp':
+                    cdn_link = cdn_link + 'csharp-abs-functions_emptybot.zip'
+                elif language == 'Javascript':
+                    cdn_link = cdn_link + 'node.js-abs-functions_emptybot_funcpack.zip'
+            else:
+                template_name = BotTemplateDeployer.v3_webapp_template_name
+                if language == 'Csharp':
+                    cdn_link = cdn_link + 'csharp-abs-webapp_simpleechobot_precompiled.zip'
+                elif language == 'Javascript':
+                    cdn_link = cdn_link + 'node.js-abs-webapp_hello-chatconnector.zip'
+        else:
+            if kind == 'function':
+                raise CLIError('Function bot creation is not supported for v4 bot sdk.')
+
+            template_name = BotTemplateDeployer.v4_webapp_template_name
+            if language == 'Csharp':
+                cdn_link = cdn_link + 'csharp-abs-webapp-v4_echobot_precompiled.zip'
+            elif language == 'Javascript':
+                cdn_link = cdn_link + 'node.js-abs-webapp-v4_echobot.zip'
+
+        return cdn_link, template_name

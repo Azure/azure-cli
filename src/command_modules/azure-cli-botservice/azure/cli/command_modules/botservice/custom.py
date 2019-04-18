@@ -29,22 +29,27 @@ logger = get_logger(__name__)
 CSHARP = 'Csharp'
 JAVASCRIPT = 'Javascript'
 NODE = 'Node'
+TYPESCRIPT = 'Typescript'
 
 
 def __language_validator(language, command):
-    # EXPIRATION_VERSION = '2.0.80'
-    if language not in (CSHARP, JAVASCRIPT, NODE):
+    # EXPIRATION_VERSION = '2.0.80'  # ETA: December 2019
+    if language not in (CSHARP, JAVASCRIPT, NODE, TYPESCRIPT) or \
+            (command != 'prepare-deploy' and language == TYPESCRIPT):
+        # Typescript is only supported in prepare-deploy, passing in Typescript should otherwise result in an error
+        # For any other command that takes language, only "Csharp", "Javascript", and "Node" should be supported.
         raise CLIError("az bot %s: '%s' is not a valid value for '--lang'. See 'az bot %s --help'."
                        % (command, language, command))
     if language == NODE:
-        logger.warning("Option `{0}` for `--lang` has been deprecated and will be removed in a future release. "
-                       "Use `Javascript` instead.".format(language))
-        language = JAVASCRIPT
+        logger.warning("Option `Node` for `--lang` has been deprecated and its support will be removed in a future "
+                       "release. Use `Javascript` instead.")
+        return JAVASCRIPT
+    return language
 
 
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals
            description=None, display_name=None, endpoint=None, tags=None, storageAccountName=None,
-           location='Central US', sku_name='F0', appInsightsLocation='South Central US', version='v4'):
+           location='Central US', sku_name='F0', appInsightsLocation=None, version='v4'):
     """Create a WebApp, Function, or Channels Registration Bot on Azure.
 
     This method is directly called via "bot create"
@@ -128,7 +133,21 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         if not language:
             raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
                            .format(webapp_kind, function_kind))
-        __language_validator(language, 'create')
+        language = __language_validator(language, 'create')
+
+        if version == 'v4':
+            if storageAccountName:
+                logger.warning('WARNING: `az bot create` for v4 bots no longer creates or uses a Storage Account. If '
+                               'you wish to create a Storage Account via Azure CLI, please use `az storage account` or '
+                               'an ARM template.')
+            if appInsightsLocation:
+                logger.warning(
+                    'WARNING: `az bot create` for v4 bots no longer creates or uses Application Insights. If '
+                    'you wish to create Application Insights via Azure CLI, please use an ARM template.')
+            storageAccountName = None
+            appInsightsLocation = None
+        if version == 'v3' and not appInsightsLocation:
+            appInsightsLocation = 'South Central US'
 
         creation_results = BotTemplateDeployer.create_app(
             cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
@@ -487,16 +506,22 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
             raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
                            'prepare-deploy"' % (file_name, code_dir, file_name))
 
-    __language_validator(language, 'prepare-deploy')
+    language = __language_validator(language, 'prepare-deploy')
 
-    if language != 'Csharp':
+    if language == JAVASCRIPT or language == TYPESCRIPT:
         if proj_file_path:
             raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
         does_file_exist('web.config')
+        module_source_dir = os.path.dirname(os.path.abspath(__file__))
+        if language == JAVASCRIPT:
+            source_web_config = os.path.join(module_source_dir, 'web.config')
+            shutil.copy(source_web_config, code_dir)
+        else:
+            source_web_config = os.path.join(module_source_dir, 'typescript.web.config')
+            shutil.copy(source_web_config, code_dir)
+            os.rename(os.path.join(code_dir, 'typescript.web.config'), os.path.join(code_dir, 'web.config'))
+        logger.info('web.config for %s successfully created.', language)
 
-        BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, {'lang': language,
-                                                                             'has_web_config': False,
-                                                                             'has_iisnode_yml': True})
     else:
         if not proj_file_path:
             raise CLIError('--proj-file-path must be provided if language is Csharp')

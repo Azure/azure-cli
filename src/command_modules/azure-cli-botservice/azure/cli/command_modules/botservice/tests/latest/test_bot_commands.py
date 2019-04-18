@@ -358,7 +358,7 @@ class BotTests(ScenarioTest):
             'password': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{valid_bot_name}'),
@@ -422,7 +422,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -452,7 +452,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Node -v v3',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript -v v3',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -539,7 +539,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -651,7 +651,7 @@ class BotTests(ScenarioTest):
     def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self, resource_group):
         dir_path = 'does_not_exist'
         self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Node'})
+                            'language': 'Javascript'})
         try:
             self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
             raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
@@ -662,22 +662,47 @@ class BotTests(ScenarioTest):
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_node_should_fail_with_proj_file_path(self, resource_group):
-        self.kwargs.update({'language': 'Node',
+    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self, resource_group):
+        self.kwargs.update({'language': 'Javascript',
                             'proj_file': 'node_bot/test.csproj'})
         try:
             self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
-            raise Exception("'az bot prepare-publish --lang Node' should have failed with --proj-file-path")
+            raise Exception("'az bot prepare-publish --lang Javascript' should have failed with --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
         except Exception as error:
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_node(self, resource_group):
+    def test_botservice_prepare_deploy_javascript(self, resource_group):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Node'})
+                            'language': 'Javascript'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+        assert os.path.exists(os.path.join(dir_path, 'web.config'))
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self, resource_group):
+        self.kwargs.update({'language': 'Typescript',
+                            'proj_file': 'node_bot/test.csproj'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+        except Exception as error:
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_typescript(self, resource_group):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Typescript'})
         if os.path.exists(dir_path):
             # clean up the folder
             shutil.rmtree(dir_path)
@@ -743,10 +768,10 @@ class BotTests(ScenarioTest):
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_node_fail_if_web_config_exists(self, resource_group):
+    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Node'})
+                            'language': 'Javascript'})
         if os.path.exists(dir_path):
             # clean up the folder
             shutil.rmtree(dir_path)
