@@ -453,7 +453,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.assertTrue(iprule['ipRules'][1]['ipMask'] == '2.2.2.2')
 
         # Get list of IP rule
-        iprulelst = self.cmd(
+        iprule = self.cmd(
             'eventhubs namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
         self.assertEqual(len(iprule['ipRules']), 2)
 
