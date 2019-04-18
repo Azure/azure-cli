@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.10
+++++++
+* Minor fixes.
+
 0.2.9
 +++++
 * Introducing support for --enable-multiple-write-locations on account update
