@@ -9,6 +9,7 @@
 # pylint: disable=unused-variable
 
 import re
+import time
 
 
 # Namespace Region
@@ -27,11 +28,7 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
                 tier=sku,
                 capacity=capacity)
         )
-    )
-
-    getnamespace = client.get(resource_group_name, namespace_name)
-    while getnamespace.provisioning_state != 'Succeeded':
-        getnamespace = client.get(resource_group_name, namespace_name)
+    ).result()
 
     if default_action:
         netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
