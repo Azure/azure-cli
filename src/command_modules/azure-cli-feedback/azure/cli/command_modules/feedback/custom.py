@@ -24,7 +24,6 @@ from knack.util import CLIError
 from azure.cli.core.util import get_az_version_string
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 from azure.cli.core.util import open_page_in_browser
-import pyperclip
 
 _ONE_MIN_IN_SECS = 60
 
@@ -279,7 +278,7 @@ class CommandLogFile(object):
             if status_msg.startswith("exit code"):
                 idx = status_msg.index(":")  # raises ValueError
                 exit_code = int(log_record_list[-1].log_msg[idx + 1:].strip())
-                log_data["success"] = True if not exit_code else False
+                log_data["success"] = bool(not exit_code)
         except (IndexError, ValueError):
             logger.debug("Couldn't extract exit code from command log %s.", file_name)
 
@@ -362,7 +361,7 @@ class ErrorMinifier(object):
         self._capacity = int(capacity)
         self._minified_error = self._get_minified_errors()
 
-    def _get_minified_errors(self):
+    def _get_minified_errors(self):  # pylint: disable=too-many-return-statements
         errors_list = self._errors_list
         errors_string = "\n".join(errors_list)
         if self._capacity is None:
@@ -432,7 +431,7 @@ class ErrorMinifier(object):
         if levels > 0:
             new_name = os.path.basename(file_name)
             file_name = os.path.dirname(file_name)
-            for i in range(levels-1):
+            for _ in range(levels - 1):
                 new_name = os.path.join(os.path.basename(file_name), new_name)
                 file_name = os.path.dirname(file_name)
             return new_name
@@ -474,11 +473,11 @@ class ErrorMinifier(object):
 
         return "\n".join(new_lines)
 
-
     def __str__(self):
         if self._minified_error:
             return "```\n{}\n```".format(self._minified_error.strip())
         return ""
+
 
 def _build_issue_info_tup(command_log_file=None):
     def _get_parent_proc_name():
@@ -553,7 +552,7 @@ def _build_issue_info_tup(command_log_file=None):
     logger.debug("Total minified issue length is %s", len(minified_issue_body))
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
-    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), _ISSUES_TEMPLATE.format(**format_dict), formatted_issues_url, original_issue_body
+    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), formatted_issues_url, original_issue_body
 
 
 def _get_minified_issue_url(command_log_file, format_dict, is_ext, capacity):
@@ -571,7 +570,8 @@ def _get_minified_issue_url(command_log_file, format_dict, is_ext, capacity):
     minified_issue_body = _ISSUES_TEMPLATE.format(**format_dict)
 
     # prefix formatted url with 'https://' if necessary and supply empty body to remove any existing issue template
-    formatted_issues_url = _RAW_EXTENSIONS_ISSUES_URL if is_ext else _RAW_CLI_ISSUES_URL  # aka.ms doesn't work well for long urls / query params
+    # aka.ms doesn't work well for long urls / query params
+    formatted_issues_url = _RAW_EXTENSIONS_ISSUES_URL if is_ext else _RAW_CLI_ISSUES_URL
     if not formatted_issues_url.startswith("http"):
         formatted_issues_url = "https://" + formatted_issues_url
     query_dict = {'body': minified_issue_body}
@@ -707,22 +707,23 @@ def _prompt_issue(recent_command_list):
 
     if ans in ["y", "n"]:
         if ans == "y":
-            prefix, body, url, original_issue = _build_issue_info_tup()
+            prefix, url, original_issue = _build_issue_info_tup()
         else:
             return False
     else:
         if ans in ["q", "quit"]:
             return False
         if ans == 0:
-            prefix, body, url, original_issue = _build_issue_info_tup()
+            prefix, url, original_issue = _build_issue_info_tup()
         else:
-            prefix, body, url, original_issue = _build_issue_info_tup(recent_command_list[ans])
+            prefix, url, original_issue = _build_issue_info_tup(recent_command_list[ans])
 
     print(prefix)
 
     # open issues page in browser and copy issue body to clipboard
+    # import pyperclip
     # try:  # todo: if no longer using clipboard, remove dependency
-    #     pyperclip.copy(body)
+    #     pyperclip.copy(original_issue)
     # except pyperclip.PyperclipException as ex:
     #     logger.debug(ex)
 
