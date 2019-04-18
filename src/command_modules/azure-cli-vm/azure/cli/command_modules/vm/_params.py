@@ -283,10 +283,6 @@ def load_arguments(self, _):
 
     with self.argument_context('vm restart') as c:
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
-
-    with self.argument_context('vm stop') as c:
-        c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off the VM immediately.')
-
     # endregion
 
     # region VMSS
@@ -395,6 +391,9 @@ def load_arguments(self, _):
         with self.argument_context('{} run-command invoke'.format(scope)) as c:
             c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
             c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
+
+        with self.argument_context('{} stop'.format(scope)) as c:
+            c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
