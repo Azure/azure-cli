@@ -856,21 +856,21 @@ def my_command(cmd, ...):
 
 4. Use appropriate conditionals to ensure your command can run on all supported profiles:
 
-** commands.py **
+***commands.py***
 
 ```Python
 with self.command_group('test') as g:
   g.command('use-new-feature', 'use_new_feature', min_api='2018-03-01')  # won't be available unless min API is met
 ```
 
-** params.py **
+***params.py***
 
 ```Python
 with self.argument_context('test create') as c:
   c.argument('enable_new_feature', min_api='2018-03-01', arg_type=get_three_state_flag())  # expose argument only when min API is satisfied
 ```
 
-** custom.py **
+***custom.py***
 
 ```Python
 def my_test_command(cmd, ...):
