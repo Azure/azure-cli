@@ -1404,10 +1404,11 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
             'config2': 'ipconfig2'
         })
 
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet {subnet1} --vnet-name {vnet} --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --cache write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --cache read')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
         with self.assertRaisesRegexp(CloudError, 'not supported for secondary IpConfigurations'):
@@ -1528,12 +1529,13 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
             'pool': 'pool1'
         })
 
-        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1}  --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --cache write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --cache read')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
         self.kwargs['ag_pool_id'] = self.cmd('network application-gateway address-pool show -g {rg} --gateway-name {ag} -n {pool}').get_output_in_json()['id']
 
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet}')
 
         self.cmd('network nic ip-config address-pool add -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
@@ -2025,7 +2027,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Sql/servers', checks=[
             self.check('delegations[0].serviceName', 'Microsoft.Sql/servers'),
-            self.check('purpose', 'InterfaceEndpoints')
+            self.check('purpose', 'PrivateEndpoints')
         ])
         # verify the update command, and that CLI validation will accept either serviceName or Name
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql.Servers',

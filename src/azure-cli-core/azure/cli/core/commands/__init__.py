@@ -349,7 +349,7 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
     try:
         cache_obj.load(args, kwargs)
         return cache_obj
-    except FileNotFoundError:
+    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
         message = "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
         logger.warning(message)
         return _get_operation()
