@@ -759,63 +759,63 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --default-action Allow',
             checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
                  checks=[self.check('sku.name', self.kwargs['sku'])])
 
-        # Create NetworkRule
-        netwrokruleset = self.cmd(
-            'servicebus namespace network-rule create --resource-group {rg} --name {namespacename} --default-action Deny').get_output_in_json()
-        self.assertEqual(netwrokruleset['defaultAction'], 'Deny')
+        # Update Namespace
+        self.cmd(
+            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags} --default-action Deny',
+            checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get NetworkRule
         self.cmd(
-            'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}')
+            'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
 
         # add IP Rule
         iprule = self.cmd(
-            'servicebus namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask1} --action Allow').get_output_in_json()
-        self.assertEqual(len(iprule), 1)
+            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask1} --action Allow').get_output_in_json()
+        self.assertEqual(len(iprule['ipRules']), 1)
 
         # add IP Rule
         iprule = self.cmd(
-            'servicebus namespace network-rule ip-address-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask2} --action Allow').get_output_in_json()
-        self.assertEqual(len(iprule), 2)
-        self.assertTrue(iprule[0]['ipMask'] == '1.1.1.1')
-        self.assertTrue(iprule[1]['ipMask'] == '2.2.2.2')
+            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask2} --action Allow').get_output_in_json()
+        self.assertEqual(len(iprule['ipRules']), 2)
+        self.assertTrue(iprule['ipRules'][0]['ipMask'] == '1.1.1.1')
+        self.assertTrue(iprule['ipRules'][1]['ipMask'] == '2.2.2.2')
 
         # Get list of IP rule
-        iprulelst = self.cmd(
-            'servicebus namespace network-rule ip-address-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
-        self.assertEqual(len(iprulelst), 2)
+        iprule = self.cmd(
+            'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
+        self.assertEqual(len(iprule['ipRules']), 2)
 
         # Remove IPRule
         iprule = self.cmd(
-            'servicebus namespace network-rule ip-address-rule remove --resource-group {rg} --name {namespacename} --ip-address {ipmask2}').get_output_in_json()
-        self.assertEqual(len(iprule), 1)
-        self.assertTrue(iprule[0]['ipMask'] == '1.1.1.1')
+            'servicebus namespace network-rule remove --resource-group {rg} --name {namespacename} --ip-address {ipmask2}').get_output_in_json()
+        self.assertEqual(len(iprule['ipRules']), 1)
+        self.assertTrue(iprule['ipRules'][0]['ipMask'] == '1.1.1.1')
 
         # add vnetrule
         vnetrule = self.cmd(
-            'servicebus namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}').get_output_in_json()
-        self.assertEqual(len(vnetrule), 1)
+            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}').get_output_in_json()
+        self.assertEqual(len(vnetrule['virtualNetworkRules']), 1)
 
         # add vnetrule2
-        vnetrule2 = self.cmd(
-            'servicebus namespace network-rule virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
-        self.assertEqual(len(vnetrule2), 2)
+        vnetrule = self.cmd(
+            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
+        self.assertEqual(len(vnetrule['virtualNetworkRules']), 2)
 
         # list Vnetrules
         self.cmd(
-            'servicebus namespace network-rule virtual-network-rule list --resource-group {rg} --name {namespacename}')
+            'servicebus namespace network-rule list --resource-group {rg} --name {namespacename}')
 
         # remove Vnetrule
-        vnetrulel = self.cmd(
-            'servicebus namespace network-rule virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
-        self.assertEqual(len(vnetrulel), 1)
+        vnetrule = self.cmd(
+            'servicebus namespace network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
+        self.assertEqual(len(vnetrule['virtualNetworkRules']), 1)
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

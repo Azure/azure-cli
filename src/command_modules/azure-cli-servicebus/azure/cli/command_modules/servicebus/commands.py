@@ -146,17 +146,6 @@ def load_command_table(self, _):
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_networkruleset_createupdate')
-        g.generic_update_command('update', getter_name='get_network_rule_set', setter_name='create_or_update_network_rule_set', custom_func_name='cli_networkruleset_update')
+        g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
         g.show_command('list', 'get_network_rule_set')
-        g.custom_command('delete', 'cli_networkruleset_delete')
-
-    with self.command_group('servicebus namespace network-rule virtual-network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('add', 'cli_virtualnetwrokrule_add', validator=validate_subnet)
-        g.custom_command('list', 'cli_virtualnetwrokrule_list')
-        g.custom_command('remove', 'cli_virtualnetwrokrule_delete')
-
-    with self.command_group('servicebus namespace network-rule ip-address-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('add', 'cli_iprule_add')
-        g.custom_command('list', 'cli_iprule_list')
-        g.custom_command('remove', 'cli_iprule_delete')
+        g.custom_command('remove', 'cli_networkrule_delete')

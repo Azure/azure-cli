@@ -248,23 +248,13 @@ def load_arguments_sb(self, _):
             c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
 
 # Region Namespace NetworkRuleSet
-    for scope in ['servicebus namespace network-rule create', 'servicebus namespace network-rule update']:
-        with self.argument_context(scope)as c:
-            c.argument('default_action', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']), help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
+    with self.argument_context('servicebus namespace network-rule') as c:
+        c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('ip_mask', arg_group='ipaddressrule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
 
-    for scope in ['servicebus namespace network-rule virtual-network-rule add', 'servicebus namespace network-ruleset virtualnetworkrule remove']:
-        with self.argument_context(scope) as c:
-            c.argument('subnet', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-
-    with self.argument_context('servicebus namespace network-rule virtual-network-rule add') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-        c.extra('vnet_name', options_list=['--vnet-name'], help='Name of the Virtual Network')
-
-    for scope in ['servicebus namespace network-rule ip-address-rule add', 'servicebus namespace network-rule ip-address-rule remove']:
-        with self.argument_context(scope) as c:
-            c.argument('ip_mask', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
-
-    with self.argument_context('servicebus namespace network-rule ip-address-rule add') as c:
-        c.argument('action', arg_type=get_enum_type(['Allow']),
-                   help='Action of the IP rule. Default: Allow')
+    with self.argument_context('servicebus namespace network-rule add')as c:
+        c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('ignore_missing_vnet_service_endpoint', arg_group='virtualnetworkrule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+        c.extra('vnet_name', arg_group='virtualnetworkrule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+        c.argument('ip_mask', arg_group='ipaddressrule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+        c.argument('action', arg_group='ipaddressrule', arg_type=get_enum_type(['Allow']), help='Action of the IP rule. Default: Allow')
