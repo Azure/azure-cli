@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.3
++++++
+* Minor fixes.
+
 0.2.2
 +++++
 * Add support for Microsoft_Standard and Standard_ChinaCdn

@@ -2,6 +2,8 @@
 
 Release History
 ===============
+0.2.18
+++++++
 * webapp: az webapp ssh now support ASE and a timeout parameter
 * functionapp: add feature for establishing CI CD to an Azure DevOps pipeline from a Github repository
 * functionapp: in `az functionapp devops-build create`, added `--github-pat` flag to accept Github personal access token
