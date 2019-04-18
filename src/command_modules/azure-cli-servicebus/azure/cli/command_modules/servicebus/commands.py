@@ -147,5 +147,5 @@ def load_command_table(self, _):
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
-        g.show_command('list', 'get_network_rule_set')
+        g.command('list', 'get_network_rule_set')
         g.custom_command('remove', 'cli_networkrule_delete')

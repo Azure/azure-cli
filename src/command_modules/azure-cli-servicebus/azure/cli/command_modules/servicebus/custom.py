@@ -9,7 +9,6 @@
 # pylint: disable=unused-variable
 
 import re
-import time
 
 
 # Namespace Region

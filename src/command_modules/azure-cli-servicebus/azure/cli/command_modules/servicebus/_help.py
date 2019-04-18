@@ -583,7 +583,7 @@ helps['servicebus namespace network-rule add'] = """
     short-summary: Set a Network rule for a Namespace
     examples:
         - name: set a Network rule for a namespace
-          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace  --default-action true
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['servicebus namespace network-rule list'] = """
