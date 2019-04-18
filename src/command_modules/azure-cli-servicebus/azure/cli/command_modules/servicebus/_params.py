@@ -251,6 +251,7 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace network-rule') as c:
         c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('ip_mask', arg_group='ipaddressrule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
 
     with self.argument_context('servicebus namespace network-rule add')as c:
         c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
