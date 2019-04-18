@@ -8,6 +8,9 @@ Release History
 * functionapp: in `az functionapp devops-build create`, added `--github-repository` flag to accept Github repository that contains a functionapp source code
 * webapp: az webapp up --logs was failing with a error and updating default .NETCORE version to 2.1
 * functionapp: remove unnecessary app settings while creating a function app with consumption plan
+* webapp: az webapp up default asp string now appends number at the end to create a new ASP based on SKU options
+* webapp: az webapp up support -b as an option to launch the app in the browser
+* webapp: az webapp deployment source config zip handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
 
 0.2.17
 ++++++
