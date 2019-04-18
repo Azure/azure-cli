@@ -41,6 +41,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
+        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
+                   help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
 
     with self.argument_context('eventhubs namespace update') as c:
         c.argument('tags', arg_type=tags_type)
@@ -48,6 +50,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
+        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
+                   help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
@@ -157,23 +161,13 @@ def load_arguments_eh(self, _):
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
 # Region Namespace NetworkRuleSet
-    for scope in ['eventhubs namespace network-rule create', 'eventhubs namespace network-rule update']:
-        with self.argument_context(scope)as c:
-            c.argument('default_action', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']), help='Default Action for Network Rule Set. Possible values include: Allow, Deny')
+    with self.argument_context('eventhubs namespace network-rule') as c:
+        c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('ip_mask', arg_group='ipaddressrule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
 
-    for scope in ['eventhubs namespace network-rule virtual-network-rule add', 'eventhubs namespace network-ruleset virtualnetworkrule remove']:
-        with self.argument_context(scope) as c:
-            c.argument('subnet', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-
-    with self.argument_context('eventhubs namespace network-rule virtual-network-rule add') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-        c.extra('vnet_name', options_list=['--vnet-name'], help='Name of the Virtual Network')
-
-    for scope in ['eventhubs namespace network-rule ip-address-rule add', 'eventhubs namespace network-rule ip-address-rule remove']:
-        with self.argument_context(scope) as c:
-            c.argument('ip_mask', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
-
-    with self.argument_context('eventhubs namespace network-rule ip-address-rule add') as c:
-        c.argument('action', arg_type=get_enum_type(['Allow']),
-                   help='Action of the IP rule. Default: Allow')
+    with self.argument_context('eventhubs namespace network-rule add')as c:
+        c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('ignore_missing_vnet_service_endpoint', arg_group='virtualnetworkrule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+        c.extra('vnet_name', arg_group='virtualnetworkrule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+        c.argument('ip_mask', arg_group='ipaddressrule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+        c.argument('action', arg_group='ipaddressrule', arg_type=get_enum_type(['Allow']), help='Action of the IP rule. Default: Allow')
