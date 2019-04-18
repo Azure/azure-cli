@@ -21,7 +21,7 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
             sku=Sku(name=sku, tier=sku, capacity=capacity),
             is_auto_inflate_enabled=is_auto_inflate_enabled,
             maximum_throughput_units=maximum_throughput_units,
-            kafka_enabled=is_kafka_enabled))
+            kafka_enabled=is_kafka_enabled)).result()
 
     getnamespace = client.get(resource_group_name, namespace_name)
     while getnamespace.provisioning_state != 'Succeeded':
