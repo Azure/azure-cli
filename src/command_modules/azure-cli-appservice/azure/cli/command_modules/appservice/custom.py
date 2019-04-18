@@ -2390,7 +2390,6 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         _set_build_app_setting = True
         # Configure default logging
         _configure_default_logging(cmd, rg_name, name)
-        # TODO: Set always on to true
         if _show_too_many_apps_warn:
             logger.warning("There are sites that have been deployed to the same hosting "
                            "VM of this region, to prevent performance impact please "
@@ -2417,7 +2416,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         _app_settings = application_settings.properties
         for key, value in _app_settings.items():
             if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
-                is_skip_build = True if value.upper() == "FALSE" else False
+                is_skip_build = value.upper() == "FALSE"
                 # if the value is already set just honor it
                 _set_build_app_setting = False
                 break
@@ -2449,8 +2448,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         logger.warning("Launching app using default browser")
         return view_in_browser(cmd, rg_name, name, None, logs)
     _url = _get_url(cmd, rg_name, name)
-    return logger.warning("Launch the created app '%s'. To redeploy the app run the command az webapp up -n %s -l %s",
-                          _url, name, location)
+    return logger.warning("You can launch the app at '%s'. To redeploy the app run the command az webapp up -n "
+                          "%s -l %s", _url, name, location)
 
 
 def _ping_scm_site(cmd, resource_group, name):
