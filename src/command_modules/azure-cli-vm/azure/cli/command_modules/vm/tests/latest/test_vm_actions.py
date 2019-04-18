@@ -518,7 +518,7 @@ class TestActions(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.get_models.return_value = TargetRegion
 
-        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs", "eastus2=standard_zrs=3"]
+        target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
         np.target_regions = target_regions_list
 
         process_gallery_image_version_namespace(cmd, np)
@@ -528,7 +528,6 @@ class TestActions(unittest.TestCase):
         self.assertEqual(target_regions_objs[1], TargetRegion(name="westus", regional_replica_count=1))
         self.assertEqual(target_regions_objs[2], TargetRegion(name="westus2", storage_account_type="standard_zrs"))
         self.assertEqual(target_regions_objs[3], TargetRegion(name="eastus", regional_replica_count=2, storage_account_type="standard_lrs"))
-        self.assertEqual(target_regions_objs[4], TargetRegion(name="eastus2", regional_replica_count=3, storage_account_type="standard_zrs"))
 
         # handle invalid storage account / replica count
         with self.assertRaises(CLIError):
@@ -555,6 +554,12 @@ class TestActions(unittest.TestCase):
         # handle invalid replica count
         with self.assertRaises(CLIError):
             target_regions_list = ["westus=standard_lrs=standard_zrs"]
+            np.target_regions = target_regions_list
+            process_gallery_image_version_namespace(cmd, np)
+
+        # handle invalid replica count
+        with self.assertRaises(CLIError):
+            target_regions_list = ["westus=standard_lrs=2"]
             np.target_regions = target_regions_list
             process_gallery_image_version_namespace(cmd, np)
 

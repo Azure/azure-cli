@@ -393,7 +393,7 @@ def load_arguments(self, _):
             c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
         with self.argument_context('{} stop'.format(scope)) as c:
-            c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.')
+            c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -590,7 +590,8 @@ def load_arguments(self, _):
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
-        c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions", arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS"]))
+        c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions",
+                   arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS"]), min_api='2019-03-01')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")

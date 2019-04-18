@@ -3,7 +3,7 @@
 Release History
 ===============
 
-2.2.18
+2.2.19
 ++++++
 * vm/vmss stop: expose --skip-shutdown. If used, the VM will be powered-off without shutting down. This is helpful if a VM crashes and/or cannot properly shutdown.
 * sig image-version create: expose --storage-account-type. Can now set the publishing profile's general storage account type to Standard_LRS or Standard_ZRS

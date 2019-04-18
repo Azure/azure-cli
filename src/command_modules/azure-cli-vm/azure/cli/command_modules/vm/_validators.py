@@ -1388,17 +1388,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
                                        "not a valid storage account type. Storage account types must be one of {}."
                                        .format(t, storage_account_types_str))
                 except ValueError:
-                    try:
-                        replica_count = int(parts[2])  # raises ValueError if neither part is an integer replica count.
-                        storage_account_type = parts[1]
-                        if storage_account_type not in storage_account_types_list:
-                            raise CLIError("usage error: {} is an invalid target region argument. The second part is "
-                                           "not a valid storage account type. Storage account types must be one of {}."
-                                           .format(t, storage_account_types_str))
-
-                    except ValueError:
-                        raise CLIError("usage error: {} is an invalid target region argument. Neither the second "
-                                       "nor third part is a valid integer replica count.".format(t))
+                    raise CLIError("usage error: {} is an invalid target region argument. "
+                                   "The second part must be a valid integer replica count.".format(t))
 
             # At least the region is specified
             if len(parts) >= 1:
