@@ -137,7 +137,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-            '--insights-location "West US 2" -v v3',
+            '--insights-location "West US 2" -v v3 --lang Csharp',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -181,7 +181,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
         self.cmd(
-            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -226,7 +226,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-            '--insights-location "West US 2" --lang Node -v v3',
+            '--insights-location "West US 2" --lang Javascript -v v3',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -268,7 +268,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -308,7 +308,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -398,7 +398,7 @@ class BotTests(ScenarioTest):
             # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -422,7 +422,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Javascript',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -482,7 +482,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang CSharp',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -512,7 +512,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v3',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v3 --lang Csharp',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -539,7 +539,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Javascript',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -556,7 +556,7 @@ class BotTests(ScenarioTest):
         os.remove(os.path.join(dir_path, 'web.config'))
         os.remove(os.path.join(dir_path, 'iisnode.yml'))
         # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v4', checks=[
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
             self.check('active', True)
         ])
 
@@ -573,11 +573,12 @@ class BotTests(ScenarioTest):
             'botname': self.create_random_name(prefix='cli', length=10),
             'description': 'description1',
             'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4())
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         self.cmd(
-            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags '
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p {password} --tags '
             'key1=value1',
             checks=[
                 self.check('name', '{botname}'),
