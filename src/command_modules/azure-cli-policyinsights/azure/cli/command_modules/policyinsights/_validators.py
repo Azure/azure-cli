@@ -14,3 +14,13 @@ def validate_resource(cmd, namespace):  # pylint: disable=unused-argument
                 raise CLIError('--namespace is required if --resource is not a resource ID.')
             if not namespace.resource_type:
                 raise CLIError('--resource-type is required if --resource is not a resource ID.')
+
+def validate_resourceScopeRequired(cmd, namespace):
+    if not namespace.resource:
+        raise CLIError('--resource is required for the operation.')
+    else:
+        validate_resource(cmd, namespace)
+
+def validate_expand(cmd, namespace):
+    if namespace.expand_clause is not None:
+        validate_resourceScopeRequired(cmd, namespace)
