@@ -164,6 +164,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace network-rule') as c:
         c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('ip_mask', arg_group='ipaddressrule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+        c.argument('namespace_name', id_part='name', help='name of Namespace')
 
     with self.argument_context('eventhubs namespace network-rule add')as c:
         c.argument('subnet', arg_group='virtualnetworkrule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')

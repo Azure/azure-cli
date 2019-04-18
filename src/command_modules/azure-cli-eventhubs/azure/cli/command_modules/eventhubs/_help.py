@@ -389,7 +389,7 @@ helps['eventhubs namespace network-rule add'] = """
     short-summary: Set a Network rule for a Namespace
     examples:
         - name: set a Network rule for a namespace
-          text: az eventhubs namespace network-rule create --resource-group myresourcegroup --namespace-name mynamespace  --default-action true
+          text: az eventhubs namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace  --default-action true
 """
 
 helps['eventhubs namespace network-rule list'] = """
