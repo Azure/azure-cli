@@ -62,7 +62,7 @@ _ISSUES_TEMPLATE_PREFIX = """
 BEGIN TEMPLATE
 ===============
 **A browser has been opened to {} to create an issue.**
-**You can also run `az feedback --verbose` to emit the output to stderr.**
+**You can also run `az feedback --verbose` to emit the full output to stderr.**
 """
 
 _ISSUES_TEMPLATE = """
@@ -176,11 +176,7 @@ class CommandLogFile(object):
         if not self.command_data_dict:
             return False
 
-        was_successful = self.command_data_dict.get("success", True)
-        if was_successful:
-            return False
-        else:
-            return True
+        return not self.command_data_dict.get("success", True)
 
     def get_command_time_str(self):
         if not self.metadata_tup:
@@ -539,11 +535,20 @@ def _build_issue_info_tup(command_log_file=None):
     capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
 
     # while formatted issue to long, minify to new capacity
-    while len(formatted_issues_url) > _MAX_URL_LENGTH:
+    tries = 0
+    while len(formatted_issues_url) > _MAX_URL_LENGTH and tries < 25:
         # reduce capacity by difference if formatted_issues_url is too long because of url escaping
         res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, capacity)
         formatted_issues_url, minified_issue_body = res
         capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
+        tries += 1
+
+    # if something went wrong with minification (i.e. another part of the issue is unexpectedly too long)
+    # then truncate the whole issue body and warn the user.
+    if len(formatted_issues_url) > _MAX_URL_LENGTH:
+        formatted_issues_url = formatted_issues_url[:_MAX_URL_LENGTH]
+        logger.warning("Failed to properly minify issue url. "
+                       "Please use 'az feedback --verbose' to get the full issue output.")
 
     logger.debug("Total minified issue length is %s", len(minified_issue_body))
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
