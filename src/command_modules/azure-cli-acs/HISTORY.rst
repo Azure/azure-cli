@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.3.22
+++++++
+* adding customer-admin-group-id flag to "az osa create"
+
 2.3.21
 ++++++
 * Minor fixes.
@@ -9,10 +13,6 @@ Release History
 2.3.20
 ++++++
 * Minor fixes.
-
-2.3.20
-++++++
-* adding customer-admin-group-id flag to az osa create
 
 2.3.19
 ++++++
