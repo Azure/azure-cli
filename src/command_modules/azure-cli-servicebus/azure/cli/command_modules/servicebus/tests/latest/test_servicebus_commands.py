@@ -43,16 +43,16 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Update Namespace
         self.cmd(
             'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('servicebus namespace list').output
@@ -65,17 +65,17 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Authoriazation Rule
         self.cmd(
             'servicebus namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Authorization Rule
         self.cmd(
             'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacename} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Update Authoriazation Rule
         self.cmd(
             'servicebus namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights1}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Default Authorization Rule
         self.cmd(
@@ -126,25 +126,25 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Create Queue
         self.cmd(
             'servicebus queue create --resource-group {rg} --namespace-name {namespacename} --name {queuename} --auto-delete-on-idle {lockduration} ',
-            checks=[self.check('name', self.kwargs['queuename'])])
+            checks=[self.check('name', '{queuename}')])
 
         # Get Queue
         self.cmd('servicebus queue show --resource-group {rg} --namespace-name {namespacename} --name {queuename}',
-                 checks=[self.check('name', self.kwargs['queuename'])])
+                 checks=[self.check('name', '{queuename}')])
 
         # Update Queue
         self.cmd(
             'servicebus queue update --resource-group {rg} --namespace-name {namespacename} --name {queuename} --auto-delete-on-idle {lockduration1} ',
-            checks=[self.check('name', self.kwargs['queuename'])])
+            checks=[self.check('name', '{queuename}')])
 
         # Queue List
         self.cmd('servicebus queue list --resource-group {rg} --namespace-name {namespacename}')
@@ -152,17 +152,17 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Authoriazation Rule
         self.cmd(
             'servicebus queue authorization-rule create --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Create Authorization Rule
         self.cmd(
             'servicebus queue authorization-rule show --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Update Authoriazation Rule
         self.cmd(
             'servicebus queue authorization-rule update --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --rights {accessrights1}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Authorization Rule Listkeys
         self.cmd(
@@ -210,26 +210,26 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Create Topic
         self.cmd(
             'servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname}',
-            checks=[self.check('name', self.kwargs['topicname'])])
+            checks=[self.check('name', '{topicname}')])
 
         # Get Topic
         self.cmd(
             'servicebus topic show --resource-group {rg} --namespace-name {namespacename} --name {topicname}',
-            checks=[self.check('name', self.kwargs['topicname'])])
+            checks=[self.check('name', '{topicname}')])
 
         # update Topic
         self.cmd(
             'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --enable-ordering True',
-            checks=[self.check('name', self.kwargs['topicname'])])
+            checks=[self.check('name', '{topicname}')])
 
         # Topic List
         self.cmd('servicebus topic list --resource-group {rg} --namespace-name {namespacename}')
@@ -237,17 +237,17 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Authoriazation Rule
         self.cmd(
             'servicebus topic authorization-rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Create Authorization Rule
         self.cmd(
             'servicebus topic authorization-rule show --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Update Authoriazation Rule
         self.cmd(
             'servicebus topic authorization-rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --rights {accessrights1}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Authorization Rule Listkeys
         self.cmd(
@@ -291,29 +291,29 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Create Topic
         self.cmd('servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname}',
-                 checks=[self.check('name', self.kwargs['topicname'])])
+                 checks=[self.check('name', '{topicname}')])
 
         # Get Topic
         self.cmd('servicebus topic show --resource-group {rg} --namespace-name {namespacename} --name {topicname}',
-                 checks=[self.check('name', self.kwargs['topicname'])])
+                 checks=[self.check('name', '{topicname}')])
 
         # Create Subscription
         self.cmd(
             'servicebus topic subscription create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname}',
-            checks=[self.check('name', self.kwargs['subscriptionname'])])
+            checks=[self.check('name', '{subscriptionname}')])
 
         # Get Create Subscription
         self.cmd(
             'servicebus topic subscription show --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname}',
-            checks=[self.check('name', self.kwargs['subscriptionname'])])
+            checks=[self.check('name', '{subscriptionname}')])
 
         # Get list of Subscription+
         self.cmd(
@@ -322,7 +322,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # update Subscription
         self.cmd(
             'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname} --lock-duration {lockduration}',
-            checks=[self.check('name', self.kwargs['subscriptionname'])])
+            checks=[self.check('name', '{subscriptionname}')])
 
         # Delete Subscription
         self.cmd(
@@ -359,44 +359,44 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Create Topic
         self.cmd('servicebus topic create --resource-group {rg} --namespace-name {namespacename} --name {topicname} ',
-                 checks=[self.check('name', self.kwargs['topicname'])])
+                 checks=[self.check('name', '{topicname}')])
 
         # Get Topic
         self.cmd('servicebus topic show --resource-group {rg} --namespace-name {namespacename} --name {topicname} ',
-                 checks=[self.check('name', self.kwargs['topicname'])])
+                 checks=[self.check('name', '{topicname}')])
 
         # Create Subscription
         self.cmd(
             'servicebus topic subscription create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname}',
-            checks=[self.check('name', self.kwargs['subscriptionname'])])
+            checks=[self.check('name', '{subscriptionname}')])
 
         # Get Create Subscription
         self.cmd(
             'servicebus topic subscription show --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname}',
-            checks=[self.check('name', self.kwargs['subscriptionname'])])
+            checks=[self.check('name', '{subscriptionname}')])
 
         # Create Rules
         self.cmd(
             'servicebus topic subscription rule create --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-sql-expression {sqlexpression}',
-            checks=[self.check('name', self.kwargs['rulename'])])
+            checks=[self.check('name', '{rulename}')])
 
         # Get Created Rules
         self.cmd(
             'servicebus topic subscription rule show --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename}',
-            checks=[self.check('name', self.kwargs['rulename'])])
+            checks=[self.check('name', '{rulename}')])
 
         # Update Rules
         self.cmd(
             'servicebus topic subscription rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --subscription-name {subscriptionname} --name {rulename} --filter-sql-expression {sqlexpression1}',
-            checks=[self.check('name', self.kwargs['rulename'])])
+            checks=[self.check('name', '{rulename}')])
 
         # Get Rules List By Subscription
         self.cmd(
@@ -445,33 +445,33 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace - Primary
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenameprimary} --location {loc_south} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace - Primary
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacenameprimary}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Create Namespace - Secondary
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenamesecondary} --location {loc_north} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace - Secondary
         getnamespace2result = self.cmd(
             'servicebus namespace show --resource-group {rg} --name {namespacenamesecondary}',
-            checks=[self.check('sku.name', self.kwargs['sku'])]).get_output_in_json()
+            checks=[self.check('sku.name', '{sku}')]).get_output_in_json()
 
         # Create Authoriazation Rule
         self.cmd(
             'servicebus namespace authorization-rule create --resource-group {rg} --namespace-name {namespacenameprimary} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         partnernamespaceid = getnamespace2result['id']
         self.kwargs.update({'id': partnernamespaceid})
         # Get Create Authorization Rule
         self.cmd(
             'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacenameprimary} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # CheckNameAvailability - Alias
 
@@ -503,7 +503,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Get Authorization Rule
         self.cmd(
             'servicebus georecovery-alias authorization-rule show --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get Authorization Rule Keys
         self.cmd(
@@ -599,26 +599,26 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace - Standard
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenamestandard} --location {loc_south} --tags {tags} --sku {sku_std}',
-            checks=[self.check('sku.name', self.kwargs['sku_std'])])
+            checks=[self.check('sku.name', '{sku_std}')])
 
         # Get Created Namespace - Standard
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacenamestandard}',
-                 checks=[self.check('sku.name', self.kwargs['sku_std'])])
+                 checks=[self.check('sku.name', '{sku_std}')])
 
         # Create Namespace - Primary
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenamepremium} --location {loc_north} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace - Primary
         getnamespace2result = self.cmd(
             'servicebus namespace show --resource-group {rg} --name {namespacenamepremium}',
-            checks=[self.check('sku.name', self.kwargs['sku'])]).get_output_in_json()
+            checks=[self.check('sku.name', '{sku}')]).get_output_in_json()
 
         # Create Authoriazation Rule
         self.cmd(
             'servicebus namespace authorization-rule create --resource-group {rg} --namespace-name {namespacenamestandard} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         partnernamespaceid = getnamespace2result['id']
         self.kwargs.update({'id': partnernamespaceid})
@@ -626,7 +626,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Get Create Authorization Rule
         self.cmd(
             'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacenamestandard} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Create Queues under Standrad namespace
         for x in range(0, 10):
@@ -634,7 +634,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             self.kwargs.update({'queuename': queuenamestr})
             self.cmd(
                 'servicebus queue create --resource-group {rg} --namespace-name {namespacenamestandard} --name {queuename}',
-                checks=[self.check('name', self.kwargs['queuename'])])
+                checks=[self.check('name', '{queuename}')])
 
         # Create Topics under Standrad namespace
         for x in range(0, 10):
@@ -642,7 +642,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             self.kwargs.update({'topicname': topicnamestr})
             self.cmd(
                 'servicebus topic create --resource-group {rg} --namespace-name {namespacenamestandard} --name {topicname}',
-                checks=[self.check('name', self.kwargs['topicname'])])
+                checks=[self.check('name', '{topicname}')])
 
         time.sleep(10)
 
@@ -677,7 +677,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Get Authorization Rule - Premium
         self.cmd(
             'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacenamepremium} --name {authoname}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            checks=[self.check('name', '{authoname}')])
 
         # Get all queues from Premium namespace
         listqueues1 = self.cmd(
