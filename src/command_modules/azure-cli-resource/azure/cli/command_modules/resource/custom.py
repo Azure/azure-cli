@@ -1742,52 +1742,31 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, lock_name, params)
-
 # endregion
 
+
 # region ResourceLinks
-
-
 def create_resource_link(cmd, link_id, target_id, notes=None):
-    """
-    :param target_id: The id of the resource link target.
-    :type target_id: str
-    :param notes: Notes for this link.
-    :type notes: str
-    """
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
-    properties = ResourceLinkProperties(target_id, notes)
+    properties = ResourceLinkProperties(target_id=target_id, notes=notes)
     links_client.create_or_update(link_id, properties)
 
 
 def update_resource_link(cmd, link_id, target_id=None, notes=None):
-    """
-    :param target_id: The id of the resource link target.
-    :type target_id: str
-    :param notes: Notes for this link.
-    :type notes: str
-    """
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     params = links_client.get(link_id)
     properties = ResourceLinkProperties(
-        target_id if target_id is not None else params.properties.target_id,
+        target_id=target_id if target_id is not None else params.properties.target_id,
         # pylint: disable=no-member
         notes=notes if notes is not None else params.properties.notes)  # pylint: disable=no-member
     links_client.create_or_update(link_id, properties)
 
 
 def list_resource_links(cmd, scope=None, filter_string=None):
-    """
-    :param scope: The scope for the links
-    :type scope: str
-    :param filter_string: A filter for restricting the results
-    :type filter_string: str
-    """
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     if scope is not None:
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
-
 # endregion
 
 

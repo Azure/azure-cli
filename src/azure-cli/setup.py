@@ -71,6 +71,7 @@ DEPENDENCIES = [
     'azure-cli-container',
     'azure-cli-core',
     'azure-cli-cosmosdb',
+    'azure-cli-deploymentmanager',
     'azure-cli-dla',
     'azure-cli-dls',
     'azure-cli-dms',

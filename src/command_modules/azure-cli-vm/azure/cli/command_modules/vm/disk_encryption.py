@@ -99,15 +99,6 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         else:
             volume_type = 'OS'
 
-    # encryption is not supported on all linux distros, but service never tells you
-    # so let us verify at the client side
-    if is_linux:
-        image_reference = getattr(vm.storage_profile, 'image_reference', None)
-        if image_reference:
-            result, message = _check_encrypt_is_supported(image_reference, volume_type)
-            if not result:
-                logger.warning(message)
-
     # sequence_version should be unique
     sequence_version = uuid.uuid4()
 
@@ -376,52 +367,6 @@ def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
     return result.key.kid  # pylint: disable=no-member
 
 
-def _check_encrypt_is_supported(image_reference, volume_type):
-    offer = getattr(image_reference, 'offer', None)
-    publisher = getattr(image_reference, 'publisher', None)
-    sku = getattr(image_reference, 'sku', None)
-
-    # custom image?
-    if not offer or not publisher or not sku:
-        return (True, None)
-    publisher, sku, offer = publisher.lower(), sku.lower(), offer.lower()
-    supported = [
-        {
-            'offer': 'RHEL',
-            'publisher': 'RedHat',
-            'sku': ['6.7', '6.8', '7.2', '7.3', '7.4']
-        },
-        {
-            'offer': 'CentOS',
-            'publisher': 'OpenLogic',
-            'sku': ['6.8', '7.2n', '7.3']
-        },
-        {
-            'offer': 'Ubuntu',
-            'publisher': 'Canonical',
-            'sku': ['14.04', '16.04']
-        }]
-
-    if volume_type.upper() == _DATA_VOLUME_TYPE:
-        supported.append({
-            'offer': 'CentOS',
-            'publisher': 'OpenLogic',
-            'sku': ['6.5', '6.6', '6.7', '6.8', '7.0', '7.1']
-        })
-        supported.append({
-            'offer': 'SLES',
-            'publisher': 'SUSE',
-            'sku': None
-        })
-    for image in supported:
-        if (image['publisher'].lower() == publisher and
-                (not image['sku'] or any(sku.startswith(x) for x in image['sku'])) and
-                offer.startswith(image['offer'].lower())):
-            return (True, None)
-
-    return (False, "The distro is not in CLI's known supported list. Use https://aka.ms/adelinux to cross check")
-
-
 def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force):
     if is_linux:
         volume_type = volume_type or _DATA_VOLUME_TYPE
@@ -457,15 +402,6 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
     # 1. First validate arguments
     volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
-
-    # encryption is not supported on all linux distros, but service never tells you
-    # so let us verify at the client side
-    if is_linux:
-        image_reference = getattr(vmss.virtual_machine_profile.storage_profile, 'image_reference', None)
-        if image_reference:
-            result, message = _check_encrypt_is_supported(image_reference, volume_type)
-            if not result:
-                logger.warning(message)
 
     # retrieve keyvault details
     disk_encryption_keyvault_url = get_key_vault_base_url(cmd.cli_ctx,

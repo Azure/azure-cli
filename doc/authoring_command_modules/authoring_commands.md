@@ -36,6 +36,8 @@ The document provides instructions and guidelines on how to author individual co
 
 [16. Deprecating Commands and Arguments](#deprecating-commands-and-arguments)
 
+[17. Multi-API Aware Modules](#multi-api-aware-modules)
+
 Authoring Commands
 =============================
 
@@ -805,3 +807,81 @@ with self.argument_context('test show-parameters') as c:
 ```
 
 This will deprecate the argument `--resource-id` option on `test show-parameters` in favor of `--resource`. Note that call to `c.deprecate`, calling the deprecate helper method off of the argument context. The warning message for this would read: ```Option `--resource-id` has been deprecated and will be removed in a future release. Use `--resource` instead.``` Here you must specify `target` in order to identify the deprecated option. When an option value is deprecated, it appears in help as two separate arguments, with the deprecation warning on the deprecated option. 
+
+## Multi-API Aware Modules
+To convert a module that used a mono-versioned SDK to one that works with multiple API versions:
+
+1. In `azure.cli.core.profiles._shared.py` register your SDK and client in the `ResourceType` enum:
+
+```Python
+class ResourceType(Enum):
+
+  MGMT_MYSERVICE = ('azure.mgmt.myservice, MyServiceManagementClient')  # REGISTER YOUR SDK
+  ...
+```
+
+
+2. In the `AZURE_API_PROFILES` dictionary in that same file, for each profile your service applies to, add an entry for it like this:
+
+```Python
+AZURE_API_PROFILES = {
+  'latest': {
+    ResourceType.MGMT_MYSERVICE: '2019-03-01' # the supported API version on that profile
+    ...
+  },
+  '2019-03-01-hybrid': {
+    ResourceType.MGMT_MYSERVICE: '2018-08-01' # different API version for this profile
+    ...
+  },
+  ...
+}
+```
+
+3. Update imports in your files. They must use the API profile-aware "get_models" method and have access to a command or CLI object.
+
+Example:
+```Python
+from azure.mgmt.myservice import Foo, Boo
+
+def my_command(...):
+   # do stuff
+```
+
+Converted:
+```Python
+def my_command(cmd, ...):
+  Foo, Boo = cmd.get_models('Foo', 'Boo')
+  # do stuff
+```
+
+4. Use appropriate conditionals to ensure your command can run on all supported profiles:
+
+***commands.py***
+
+```Python
+with self.command_group('test') as g:
+  g.command('use-new-feature', 'use_new_feature', min_api='2018-03-01')  # won't be available unless min API is met
+```
+
+***params.py***
+
+```Python
+with self.argument_context('test create') as c:
+  c.argument('enable_new_feature', min_api='2018-03-01', arg_type=get_three_state_flag())  # expose argument only when min API is satisfied
+```
+
+***custom.py***
+
+```Python
+def my_test_command(cmd, ...):
+  Foo = cmd.get_models('Foo')
+  my_foo = Foo(...)
+  
+  # will still work with older API versions because this branch will be skipped
+  if cmd.supported_api_version(min_api='2018-03-01'):
+    my_foo.enable_new_feature = enable_new_feature
+
+  return client.create_or_update(..., my_foo)
+```
+
+See earlier topics for other kwargs that can be used with multi-API idioms.
