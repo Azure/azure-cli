@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.3.22
+++++++
+* "az aks get-credentials" will prompt to overwrite duplicated values
+* Remove "(PREVIEW)" from Dev Spaces commands, "az aks use-dev-spaces" and "az aks remove-dev-spaces".
+
 2.3.21
 ++++++
 * Minor fixes.

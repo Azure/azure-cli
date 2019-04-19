@@ -219,5 +219,4 @@ def check_remote_source_code(source_location):
             else:
                 raise CLIError("'{}' doesn't exist.".format(source_location))
 
-    raise CLIError(
-        "'{}' is not a valid remote URL for git or tarball.".format(source_location))
+    raise CLIError("'{}' doesn't exist.".format(source_location))

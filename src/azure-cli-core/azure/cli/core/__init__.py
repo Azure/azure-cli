@@ -18,7 +18,7 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.util import CLIError
-from knack.arguments import ArgumentsContext  # pylint: disable=unused-import
+from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 
 logger = get_logger(__name__)
 
@@ -32,6 +32,7 @@ class AzCli(CLI):
     def __init__(self, **kwargs):
         super(AzCli, self).__init__(**kwargs)
 
+        from azure.cli.core.commands import register_cache_arguments
         from azure.cli.core.commands.arm import (
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
@@ -57,6 +58,7 @@ class AzCli(CLI):
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
+        register_cache_arguments(self)
 
         self.progress_controller = None
 
