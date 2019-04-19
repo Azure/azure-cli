@@ -133,8 +133,7 @@ def load_command_table(self, _):
     )
 
     compute_proximity_placement_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
-        client_factory=cf_proximity_placement_groups
+        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}'
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -357,10 +356,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_arg_name='gallery_image_version', custom_func_name='update_image_version', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01') as g:
+    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.command('show', 'get')
-        g.command('create', 'create_or_update')      # make sure to support --ids, make sure to support no wait too
-        g.command('list', 'list_by_resource_group')  # make this custom to support list by resource group or in sub
-        g.command('update', 'create_or_update')      # support generic update
+        g.custom_command('create', 'create_proximity_placement_group')      # make sure to support --ids, make sure to support no wait too
+        g.custom_command('list', 'list_proximity_placement_groups')
+        g.generic_update_command('update', 'create_or_update')
         g.command('delete', 'delete')
-        g.wait_command('wait')

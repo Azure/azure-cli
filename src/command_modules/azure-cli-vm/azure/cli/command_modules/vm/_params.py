@@ -26,7 +26,9 @@ from ._vm_utils import MSI_LOCAL_ID
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
+    # Model imports
     StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
+    ProximityPlacementGroupType = self.get_models('ProximityPlacementGroupType')
     OperatingSystemTypes = self.get_models('OperatingSystemTypes')
 
     # REUSABLE ARGUMENT DEFINITIONS
@@ -612,4 +614,12 @@ def load_arguments(self, _):
                        help='Space-separated list of regions and their replica counts. Use "<region>[=<replica count>][=<storage account type>]" to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+    # endregion
+
+    # region Proximity Placement Group
+    with self.argument_context('ppg', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
+
+    with self.argument_context('ppg create', min_api='2018-04-01') as c:
+        c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(ProximityPlacementGroupType), help="The type of the proximity placement group.")
     # endregion

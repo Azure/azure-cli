@@ -2612,3 +2612,23 @@ def update_image_version(instance, target_regions=None, replica_count=None):
         instance.publishing_profile.replica_count = replica_count
     return instance
 # endregion
+
+
+# region Proximity Placement Group
+def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
+                                     ppg_type, location=None):
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
+
+    ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, type=ppg_type, location=location)
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
+
+
+def list_proximity_placement_groups(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list_by_subscription()
+# endregion
