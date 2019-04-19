@@ -2,9 +2,12 @@
 
 Release History
 ===============
+
 2.3.22
 ++++++
-* adding customer-admin-group-id flag to "az osa create"
+* "az aks get-credentials" will prompt to overwrite duplicated values
+* Remove "(PREVIEW)" from Dev Spaces commands, "az aks use-dev-spaces" and "az aks remove-dev-spaces".
+* adding customer-admin-group-id flag to "az openshift create"
 
 2.3.21
 ++++++

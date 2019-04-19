@@ -17,10 +17,10 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_sp_create_scenario(self):
-        app_id_uri = 'http://' + self.create_random_name('clisp-test-', 20)
-        self.kwargs['app_id_uri'] = app_id_uri
+        self.kwargs['display_name'] = self.create_random_name('clisp-test-', 20)
+        self.kwargs['app_id_uri'] = 'http://' + self.kwargs['display_name']
         # create app through express option
-        self.cmd('ad sp create-for-rbac -n {app_id_uri} --skip-assignment',
+        self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
                  checks=self.check('name', '{app_id_uri}'))
 
         # show/list app
@@ -100,6 +100,19 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
             self.exists('appId')
         ])
 
+    def test_app_create_idempotent(self):
+        self.kwargs = {
+            'display_name': self.create_random_name('app', 20)
+        }
+        app_id = None
+        try:
+            result = self.cmd("ad app create --display-name {display_name} --available-to-other-tenants true").get_output_in_json()
+            app_id = result['appId']
+            self.cmd("ad app create --display-name {display_name} --available-to-other-tenants false",
+                     checks=self.check('availableToOtherTenants', False))
+        finally:
+            self.cmd("ad app delete --id " + app_id)
+
 
 class ApplicationSetScenarioTest(ScenarioTest):
 
@@ -163,11 +176,11 @@ class CreateForRbacScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_revoke_sp_for_rbac(self):
-        name = self.create_random_name(prefix='cli-graph', length=14)
-        self.kwargs['name'] = 'http://' + name
+        self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
+        self.kwargs['name'] = 'http://' + self.kwargs['display_name']
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('ad sp create-for-rbac -n {name}')
+            self.cmd('ad sp create-for-rbac -n {display_name}')
 
             self.cmd('ad sp list --spn {name}')
 
@@ -185,6 +198,22 @@ class CreateForRbacScenarioTest(ScenarioTest):
                      checks=self.check('length([])', 0))
             self.cmd('ad app list --identifier-uri {name}',
                      checks=self.check('length([])', 0))
+
+    @AllowLargeResponse()
+    def test_create_for_rbac_idempotent(self):
+        self.kwargs['display_name'] = self.create_random_name(prefix='sp_', length=14)
+        self.kwargs['name'] = 'http://' + self.kwargs['display_name']
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            try:
+                self.cmd('ad sp create-for-rbac -n {display_name}')
+                self.cmd('ad sp create-for-rbac -n {display_name}')
+                result = self.cmd('ad sp list --spn {name}').get_output_in_json()
+                self.assertEqual(1, len(result))
+                result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
+                self.assertEqual(1, len(result))
+            finally:
+                self.cmd('ad sp delete --id {name}')
 
 
 class GraphGroupScenarioTest(ScenarioTest):
@@ -264,6 +293,22 @@ class GraphGroupScenarioTest(ScenarioTest):
             except Exception:
                 pass
 
+    def test_graph_group_idempotent(self):
+        account_info = self.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] == 'servicePrincipal':
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'group': 'deleteme_g2',
+        }
+        try:
+            self.cmd('ad group create --display-name {group} --mail-nickname {group}')
+            self.cmd('ad group create --display-name {group} --mail-nickname {group}')
+            self.cmd('ad group list',
+                     checks=self.check("length([?displayName=='{group}'])", 1))
+        finally:
+            self.cmd('ad group delete -g {group}')
+
 
 def get_signed_in_user(test_case):
     playback = not (test_case.is_live or test_case.in_recording)
@@ -284,12 +329,13 @@ class GraphOwnerScenarioTest(ScenarioTest):
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
         self.kwargs = {
-            'owner': owner
+            'owner': owner,
+            'display_name': self.create_random_name('sp', 15)
         }
         self.recording_processors.append(AADGraphUserReplacer(owner, 'example@example.com'))
         try:
             self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
-            self.kwargs['app_id'] = self.cmd('ad sp create-for-rbac --skip-assignment').get_output_in_json()['appId']
+            self.kwargs['app_id'] = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()['appId']
             self.cmd('ad app owner add --owner-object-id {owner_object_id} --id {app_id}')
             self.cmd('ad app owner list --id {app_id}', checks=self.check('[0].userPrincipalName', owner))
             self.cmd('ad app owner remove --owner-object-id {owner_object_id} --id {app_id}')
@@ -327,12 +373,14 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
         self.kwargs = {
-            'app': "http://" + self.create_random_name('cli-app-', 15),
-            'app2': "http://" + self.create_random_name('cli-app-', 15)
+            'display_name': self.create_random_name('cli-app-', 15),
+            'display_name2': self.create_random_name('cli-app-', 15),
         }
+        self.kwargs['app'] = 'http://' + self.kwargs['display_name']
+        self.kwargs['app2'] = 'http://' + self.kwargs['display_name2']
         app_id = None
         try:
-            result = self.cmd('ad sp create-for-rbac --name {app} --skip-assignment').get_output_in_json()
+            result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
             app_id = result['appId']
 
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
@@ -371,7 +419,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('az ad sp update --id {app} --set appRoleAssignmentRequired=true')
             self.cmd('az ad sp show --id {app}')
 
-            result = self.cmd('ad sp create-for-rbac --name {app2} --skip-assignment --years 10').get_output_in_json()
+            result = self.cmd('ad sp create-for-rbac --name {display_name2} --skip-assignment --years 10').get_output_in_json()
             app_id2 = result['appId']
             result = self.cmd('ad sp credential list --id {app2}', checks=self.check('length([*])', 1)).get_output_in_json()
             diff = dateutil.parser.parse(result[0]['endDate']).replace(tzinfo=None) - datetime.datetime.utcnow()
@@ -389,14 +437,14 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
         if not get_signed_in_user(self):
             return  # this test delete users which are beyond a SP's capacity, so quit...
         self.kwargs = {
-            'app': "http://" + self.create_random_name('cli-app-', 15),
+            'display_name': self.create_random_name('cli-app-', 15),
             'graph_resource': '00000002-0000-0000-c000-000000000000',
             'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a',
             'target_api2': '311a71cc-e848-46a1-bdf8-97ff7156d8e6'
         }
         app_id = None
         try:
-            result = self.cmd('ad sp create-for-rbac --name {app} --skip-assignment').get_output_in_json()
+            result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
             self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api}=Scope')
             self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')

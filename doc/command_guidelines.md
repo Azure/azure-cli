@@ -121,6 +121,48 @@ For commands that don't conform to one of the above-listed standard command patt
 - (*) Don't use single word verbs if they could cause confusion with the standard command types. For example, don't use `get` or `new` as these sound functionally the same as `show` and `create` respectively, leading to confusion as to what the expected behavior should be.
 - (*) Descriptive, hyphenated command names are often a better option than single verbs.
 
+## Network Rule Commands
+
+Several services support the concept of network rules. To drive consistency across services, command authors for these services should use the following as guidance. Questions/exceptions should be directed to the CLI team.
+
+- The parent resource should expose a single command group called `network-rule` with three commands: `add`, `remove`, `list`.
+- Internally, network rules are typically modeled as a rule set. This implementation is largely hidden from the user since these services only allow a single rule set. If there are properties that can be set on the rule set generally (the only known one as of this writing is `default_action`, these properties should be exposed on the `create/update` commands of the parent object, under an argument group called `Network Rule`.
+- The following examples assume that individual rules do not have names. If your rules do have names, consult the CLI team for guidance.
+- The `... network-rule add` command should look similar to the following, depending on which features are supported by the service.
+```
+Arguments
+    --name -n [Required]      : The name of the [PARENT RESOURCE].
+    --resource-group -g       : Name of resource group. You can configure the default group using `az
+                                configure --defaults group=<name>`.
+
+IP Address Rule Arguments
+    --ip-address              : IPv4 address or CIDR range.
+    --action                  : Action of the IP rule. Default: Allow
+
+Virtual Network Rule Arguments
+    --subnet                  : Name or ID of subnet. If name is supplied, `--vnet-name` must be
+                                supplied.
+    --vnet-name               : Name of a virtual network.
+    --ignore-missing-endpoint : Create the rule before the virtual network has vnet service
+                                endpoint enabled.
+```
+
+- The `... network-rule remove` command should look similar to the following, depending on which features are supported by the service.
+```
+Arguments
+    --name -n [Required]         : The name of the [PARENT RESOURCE].
+    --resource-group -g          : Name of resource group. You can configure the default group using
+                                   `az configure --defaults group=<name>`.
+
+IP Address Rule Arguments
+    --ip-address                 : IPv4 address or CIDR range.
+
+Virtual Network Rule Arguments
+    --subnet                     : Name or ID of subnet. If name is supplied, `--vnet-name` must be
+                                   supplied.
+    --vnet-name                  : Name of a virtual network.
+```
+
 ## Coding Practices
 
 - All code must support Python 2 & 3.

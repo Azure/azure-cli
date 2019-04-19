@@ -13,7 +13,7 @@ import re
 from six import string_types
 
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
-from azure.cli.core.commands import LongRunningOperation, _is_poller
+from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import (
@@ -494,13 +494,14 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             del args[item]
 
         getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op, context_copy)
+
         if child_collection_prop_name:
-            parent = getter(**getterargs)
+            parent = cached_get(cmd, getter, **getterargs)
             instance = find_child_item(
                 parent, *child_names, path=child_collection_prop_name, key_path=child_collection_key)
         else:
             parent = None
-            instance = getter(**getterargs)
+            instance = cached_get(cmd, getter, **getterargs)
 
         # pass instance to the custom_function, if provided
         if custom_function_op:
@@ -548,7 +549,10 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             if no_wait_param:
                 setterargs[no_wait_param] = args[no_wait_param]
 
-        result = setter(**setterargs)
+        if setter_arg_name == 'parameters':
+            result = cached_put(cmd, setter, **setterargs)
+        else:
+            result = cached_put(cmd, setter, setterargs[setter_arg_name], **setterargs)
 
         if supports_no_wait and no_wait_enabled:
             return None
@@ -558,7 +562,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             return None
 
         if _is_poller(result):
-            result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
+            result = result.result()
 
         if child_collection_prop_name:
             result = find_child_item(

@@ -1011,28 +1011,33 @@ type: group
 short-summary: Manage links between resources.
 long-summary: >
     Linking is a feature of the Resource Manager. It enables declaring relationships between resources even if they do not reside in the same resource group.
-    Linking has no impact on resource usage, no impact on billing, and no impact on role-based access. It allows for managing multiple resources across groups
-    as a single unit.
+    Linking has no impact on resource usage, billing, or role-based access. It allows for managing multiple resources across groups as a single unit.
 """
 
 helps['resource link create'] = """
 type: command
 short-summary: Create a new link between resources.
-long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
+parameters:
+  - name: --link
+    long-summary: >
+      Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 examples:
   - name: Create a link from {SourceID} to {ResourceID} with notes
     text: >
-        az resource link create --link-id {SourceID} --target-id {ResourceID} --notes "SourceID depends on ResourceID"
+        az resource link create --link {SourceID} --target {ResourceID} --notes "SourceID depends on ResourceID"
 """
 
 helps['resource link delete'] = """
 type: command
 short-summary: Delete a link between resources.
-long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
+parameters:
+  - name: --link
+    long-summary: >
+      Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 examples:
   - name: Delete link {LinkID}
     text: >
-        az resource link delete --link-id {LinkID}
+        az resource link delete --link {LinkID}
 """
 
 helps['resource link list'] = """
@@ -1047,24 +1052,17 @@ examples:
         az resource link list --scope /subscriptions/{SubID}/resourceGroups/{ResourceGroup}
 """
 
-helps['resource link show'] = """
-type: command
-short-summary: Get details for a resource link.
-long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
-examples:
-  - name: Get details for a resource link
-    text: az resource link show --link-id {link-id}
-    crafted: true
-"""
-
 helps['resource link update'] = """
 type: command
 short-summary: Update link between resources.
-long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
+parameters:
+  - name: --link
+    long-summary: >
+      Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 examples:
   - name: Update the notes for {LinkID} notes "some notes to explain this link"
     text: >
-        az resource link update --link-id {LinkID} --notes "some notes to explain this link"
+        az resource link update --link {LinkID} --notes "some notes to explain this link"
 """
 
 helps['resource list'] = """
