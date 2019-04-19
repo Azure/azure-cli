@@ -4,10 +4,7 @@ Release History
 ===============
 2.2.3
 +++++
-* Added new commands for Virtual Cluster:
-    * az sql virtual-cluster show
-    * az sql virtual-cluster list
-    * az sql virtual-cluster delete
+* Added commands sql virtual-cluster list/show/delete
 
 2.2.2
 +++++

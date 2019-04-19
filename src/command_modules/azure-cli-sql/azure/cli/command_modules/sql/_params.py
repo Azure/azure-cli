@@ -39,7 +39,8 @@ from azure.cli.core.commands.parameters import (
     get_enum_type,
     get_resource_name_completion_list,
     get_location_type,
-    tags_type
+    tags_type,
+    resource_group_name_type
 )
 
 from knack.arguments import CLIArgumentType, ignore_type
@@ -1227,6 +1228,4 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=name is 1st name in uri
                    id_part='name')
 
-        c.argument('resource_group_name',
-                   help='Name of the resource group containing the virtual cluster',
-                   options_list=['--resource-group', '-g'])
+        c.argument('resource_group_name', arg_type=resource_group_name_type)

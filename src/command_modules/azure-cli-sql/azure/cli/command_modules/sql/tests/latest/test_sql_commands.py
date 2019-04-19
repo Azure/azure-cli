@@ -2987,93 +2987,90 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_virtual_cluster_mgmt(self, resource_group, resource_group_location):
-        vnet_name = 'vcCliTestVnet'
-        subnet_name = 'vcCliTestSubnet'
-        route_table_name = 'vcCliTestRouteTable'
-        route_name = 'vcCliTestRoute'
+        self.kwargs.update({
+            'loc' : resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name' : 'vcCliTestSubnet',
+            'route_table_name' : 'vcCliTestRouteTable',
+            'route_name' : 'vcCliTestRoute',
+            'managed_instance_name' : self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login' : 'admin123',
+            'admin_password' : 'SecretPassword123',
+            'license_type' : 'LicenseIncluded',
+            'v_cores' : 8,
+            'storage_size_in_gb' : '32',
+            'edition' : 'GeneralPurpose',
+            'family' : 'Gen5',
+            'collation' : "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override' : "Proxy"
+        })
 
         # Create and prepare VNet and subnet for new virtual cluster
-        self.cmd('network route-table create -g {} -n {}'.format(resource_group, route_table_name))
-        self.cmd('network route-table route create -g {} --route-table-name {} -n {} --next-hop-type Internet --address-prefix 0.0.0.0/0'
-                 .format(resource_group, route_table_name, route_name))
-        self.cmd('network vnet create -g {} -n {} --location {} --address-prefix 10.0.0.0/16'
-                 .format(resource_group, vnet_name, resource_group_location))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.0.0/24 --route-table {}'
-                 .format(resource_group, vnet_name, subnet_name, route_table_name))
-        subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'
-                          .format(resource_group, vnet_name, subnet_name)).get_output_in_json()
-        subnet_id = subnet['id']
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
-        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
-
-        license_type = 'LicenseIncluded'
-        v_cores = 8
-        storage_size_in_gb = '32'
-        edition = 'GeneralPurpose'
-        family = 'Gen5'
-        collation = "Serbian_Cyrillic_100_CS_AS"
-        proxy_override = "Proxy"
-
-        user = admin_login
+        self.kwargs.update({
+            'subnet_id' : subnet['id']
+        })
 
         # create sql managed_instance
-        self.cmd('sql mi create -g {} -n {} -l {} '
-                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
-                 .format(resource_group, managed_instance_name, resource_group_location, user, admin_password, subnet_id, license_type, v_cores, storage_size_in_gb, edition, family, collation, proxy_override),
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
                  checks=[
-                     JMESPathCheck('name', managed_instance_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('vCores', v_cores),
-                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
-                     JMESPathCheck('licenseType', license_type),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('sku.family', family),
-                     JMESPathCheck('sku.capacity', v_cores),
-                     JMESPathCheck('identity', None),
-                     JMESPathCheck('collation', collation),
-                     JMESPathCheck('proxyOverride', proxy_override),
-                     JMESPathCheck('publicDataEndpointEnabled', 'True')])
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('identity', None),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')])
 
         # test list sql virtual cluster in the subscription, should be at least 1
         virtual_clusters = self.cmd('sql virtual-cluster list',
                                     checks=[
-                                        JMESPathCheckGreaterThan('length(@)', 0),
-                                        JMESPathCheck('length([?subnetId == \'{}\'])'.format(subnet_id), 1),
-                                        JMESPathCheck('[?subnetId == \'{}\'].location | [0]'.format(subnet_id), resource_group_location),
-                                        JMESPathCheck('[?subnetId == \'{}\'].resourceGroup | [0]'.format(subnet_id), resource_group)])
+                                        self.greater_than('length(@)', 0),
+                                        self.check('length([?subnetId == \'{subnet_id}\'])', 1),
+                                        self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
+                                        self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]', '{rg}')])
 
         # test list sql virtual cluster in the resource group, should be at least 1
-        virtual_clusters = self.cmd('sql virtual-cluster list -g {}'
-                                    .format(resource_group),
+        virtual_clusters = self.cmd('sql virtual-cluster list -g {rg}',
                                     checks=[
-                                        JMESPathCheckGreaterThan('length(@)', 0),
-                                        JMESPathCheck('length([?subnetId == \'{}\'])'.format(subnet_id), 1),
-                                        JMESPathCheck('[?subnetId == \'{}\'].location | [0]'.format(subnet_id), resource_group_location),
-                                        JMESPathCheck('[?subnetId == \'{}\'].resourceGroup | [0]'.format(subnet_id), resource_group)]).get_output_in_json()
+                                        self.greater_than('length(@)', 0),
+                                        self.check('length([?subnetId == \'{subnet_id}\'])', 1),
+                                        self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
+                                        self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]', '{rg}')]).get_output_in_json()
 
-        virtual_cluster = next(vc for vc in virtual_clusters if vc['subnetId'] == subnet_id)
+        virtual_cluster = next(vc for vc in virtual_clusters if vc['subnetId'] == self._apply_kwargs('{subnet_id}'))
+
+        self.kwargs.update({
+            'vc_name' : virtual_cluster['name']
+        })
 
         # test show sql virtual cluster
-        self.cmd('sql virtual-cluster show -g {} -n {}'
-                 .format(resource_group, virtual_cluster['name']),
+        self.cmd('sql virtual-cluster show -g {rg} -n {vc_name}',
                  checks=[
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('name', virtual_cluster['name']),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('subnetId', subnet_id)])
+                     self.check('location', '{loc}'),
+                     self.check('name', '{vc_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('subnetId', '{subnet_id}')])
 
         # delete sql managed instance
-        self.cmd('sql mi delete -g {} -n {} --yes'
-                 .format(resource_group, managed_instance_name), checks=NoneCheck())
+        self.cmd('sql mi delete -g {rg} -n {managed_instance_name} --yes', checks=NoneCheck())
 
         # test delete sql virtual cluster
-        self.cmd('sql virtual-cluster delete -g {} -n {}'
-                 .format(resource_group, virtual_cluster['name']), checks=NoneCheck())
+        self.cmd('sql virtual-cluster delete -g {rg} -n {vc_name}', checks=NoneCheck())
 
         # test show sql virtual cluster doesn't return anything
-        self.cmd('sql virtual-cluster show -g {} -n {}'
-                 .format(resource_group, virtual_cluster['name']),
-                 expect_failure=True)
+        self.cmd('sql virtual-cluster show -g {rg} -n {vc_name}', expect_failure=True)
