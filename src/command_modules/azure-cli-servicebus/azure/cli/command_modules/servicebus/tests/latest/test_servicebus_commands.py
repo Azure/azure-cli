@@ -21,8 +21,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_namespace')
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
-            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
@@ -42,7 +40,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
@@ -104,8 +102,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_queue')
     def test_sb_queue(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
-            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1=value1', 'tag2=value2'},
             'sku': 'Standard',
@@ -125,7 +121,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
@@ -191,8 +187,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_topic')
     def test_sb_topic(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
-            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
             'sku': 'Standard',
@@ -209,7 +203,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
@@ -271,8 +265,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_subscription')
     def test_sb_subscription(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
-            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
             'sku': 'Standard',
@@ -290,7 +282,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
@@ -337,8 +329,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_rules')
     def test_sb_rules(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
-            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
             'sku': 'Standard',
@@ -358,7 +348,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
@@ -422,7 +412,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc_south': 'SouthCentralUS',
             'loc_north': 'NorthCentralUS',
-            'rg': resource_group,
             'namespacenameprimary': self.create_random_name(prefix='sb-nscli', length=20),
             'namespacenamesecondary': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
@@ -573,7 +562,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc_south': 'SouthCentralUS',
             'loc_north': 'NorthCentralUS',
-            'rg': resource_group,
             'namespacenamestandard': self.create_random_name(prefix='sb-std-nscli', length=20),
             'namespacenamepremium': self.create_random_name(prefix='sb-pre-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
@@ -722,7 +710,6 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_network')
     def test_sb_network(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
             'namespacename': self.create_random_name(prefix='servicebus-cli', length=20),
             'namespacenamekafka': self.create_random_name(prefix='servicebus-cli1', length=20),
             'tags': {'tag1=value1'},
@@ -758,7 +745,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --default-action Allow',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku} --default-action Allow',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace

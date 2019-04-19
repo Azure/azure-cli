@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-04-19T02:33:07Z"}}'
+      "date": "2019-04-19T23:11:00Z"}}'
     headers:
       Accept:
       - application/json
@@ -26,7 +26,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001","name":"cli_test_sb_subscription000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T02:33:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001","name":"cli_test_sb_subscription000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T23:11:00Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:07 GMT
+      - Fri, 19 Apr 2019 23:11:01 GMT
       expires:
       - '-1'
       pragma:
@@ -45,12 +45,57 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
 - request:
-    body: '{"location": "westus2", "tags": {"{tag1: value1,": "", "tag2: value2}":
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001","name":"cli_test_sb_subscription000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T23:11:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 23:11:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {"{tag1: value1,": "", "tag2: value2}":
       ""}, "sku": {"name": "Standard", "tier": "Standard"}}'
     headers:
       Accept:
@@ -62,11 +107,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '125'
+      - '124'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --resource-group --name --location --tags --sku
+      - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
@@ -77,16 +122,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US 2","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T02:33:09.277Z","updatedAt":"2019-04-19T02:33:09.277Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T23:11:02.783Z","updatedAt":"2019-04-19T23:11:02.783Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '696'
+      - '694'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:09 GMT
+      - Fri, 19 Apr 2019 23:11:03 GMT
       expires:
       - '-1'
       pragma:
@@ -105,7 +150,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -121,7 +166,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --location --tags --sku
+      - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
@@ -130,16 +175,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US 2","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T02:33:09.277Z","updatedAt":"2019-04-19T02:33:34.487Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T23:11:02.783Z","updatedAt":"2019-04-19T23:11:27.863Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '694'
+      - '692'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:39 GMT
+      - Fri, 19 Apr 2019 23:11:33 GMT
       expires:
       - '-1'
       pragma:
@@ -172,7 +217,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --location --tags --sku
+      - --resource-group --name --tags --sku
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
@@ -183,16 +228,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US 2","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T02:33:09.277Z","updatedAt":"2019-04-19T02:33:34.487Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T23:11:02.783Z","updatedAt":"2019-04-19T23:11:27.863Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '694'
+      - '692'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:40 GMT
+      - Fri, 19 Apr 2019 23:11:33 GMT
       expires:
       - '-1'
       pragma:
@@ -236,16 +281,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US 2","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T02:33:09.277Z","updatedAt":"2019-04-19T02:33:34.487Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:sb-nscli000002","createdAt":"2019-04-19T23:11:02.783Z","updatedAt":"2019-04-19T23:11:27.863Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '694'
+      - '692'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:40 GMT
+      - Fri, 19 Apr 2019 23:11:34 GMT
       expires:
       - '-1'
       pragma:
@@ -293,16 +338,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/Namespaces/Topics","location":"West
-        US 2","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":5120,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-04-19T02:33:43.13Z","updatedAt":"2019-04-19T02:33:43.403Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":5120,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-04-19T23:11:37.25Z","updatedAt":"2019-04-19T23:11:37.33Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1003'
+      - '1000'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:44 GMT
+      - Fri, 19 Apr 2019 23:11:37 GMT
       expires:
       - '-1'
       pragma:
@@ -321,7 +366,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -348,16 +393,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/Namespaces/Topics","location":"West
-        US 2","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":5120,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-04-19T02:33:43.13Z","updatedAt":"2019-04-19T02:33:43.403Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+        US","properties":{"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":5120,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2019-04-19T23:11:37.25Z","updatedAt":"2019-04-19T23:11:37.33Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1004'
+      - '1001'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:44 GMT
+      - Fri, 19 Apr 2019 23:11:39 GMT
       expires:
       - '-1'
       pragma:
@@ -405,16 +450,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000006","name":"sb-subscli000006","type":"Microsoft.ServiceBus/Namespaces/Topics/Subscriptions","location":"West
-        US 2","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T02:33:47.2099637Z","updatedAt":"2019-04-19T02:33:47.2099637Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+        US","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T23:11:41.0174742Z","updatedAt":"2019-04-19T23:11:41.0174742Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1024'
+      - '1022'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:47 GMT
+      - Fri, 19 Apr 2019 23:11:41 GMT
       expires:
       - '-1'
       pragma:
@@ -460,16 +505,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000006","name":"sb-subscli000006","type":"Microsoft.ServiceBus/Namespaces/Topics/Subscriptions","location":"West
-        US 2","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T02:33:47.1996433Z","updatedAt":"2019-04-19T02:33:47.1996433Z","accessedAt":"2019-04-19T02:33:47.2Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+        US","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T23:11:41.020939Z","updatedAt":"2019-04-19T23:11:41.020939Z","accessedAt":"2019-04-19T23:11:41.020939Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1027'
+      - '1028'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:48 GMT
+      - Fri, 19 Apr 2019 23:11:42 GMT
       expires:
       - '-1'
       pragma:
@@ -513,16 +558,16 @@ interactions:
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000006","name":"sb-subscli000006","type":"Microsoft.ServiceBus/Namespaces/Topics/Subscriptions","location":"West
-        US 2","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T02:33:47.1996433Z","updatedAt":"2019-04-19T02:33:47.1996433Z","accessedAt":"2019-04-19T02:33:47.2Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}]}'
+        US","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T23:11:41.020939Z","updatedAt":"2019-04-19T23:11:41.020939Z","accessedAt":"2019-04-19T23:11:41.020939Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1039'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:49 GMT
+      - Fri, 19 Apr 2019 23:11:42 GMT
       expires:
       - '-1'
       pragma:
@@ -568,16 +613,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000006","name":"sb-subscli000006","type":"Microsoft.ServiceBus/Namespaces/Topics/Subscriptions","location":"West
-        US 2","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T02:33:47.1996433Z","updatedAt":"2019-04-19T02:33:47.1996433Z","accessedAt":"2019-04-19T02:33:47.2Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+        US","properties":{"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T23:11:41.020939Z","updatedAt":"2019-04-19T23:11:41.020939Z","accessedAt":"2019-04-19T23:11:41.020939Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1027'
+      - '1028'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:50 GMT
+      - Fri, 19 Apr 2019 23:11:43 GMT
       expires:
       - '-1'
       pragma:
@@ -625,7 +670,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000006","name":"sb-subscli000006","type":"Microsoft.ServiceBus/Namespaces/Topics/Subscriptions","location":"West
-        US 2","properties":{"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T02:33:51.582279Z","updatedAt":"2019-04-19T02:33:51.582279Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+        US","properties":{"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2019-04-19T23:11:44.9304376Z","updatedAt":"2019-04-19T23:11:44.9304376Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
@@ -634,7 +679,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 19 Apr 2019 02:33:51 GMT
+      - Fri, 19 Apr 2019 23:11:44 GMT
       expires:
       - '-1'
       pragma:
@@ -688,7 +733,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 19 Apr 2019 02:33:52 GMT
+      - Fri, 19 Apr 2019 23:11:46 GMT
       expires:
       - '-1'
       pragma:
@@ -703,7 +748,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14996'
     status:
       code: 200
       message: OK
@@ -738,7 +783,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 19 Apr 2019 02:33:53 GMT
+      - Fri, 19 Apr 2019 23:11:47 GMT
       expires:
       - '-1'
       pragma:
@@ -788,7 +833,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 19 Apr 2019 02:33:54 GMT
+      - Fri, 19 Apr 2019 23:11:48 GMT
       expires:
       - '-1'
       location:
@@ -836,7 +881,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 19 Apr 2019 02:34:26 GMT
+      - Fri, 19 Apr 2019 23:12:19 GMT
       expires:
       - '-1'
       pragma:
@@ -884,11 +929,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 19 Apr 2019 02:34:27 GMT
+      - Fri, 19 Apr 2019 23:12:20 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU0I6NUZTVUJTQ1JJUFRJT05TMkRDWldPRVNENEJCR1lCWHw2QTk2MUU1Qjc0OEM4QUU3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU0I6NUZTVUJTQ1JJUFRJT04zU09INFJMWTZFWUQ0QVFNSXw5NkZBMjY0OTQzOUEzNkMyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:

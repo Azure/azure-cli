@@ -580,7 +580,7 @@ helps['servicebus namespace network-rule add'] = """
         - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
           text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId --ignore-missing-endpoint True
         - name: add a IP rule in NetworkruleSet for a namespace
-          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address ipmask --action Allow
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24 --action Allow
 """
 
 helps['servicebus namespace network-rule list'] = """
