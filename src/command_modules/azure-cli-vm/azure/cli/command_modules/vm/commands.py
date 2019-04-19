@@ -10,7 +10,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images, cf_run_commands,
                                                           cf_rolling_upgrade_commands, cf_galleries,
-                                                          cf_gallery_images, cf_gallery_image_versions)
+                                                          cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_proximity_placement_groups)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -129,6 +130,11 @@ def load_command_table(self, _):
     compute_gallery_image_versions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImageVersionsOperations.{}',
         client_factory=cf_gallery_image_versions,
+    )
+
+    compute_proximity_placement_groups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
+        client_factory=cf_proximity_placement_groups
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -349,4 +355,12 @@ def load_command_table(self, _):
         g.command('list', 'list_by_gallery_image')
         g.custom_command('create', 'create_image_version', supports_no_wait=True)
         g.generic_update_command('update', setter_arg_name='gallery_image_version', custom_func_name='update_image_version', supports_no_wait=True)
+        g.wait_command('wait')
+
+    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01') as g:
+        g.command('show', 'get')
+        g.command('create', 'create_or_update')      # make sure to support --ids, make sure to support no wait too
+        g.command('list', 'list_by_resource_group')  # make this custom to support list by resource group or in sub
+        g.command('update', 'create_or_update')      # support generic update
+        g.command('delete', 'delete')
         g.wait_command('wait')
