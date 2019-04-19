@@ -17,7 +17,22 @@ name_arg_type = CLIArgumentType(metavar='NAME', configured_default='botname', id
 # In custom.py we're still supporting 'Node' in __language_validator()
 SUPPORTED_LANGUAGES = ['Csharp', 'Javascript']
 UPCOMING_LANGUAGES = list(SUPPORTED_LANGUAGES).append('Typescript')
-SUPPORTED_APP_INSIGHTS_REGIONS = ['South Central US', 'East US', 'West US 2', 'North Europe', 'West Europe', 'Southeast Asia']
+SUPPORTED_APP_INSIGHTS_REGIONS = [
+    'Australia East',
+    'Canada Central',
+    'Central India',
+    'East Asia',
+    'East US',
+    'East US 2',
+    'France Central',
+    'Japan East',
+    'Korea Central'
+    'North Europe',
+    'South Central US',
+    'Southeast Asia',
+    'UK South',
+    'West Europe',
+    'West US 2']
 SUPPORTED_LANGUAGES_MSG = '  Allowed values: Csharp, Javascript.'
 UPCOMING_SUPPORTED_LANGUAGES_MSG = '  Allowed values: Csharp, Javascript, Typescript.'
 

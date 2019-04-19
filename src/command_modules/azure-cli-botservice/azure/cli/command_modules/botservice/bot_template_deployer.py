@@ -14,7 +14,6 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
-from azure.cli.command_modules.botservice.azure_region_mapper import AzureRegionMapper
 
 
 class BotTemplateDeployer:
@@ -123,8 +122,7 @@ class BotTemplateDeployer:
             paramsdict['storageAccountName'] = storageAccountName
 
             # Application insights prep
-            appInsightsLocation = AzureRegionMapper.get_app_insights_location(
-                appInsightsLocation.lower().replace(' ', ''))
+            appInsightsLocation = appInsightsLocation.lower().replace(' ', '')
             paramsdict['useAppInsights'] = True
             paramsdict['appInsightsLocation'] = appInsightsLocation
             logger.debug('Application insights location resolved to %s.', appInsightsLocation)
