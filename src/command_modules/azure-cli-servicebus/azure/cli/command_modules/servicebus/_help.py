@@ -594,7 +594,7 @@ helps['servicebus namespace network-rule list'] = """
 helps['servicebus namespace network-rule remove'] = """
     type: command
     short-summary: Remove network rule for a namespace
-    examples:        
+    examples:
         - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
           text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId
         - name: remove IP rule from NetworkruleSet for a namespace
