@@ -38,6 +38,7 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
 
 
 def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None):
+    from msrestazure.tools import parse_resource_id
 
     if tags is not None:
         instance.tags = tags
@@ -50,7 +51,7 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
         instance.sku.capacity = capacity
 
     if default_action:
-        resourcegroup = instance.id.split('/')[4]
+        resourcegroup = parse_resource_id(instance.id)['resource_group']
         netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
         netwrokruleset.default_action = default_action
         client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
@@ -480,10 +481,10 @@ def cli_networkrule_createupdate(client, resource_group_name, namespace_name, su
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
     if netwrokruleset.virtual_network_rules is None:
-        netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
+        netwrokruleset.virtual_network_rules = []
 
     if netwrokruleset.ip_rules is None:
-        netwrokruleset.ip_rules = [NWRuleSetIpRules]
+        netwrokruleset.ip_rules = []
 
     if subnet:
         netwrokruleset.virtual_network_rules.append(NWRuleSetVirtualNetworkRules(subnet=Subnet(id=subnet),
@@ -504,9 +505,10 @@ def cli_networkrule_delete(client, resource_group_name, namespace_name, subnet=N
         virtualnetworkrule.subnet = subnet
 
         for vnetruletodelete in netwrokruleset.virtual_network_rules:
-            if vnetruletodelete.subnet.id == subnet:
+            if vnetruletodelete.subnet.id.lower() == subnet.lower():
                 virtualnetworkrule.ignore_missing_vnet_service_endpoint = vnetruletodelete.ignore_missing_vnet_service_endpoint
                 netwrokruleset.virtual_network_rules.remove(vnetruletodelete)
+                break
 
     if ip_mask:
         ipruletodelete = NWRuleSetIpRules()

@@ -29,12 +29,7 @@ helps['servicebus namespace authorization-rule keys'] = """
 """
 helps['servicebus namespace network-rule'] = """
     type: group
-    short-summary: Manage Azure ServiceBus NetwrokruleSet for Namespace
-"""
-
-helps['servicebus namespace network-rule'] = """
-    type: group
-    short-summary: Manage Azure EventHubs NetwrokruleSet for Namespace
+    short-summary: Manage Azure ServiceBus networkruleSet for namespace
 """
 
 helps['servicebus queue'] = """
@@ -580,15 +575,17 @@ helps['servicebus migration abort'] = """
 
 helps['servicebus namespace network-rule add'] = """
     type: command
-    short-summary: Set a Network rule for a Namespace
+    short-summary: Add a network rule for a namespace.
     examples:
-        - name: set a Network rule for a namespace
-          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace
+        - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId --ignore-missing-endpoint True
+        - name: add a IP rule in NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address ipmask --action Allow
 """
 
 helps['servicebus namespace network-rule list'] = """
     type: command
-    short-summary: Show properties of Network rule of the given Namespace
+    short-summary: Show properties of Network rule of the given Namespace.
     examples:
         - name: Show properties of Network rule of the given Namespace
           text: az servicebus namespace network-rule list --resource-group myresourcegroup --namespace-name mynamespace
@@ -596,8 +593,10 @@ helps['servicebus namespace network-rule list'] = """
 
 helps['servicebus namespace network-rule remove'] = """
     type: command
-    short-summary: Remove Network Rule of the given Namespace
-    examples:
-        - name: Remove Network rulet of the given Namespace
-          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace
+    short-summary: Remove network rule for a namespace
+    examples:        
+        - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId
+        - name: remove IP rule from NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address ipmask
 """

@@ -5,7 +5,8 @@ Release History
 
 0.3.5
 +++++
-* added netwrokruleset commands
+* namespace: Added network-rule commands.
+* namespace create/update: Added --default-action argument for network rules.
 
 0.3.4
 +++++

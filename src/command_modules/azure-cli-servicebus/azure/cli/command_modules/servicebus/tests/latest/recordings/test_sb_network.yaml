@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-04-18T19:49:27Z"}}'
+      "date": "2019-04-19T01:40:59Z"}}'
     headers:
       Accept:
       - application/json
@@ -26,7 +26,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-18T19:49:27Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T01:40:59Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:49:27 GMT
+      - Fri, 19 Apr 2019 01:41:01 GMT
       expires:
       - '-1'
       pragma:
@@ -45,10 +45,754 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T01:40:59Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
+        \ \"etag\": \"W/\\\"88904b33-8e77-49a9-b081-3866e6b59d7d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"5552d65a-53ef-4796-acb7-f7ec299134a2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/142db373-0e55-4871-b3b3-7ffa150d6782?api-version=2018-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/142db373-0e55-4871-b3b3-7ffa150d6782?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
+        \ \"etag\": \"W/\\\"2ac0c038-4e49-4c8a-83aa-d7228e084646\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"5552d65a-53ef-4796-acb7-f7ec299134a2\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '783'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:08 GMT
+      etag:
+      - W/"2ac0c038-4e49-4c8a-83aa-d7228e084646"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T01:40:59Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
+        \ \"etag\": \"W/\\\"2558d421-9606-4893-af7d-7636668614f6\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"47b3e10c-4b62-4a59-bcf2-329ccc1ffd65\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a4f1056a-1066-41d7-97e5-910784492ade?api-version=2018-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a4f1056a-1066-41d7-97e5-910784492ade?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
+        \ \"etag\": \"W/\\\"c74f33f1-143a-459a-b0c7-a9ea4890a8e1\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"47b3e10c-4b62-4a59-bcf2-329ccc1ffd65\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '783'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:13 GMT
+      etag:
+      - W/"c74f33f1-143a-459a-b0c7-a9ea4890a8e1"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"addressPrefix": "10.0.0.0/24"}, "name": "default"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '67'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"a6065a8f-e98b-4d5a-8621-ea7423c133df\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5bfba6b1-2b57-4049-a0a7-4db56c2a3650?api-version=2018-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5bfba6b1-2b57-4049-a0a7-4db56c2a3650?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"b820262a-74c9-4e58-b561-85bf363ec6be\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '491'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:18 GMT
+      etag:
+      - W/"b820262a-74c9-4e58-b561-85bf363ec6be"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"addressPrefix": "10.0.0.0/24"}, "name": "secondvnet"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '70'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"secondvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
+        \ \"etag\": \"W/\\\"0ce1a62c-c58f-4f07-b624-049f8a65d7f7\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8dd62f36-c5bc-4b2d-9ee5-54781411b233?api-version=2018-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '496'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8dd62f36-c5bc-4b2d-9ee5-54781411b233?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet?api-version=2018-12-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"secondvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
+        \ \"etag\": \"W/\\\"72716c69-b854-4826-8cf0-b5bbece7024d\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '497'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:41:23 GMT
+      etag:
+      - W/"72716c69-b854-4826-8cf0-b5bbece7024d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: 'b''{"name": "servicebus-cli000002"}'''
     headers:
@@ -84,7 +828,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:49:27 GMT
+      - Fri, 19 Apr 2019 01:41:25 GMT
       expires:
       - '-1'
       pragma:
@@ -103,12 +847,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"{tag1": "value1}"}, "sku": {"name": "Premium",
+    body: '{"location": "westus2", "tags": {"{tag1": "value1}"}, "sku": {"name": "Premium",
       "tier": "Premium"}}'
     headers:
       Accept:
@@ -120,7 +864,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '99'
+      - '100'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -135,16 +879,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:49:29.517Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:41:26.907Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '686'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:49:29 GMT
+      - Fri, 19 Apr 2019 01:41:26 GMT
       expires:
       - '-1'
       pragma:
@@ -188,16 +932,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:49:29.517Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:41:26.907Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '686'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:49:59 GMT
+      - Fri, 19 Apr 2019 01:41:57 GMT
       expires:
       - '-1'
       pragma:
@@ -239,16 +983,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:50:09.897Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:42:11.02Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '683'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:29 GMT
+      - Fri, 19 Apr 2019 01:42:28 GMT
       expires:
       - '-1'
       pragma:
@@ -292,16 +1036,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '408'
+      - '410'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:31 GMT
+      - Fri, 19 Apr 2019 01:42:28 GMT
       expires:
       - '-1'
       pragma:
@@ -350,16 +1094,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}'
+        US 2","properties":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '409'
+      - '411'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:47 GMT
+      - Fri, 19 Apr 2019 01:42:46 GMT
       expires:
       - '-1'
       pragma:
@@ -378,7 +1122,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -405,16 +1149,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:50:09.897Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:42:11.02Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '683'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:48 GMT
+      - Fri, 19 Apr 2019 01:42:47 GMT
       expires:
       - '-1'
       pragma:
@@ -458,16 +1202,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:50:09.897Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:42:11.02Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '683'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:48 GMT
+      - Fri, 19 Apr 2019 01:42:47 GMT
       expires:
       - '-1'
       pragma:
@@ -511,16 +1255,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:50:09.897Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:42:11.02Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '683'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:48 GMT
+      - Fri, 19 Apr 2019 01:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -564,16 +1308,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}'
+        US 2","properties":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '409'
+      - '411'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:50:50 GMT
+      - Fri, 19 Apr 2019 01:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -622,16 +1366,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '408'
+      - '410'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:51:06 GMT
+      - Fri, 19 Apr 2019 01:43:06 GMT
       expires:
       - '-1'
       pragma:
@@ -650,13 +1394,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1196'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "West US", "tags": {"{tag1": "value1}"}, "sku": {"name": "Premium",
-      "tier": "Premium", "capacity": 1}}'
+    body: '{"location": "West US 2", "tags": {"{tag1": "value1}"}, "sku": {"name":
+      "Premium", "tier": "Premium", "capacity": 1}}'
     headers:
       Accept:
       - application/json
@@ -667,7 +1411,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '115'
+      - '117'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -682,16 +1426,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Updating","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:51:27.46Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Updating","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:43:24.02Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '686'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:51:27 GMT
+      - Fri, 19 Apr 2019 01:43:24 GMT
       expires:
       - '-1'
       pragma:
@@ -710,7 +1454,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -735,16 +1479,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-18T19:49:29.517Z","updatedAt":"2019-04-18T19:51:33.737Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US 2","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"854d368f-1828-428f-8f3c-f2affa9b2f7d:servicebus-cli000002","createdAt":"2019-04-19T01:41:26.907Z","updatedAt":"2019-04-19T01:43:28.29Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '683'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:51:58 GMT
+      - Fri, 19 Apr 2019 01:43:54 GMT
       expires:
       - '-1'
       pragma:
@@ -788,16 +1532,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '408'
+      - '410'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:51:59 GMT
+      - Fri, 19 Apr 2019 01:43:56 GMT
       expires:
       - '-1'
       pragma:
@@ -841,16 +1585,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '408'
+      - '410'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:00 GMT
+      - Fri, 19 Apr 2019 01:43:58 GMT
       expires:
       - '-1'
       pragma:
@@ -899,16 +1643,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '445'
+      - '447'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:17 GMT
+      - Fri, 19 Apr 2019 01:44:15 GMT
       expires:
       - '-1'
       pragma:
@@ -954,16 +1698,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '445'
+      - '447'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:18 GMT
+      - Fri, 19 Apr 2019 01:44:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1012,16 +1756,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '483'
+      - '485'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:35 GMT
+      - Fri, 19 Apr 2019 01:44:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1067,16 +1811,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '483'
+      - '485'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:36 GMT
+      - Fri, 19 Apr 2019 01:44:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1120,16 +1864,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '483'
+      - '485'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:37 GMT
+      - Fri, 19 Apr 2019 01:44:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1178,131 +1922,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '445'
+      - '447'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:52:55 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus namespace network-rule add
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --subnet
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default?api-version=2017-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '445'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 18 Apr 2019 19:52:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": false}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus namespace network-rule add
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '340'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --resource-group --name --subnet
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
-        Azure-SDK-For-Python AZURECLI/2.0.62
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default?api-version=2017-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":false}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '658'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 18 Apr 2019 19:53:14 GMT
+      - Fri, 19 Apr 2019 01:45:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1337,7 +1966,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --subnet
+      - --resource-group --name --subnet --ignore-missing-endpoint
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
@@ -1348,16 +1977,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":false}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '658'
+      - '447'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:53:15 GMT
+      - Fri, 19 Apr 2019 01:45:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1379,11 +2008,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": false}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault"},
-      "ignoreMissingVnetServiceEndpoint": false}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}]}}'
+    body: 'b''{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
+      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
+      "action": "Allow"}]}}'''
     headers:
       Accept:
       - application/json
@@ -1394,11 +2022,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '561'
+      - '403'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --resource-group --name --subnet
+      - --resource-group --name --subnet --ignore-missing-endpoint
       User-Agent:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
@@ -1409,16 +2037,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":false},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault"},"ignoreMissingVnetServiceEndpoint":false}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '874'
+      - '723'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:53:33 GMT
+      - Fri, 19 Apr 2019 01:46:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1437,7 +2065,123 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus namespace network-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --subnet --ignore-missing-endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default?api-version=2017-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '723'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:46:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
+      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
+      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
+      "action": "Allow"}]}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus namespace network-rule add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '688'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --subnet --ignore-missing-endpoint
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-servicebus/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.0.62
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default?api-version=2017-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1003'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 01:46:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
     status:
       code: 200
       message: OK
@@ -1464,16 +2208,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":false},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault"},"ignoreMissingVnetServiceEndpoint":false}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '874'
+      - '1003'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:53:34 GMT
+      - Fri, 19 Apr 2019 01:46:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1517,16 +2261,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":false},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault"},"ignoreMissingVnetServiceEndpoint":false}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '874'
+      - '1003'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:53:35 GMT
+      - Fri, 19 Apr 2019 01:46:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1548,10 +2292,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": false}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}]}}'
+    body: 'b''{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
+      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
+      "action": "Allow"}]}}'''
     headers:
       Accept:
       - application/json
@@ -1562,7 +2306,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '340'
+      - '403'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -1577,16 +2321,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSet","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":false}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US 2","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '658'
+      - '723'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 18 Apr 2019 19:53:54 GMT
+      - Fri, 19 Apr 2019 01:47:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1640,7 +2384,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 18 Apr 2019 19:53:55 GMT
+      - Fri, 19 Apr 2019 01:48:04 GMT
       expires:
       - '-1'
       location:
@@ -1688,7 +2432,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 18 Apr 2019 19:54:25 GMT
+      - Fri, 19 Apr 2019 01:48:35 GMT
       expires:
       - '-1'
       location:
@@ -1734,7 +2478,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 18 Apr 2019 19:54:56 GMT
+      - Fri, 19 Apr 2019 01:49:06 GMT
       expires:
       - '-1'
       location:
@@ -1780,7 +2524,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 18 Apr 2019 19:55:26 GMT
+      - Fri, 19 Apr 2019 01:49:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1828,11 +2572,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 18 Apr 2019 19:55:27 GMT
+      - Fri, 19 Apr 2019 01:49:38 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU0I6NUZORVRXT1JLUVlXNzdRMktEQkNERFNSSUQ3RkVXWHwwMEVFRkU5NERDNEJCMTc5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGU0I6NUZORVRXT1JLWlVSRFRTSDZUUFBZWFdSWldVSjRLWnw5MkNBNzg0MzI1MTA3MTJGLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:

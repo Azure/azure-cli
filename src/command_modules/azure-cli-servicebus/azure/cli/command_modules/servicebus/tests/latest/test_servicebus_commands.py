@@ -722,8 +722,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sb_network')
     def test_sb_network(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus',
-            'rg': resource_group,
+            'loc': 'westus2',
             'namespacename': self.create_random_name(prefix='servicebus-cli', length=20),
             'namespacenamekafka': self.create_random_name(prefix='servicebus-cli1', length=20),
             'tags': {'tag1=value1'},
@@ -733,25 +732,25 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
             'defaultauthorizationrule': 'RootManageSharedAccessKey',
             'accessrights': 'Send',
-            'accessrights1': 'Listen',
-            'primary': 'PrimaryKey',
-            'secondary': 'SecondaryKey',
+            'namevnet': 'sbehvnettest1',
+            'namevnet1': 'sbehvnettest2',
+            'namesubnet1': 'default',
+            'namesubnet2': 'secondvnet',
             'isautoinflateenabled': 'True',
             'maximumthroughputunits': 4,
             'maximumthroughputunits_update': 5,
             'varfalse': 'false',
             'ipmask1': '1.1.1.1',
-            'ipmask2': '2.2.2.2',
-            'subnet1': '',
-            'subnet2': ''
+            'ipmask2': '2.2.2.2'
         })
 
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        # update sub ids
-        self.kwargs.update({'subnet1': '/subscriptions/' + get_subscription_id(
-            self.cli_ctx) + '/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default'})
-        self.kwargs.update({'subnet2': '/subscriptions/' + get_subscription_id(
-            self.cli_ctx) + '/resourcegroups/v-ajnavtest/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/sbdefault'})
+        self.cmd('az network vnet create --resource-group ' + resource_group + ' --name {namevnet}')
+        self.cmd('az network vnet create --resource-group ' + resource_group + ' --name {namevnet1}')
+
+        created_subnet1 = self.cmd(
+            'az network vnet subnet create --resource-group ' + resource_group + ' --name {namesubnet1} --vnet-name {namevnet} --address-prefixes 10.0.0.0/24').get_output_in_json()
+        created_subnet2 = self.cmd(
+            'az network vnet subnet create --resource-group ' + resource_group + ' --name {namesubnet2} --vnet-name {namevnet1} --address-prefixes 10.0.0.0/24').get_output_in_json()
 
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',
@@ -760,16 +759,16 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --default-action Allow',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace
         self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', self.kwargs['sku'])])
+                 checks=[self.check('sku.name', '{sku}')])
 
         # Update Namespace
         self.cmd(
             'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags} --default-action Deny',
-            checks=[self.check('sku.name', self.kwargs['sku'])])
+            checks=[self.check('sku.name', '{sku}')])
 
         # Get NetworkRule
         self.cmd(
@@ -800,12 +799,14 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # add vnetrule
         vnetrule = self.cmd(
-            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet1}').get_output_in_json()
+            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --subnet ' +
+            created_subnet1['id'] + ' --ignore-missing-endpoint True').get_output_in_json()
         self.assertEqual(len(vnetrule['virtualNetworkRules']), 1)
 
         # add vnetrule2
         vnetrule = self.cmd(
-            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
+            'servicebus namespace network-rule add --resource-group {rg} --name {namespacename} --subnet ' +
+            created_subnet2['id'] + ' --ignore-missing-endpoint True').get_output_in_json()
         self.assertEqual(len(vnetrule['virtualNetworkRules']), 2)
 
         # list Vnetrules
@@ -814,7 +815,8 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # remove Vnetrule
         vnetrule = self.cmd(
-            'servicebus namespace network-rule remove --resource-group {rg} --name {namespacename} --subnet {subnet2}').get_output_in_json()
+            'servicebus namespace network-rule remove --resource-group {rg} --name {namespacename} --subnet ' +
+            created_subnet2['id']).get_output_in_json()
         self.assertEqual(len(vnetrule['virtualNetworkRules']), 1)
 
         # Delete Namespace list by ResourceGroup
