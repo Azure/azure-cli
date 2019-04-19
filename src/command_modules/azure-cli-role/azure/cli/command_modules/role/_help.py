@@ -310,7 +310,7 @@ helps['role definition create'] = """
           text: |
                 az role definition create --role-definition '{ \\
                     "Name": "Contoso On-call", \\
-                    "Description": "Perform VM actions and read storage and network information." \\
+                    "Description": "Perform VM actions and read storage and network information.", \\
                     "Actions": [ \\
                         "Microsoft.Compute/*/read", \\
                         "Microsoft.Compute/virtualMachines/start/action", \\
