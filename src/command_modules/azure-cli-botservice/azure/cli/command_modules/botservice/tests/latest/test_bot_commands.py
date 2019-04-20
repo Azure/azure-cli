@@ -796,11 +796,9 @@ class BotTests(ScenarioTest):
                  })
 
         results = self.cmd('az bot update -g {rg} -n {botname} -e "{endpoint}" --description {description} --sku S1 '
-                           '-d {display_name} -ai-key {ai-key} -ai-api-key {ai-api-key} -ai-app-id {ai-app-id} --tags '
-                           '{tag}={tag-value}', checks=[
-                                                        self.check('name', '{botname}'),
-                                                        self.check('resourceGroup', '{rg}'),
-                                                    ])
+                           '-d {display_name} --ai-key {ai-key} --ai-api-key {ai-api-key} --ai-app-id {ai-app-id} --tags '
+                           '{tag}={tag-value}', checks=[self.check('name', '{botname}'),
+                                                        self.check('resourceGroup', '{rg}')])
         results = results.get_output_in_json()
 
         assert results['sku']['name'] == 'S1'

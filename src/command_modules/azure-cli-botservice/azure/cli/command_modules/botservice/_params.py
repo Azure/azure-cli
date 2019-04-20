@@ -98,15 +98,15 @@ def load_arguments(self, _):
         c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(SUPPORTED_SKUS),
                    help='The Sku of the bot.')
         c.argument('tags', arg_type=tags_type)
-        c.argument('app_inisghts_key', options_list=['--app-insights-key', '-ai-key'],
+        c.argument('app_inisghts_key', options_list=['--app-insights-key', '--ai-key'],
                    arg_group='Bot Analytics/Application Insights',
                    help='Azure Application Insights Key used to write bot analytics data. Provide a key if you want '
                         'to receive bot analytics.')
-        c.argument('app_inisghts_api_key', options_list=['--app-insights-api-key', '-ai-api-key'],
+        c.argument('app_inisghts_api_key', options_list=['--app-insights-api-key', '--ai-api-key'],
                    arg_group='Bot Analytics/Application Insights',
                    help='Azure Application Insights API Key used to read bot analytics data. Provide a key if you want '
                         'to view analytics about your bot in the Analytics blade.')
-        c.argument('app_inisghts_app_id', options_list=['--app-insights-app-id', '-ai-app-id'],
+        c.argument('app_inisghts_app_id', options_list=['--app-insights-app-id', '--ai-app-id'],
                    arg_group='Bot Analytics/Application Insights',
                    help='Azure Application Insights Application ID used to read bot analytics data. Provide an Id if '
                         'you want to view analytics about your bot in the Analytics blade.')
