@@ -20,7 +20,9 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
-    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
+    validate_asg_names_or_ids, validate_keyvault, validate_proximity_placement_group,
+    process_gallery_image_version_namespace)
+
 from ._vm_utils import MSI_LOCAL_ID
 
 
@@ -622,4 +624,9 @@ def load_arguments(self, _):
 
     with self.argument_context('ppg create', min_api='2018-04-01') as c:
         c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(ProximityPlacementGroupType), help="The type of the proximity placement group.")
+
+    for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'), ('vm availability-set create', 'availability set')]:
+        with self.argument_context(scope, min_api='2018-04-01') as c:
+            c.argument('proximity_placement_group', help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
+                       validator=validate_proximity_placement_group)
     # endregion

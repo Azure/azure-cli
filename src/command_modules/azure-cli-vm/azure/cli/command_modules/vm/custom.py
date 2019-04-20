@@ -513,7 +513,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              aux_subscriptions=None):
+              proximity_placement_group=None, aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -988,10 +988,9 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
     logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
 
 
-def create_av_set(cmd, availability_set_name, resource_group_name,
-                  platform_fault_domain_count=2, platform_update_domain_count=None,
-                  location=None, no_wait=False,
-                  unmanaged=False, tags=None, validate=False):
+def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
+                  platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
+                  no_wait=False, tags=None, validate=False):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import build_av_set_resource
@@ -1852,7 +1851,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                aux_subscriptions=None):
+                proximity_placement_group=None, aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder

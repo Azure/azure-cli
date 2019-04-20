@@ -68,6 +68,12 @@ def validate_keyvault(cmd, namespace):
                                           'vaults', 'Microsoft.KeyVault')
 
 
+def validate_proximity_placement_group(cmd, namespace):
+    namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
+                                                           namespace.resource_group_name,
+                                                           'proximityPlacementGroups', 'Microsoft.Compute')
+
+
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
     from azure.cli.core._output import (get_output_format, set_output_format)
