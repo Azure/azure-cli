@@ -670,3 +670,31 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         logger.error('Deployment failed. To find out more information about this deployment, please visit %s.',
                      deployment_url)
     return output
+
+
+def update(client, resource_group_name, resource_name, endpoint=None, description=None,
+           display_name=None, tags=None, sku_name=None, app_inisghts_key=None,
+           app_inisghts_api_key=None, app_inisghts_app_id=None):
+    bot = client.bots.get(
+        resource_group_name=resource_group_name,
+        resource_name=resource_name
+    )
+    sku = Sku(name=sku_name if sku_name else bot.sku.name)
+    bot_props = bot.properties
+
+    bot_props.description = description if description else bot_props.description
+    bot_props.display_name = display_name if display_name else bot_props.display_name
+    bot_props.endpoint = endpoint if endpoint else bot_props.endpoint
+
+    bot_props.developer_app_insight_key = app_inisghts_key if app_inisghts_key else bot_props.developer_app_insight_key
+    bot_props.developer_app_insights_application_id = app_inisghts_app_id if app_inisghts_app_id \
+        else bot_props.developer_app_insights_application_id
+
+    if app_inisghts_api_key:
+        bot_props.developer_app_insights_api_key = app_inisghts_api_key
+
+    return client.bots.update(resource_group_name,
+                              resource_name,
+                              tags=tags,
+                              sku=sku,
+                              properties=bot_props)

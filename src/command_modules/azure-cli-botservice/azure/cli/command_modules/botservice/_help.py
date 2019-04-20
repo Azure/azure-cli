@@ -47,7 +47,7 @@ helps['bot update'] = """
     examples:
         - name: Update description on a bot
           text: |-
-            az bot update -n botName -g MyResourceGroup --set properties.description="some description"
+            az bot update -n botName -g MyResourceGroup --endpoint "https://bing.com/api/messages" --display-name "Hello World"
 """
 helps['bot publish'] = """
     type: command

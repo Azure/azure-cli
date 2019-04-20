@@ -90,16 +90,18 @@ class DirectLineClient(object):
 class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
-    def registration_bot_create(self, resource_group):
+    def test_botservice_registration_bot_create(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
             'description': 'description1',
             'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4())
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         self.cmd(
-            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1',
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p '
+            '{password} --tags key1=value1',
             checks=[
                 self.check('name', '{botname}'),
                 self.check('properties.description', '{description}'),
@@ -112,7 +114,7 @@ class BotTests(ScenarioTest):
             self.check('name', '{botname}')
         ])
 
-        self.cmd('az bot update --set properties.description=description2 -g {rg} -n {botname}', checks=[
+        self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
             self.check('name', '{botname}'),
             self.check('properties.description', 'description2')
         ])
@@ -767,6 +769,49 @@ class BotTests(ScenarioTest):
         except Exception as error:
             shutil.rmtree(dir_path)
             raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_update_should_update_bot_properties(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'endpoint': 'https://dev.botframework.com/api/messages',
+            'description': 'HelloWorld!',
+            'ai-key': str(uuid.uuid4()),
+            'ai-api-key': self.create_random_name(prefix='cli.', length=40),
+            'ai-app-id': str(uuid.uuid4()),
+            'tag': 'Hello',
+            'tag-value': 'Microsoft!'
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs')
+                 })
+
+        results = self.cmd('az bot update -g {rg} -n {botname} -e "{endpoint}" --description {description} --sku S1 '
+                           '-d {display_name} -ai-key {ai-key} -ai-api-key {ai-api-key} -ai-app-id {ai-app-id} --tags '
+                           '{tag}={tag-value}', checks=[
+                                                        self.check('name', '{botname}'),
+                                                        self.check('resourceGroup', '{rg}'),
+                                                    ])
+        results = results.get_output_in_json()
+
+        assert results['sku']['name'] == 'S1'
+        assert results['properties']['displayName'] == 'clitestbot'
+        assert results['properties']['endpoint'] == 'https://dev.botframework.com/api/messages'
+        assert results['properties']['description'] == 'HelloWorld!'
+        assert results['tags']['Hello'] == 'Microsoft!'
+        assert results['properties']['developerAppInsightKey']
+        # The "developerAppInsightsApiKey" is a secret and is always null when retrieved.
+        assert not results['properties']['developerAppInsightsApiKey']
+        assert results['properties']['developerAppInsightsApplicationId']
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):

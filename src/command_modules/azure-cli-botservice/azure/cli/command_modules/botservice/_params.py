@@ -35,6 +35,7 @@ SUPPORTED_APP_INSIGHTS_REGIONS = [
     'West US 2']
 SUPPORTED_LANGUAGES_MSG = '  Allowed values: Csharp, Javascript.'
 UPCOMING_SUPPORTED_LANGUAGES_MSG = '  Allowed values: Csharp, Javascript, Typescript.'
+SUPPORTED_SKUS = ['F0', 'S1']
 
 
 # pylint: disable=line-too-long,too-many-statements
@@ -55,7 +56,7 @@ def load_arguments(self, _):
                    arg_type=name_arg_type)
 
     with self.argument_context('bot create') as c:
-        c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(['F0', 'S1']), help='The Sku of the bot.', arg_group='Registration bot Specific')
+        c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(SUPPORTED_SKUS), help='The Sku of the bot.', arg_group='Registration bot Specific')
         c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(['registration', 'function', 'webapp']), help='The kind of the bot.')
         c.argument('display_name', help='The display name of the bot. If not specified, defaults to the name of the bot.', arg_group='Registration bot Specific')
         c.argument('description', options_list=['--description', '-d'], help='The description of the bot.', arg_group='Registration bot Specific')
@@ -88,6 +89,27 @@ def load_arguments(self, _):
 
     with self.argument_context('bot show') as c:
         c.argument('bot_json', options_list=['--msbot'], help='Show the output as JSON compatible with a .bot file.', arg_type=get_three_state_flag())
+
+    with self.argument_context('bot update') as c:
+        c.argument('description', options_list=['--description'], help="The bot's new description.")
+        c.argument('display_name', options_list=['--display-name', '-d'], help="The bot's new display name.")
+        c.argument('endpoint', options_list=['--endpoint', '-e'],
+                   help='The new endpoint of the bot. Must start with "https://"')
+        c.argument('sku_name', options_list=['--sku'], arg_type=get_enum_type(SUPPORTED_SKUS),
+                   help='The Sku of the bot.')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('app_inisghts_key', options_list=['--app-insights-key', '-ai-key'],
+                   arg_group='Bot Analytics/Application Insights',
+                   help='Azure Application Insights Key used to write bot analytics data. Provide a key if you want '
+                        'to receive bot analytics.')
+        c.argument('app_inisghts_api_key', options_list=['--app-insights-api-key', '-ai-api-key'],
+                   arg_group='Bot Analytics/Application Insights',
+                   help='Azure Application Insights API Key used to read bot analytics data. Provide a key if you want '
+                        'to view analytics about your bot in the Analytics blade.')
+        c.argument('app_inisghts_app_id', options_list=['--app-insights-app-id', '-ai-app-id'],
+                   arg_group='Bot Analytics/Application Insights',
+                   help='Azure Application Insights Application ID used to read bot analytics data. Provide an Id if '
+                        'you want to view analytics about your bot in the Analytics blade.')
 
     with self.argument_context('bot prepare-publish') as c:
         c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
