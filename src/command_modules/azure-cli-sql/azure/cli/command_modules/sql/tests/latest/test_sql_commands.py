@@ -2988,21 +2988,21 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_virtual_cluster_mgmt(self, resource_group, resource_group_location):
         self.kwargs.update({
-            'loc' : resource_group_location,
+            'loc': resource_group_location,
             'vnet_name': 'vcCliTestVnet',
-            'subnet_name' : 'vcCliTestSubnet',
-            'route_table_name' : 'vcCliTestRouteTable',
-            'route_name' : 'vcCliTestRoute',
-            'managed_instance_name' : self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
-            'admin_login' : 'admin123',
-            'admin_password' : 'SecretPassword123',
-            'license_type' : 'LicenseIncluded',
-            'v_cores' : 8,
-            'storage_size_in_gb' : '32',
-            'edition' : 'GeneralPurpose',
-            'family' : 'Gen5',
-            'collation' : "Serbian_Cyrillic_100_CS_AS",
-            'proxy_override' : "Proxy"
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name': 'vcCliTestRoute',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
         })
 
         # Create and prepare VNet and subnet for new virtual cluster
@@ -3013,7 +3013,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
-            'subnet_id' : subnet['id']
+            'subnet_id': subnet['id']
         })
 
         # create sql managed_instance
@@ -3055,7 +3055,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         virtual_cluster = next(vc for vc in virtual_clusters if vc['subnetId'] == self._apply_kwargs('{subnet_id}'))
 
         self.kwargs.update({
-            'vc_name' : virtual_cluster['name']
+            'vc_name': virtual_cluster['name']
         })
 
         # test show sql virtual cluster
