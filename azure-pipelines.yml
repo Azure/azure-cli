@@ -120,7 +120,7 @@ jobs:
       script: |
         $InstallArgs = @(
           "/I"
-          "$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"
+          "\"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi\""
           "/norestart"
         )
         Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
