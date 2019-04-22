@@ -123,7 +123,7 @@ jobs:
           "$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"
           "/norestart"
         )
-        Start-Process "msiexec.exe" -Arguments $InstallArgs -Wait -NoNewWindow
+        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
         az --version
         az self-test
 
