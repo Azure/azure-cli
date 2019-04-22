@@ -120,10 +120,14 @@ jobs:
       script: |
         $InstallArgs = @(
           "/I"
-          "\"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi\""
+          '"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"'
           "/norestart"
+          "/L*v"
+          ".\install_logs.txt"
         )
         Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
+        Get-Content .\install_logs.txt
+
         az --version
         az self-test
 
