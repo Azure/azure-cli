@@ -3,6 +3,7 @@
 Release History
 ===============
 * webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
+* appserviceplan: az appserviceplan create support for Linux FREE sku
 
 0.2.18
 ++++++

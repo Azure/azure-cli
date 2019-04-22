@@ -12,14 +12,13 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 from binascii import hexlify
 from os import urandom
 import json
 import ssl
 import sys
 import OpenSSL.crypto
-
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 from fabric import Connection
 
 
@@ -82,6 +81,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
+    if isinstance(plan_info.sku, SkuDescription) and plan_info.sku not in ['F1', 'Free']:
+        site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
     helper = _StackRuntimeHelper(client, linux=is_linux)
 
@@ -297,24 +298,23 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
 def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     tier = tier.upper()
-    if tier == 'F1' or tier == "FREE":
+    if tier in ['F1', 'FREE']:
         return 'FREE'
-    elif tier == 'D1' or tier == "SHARED":
+    if tier in ['D1', "SHARED"]:
         return 'SHARED'
-    elif tier in ['B1', 'B2', 'B3', 'BASIC']:
+    if tier in ['B1', 'B2', 'B3', 'BASIC']:
         return 'BASIC'
-    elif tier in ['S1', 'S2', 'S3']:
+    if tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
+    if tier in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
-    elif tier in ['P1V2', 'P2V2', 'P3V2']:
+    if tier in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
-    elif tier in ['PC2', 'PC3', 'PC4']:
+    if tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
-    elif tier in ['EP1', 'EP2', 'EP3']:
+    if tier in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
-    else:
-        raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -393,7 +393,7 @@ def validate_plan_switch_compatibility(client, src_functionapp_instance, dest_pl
                                                  src_parse_result['name'])
     if src_plan_info is None:
         raise CLIError('Could not determine the current plan of the functionapp')
-    elif not (is_plan_consumption(src_plan_info) or is_plan_elastic_premium(src_plan_info)):
+    if not (is_plan_consumption(src_plan_info) or is_plan_elastic_premium(src_plan_info)):
         raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
     if not (is_plan_consumption(dest_plan_instance) or is_plan_elastic_premium(dest_plan_instance)):
         raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
@@ -1182,6 +1182,14 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    # if is_linux and FREE SKU check the region is supported, FREE is supported on some select regions only
+    if is_linux and sku == 'F1':
+        geo_regions = list(filter(lambda x: location in x.name, list_locations(cmd, sku, is_linux)))
+        num_geo_regions = len(geo_regions)
+        if num_geo_regions == 0:
+            raise CLIError('Free SKU not supported in region "{}". Run the command with --location to use a '
+                           'supported region. See az appservice list-locations --sku F1 --linux-workers-enabled to see '
+                           'the list of supported regions'.format(location))
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
@@ -2284,7 +2292,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     lang_details = get_lang_from_content(src_dir)
     # we support E2E create and deploy for selected stacks, any other stack, set defaults for os & runtime
     # and skip deployment
-    if lang_details['language'] is None:
+    language = lang_details.get('language')
+    if not language:
         do_deployment = False
         sku = sku or 'F1'
         os_val = OS_DEFAULT
@@ -2296,7 +2305,6 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
             sku = lang_details.get("default_sku")
         else:
             sku = sku
-        language = lang_details.get("language")
         is_skip_build = language.lower() == STATIC_RUNTIME_NAME
         os_val = "Linux" if language.lower() == NODE_RUNTIME_NAME \
             or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
@@ -2381,13 +2389,17 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         logger.warning("App service plan '%s' already exists.", asp)
         _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
         _create_new_app = should_create_new_app(cmd, rg_name, name)
-
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ...", name)
         create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
         logger.warning("Webapp creation complete")
         _set_build_app_setting = True
+        # Update appSettings for netcore apps
+        if language == 'dotnetcore':
+            update_app_settings(cmd, rg_name, name, ['ANCM_ADDITIONAL_ERROR_PAGE_LINK=' +
+                                                     'https://{}.scm.azurewebsites.net/detectors'.format(name)])
+
         # Configure default logging
         _configure_default_logging(cmd, rg_name, name)
         if _show_too_many_apps_warn:
@@ -2426,6 +2438,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
         update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
+        # wait for all the settings to completed
+        time.sleep(30)
 
     if do_deployment:
         logger.warning("Creating zip with contents of dir %s ...", src_dir)
@@ -2441,15 +2455,17 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
             os.remove(zip_file_path)
         except OSError:
             pass
-    if logs:
-        _configure_default_logging(cmd, rg_name, name)
     logger.warning("All done.")
     if launch_browser:
         logger.warning("Launching app using default browser")
-        return view_in_browser(cmd, rg_name, name, None, logs)
-    _url = _get_url(cmd, rg_name, name)
-    return logger.warning("You can launch the app at '%s'. To redeploy the app run the command az webapp up -n "
-                          "%s -l %s", _url, name, location)
+        view_in_browser(cmd, rg_name, name, None, logs)
+    else:
+        _url = _get_url(cmd, rg_name, name)
+        logger.warning("You can launch the app at '%s'", _url)
+    logger.warning('To redeploy the app run the command az webapp up -n %s -l "%s" ', name, location)
+    if logs:
+        _configure_default_logging(cmd, rg_name, name)
+        return get_streaming_log(cmd, rg_name, name)
 
 
 def _ping_scm_site(cmd, resource_group, name):
