@@ -102,7 +102,7 @@ jobs:
       ArtifactName: msi
 
 - job: TestWindowsMSI
-  displayName: TestWindowsMSI
+  displayName: Test Windows MSI
 
   dependsOn: BuildWindowsMSI
   condition: succeeded()
@@ -115,6 +115,7 @@ jobs:
       artifactName: msi
 
   - task: PowerShell@2
+    displayName: Install and Load CLI
     inputs:
       targetType: inline
       script: |
