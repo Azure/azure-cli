@@ -26,7 +26,7 @@ SUPPORTED_APP_INSIGHTS_REGIONS = [
     'East US 2',
     'France Central',
     'Japan East',
-    'Korea Central'
+    'Korea Central',
     'North Europe',
     'South Central US',
     'Southeast Asia',
