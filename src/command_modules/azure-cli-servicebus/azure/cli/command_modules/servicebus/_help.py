@@ -578,7 +578,7 @@ helps['servicebus namespace network-rule add'] = """
     short-summary: Add a network rule for a namespace.
     examples:
         - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
-          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId --ignore-missing-endpoint True
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId} --ignore-missing-endpoint True
         - name: add a IP rule in NetworkruleSet for a namespace
           text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24 --action Allow
 """
@@ -596,7 +596,7 @@ helps['servicebus namespace network-rule remove'] = """
     short-summary: Remove network rule for a namespace
     examples:
         - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
-          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId
+          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId}
         - name: remove IP rule from NetworkruleSet for a namespace
-          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address ipmask
+          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24
 """

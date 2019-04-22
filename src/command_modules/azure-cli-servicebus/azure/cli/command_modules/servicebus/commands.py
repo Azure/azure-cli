@@ -148,4 +148,4 @@ def load_command_table(self, _):
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
         g.command('list', 'get_network_rule_set')
-        g.custom_command('remove', 'cli_networkrule_delete')
+        g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)

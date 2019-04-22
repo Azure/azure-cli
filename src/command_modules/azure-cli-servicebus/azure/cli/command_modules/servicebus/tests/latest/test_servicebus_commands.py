@@ -731,13 +731,13 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'ipmask2': '2.2.2.2'
         })
 
-        self.cmd('az network vnet create --resource-group ' + resource_group + ' --name {namevnet}')
-        self.cmd('az network vnet create --resource-group ' + resource_group + ' --name {namevnet1}')
+        self.cmd('az network vnet create --resource-group {rg} --name {namevnet}')
+        self.cmd('az network vnet create --resource-group {rg} --name {namevnet1}')
 
         created_subnet1 = self.cmd(
-            'az network vnet subnet create --resource-group ' + resource_group + ' --name {namesubnet1} --vnet-name {namevnet} --address-prefixes 10.0.0.0/24').get_output_in_json()
+            'az network vnet subnet create --resource-group {rg} --name {namesubnet1} --vnet-name {namevnet} --address-prefixes 10.0.0.0/24').get_output_in_json()
         created_subnet2 = self.cmd(
-            'az network vnet subnet create --resource-group ' + resource_group + ' --name {namesubnet2} --vnet-name {namevnet1} --address-prefixes 10.0.0.0/24').get_output_in_json()
+            'az network vnet subnet create --resource-group {rg} --name {namesubnet2} --vnet-name {namevnet1} --address-prefixes 10.0.0.0/24').get_output_in_json()
 
         # Check for the NameSpace name Availability
         self.cmd('servicebus namespace exists --name {namespacename}',
