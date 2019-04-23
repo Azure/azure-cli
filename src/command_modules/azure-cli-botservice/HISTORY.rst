@@ -3,7 +3,7 @@
 Release History
 ===============
 
-1.0.0
+0.2.0
 +++++
 * [Breaking Change]: The default value for `--version` is now `v4`, not `v3` (except for `az bot prepare-publish`).
 * [Breaking Change]: `--lang` no longer defaults to `Csharp`. If the command requires `--lang` and it is not provided, the command will error out.
