@@ -632,7 +632,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
-        boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled)
+        boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
+        proximity_placement_group=proximity_placement_group)
+
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -1002,7 +1004,8 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
 
     av_set_resource = build_av_set_resource(cmd, availability_set_name, location, tags,
                                             platform_update_domain_count,
-                                            platform_fault_domain_count, unmanaged)
+                                            platform_fault_domain_count, unmanaged,
+                                            proximity_placement_group=proximity_placement_group)
     master_template.add_resource(av_set_resource)
 
     template = master_template.build()
@@ -2055,7 +2058,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
-        ultra_ssd_enabled=ultra_ssd_enabled)
+        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
