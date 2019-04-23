@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.4.1
++++++
+* `storage blob generate-sas`: Fix double url-encoded sas token
+
 2.4.0
 +++++
 * BREAKING CHANGE: `storage blob delete`: remove the return result of command

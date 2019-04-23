@@ -22,8 +22,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 
 
-from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, _check_encrypt_is_supported,
-                                                          encrypt_vmss, decrypt_vmss)
+from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, encrypt_vmss, decrypt_vmss)
 from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.core.mock import DummyCli
@@ -293,48 +292,6 @@ class TestVmCustom(unittest.TestCase):
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
         decrypt_vm(cmd, 'rg1', 'vm1', 'DATA')
-
-    def test_encryption_distro_check(self):
-        image = ImageReference(id=None, publisher='canonical', offer='ubuntuserver', sku='16.04.0-LTS')
-        result, msg = _check_encrypt_is_supported(image, 'data')
-        self.assertTrue(result)
-        self.assertEqual(None, msg)
-
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2n')
-        result, msg = _check_encrypt_is_supported(image, 'data')
-        self.assertTrue(result)
-        self.assertEqual(None, msg)
-
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
-        result, msg = _check_encrypt_is_supported(image, 'all')
-        self.assertFalse(result)
-        self.assertEqual(msg,
-                         "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
-
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
-        result, msg = _check_encrypt_is_supported(image, 'data')
-        self.assertTrue(result)
-
-    def test_encryption_distro_check(self):
-        image = ImageReference(id=None, publisher='canonical', offer='ubuntuserver', sku='16.04.0-LTS')
-        result, msg = _check_encrypt_is_supported(image, 'data')
-        self.assertTrue(result)
-        self.assertEqual(None, msg)
-
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2n')
-        result, msg = _check_encrypt_is_supported(image, 'data')
-        self.assertTrue(result)
-        self.assertEqual(None, msg)
-
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
-        result, msg = _check_encrypt_is_supported(image, 'all')
-        self.assertFalse(result)
-        self.assertEqual(msg,
-                         "The distro is not in CLI's known supported list. Use https://aka.ms/adelinux to cross check")
-
-        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='6.7')
-        result, msg = _check_encrypt_is_supported(image, 'data')
-        self.assertTrue(result)
 
     def test_merge_secrets(self):
         secret1 = [{

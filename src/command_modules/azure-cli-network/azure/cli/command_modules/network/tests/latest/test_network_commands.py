@@ -802,6 +802,7 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 
 class NetworkRouteFilterScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
     def test_network_route_filter(self, resource_group):
         self.kwargs['filter'] = 'filter1'
@@ -1403,10 +1404,11 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
             'config2': 'ipconfig2'
         })
 
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet {subnet1} --vnet-name {vnet} --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --cache write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --cache read')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
         with self.assertRaisesRegexp(CloudError, 'not supported for secondary IpConfigurations'):
@@ -1527,12 +1529,13 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
             'pool': 'pool1'
         })
 
-        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1}  --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --cache write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --cache read')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
         self.kwargs['ag_pool_id'] = self.cmd('network application-gateway address-pool show -g {rg} --gateway-name {ag} -n {pool}').get_output_in_json()['id']
 
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet}')
 
         self.cmd('network nic ip-config address-pool add -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
@@ -1772,6 +1775,35 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+
+class NetworkVNetCachingScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
+    def test_network_vnet_caching(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+        # test that custom commands work with caching
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --cache write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --cache read write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --cache read write')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24 --cache read')
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('length(subnets)', 3)
+        ])
+
+        # test that generic update works with caching
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --cache write')
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2 --cache read write-through')
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('length(tags)', 2)
+        ])
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.c=3 --cache read')
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('length(tags)', 3)
+        ])
+
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
@@ -1995,7 +2027,7 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Sql/servers', checks=[
             self.check('delegations[0].serviceName', 'Microsoft.Sql/servers'),
-            self.check('purpose', 'InterfaceEndpoints')
+            self.check('purpose', 'PrivateEndpoints')
         ])
         # verify the update command, and that CLI validation will accept either serviceName or Name
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql.Servers',

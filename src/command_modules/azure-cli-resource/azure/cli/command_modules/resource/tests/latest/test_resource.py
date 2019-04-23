@@ -67,6 +67,33 @@ class ResourceGroupNoWaitScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
 
+class ResourceLinkScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_link_scenario')
+    def test_resource_link_scenario(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        rg_id = self.cmd('group show -g {rg}').get_output_in_json()['id']
+        self.kwargs['link_id'] = '{}/providers/Microsoft.Resources/links/link1'.format(rg_id)
+        self.cmd('resource link create --link {link_id} --target {vnet_id} --notes "blah notes"')
+        self.cmd('resource link show --link {link_id}', checks=[
+            self.check('name', 'link1'),
+            self.check('properties.notes', 'blah notes')
+        ])
+        self.cmd('resource link update --link {link_id} --target {vnet_id} --notes "group to vnet"')
+        num_link = int(self.cmd('resource link list --query length(@) -o tsv').output)
+        self.cmd('resource link show --link {link_id}', checks=[
+            self.check('name', 'link1'),
+            self.check('properties.notes', 'group to vnet')
+        ])
+        self.cmd('resource link delete --link {link_id}')
+        self.cmd('resource link list',
+                 checks=self.check('length(@)', num_link - 1))
+
+
 class ResourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')

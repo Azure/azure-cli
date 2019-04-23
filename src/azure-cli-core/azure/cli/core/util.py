@@ -197,7 +197,10 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     content = read_file_content(file_path)
     if not content and not throw_on_empty:
         return None
-    return shell_safe_json_parse(content, preserve_order)
+    try:
+        return shell_safe_json_parse(content, preserve_order)
+    except CLIError as ex:
+        raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -236,6 +239,9 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
             return ast.literal_eval(json_or_dict_string)
         except SyntaxError:
             raise CLIError(json_ex)
+        except ValueError as ex:
+            logger.debug(ex)  # log the exception which could be a python dict parsing error.
+            raise CLIError(json_ex)  # raise json_ex error which is more readable and likely.
 
 
 def b64encode(s):

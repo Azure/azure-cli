@@ -56,9 +56,9 @@ helps['sql db list-editions'] = """
     long-summary: Includes available service objectives and storage limits. In order to reduce verbosity, settings to intentionally reduce storage limits are hidden by default.
     examples:
         - name: Show all database editions in a location.
-          text: az sql db list-editions -l westus
+          text: az sql db list-editions -l westus -o table
         - name: Show all available database service objectives for Standard edition.
-          text: az sql db list-editions -l westus --edition Standard
+          text: az sql db list-editions -l westus --edition Standard -o table
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
@@ -304,13 +304,13 @@ helps['sql elastic-pool list-editions'] = """
                   database settings are hidden by default.
     examples:
         - name: Show all elastic pool editions and pool DTU limits in the West US region.
-          text: az sql elastic-pool list-editions -l westus
+          text: az sql elastic-pool list-editions -l westus -o table
         - name: Show all pool DTU limits for Standard edition in the West US region.
-          text: az sql elastic-pool list-editions -l westus --edition Standard
+          text: az sql elastic-pool list-editions -l westus --edition Standard -o table
         - name: Show available max sizes for elastic pools with at least 100 DTUs in the West US region.
-          text: az sql elastic-pool list-editions -l westus --dtu 100 --show-details max-size
+          text: az sql elastic-pool list-editions -l westus --dtu 100 --show-details max-size -o table
         - name: Show available per database settings for Standard 100 DTU elastic pools in the West US region.
-          text: az sql elastic-pool list-editions -l westus --edition Standard --dtu 100
+          text: az sql elastic-pool list-editions -l westus --edition Standard --dtu 100 -o table
                 --show-details db-min-dtu db-max-dtu db-max-size
     """
 helps['sql elastic-pool update'] = """
