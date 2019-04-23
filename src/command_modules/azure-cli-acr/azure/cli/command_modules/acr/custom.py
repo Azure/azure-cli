@@ -181,7 +181,7 @@ def acr_login(cmd,
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    docker_command = _get_docker_command()
+    docker_command = get_docker_command()
 
     login_server, username, password = get_login_credentials(
         cmd=cmd,
@@ -224,7 +224,7 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
     return client.list_usages(resource_group_name, registry_name)
 
 
-def _get_docker_command():
+def get_docker_command():
     docker_not_installed = "Please verify if docker is installed."
     docker_not_available = "Please verify if docker daemon is running properly."
     docker_command = 'docker'

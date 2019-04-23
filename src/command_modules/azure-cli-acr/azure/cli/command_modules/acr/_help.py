@@ -747,3 +747,17 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+helps['acr health-check'] = """
+type: command
+short-summary: Gets health information on the environment and the registry.
+examples:
+  - name: Gets health state on connectivity issues.
+    text: >
+        az acr health-check -n myRegistry --connectivity
+  - name: Gets health state on the environment.
+    text: >
+        az acr health-check --environment
+  - name: Gets all health reports supported.
+    text: >
+        az acr health-check -n myRegistry --all
+"""

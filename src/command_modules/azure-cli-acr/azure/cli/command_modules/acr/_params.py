@@ -220,3 +220,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.')
         c.argument('ip_address', help='IPv4 address or CIDR range.')
+
+    with self.argument_context('acr health-check') as c:
+        c.argument('registry_name', options_list=['-n', '--name'], help='Name of target registry.', required=False)
+        c.argument('connectivity', options_list=['--connectivity'], help='Check health state for connectivity issues.', action='store_true', required=False)
+        c.argument('environment', options_list=['--environment'], help='Check health state for environment issues.', action='store_true', required=False)
+        c.argument('all_checks', options_list=['-a', '--all-checks'], help='Get all health reports supported.', action='store_true', required=False)
