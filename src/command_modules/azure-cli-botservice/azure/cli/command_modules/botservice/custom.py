@@ -673,8 +673,8 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
 
 def update(client, resource_group_name, resource_name, endpoint=None, description=None,
-           display_name=None, tags=None, sku_name=None, app_inisghts_key=None,
-           app_inisghts_api_key=None, app_inisghts_app_id=None):
+           display_name=None, tags=None, sku_name=None, app_insights_key=None,
+           app_insights_api_key=None, app_insights_app_id=None):
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -686,12 +686,12 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
     bot_props.display_name = display_name if display_name else bot_props.display_name
     bot_props.endpoint = endpoint if endpoint else bot_props.endpoint
 
-    bot_props.developer_app_insight_key = app_inisghts_key if app_inisghts_key else bot_props.developer_app_insight_key
-    bot_props.developer_app_insights_application_id = app_inisghts_app_id if app_inisghts_app_id \
+    bot_props.developer_app_insight_key = app_insights_api_key if app_insights_api_key else bot_props.developer_app_insight_key
+    bot_props.developer_app_insights_application_id = app_insights_app_id if app_insights_app_id \
         else bot_props.developer_app_insights_application_id
 
-    if app_inisghts_api_key:
-        bot_props.developer_app_insights_api_key = app_inisghts_api_key
+    if app_insights_api_key:
+        bot_props.developer_app_insights_api_key = app_insights_api_key
 
     return client.bots.update(resource_group_name,
                               resource_name,
