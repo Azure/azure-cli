@@ -73,6 +73,14 @@ def batch_data_service_factory(cli_ctx, kwargs):
     account_endpoint = kwargs.pop('account_endpoint', None)
     kwargs.pop('yes', None)
 
+    # Verify all values are populated and display readable error
+    if not account_name:
+        raise ValueError("Account name not set.")
+    if not account_key:
+        raise ValueError("Account key not set.")
+    if not account_endpoint:
+        raise ValueError("Account endpoint not set.")
+
     credentials = None
     if not account_key:
         from azure.cli.core._profile import Profile

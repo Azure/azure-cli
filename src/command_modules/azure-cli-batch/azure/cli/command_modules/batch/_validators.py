@@ -284,6 +284,14 @@ def validate_client_parameters(cmd, namespace):
     if not namespace.account_endpoint:
         namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
 
+    # Verify all values are populated and display readable error
+    if not namespace.account_name:
+        raise ValueError("Account name not set.")
+    if not namespace.account_key:
+        raise ValueError("Account key not set.")
+    if not namespace.account_endpoint:
+        raise ValueError("Account endpoint not set.")
+
     # Simple validation for account_endpoint
     if not (namespace.account_endpoint.startswith('https://') or
             namespace.account_endpoint.startswith('http://')):
