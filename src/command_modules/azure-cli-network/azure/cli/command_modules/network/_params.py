@@ -1075,7 +1075,7 @@ def load_arguments(self, _):
         c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='2.1.0')], help='Resource ID or name of the remote VNet.')
 
     with self.argument_context('network vnet peering create') as c:
-        c.argument('allow_virtual_network_access', options_list='--allow-vnet-access', action='store_true', help='Allows VMs in the remote VNet to access all VMs in the local VNet.')
+        c.argument('allow_virtual_network_access', options_list='--allow-vnet-access', action='store_true', help='Allows VMs in the local VNet to access all VMs in the remov VNet.')
         c.argument('allow_gateway_transit', action='store_true', help='Allows gateway link to be used in the remote VNet.')
         c.argument('allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the VMs in the remote VNet.')
         c.argument('use_remote_gateways', action='store_true', help='Allows VNet to use the remote VNet\'s gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.')

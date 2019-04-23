@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+import json
 import os
 from six.moves import configparser
 
@@ -153,3 +154,56 @@ def _normalize_config_value(value):
     if value:
         value = '' if value in ["''", '""'] else value
     return value
+
+
+def _get_cache_directory(cli_ctx):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core._environment import get_config_dir
+    return os.path.join(
+        get_config_dir(),
+        'object_cache',
+        cli_ctx.cloud.name,
+        get_subscription_id(cli_ctx))
+
+
+def list_cache_contents(cmd):
+    from glob import glob
+    directory = _get_cache_directory(cmd.cli_ctx)
+    contents = []
+    rg_paths = glob(os.path.join(directory, '*'))
+    for rg_path in rg_paths:
+        rg_name = os.path.split(rg_path)[1]
+        for dir_name, _, file_list in os.walk(rg_path):
+            if not file_list:
+                continue
+            resource_type = os.path.split(dir_name)[1]
+            for f in file_list:
+                with open(os.path.join(dir_name, f), 'r') as cache_file:
+                    cache_obj = json.loads(cache_file.read())
+                contents.append({
+                    'resourceGroup': rg_name,
+                    'resourceType': resource_type,
+                    'name': f.split('.', 1)[0],
+                    'lastTouched': cache_obj['_last_touched'],
+                })
+    return contents
+
+
+def show_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
+    directory = _get_cache_directory(cmd.cli_ctx)
+    item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
+    try:
+        with open(item_path, 'r') as cache_file:
+            cache_obj = json.loads(cache_file.read())
+    except OSError:
+        raise CLIError('Not found in cache: {}'.format(item_path))
+    return cache_obj['_payload']
+
+
+def delete_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
+    directory = _get_cache_directory(cmd.cli_ctx)
+    item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
+    try:
+        os.remove(item_path)
+    except OSError:
+        logger.info('%s not found in object cache.', item_path)

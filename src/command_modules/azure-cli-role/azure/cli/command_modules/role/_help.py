@@ -526,7 +526,7 @@ examples:
     text: |
         az role definition create --role-definition '{ \\
             "Name": "Contoso On-call", \\
-            "Description": "Perform VM actions and read storage and network information." \\
+            "Description": "Perform VM actions and read storage and network information.", \\
             "Actions": [ \\
                 "Microsoft.Compute/*/read", \\
                 "Microsoft.Compute/virtualMachines/start/action", \\
@@ -578,7 +578,7 @@ examples:
     text: |
         az role definition update --role-definition '{ \\
             "roleName": "Contoso On-call", \\
-            "Description": "Perform VM actions and read storage and network information." \\
+            "Description": "Perform VM actions and read storage and network information.", \\
             "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/providers/Microsoft.Authorization/roleDefinitions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", \\
             "roleType": "CustomRole", \\
             "type": "Microsoft.Authorization/roleDefinitions", \\

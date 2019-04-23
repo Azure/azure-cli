@@ -51,7 +51,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
-                           should_create_new_rg, set_location, should_create_new_asp, should_create_new_app,
+                           should_create_new_rg, set_location, should_create_new_app,
                            get_lang_from_content, get_num_apps_in_asp)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME,
                          RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
@@ -283,11 +283,12 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     import requests
     import os
+    from azure.cli.core.util import should_disable_connection_verify
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment")
-        requests.post(zip_url, data=zip_content, headers=headers)
+        requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
@@ -2081,9 +2082,13 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION', value='10.14.1'))
 
+    # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(plan_info):
         site_config.always_on = True
-    else:
+
+    # If plan is elastic premium or windows consumption, we need these app settings
+    is_windows_consumption = consumption_plan_location is not None and not is_linux
+    if is_plan_elastic_premium(plan_info) or is_windows_consumption:
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
@@ -2260,7 +2265,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # pylint: disable=too-many-statements, too-many-branches
+def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, launch_browser=False):  # pylint: disable=too-many-statements, too-many-branches
     import os
     from azure.cli.core._profile import Profile
     client = web_client_factory(cmd.cli_ctx)
@@ -2306,8 +2311,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
-    asp = "{}_asp_{}_{}".format(user, os_val, loc_name)
-    rg_name = "{}_asp_{}_{}".format(user, os_val, loc_name)
+    asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
+    rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
     # Resource group: check if default RG is set
     default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
     _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
@@ -2342,7 +2347,26 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _create_new_asp = should_create_new_asp(cmd, rg_name, asp, location)
+        _asp_generic = asp[:-len(asp.split("_")[4])]
+        # get all asp in the RG
+        data = (list(filter(lambda x: _asp_generic in x.name,
+                            client.app_service_plans.list_by_resource_group(rg_name))))
+        data_sorted = (sorted(data, key=lambda x: x.name))
+        num_asps = len(data)
+        # check if any of these matches the SKU & location to be used
+        # and get FirstOrDefault
+        selected_asp = next((a for a in data if isinstance(a.sku, SkuDescription) and
+                             a.sku.tier.lower() == full_sku.lower() and
+                             (a.location.replace(" ", "").lower() == location or a.location == location)), None)
+        if selected_asp is not None:
+            asp = selected_asp.name
+            _create_new_asp = False
+        elif selected_asp is None and num_asps > 0:
+            # from the sorted data pick the last one & check if a new ASP needs to be created
+            # based on SKU or not
+            _plan_info = data_sorted[num_asps - 1]
+            _asp_num = int(_plan_info.name.split('_')[4]) + 1
+            asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
@@ -2387,11 +2411,13 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
 
     if do_deployment and not is_skip_build:
         _set_build_app_setting = True
-        # setting the appsettings causes a app restart so we avoid if not needed
+        # app settings causes an app recycle so we avoid if not needed
         application_settings = client.web_apps.list_application_settings(rg_name, name)
         _app_settings = application_settings.properties
         for key, value in _app_settings.items():
-            if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT' and value.upper() == "FALSE":
+            if key.upper() == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
+                is_skip_build = value.upper() == "FALSE"
+                # if the value is already set just honor it
                 _set_build_app_setting = False
                 break
 
@@ -2417,8 +2443,13 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False):  # 
             pass
     if logs:
         _configure_default_logging(cmd, rg_name, name)
-    logger.warning("All done. Launching the app in your default browser.")
-    return view_in_browser(cmd, rg_name, name, None, logs)
+    logger.warning("All done.")
+    if launch_browser:
+        logger.warning("Launching app using default browser")
+        return view_in_browser(cmd, rg_name, name, None, logs)
+    _url = _get_url(cmd, rg_name, name)
+    return logger.warning("You can launch the app at '%s'. To redeploy the app run the command az webapp up -n "
+                          "%s -l %s", _url, name, location)
 
 
 def _ping_scm_site(cmd, resource_group, name):
@@ -2436,7 +2467,7 @@ def is_webapp_up(tunnel_server):
     return tunnel_server.is_webapp_up()
 
 
-def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None):
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -2452,12 +2483,10 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
-    host_name = name
 
-    if slot is not None:
-        host_name += "-" + slot
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('', port, host_name, profile_user_name, profile_user_password)
+    tunnel_server = TunnelServer('', port, scm_url, profile_user_name, profile_user_password)
     _ping_scm_site(cmd, resource_group_name, name)
 
     _wait_for_webapp(tunnel_server)
@@ -2471,8 +2500,11 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     s.daemon = True
     s.start()
 
-    while s.isAlive() and t.isAlive():
-        time.sleep(5)
+    if timeout:
+        time.sleep(int(timeout))
+    else:
+        while s.isAlive() and t.isAlive():
+            time.sleep(5)
 
 
 def _wait_for_webapp(tunnel_server):
@@ -2521,20 +2553,31 @@ def _start_ssh_session(hostname, port, username, password):
         c.close()
 
 
-def ssh_webapp(cmd, resource_group_name, name, slot=None):  # pylint: disable=too-many-statements
+def ssh_webapp(cmd, resource_group_name, name, slot=None, timeout=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
-        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot)
+        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot, timeout=timeout)
 
 
-def create_devops_build(cmd, functionapp_name=None, organization_name=None, project_name=None,
-                        repository_name=None, overwrite_yaml=None, allow_force_push=None, use_local_settings=None):
+def create_devops_build(
+        cmd,
+        functionapp_name=None,
+        organization_name=None,
+        project_name=None,
+        repository_name=None,
+        overwrite_yaml=None,
+        allow_force_push=None,
+        use_local_settings=None,
+        github_pat=None,
+        github_repository=None
+):
     from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
     azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
                                                                  organization_name, project_name, repository_name,
-                                                                 overwrite_yaml, allow_force_push, use_local_settings)
+                                                                 overwrite_yaml, allow_force_push, use_local_settings,
+                                                                 github_pat, github_repository)
     return azure_devops_build_interactive.interactive_azure_devops_build()
 
 
