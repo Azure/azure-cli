@@ -46,7 +46,8 @@ def _get_aad_token(cli_ctx,
                    only_refresh_token,
                    repository=None,
                    artifact_repository=None,
-                   permission=None):
+                   permission=None,
+                   is_diagnostics_context=False):
     """Obtains refresh and access tokens for an AAD-enabled registry.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -66,18 +67,27 @@ def _get_aad_token(cli_ctx,
 
     challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
-        raise CLIError("Registry '{}' did not issue a challenge.".format(login_server))
+        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server).get_error_message())
 
     authenticate = challenge.headers['WWW-Authenticate']
 
     tokens = authenticate.split(' ', 2)
     if len(tokens) < 2 or tokens[0].lower() != 'bearer':
-        raise CLIError("Registry '{}' does not support AAD login.".format(login_server))
+        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
 
     params = {y[0]: y[1].strip('"') for y in
               (x.strip().split('=', 2) for x in tokens[1].split(','))}
     if 'realm' not in params or 'service' not in params:
-        raise CLIError("Registry '{}' does not support AAD login.".format(login_server))
+        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
 
     authurl = urlparse(params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
@@ -98,8 +108,10 @@ def _get_aad_token(cli_ctx,
                              verify=(not should_disable_connection_verify()))
 
     if response.status_code not in [200]:
-        raise CLIError("Access to registry '{}' was denied. Response code: {}.".format(
-            login_server, response.status_code))
+        from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+        raise CLIError(CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code).get_error_message())
 
     refresh_token = loads(response.content.decode("utf-8"))["refresh_token"]
     if only_refresh_token:
@@ -125,8 +137,11 @@ def _get_aad_token(cli_ctx,
                              verify=(not should_disable_connection_verify()))
 
     if response.status_code not in [200]:
-        raise CLIError("Access to registry '{}' was denied. Response code: {}.".format(
-            login_server, response.status_code))
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code) \
+            .get_error_message())
 
     return loads(response.content.decode("utf-8"))["access_token"]
 

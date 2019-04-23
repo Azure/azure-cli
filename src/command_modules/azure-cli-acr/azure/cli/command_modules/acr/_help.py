@@ -827,3 +827,14 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+helps['acr check-health'] = """
+type: command
+short-summary: Gets health information on the environment and, optionally, a target registry.
+examples:
+  - name: Gets health state with target registry 'MyRegistry', skipping confirmation for pulling image.
+    text: >
+        az acr check-health -n myRegistry
+  - name: Gets health state with target registry 'myRegistry', without stopping on first error.
+    text: >
+        az acr check-health -n myRegistry --ignore
+"""
