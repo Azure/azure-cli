@@ -3,6 +3,10 @@
 Release History
 ===============
 
+4.0.1
++++++
+* Fix bug in validator for --application-package-references options.
+
 4.0.0
 +++++
 * Updated to Batch SDK and Batch Management Plane SDK to 6.0.0
