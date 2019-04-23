@@ -189,8 +189,8 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
-            'sku': 'Standard',
-            'tier': 'Standard',
+            'sku': 'Premium',
+            'tier': 'Premium',
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
             'defaultauthorizationrule': 'RootManageSharedAccessKey',
             'accessrights': 'Send',

@@ -183,6 +183,11 @@ def cli_sbtopic_create(client, resource_group_name, namespace_name, topic_name, 
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
     from azure.mgmt.servicebus.models import SBTopic
+    from knack.util import CLIError
+    if max_size_in_megabytes:
+        getnamespace = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name)
+        if getnamespace.sku.name == 'Standard' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120]:
+            raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GB')
     topic_params = SBTopic(
         default_message_time_to_live=return_valid_duration_create(default_message_time_to_live),
         max_size_in_megabytes=max_size_in_megabytes,
