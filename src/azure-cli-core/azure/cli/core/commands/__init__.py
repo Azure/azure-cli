@@ -111,9 +111,10 @@ def _pre_command_table_create(cli_ctx, args):
     return _expand_file_prefixed_files(args)
 
 
+# pylint: disable=too-many-instance-attributes
 class CacheObject(object):
 
-    def _get_cached_object_path(self, args, kwargs):
+    def path(self, args, kwargs):
         from azure.cli.core._environment import get_config_dir
         from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -146,40 +147,31 @@ class CacheObject(object):
             cli_ctx.cloud.name,
             subscription_id,
             self._resource_group,
-            self._model_type
+            self._model_name
         )
         filename = '{}.json'.format(resource_name)
         return directory, filename
 
-    def _get_model_type(self):
-        if sys.version_info[0] == 3:
-            rt_regex = re.compile(r'.* (?P<rt>[a-zA-Z]*)sOperations.*')
-            op_string = str(self._operation)
-            return rt_regex.findall(op_string)[0]
+    def _resolve_model(self):
+        if self._model_name and self._model_path:
+            return
 
-        # python 2
         import inspect
         op_metadata = inspect.getmembers(self._operation)
-        op_string = None
+        doc_string = None
         for key, value in op_metadata:
-            if key == 'func_code':
-                op_string = str(value)
+            if key == '__doc__':
+                doc_string = value
                 break
-            try:
-                if key == 'im_func':
-                    op_string = str(value.func_code)
-                    break
-            except TypeError:
-                continue
-        if not op_string:
-            raise CLIError('unable to resolve resource type for cache object')
-        rt_regex = re.compile(r'.*[\\/]operations[\\/](?P<rt>[a-zA-Z_]*)s_operations.*')
+
+        doc_string = doc_string.replace('\r', '').replace('\n', ' ')
+        model_name_regex = re.compile(r':return: (.*that returns )?(?P<model>[a-zA-Z]*)')
+        model_path_regex = re.compile(r':rtype:.*(?P<path>azure.mgmt[a-zA-Z0-9_\.]*)')
         try:
-            print(op_string)
-            match_comps = rt_regex.findall(op_string)[0].split('_')
-        except IndexError:
-            raise CLIError('unable to resolve resource type for cache object')
-        return ''.join(comp.title() for comp in match_comps)
+            self._model_name = model_name_regex.search(doc_string).group('model')
+            self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
+        except AttributeError:
+            raise CLIError('unable to resolve model name or path.')
 
     def _dump_to_file(self, open_file):
         cache_obj_dump = json.dumps({
@@ -189,10 +181,10 @@ class CacheObject(object):
         open_file.write(cache_obj_dump)
 
     def load(self, args, kwargs):
-        directory, filename = self._get_cached_object_path(args, kwargs)
+        directory, filename = self.path(args, kwargs)
         with open(os.path.join(directory, filename), 'r') as f:
             logger.info(
-                "Loading %s '%s' from cache: %s", self._model_type, self._resource_name,
+                "Loading %s '%s' from cache: %s", self._model_name, self._resource_name,
                 os.path.join(directory, filename)
             )
             obj_data = json.loads(f.read())
@@ -200,26 +192,26 @@ class CacheObject(object):
             self.last_saved = obj_data['last_saved']
         self._payload = self.result()
 
-
     def save(self, args, kwargs):
         from knack.util import ensure_dir
-        directory, filename = self._get_cached_object_path(args, kwargs)
+        directory, filename = self.path(args, kwargs)
         ensure_dir(directory)
         with open(os.path.join(directory, filename), 'w') as f:
             logger.info(
-                "Caching %s '%s' as: %s", self._model_type, self._resource_name,
+                "Caching %s '%s' as: %s", self._model_name, self._resource_name,
                 os.path.join(directory, filename)
             )
             self.last_saved = str(datetime.datetime.now())
             self._dump_to_file(f)
 
     def result(self):
-        model_cls = self._cmd.get_models(self._model_type)
+        module = import_module(self._model_path)
+        model_cls = getattr(module, self._model_name)
         return model_cls.deserialize(self._payload)
 
     def prop_dict(self):
         return {
-            'model': self._model_type,
+            'model': self._model_name,
             'name': self._resource_name,
             'group': self._resource_group
         }
@@ -229,9 +221,11 @@ class CacheObject(object):
         self._operation = operation
         self._resource_group = None
         self._resource_name = None
-        self._model_type = self._get_model_type()
+        self._model_name = None
+        self._model_path = None
         self._payload = payload
         self.last_saved = None
+        self._resolve_model()
 
     def __getattribute__(self, key):
         try:
@@ -1175,7 +1169,8 @@ def register_cache_arguments(cli_ctx):
                     options_list='--defer',
                     nargs='?',
                     action=CacheAction,
-                    help='Store the object in local cache. Do not send to Azure.'
+                    help='Temporarily store the object in the local cache instead of sending to Azure. ' \
+                         'Use `az cache` commands to view/clear.'
                 )
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_cache_arguments)

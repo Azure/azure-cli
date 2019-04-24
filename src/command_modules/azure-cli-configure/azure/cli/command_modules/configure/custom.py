@@ -227,3 +227,12 @@ def delete_cache_contents(cmd, resource_group_name, item_name, resource_type):
         os.remove(item_path)
     except OSError:
         logger.info('%s not found in object cache.', item_path)
+
+def purge_cache_contents(cmd):
+    import shutil
+    from azure.cli.core._environment import get_config_dir
+    directory = os.path.join(get_config_dir(), 'object_cache')
+    try:
+        shutil.rmtree(directory)
+    except OSError as ex:
+        raise CLIError(ex)
