@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.4.6
++++++
+* Bug fix for validator return types.
+* Tests updated for new SDK requirements.
+
 0.4.5
 +++++
 * Bug fix for asset and account filters update.
