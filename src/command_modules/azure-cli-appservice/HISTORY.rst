@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* webapp: webapp ssh, add option to skip ssl check
+
 0.2.18
 ++++++
 * webapp: az webapp ssh now support ASE and a timeout parameter
