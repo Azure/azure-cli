@@ -18,8 +18,8 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 from msrest.exceptions import ClientException
 
-from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
@@ -50,8 +50,6 @@ def image_builder_client_factory(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.imagebuilder import ImageBuilderClient
     client = get_mgmt_service_client(cli_ctx, ImageBuilderClient) # Needed until I get access to 2019-05-01 preview version
-    client.api_version = '2019-02-01-preview'
-    client.virtual_machine_image_templates.api_version = '2019-02-01-preview'
 
     return client
 
@@ -349,7 +347,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(client, resource_group_name, image_template_name, source, scripts=None,
+def create_image_template(cmd, client, resource_group_name, image_template_name, source, scripts=None,
                           checksum=None, location=None, no_wait=False,
                           managed_image_destinations=None, shared_image_destinations=None,
                           source_dict=None, scripts_list=None, destinations_lists=None):
@@ -394,13 +392,16 @@ def create_image_template(client, resource_group_name, image_template_name, sour
             logger.info("No applicable destination found for destination {}".format(tuple([dest_type, id, loc_info])))
 
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations, location=location)
-    return sdk_no_wait(no_wait, client.virtual_machine_image_templates.create_or_update, image_template, resource_group_name, image_template_name)
+
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def list_image_templates(client, resource_group_name=None):
     if resource_group_name:
         return client.virtual_machine_image_templates.list_by_resource_group(resource_group_name)
     return client.virtual_machine_image_templates.list()
+
 
 def show_build_output(client, resource_group_name, image_template_name, output_name=None):
     if output_name:
@@ -414,8 +415,9 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
                         managed_image=None, managed_image_location=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplateManagedImageDistributor, ImageTemplateVhdDistributor,
                                                 ImageTemplateSharedImageDistributor)
-    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-    old_template_copy = copy.deepcopy(existing_image_template)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
 
     if managed_image:
         parsed = parse_resource_id(managed_image)
@@ -436,13 +438,15 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
                 raise CLIError("Output with output name {} already exists in image template {}.".format(distributor.run_output_name.lower(), image_template_name))
 
     existing_image_template.distribute.append(distributor)
-    # Work around of not having update method. delete then create.
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
 
 def remove_template_output(cmd, client, resource_group_name, image_template_name, output_name):
-    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-    old_template_copy = copy.deepcopy(existing_image_template)
-
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
     if not existing_image_template.distribute:
         raise CLIError("No outputs to remove.")
 
@@ -457,20 +461,21 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
     existing_image_template.distribute = new_distribute
 
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def clear_template_output(cmd, client, resource_group_name, image_template_name):
-    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-
-    old_template_copy = copy.deepcopy(existing_image_template)
-
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
     if not existing_image_template.distribute:
         raise CLIError("No outputs to remove.")
 
     existing_image_template.distribute = []
 
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def _update_image_template(cmd, client, resource_group_name, image_template_name, new_template, old_template):
@@ -498,9 +503,10 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
                             script_url=None, inline_script=None, valid_exit_codes=None,
                             restart_command=None, restart_check_command=None, restart_timeout=None):
     from azure.mgmt.imagebuilder.models import ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer, ImageTemplateRestartCustomizer
-    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-    old_template_copy = copy.deepcopy(existing_image_template)
 
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
 
     if existing_image_template.customize is None:
         existing_image_template.customize = []
@@ -524,13 +530,15 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
         raise CLIError("Cannot determine customizer from type {}.".format(customizer_type))
 
     existing_image_template.customize.append(new_customizer)
-    # Work around of not having update method. delete then create.
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def remove_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name):
-    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-    old_template_copy = copy.deepcopy(existing_image_template)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
 
     if not existing_image_template.customize:
         raise CLIError("No customizers to remove.")
@@ -546,18 +554,20 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
 
     existing_image_template.customize = new_customize
 
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 def clear_template_customizer(cmd, client, resource_group_name, image_template_name):
-    existing_image_template = client.virtual_machine_image_templates.get(resource_group_name, image_template_name)
-
-    old_template_copy = copy.deepcopy(existing_image_template)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
 
     if not existing_image_template.customize:
         raise CLIError("No customizers to remove.")
 
     existing_image_template.customize = []
 
-    return _update_image_template(cmd, client, resource_group_name, image_template_name, existing_image_template, old_template_copy)
+    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 # endregion

@@ -167,24 +167,24 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_image')
 
     with self.command_group('image template', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
-        g.custom_command('create', 'create_image_template', supports_no_wait=True, validator=process_image_template_create_namespace)
-        g.custom_command('list', 'list_image_templates') # custom because there are two api methods for by resource group and all
+        g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
+        g.custom_command('list', 'list_image_templates')
         g.command('show', 'get')
         g.command('delete', 'delete')
-        # g.generic_update_command('update', 'list_image_templates') todo when supported by service
+        g.generic_update_command('update', 'create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
         g.command('run', 'run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
 
     with self.command_group('image template customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
-        g.custom_command('add', 'add_template_customizer', validator=process_img_tmpl_customizer_add_namespace)
-        g.custom_command('remove', 'remove_template_customizer')
-        g.custom_command('clear', 'clear_template_customizer')
+        g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
+        g.custom_command('remove', 'remove_template_customizer', supports_local_cache=True)
+        g.custom_command('clear', 'clear_template_customizer', supports_local_cache=True)
 
     with self.command_group('image template output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
-        g.custom_command('add', 'add_template_output', validator=process_img_tmpl_output_add_namespace)
-        g.custom_command('remove', 'remove_template_output')
-        g.custom_command('clear', 'clear_template_output')
+        g.custom_command('add', 'add_template_output', supports_local_cache=True, validator=process_img_tmpl_output_add_namespace)
+        g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
+        g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)
