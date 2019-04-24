@@ -1105,7 +1105,7 @@ def _get_authorization_code_worker(authority_url, scopes, results):
     # launch browser:
     url = ('{0}/oauth2/v2.0/authorize?response_type=code&client_id={1}'
            '&redirect_uri={2}&state={3}&prompt=select_account&scope={4}')
-    url = url.format(authority_url, _CLIENT_ID, reply_url, 'code', ' '.join(scopes))
+    url = url.format(authority_url, _CLIENT_ID, reply_url, request_state, ' '.join(scopes))
 
     logger.info('Open browser with url: %s', url)
     succ = open_page_in_browser(url)
