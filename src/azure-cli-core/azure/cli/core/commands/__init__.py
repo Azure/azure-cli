@@ -208,6 +208,11 @@ class CacheObject(object):
     def result(self):
         module = import_module(self._model_path)
         model_cls = getattr(module, self._model_name)
+        # model_cls = self._cmd.get_models(self._model_type)
+        # todo: Remove temp work around!!!
+        if model_cls is None:
+            from azure.mgmt.imagebuilder.models import ImageTemplate
+            model_cls = ImageTemplate
         return model_cls.deserialize(self._payload)
 
     def prop_dict(self):

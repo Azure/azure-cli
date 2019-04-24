@@ -38,6 +38,9 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
+    def _clear_cli_ctx_cache_arg(self):
+        self.cli_ctx.data.pop('_cache', '')
+
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
     def test_image_template_basic(self, resource_group):
         self._assign_ib_permissions(resource_group)
@@ -53,17 +56,20 @@ class ImageTemplateTest(ScenarioTest):
         })
 
         # test template creation works.
-        self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src}',
+        self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --cache write',
                  checks=[
-                     self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
-                     self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
-                     self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
-                     self.check('source.type', 'PlatformImage'),
-                     self.check('length(customize)', 2),
-                     self.check('customize[0].name', 'customizeScript.sh'), self.check('customize[0].script', TEST_SHELL_SCRIPT), self.check('customize[0].type', 'Shell'),
-                     self.check('customize[1].name', 'customizeScript.sh'), self.check('customize[1].script', TEST_SHELL_SCRIPT), self.check('customize[1].type', 'Shell'),
-                     self.check('distribute', None)
+                     self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
+                     self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', '18.04.201808140'),
+                     self.check('properties.source.type', 'PlatformImage'),
+                     self.check('length(properties.customize)', 2),
+
+                     self.check('properties.customize[0].name', 'customizeScript.sh'), self.check('properties.customize[0].scriptUri', TEST_SHELL_SCRIPT),
+                     self.check('properties.customize[0].type', 'Shell'),
+                     self.check('properties.customize[1].name', 'customizeScript.sh'), self.check('properties.customize[1].scriptUri', TEST_SHELL_SCRIPT),
+                     self.check('properties.customize[1].type', 'Shell'),
                  ])
+
+        self._clear_cli_ctx_cache_arg()
 
         # test that outputs can be set through create command.
         out_2 = "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2=centralus"
@@ -80,7 +86,6 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('distribute[1].location', 'centralus'),
                      self.check('distribute[1].runOutputName', 'img_2'),
                      self.check('distribute[1].type', 'ManagedImage'),
-
                  ])
 
         self.kwargs.update({
@@ -88,19 +93,43 @@ class ImageTemplateTest(ScenarioTest):
             'new_loc': 'southcentralus'
         })
         out_3 = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/images/{}".format(subscription_id, resource_group, 'new_img')
-        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {new_img} --managed-image-location {new_loc}',
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {new_img} --managed-image-location {new_loc} --cache read write',
                  checks=[
-                     self.check('name', '{tmpl_01}'),
+                     self.check('properties.distribute[0].imageId', out_3),
+                     self.check('properties.distribute[0].location', '{new_loc}'),
+                     self.check('properties.distribute[0].runOutputName', '{new_img}'),
+                     self.check('properties.distribute[0].type', 'ManagedImage')
+                 ])
+
+        self._clear_cli_ctx_cache_arg()
+
+        # test vhd output
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd --cache read write',
+                 checks=[
+                     self.check('properties.distribute[1].runOutputName', '{vhd_out}'),
+                     self.check('properties.distribute[1].type', 'VHD')
+                 ])
+
+        self._clear_cli_ctx_cache_arg()
+
+        self.cmd('image template update -n {tmpl_01} -g {rg} --cache read',
+                 checks=[
+                     self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
+                     self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
+                     self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
+                     self.check('source.type', 'PlatformImage'),
+                     self.check('length(customize)', 2),
+                     self.check('length(distribute)', 2),
+
+                     self.check('customize[0].name', 'customizeScript.sh'),
+                     self.check('customize[0].scriptUri', TEST_SHELL_SCRIPT), self.check('customize[0].type', 'Shell'),
+                     self.check('customize[1].name', 'customizeScript.sh'),
+                     self.check('customize[1].scriptUri', TEST_SHELL_SCRIPT), self.check('customize[1].type', 'Shell'),
+
                      self.check('distribute[0].imageId', out_3),
                      self.check('distribute[0].location', '{new_loc}'),
                      self.check('distribute[0].runOutputName', '{new_img}'),
-                     self.check('distribute[0].type', 'ManagedImage')
-                 ])
-
-        # test vhd output
-        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd',
-                 checks=[
-                     self.check('name', '{tmpl_01}'),
+                     self.check('distribute[0].type', 'ManagedImage'),
                      self.check('distribute[1].runOutputName', '{vhd_out}'),
                      self.check('distribute[1].type', 'VHD')
                  ])
@@ -268,9 +297,9 @@ class ImageTemplateTest(ScenarioTest):
         # self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
 
-
     def test_image_template_managed_image_source(self):
         pass
+
 
     def test_image_template_customizers(self):
         pass
