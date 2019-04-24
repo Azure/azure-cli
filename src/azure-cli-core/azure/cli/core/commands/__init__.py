@@ -183,7 +183,7 @@ class CacheObject(object):
 
     def _dump_to_file(self, open_file):
         cache_obj_dump = json.dumps({
-            '_last_touched': self._last_touched,
+            'last_saved': self.last_saved,
             '_payload': self._payload
         })
         open_file.write(cache_obj_dump)
@@ -197,10 +197,9 @@ class CacheObject(object):
             )
             obj_data = json.loads(f.read())
             self._payload = obj_data['_payload']
-        # need to save the lastTouched metadata when retrieved
-        with open(os.path.join(directory, filename), 'w') as f:
-            self._dump_to_file(f)
+            self.last_saved = obj_data['last_saved']
         self._payload = self.result()
+
 
     def save(self, args, kwargs):
         from knack.util import ensure_dir
@@ -211,6 +210,7 @@ class CacheObject(object):
                 "Caching %s '%s' as: %s", self._model_type, self._resource_name,
                 os.path.join(directory, filename)
             )
+            self.last_saved = str(datetime.datetime.now())
             self._dump_to_file(f)
 
     def result(self):
@@ -231,7 +231,7 @@ class CacheObject(object):
         self._resource_name = None
         self._model_type = self._get_model_type()
         self._payload = payload
-        self._last_touched = str(datetime.datetime.now())
+        self.last_saved = None
 
     def __getattribute__(self, key):
         try:
@@ -331,6 +331,21 @@ class AzCliCommand(CLICommand):
         return UpdateContext(obj_inst)
 
 
+def _is_stale(cli_ctx, cache_obj):
+    from configparser import NoOptionError, NoSectionError
+    cache_ttl = None
+    try:
+        cache_ttl = cli_ctx.config.get('core', 'cache_ttl')
+    except (NoOptionError, NoSectionError):
+        # ensure a default value exists even if not previously set
+        from azure.cli.command_modules.configure._consts import DEFAULT_CACHE_TTL
+        cli_ctx.config.set_value('core', 'cache_ttl', DEFAULT_CACHE_TTL)
+        cache_ttl = DEFAULT_CACHE_TTL
+    time_now = datetime.datetime.now()
+    time_cache = datetime.datetime.strptime(cache_obj.last_saved, '%Y-%m-%d %H:%M:%S.%f')
+    return time_now - time_cache > datetime.timedelta(minutes=int(cache_ttl))
+
+
 def cached_get(cmd_obj, operation, *args, **kwargs):
 
     def _get_operation():
@@ -341,21 +356,17 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
             result = operation(**kwargs)
         return result
 
-    cache_opt = cmd_obj.cli_ctx.data.get('_cache', '')
-    if 'read' not in cache_opt:
-        return _get_operation()
-
     cache_obj = CacheObject(cmd_obj, None, operation)
     try:
         cache_obj.load(args, kwargs)
+        if _is_stale(cmd_obj.cli_ctx, cache_obj):
+            message = "{model} '{name}' stale in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
+            logger.warning(message)
+            return _get_operation()
         return cache_obj
-    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
+    except (OSError, IOError, t_JSONDecodeError):  # FileNotFoundError introduced in Python 3
         message = "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
-        logger.warning(message)
-        return _get_operation()
-    except t_JSONDecodeError:
-        message = "{model} '{name}' found corrupt in cache. Retrieving from Azure...".format(**cache_obj.prod_dict())
-        logger.warning(message)
+        logger.debug(message)
         return _get_operation()
 
 
@@ -369,19 +380,13 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
             result = operation(parameters=parameters, **kwargs)
         return result
 
-    cache_opt = cmd_obj.cli_ctx.data.get('_cache', '')
-    write = 'write' in cache_opt
-    write_through = 'write-through' in cache_opt
-
-    if not write and not write_through:
-        return _put_operation()
-
+    # because of the implicit behavior to read from the cache, all calls
+    # to cached_put must be write-through
     cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
     cache_obj.save(args, kwargs)
 
-    if not write_through:
-        return cache_obj
-    return _put_operation()
+    use_cache = cmd_obj.cli_ctx.data.get('_cache', False)
+    return cache_obj if use_cache else _put_operation()
 
 
 # pylint: disable=too-few-public-methods
@@ -1157,22 +1162,20 @@ def register_cache_arguments(cli_ctx):
         class CacheAction(argparse.Action):  # pylint:disable=too-few-public-methods
 
             def __call__(self, parser, namespace, values, option_string=None):
-                setattr(namespace, cache_dest, values)
+                setattr(namespace, cache_dest, True)
                 # save caching status to CLI context
                 cmd = getattr(namespace, 'cmd', None) or getattr(namespace, '_cmd', None)
-                cmd.cli_ctx.data[cache_dest] = values
+                cmd.cli_ctx.data[cache_dest] = True
 
         for command in command_table.values():
             supports_local_cache = command.command_kwargs.get('supports_local_cache')
             if supports_local_cache:
                 command.arguments[cache_dest] = CLICommandArgument(
                     '_cache',
-                    options_list='--cache',
-                    arg_group='Caching Strategy',
-                    nargs='+',
-                    choices=CaseInsensitiveList(['read', 'write', 'write-through']),
+                    options_list='--defer',
+                    nargs='?',
                     action=CacheAction,
-                    help='Space-separated list of caching directives.'
+                    help='Store the object in local cache. Do not send to Azure.'
                 )
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_cache_arguments)
