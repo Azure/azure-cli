@@ -9,7 +9,7 @@ Release History
 * vmss update: add `--instance-id` to enable generic update of VMSS VM instances.
 * vmss wait: add `--instance-id`.
 * [new command group] ppg: add `ppg create / delete / list / show / update` for managing Proximity Placement Groups.
-* ppg: add `--proximity-placement-group` to `vm create`, `vmss create` and `vm availability-set create`
+* ppg: add `--ppg` to `vm create`, `vmss create` and `vm availability-set create`
 
 2.2.19
 ++++++

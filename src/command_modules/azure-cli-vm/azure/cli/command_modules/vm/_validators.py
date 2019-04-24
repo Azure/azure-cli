@@ -76,7 +76,7 @@ def validate_proximity_placement_group(cmd, namespace):
                                                            'proximityPlacementGroups', 'Microsoft.Compute')
 
     if not namespace.proximity_placement_group or not is_valid_resource_id(namespace.proximity_placement_group):
-        logger.debug('Proximity placement group is {}'.format(namespace.proximity_placement_group))
+        logger.debug('Proximity placement group is %s', namespace.proximity_placement_group)
         return
 
     parsed = parse_resource_id(namespace.proximity_placement_group)

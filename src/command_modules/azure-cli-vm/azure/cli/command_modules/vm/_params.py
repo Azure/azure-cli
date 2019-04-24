@@ -624,9 +624,10 @@ def load_arguments(self, _):
 
     with self.argument_context('ppg create', min_api='2018-04-01') as c:
         c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(ProximityPlacementGroupType), help="The type of the proximity placement group.")
+        c.argument('tags', tags_type)
 
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'), ('vm availability-set create', 'availability set')]:
         with self.argument_context(scope, min_api='2018-04-01') as c:
-            c.argument('proximity_placement_group', help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
+            c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
                        validator=validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
     # endregion

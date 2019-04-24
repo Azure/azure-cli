@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._format import (
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
-    process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace, validate_proximity_placement_group)
+    process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
@@ -358,7 +358,7 @@ def load_command_table(self, _):
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.command('show', 'get')
-        g.custom_command('create', 'create_proximity_placement_group')      # make sure to support --ids, make sure to support no wait too
+        g.custom_command('create', 'create_proximity_placement_group')
         g.custom_command('list', 'list_proximity_placement_groups')
-        g.generic_update_command('update', 'create_or_update')
+        g.generic_update_command('update')
         g.command('delete', 'delete')
