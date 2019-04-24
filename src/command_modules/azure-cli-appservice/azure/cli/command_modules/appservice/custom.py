@@ -17,8 +17,8 @@ from os import urandom
 import json
 import ssl
 import sys
-import OpenSSL.crypto
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
+import OpenSSL.crypto
 from fabric import Connection
 
 
