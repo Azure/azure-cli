@@ -9,7 +9,7 @@ import os
 from six.moves import configparser
 
 from knack.log import get_logger
-from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, prompt_int, NoTTYException
+from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METHOD_LIST,
@@ -228,7 +228,8 @@ def delete_cache_contents(cmd, resource_group_name, item_name, resource_type):
     except OSError:
         logger.info('%s not found in object cache.', item_path)
 
-def purge_cache_contents(cmd):
+
+def purge_cache_contents():
     import shutil
     from azure.cli.core._environment import get_config_dir
     directory = os.path.join(get_config_dir(), 'object_cache')

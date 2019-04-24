@@ -1794,9 +1794,8 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
             # ensure vnet has not been created
             self.cmd('network vnet show -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
-        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-           self.check('length(subnets)', 3)
-        ])
+        self.cmd('network vnet show -g {rg} -n {vnet}',
+                 checks=self.check('length(subnets)', 3))
 
         # test that generic update works with caching
         self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --defer')

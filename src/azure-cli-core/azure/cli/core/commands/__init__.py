@@ -158,10 +158,10 @@ class CacheObject(object):
 
         import inspect
         op_metadata = inspect.getmembers(self._operation)
-        doc_string = None
+        doc_string = ''
         for key, value in op_metadata:
             if key == '__doc__':
-                doc_string = value
+                doc_string = value or ''
                 break
 
         doc_string = doc_string.replace('\r', '').replace('\n', ' ')
@@ -171,7 +171,7 @@ class CacheObject(object):
             self._model_name = model_name_regex.search(doc_string).group('model')
             self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
         except AttributeError:
-            raise CLIError('unable to resolve model name or path.')
+            return
 
     def _dump_to_file(self, open_file):
         cache_obj_dump = json.dumps({
@@ -358,7 +358,7 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
             logger.warning(message)
             return _get_operation()
         return cache_obj
-    except (OSError, IOError, t_JSONDecodeError):  # FileNotFoundError introduced in Python 3
+    except Exception:  # pylint: disable=broad-except
         message = "{model} '{name}' not found in cache. Retrieving from Azure...".format(**cache_obj.prop_dict())
         logger.debug(message)
         return _get_operation()
@@ -376,8 +376,11 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
 
     # because of the implicit behavior to read from the cache, all calls
     # to cached_put must be write-through
-    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
-    cache_obj.save(args, kwargs)
+    try:
+        cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+        cache_obj.save(args, kwargs)
+    except Exception:  # pylint: disable=broad-except
+        pass
 
     use_cache = cmd_obj.cli_ctx.data.get('_cache', False)
     return cache_obj if use_cache else _put_operation()
@@ -1142,7 +1145,6 @@ class AzCommandGroup(CommandGroup):
 
 def register_cache_arguments(cli_ctx):
     from knack import events
-    from azure.cli.core.commands.parameters import CaseInsensitiveList
 
     cache_dest = '_cache'
 
@@ -1169,7 +1171,7 @@ def register_cache_arguments(cli_ctx):
                     options_list='--defer',
                     nargs='?',
                     action=CacheAction,
-                    help='Temporarily store the object in the local cache instead of sending to Azure. ' \
+                    help='Temporarily store the object in the local cache instead of sending to Azure. '
                          'Use `az cache` commands to view/clear.'
                 )
 
