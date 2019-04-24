@@ -686,7 +686,7 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
     bot_props.display_name = display_name if display_name else bot_props.display_name
     bot_props.endpoint = endpoint if endpoint else bot_props.endpoint
 
-    bot_props.developer_app_insight_key = app_insights_api_key if app_insights_api_key else bot_props.developer_app_insight_key
+    bot_props.developer_app_insight_key = app_insights_key if app_insights_key else bot_props.developer_app_insight_key
     bot_props.developer_app_insights_application_id = app_insights_app_id if app_insights_app_id \
         else bot_props.developer_app_insights_application_id
 
