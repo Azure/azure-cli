@@ -5,7 +5,7 @@
 #   1. Add Microsoft's GPG Key has a trusted source of apt packages.                                                  #
 #   2. Add Microsoft's repositories as a source for apt packages.                                                     #
 #   3. Installs the Azure CLI from those repositories.                                                                #
-# Given the nature of this script, it must be executed with elevated privledges, i.e. with `sudo`.                    #
+# Given the nature of this script, it must be executed with elevated privileges, i.e. with `sudo`.                    #
 #                                                                                                                     #
 # Remember, with great power comes great responsibility.                                                              #
 #                                                                                                                     #
