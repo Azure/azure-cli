@@ -74,12 +74,8 @@ def batch_data_service_factory(cli_ctx, kwargs):
     kwargs.pop('yes', None)
 
     # Verify all values are populated and display readable error
-    if not account_name:
-        raise ValueError("Account name not set.")
-    if not account_key:
-        raise ValueError("Account key not set.")
-    if not account_endpoint:
-        raise ValueError("Account endpoint not set.")
+    if not all([account_name, account_key, account_endpoint]):
+        raise ValueError('usage error: --account-name NAME --account-key KEY --account-endpoint ENDPOINT')
 
     credentials = None
     if not account_key:
