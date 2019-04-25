@@ -2281,7 +2281,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     src_dir = os.getcwd()
     user = Profile().get_current_account_user()
     user = user.split('@', 1)[0]
-    logger.info("UserPrefix to use {}".format(user))
+    logger.info("UserPrefix to use '%s'", user)
     # if dir is empty, show a message in dry run
     do_deployment = False if os.listdir(src_dir) == [] else True
     _create_new_rg = True
@@ -2324,9 +2324,9 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
     # Resource group: check if default RG is set
     default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
-    logger.info("Found default RG, {}".format(default_rg))
+    logger.info("default RG value is: %s", default_rg)
     _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
-    logger.info("Should create new RG {}", _create_new_rg)
+    logger.info("Should create new RG %s", _create_new_rg)
     src_path = "{}".format(src_dir.replace("\\", "\\\\"))
     rg_str = "{}".format(rg_name)
     dry_run_str = r""" {
