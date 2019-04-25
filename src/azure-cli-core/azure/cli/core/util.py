@@ -34,10 +34,8 @@ def handle_exception(ex):
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
             return 1
-            
-       if isinstance(ex, ClientRequestError):
-            logger.error("The request failed:\n")
-            logger.error(ex)
+        if isinstance(ex, ClientRequestError):
+            logger.error("request failed: %s", ex)
             return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
