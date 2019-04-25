@@ -23,7 +23,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
-    from msrest.exceptions import HttpOperationError
+    from msrest.exceptions import HttpOperationError, ValidationError
     from azure.cli.core.azlogging import CommandLoggerContext
 
     with CommandLoggerContext(logger):
@@ -31,6 +31,9 @@ def handle_exception(ex):
         if isinstance(ex, (CLIError, CloudError)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
+        if isinstance(ex, ValidationError):
+            logger.error('validation error: %s', ex)
+            return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
         if isinstance(ex, HttpOperationError):
