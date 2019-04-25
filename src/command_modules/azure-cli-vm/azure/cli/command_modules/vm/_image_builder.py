@@ -21,7 +21,7 @@ from msrest.exceptions import ClientException
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
 
 from azure.cli.command_modules.vm._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._validators import _get_resource_id
@@ -34,6 +34,7 @@ class _SourceType(Enum):
     PLATFORM_IMAGE = "PlatformImage"
     ISO_URI = "ISO"
     MANAGED_IMAGE = "ManagedImage"
+    SIG_VERSION = "SharedImageVersion"
 
 class _DestType(Enum):
     MANAGED_IMAGE = 1
@@ -43,6 +44,7 @@ class ScriptType(Enum):
     SHELL = "shell"
     POWERSHELL = "powershell"
     WINDOWS_RESTART = "windows-restart"
+    FILE = "file"
 
 # region Client Factories
 
@@ -157,6 +159,9 @@ def process_image_template_create_namespace(cmd, namespace):
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
 
+    # validate tags.
+    validate_tags(namespace)
+
     # Validate and parse scripts
     if namespace.scripts:
         for ns_script in namespace.scripts:
@@ -164,7 +169,6 @@ def process_image_template_create_namespace(cmd, namespace):
 
 
     # Validate and parse destination and locations
-
     destinations = []
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
     location_names = [l.name for l in subscription_locations]
@@ -203,12 +207,27 @@ def process_image_template_create_namespace(cmd, namespace):
 
     # 2 - check if a fully-qualified ID (assumes it is an image ID)
     elif is_valid_resource_id(namespace.source):
-        source = {
-            'image_id': namespace.source,
-            'type': _SourceType.MANAGED_IMAGE
-        }
 
-        logger.info("{} looks like a managed image id.".format(namespace.source))
+        parsed = parse_resource_id(namespace.source)
+        image_type = parsed.get('type')
+        image_resource_type = parsed.get('type')
+
+        if not image_type:
+            pass
+
+        elif image_type.lower() == 'images':
+            source = {
+                'image_id': namespace.source,
+                'type': _SourceType.MANAGED_IMAGE
+            }
+            logger.info("{} looks like a managed image id.".format(namespace.source))
+
+        elif image_type == "galleries" and image_resource_type:
+            source = {
+                'image_version_id': namespace.source,
+                'type': _SourceType.SIG_VERSION
+            }
+            logger.info("{} looks like a shared image version id.".format(namespace.source))
 
     # 3 - check if source is a Redhat iso uri. If so a checksum must be provided.
     elif urlparse(namespace.source).scheme and "://" in namespace.source and ".iso" in namespace.source.lower():
@@ -341,18 +360,22 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
         namespace.gallery_replication_regions = processed_regions
 
 
+    # get default location from resource group
     if not any([namespace.managed_image_location, namespace.gallery_replication_regions]) and hasattr(namespace, 'location'):
         get_default_location_from_resource_group(cmd, namespace) # store location in namespace.location for use in custom method.
 
+    # validate tags.
+    validate_tags(namespace)
 
 # region Custom Commands
 
 def create_image_template(cmd, client, resource_group_name, image_template_name, source, scripts=None,
                           checksum=None, location=None, no_wait=False,
                           managed_image_destinations=None, shared_image_destinations=None,
-                          source_dict=None, scripts_list=None, destinations_lists=None):
-    from azure.mgmt.imagebuilder.models import (ImageTemplate,
+                          source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None):
+    from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,
+
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  #pylint: disable=line-too-long
 
@@ -365,6 +388,8 @@ def create_image_template(cmd, client, resource_group_name, image_template_name,
         template_source = ImageTemplateIsoSource(**source_dict)
     elif source_dict['type'] == _SourceType.MANAGED_IMAGE:
         template_source = ImageTemplateManagedImageSource(**source_dict)
+    elif source_dict['type'] == _SourceType.SIG_VERSION:
+        template_source = ImageTemplateSharedImageVersionSource(**source_dict)
 
     # create image template customizer settings
     # Script structure can be found in _parse_script's function definition
@@ -391,7 +416,8 @@ def create_image_template(cmd, client, resource_group_name, image_template_name,
         else:
             logger.info("No applicable destination found for destination {}".format(tuple([dest_type, id, loc_info])))
 
-    image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations, location=location)
+    image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
+                                   location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}))
 
     return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
@@ -410,7 +436,7 @@ def show_build_output(client, resource_group_name, image_template_name, output_n
 
 # TODO: add when new whl file generated. support tags for create and here.
 def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,
-                        output_name=None, is_vhd=None,
+                        output_name=None, is_vhd=None, tags=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
                         managed_image=None, managed_image_location=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplateManagedImageDistributor, ImageTemplateVhdDistributor,
@@ -418,6 +444,8 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
+
+    distributor = None
 
     if managed_image:
         parsed = parse_resource_id(managed_image)
@@ -429,6 +457,9 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
                                                                gallery_image_id=gallery_image_definition, replication_regions=gallery_replication_regions or [location])
     elif is_vhd:
         distributor = ImageTemplateVhdDistributor(run_output_name=output_name)
+
+    if distributor:
+        distributor.artifact_tags = tags or {}
 
     if existing_image_template.distribute is None:
         existing_image_template.distribute = []
@@ -501,8 +532,10 @@ def _update_image_template(cmd, client, resource_group_name, image_template_name
 
 def add_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name, customizer_type,
                             script_url=None, inline_script=None, valid_exit_codes=None,
-                            restart_command=None, restart_check_command=None, restart_timeout=None):
-    from azure.mgmt.imagebuilder.models import ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer, ImageTemplateRestartCustomizer
+                            restart_command=None, restart_check_command=None, restart_timeout=None,
+                            file_source=None, dest_path=None):
+    from azure.mgmt.imagebuilder.models import (ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
+                                                ImageTemplateRestartCustomizer, ImageTemplateFileCustomizer)
 
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
@@ -525,6 +558,8 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
         new_customizer = ImageTemplateRestartCustomizer(name=customizer_name, restart_command=restart_command,
                                                            restart_check_command=restart_check_command,
                                                            restart_timeout=restart_timeout)
+    elif customizer_type.lower() == ScriptType.FILE.value.lower():
+        new_customizer = ImageTemplateFileCustomizer(name=customizer_name, source_uri=file_source, destination=dest_path)
 
     if not new_customizer:
         raise CLIError("Cannot determine customizer from type {}.".format(customizer_type))
