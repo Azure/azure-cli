@@ -13,15 +13,39 @@
 # well-known publishers.                                                                                              #
 #######################################################################################################################
 
-set -ev
+set -e
 
-apt-get install -y curl apt-transport-https lsb-release gnupg
+if [[ $# -ge 1 && $1 == "-y" ]]; then
+    global_consent=0
+else
+    global_consent=1
+fi
 
+function assert_consent {
+    if [[ $2 -eq 0 ]]; then
+        return 0
+    fi
+
+    echo -n "$1 [Y/n] "
+    read consent
+    if [[ ! "${consent}" == "y" && ! "${consent}" == "Y" && ! "${consent}" == "" ]]; then
+        echo "'${consent}'"
+        exit 1
+    fi
+}
+
+assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
+set -v
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+set +v
 
-AZ_REPO=$(lsb_release -cs)
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" \
+
+assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
+set -v
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" \
     > /etc/apt/sources.list.d/azure-cli.list
-
 apt-get update
+set +v
+
+assert_consent "Install the Azure CLI?" ${global_consent}
 apt-get install -y azure-cli

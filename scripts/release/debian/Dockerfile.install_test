@@ -12,7 +12,7 @@ RUN apt-get install -y curl apt-transport-https lsb-release gnupg dos2unix
 ADD . .
 
 RUN dos2unix ./deb_install.sh
-RUN cat ./deb_install.sh | bash
+RUN ./deb_install.sh -y
 
 
 CMD ["/bin/bash", "-c", "az --version && az self-test"]
