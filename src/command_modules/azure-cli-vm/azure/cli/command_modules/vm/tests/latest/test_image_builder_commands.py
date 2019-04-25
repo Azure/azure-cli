@@ -73,8 +73,8 @@ class ImageTemplateTest(ScenarioTest):
 
         # test that outputs can be set through create command.
         out_2 = "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2=centralus"
-        self.cmd('image template create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
-                 '--managed-image-destinations img_1=westus ' + out_2,
+        self.cmd('image template create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} --build-timeout 22'
+                 ' --managed-image-destinations img_1=westus ' + out_2,
                  checks=[
                      self.check('name', '{tmpl_02}'), self.check('provisioningState', 'Succeeded'),
                      self.check('length(distribute)', 2),
@@ -86,6 +86,7 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('distribute[1].location', 'centralus'),
                      self.check('distribute[1].runOutputName', 'img_2'),
                      self.check('distribute[1].type', 'ManagedImage'),
+                     self.check('buildTimeoutInMinutes', 22)
                  ])
 
         self.kwargs.update({
@@ -150,6 +151,7 @@ class ImageTemplateTest(ScenarioTest):
 
         # create a sig
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
 
@@ -216,11 +218,12 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
 
-        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src}')
-        self.cmd('image template output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} --gallery-replication-regions westus',
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --cache write')
+        self.cmd('image template output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
+                 ' --gallery-replication-regions westus --cache read write',
                  checks=[
-                     self.check('distribute[0].replicationRegions[0]', 'westus'),
-                     self.check('distribute[0].runOutputName', '{sig1}')
+                     self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
+                     self.check('properties.distribute[0].runOutputName', '{sig1}')
                  ])
 
         # Takes a long time to build a SIG based image template.
@@ -229,6 +232,10 @@ class ImageTemplateTest(ScenarioTest):
         output = self.cmd('image template show-runs -n {tmpl} -g {rg} --output-name {sig1}',
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
+
+        with open("/Users/tosin/Repos/azure-cli") as f:
+            f.write(output)
+
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
@@ -265,7 +272,7 @@ class ImageTemplateTest(ScenarioTest):
                  checks=[
                      self.check('customize[1].name', '{pwsh_name}'),
                      self.check('customize[1].script', '{script}'),
-                     # self.check('customize[1].valid_exit_codes', '[0,1,2]'), not working due to sdk / service bug.
+                     self.check('customize[1].valid_exit_codes', '[0,1,2]'),
                      self.check('customize[1].type', 'PowerShell')
                  ])
 
@@ -281,8 +288,6 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image template show -n {tmpl} -g {rg}')
 
         # todo test customizer / distributor remove and clear commands / test win source.
-
-
         # self.cmd('image template run -n {tmpl} -g {rg}')
         #
         # # get the run output
