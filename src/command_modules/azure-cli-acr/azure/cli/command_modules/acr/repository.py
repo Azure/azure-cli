@@ -343,7 +343,7 @@ def _acr_repository_attributes_helper(cmd,
         path = _get_repository_path(repository)
         result_index = None
 
-    # Non-GET request doesn't return the entity so there is always a GET reqeust
+    # Non-GET request doesn't return the entity so there is always a GET request
     if http_method != 'get':
         try:
             request_data_from_registry(
