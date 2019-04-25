@@ -511,8 +511,7 @@ jobs:
   displayName: Build Ubuntu Disco Package
 
   dependsOn: BuildPythonWheel
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  condition: succeeded()
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
