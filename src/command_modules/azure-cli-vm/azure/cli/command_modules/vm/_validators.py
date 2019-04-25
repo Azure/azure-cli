@@ -76,7 +76,7 @@ def validate_proximity_placement_group(cmd, namespace):
                                                            'proximityPlacementGroups', 'Microsoft.Compute')
 
     if not namespace.proximity_placement_group or not is_valid_resource_id(namespace.proximity_placement_group):
-        logger.debug('Proximity placement group is %s', namespace.proximity_placement_group)
+        logger.debug('namespace.proximity_placement_group is %s', namespace.proximity_placement_group)
         return
 
     parsed = parse_resource_id(namespace.proximity_placement_group)
@@ -85,7 +85,7 @@ def validate_proximity_placement_group(cmd, namespace):
     name = parsed['name']
 
     if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
-        raise CLIError("Availability set '{}' does not exist.".format(name))
+        raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
 
 
 def process_vm_secret_format(cmd, namespace):
