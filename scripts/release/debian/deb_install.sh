@@ -39,7 +39,6 @@ set -v
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
 set +v
 
-
 assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
 set -v
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" \
