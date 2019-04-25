@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
+
 0.2.18
 ++++++
 * webapp: az webapp ssh now support ASE and a timeout parameter
