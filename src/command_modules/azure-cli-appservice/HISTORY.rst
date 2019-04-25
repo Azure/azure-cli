@@ -6,6 +6,7 @@ Release History
 * appserviceplan: az appserviceplan create support for Linux FREE sku
 * webapp: az webapp up now has a 30s sleep after setting SCM_DO_BUILD_DURING_DEPLOYMENT=true appsetting to handle kudu cold start
 * functionapp: `az functionapp create` supports a runtime of `powershell` on Windows
+* webapp: add create-remote-connection command
 
 0.2.18
 ++++++

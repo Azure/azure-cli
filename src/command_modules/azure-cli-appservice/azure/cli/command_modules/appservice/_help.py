@@ -1480,3 +1480,8 @@ helps['webapp webjob triggered run'] = """
 type: command
 short-summary: Run a specific triggered webjob hosted on a web app.
 """
+
+helps['webapp create-remote-connection'] = """
+    type: command
+    short-summary: Creates a remote connection using a tcp tunnel to your web app
+"""
