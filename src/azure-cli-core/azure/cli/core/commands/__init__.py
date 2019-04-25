@@ -365,6 +365,8 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
 
 
 def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
+    from msrest.exceptions import SerializationError
+
     def _put_operation():
         result = None
         if args:
@@ -374,18 +376,24 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
             result = operation(parameters=parameters, **kwargs)
         return result
 
-    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
     use_cache = cmd_obj.cli_ctx.data.get('_cache', False)
-    if use_cache:
-        cache_obj.save(args, kwargs)
-        return cache_obj
+    if not use_cache:
+        result = _put_operation()
 
-    result = _put_operation()
     try:
+        cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+        if use_cache:
+            cache_obj.save(args, kwargs)
+            return cache_obj
+
+        # for a successful PUT, attempt to delete the cache file
         obj_dir, obj_file = cache_obj.path(args, kwargs)
         obj_path = os.path.join(obj_dir, obj_file)
         os.remove(obj_path)
-    except Exception:  # pylint: disable=broad-except
+    # except SerializationError as ex:
+    #     logger.debug(ex)
+    #     raise CLIError('BANOODLE')
+    except CLIError:  # pylint: disable=broad-except
         pass
     return result
 
