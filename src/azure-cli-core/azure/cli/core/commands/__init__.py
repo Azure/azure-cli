@@ -374,16 +374,20 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
             result = operation(parameters=parameters, **kwargs)
         return result
 
-    # because of the implicit behavior to read from the cache, all calls
-    # to cached_put must be write-through
-    try:
-        cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+    use_cache = cmd_obj.cli_ctx.data.get('_cache', False)
+    if use_cache:
         cache_obj.save(args, kwargs)
+        return cache_obj
+
+    result = _put_operation()
+    try:
+        obj_dir, obj_file = cache_obj.path(args, kwargs)
+        obj_path = os.path.join(obj_dir, obj_file)
+        os.remove(obj_path)
     except Exception:  # pylint: disable=broad-except
         pass
-
-    use_cache = cmd_obj.cli_ctx.data.get('_cache', False)
-    return cache_obj if use_cache else _put_operation()
+    return result
 
 
 # pylint: disable=too-few-public-methods

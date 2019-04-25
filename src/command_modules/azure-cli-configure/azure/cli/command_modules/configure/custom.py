@@ -236,4 +236,4 @@ def purge_cache_contents():
     try:
         shutil.rmtree(directory)
     except OSError as ex:
-        raise CLIError(ex)
+        logger.debug(ex)
