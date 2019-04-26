@@ -137,7 +137,7 @@ def handle_configure(cmd, defaults=None, list_defaults=None):
         return
     if list_defaults:
         use_local_config_original = cmd.cli_ctx.config.use_local_config
-        cmd.cli_ctx.config.set_to_use_local_config(list_defaults=='local')
+        cmd.cli_ctx.config.set_to_use_local_config(list_defaults == 'local')
         defaults_result = cmd.cli_ctx.config.items(cmd.cli_ctx.config.defaults_section_name)
         cmd.cli_ctx.config.set_to_use_local_config(use_local_config_original)
         return defaults_result
