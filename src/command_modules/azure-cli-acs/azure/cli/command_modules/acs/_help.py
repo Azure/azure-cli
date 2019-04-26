@@ -457,7 +457,7 @@ examples:
 
 helps['aks remove-dev-spaces'] = """
 type: command
-short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+short-summary: Remove Azure Dev Spaces from a managed Kubernetes cluster.
 examples:
   - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
     text: |-
@@ -596,7 +596,7 @@ examples:
 
 helps['aks use-dev-spaces'] = """
 type: command
-short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+short-summary: Use Azure Dev Spaces with a managed Kubernetes cluster.
 parameters:
   - name: --update
     type: bool
@@ -659,11 +659,16 @@ parameters:
   - name: --subnet-prefix
     type: string
     short-summary: The CIDR used on the Subnet into which to deploy the cluster.
+  - name: --customer-admin-group-id
+    type: string
+    short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
 
 
 examples:
   - name: Create an OpenShift cluster and auto create an AAD Client
     text: az openshift create -g MyResourceGroup -n MyManagedCluster
+  - name: Create an OpenShift cluster and auto create an AAD Client and setup cluster admin group
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --customer-admin-group-id {GROUP_ID}
   - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
   - name: Create an Openshift cluster using a custom vnet

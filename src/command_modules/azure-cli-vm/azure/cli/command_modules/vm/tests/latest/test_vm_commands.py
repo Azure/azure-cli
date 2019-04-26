@@ -692,33 +692,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
 
 
-class VMWriteAcceleratorScenarioTest(ScenarioTest):
-
-    @record_only()  # this test requires M series of VM with 64+ cores. Being in live-run is not feasible due to quota limit
-    @ResourceGroupPreparer(name_prefix='cli_vm_write_accel', location='westus2')
-    def test_vm_write_accelerator_e2e(self, resource_group, resource_group_location):
-        self.kwargs.update({
-            'vm': 'vm1'
-        })
-        self.cmd('vm create -g {rg} -n {vm} --data-disk-sizes-gb 1 --image centos --size Standard_M64ms --admin-username clitester --generate-ssh-keys --accelerated-network false')
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('storageProfile.osDisk.writeAcceleratorEnabled', None),
-            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', None)
-        ])
-        self.cmd('vm update -g {rg} -n {vm} --write-accelerator true --disk-caching readonly')
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('storageProfile.osDisk.writeAcceleratorEnabled', True),
-            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
-        ])
-        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name d1 --enable-write-accelerator --new --size-gb 1')
-        self.cmd('vm update -g {rg} -n {vm} --write-accelerator 1=false os=false')
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('storageProfile.osDisk.writeAcceleratorEnabled', False),
-            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
-            self.check('storageProfile.dataDisks[1].writeAcceleratorEnabled', False)
-        ])
-
-
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
     def _check_vm_power_state(self, expected_power_state):
@@ -1565,10 +1538,10 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'disk3': 'd3',
             'disk4': 'd4'
         })
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk show -g {rg} -n {disk1}')
         self.cmd('disk create -g {rg} -n {disk2} --size-gb 4 --sku UltraSSD_LRS')
-        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --size Standard_D2s_v3 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --size Standard_D2s_v3 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 2 --location eastus2')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk3} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1}')
 
@@ -1578,7 +1551,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'UltraSSD_LRS'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --size Standard_D2s_v3 --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image debian --size Standard_D2s_v3 --ultra-ssd-enabled --zone 2 --location eastus2')
         self.cmd('vm disk attach -g {rg} --vm-name {vm2} --name {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1590,7 +1563,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.kwargs.update({
             'disk1': 'd1'
         })
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 3')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
             self.check('diskIopsReadWrite', 510),
             self.check('diskMbpsReadWrite', 10)
@@ -1603,13 +1576,14 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vmss': 'vm-ultrassd',
             'vmss2': 'vm-ultrassd2'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS --data-disk-sizes-gb 4 --zone 3 --location eastus2')
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password testPassword0 --image debian --storage-sku UltraSSD_LRS '
+                 ' --data-disk-sizes-gb 4 --zone 2 --location eastus2 --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 3 --location eastus2')
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username admin123 --admin-password testPassword0 --image debian --ultra-ssd-enabled --zone 2 --location eastus2 --vm-sku Standard_D2s_v3')
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss2} --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
@@ -3123,7 +3097,9 @@ class VMGalleryImage(ScenarioTest):
                  checks=[
                      self.check('publishingProfile.replicaCount', 2),
                      self.check('length(publishingProfile.targetRegions)', 2),
-                     self.check('publishingProfile.targetRegions', [dict(name="West US 2", regionalReplicaCount=1), dict(name="East US 2", regionalReplicaCount=2)])
+                     self.check('publishingProfile.targetRegions',
+                                [dict(name="West US 2", regionalReplicaCount=1, storageAccountType='Standard_LRS'),
+                                 dict(name="East US 2", regionalReplicaCount=2, storageAccountType='Standard_LRS')])
                  ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys', checks=self.check('powerState', 'VM running'))

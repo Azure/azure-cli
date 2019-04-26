@@ -11,7 +11,8 @@ CLI_COMMON_KWARGS = ['min_api', 'max_api', 'resource_type', 'operation_group',
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler',
                       'client_factory', 'operations_tmpl', 'no_wait_param', 'supports_no_wait', 'validator',
-                      'client_arg_name', 'doc_string_source', 'deprecate_info'] + CLI_COMMON_KWARGS
+                      'client_arg_name', 'doc_string_source', 'deprecate_info',
+                      'supports_local_cache'] + CLI_COMMON_KWARGS
 CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type',
      'deprecate_info'] \

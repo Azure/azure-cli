@@ -1005,19 +1005,31 @@ def _k8s_get_credentials_internal(name, acs_info, path, ssh_key_file, overwrite_
 
 
 def _handle_merge(existing, addition, key, replace):
-    if addition[key]:
-        if existing[key] is None:
-            existing[key] = addition[key]
-            return
+    if not addition[key]:
+        return
+    if existing[key] is None:
+        existing[key] = addition[key]
+        return
 
-        for i in addition[key]:
-            for j in existing[key]:
-                if i['name'] == j['name']:
-                    if replace or i == j:
+    for i in addition[key]:
+        for j in existing[key]:
+            if i['name'] == j['name']:
+                if replace or i == j:
+                    existing[key].remove(j)
+                else:
+                    from knack.prompting import prompt_y_n, NoTTYException
+                    msg = 'A different object named {} already exists in your kubeconfig file.\nOverwrite?'
+                    overwrite = False
+                    try:
+                        overwrite = prompt_y_n(msg.format(i['name']))
+                    except NoTTYException:
+                        pass
+                    if overwrite:
                         existing[key].remove(j)
                     else:
-                        raise CLIError('A different object named {} already exists in {}'.format(i['name'], key))
-            existing[key].append(i)
+                        msg = 'A different object named {} already exists in {} in your kubeconfig file.'
+                        raise CLIError(msg.format(i['name'], key))
+        existing[key].append(i)
 
 
 def load_kubernetes_configuration(filename):
@@ -1768,8 +1780,8 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-DEV_SPACES_EXTENSION_NAME = 'dev-spaces-preview'
-DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces_preview.custom'
+DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
+DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
 def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, prompt=False):
@@ -2247,7 +2259,8 @@ def _ensure_osa_aad(cli_ctx,
                     aad_client_app_secret=None,
                     aad_tenant_id=None,
                     identifier=None,
-                    name=None, create=False):
+                    name=None, create=False,
+                    customer_admin_group_id=None):
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if create:
         # This reply_url is temporary set since Azure need one to create the AAD.
@@ -2258,9 +2271,14 @@ def _ensure_osa_aad(cli_ctx,
         # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
         resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
                                          additional_properties=None, type="Scope")
-        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access],
+        # Read directory permissions on Windows Azure Active Directory API
+        directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
+                                          additional_properties=None, type="Role")
+
+        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
                                                          additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
+
         list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
                                                                .format(app_id_name)))
         if list_aad_filtered:
@@ -2293,7 +2311,8 @@ def _ensure_osa_aad(cli_ctx,
         client_id=aad_client_app_id,
         secret=aad_client_app_secret,
         tenant_id=aad_tenant_id,
-        kind='AADIdentityProvider')
+        kind='AADIdentityProvider',
+        customer_admin_group_id=customer_admin_group_id)
 
 
 def _ensure_service_principal(cli_ctx,
@@ -2484,7 +2503,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      subnet_prefix="10.0.0.0/24",
                      vnet_peer=None,
                      tags=None,
-                     no_wait=False):
+                     no_wait=False,
+                     customer_admin_group_id=None):
 
     if location is None:
         location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -2500,7 +2520,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='infra',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(2),
+        count=int(3),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.infra,
@@ -2533,7 +2553,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
                                        aad_tenant_id=aad_tenant_id, identifier=None,
-                                       name=name, create=create_aad)
+                                       name=name, create=create_aad,
+                                       customer_admin_group_id=customer_admin_group_id)
     identity_providers.append(
         OpenShiftManagedClusterIdentityProvider(
             name='Azure AD',

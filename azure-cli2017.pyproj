@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>MSBuild|env1|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>
     </CommandLineArguments>
@@ -253,11 +253,15 @@
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\custom.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_devops_build_commands.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_devops_build_commands_thru_mock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands_thru_mock.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tunnel.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\utils.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\vsts_cd_provider.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_appservice_utils.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_client_factory.py" />
@@ -407,6 +411,16 @@
     <Compile Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\_validators.py" />
     <Compile Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\__init__.py" />
     <Compile Include="command_modules\azure-cli-cosmosdb\setup.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\commands.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\custom.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\latest\recording_processors.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\latest\test_deploymentmanager_scenario.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\_help.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\_params.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\__init__.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure_bdist_wheel.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\setup.py" />
     <Compile Include="command_modules\azure-cli-dla\azure\cli\command_modules\dla\commands.py" />
     <Compile Include="command_modules\azure-cli-dla\azure\cli\command_modules\dla\custom.py" />
     <Compile Include="command_modules\azure-cli-dla\azure\cli\command_modules\dla\tests\latest\recording_processors.py" />
@@ -1069,6 +1083,13 @@
     <Folder Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\" />
     <Folder Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\tests\" />
     <Folder Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\latest\" />
     <Folder Include="command_modules\azure-cli-dla\" />
     <Folder Include="command_modules\azure-cli-dla\azure\" />
     <Folder Include="command_modules\azure-cli-dla\azure\cli\" />
@@ -1704,22 +1725,19 @@
     <Content Include="command_modules\azure-cli-vm\linter_exclusions.yml" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.6" />
-  </ItemGroup>
-  <ItemGroup>
-    <Interpreter Include="..\..\env\">
-      <Id>env1</Id>
-      <Version>3.7</Version>
-      <Description>env (Python 3.7 (32-bit))</Description>
+    <Interpreter Include="..\..\env2\">
+      <Id>env2</Id>
+      <Version>2.7</Version>
+      <Description>env2 (Python 2.7 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X86</Architecture>
+      <Architecture>X64</Architecture>
     </Interpreter>
-    <Interpreter Include="..\env\">
+    <Interpreter Include="..\..\env\">
       <Id>env</Id>
-      <Version>3.6</Version>
-      <Description>env (Python 3.6 (64-bit))</Description>
+      <Version>3.7</Version>
+      <Description>env (Python 3.7 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
