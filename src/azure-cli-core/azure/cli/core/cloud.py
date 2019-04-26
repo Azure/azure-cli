@@ -238,7 +238,7 @@ def _set_active_cloud(cli_ctx, cloud_name):
 
 def get_active_cloud_name(cli_ctx):
     try:
-        return cli_ctx.config.config_parser.get('cloud', 'name')
+        return cli_ctx.config.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
         _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
