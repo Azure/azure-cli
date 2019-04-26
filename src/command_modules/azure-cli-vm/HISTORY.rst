@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.2.20
+++++++
+* vmss update: add `--instance-ids` to enable generic update of VMSS VM instances.
+* vmss update: add `--protect-from-scale-in` and `--protect-from-scale-set-actions` optionals to enable update of the protection policy of VMSS VM instances.
+
 2.2.19
 ++++++
 * vm/vmss stop: expose --skip-shutdown. If used, the VM will be powered-off without shutting down. This is helpful if a VM crashes and/or cannot properly shutdown.
