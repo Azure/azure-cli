@@ -438,13 +438,13 @@ short-summary: Create an Azure DevOps pipeline for a function app.
 examples:
     - name: create an Azure Pipeline to a function app.
       text: >
-          az functionapp devops-pipeline create --functionapp-name MyFunctionApp
+          az functionapp devops-pipeline create --functionapp-name FunctionApp
     - name: create an Azure Pipeline from a Github function app repository.
       text: >
-          az functionapp devops-pipeline create --github-repository MyGithubOrganization/MyGithubRepository --github-pat GithubPersonalAccessToken
+          az functionapp devops-pipeline create --github-repository GithubOrganization/GithubRepository --github-pat GithubPersonalAccessToken
     - name: create an Azure Pipeline with specific Azure DevOps organization and project
       text: >
-          az functionapp devops-pipeline create --organization-name MyAzureDevOpsOrganization --project-name MyAzureDevOpsProject
+          az functionapp devops-pipeline create --organization-name AzureDevOpsOrganization --project-name AzureDevOpsProject
 """
 
 helps['functionapp identity'] = """
