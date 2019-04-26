@@ -433,7 +433,7 @@ short-summary: Azure Function specific integration with Azure DevOps.
 """
 
 helps['functionapp devops-pipeline create'] = """
-type: group
+type: command
 short-summary: Create an Azure DevOps pipeline for a function app.
 examples:
     - name: create an Azure Pipeline to a function app.
