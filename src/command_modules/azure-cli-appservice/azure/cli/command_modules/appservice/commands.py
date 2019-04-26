@@ -288,3 +288,6 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp devops-build') as g:
         g.custom_command('create', 'create_devops_build')
+
+    with self.command_group('functionapp devops-pipeline') as g:
+        g.custom_command('create', 'create_devops_build')

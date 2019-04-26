@@ -419,12 +419,32 @@ examples:
 
 helps['functionapp devops-build'] = """
 type: group
-short-summary: Azure Function specific integration with Azure DevOps.
+short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps.
 """
 
 helps['functionapp devops-build create'] = """
 type: command
+short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app.
+"""
+
+helps['functionapp devops-pipeline'] = """
+type: group
+short-summary: Azure Function specific integration with Azure DevOps.
+"""
+
+helps['functionapp devops-pipeline create'] = """
+type: group
 short-summary: Create an Azure DevOps pipeline for a function app.
+examples:
+    - name: create an Azure Pipeline to a function app.
+      text: >
+          az functionapp devops-pipeline create --functionapp-name MyFunctionApp
+    - name: create an Azure Pipeline from a Github function app repository.
+      text: >
+          az functionapp devops-pipeline create --github-repository MyGithubOrganization/MyGithubRepository --github-pat MyGithubPersonalAccessToken
+    - name: create an Azure Pipeline with specific Azure DevOps organization and project
+      text: >
+          az functionapp devops-pipeline create --organization-name MyAzureDevOpsOrganization --project-name MyAzureDevOpsProject
 """
 
 helps['functionapp identity'] = """
