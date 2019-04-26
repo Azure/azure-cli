@@ -2,6 +2,13 @@
 
 Release History
 ===============
+
+0.3.5
++++++
+* namespace: Added network-rule commands.
+* namespace create/update: Added --default-action argument for network rules.
+* topic create/update: fixed the command for parameter --max-size to support 10, 20, 40 and 80GB values with premium sku
+
 0.3.4
 +++++
 * Minor fixes
