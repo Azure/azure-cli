@@ -350,6 +350,10 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
             result = operation(**kwargs)
         return result
 
+    # early out if the command does not use the cache
+    if not cmd_obj.command_kwargs.get('supports_local_cache', False):
+        return _get_operation()
+
     cache_obj = CacheObject(cmd_obj, None, operation)
     try:
         cache_obj.load(args, kwargs)
@@ -365,7 +369,6 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
 
 
 def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
-    from msrest.exceptions import SerializationError
 
     def _put_operation():
         result = None
@@ -376,24 +379,25 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
             result = operation(parameters=parameters, **kwargs)
         return result
 
+    # early out if the command does not use the cache
+    if not cmd_obj.command_kwargs.get('supports_local_cache', False):
+        return _put_operation()
+
     use_cache = cmd_obj.cli_ctx.data.get('_cache', False)
     if not use_cache:
         result = _put_operation()
 
-    try:
-        cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
-        if use_cache:
-            cache_obj.save(args, kwargs)
-            return cache_obj
+    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+    if use_cache:
+        cache_obj.save(args, kwargs)
+        return cache_obj
 
-        # for a successful PUT, attempt to delete the cache file
-        obj_dir, obj_file = cache_obj.path(args, kwargs)
-        obj_path = os.path.join(obj_dir, obj_file)
+    # for a successful PUT, attempt to delete the cache file
+    obj_dir, obj_file = cache_obj.path(args, kwargs)
+    obj_path = os.path.join(obj_dir, obj_file)
+    try:
         os.remove(obj_path)
-    # except SerializationError as ex:
-    #     logger.debug(ex)
-    #     raise CLIError('BANOODLE')
-    except CLIError:  # pylint: disable=broad-except
+    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
         pass
     return result
 

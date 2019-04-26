@@ -215,7 +215,7 @@ def show_cache_contents(cmd, resource_group_name, item_name, resource_type):
     try:
         with open(item_path, 'r') as cache_file:
             cache_obj = json.loads(cache_file.read())
-    except OSError:
+    except (OSError, IOError):
         raise CLIError('Not found in cache: {}'.format(item_path))
     return cache_obj['_payload']
 
@@ -225,7 +225,7 @@ def delete_cache_contents(cmd, resource_group_name, item_name, resource_type):
     item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
     try:
         os.remove(item_path)
-    except OSError:
+    except (OSError, IOError):
         logger.info('%s not found in object cache.', item_path)
 
 
@@ -235,5 +235,5 @@ def purge_cache_contents():
     directory = os.path.join(get_config_dir(), 'object_cache')
     try:
         shutil.rmtree(directory)
-    except OSError as ex:
+    except (OSError, IOError) as ex:
         logger.debug(ex)
