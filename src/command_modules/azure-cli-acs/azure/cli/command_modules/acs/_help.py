@@ -257,7 +257,7 @@ parameters:
     long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
   - name: --network-policy
     type: string
-    short-summary: (PREVIEW) The Kubernetes network policy to use.
+    short-summary: The Kubernetes network policy to use.
     long-summary: |
         Using together with "azure" network plugin.
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
