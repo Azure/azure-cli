@@ -6,7 +6,6 @@
 from __future__ import print_function
 import json
 import os
-from six.moves import configparser
 
 from knack.config import get_config_parser
 from knack.log import get_logger
