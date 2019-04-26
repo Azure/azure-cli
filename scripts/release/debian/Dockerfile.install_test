@@ -14,8 +14,6 @@ ADD . .
 RUN dos2unix ./deb_install.sh
 
 FROM $base AS execution
-RUN apt-get update
-RUN apt-get install -y curl apt-transport-https lsb-release gnupg
 
 COPY --from=builder ./deb_install.sh ./deb_install.sh
 
