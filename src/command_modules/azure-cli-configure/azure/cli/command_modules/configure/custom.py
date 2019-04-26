@@ -125,6 +125,7 @@ def _handle_global_configuration(config):
             config.set_to_use_local_config(True)
 
 
+# pylint: disable=inconsistent-return-statements
 def handle_configure(cmd, defaults=None, list_defaults=None):
     if defaults:
         defaults_section = cmd.cli_ctx.config.defaults_section_name
