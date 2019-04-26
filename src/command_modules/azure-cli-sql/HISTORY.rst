@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.3
++++++
+* Added commands sql virtual-cluster list/show/delete
+
 2.2.2
 +++++
 * Support for custom time zone on managed instance.
