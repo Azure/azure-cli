@@ -264,7 +264,21 @@ class AzCliCommand(CLICommand):
         self.confirmation = kwargs.get('confirmation', False)
         self.command_kwargs = kwargs
 
+    # pylint: disable=no-self-use
+    def _add_vscode_extension_metadata(self, arg, overrides):
+        """ Adds metadata for use by the VSCode CLI extension. Do
+            not remove or modify without contacting the VSCode team. """
+        if not hasattr(arg.type, 'required_tooling'):
+            required = arg.type.settings.get('required', False)
+            setattr(arg.type, 'required_tooling', required)
+        if 'configured_default' in overrides.settings:
+            def_config = overrides.settings.get('configured_default', None)
+            setattr(arg.type, 'default_name_tooling', def_config)
+
     def _resolve_default_value_from_config_file(self, arg, overrides):
+
+        self._add_vscode_extension_metadata(arg, overrides)
+
         # same blunt mechanism like we handled id-parts, for create command, no name default
         if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
             return
