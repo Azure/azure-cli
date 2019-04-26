@@ -34,6 +34,8 @@ function assert_consent {
     fi
 }
 
+global_consent=0 # Artificially giving global consent after review-feedback. Remove this line to enable interactive mode
+
 assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
 set -v
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
@@ -41,7 +43,8 @@ set +v
 
 assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
 set -v
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" \
+CLI_REPO=$(lsb_release -cs)
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
     > /etc/apt/sources.list.d/azure-cli.list
 apt-get update
 set +v
