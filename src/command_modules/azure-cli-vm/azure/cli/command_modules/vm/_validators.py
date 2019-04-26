@@ -67,6 +67,25 @@ def validate_keyvault(cmd, namespace):
     namespace.keyvault = _get_resource_id(cmd.cli_ctx, namespace.keyvault, namespace.resource_group_name,
                                           'vaults', 'Microsoft.KeyVault')
 
+def _validate_key_value(string):
+    """ Extracts a single k-v dict in key[=value] format """
+    result = {}
+    if string:
+        comps = string.split('=', 1)
+        result = {comps[0]: comps[1]} if len(comps) > 1 else {string: ''}
+    return result
+
+
+def _validate_key_value_list(ns, attr="tags"):
+    """ Extracts multiple space-separated k-v dict in key[=value] format from attribute attr in namespace ns"""
+    try:
+        if isinstance(getattr(ns, attr), list):
+            k_v_dict = {}
+            for item in getattr(ns, attr):
+                k_v_dict.update(_validate_key_value(item))
+            setattr(ns, attr, k_v_dict)
+    except (AttributeError, TypeError) as e:
+        raise CLIError("Error parsing attribute {} from namespace. Error: {}. For help use: 'az feedback'", attr, e)
 
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
@@ -1220,10 +1239,37 @@ def process_vmss_create_namespace(cmd, namespace):
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('Usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
+
+def process_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    from ._vm_utils import VMSS_PROTECTION_POLICY_TYPES
+
+    # validate namespace protection policy
+    if namespace.protection_policy:
+        if namespace.instance_id is None:
+            raise CLIError("usage error: protection policies can only be applied to VMSS instances. use --instance-id")
+
+        # parse out key_value_dict from namespace
+        _validate_key_value_list(namespace, "protection_policy")
+
+        # validate keys and values
+        namespace.protection_policy = {k.lower(): v for k, v in namespace.protection_policy.items()}
+        for k, v in namespace.protection_policy.copy().items():
+            if k not in VMSS_PROTECTION_POLICY_TYPES:
+                raise CLIError("usage error: protection policy key {} should be one of {}."
+                               .format(k, ", ".join(VMSS_PROTECTION_POLICY_TYPES)))
+            if v.lower() == "true":
+               namespace.protection_policy[k] = True
+            elif v.lower() == "false" or v.lower() == "":
+                namespace.protection_policy[k] = False
+            else:
+                raise CLIError("usage error: expected boolean value for protection policy key {}, instead found: {}.".format(k, v))
+
+
 # endregion
 
 

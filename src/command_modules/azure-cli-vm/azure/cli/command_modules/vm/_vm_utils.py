@@ -19,6 +19,8 @@ logger = get_logger(__name__)
 
 MSI_LOCAL_ID = '[system]'
 
+VMSS_PROTECTION_POLICY_TYPES = ["protect_from_scale_in", "protect_from_scale_set_actions"]
+
 
 def get_target_network_api(cli_ctx):
     """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
