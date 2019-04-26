@@ -45,7 +45,7 @@ def _osa_table_format(result):
         resourceGroup: resourceGroup,
         openShiftVersion: openShiftVersion,
         provisioningState: provisioningState,
-        fqdn: fqdn
+        publicHostname: publicHostname
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))

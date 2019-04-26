@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.23
+++++++
+* 'az configure' add --list-defaults to show the configures
+
 2.0.22
 ++++++
 * Minor fixes
