@@ -16,7 +16,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
 
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         client.create_or_update(
             resource_group_name=resource_group_name,
             namespace_name=namespace_name,
@@ -28,10 +28,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
                 maximum_throughput_units=maximum_throughput_units,
                 kafka_enabled=is_kafka_enabled)).result()
 
-    getnamespace = client.get(resource_group_name, namespace_name)
-    while getnamespace.provisioning_state != 'Succeeded':
-        getnamespace = client.get(resource_group_name, namespace_name)
-
     if default_action:
         netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
         netwrokruleset.default_action = default_action
@@ -42,7 +38,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, default_action=None):
 
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if tags:
             instance.tags = tags
 
@@ -81,7 +77,7 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
 
 # Namespace Authorization rule:
 def cli_autho_update(cmd, instance, rights):
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         from azure.cli.command_modules.eventhubs._utils import accessrights_converter
         instance.rights = accessrights_converter(rights)
     return instance
@@ -98,7 +94,7 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
 
     eventhubparameter1 = Eventhub()
 
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if message_retention_in_days:
             eventhubparameter1.message_retention_in_days = message_retention_in_days
 
@@ -135,7 +131,7 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
     # from azure.mgmt.eventhub.models import CaptureDescription, Destination, EncodingCaptureDescription
     capturedescription, destination, encodingcapturedescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription')
 
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if message_retention_in_days:
             instance.message_retention_in_days = message_retention_in_days
 
@@ -173,43 +169,46 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
 
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
-    # from azure.mgmt.eventhub.models import NWRuleSetVirtualNetworkRules, Subnet, NWRuleSetIpRules
-    nwrulesetvirtualnetworkrules, subnet, nwrulesetiprules = cmd.get_models('NWRuleSetVirtualNetworkRules', 'Subnet', 'NWRuleSetIpRules')
+    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
+    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_EVENTHUB)
+    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
+
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if netwrokruleset.virtual_network_rules is None:
-            netwrokruleset.virtual_network_rules = [nwrulesetvirtualnetworkrules]
+            netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
 
         if netwrokruleset.ip_rules is None:
-            netwrokruleset.ip_rules = [nwrulesetiprules]
+            netwrokruleset.ip_rules = [NWRuleSetIpRules]
 
         if subnet:
-            netwrokruleset.virtual_network_rules.append(nwrulesetvirtualnetworkrules(subnet=subnet(id=subnet),
+            netwrokruleset.virtual_network_rules.append(NWRuleSetVirtualNetworkRules(subnet=Subnet(id=subnet),
                                                                                      ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
 
         if ip_mask:
-            netwrokruleset.ip_rules.append(nwrulesetiprules(ip_mask=ip_mask, action=action))
+            netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action=action))
 
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
 def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
-    # from azure.mgmt.eventhub.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
-    nwrulesetvirtualnetworkrules, nwrulesetiprules = cmd.get_models('NWRuleSetVirtualNetworkRules', 'NWRuleSetIpRules')
+    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
+    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-    if cmd.supported_api_version(min_api='2017-04-01'):
+    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if subnet:
-            virtualnetworkrule = nwrulesetvirtualnetworkrules()
+            virtualnetworkrule = NWRuleSetVirtualNetworkRules()
             virtualnetworkrule.subnet = subnet
 
             for vnetruletodelete in netwrokruleset.virtual_network_rules:
-                if vnetruletodelete.subnet.id == subnet:
+                if vnetruletodelete.subnet.id.lower() == subnet.lower():
                     virtualnetworkrule.ignore_missing_vnet_service_endpoint = vnetruletodelete.ignore_missing_vnet_service_endpoint
                     netwrokruleset.virtual_network_rules.remove(vnetruletodelete)
+                    break
 
         if ip_mask:
-            ipruletodelete = nwrulesetiprules()
+            ipruletodelete = NWRuleSetIpRules()
             ipruletodelete.ip_mask = ip_mask
             ipruletodelete.action = "Allow"
 
