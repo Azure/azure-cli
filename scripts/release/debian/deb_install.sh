@@ -36,6 +36,12 @@ function assert_consent {
 
 global_consent=0 # Artificially giving global consent after review-feedback. Remove this line to enable interactive mode
 
+assert_consent "Add packages necessary to modify your apt-package sources?" ${global_consent}
+set -v
+apt-get update
+apt-get install apt-transport-https lsb-release gnupg curl
+set +v
+
 assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
 set -v
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
