@@ -117,7 +117,7 @@ def load_arguments_sb(self, _):
         with self.argument_context('servicebus topic {}'.format(scope)) as c:
             c.argument('topic_name', arg_type=name_type, id_part='child_name_1', completer=get_topic_command_completion_list, help='Name of Topic')
             c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
-            c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.')
+            c.argument('max_size_in_megabytes', options_list=['--max-size'], type=int, choices=[1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920], help='Maximum size of topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024. Max for Standard SKU is 5120 and for Premium SKU is 81920')
             c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'], arg_type=get_three_state_flag(), help='A boolean value indicating if this topic requires duplicate detection.')
             c.argument('duplicate_detection_history_time_window', validator=_validate_duplicate_detection_history_time_window, help='ISO 8601 timespan or duration time format for structure that defines the duration of the duplicate detection history. The default value is 10 minutes.')
             c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
@@ -246,3 +246,18 @@ def load_arguments_sb(self, _):
     for scope in ['show', 'complete', 'abort']:
         with self.argument_context('servicebus migration {}'.format(scope)) as c:
             c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
+
+# Region Namespace NetworkRuleSet
+    with self.argument_context('servicebus namespace network-rule') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['servicebus namespace network-rule add', 'servicebus namespace network-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+
+    with self.argument_context('servicebus namespace network-rule add') as c:
+        c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+        c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
