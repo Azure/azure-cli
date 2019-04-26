@@ -7,7 +7,6 @@ import json
 import os
 import shutil
 
-from azure.cli.command_modules.botservice.converged_app import ConvergedApp
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
@@ -27,11 +26,30 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+CSHARP = 'Csharp'
+JAVASCRIPT = 'Javascript'
+NODE = 'Node'
+TYPESCRIPT = 'Typescript'
 
-def create(cmd, client, resource_group_name, resource_name, kind, description=None, display_name=None,  # pylint: disable=too-many-locals
-           endpoint=None, msa_app_id=None, password=None, tags=None, storageAccountName=None,
-           location='Central US', sku_name='F0', appInsightsLocation='South Central US',
-           language='Csharp', version='v3'):
+
+def __language_validator(language, command):
+    # EXPIRATION_VERSION = '2.0.80'  # ETA: December 2019
+    if language not in (CSHARP, JAVASCRIPT, NODE, TYPESCRIPT) or \
+            (command != 'prepare-deploy' and language == TYPESCRIPT):
+        # Typescript is only supported in prepare-deploy, passing in Typescript should otherwise result in an error
+        # For any other command that takes language, only "Csharp", "Javascript", and "Node" should be supported.
+        raise CLIError("az bot %s: '%s' is not a valid value for '--lang'. See 'az bot %s --help'."
+                       % (command, language, command))
+    if language == NODE:
+        logger.warning("Option `Node` for `--lang` has been deprecated and its support will be removed in a future "
+                       "release. Use `Javascript` instead.")
+        return JAVASCRIPT
+    return language
+
+
+def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals
+           description=None, display_name=None, endpoint=None, tags=None, storageAccountName=None,
+           location='Central US', sku_name='F0', appInsightsLocation=None, version='v4'):
     """Create a WebApp, Function, or Channels Registration Bot on Azure.
 
     This method is directly called via "bot create"
@@ -58,12 +76,10 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
 
     # Kind parameter validation
     kind = kind.lower()
-
     registration_kind = 'registration'
     bot_kind = 'bot'
     webapp_kind = 'webapp'
     function_kind = 'function'
-    show_password = False
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -78,19 +94,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
     if kind == registration_kind:
         kind = bot_kind
 
-    if kind not in (bot_kind, webapp_kind, function_kind):
-        raise CLIError('Invalid Bot Parameter : kind. Valid kinds are \'registration\' for registration bots, '
-                       '\'webapp\' for webapp bots and \'function\' for function bots. Run \'az bot create -h\' '
-                       'for more information.')
-
-    # If a Microsoft application id was not provided, provision one for the user
-    if not msa_app_id:
-
-        logger.info('Microsoft application id not passed as a parameter. Provisioning a new Microsoft application.')
-        show_password = True
-        msa_app_id, password = ConvergedApp.provision(resource_name)
-        logger.info('Microsoft application provisioning successful. Application Id: %s.', msa_app_id)
-
     logger.info('Creating Azure Bot Service.')
 
     # Registration bots: simply call ARM and create the bot
@@ -101,8 +104,6 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         # Registration bot specific validation
         if not endpoint:
             endpoint = ''
-        if not msa_app_id:
-            raise CLIError('Microsoft application id is required for creating a registration bot.')
 
         parameters = Bot(
             location='global',
@@ -119,17 +120,34 @@ def create(cmd, client, resource_group_name, resource_name, kind, description=No
         logger.info('Bot parameters client side validation successful.')
         logger.info('Creating bot.')
 
-        result = client.bots.create(
+        return client.bots.create(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             parameters=parameters
-        ).as_dict()
-        if show_password:
-            result['password'] = password
-        return result
+        )
+
     # Web app and function bots require deploying custom ARM templates, we do that in a separate method
     else:
         logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
+
+        if not language:
+            raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
+                           .format(webapp_kind, function_kind))
+        language = __language_validator(language, 'create')
+
+        if version == 'v4':
+            if storageAccountName:
+                logger.warning('WARNING: `az bot create` for v4 bots no longer creates or uses a Storage Account. If '
+                               'you wish to create a Storage Account via Azure CLI, please use `az storage account` or '
+                               'an ARM template.')
+            if appInsightsLocation:
+                logger.warning(
+                    'WARNING: `az bot create` for v4 bots no longer creates or uses Application Insights. If '
+                    'you wish to create Application Insights via Azure CLI, please use an ARM template.')
+            storageAccountName = None
+            appInsightsLocation = None
+        if version == 'v3' and not appInsightsLocation:
+            appInsightsLocation = 'South Central US'
 
         creation_results = BotTemplateDeployer.create_app(
             cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
@@ -488,14 +506,22 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
             raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
                            'prepare-deploy"' % (file_name, code_dir, file_name))
 
-    if language != 'Csharp':
+    language = __language_validator(language, 'prepare-deploy')
+
+    if language == JAVASCRIPT or language == TYPESCRIPT:
         if proj_file_path:
             raise CLIError('--proj-file-path should not be passed in if language is not Csharp')
         does_file_exist('web.config')
+        module_source_dir = os.path.dirname(os.path.abspath(__file__))
+        if language == JAVASCRIPT:
+            source_web_config = os.path.join(module_source_dir, 'web.config')
+            shutil.copy(source_web_config, code_dir)
+        else:
+            source_web_config = os.path.join(module_source_dir, 'typescript.web.config')
+            shutil.copy(source_web_config, code_dir)
+            os.rename(os.path.join(code_dir, 'typescript.web.config'), os.path.join(code_dir, 'web.config'))
+        logger.info('web.config for %s successfully created.', language)
 
-        BotPublishPrep.prepare_publish_v4(logger, code_dir, proj_file_path, {'lang': language,
-                                                                             'has_web_config': False,
-                                                                             'has_iisnode_yml': True})
     else:
         if not proj_file_path:
             raise CLIError('--proj-file-path must be provided if language is Csharp')
@@ -510,9 +536,11 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
             proj_file = proj_file_path.lower()
             proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
             f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
+        logger.info('.deployment file successfully created.')
+    return True
 
 
-def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v3',  # pylint:disable=too-many-statements
+def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, proj_file_path=None, version='v4',  # pylint:disable=too-many-statements
                 keep_node_modules=None, timeout=None):
     """Publish local bot code to Azure.
 
@@ -554,7 +582,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     # 1. We may not need to download the necessary web.config and iisnode.yml files to deploy a Node.js bot on IIS.
     # 2. We shouldn't delete their local web.config and issnode.yml files (if they exist).
     iis_publish_info = {
-        'lang': 'Csharp' if not os.path.exists(os.path.join(code_dir, 'package.json')) else 'Node',
+        'lang': CSHARP if not os.path.exists(os.path.join(code_dir, 'package.json')) else NODE,
         'has_web_config': True if os.path.exists(os.path.join(code_dir, 'web.config')) else False,
         'has_iisnode_yml': True if os.path.exists(os.path.join(code_dir, 'iisnode.yml')) else False
     }
@@ -606,7 +634,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
     logger.info('Bot source published. Preparing bot application to run the new source.')
     os.remove('upload.zip')
     # If the bot is a Node.js bot and did not initially have web.config, delete web.config and iisnode.yml.
-    if iis_publish_info['lang'] == 'Node':
+    if iis_publish_info['lang'] == NODE:
         if not iis_publish_info['has_web_config'] and os.path.exists(os.path.join(code_dir, 'web.config')):
             os.remove(os.path.join(code_dir, 'web.config'))
         if not iis_publish_info['has_iisnode_yml'] and os.path.exists(os.path.join(code_dir, 'iisnode.yml')):
@@ -642,3 +670,31 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         logger.error('Deployment failed. To find out more information about this deployment, please visit %s.',
                      deployment_url)
     return output
+
+
+def update(client, resource_group_name, resource_name, endpoint=None, description=None,
+           display_name=None, tags=None, sku_name=None, app_insights_key=None,
+           app_insights_api_key=None, app_insights_app_id=None):
+    bot = client.bots.get(
+        resource_group_name=resource_group_name,
+        resource_name=resource_name
+    )
+    sku = Sku(name=sku_name if sku_name else bot.sku.name)
+    bot_props = bot.properties
+
+    bot_props.description = description if description else bot_props.description
+    bot_props.display_name = display_name if display_name else bot_props.display_name
+    bot_props.endpoint = endpoint if endpoint else bot_props.endpoint
+
+    bot_props.developer_app_insight_key = app_insights_key if app_insights_key else bot_props.developer_app_insight_key
+    bot_props.developer_app_insights_application_id = app_insights_app_id if app_insights_app_id \
+        else bot_props.developer_app_insights_application_id
+
+    if app_insights_api_key:
+        bot_props.developer_app_insights_api_key = app_insights_api_key
+
+    return client.bots.update(resource_group_name,
+                              resource_name,
+                              tags=tags,
+                              sku=sku,
+                              properties=bot_props)

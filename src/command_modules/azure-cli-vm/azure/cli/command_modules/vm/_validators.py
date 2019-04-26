@@ -1356,18 +1356,46 @@ def process_remove_identity_namespace(cmd, namespace):
 
 def process_gallery_image_version_namespace(cmd, namespace):
     TargetRegion = cmd.get_models('TargetRegion')
+    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS']]
+    storage_account_types_str = ", ".join(storage_account_types_list)
+
     if namespace.target_regions:
         regions_info = []
         for t in namespace.target_regions:
-            parts = t.split('=', 1)
-            if len(parts) == 1:
-                regions_info.append(TargetRegion(name=parts[0]))
-            else:
+            parts = t.split('=', 2)
+            replica_count = None
+            storage_account_type = None
+
+            # Region specified, but also replica count or storage account type
+            if len(parts) == 2:
                 try:
                     replica_count = int(parts[1])
                 except ValueError:
-                    raise CLIError("usage error: {}'s replica count must be an integer".format(parts[0]))
-                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
+                    storage_account_type = parts[1]
+                    if parts[1].lower() not in storage_account_types_list:
+                        raise CLIError("usage error: {} is an invalid target region argument. The second part is "
+                                       "neither an integer replica count or a valid storage account type. "
+                                       "Storage account types must be one of {}."
+                                       .format(t, storage_account_types_str))
+
+            # Region specified, but also replica count and storage account type
+            elif len(parts) == 3:
+                try:
+                    replica_count = int(parts[1])   # raises ValueError if this is not a replica count, try other order.
+                    storage_account_type = parts[2]
+                    if storage_account_type not in storage_account_types_list:
+                        raise CLIError("usage error: {} is an invalid target region argument. The third part is "
+                                       "not a valid storage account type. Storage account types must be one of {}."
+                                       .format(t, storage_account_types_str))
+                except ValueError:
+                    raise CLIError("usage error: {} is an invalid target region argument. "
+                                   "The second part must be a valid integer replica count.".format(t))
+
+            # At least the region is specified
+            if len(parts) >= 1:
+                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
+                                                 storage_account_type=storage_account_type))
+
         namespace.target_regions = regions_info
 # endregion
 

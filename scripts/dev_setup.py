@@ -10,8 +10,29 @@ from __future__ import print_function
 import sys
 import os
 from subprocess import check_call, CalledProcessError
+from logging import getLogger
 
 root_dir = os.path.abspath(os.path.join(os.path.abspath(__file__), '..', '..'))
+logger = getLogger(__name__)
+
+def print_support_message():
+    logger.warning('''
+
+*******************************************************************************
+
+dev_setup.py is no longer supported for developer use.
+Instead, please do the following:
+
+create and activate new venv
+pip install azdev
+azdev setup -c
+
+For full details, please read
+ https://github.com/Azure/azure-cli/blob/dev/doc/configuring_your_machine.md
+
+*******************************************************************************
+
+''')
 
 
 def py_command(command):
@@ -21,10 +42,13 @@ def py_command(command):
         print()
     except CalledProcessError as err:
         print(err, file=sys.stderr)
+        print_support_message()
         sys.exit(1)
 
 def pip_command(command):
     py_command('-m pip ' + command)
+
+print_support_message()
 
 print('Running dev setup...')
 print('Root directory \'{}\'\n'.format(root_dir))
@@ -55,4 +79,7 @@ pip_command('install -e src/azure-cli-testsdk')
 # package declaration by installing the old namespace package
 pip_command('install --force-reinstall azure-nspkg==1.0.0')
 pip_command('install --force-reinstall azure-mgmt-nspkg==1.0.0')
+
+print_support_message()
 print('Finished dev setup.')
+

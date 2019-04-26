@@ -279,7 +279,7 @@ def load_arguments(self, _):
         c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availability zones")
         c.argument('show_all', options_list=['--all'], arg_type=get_three_state_flag(),
                    help="show all information including vm sizes not available under the current subscription")
-        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disk", etc')
+        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disks", etc')
 
     with self.argument_context('vm restart') as c:
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
@@ -391,6 +391,9 @@ def load_arguments(self, _):
         with self.argument_context('{} run-command invoke'.format(scope)) as c:
             c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
             c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
+
+        with self.argument_context('{} stop'.format(scope)) as c:
+            c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
@@ -587,12 +590,16 @@ def load_arguments(self, _):
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
+        c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions",
+                   arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS"]), min_api='2019-03-01')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
+
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
-                       help='Space-separated list of regions and their replica counts. Use "<region>=<replica count>" to set the replica count for each region. If only the region is specified, the default replica count will be used.')
+                       help='Space-separated list of regions and their replica counts. Use "<region>[=<replica count>][=<storage account type>]" to optionally set the replica count and/or storage account type for each region. '
+                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
     # endregion
