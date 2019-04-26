@@ -2,8 +2,7 @@
 
 Release History
 ===============
-* functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`.
-* functionapp: add examples for command parameters when using `az functionapp devops-pipeline`.
+* functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
 
 0.2.18
 ++++++
