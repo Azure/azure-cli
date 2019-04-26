@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.13
+++++++
+* Minor fixes
+
 0.2.12
 ++++++
 * `metrics alert create/update`: Fixed issue where "count" was not a permitted value.

@@ -97,7 +97,7 @@ def load_arguments(self, _):
 
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                   deprecate_info=c.deprecate(hide=False), help="If missing, CLI will generate a strong password")
+                   deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('ad sp credential reset') as c:
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
@@ -140,6 +140,8 @@ def load_arguments(self, _):
 
     with self.argument_context('ad group create') as c:
         c.argument('mail_nickname', help='Mail nickname')
+        c.argument('force', arg_type=get_three_state_flag(),
+                   help='always create a new group instead of updating the one with same display and mail nickname')
 
     with self.argument_context('ad group show') as c:
         c.extra('cmd')

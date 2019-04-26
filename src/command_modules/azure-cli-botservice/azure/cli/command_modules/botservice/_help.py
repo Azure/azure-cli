@@ -33,9 +33,9 @@ helps['bot prepare-deploy'] = """
     short-summary: Add scripts and configuration files to your local source code directory to be able to publish back
                    using `az webapp deployment source`.
     examples:
-        - name: Prepare to use `az webapp` to deploy a Node.js bot by fetching a necessary file.
+        - name: Prepare to use `az webapp` to deploy a Javascript bot by fetching a necessary file.
           text: |-
-            az bot prepare-deploy --lang Node --code-dir "MyBotCode"
+            az bot prepare-deploy --lang Javascript --code-dir "MyBotCode"
 """
 helps['bot delete'] = """
     type: command
@@ -47,7 +47,7 @@ helps['bot update'] = """
     examples:
         - name: Update description on a bot
           text: |-
-            az bot update -n botName -g MyResourceGroup --set properties.description="some description"
+            az bot update -n botName -g MyResourceGroup --endpoint "https://bing.com/api/messages" --display-name "Hello World"
 """
 helps['bot publish'] = """
     type: command

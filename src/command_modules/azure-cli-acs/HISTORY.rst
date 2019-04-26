@@ -7,6 +7,8 @@ Release History
 ++++++
 * "az aks get-credentials" will prompt to overwrite duplicated values
 * Remove "(PREVIEW)" from Dev Spaces commands, "az aks use-dev-spaces" and "az aks remove-dev-spaces".
+* adding customer-admin-group-id flag to "az openshift create"
+* Remove "(PREVIEW)" from "az aks create" option "--network-policy".
 
 2.3.21
 ++++++

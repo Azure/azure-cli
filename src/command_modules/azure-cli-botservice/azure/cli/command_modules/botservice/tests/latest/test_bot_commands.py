@@ -90,16 +90,18 @@ class DirectLineClient(object):
 class BotTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
-    def registration_bot_create(self, resource_group):
+    def test_botservice_registration_bot_create(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=10),
             'description': 'description1',
             'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4())
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         self.cmd(
-            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags key1=value1',
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p '
+            '{password} --tags key1=value1',
             checks=[
                 self.check('name', '{botname}'),
                 self.check('properties.description', '{description}'),
@@ -112,7 +114,7 @@ class BotTests(ScenarioTest):
             self.check('name', '{botname}')
         ])
 
-        self.cmd('az bot update --set properties.description=description2 -g {rg} -n {botname}', checks=[
+        self.cmd('az bot update --description description2 -g {rg} -n {botname}', checks=[
             self.check('name', '{botname}'),
             self.check('properties.description', 'description2')
         ])
@@ -137,7 +139,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-            '--insights-location "West US 2"',
+            '--insights-location "West US 2" -v v3 --lang Csharp',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -156,7 +158,7 @@ class BotTests(ScenarioTest):
         self.check(os.path.isdir(os.path.join('dir_path', 'postDeployScripts')), True)
 
         # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v3', checks=[
             self.check('active', True)
         ])
 
@@ -181,7 +183,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
         self.cmd(
-            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -226,7 +228,7 @@ class BotTests(ScenarioTest):
 
         self.cmd(
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --location westus '
-            '--insights-location "West US 2" --lang Node',
+            '--insights-location "West US 2" --lang Javascript -v v3',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -246,7 +248,7 @@ class BotTests(ScenarioTest):
         # TODO implement
 
         # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v3', checks=[
             self.check('active', True)
         ])
         # clean up the folder
@@ -268,7 +270,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -308,7 +310,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -358,7 +360,7 @@ class BotTests(ScenarioTest):
             'password': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{valid_bot_name}'),
@@ -398,7 +400,7 @@ class BotTests(ScenarioTest):
             # Clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -422,7 +424,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -452,7 +454,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript -v v3',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -482,7 +484,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang CSharp',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Csharp',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -512,7 +514,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password}',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v3 --lang Csharp',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -539,7 +541,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} -v v4 --lang Node',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -556,7 +558,7 @@ class BotTests(ScenarioTest):
         os.remove(os.path.join(dir_path, 'web.config'))
         os.remove(os.path.join(dir_path, 'iisnode.yml'))
         # Publish it back
-        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname} -v v4', checks=[
+        self.cmd('az bot publish -g {rg} -n {botname} --code-dir {botname}', checks=[
             self.check('active', True)
         ])
 
@@ -573,11 +575,12 @@ class BotTests(ScenarioTest):
             'botname': self.create_random_name(prefix='cli', length=10),
             'description': 'description1',
             'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4())
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
         })
 
         self.cmd(
-            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} --tags '
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p {password} --tags '
             'key1=value1',
             checks=[
                 self.check('name', '{botname}'),
@@ -651,7 +654,7 @@ class BotTests(ScenarioTest):
     def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self, resource_group):
         dir_path = 'does_not_exist'
         self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Node'})
+                            'language': 'Javascript'})
         try:
             self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
             raise Exception("'az bot prepare-publish' should have failed with nonexistent --code-dir value")
@@ -662,22 +665,47 @@ class BotTests(ScenarioTest):
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_node_should_fail_with_proj_file_path(self, resource_group):
-        self.kwargs.update({'language': 'Node',
+    def test_botservice_prepare_deploy_javascript_should_fail_with_proj_file_path(self, resource_group):
+        self.kwargs.update({'language': 'Javascript',
                             'proj_file': 'node_bot/test.csproj'})
         try:
             self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
-            raise Exception("'az bot prepare-publish --lang Node' should have failed with --proj-file-path")
+            raise Exception("'az bot prepare-publish --lang Javascript' should have failed with --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
         except Exception as error:
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_node(self, resource_group):
+    def test_botservice_prepare_deploy_javascript(self, resource_group):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Node'})
+                            'language': 'Javascript'})
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        self.cmd('az bot prepare-deploy --lang {language} --code-dir {dir_path}')
+        assert os.path.exists(os.path.join(dir_path, 'web.config'))
+        shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_typescript_should_fail_with_proj_file_path(self, resource_group):
+        self.kwargs.update({'language': 'Typescript',
+                            'proj_file': 'node_bot/test.csproj'})
+        try:
+            self.cmd('az bot prepare-deploy --lang {language} --proj-file-path {proj_file}')
+            raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
+        except CLIError as cli_error:
+            assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
+        except Exception as error:
+            raise error
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_typescript(self, resource_group):
+        dir_path = 'node_bot'
+        self.kwargs.update({'dir_path': dir_path,
+                            'language': 'Typescript'})
         if os.path.exists(dir_path):
             # clean up the folder
             shutil.rmtree(dir_path)
@@ -743,10 +771,51 @@ class BotTests(ScenarioTest):
             raise error
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_prepare_deploy_node_fail_if_web_config_exists(self, resource_group):
+    def test_botservice_update_should_update_bot_properties(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'endpoint': 'https://dev.botframework.com/api/messages',
+            'description': 'HelloWorld!',
+            'ai-key': str(uuid.uuid4()),
+            'ai-api-key': self.create_random_name(prefix='cli.', length=40),
+            'ai-app-id': str(uuid.uuid4()),
+            'tag': 'Hello',
+            'tag-value': 'Microsoft!'
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password}',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{botname}'),
+                     self.check('type', 'abs')
+                 })
+
+        results = self.cmd('az bot update -g {rg} -n {botname} -e "{endpoint}" --description {description} --sku S1 '
+                           '-d {display_name} --ai-key {ai-key} --ai-api-key {ai-api-key} --ai-app-id {ai-app-id} --tags '
+                           '{tag}={tag-value}', checks=[self.check('name', '{botname}'),
+                                                        self.check('resourceGroup', '{rg}')])
+        results = results.get_output_in_json()
+
+        assert results['sku']['name'] == 'S1'
+        assert results['properties']['displayName'] == 'clitestbot'
+        assert results['properties']['endpoint'] == 'https://dev.botframework.com/api/messages'
+        assert results['properties']['description'] == 'HelloWorld!'
+        assert results['tags']['Hello'] == 'Microsoft!'
+        assert results['properties']['developerAppInsightKey']
+        # The "developerAppInsightsApiKey" is a secret and is always null when retrieved.
+        assert not results['properties']['developerAppInsightsApiKey']
+        assert results['properties']['developerAppInsightsApplicationId']
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_prepare_deploy_javascript_fail_if_web_config_exists(self, resource_group):
         dir_path = 'node_bot'
         self.kwargs.update({'dir_path': dir_path,
-                            'language': 'Node'})
+                            'language': 'Javascript'})
         if os.path.exists(dir_path):
             # clean up the folder
             shutil.rmtree(dir_path)

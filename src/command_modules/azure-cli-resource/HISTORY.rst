@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.1.14
+++++++
+* `resource link`: Deprecate `--link-id`, `--target-id` and `--filter-string` in favor of
+                   `--link`, `--target`, and `--filter` respectively.
+* `resource link create/update`: Fix issue where these commands would not work.
 * `resource delete`: Fix issue where deleting using a resource ID could crash on error.
 
 2.1.13

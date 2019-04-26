@@ -3,6 +3,12 @@
 Release History
 ===============
 
+* create-for-rbac: hide '--password' as the preparations to pull the plug completely in 2019 May
+
+2.6.0
++++++
+* [BREAKING CHANGE] 'group create'/'app create'/'sp create-for-rbac': supports idempotent, hence confliction error will not be surfaced
+
 2.5.0
 +++++
 * create-for-rbac: handle --years correctly

@@ -27,9 +27,10 @@ import os
 import logging
 import datetime
 
+from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+
 from knack.log import CLILogging, get_logger
 from knack.util import ensure_dir
-from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
 
 _UNKNOWN_COMMAND = "unknown_command"
