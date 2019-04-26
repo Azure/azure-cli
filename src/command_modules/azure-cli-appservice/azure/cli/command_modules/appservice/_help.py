@@ -424,7 +424,7 @@ short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOp
 
 helps['functionapp devops-build create'] = """
 type: command
-short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app.
+short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command.
 """
 
 helps['functionapp devops-pipeline'] = """
@@ -441,7 +441,7 @@ examples:
           az functionapp devops-pipeline create --functionapp-name MyFunctionApp
     - name: create an Azure Pipeline from a Github function app repository.
       text: >
-          az functionapp devops-pipeline create --github-repository MyGithubOrganization/MyGithubRepository --github-pat MyGithubPersonalAccessToken
+          az functionapp devops-pipeline create --github-repository MyGithubOrganization/MyGithubRepository --github-pat GithubPersonalAccessToken
     - name: create an Azure Pipeline with specific Azure DevOps organization and project
       text: >
           az functionapp devops-pipeline create --organization-name MyAzureDevOpsOrganization --project-name MyAzureDevOpsProject
