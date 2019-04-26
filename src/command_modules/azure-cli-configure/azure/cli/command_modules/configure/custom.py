@@ -24,7 +24,7 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING)
 from azure.cli.command_modules.configure._utils import get_default_from_config
-
+from knack.config import get_config_parser
 answers = {}
 
 logger = get_logger(__name__)
@@ -95,7 +95,7 @@ def _handle_global_configuration(config):
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))
     # set up the config parsers
-    file_config = config.config_parser
+    file_config = get_config_parser()
     config_exists = file_config.read([config.config_path])
     should_modify_global_config = False
     if config_exists:
@@ -105,8 +105,11 @@ def _handle_global_configuration(config):
         answers['modify_global_prompt'] = should_modify_global_config
     if not config_exists or should_modify_global_config:
         # no config exists yet so configure global config or user wants to modify global config
+        need_to_reset_use_local_config = True if config.use_local_config else False
+        if need_to_reset_use_local_config:
+            config.set_to_use_local_config(False)
         output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
-                                          default=get_default_from_config(config.config_parser,
+                                          default=get_default_from_config(config,
                                                                           'core', 'output',
                                                                           OUTPUT_LIST))
         answers['output_type_prompt'] = output_index
@@ -115,20 +118,14 @@ def _handle_global_configuration(config):
         allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
         answers['telemetry_prompt'] = allow_telemetry
         # save the global config
-        try:
-            config.config_parser.add_section('core')
-        except configparser.DuplicateSectionError:
-            pass
-        try:
-            config.config_parser.add_section('logging')
-        except configparser.DuplicateSectionError:
-            pass
         config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
         config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
         config.set_value('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
+        if need_to_reset_use_local_config:
+            config.set_to_use_local_config(True)
 
 
-def handle_configure(cmd, defaults=None):
+def handle_configure(cmd, defaults=None, list_defaults=None):
     if defaults:
         defaults_section = cmd.cli_ctx.config.defaults_section_name
         for default in defaults:
@@ -137,6 +134,12 @@ def handle_configure(cmd, defaults=None):
                 raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
             cmd.cli_ctx.config.set_value(defaults_section, parts[0], _normalize_config_value(parts[1]))
         return
+    if list_defaults:
+        use_local_config_original = cmd.cli_ctx.config.use_local_config
+        cmd.cli_ctx.config.set_to_use_local_config(list_defaults=='local')
+        defaults_result = cmd.cli_ctx.config.items(cmd.cli_ctx.config.defaults_section_name)
+        cmd.cli_ctx.config.set_to_use_local_config(use_local_config_original)
+        return defaults_result
 
     # if nothing supplied, we go interactively
     try:
