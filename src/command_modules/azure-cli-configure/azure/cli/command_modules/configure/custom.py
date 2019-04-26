@@ -8,6 +8,7 @@ import json
 import os
 from six.moves import configparser
 
+from knack.config import get_config_parser
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -24,7 +25,7 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING)
 from azure.cli.command_modules.configure._utils import get_default_from_config
-from knack.config import get_config_parser
+
 answers = {}
 
 logger = get_logger(__name__)
