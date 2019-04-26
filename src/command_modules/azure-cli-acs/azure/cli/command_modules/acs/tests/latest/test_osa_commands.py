@@ -29,7 +29,6 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': osa_name,
-            'fqdn': self.generate_random_fqdn(osa_name, resource_group_location),
             'location': resource_group_location,
             'aad_client_app_id': aad_client_app_id,
             'aad_client_app_secret': aad_client_app_secret,
@@ -38,7 +37,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # create
         create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--fqdn={fqdn} --compute-count=1 ' \
+                     '--compute-count=1 ' \
                      '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
@@ -53,7 +52,6 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D4s_v3'),
-            self.check('fqdn', '{fqdn}'),
             self.exists('openShiftVersion')
         ])
 
@@ -80,14 +78,13 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': osa_name,
-            'fqdn': self.generate_random_fqdn(osa_name, resource_group_location),
             'location': resource_group_location,
             'aad_client_app_id': aad_client_app_id,
             'aad_client_app_secret': aad_client_app_secret
         })
 
         # create --no-wait
-        create_cmd = 'openshift create -g {resource_group} -n {name} --fqdn {fqdn} ' \
+        create_cmd = 'openshift create -g {resource_group} -n {name} ' \
                      '-l {location} -c 1 --aad-client-app-id {aad_client_app_id} ' \
                      '--aad-client-app-secret {aad_client_app_secret} ' \
                      '--tags scenario_test --no-wait'
@@ -102,7 +99,6 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D4s_v3'),
-            self.check('fqdn', '{fqdn}'),
             self.check('provisioningState', 'Succeeded'),
             self.exists('openShiftVersion')
         ])
@@ -122,14 +118,13 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': osa_name,
-            'fqdn': self.generate_random_fqdn(osa_name, resource_group_location),
             'location': resource_group_location,
             'resource_type': 'Microsoft.ContainerService/OpenShiftManagedClusters'
         })
 
         # create
         create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--fqdn={fqdn} --compute-count=1 '
+                     '--compute-count=1 '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.check('provisioningState', 'Succeeded')
@@ -143,7 +138,6 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D4s_v3'),
-            self.check('fqdn', '{fqdn}'),
             self.exists('openShiftVersion')
         ])
 
@@ -159,7 +153,3 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @classmethod
-    def generate_random_fqdn(self, name, location):
-        return "{}.{}.cloudapp.azure.com".format(name, location)

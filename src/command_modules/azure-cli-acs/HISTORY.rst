@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.4.0
+++++++
+* BREAKING CHANGE: Removing `--fqdn` flag on az openshift commands
 
 2.3.22
 ++++++
