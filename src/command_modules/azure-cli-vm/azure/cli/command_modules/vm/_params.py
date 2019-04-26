@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._completers import (
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
     validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
-from ._vm_utils import MSI_LOCAL_ID, VMSS_PROTECTION_POLICY_TYPES
+from ._vm_utils import MSI_LOCAL_ID
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
@@ -344,9 +344,11 @@ def load_arguments(self, _):
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
 
     with self.argument_context('vmss update') as c:
-        c.argument('protection_policy', min_api='2019-03-01', nargs='+',
-                   help="For VMSS instances only. Space-separated settings in 'key[=value]' format. Each key must be one of: {}. Each value must be a boolean.".format(", ".join(VMSS_PROTECTION_POLICY_TYPES)))
-        c.argument('instance_id', help="Update VM instance with this ID. If missing, update the VMSS.")
+        protection_policy_type = CLIArgumentType(overrides=get_three_state_flag(), arg_group="Protection Policy", min_api='2019-03-01')
+
+        c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
+        c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
+        c.argument('instance_id', help="Update the VM instance with this ID. If missing, update the VMSS.")
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:

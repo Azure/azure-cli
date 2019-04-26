@@ -2282,7 +2282,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
-                protection_policy=None,
+                protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2294,20 +2294,24 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if license_type is not None:
             vmss.license_type = license_type
 
-        if protection_policy is not None:
-            vmss.protection_policy = VMProtectionPolicy(**protection_policy)
+        if not vmss.protection_policy:
+            vmss.protection_policy = VMProtectionPolicy()
+
+        if protect_from_scale_in is not None:
+            vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
+
+        if protect_from_scale_set_actions is not None:
+            vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
 
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.update,
                            resource_group_name, name, instance_id, **kwargs)
 
-
     # else handle vmss update
-    else:
-        if license_type is not None:
-            vmss.virtual_machine_profile.license_type = license_type
+    if license_type is not None:
+        vmss.virtual_machine_profile.license_type = license_type
 
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
-                           resource_group_name, name, **kwargs)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, name, **kwargs)
 
 # endregion
 
