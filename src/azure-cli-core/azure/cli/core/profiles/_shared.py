@@ -86,8 +86,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
             'resource_skus': '2017-09-01',
             'disks': '2018-09-30',
-            'snapshots': '2018-09-30',
-            'images': '2018-10-01'
+            'snapshots': '2018-09-30'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
