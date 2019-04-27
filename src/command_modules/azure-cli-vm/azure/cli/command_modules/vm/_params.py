@@ -29,9 +29,10 @@ from ._vm_utils import MSI_LOCAL_ID
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     # Model imports
-    StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
+    StorageAccountTypes, DiskStorageAccountTypes, SnapshotStorageAccountTypes = self.get_models('StorageAccountTypes', 'DiskStorageAccountTypes', 'SnapshotStorageAccountTypes')
+    UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     ProximityPlacementGroupType = self.get_models('ProximityPlacementGroupType')
-    OperatingSystemTypes = self.get_models('OperatingSystemTypes')
+
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -50,12 +51,22 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
 
-    if StorageAccountTypes:
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
+    # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
+    DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
+
+    if DiskStorageAccountTypes:
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(DiskStorageAccountTypes))
     else:
         # StorageAccountTypes introduced in api version 2016_04_30_preview of Resource.MGMT.Compute package..
         # However, 2017-03-09-profile targets version 2016-03-30 of compute package.
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
+
+    if SnapshotStorageAccountTypes:
+        snapshot_sku = CLIArgumentType(arg_type=get_enum_type(SnapshotStorageAccountTypes))
+    else:
+        # SnapshotStorageAccountTypes introduced in api version 2018_04_01 of Resource.MGMT.Compute package..
+        # However, 2017-03-09-profile targets version 2016-03-30 of compute package.
+        snapshot_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
@@ -98,10 +109,7 @@ def load_arguments(self, _):
     with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
-        if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
-            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
-        else:
-            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
+        c.argument('sku', arg_type=snapshot_sku)
     # endregion
 
     # region Images
@@ -448,8 +456,8 @@ def load_arguments(self, _):
             c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux. "all" enables both ssh and password authentication. ', arg_type=get_enum_type(['ssh', 'password', 'all']))
 
         with self.argument_context(scope, arg_group='Storage') as c:
-            if StorageAccountTypes:
-                allowed_values = ", ".join([sku.value for sku in StorageAccountTypes])
+            if DiskStorageAccountTypes:
+                allowed_values = ", ".join([sku.value for sku in DiskStorageAccountTypes])
             else:
                 allowed_values = ", ".join(['Premium_LRS', 'Standard_LRS'])
 
