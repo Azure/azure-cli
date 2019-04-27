@@ -257,7 +257,7 @@ parameters:
     long-summary: Specify "azure" for advanced networking configurations. Defaults to "kubenet".
   - name: --network-policy
     type: string
-    short-summary: (PREVIEW) The Kubernetes network policy to use.
+    short-summary: The Kubernetes network policy to use.
     long-summary: |
         Using together with "azure" network plugin.
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
@@ -641,9 +641,6 @@ parameters:
   - name: --compute-count -c
     type: int
     short-summary: Number of nodes in the OpenShift node pool.
-  - name: --fqdn
-    type: string
-    short-summary: FQDN for OpenShift API server loadbalancer internal hostname. For example myopenshiftcluster.eastus.cloudapp.azure.com
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.
@@ -662,15 +659,20 @@ parameters:
   - name: --subnet-prefix
     type: string
     short-summary: The CIDR used on the Subnet into which to deploy the cluster.
+  - name: --customer-admin-group-id
+    type: string
+    short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
 
 
 examples:
   - name: Create an OpenShift cluster and auto create an AAD Client
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN}
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster
+  - name: Create an OpenShift cluster and auto create an AAD Client and setup cluster admin group
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --customer-admin-group-id {GROUP_ID}
   - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN} --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
   - name: Create an Openshift cluster using a custom vnet
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --fqdn {FQDN} --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
 """
 
 helps['openshift delete'] = """

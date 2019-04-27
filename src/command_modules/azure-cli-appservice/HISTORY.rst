@@ -3,6 +3,7 @@
 Release History
 ===============
 * functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
+* webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
 
 0.2.18
 ++++++

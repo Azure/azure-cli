@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.2.0
++++++
+* [Breaking Change]: The default value for `--version` is now `v4`, not `v3` (except for `az bot prepare-publish`).
+* [Breaking Change]: `--lang` no longer defaults to `Csharp`. If the command requires `--lang` and it is not provided, the command will error out.
+* [Breaking Change]: The `--appid` and `--password` args for `az bot create` are now required and can be created via `az ad app create`.
+* [Breaking Change]: `az bot create -v v4` does not create or use a Storage Account or Application Insights.
+* [Breaking Change]: Instead of mapping Application Insights regions for `az bot create -v v3`, the command only accepts regions where Application Insights is creatable.
+* [Breaking Change]: `az bot update` is no longer a generic update command, but instead can affect specific properties of a bot.
+* [Deprecation]: All --lang flags now accept and advise users to use `Javascript` instead of `Node`. `Node` as a --lang value is deprecated.
+* Add `Typescript` support to `az bot prepare-deploy`
+* `az bot prepare-deploy` returns `true` if successful and has helpful verbose logging.
+* Add more available Application Insights regions to `az bot create -v v3`
+
 0.1.10
 ++++++
 * Minor fixes

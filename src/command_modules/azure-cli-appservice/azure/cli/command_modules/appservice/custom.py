@@ -2453,6 +2453,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
 
 
 def _ping_scm_site(cmd, resource_group, name):
+    from azure.cli.core.util import should_disable_connection_verify
+
     #  wake up kudu, by making an SCM call
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed
@@ -2460,7 +2462,7 @@ def _ping_scm_site(cmd, resource_group, name):
     scm_url = _get_scm_url(cmd, resource_group, name)
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
-    requests.get(scm_url + '/api/settings', headers=authorization)
+    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify())
 
 
 def is_webapp_up(tunnel_server):

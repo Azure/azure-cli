@@ -41,7 +41,9 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
+from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac.models import (ApplicationCreateParameters,
+                                    ApplicationUpdateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
@@ -1219,6 +1221,8 @@ def update_application(client, object_id, display_name, homepage, identifier_uri
             client.update_key_credentials(object_id, key_creds)
         if password_creds:
             client.update_password_credentials(object_id, password_creds)
+        if reply_urls:
+            client.patch(object_id, ApplicationUpdateParameters(reply_urls=reply_urls))
         return
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
@@ -2255,55 +2259,60 @@ def _ensure_osa_aad(cli_ctx,
                     aad_client_app_secret=None,
                     aad_tenant_id=None,
                     identifier=None,
-                    name=None, update=False):
+                    name=None, create=False,
+                    customer_admin_group_id=None):
     rbac_client = get_graph_rbac_management_client(cli_ctx)
-    if not aad_client_app_id:
-        if not aad_client_app_secret and update:
+    if create:
+        # This reply_url is temporary set since Azure need one to create the AAD.
+        app_id_name = 'https://{}'.format(name)
+        if not aad_client_app_secret:
             aad_client_app_secret = _create_client_secret()
-        reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
 
         # Delegate Sign In and Read User Profile permissions on Windows Azure Active Directory API
         resource_access = ResourceAccess(id="311a71cc-e848-46a1-bdf8-97ff7156d8e6",
                                          additional_properties=None, type="Scope")
-        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access],
+        # Read directory permissions on Windows Azure Active Directory API
+        directory_access = ResourceAccess(id="5778995a-e1bf-45b8-affa-663a9f3f4d04",
+                                          additional_properties=None, type="Role")
+
+        required_osa_aad_access = RequiredResourceAccess(resource_access=[resource_access, directory_access],
                                                          additional_properties=None,
                                                          resource_app_id="00000002-0000-0000-c000-000000000000")
+
         list_aad_filtered = list(rbac_client.applications.list(filter="identifierUris/any(s:s eq '{}')"
-                                                               .format(reply_url)))
-        if update:
-            if list_aad_filtered:
-                update_application(client=rbac_client.applications,
-                                   object_id=list_aad_filtered[0].object_id,
-                                   display_name=identifier,
-                                   identifier_uris=[reply_url],
-                                   reply_urls=[reply_url],
-                                   homepage=reply_url,
-                                   password=aad_client_app_secret,
-                                   required_resource_accesses=[required_osa_aad_access])
-                aad_client_app_id = list_aad_filtered[0].app_id
-                logger.info('Updated AAD: %s', aad_client_app_id)
-            else:
-                result = create_application(client=rbac_client.applications,
-                                            display_name=identifier,
-                                            identifier_uris=[reply_url],
-                                            reply_urls=[reply_url],
-                                            homepage=reply_url,
-                                            password=aad_client_app_secret,
-                                            required_resource_accesses=[required_osa_aad_access])
-                aad_client_app_id = result.app_id
-                logger.info('Created an AAD: %s', aad_client_app_id)
-        else:
+                                                               .format(app_id_name)))
+        if list_aad_filtered:
             aad_client_app_id = list_aad_filtered[0].app_id
-            aad_client_app_secret = 'whatever'
-    # Get the TenantID
-    if aad_tenant_id is None:
-        profile = Profile(cli_ctx=cli_ctx)
-        _, _, aad_tenant_id = profile.get_login_credentials()
+            # Updating reply_url with the correct FQDN information returned by the RP
+            reply_url = 'https://{}/oauth2callback/Azure%20AD'.format(identifier)
+            update_application(client=rbac_client.applications,
+                               object_id=list_aad_filtered[0].object_id,
+                               display_name=name,
+                               identifier_uris=[app_id_name],
+                               reply_urls=[reply_url],
+                               homepage=app_id_name,
+                               password=aad_client_app_secret,
+                               required_resource_accesses=[required_osa_aad_access])
+            logger.info('Updated AAD: %s', aad_client_app_id)
+        else:
+            result = create_application(client=rbac_client.applications,
+                                        display_name=name,
+                                        identifier_uris=[app_id_name],
+                                        homepage=app_id_name,
+                                        password=aad_client_app_secret,
+                                        required_resource_accesses=[required_osa_aad_access])
+            aad_client_app_id = result.app_id
+            logger.info('Created an AAD: %s', aad_client_app_id)
+        # Get the TenantID
+        if aad_tenant_id is None:
+            profile = Profile(cli_ctx=cli_ctx)
+            _, _, aad_tenant_id = profile.get_login_credentials()
     return OpenShiftManagedClusterAADIdentityProvider(
         client_id=aad_client_app_id,
         secret=aad_client_app_secret,
         tenant_id=aad_tenant_id,
-        kind='AADIdentityProvider')
+        kind='AADIdentityProvider',
+        customer_admin_group_id=customer_admin_group_id)
 
 
 def _ensure_service_principal(cli_ctx,
@@ -2428,7 +2437,7 @@ def _remove_osa_nulls(managed_clusters):
     This works around a quirk of the SDK for python behavior. These fields are not sent
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
-    attrs = ['tags', 'public_hostname', 'plan', 'type', 'id']
+    attrs = ['tags', 'plan', 'type', 'id']
     ap_master_attrs = ['name', 'os_type']
     net_attrs = ['peer_vnet_id']
     for managed_cluster in managed_clusters:
@@ -2484,7 +2493,6 @@ def osa_list(cmd, client, resource_group_name=None):
 
 
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
-                     fqdn,
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
                      compute_count=3,
@@ -2495,7 +2503,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      subnet_prefix="10.0.0.0/24",
                      vnet_peer=None,
                      tags=None,
-                     no_wait=False):
+                     no_wait=False,
+                     customer_admin_group_id=None):
 
     if location is None:
         location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -2511,7 +2520,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='infra',  # Must be 12 chars or less before ACS RP adds to it
-        count=int(2),
+        count=int(3),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.infra,
@@ -2530,17 +2539,22 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     )
     identity_providers = []
 
+    # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
+    create_aad = False
+    if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
+        create_aad = True
+
     # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
-    update_aad_secret = False
     try:
         client.get(resource_group_name, name)
     except CloudError:
-        update_aad_secret = True
+        create_aad = True
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
-                                       aad_tenant_id=aad_tenant_id, identifier=fqdn,
-                                       name=name, update=update_aad_secret)
+                                       aad_tenant_id=aad_tenant_id, identifier=None,
+                                       name=name, create=create_aad,
+                                       customer_admin_group_id=customer_admin_group_id)
     identity_providers.append(
         OpenShiftManagedClusterIdentityProvider(
             name='Azure AD',
@@ -2567,7 +2581,6 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
         open_shift_version="v3.11",
-        fqdn=fqdn,
         network_profile=network_profile,
         auth_profile=auth_profile,
         agent_pool_profiles=agent_pool_profiles,
@@ -2576,8 +2589,15 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     try:
         # long_running_operation_timeout=300
-        return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+        result = sdk_no_wait(no_wait, client.create_or_update,
+                             resource_group_name=resource_group_name, resource_name=name, parameters=osamc)
+        result = LongRunningOperation(cmd.cli_ctx)(result)
+        instance = client.get(resource_group_name, name)
+        _ensure_osa_aad(cmd.cli_ctx,
+                        aad_client_app_id=osa_aad_identity.client_id,
+                        aad_client_app_secret=osa_aad_identity.secret,
+                        aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
+                        name=name, create=True)
     except CloudError as ex:
         raise ex
 
