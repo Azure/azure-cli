@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.4.1
+++++++
+* Using Azure RedHat Openshift GA API Version
+
 2.4.0
 ++++++
 * BREAKING CHANGE: Removing `--fqdn` flag on az openshift commands
