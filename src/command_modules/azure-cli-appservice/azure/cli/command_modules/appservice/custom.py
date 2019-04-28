@@ -2273,7 +2273,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, launch_browser=False):  # pylint: disable=too-many-statements, too-many-branches
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False,
+              logs=False, launch_browser=False):  # pylint: disable=too-many-statements, too-many-branches
     import os
     from azure.cli.core._profile import Profile
     client = web_client_factory(cmd.cli_ctx)
@@ -2305,6 +2306,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         if sku is None:
             sku = lang_details.get("default_sku")
         else:
+            logger.info("Found sku argument, skipping use default sku")
             sku = sku
         is_skip_build = language.lower() == STATIC_RUNTIME_NAME
         os_val = "Linux" if language.lower() == NODE_RUNTIME_NAME \
@@ -2320,12 +2322,22 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
-    asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
-    rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
-    # Resource group: check if default RG is set
-    default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
-    logger.info("default RG value is: %s", default_rg)
-    _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
+
+    if resource_group_name is None:
+        logger.info('Using default ResourceGroup value')
+        rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
+    else:
+        logger.info("Found user input for ResourceGroup %s", resource_group_name)
+        rg_name = resource_group_name
+
+    if plan is None:
+        logger.info('Using default appserviceplan value')
+        asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
+        _asp_generic = asp[:-len(asp.split("_")[4])]  # used to determine if a new ASP needs to be created
+    else:
+        asp = plan
+        _asp_generic = asp
+    _create_new_rg = should_create_new_rg(cmd, rg_name, is_linux)
     logger.info("Should create new RG %s", _create_new_rg)
     src_path = "{}".format(src_dir.replace("\\", "\\\\"))
     rg_str = "{}".format(rg_name)
@@ -2343,6 +2355,11 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
             """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
                    detected_version, runtime_version)
     create_json = json.loads(dry_run_str)
+    cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
+    cmd.cli_ctx.config.set_value('defaults', 'sku', full_sku)
+    cmd.cli_ctx.config.set_value('defaults', 'plan', asp)
+    cmd.cli_ctx.config.set_value('defaults', 'location', location)
+    cmd.cli_ctx.config.set_value('defaults', 'web', name)
 
     if dryrun:
         logger.warning("Web app will be created with the below configuration,re-run command "
@@ -2357,8 +2374,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _asp_generic = asp[:-len(asp.split("_")[4])]
         # get all asp in the RG
+        logger.warning("Verifying if the plan with the same sku exists or should create a new plan")
         data = (list(filter(lambda x: _asp_generic in x.name,
                             client.app_service_plans.list_by_resource_group(rg_name))))
         data_sorted = (sorted(data, key=lambda x: x.name))
@@ -2375,8 +2392,12 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
             # from the sorted data pick the last one & check if a new ASP needs to be created
             # based on SKU or not
             _plan_info = data_sorted[num_asps - 1]
-            _asp_num = int(_plan_info.name.split('_')[4]) + 1
-            asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
+            if plan is None:
+                _asp_num = int(_plan_info.name.split('_')[4]) + 1
+                asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
+            else:
+                asp = plan
+
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
@@ -2391,6 +2412,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         logger.warning("App service plan '%s' already exists.", asp)
         _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
         _create_new_app = should_create_new_app(cmd, rg_name, name)
+    cmd.cli_ctx.config.set_value('defaults', 'plan', asp)
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ...", name)
