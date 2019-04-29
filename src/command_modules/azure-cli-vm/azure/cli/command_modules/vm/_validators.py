@@ -69,7 +69,7 @@ def validate_keyvault(cmd, namespace):
 
 
 def validate_proximity_placement_group(cmd, namespace):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from msrestazure.tools import parse_resource_id
 
     if namespace.proximity_placement_group:
         namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,

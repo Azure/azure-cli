@@ -33,7 +33,6 @@ def load_arguments(self, _):
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     ProximityPlacementGroupType = self.get_models('ProximityPlacementGroupType')
 
-
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     multi_ids_type = CLIArgumentType(nargs='+')
