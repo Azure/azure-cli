@@ -30,12 +30,18 @@ helps['bot prepare-publish'] = """
 """
 helps['bot prepare-deploy'] = """
     type: command
-    short-summary: Add scripts and configuration files to your local source code directory to be able to publish back
-                   using `az webapp deployment source`.
+    short-summary: Add scripts/config files for publishing with `az webapp deployment`.
+    long-summary: Add scripts or configuration files to the root of your local source code directory to be able to
+                  publish using `az webapp deployment`. When your code is deployed to your App Service, the generated
+                  scripts or configuration files should be appear in D:\\home\\site\\wwwroot on App Service's Kudu web
+                  page.
     examples:
-        - name: Prepare to use `az webapp` to deploy a Javascript bot by fetching a necessary file.
+        - name: Prepare to use `az webapp` to deploy a Javascript bot by fetching a Node.js IIS web.config file.
           text: |-
             az bot prepare-deploy --lang Javascript --code-dir "MyBotCode"
+        - name: Prepare to use `az webapp` to deploy a Csharp bot by creating a .deployment file.
+          text: |-
+            az bot prepare-deploy --lang Csharp --code-dir "." --proj-file-path "MyBot.csproj"
 """
 helps['bot delete'] = """
     type: command

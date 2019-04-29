@@ -5,14 +5,22 @@ Release History
 
 0.2.0
 +++++
+* [Breaking Change]: `az bot create -v v4 -k webapp` now creates an empty Web App Bot by default (i.e. no bot is deployed to the App Service).
+    * To use the Echo Bot template that was always deployed in the past, use the new `--echo` flag when creating a v4 Web App Bot.
+    * `v3` bot creation does not support using the `--echo` flag.
 * [Breaking Change]: The default value for `--version` is now `v4`, not `v3` (except for `az bot prepare-publish`).
 * [Breaking Change]: `--lang` no longer defaults to `Csharp`. If the command requires `--lang` and it is not provided, the command will error out.
 * [Breaking Change]: The `--appid` and `--password` args for `az bot create` are now required and can be created via `az ad app create`.
+    * Add `--appid` and `--password` validations
 * [Breaking Change]: `az bot create -v v4` does not create or use a Storage Account or Application Insights.
 * [Breaking Change]: Instead of mapping Application Insights regions for `az bot create -v v3`, the command only accepts regions where Application Insights is creatable.
 * [Breaking Change]: `az bot update` is no longer a generic update command, but instead can affect specific properties of a bot.
-* [Deprecation]: All --lang flags now accept and advise users to use `Javascript` instead of `Node`. `Node` as a --lang value is deprecated.
+* [Breaking Change]: All --lang flags now accept `Javascript` instead of `Node`. `Node` as a `--lang` value is no longer supported.
+* [Breaking Change]: `az bot create -v v4 -k webapp` no longer sets `SCM_DO_BUILD_DURING_DEPLOYMENT` to true. All deployments through Kudu will act according to their default behavior.
+* `az bot download` for bots without .bot files now create the language-specific configuration file with values from the Application Settings for the bot.
 * Add `Typescript` support to `az bot prepare-deploy`
+* Add warning message to `az bot prepare-deploy` for `Javascript` and `Typescript` bots.
+    * This message only appears if the `--code-dir` doesn't contain a package.json.
 * `az bot prepare-deploy` returns `true` if successful and has helpful verbose logging.
 * Add more available Application Insights regions to `az bot create -v v3`
 

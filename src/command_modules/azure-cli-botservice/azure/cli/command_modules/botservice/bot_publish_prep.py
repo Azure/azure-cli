@@ -78,7 +78,7 @@ class BotPublishPrep:
                     f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'
                             .format(BotPublishPrep.__find_proj(proj_file)))
 
-            else:
+            elif iis_info['lang'] == 'Javascript':
                 logger.info('Detected bot language JavaScript, Bot Builder version v4. Fetching necessary deployment '
                             'files for deploying on IIS.')
 
