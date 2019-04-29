@@ -263,10 +263,8 @@ def set_location(cmd, sku, location):
     return location
 
 
-def should_create_new_rg(cmd, default_rg, rg_name, is_linux):
-    if (default_rg and _check_resource_group_exists(cmd, default_rg) and
-            _check_resource_group_supports_os(cmd, default_rg, is_linux)):
-        return False
+# check if the RG value to use already exists and follows the OS requirements or new RG to be created
+def should_create_new_rg(cmd, rg_name, is_linux):
     if (_check_resource_group_exists(cmd, rg_name) and
             _check_resource_group_supports_os(cmd, rg_name, is_linux)):
         return False
