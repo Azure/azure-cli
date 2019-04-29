@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
 * webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
 * appserviceplan: az appserviceplan create support for Linux FREE sku
 * webapp: az webapp up now has a 30s sleep after setting SCM_DO_BUILD_DURING_DEPLOYMENT=true appsetting to handle kudu cold start
