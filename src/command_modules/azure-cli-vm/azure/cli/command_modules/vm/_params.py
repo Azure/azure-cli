@@ -348,7 +348,10 @@ def load_arguments(self, _):
 
         c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
         c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
-        c.argument('instance_id', help="Update the VM instance with this ID. If missing, update the VMSS.")
+
+    for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
+        with self.argument_context(scope) as c:
+            c.argument('instance_id', id_part='child_name_1', help="{0} VM instance with this ID. If missing, {0} VMSS.".format(help_prefix))
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
