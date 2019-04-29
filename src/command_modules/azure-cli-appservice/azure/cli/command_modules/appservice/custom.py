@@ -2273,8 +2273,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False,
-              logs=False, launch_browser=False):  # pylint: disable=too-many-statements, too-many-branches
+def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable=too-many-statements, too-many-branches
+              location=None, sku=None, dryrun=False, logs=False, launch_browser=False):
     import os
     from azure.cli.core._profile import Profile
     client = web_client_factory(cmd.cli_ctx)
