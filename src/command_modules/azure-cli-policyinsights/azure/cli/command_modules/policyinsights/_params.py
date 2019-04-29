@@ -9,7 +9,7 @@ from azure.cli.command_modules.resource._completers import (
     get_policy_set_completion_list, get_policy_completion_list,
     get_policy_assignment_completion_list, get_providers_completion_list, get_resource_types_completion_list)
 
-from ._validators import validate_resource
+from ._validators import (validate_resource, validate_expand)
 
 from ._completers import get_policy_remediation_completion_list
 
@@ -110,9 +110,15 @@ def load_arguments(self, _):
             options_list=['--all'],
             action='store_true',
             help='Within the specified time interval, get all policy states instead of the latest only.')
+        c.argument(
+            'expand_clause',
+            validator=validate_expand,
+            options_list=['--expand'],
+            arg_group='Query Option',
+            help='Expand expression using OData notation.')
 
     with self.argument_context('policy state summarize') as c:
-        c.ignore('all_results', 'order_by_clause', 'select_clause', 'apply_clause')
+        c.ignore('all_results', 'order_by_clause', 'select_clause', 'apply_clause', 'expand_clause')
 
     with self.argument_context('policy remediation') as c:
         c.argument('remediation_name', options_list=['--name', '-n'],

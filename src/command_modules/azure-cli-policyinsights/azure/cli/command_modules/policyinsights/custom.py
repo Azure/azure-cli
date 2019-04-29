@@ -115,7 +115,8 @@ def list_policy_states(
         select_clause=None,
         top_value=None,
         filter_clause=None,
-        apply_clause=None):
+        apply_clause=None,
+        expand_clause=None):
 
     from azure.mgmt.policyinsights.models import QueryOptions
 
@@ -126,7 +127,8 @@ def list_policy_states(
         from_property=from_value,
         to=to_value,
         filter=filter_clause,
-        apply=apply_clause)
+        apply=apply_clause,
+        expand=expand_clause)
 
     policy_states_resource = 'latest'
     if all_results is True:
