@@ -389,9 +389,9 @@ helps['eventhubs namespace network-rule add'] = """
     short-summary: Add a network rule for a namespace.
     examples:
         - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
-          text: az eventhubs namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId --ignore-missing-endpoint True
+          text: az eventhubs namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet /subscriptions/{subscriptionid}/resourcegroups/{resourcegroupname}/providers/Microsoft.Network/virtualNetworks/{virtualnetworkname}/subnets/{subnetname} --ignore-missing-endpoint True
         - name: add a IP rule in NetworkruleSet for a namespace
-          text: az eventhubs namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address ipmask --action Allow
+          text: az eventhubs namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.6.0.0/24 --action Allow
 """
 
 helps['eventhubs namespace network-rule list'] = """
@@ -407,7 +407,7 @@ helps['eventhubs namespace network-rule remove'] = """
     short-summary: Remove network rule for a namespace
     examples:
         - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
-          text: az eventhubs namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet subnetId
+          text: az eventhubs namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet /subscriptions/{subscriptionid}/resourcegroups/{resourcegroupname}/providers/Microsoft.Network/virtualNetworks/{virtualnetworkname}/subnets/{subnetname}
         - name: remove IP rule from NetworkruleSet for a namespace
-          text: az eventhubs namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address ipmask
+          text: az eventhubs namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.6.0.0/24
 """
