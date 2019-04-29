@@ -2487,7 +2487,7 @@ def is_webapp_up(tunnel_server):
     return tunnel_server.is_webapp_up()
 
 
-def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
+def get_tunnel(cmd, resource_group_name, name, port=None, slot=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -2496,9 +2496,6 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     profile_user_name = next(p['userName'] for p in profiles)
     profile_user_password = next(p['userPWD'] for p in profiles)
-
-    ssh_user_name = 'root'
-    ssh_user_password = 'Docker!'
 
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
@@ -2510,10 +2507,44 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     _ping_scm_site(cmd, resource_group_name, name)
 
     _wait_for_webapp(tunnel_server)
+    return tunnel_server
+
+
+def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
+
+    logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
+
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if config.remote_debugging_enabled:
+        logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
+    else:
+        ssh_user_name = 'root'
+        ssh_user_password = 'Docker!'
+        logger.warning('SSH is available { username: %s, password: %s }', ssh_user_name, ssh_user_password)
+
+    logger.warning('Ctrl + C to close')
+
+    if timeout:
+        time.sleep(int(timeout))
+    else:
+        while t.isAlive():
+            time.sleep(5)
+
+
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
+
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+
+    ssh_user_name = 'root'
+    ssh_user_password = 'Docker!'
 
     s = threading.Thread(target=_start_ssh_session,
                          args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
@@ -2573,12 +2604,16 @@ def _start_ssh_session(hostname, port, username, password):
         c.close()
 
 
-def ssh_webapp(cmd, resource_group_name, name, slot=None, timeout=None):  # pylint: disable=too-many-statements
+def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None):  # pylint: disable=too-many-statements
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if config.remote_debugging_enabled:
+        raise CLIError('remote debugging is enabled, please disable')
+
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
-        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot, timeout=timeout)
+        create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
 def create_devops_build(

@@ -369,8 +369,14 @@ def load_arguments(self, _):
         c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
-        c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
-        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none')
+        c.argument('port', options_list=['--port', '-p'],
+                   help='Port for the remote connection. Default: Random available port', type=int)
+        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+
+    with self.argument_context('webapp create-remote-connection') as c:
+        c.argument('port', options_list=['--port', '-p'],
+                   help='Port for the remote connection. Default: Random available port', type=int)
+        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
