@@ -326,15 +326,20 @@ class AzCliCommand(CLICommand):
 
 
 def _is_stale(cli_ctx, cache_obj):
-    from configparser import NoOptionError, NoSectionError
     cache_ttl = None
     try:
         cache_ttl = cli_ctx.config.get('core', 'cache_ttl')
-    except (NoOptionError, NoSectionError):
-        # ensure a default value exists even if not previously set
-        from azure.cli.command_modules.configure._consts import DEFAULT_CACHE_TTL
-        cli_ctx.config.set_value('core', 'cache_ttl', DEFAULT_CACHE_TTL)
-        cache_ttl = DEFAULT_CACHE_TTL
+    except Exception as ex:  # pylint: disable=broad-except
+        # TODO: No idea why Python2's except clause fails to catch NoOptionError, but this
+        # is a temp workaround
+        cls_str = str(ex.__class__)
+        if 'NoOptionError' in cls_str or 'NoSectionError' in cls_str:
+            # ensure a default value exists even if not previously set
+            from azure.cli.command_modules.configure._consts import DEFAULT_CACHE_TTL
+            cli_ctx.config.set_value('core', 'cache_ttl', DEFAULT_CACHE_TTL)
+            cache_ttl = DEFAULT_CACHE_TTL
+        else:
+            raise ex
     time_now = datetime.datetime.now()
     time_cache = datetime.datetime.strptime(cache_obj.last_saved, '%Y-%m-%d %H:%M:%S.%f')
     return time_now - time_cache > datetime.timedelta(minutes=int(cache_ttl))
