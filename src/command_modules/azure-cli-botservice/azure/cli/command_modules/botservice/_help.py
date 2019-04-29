@@ -59,7 +59,7 @@ helps['bot publish'] = """
     type: command
     short-summary: Publish to a bot's associated app service.
     long-summary: Publish your source code to your bot's associated app service. This is DEPRECATED for v4 bots and no
-                  longer recommended for publishing v4 bots to Azure. Instead use `az bot prepare-deploy` and `az webapp 
+                  longer recommended for publishing v4 bots to Azure. Instead use `az bot prepare-deploy` and `az webapp
                   deployment` to deploy your v4 bot. For more information see https://aka.ms/deploy-your-bot.
     examples:
         - name: Publish source code to your Azure App, from within the bot code folder
