@@ -2355,12 +2355,6 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
             """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
                    detected_version, runtime_version)
     create_json = json.loads(dry_run_str)
-    cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
-    cmd.cli_ctx.config.set_value('defaults', 'sku', full_sku)
-    cmd.cli_ctx.config.set_value('defaults', 'plan', asp)
-    cmd.cli_ctx.config.set_value('defaults', 'location', location)
-    cmd.cli_ctx.config.set_value('defaults', 'web', name)
-
     if dryrun:
         logger.warning("Web app will be created with the below configuration,re-run command "
                        "without the --dryrun flag to create & deploy a new app")
@@ -2412,7 +2406,6 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         logger.warning("App service plan '%s' already exists.", asp)
         _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
         _create_new_app = should_create_new_app(cmd, rg_name, name)
-    cmd.cli_ctx.config.set_value('defaults', 'plan', asp)
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ...", name)

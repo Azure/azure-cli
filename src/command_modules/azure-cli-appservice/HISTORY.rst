@@ -4,7 +4,6 @@ Release History
 ===============
 * functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
 * appservice plan: az appservice plan --sku documentation updated to reflect the supported appserviceplans
-* webapp: az webapp up supports local configuration and sets the values of the arguments on the local configuration on running the command
 * webapp: az webapp up supports optional arguments resourcegroup & plan to override the defaults offered by the command
 * webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
 * appserviceplan: az appserviceplan create support for Linux FREE sku
