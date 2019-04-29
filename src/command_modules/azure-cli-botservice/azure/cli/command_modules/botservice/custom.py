@@ -32,7 +32,7 @@ JAVASCRIPT = 'Javascript'
 TYPESCRIPT = 'Typescript'
 
 
-def __bot_template_validator(version, deploy_echo):
+def __bot_template_validator(version, deploy_echo):  # pylint: disable=inconsistent-return-statements
     if version == 'v3' and deploy_echo:
         raise CLIError("'az bot create --version v3' only creates one type of bot. To create a v3 bot, do not use "
                        "the '--echo' flag when using this command. See 'az bot create --help'.")
@@ -41,7 +41,47 @@ def __bot_template_validator(version, deploy_echo):
         return 'echo'
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals
+def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_path):
+    """For bots without a bot file."""
+    # If no bot file exists, create the language specific configuration file from the bot's Application Settings
+    app_settings = WebAppOperations.get_app_settings(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        name=kudu_client.bot_site_name
+    )
+
+    # Ignorable Application Settings, these are only used on Azure:
+    ignorable_settings = ['BotEnv', 'WEBSITE_NODE_DEFAULT_VERSION', 'SCM_DO_BUILD_DURING_DEPLOYMENT']
+
+    if os.path.exists(os.path.join(folder_path, 'package.json')):
+        logger.info('Detected runtime as Node.js. Package.json present at %s. Creating .env file in that '
+                    'folder.', folder_path)
+        with open(os.path.join(folder_path, '.env'), 'w+') as f:
+            for setting in app_settings:
+                if setting['name'] not in ignorable_settings:
+                    f.write('{0}={1}\n'.format(setting['name'], setting['value']))
+            f.close()
+
+    else:
+        app_settings_path = os.path.join(folder_path, 'appsettings.json')
+
+        logger.info('Detected language as CSharp. Loading app settings from %s.', app_settings_path)
+        appsettings_content = {setting['name']: setting['value'] for setting in app_settings
+                               if setting['name'] not in ignorable_settings}
+        existing = None
+        if not os.path.exists(app_settings_path):
+            logger.info('App settings not found at %s, defaulting app settings to {}.', app_settings_path)
+            existing = {}
+        else:
+            with open(app_settings_path, 'r') as f:
+                existing = json.load(f)
+        with open(os.path.join(app_settings_path), 'w+') as f:
+            for key, value in appsettings_content.items():
+                existing[key] = value
+            f.write(json.dumps(existing))
+
+
+def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
            description=None, display_name=None, endpoint=None, tags=None, storageAccountName=None,
            location='Central US', sku_name='F0', appInsightsLocation=None, version='v4', deploy_echo=None):
     # Kind parameter validation
@@ -66,7 +106,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
                        "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
-    if not len(password):
+    if not password:
         raise CLIError("--password cannot have a length of 0. This value is used to authorize calls to your bot. See "
                        "'az bot create --help'.`")
 
@@ -212,7 +252,7 @@ def create_connection(client, resource_group_name, resource_name, connection_nam
     return client.bot_connection.create(resource_group_name, resource_name, connection_name, setting)
 
 
-def download_app(cmd, client, resource_group_name, resource_name, file_save_path=None):  # pylint: disable=too-many-statements, too-many-locals
+def download_app(cmd, client, resource_group_name, resource_name, file_save_path=None):  # pylint: disable=too-many-statements, too-many-locals, too-many-branches
     logger.info('Retrieving bot information from Azure.')
 
     # Get the bot and ensure it's not a registration only bot
@@ -328,41 +368,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
             return bot_env
 
     else:
-        # If no bot file exists, create the language specific configuration file from the bot's Application Settings
-        app_settings = WebAppOperations.get_app_settings(
-            cmd=cmd,
-            resource_group_name=resource_group_name,
-            name=kudu_client.bot_site_name
-        )
-
-        # Ignorable Application Settings, these are only used on Azure:
-        ignorable_settings = ['BotEnv', 'WEBSITE_NODE_DEFAULT_VERSION', 'SCM_DO_BUILD_DURING_DEPLOYMENT']
-        if os.path.exists(os.path.join(folder_path, 'package.json')):
-            logger.info('Detected runtime as Node.js. Package.json present at %s. Creating .env file in that '
-                        'folder.', folder_path)
-            with open(os.path.join(folder_path, '.env'), 'w+') as f:
-                for setting in app_settings:
-                    if setting['name'] not in ignorable_settings:
-                        f.write('{0}={1}\n'.format(setting['name'], setting['value']))
-                f.close()
-
-        else:
-            app_settings_path = os.path.join(folder_path, 'appsettings.json')
-
-            logger.info('Detected language as CSharp. Loading app settings from %s.', app_settings_path)
-            appsettings_content = {setting['name']: setting['value'] for setting in app_settings
-                                   if setting['name'] not in ignorable_settings}
-            existing = None
-            if not os.path.exists(app_settings_path):
-                logger.info('App settings not found at %s, defaulting app settings to {}.', app_settings_path)
-                existing = {}
-            else:
-                with open(app_settings_path, 'r') as f:
-                    existing = json.load(f)
-            with open(os.path.join(app_settings_path), 'w+') as f:
-                for key, value in appsettings_content.items():
-                    existing[key] = value
-                f.write(json.dumps(existing))
+        __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_path)
 
     logger.info('Bot download completed successfully.')
 
