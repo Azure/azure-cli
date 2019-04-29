@@ -4,7 +4,7 @@ Release History
 ===============
 2.4.1
 ++++++
-* Using Azure RedHat Openshift GA API Version
+* Using Azure Red Hat Openshift GA API Version
 
 2.4.0
 ++++++

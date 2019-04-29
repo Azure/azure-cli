@@ -628,7 +628,7 @@ examples:
 
 helps['openshift'] = """
 type: group
-short-summary: Manage Azure RedHat OpenShift Services.
+short-summary: Manage Azure Red Hat OpenShift Services.
 """
 
 helps['openshift create'] = """
