@@ -29,7 +29,7 @@ MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
-WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
+WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 
 # pylint: disable=too-many-statements
 
