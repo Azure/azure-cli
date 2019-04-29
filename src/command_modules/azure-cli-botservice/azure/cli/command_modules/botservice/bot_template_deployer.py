@@ -55,28 +55,12 @@ class BotTemplateDeployer:
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
-                   storageAccountName, location, sku_name, appInsightsLocation, language, version):
-        """Create WebApp Bot.
-
-        :param cmd:
-        :param logger:
-        :param client:
-        :param resource_group_name:
-        :param resource_name:
-        :param description:
-        :param kind:
-        :param appid:
-        :param password:
-        :param storageAccountName:
-        :param location:
-        :param sku_name:
-        :param appInsightsLocation:
-        :param language:
-        :param version:
-        :return:
-        """
+                   storageAccountName, location, sku_name, appInsightsLocation, language, version, bot_template_type):
         kind = 'sdk' if kind == 'webapp' else kind
-        (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(version, language, kind)
+        (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(version,
+                                                                                    language,
+                                                                                    kind,
+                                                                                    bot_template_type)
 
         logger.debug('Detected SDK version %s, kind %s and programming language %s. Using the following template: %s.',
                      version, kind, language, zip_url)
@@ -103,7 +87,6 @@ class BotTemplateDeployer:
             "botEnv": "prod",
             "createServerFarm": True,
             "serverFarmLocation": location.lower().replace(' ', ''),
-            "azureWebJobsBotFrameworkDirectLineSecret": "",
             "botId": resource_name
         }
         if description:
@@ -178,7 +161,10 @@ class BotTemplateDeployer:
         return parameters
 
     @staticmethod
-    def __retrieve_bot_template_link(version, language, kind):
+    def __retrieve_bot_template_link(version, language, kind, bot_template_type):
+        if version == 'v4' and not bot_template_type:
+            return '', BotTemplateDeployer.v4_webapp_template_name
+
         response = requests.get('https://dev.botframework.com/api/misc/bottemplateroot')
         if response.status_code != 200:
             raise CLIError('Unable to get bot code template from CDN. Please file an issue on {0}'.format(
@@ -203,9 +189,9 @@ class BotTemplateDeployer:
                 raise CLIError('Function bot creation is not supported for v4 bot sdk.')
 
             template_name = BotTemplateDeployer.v4_webapp_template_name
-            if language == 'Csharp':
+            if language == 'Csharp' and bot_template_type == 'echo':
                 cdn_link = cdn_link + 'csharp-abs-webapp-v4_echobot_precompiled.zip'
-            elif language == 'Javascript':
+            elif language == 'Javascript' and bot_template_type == 'echo':
                 cdn_link = cdn_link + 'node.js-abs-webapp-v4_echobot.zip'
 
         return cdn_link, template_name
