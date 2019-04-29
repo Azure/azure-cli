@@ -71,21 +71,16 @@ def validate_keyvault(cmd, namespace):
 def validate_proximity_placement_group(cmd, namespace):
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
-    namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
-                                                           namespace.resource_group_name,
-                                                           'proximityPlacementGroups', 'Microsoft.Compute')
+    if namespace.proximity_placement_group:
+        namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
+                                                               namespace.resource_group_name,
+                                                               'proximityPlacementGroups', 'Microsoft.Compute')
 
-    if not namespace.proximity_placement_group or not is_valid_resource_id(namespace.proximity_placement_group):
-        logger.debug('namespace.proximity_placement_group is %s', namespace.proximity_placement_group)
-        return
+        parsed = parse_resource_id(namespace.proximity_placement_group)
+        rg, name = parsed['resource_group'], parsed['name']
 
-    parsed = parse_resource_id(namespace.proximity_placement_group)
-
-    rg = parsed['resource_group']
-    name = parsed['name']
-
-    if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
-        raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
+            raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
 
 
 def process_vm_secret_format(cmd, namespace):
