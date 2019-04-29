@@ -10,6 +10,7 @@ Release History
 * vmss wait: add `--instance-id`.
 * [new command group] ppg: add `ppg create / delete / list / show / update` for managing Proximity Placement Groups.
 * ppg: add `--ppg` to `vm create`, `vmss create` and `vm availability-set create`
+* image create: expose `--hyper-v-generation` parameter.
 
 2.2.19
 ++++++

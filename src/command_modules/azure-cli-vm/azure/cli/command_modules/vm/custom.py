@@ -314,7 +314,7 @@ def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_wr
 # region Images (Managed)
 def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk_sources=None, location=None,  # pylint: disable=too-many-locals,unused-argument
                  # below are generated internally from 'source' and 'data_disk_sources'
-                 source_virtual_machine=None, storage_sku=None,
+                 source_virtual_machine=None, storage_sku=None, hyper_v_generation=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
@@ -355,6 +355,9 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
         # pylint disable=no-member
         image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
+
+    if hyper_v_generation:
+        image.hyper_vgeneration = hyper_v_generation
 
     client = _compute_client_factory(cmd.cli_ctx)
     return client.images.create_or_update(resource_group_name, name, image)

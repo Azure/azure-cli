@@ -31,7 +31,7 @@ def load_arguments(self, _):
     # Model imports
     StorageAccountTypes, DiskStorageAccountTypes, SnapshotStorageAccountTypes = self.get_models('StorageAccountTypes', 'DiskStorageAccountTypes', 'SnapshotStorageAccountTypes')
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
-    ProximityPlacementGroupType = self.get_models('ProximityPlacementGroupType')
+    ProximityPlacementGroupType, HyperVGenerationTypes, HyperVGeneration = self.get_models('ProximityPlacementGroupType', 'HyperVGenerationTypes', 'HyperVGeneration')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -71,6 +71,12 @@ def load_arguments(self, _):
     with self.argument_context('network nic scale-set list') as c:
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
+    HyperVGenerationTypes = HyperVGenerationTypes or HyperVGeneration
+    if HyperVGenerationTypes:
+        hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
+    else:
+        hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -86,7 +92,9 @@ def load_arguments(self, _):
                 c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
                 c.argument('for_upload', arg_type=get_three_state_flag(),
                            help='Create the {0} for uploading blobs later on through storage commands. Run "az {0} grant-access --access-level Write" to retrieve the {0}\'s SAS token.'.format(scope))
-                c.argument('hyper_v_generation', help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only. Possible values include: "V1", "V2"')
+                c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
+            else:
+                c.ignore('access_level', 'for_upload', 'hyper_v_generation')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -126,6 +134,7 @@ def load_arguments(self, _):
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to create the VM image. Unused if source VM is specified.')
         c.argument('os_disk_caching', arg_type=get_enum_type(CachingTypes), help="Storage caching type for the image's OS disk.")
+        c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
