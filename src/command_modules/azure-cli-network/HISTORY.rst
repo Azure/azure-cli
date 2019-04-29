@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.4.0
++++++
+* [BREAKING CHANGE] `vnet create/update`: Replaced `--cache` arugment with `--defer`.
+
 2.3.7
 +++++
 * `dns zone create`: Add auto name server delegation in parent during child zone creation
