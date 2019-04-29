@@ -2282,6 +2282,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     src_dir = os.getcwd()
     user = Profile().get_current_account_user()
     user = user.split('@', 1)[0]
+    if len(user.split('#', 1)) > 1:  # on cloudShell user is in format live.com#user@domain.com
+        user = user.split('#', 1)[1]
     logger.info("UserPrefix to use '%s'", user)
     # if dir is empty, show a message in dry run
     do_deployment = False if os.listdir(src_dir) == [] else True

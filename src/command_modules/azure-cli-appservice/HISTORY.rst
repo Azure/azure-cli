@@ -3,6 +3,7 @@
 Release History
 ===============
 * functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
+* webapp: Fixing getting the correct username for cloudshell which was causing az webapp up to fail
 * appservice plan: az appservice plan --sku documentation updated to reflect the supported appserviceplans
 * webapp: az webapp up supports optional arguments resourcegroup & plan to override the defaults offered by the command
 * webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
