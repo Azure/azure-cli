@@ -165,9 +165,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
         c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo). If '/dev/null' is specified, the value will be set to None and ignored.")
         c.argument('arg', help="Build argument in 'name[=value]' format. Multiple --arg can be fed.", action='append', validator=validate_arg)
-        c.argument('secret_arg', help="Secret build argument in 'name[=value]' format. Multiple --secret-arg can be fed.", action='append", validator=validate_secret_arg)
-        c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format. Multiple --set can be fed.", action='append", validator=validate_set)
-        c.argument('set_secret', help="Secret task value in 'name[=value]' format. Multiple --set-secret can be fed.", action='append", validator=validate_set_secret)
+        c.argument('secret_arg', help="Secret build argument in 'name[=value]' format. Multiple --secret-arg can be fed.", action='append', validator=validate_secret_arg)
+        c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format. Multiple --set can be fed.", action='append', validator=validate_set)
+        c.argument('set_secret', help="Secret task value in 'name[=value]' format. Multiple --set-secret can be fed.", action='append', validator=validate_set_secret)
 
         # Source Trigger parameters
         c.argument('source_trigger_name', help="The name of the source trigger.")
