@@ -22,7 +22,9 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_GLOBAL_OUTPUT,
                                                          MSG_PROMPT_LOGIN,
                                                          MSG_PROMPT_TELEMETRY,
-                                                         MSG_PROMPT_FILE_LOGGING)
+                                                         MSG_PROMPT_FILE_LOGGING,
+                                                         MSG_PROMPT_CACHE_TTL,
+                                                         DEFAULT_CACHE_TTL)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 
 answers = {}
@@ -117,9 +119,21 @@ def _handle_global_configuration(config):
         enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
         allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
         answers['telemetry_prompt'] = allow_telemetry
+        cache_ttl = None
+        while not cache_ttl:
+            try:
+                cache_ttl = prompt(MSG_PROMPT_CACHE_TTL) or DEFAULT_CACHE_TTL
+                # ensure valid int by casting
+                cache_value = int(cache_ttl)
+                if cache_value < 1:
+                    raise ValueError
+            except ValueError:
+                logger.error('TTL must be a positive integer')
+                cache_ttl = None
         # save the global config
         config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
         config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
+        config.set_value('core', 'cache_ttl', cache_ttl)
         config.set_value('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
         if need_to_reset_use_local_config:
             config.set_to_use_local_config(True)
@@ -182,32 +196,48 @@ def list_cache_contents(cmd):
                 continue
             resource_type = os.path.split(dir_name)[1]
             for f in file_list:
-                with open(os.path.join(dir_name, f), 'r') as cache_file:
-                    cache_obj = json.loads(cache_file.read())
-                contents.append({
-                    'resourceGroup': rg_name,
-                    'resourceType': resource_type,
-                    'name': f.split('.', 1)[0],
-                    'lastTouched': cache_obj['_last_touched'],
-                })
+                file_path = os.path.join(dir_name, f)
+                try:
+                    with open(file_path, 'r') as cache_file:
+                        cache_obj = json.loads(cache_file.read())
+                        contents.append({
+                            'resourceGroup': rg_name,
+                            'resourceType': resource_type,
+                            'name': f.split('.', 1)[0],
+                            'lastSaved': cache_obj['last_saved']
+                        })
+                except KeyError:
+                    # invalid cache entry
+                    logger.debug('Removing corrupt cache file: %s', file_path)
+                    os.remove(file_path)
     return contents
 
 
-def show_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
+def show_cache_contents(cmd, resource_group_name, item_name, resource_type):
     directory = _get_cache_directory(cmd.cli_ctx)
     item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
     try:
         with open(item_path, 'r') as cache_file:
             cache_obj = json.loads(cache_file.read())
-    except OSError:
+    except (OSError, IOError):
         raise CLIError('Not found in cache: {}'.format(item_path))
     return cache_obj['_payload']
 
 
-def delete_cache_contents(cmd, resource_group_name=None, item_name=None, resource_type=None):
+def delete_cache_contents(cmd, resource_group_name, item_name, resource_type):
     directory = _get_cache_directory(cmd.cli_ctx)
     item_path = os.path.join(directory, resource_group_name, resource_type, '{}.json'.format(item_name))
     try:
         os.remove(item_path)
-    except OSError:
+    except (OSError, IOError):
         logger.info('%s not found in object cache.', item_path)
+
+
+def purge_cache_contents():
+    import shutil
+    from azure.cli.core._environment import get_config_dir
+    directory = os.path.join(get_config_dir(), 'object_cache')
+    try:
+        shutil.rmtree(directory)
+    except (OSError, IOError) as ex:
+        logger.debug(ex)
