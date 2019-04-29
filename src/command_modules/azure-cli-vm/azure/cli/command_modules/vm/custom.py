@@ -2148,8 +2148,11 @@ def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
                        resource_group_name, vm_scale_set_name, instance_ids)
 
 
-def get_vmss(cmd, resource_group_name, name):
-    return _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.get(resource_group_name, name)
+def get_vmss(cmd, resource_group_name, name, instance_id=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if instance_id is not None:
+        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+    return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
@@ -2252,13 +2255,6 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
                        resource_group_name, vm_scale_set_name, vmss_new)
 
 
-def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if instance_id:
-        return client.virtual_machine_scale_set_vms.get(resource_group_name, vm_scale_set_name, instance_id)
-    return client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-
-
 def start_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
@@ -2285,13 +2281,38 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
                        resource_group_name, vm_scale_set_name, instance_ids)
 
 
-def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, **kwargs):
+def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
+                protect_from_scale_in=None, protect_from_scale_set_actions=None,
+                **kwargs):
     vmss = kwargs['parameters']
+    client = _compute_client_factory(cmd.cli_ctx)
+
+    VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
+
+    # handle vmss instance update
+    if instance_id is not None:
+        if license_type is not None:
+            vmss.license_type = license_type
+
+        if not vmss.protection_policy:
+            vmss.protection_policy = VMProtectionPolicy()
+
+        if protect_from_scale_in is not None:
+            vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
+
+        if protect_from_scale_set_actions is not None:
+            vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
+
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.update,
+                           resource_group_name, name, instance_id, **kwargs)
+
+    # else handle vmss update
     if license_type is not None:
         vmss.virtual_machine_profile.license_type = license_type
 
-    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
+
 # endregion
 
 

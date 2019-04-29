@@ -343,6 +343,16 @@ def load_arguments(self, _):
         c.argument('accelerated_networking', arg_type=get_three_state_flag(),
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
 
+    with self.argument_context('vmss update') as c:
+        protection_policy_type = CLIArgumentType(overrides=get_three_state_flag(), arg_group="Protection Policy", min_api='2019-03-01')
+
+        c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
+        c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
+
+    for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
+        with self.argument_context(scope) as c:
+            c.argument('instance_id', id_part='child_name_1', help="{0} VM instance with this ID. If missing, {0} VMSS.".format(help_prefix))
+
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
             c.argument('instance_ids', multi_ids_type, help='Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances.')

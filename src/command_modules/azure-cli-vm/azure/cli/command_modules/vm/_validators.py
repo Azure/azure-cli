@@ -1220,10 +1220,17 @@ def process_vmss_create_namespace(cmd, namespace):
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('Usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
+
+def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    if not namespace.instance_id:
+        if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
+            raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
+                           " Please use --instance-id to specify a VM instance")
 # endregion
 
 

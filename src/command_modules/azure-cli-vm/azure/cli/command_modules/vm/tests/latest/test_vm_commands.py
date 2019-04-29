@@ -259,14 +259,12 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         ])
 
 
-class VMVMSSWindowsLicenseTest(ScenarioTest):
+class VMWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_windows_license_type')
-    def test_vm_vmss_windows_license_type(self, resource_group):
-
+    def test_vm_windows_license_type(self, resource_group):
         self.kwargs.update({
-            'vm': 'winvm',
-            'vmss': 'winvmss'
+            'vm': 'winvm'
         })
         self.cmd('vm create -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -274,13 +272,6 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
         self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
             self.check('licenseType', 'None')
-        ])
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('virtualMachineProfile.licenseType', 'Windows_Server')
-        ])
-        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
-            self.check('virtualMachineProfile.licenseType', 'None')
         ])
 
 
@@ -1954,6 +1945,48 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
+
+
+class VMSSUpdateTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_')
+    def test_vmss_update(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'winvmss'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.licenseType', 'Windows_Server'),
+        ])
+
+        # test --license-type
+        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
+            self.check('virtualMachineProfile.licenseType', 'None')
+        ])
+
+        # test generic update on the vmss
+        self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.licenseType=Windows_Server', checks=[
+            self.check('virtualMachineProfile.licenseType', 'Windows_Server')
+        ])
+
+        # get the instance id of the VM instance
+        self.kwargs['instance_id'] = self.cmd('vmss list-instances -n {vmss} -g {rg}').get_output_in_json()[0]['instanceId']
+
+        # test updating a VM instance's protection policy
+        self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True --instance-id {instance_id}', checks=[
+            self.check('protectionPolicy.protectFromScaleIn', True),
+            self.check('protectionPolicy.protectFromScaleSetActions', True)
+        ])
+
+        # test generic update on a VM instance
+        self.cmd('vmss update -g {rg} -n {vmss} --set protectionPolicy.protectFromScaleIn=False protectionPolicy.protectFromScaleSetActions=False --instance-id {instance_id}', checks=[
+            self.check('protectionPolicy.protectFromScaleIn', False),
+            self.check('protectionPolicy.protectFromScaleSetActions', False)
+        ])
+
+        # test that cannot try to update protection policy on VMSS itself
+        self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
 
 class AcceleratedNetworkingTest(ScenarioTest):
