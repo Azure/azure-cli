@@ -81,7 +81,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    print(plan_info.sku)
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name not in ['F1', 'Free']:
         site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
@@ -2397,7 +2396,6 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
-        print('creating new asp')
         sku_def = SkuDescription(tier=full_sku, name=sku, capacity=(1 if is_linux else None))
         plan_def = AppServicePlan(location=loc_name, name=asp,
                                   sku=sku_def, reserved=(is_linux or None))
