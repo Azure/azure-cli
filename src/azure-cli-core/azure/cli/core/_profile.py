@@ -24,6 +24,8 @@ from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from knack.log import get_logger
 from knack.util import CLIError
 
+from msal_extensions import get_protected_token_cache
+
 logger = get_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
@@ -628,8 +630,16 @@ class Profile(object):
         subscription_finder = subscription_finder or SubscriptionFinder(self.cli_ctx,
                                                                         self.aad_application_factory,
                                                                         self._creds_cache.adal_token_cache)
+
+        # If other tools have contributed the the MSAL cache since the last time we refreshed accounts, we must use
+        # those credentials as well.
+        subs_from_msal = subscription_finder.find_from_cache(resource=self._ad_resource_uri)
+
+        result = self._normalize_properties(None, subs_from_msal, False)
+
+        to_refresh = _subscription_list_remove(to_refresh, result)
+
         refreshed_list = set()
-        result = []
         for s in to_refresh:
             user_name = s[_USER_ENTITY][_USER_NAME]
             if user_name in refreshed_list:
@@ -664,8 +674,8 @@ class Profile(object):
                                                       is_service_principal)
             result += consolidated
 
-        if self._creds_cache.adal_token_cache.has_state_changed:
-            self._creds_cache.persist_cached_creds()
+        temp_app = self.aad_application_factory(self.cli_ctx)
+        temp_app.get_accounts()
 
         self._set_subscriptions(result, merge=False)
 
@@ -783,17 +793,17 @@ class SubscriptionFinder(object):
         application = self._create_aad_app(tenant)
         scopes = _create_scopes(self.cli_ctx, resource)
         if password:
-            token_entry = application.acquire_token_by_username_password(username, password,
-                                                                         scopes)
+            token_entry = application.acquire_token_by_username_password(username, password, scopes)
         else:  # when refresh account, we will leverage local cached tokens
             accounts = application.get_accounts(username)
-            if not accounts: # verify multiple match as well
-                raise CLIError("No accounts were found")
             token_entry = application.acquire_token_silent(scopes, accounts[0])
 
+        accounts = application.get_accounts(username)
+        if not accounts: # verify multiple match as well
+            raise CLIError("No accounts were found")
         if not token_entry:
             return []
-        self.user_home_account = self._find_user_home_account(token_entry)
+        self.user_home_account = accounts[0]
 
         if tenant is None:
             result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
@@ -840,6 +850,16 @@ class SubscriptionFinder(object):
         result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         self.tenants = [tenant]
         return result
+
+    def find_from_cache(self, resource):
+        """Finds all subscriptions for accounts already populating the MSAL cache."""
+        temp_app = self._create_aad_app(tenant=None)
+
+        users = set(account.get('username').lower() for account in temp_app.get_accounts())
+        subscription_lists = (self.find_from_user_account(username, None, None, resource) for username in users)
+        subscriptions = [subscription for entry in subscription_lists for subscription in entry]
+        return subscriptions
+
 
     #  only occur inside cloud console or VM with identity
     def find_from_raw_token(self, tenant, token):
@@ -963,7 +983,7 @@ class CredsCache(object):
         if self._adal_token_cache is None:
             import msal
             #all_entries = open(self._token_file)
-            self._adal_token_cache = msal.SerializableTokenCache()
+            self._adal_token_cache = get_protected_token_cache()
             temp = json.dumps(_load_tokens_from_file(self._token_file))
             self._adal_token_cache.deserialize(temp)
         return self._adal_token_cache
@@ -1162,3 +1182,18 @@ def _get_authorization_code(scopes, authority_url):
     if results.get('no_browser'):
         raise RuntimeError()
     return results
+
+
+def _subscription_list_union(left, right):
+    left_ids = [subscription.get('id') for subscription in left]
+    return left + [subscription for subscription in right if subscription.get('id') not in left_ids]
+
+
+def _subscription_list_remove(left, right):
+    right_ids = [subscription.get('id') for subscription in right]
+    return [subscription for subscription in left if subscription.get('id') not in right_ids]
+
+
+def _subscription_list_intersect(left, right):
+    right_ids = [subscription.get('id') for subscription in right]
+    return [subscription for subscription in left if subscription.get('id') in right_ids]

@@ -21,7 +21,7 @@ _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated unde
                                 " Run 'az login' only if you need to use a different account")
 
 
-def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(cmd, all=False, refresh=True):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     from azure.cli.core.api import load_subscriptions
 
