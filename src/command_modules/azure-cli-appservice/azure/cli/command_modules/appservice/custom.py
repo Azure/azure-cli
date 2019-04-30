@@ -288,7 +288,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
-        logger.warning("Starting zip deployment")
+        logger.warning("Starting zip deployment. This operation can take a while to complete ...")
         requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
@@ -2396,10 +2396,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
-        sku_def = SkuDescription(tier=full_sku, name=sku, capacity=(1 if is_linux else None))
-        plan_def = AppServicePlan(location=loc_name, name=asp,
-                                  sku=sku_def, reserved=(is_linux or None))
-        client.app_service_plans.create_or_update(rg_name, asp, plan_def)
+        create_app_service_plan(cmd, rg_name, asp, is_linux, None, sku, 1 if is_linux else None, location)
         logger.warning("App service plan creation complete")
         _create_new_app = True
         _show_too_many_apps_warn = False
@@ -2410,7 +2407,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ...", name)
-        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
+        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None, tags={"cli": 'webapp_up'})
         logger.warning("Webapp creation complete")
         _set_build_app_setting = True
         # Update appSettings for netcore apps
@@ -2464,9 +2461,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         # zip contents & deploy
         zip_file_path = zip_contents_from_dir(src_dir, language)
 
-        logger.warning("Preparing to deploy %s contents to app."
-                       "This operation can take a while to complete ...",
-                       '' if is_skip_build else 'and build')
+        logger.warning("Preparing to deploy %s contents to app.", '' if is_skip_build else 'and build')
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file after deployment, handling exception if user removed the file manually
         try:
