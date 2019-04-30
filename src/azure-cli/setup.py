@@ -138,5 +138,8 @@ setup(
         'azure.cli',
     ],
     install_requires=DEPENDENCIES,
+    dependency_links=[
+        'git+https://github.com/marstr/microsoft-authentication-extensions-for-python.git@e4135f201a6e68ab9e63713d792fbf5b557c9b00#egg=msal-extensions',
+    ],
     cmdclass=cmdclass
 )
