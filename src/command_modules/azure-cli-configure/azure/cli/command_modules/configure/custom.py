@@ -109,7 +109,7 @@ def _handle_global_configuration(config):
         answers['modify_global_prompt'] = should_modify_global_config
     if not config_exists or should_modify_global_config:
         # no config exists yet so configure global config or user wants to modify global config
-        with ConfiguredDefaultSetter(config):
+        with ConfiguredDefaultSetter(config, False):
             output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
                                               default=get_default_from_config(config,
                                                                               'core', 'output',
