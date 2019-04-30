@@ -110,7 +110,6 @@ DEPENDENCIES = [
     'azure-cli-storage',
     'azure-cli-telemetry',
     'azure-cli-vm',
-    'msal-extensions',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -139,8 +138,5 @@ setup(
         'azure.cli',
     ],
     install_requires=DEPENDENCIES,
-    dependency_links=[
-        'git+https://github.com/marstr/microsoft-authentication-extensions-for-python.git@e4135f201a6e68ab9e63713d792fbf5b557c9b00#egg=msal-extensions-0.0.1',
-    ],
     cmdclass=cmdclass
 )
