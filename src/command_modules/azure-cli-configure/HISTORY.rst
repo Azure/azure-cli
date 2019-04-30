@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.23
 ++++++
-* Support "local" configuration applicable to a folder
+* Support folder based argument default value configurations
 
 2.0.22
 ++++++
