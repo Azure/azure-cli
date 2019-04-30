@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.23
 ++++++
-* 'az configure' add --list-defaults to show the configures
+* Support folder based argument default value configurations
 
 2.0.22
 ++++++
