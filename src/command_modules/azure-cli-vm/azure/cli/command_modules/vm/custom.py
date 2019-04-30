@@ -314,7 +314,7 @@ def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_wr
 # region Images (Managed)
 def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk_sources=None, location=None,  # pylint: disable=too-many-locals,unused-argument
                  # below are generated internally from 'source' and 'data_disk_sources'
-                 source_virtual_machine=None, storage_sku=None,
+                 source_virtual_machine=None, storage_sku=None, hyper_v_generation=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
                  os_disk=None, os_disk_caching=None, data_disks=None, tags=None, zone_resilient=None):
@@ -355,6 +355,9 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
         # pylint disable=no-member
         image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
+
+    if hyper_v_generation:
+        image.hyper_vgeneration = hyper_v_generation
 
     client = _compute_client_factory(cmd.cli_ctx)
     return client.images.create_or_update(resource_group_name, name, image)
@@ -513,7 +516,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-              aux_subscriptions=None):
+              proximity_placement_group=None, aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -632,7 +635,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
-        boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled)
+        boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
+        proximity_placement_group=proximity_placement_group)
+
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -988,10 +993,9 @@ def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_na
     logger.warning('Availability set %s is already configured for managed disks.', availability_set_name)
 
 
-def create_av_set(cmd, availability_set_name, resource_group_name,
-                  platform_fault_domain_count=2, platform_update_domain_count=None,
-                  location=None, no_wait=False,
-                  unmanaged=False, tags=None, validate=False):
+def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
+                  platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
+                  no_wait=False, tags=None, validate=False):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import build_av_set_resource
@@ -1003,7 +1007,8 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
 
     av_set_resource = build_av_set_resource(cmd, availability_set_name, location, tags,
                                             platform_update_domain_count,
-                                            platform_fault_domain_count, unmanaged)
+                                            platform_fault_domain_count, unmanaged,
+                                            proximity_placement_group=proximity_placement_group)
     master_template.add_resource(av_set_resource)
 
     template = master_template.build()
@@ -1852,7 +1857,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
-                aux_subscriptions=None):
+                proximity_placement_group=None, aux_subscriptions=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2056,7 +2061,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
         custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
         eviction_policy=eviction_policy, application_security_groups=application_security_groups,
-        ultra_ssd_enabled=ultra_ssd_enabled)
+        ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
@@ -2611,4 +2616,25 @@ def update_image_version(instance, target_regions=None, replica_count=None):
     if replica_count:
         instance.publishing_profile.replica_count = replica_count
     return instance
+# endregion
+
+
+# region Proximity Placement Group
+def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
+                                     ppg_type, location=None, tags=None):
+    location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+
+    ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
+
+    ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
+                                         location=location, tags=(tags or {}))
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
+
+
+def list_proximity_placement_groups(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list_by_subscription()
 # endregion
