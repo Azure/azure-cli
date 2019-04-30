@@ -3149,6 +3149,7 @@ class VMGalleryImage(ScenarioTest):
 
 # region ppg tests
 
+
 class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix="cli_test_ppg_cmds_")
@@ -3199,7 +3200,6 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'], rg_prefix='cli_test_ppg_resources_')
         self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'], 'cli_test_ppg_resources_')
 
-
     # it would be simpler to do the following:
     # self.assertEqual(ppg_resource['availabilitySets'][0]['id'].lower(), self.kwargs['avset_id'].lower())
     # self.assertEqual(ppg_resource['virtualMachines'][0]['id'].lower(), self.kwargs['vm_id'].lower())
@@ -3221,6 +3221,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
                 self.assertTrue(parsed_2[k2].startswith(rg_prefix))
             else:
                 self.assertEqual(parsed_1[k1], parsed_2[k2])
+# endregion
 
 
 if __name__ == '__main__':
