@@ -35,7 +35,7 @@ from ._validators import (
 
 image_by_tag_type = CLIArgumentType(
     options_list=['--image', '-t'],
-    help="The name of the image. May include a tag in the format 'name:tag'."
+    help="The name of the image. May include a tag in the format 'name:tag'. Multiple --image or -t can be fed."
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -82,7 +82,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('source_registry_username', options_list=['--username', '-u'], help='The username of source container registry')
         c.argument('source_registry_password', options_list=['--password', '-p'], help='The password of source container registry')
         c.argument('target_tags', arg_type=image_by_tag_type, action='append')
-        c.argument('repository', help='The repository name to do a manifest-only copy for images.', action='append')
+        c.argument('repository', help='The repository name to do a manifest-only copy for images. Multiple --repository can be fed.', action='append')
         c.argument('force', help='Overwrite the existing tag of the image to be imported.', action='store_true')
 
     with self.argument_context('acr config content-trust') as c:
@@ -138,16 +138,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())
         c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context. It can be '-' to pipe a file from the standard input.")
         c.argument('values', help="The task values file path relative to the source context.")
-        c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format.", action='append', validator=validate_set)
-        c.argument('set_secret', help="Secret value in 'name[=value]' format.", action='append', validator=validate_set_secret)
+        c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format. Multiple --set can be fed.", action='append', validator=validate_set)
+        c.argument('set_secret', help="Secret value in 'name[=value]' format. Multiple --set-secret can be fed.", action='append', validator=validate_set_secret)
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
         c.argument('no_push', help="Indicates whether the image built should be pushed to the registry.", action='store_true')
         c.argument('no_wait', help="Do not wait for the build to complete and return immediately after queuing the build.", action='store_true')
-        c.argument('arg', options_list=['--build-arg'], help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
-        c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
+        c.argument('arg', options_list=['--build-arg'], help="Build argument in 'name[=value]' format. Multiple --build-arg can be fed.", action='append', validator=validate_arg)
+        c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in 'name[=value]' format. Multiple --secret-build-arg can be fed.", action='append', validator=validate_secret_arg)
 
     with self.argument_context('acr task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -164,10 +164,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         # common to DockerBuildStep, FileTaskStep and RunTaskStep
         c.argument('context_path', options_list=['--context', '-c'], help="The full URL to the source code repository (Requires '.git' suffix for a github repo). If '/dev/null' is specified, the value will be set to None and ignored.")
-        c.argument('arg', help="Build argument in 'name[=value]' format.", action='append', validator=validate_arg)
-        c.argument('secret_arg', help="Secret build argument in 'name[=value]' format.", action='append', validator=validate_secret_arg)
-        c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format.", action='append', validator=validate_set)
-        c.argument('set_secret', help="Secret task value in 'name[=value]' format.", action='append', validator=validate_set_secret)
+        c.argument('arg', help="Build argument in 'name[=value]' format. Multiple --arg can be fed.", action='append', validator=validate_arg)
+        c.argument('secret_arg', help="Secret build argument in 'name[=value]' format. Multiple --secret-arg can be fed.", action='append', validator=validate_secret_arg)
+        c.argument('set_value', options_list=['--set'], help="Task value in 'name[=value]' format. Multiple --set can be fed.", action='append', validator=validate_set)
+        c.argument('set_secret', help="Secret task value in 'name[=value]' format. Multiple --set-secret can be fed.", action='append', validator=validate_set_secret)
 
         # Source Trigger parameters
         c.argument('source_trigger_name', help="The name of the source trigger.")
