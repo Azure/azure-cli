@@ -11,7 +11,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 class IoTHubTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='centraluseuap')
     def test_iot_hub(self, resource_group, resource_group_location):
         hub = 'iot-hub-for-test-1'
         rg = resource_group
@@ -39,6 +39,11 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub show-connection-string -n {0} -g {1}'.format(hub, rg), checks=[
             self.check('length(@)', 1),
             self.check_pattern('connectionString', conn_str_pattern)
+        ])
+
+        self.cmd('iot hub show-connection-string -n {0} -g {1} --all'.format(hub, rg), checks=[
+            self.check('length(connectionString[*])', 5),
+            self.check_pattern('connectionString[0]', conn_str_pattern)
         ])
 
         # Test 'az iot hub update'
@@ -145,7 +150,7 @@ class IoTHubTest(ScenarioTest):
             self.check('[0].name', 'TotalMessages'),
             self.check('[0].maxValue', 400000),
             self.check('[1].name', 'TotalDeviceCount'),
-            self.check('[1].maxValue', 500000)
+            self.check('[1].maxValue', 1000000)
         ])
 
         # Test 'az iot hub show-stats'
@@ -284,7 +289,9 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(storageContainers[*])', 1)])
 
         # Test 'az iot hub devicestream show'
-        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
+        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=[
+                 self.check('length(streamingEndpoints[*])', 1)
+                 ])
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
