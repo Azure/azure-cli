@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.23
 ++++++
-* 'az configure' add --list-defaults to show the configures
+* Support "local" configuration applicable to a folder
 
 2.0.22
 ++++++

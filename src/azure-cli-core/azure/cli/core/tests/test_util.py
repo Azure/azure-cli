@@ -13,7 +13,7 @@ import json
 
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
-     open_page_in_browser, can_launch_browser, handle_exception)
+     open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter)
 
 
 class TestUtils(unittest.TestCase):
@@ -305,6 +305,18 @@ class TestHandleException(unittest.TestCase):
         self.assertTrue(mock_logger_error.called)
         self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
         self.assertEqual(ex_result, 1)
+
+    def test_configured_default_setter(self):
+        config = mock.MagicMock()
+        config.use_local_config = None
+        with ConfiguredDefaultSetter(config, True):
+            self.assertEqual(config.use_local_config, True)
+        self.assertIsNone(config.use_local_config)
+
+        config.use_local_config = True
+        with ConfiguredDefaultSetter(config, False):
+            self.assertEqual(config.use_local_config, False)
+        self.assertTrue(config.use_local_config)
 
     @staticmethod
     def _get_mock_HttpOperationError(response_text):

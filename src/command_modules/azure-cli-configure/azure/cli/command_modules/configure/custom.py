@@ -12,6 +12,8 @@ from knack.log import get_logger
 from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
 from knack.util import CLIError
 
+from azure.cli.core.util import ConfiguredDefaultSetter
+
 from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METHOD_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
@@ -107,53 +109,48 @@ def _handle_global_configuration(config):
         answers['modify_global_prompt'] = should_modify_global_config
     if not config_exists or should_modify_global_config:
         # no config exists yet so configure global config or user wants to modify global config
-        need_to_reset_use_local_config = config.use_local_config
-        if need_to_reset_use_local_config:
-            config.set_to_use_local_config(False)
-        output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
-                                          default=get_default_from_config(config,
-                                                                          'core', 'output',
-                                                                          OUTPUT_LIST))
-        answers['output_type_prompt'] = output_index
-        answers['output_type_options'] = str(OUTPUT_LIST)
-        enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
-        allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
-        answers['telemetry_prompt'] = allow_telemetry
-        cache_ttl = None
-        while not cache_ttl:
-            try:
-                cache_ttl = prompt(MSG_PROMPT_CACHE_TTL) or DEFAULT_CACHE_TTL
-                # ensure valid int by casting
-                cache_value = int(cache_ttl)
-                if cache_value < 1:
-                    raise ValueError
-            except ValueError:
-                logger.error('TTL must be a positive integer')
-                cache_ttl = None
-        # save the global config
-        config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
-        config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
-        config.set_value('core', 'cache_ttl', cache_ttl)
-        config.set_value('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
-        if need_to_reset_use_local_config:
-            config.set_to_use_local_config(True)
+        with ConfiguredDefaultSetter(config):
+            output_index = prompt_choice_list(MSG_PROMPT_GLOBAL_OUTPUT, OUTPUT_LIST,
+                                              default=get_default_from_config(config,
+                                                                              'core', 'output',
+                                                                              OUTPUT_LIST))
+            answers['output_type_prompt'] = output_index
+            answers['output_type_options'] = str(OUTPUT_LIST)
+            enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
+            allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
+            answers['telemetry_prompt'] = allow_telemetry
+            cache_ttl = None
+            while not cache_ttl:
+                try:
+                    cache_ttl = prompt(MSG_PROMPT_CACHE_TTL) or DEFAULT_CACHE_TTL
+                    # ensure valid int by casting
+                    cache_value = int(cache_ttl)
+                    if cache_value < 1:
+                        raise ValueError
+                except ValueError:
+                    logger.error('TTL must be a positive integer')
+                    cache_ttl = None
+            # save the global config
+            config.set_value('core', 'output', OUTPUT_LIST[output_index]['name'])
+            config.set_value('core', 'collect_telemetry', 'yes' if allow_telemetry else 'no')
+            config.set_value('core', 'cache_ttl', cache_ttl)
+            config.set_value('logging', 'enable_log_file', 'yes' if enable_file_logging else 'no')
 
 
 # pylint: disable=inconsistent-return-statements
-def handle_configure(cmd, defaults=None, list_defaults=None):
+def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
     if defaults:
         defaults_section = cmd.cli_ctx.config.defaults_section_name
-        for default in defaults:
-            parts = default.split('=', 1)
-            if len(parts) == 1:
-                raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
-            cmd.cli_ctx.config.set_value(defaults_section, parts[0], _normalize_config_value(parts[1]))
+        with ConfiguredDefaultSetter(cmd.cli_ctx.config, scope.lower() == 'local'):
+            for default in defaults:
+                parts = default.split('=', 1)
+                if len(parts) == 1:
+                    raise CLIError('usage error: --defaults STRING=STRING STRING=STRING ...')
+                cmd.cli_ctx.config.set_value(defaults_section, parts[0], _normalize_config_value(parts[1]))
         return
     if list_defaults:
-        use_local_config_original = cmd.cli_ctx.config.use_local_config
-        cmd.cli_ctx.config.set_to_use_local_config(list_defaults == 'local')
-        defaults_result = cmd.cli_ctx.config.items(cmd.cli_ctx.config.defaults_section_name)
-        cmd.cli_ctx.config.set_to_use_local_config(use_local_config_original)
+        with ConfiguredDefaultSetter(cmd.cli_ctx.config, scope.lower() == 'local'):
+            defaults_result = cmd.cli_ctx.config.items(cmd.cli_ctx.config.defaults_section_name)
         return defaults_result
 
     # if nothing supplied, we go interactively
