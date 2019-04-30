@@ -33,7 +33,6 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
     def tearDown(self):
         self.cmd('configure --defaults global="" global2=""')
         self.cmd('configure --defaults local="" --scope local')
-        shutil.rmtree(self.local_dir)
 
     def test_configure_global_defaults(self):
         import os

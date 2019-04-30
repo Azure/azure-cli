@@ -151,7 +151,7 @@ def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
     if list_defaults:
         with ConfiguredDefaultSetter(cmd.cli_ctx.config, scope.lower() == 'local'):
             defaults_result = cmd.cli_ctx.config.items(cmd.cli_ctx.config.defaults_section_name)
-        return defaults_result
+        return [x for x in defaults_result if x.get('value')]
 
     # if nothing supplied, we go interactively
     try:
