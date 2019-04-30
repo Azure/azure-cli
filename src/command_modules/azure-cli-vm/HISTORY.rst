@@ -8,6 +8,9 @@ Release History
 * vmss update: add `--protect-from-scale-in` and `--protect-from-scale-set-actions` to enable updates to the protection policy of VMSS VM instances.
 * vmss update: add `--instance-id` to enable generic update of VMSS VM instances.
 * vmss wait: add `--instance-id`.
+* [new command group] ppg: add `ppg create / delete / list / show / update` for managing Proximity Placement Groups.
+* ppg: add `--ppg` to `vm create`, `vmss create` and `vm availability-set create`
+* image create: expose `--hyper-v-generation` parameter.
 
 2.2.19
 ++++++

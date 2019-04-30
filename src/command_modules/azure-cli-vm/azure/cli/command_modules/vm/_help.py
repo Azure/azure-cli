@@ -1922,3 +1922,28 @@ examples:
   - name: Place the CLI in a waiting state until the VMSS instance has been updated.
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
 """
+
+helps['ppg'] = """
+type: group
+short-summary: Manage Proximity Placement Groups
+"""
+
+helps['ppg create'] = """
+type: command
+short-summary: Create a proximity placement group
+"""
+
+helps['ppg show'] = """
+type: command
+short-summary: Get a proximity placement group
+"""
+
+helps['ppg list'] = """
+type: command
+short-summary: List proximity placement groups
+"""
+
+helps['ppg update'] = """
+type: command
+short-summary: Update a proximity placement group
+"""
