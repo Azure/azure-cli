@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.3.5
++++++
+* namespace: Added network-rule commands.
+* namespace create/update: Added --default-action argument for network rules.
+
 0.3.4
 +++++
 * eventhubs eventhub create/update: Added --skip-empty-archives flag to support empty archives in capture.
