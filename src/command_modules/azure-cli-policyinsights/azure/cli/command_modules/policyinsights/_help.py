@@ -127,6 +127,9 @@ helps['policy state list'] = """
         - name: Get latest policy states in current subscription aggregating results based on some properties specifying multiple groupings.
           text: >
               az policy state list --apply "groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId, resourceId))/groupby((policyAssignmentId, policySetDefinitionId, policyDefinitionReferenceId, policyDefinitionId), aggregate($count as numNonCompliantResources))"
+        - name: Get latest policy states for a resource including policy evaluation details.
+          text: >
+              az policy state list --resource "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup" --expand PolicyEvaluationDetails
 """
 helps['policy state summarize'] = """
     type: command

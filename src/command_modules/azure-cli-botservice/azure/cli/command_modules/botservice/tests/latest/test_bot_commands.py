@@ -166,7 +166,7 @@ class BotTests(ScenarioTest):
         shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_create_v4_webapp_bot(self, resource_group):
+    def test_botservice_create_v4_csharp_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
             'app_id': str(uuid.uuid4()),
@@ -183,7 +183,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
         self.cmd(
-            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp',
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp --echo',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('id', '{botname}'),
@@ -255,7 +255,7 @@ class BotTests(ScenarioTest):
         shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
-    def test_create_v4_js_webapp_bot(self, resource_group):
+    def test_botservice_create_v4_js_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
             'app_id': str(uuid.uuid4()),
@@ -270,7 +270,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript --echo',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -293,6 +293,157 @@ class BotTests(ScenarioTest):
 
         # Delete bot
         self.cmd('az bot delete -g {rg} -n {botname}')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_raise_error_for_invalid_app_id_args(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'short_app_id': str(uuid.uuid4())[:34],
+            'password': str(uuid.uuid4()),
+            'numbers_id': "223232"
+        })
+
+        expected_error = "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See " \
+                         "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app " \
+                         "for more information on App Registrations. See 'az bot create --help' for more CLI " \
+                         "information."
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {numbers_id} -p {password} --lang '
+                     'Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == expected_error
+        except AssertionError:
+            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
+
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {short_app_id} -p {password} --lang '
+                     'Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == expected_error
+        except AssertionError:
+            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
+
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid "" -p {password} --lang '
+                     'Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == expected_error
+        except AssertionError:
+            raise AssertionError('should have thrown an error for appid that is not valid GUID.')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_raise_error_for_empty_password_strings(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4())
+        })
+
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p "" --lang Javascript --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == "--password cannot have a length of 0. This value is used to " \
+                                          "authorize calls to your bot. See 'az bot create --help'.`"
+        except AssertionError:
+            raise AssertionError('should have thrown an error for empty string passwords.')
+
+    "--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
+    "https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app for"
+    " more information on App Registrations. See 'az bot create --help' for more CLI information."
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_v4_js_empty_webapp_for_webapp_bot(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript')
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_download_should_create_appsettings_for_v4_csharp_webapp_echo_bots_no_bot_file(self,
+                                                                                                      resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        results = self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Csharp '
+                           '--echo',
+                           checks={
+                               self.check('resourceGroup', '{rg}'),
+                               self.check('id', '{botname}'),
+                               self.check('type', 'abs'),
+                               self.exists('publishCommand')
+                           })
+
+        bot_name = results.get_output_in_json()['name']
+
+        results = self.cmd('az bot download -g {rg} -n {botname}', checks={self.exists('downloadPath')})
+        results = results.get_output_in_json()
+
+        assert os.path.exists(os.path.join(results['downloadPath'], 'appsettings.json'))
+        assert not os.path.exists(os.path.join(results['downloadPath'], '{0}.bot'.format(bot_name)))
+        with open(os.path.join(results['downloadPath'], 'appsettings.json')) as settings:
+            appsettings = json.load(settings)
+            assert appsettings['MicrosoftAppId']
+            assert appsettings['MicrosoftAppPassword']
+
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_download_should_create_env_file_for_v4_node_webapp_echo_bots_no_bot_file(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        # Delete the bot if already exists
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        dir_path = os.path.join('.', self.kwargs.get('botname'))
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
+
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript --echo',
+            checks={
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs'),
+                self.exists('publishCommand')
+            })
+
+        results = self.cmd('az bot download -g {rg} -n {botname}', checks={self.exists('downloadPath')})
+        results = results.get_output_in_json()
+
+        assert os.path.exists(os.path.join(results['downloadPath'], '.env'))
+        with open(os.path.join(results['downloadPath'], '.env')) as settings:
+            env = [env_var.split('=') for env_var in settings.read().split('\n')]
+            env = {env[0][0]: env[0][1], env[1][0]: env[1][0]}
+            assert env['MicrosoftAppId']
+            assert env['MicrosoftAppPassword']
+
+        if os.path.exists(dir_path):
+            # clean up the folder
+            shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_keep_node_modules_should_not_empty_node_modules_or_install_dependencies(self, resource_group):
@@ -407,6 +558,24 @@ class BotTests(ScenarioTest):
                      self.check('type', 'abs'),
                      self.check('endpoint', 'https://{valid_app_name}.azurewebsites.net/api/messages')
                  ])
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_v3_webapp_bot_should_fail_with_echo_flag(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+        try:
+            self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript '
+                     '-v v3 --echo')
+            raise AssertionError()
+        except CLIError as cli_error:
+            assert cli_error.__str__() == "'az bot create --version v3' only creates one type of bot. " \
+                                          "To create a v3 bot, do not use the '--echo' flag when using this " \
+                                          "command. See 'az bot create --help'."
+        except AssertionError:
+            raise AssertionError('should have thrown an error for v3 bot with --echo flag.')
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_show_on_v4_js_webapp_bot(self, resource_group):
@@ -602,8 +771,6 @@ class BotTests(ScenarioTest):
             pass
         except AssertionError:
             raise AssertionError('should have thrown an error for registration-type bot.')
-        except Exception as error:
-            raise error
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_prepare_publish_with_unregistered_bot_name_should_fail(self, resource_group):
@@ -698,8 +865,6 @@ class BotTests(ScenarioTest):
             raise Exception("'az bot prepare-publish --lang Typescript' should have failed with --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path should not be passed in if language is not Csharp'
-        except Exception as error:
-            raise error
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_prepare_deploy_typescript(self, resource_group):
@@ -742,8 +907,6 @@ class BotTests(ScenarioTest):
             raise Exception("'az bot prepare-publish --lang Csharp' should have failed with no --proj-file-path")
         except CLIError as cli_error:
             assert cli_error.__str__() == '--proj-file-path must be provided if language is Csharp'
-        except Exception as error:
-            raise error
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_prepare_deploy_csharp_fail_if_deployment_file_exists(self, resource_group):

@@ -418,12 +418,32 @@ examples:
 
 helps['functionapp devops-build'] = """
 type: group
-short-summary: Azure Function specific integration with Azure DevOps.
+short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps.
 """
 
 helps['functionapp devops-build create'] = """
 type: command
+short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command.
+"""
+
+helps['functionapp devops-pipeline'] = """
+type: group
+short-summary: Azure Function specific integration with Azure DevOps.
+"""
+
+helps['functionapp devops-pipeline create'] = """
+type: command
 short-summary: Create an Azure DevOps pipeline for a function app.
+examples:
+    - name: create an Azure Pipeline to a function app.
+      text: >
+          az functionapp devops-pipeline create --functionapp-name FunctionApp
+    - name: create an Azure Pipeline from a Github function app repository.
+      text: >
+          az functionapp devops-pipeline create --github-repository GithubOrganization/GithubRepository --github-pat GithubPersonalAccessToken
+    - name: create an Azure Pipeline with specific Azure DevOps organization and project
+      text: >
+          az functionapp devops-pipeline create --organization-name AzureDevOpsOrganization --project-name AzureDevOpsProject
 """
 
 helps['functionapp identity'] = """
@@ -1363,21 +1383,28 @@ examples:
 
 helps['webapp up'] = """
 type: command
-short-summary: Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder where the code is present. Current support includes Node, Python, .NET Core and ASP.NET, staticHtml. Node, Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps. If command is run from an empty folder, an empty windows web app is created.
+short-summary: >
+  Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
+  where the code is present. Current support includes Node, Python, .NET Core and ASP.NET, staticHtml. Node,
+  Python apps are created as Linux apps. .Net Core, ASP.NET and static HTML apps are created as Windows apps.
+  If command is run from an empty folder, an empty windows web app is created.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
         az webapp up -n MyUniqueAppName --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+  - name: Create a web app with the default configuration, by running the command from the folder where the code to
+          deployed exists.
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
+  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed
+          exists.
     text: >
         az webapp up -n MyUniqueAppName -l locationName
   - name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
-  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
+  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the
+          default configuration required to enable log streaming.
     text: >
         az webapp up -n MyUniqueAppName --logs
 """
@@ -1472,4 +1499,9 @@ examples:
 helps['webapp webjob triggered run'] = """
 type: command
 short-summary: Run a specific triggered webjob hosted on a web app.
+"""
+
+helps['webapp create-remote-connection'] = """
+    type: command
+    short-summary: Creates a remote connection using a tcp tunnel to your web app
 """

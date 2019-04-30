@@ -2,7 +2,15 @@
 
 Release History
 ===============
+* functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
+* webapp: Fixing getting the correct username for cloudshell which was causing az webapp up to fail
+* appservice plan: az appservice plan --sku documentation updated to reflect the supported appserviceplans
+* webapp: az webapp up supports optional arguments resourcegroup & plan to override the defaults offered by the command
 * webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
+* appserviceplan: az appserviceplan create support for Linux FREE sku
+* webapp: az webapp up now has a 30s sleep after setting SCM_DO_BUILD_DURING_DEPLOYMENT=true appsetting to handle kudu cold start
+* functionapp: `az functionapp create` supports a runtime of `powershell` on Windows
+* webapp: add create-remote-connection command
 
 0.2.18
 ++++++

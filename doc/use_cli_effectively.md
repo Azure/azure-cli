@@ -111,6 +111,10 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 
   For other details, check out [Stefan's blog](https://blog.jhnr.ch/2018/05/16/working-with-azure-cli-behind-ssl-intercepting-proxy-server/).
 
+## Concurrent builds
+
+If you are using az on a build machine, and multiple jobs can be run in parallel, then there is a risk that the login tokens are shared between two build jobs is the jobs run as the same OS user.  To avoid mix ups like this, set AZURE_CONFIG_DIR to a directory where the login tokens should be stored.  It could be a randomly created folder, or just the name of the jenkins workspace, like this ```AZURE_CONFIG_DIR=.```
+
 ## Appendix
    ### Windows batch scripts for saving to variables and using it later 
        

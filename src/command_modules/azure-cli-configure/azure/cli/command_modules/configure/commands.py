@@ -17,3 +17,4 @@ def load_command_table(self, _):
         g.command('list', 'list_cache_contents')
         g.command('show', 'show_cache_contents')
         g.command('delete', 'delete_cache_contents')
+        g.command('purge', 'purge_cache_contents')

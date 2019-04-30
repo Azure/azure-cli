@@ -33,15 +33,7 @@
             "type": "string",
             "defaultValue": "blank"
         },
-        "azureWebJobsBotFrameworkDirectLineSecret": {
-            "type": "string",
-            "defaultValue": ""
-        },
         "zipUrl": {
-            "type": "string",
-            "defaultValue": ""
-        },
-        "proactiveZipUrl": {
             "type": "string",
             "defaultValue": ""
         },
@@ -69,10 +61,6 @@
             "type": "string",
             "defaultValue": ""
         },
-        "luisApiLocation": {
-            "type": "string",
-            "defaultValue": "Global"
-        },
         "botFileEncryptionKey": {
             "type": "string",
             "defaultValue": ""
@@ -80,60 +68,19 @@
     },
     "variables": {
         "serverFarmName": "[last(split(parameters('serverFarmId'), '/'))]",
-        "myWorkerSize": 0,
-        "proactiveFunctionName": "[concat(parameters('siteName'), '-function')]",
-        "config": {
-            "scratch": {
-                "stateEndpoint": "https://intercom-api-scratch.azurewebsites.net",
-                "azureWebJobsBotFrameworkDirectLineEndpoint": "https://directline.scratch.botframework.com/",
-                "blobStoreName": "icscratch",
-                "openIdMetadata": "https://intercom-api-ppe.azurewebsites.net/v1/.well-known/openidconfiguration"
-            },
-            "ppe": {
-                "stateEndpoint": "https://intercom-api-ppe.azurewebsites.net",
-                "azureWebJobsBotFrameworkDirectLineEndpoint": "https://directline.ppe.botframework.com/",
-                "blobStoreName": "intercomppe",
-                "openIdMetadata": "https://intercom-api-ppe.azurewebsites.net/v1/.well-known/openidconfiguration"
-            },
-            "prod": {
-                "stateEndpoint": "",
-                "azureWebJobsBotFrameworkDirectLineEndpoint": "https://directline.botframework.com/",
-                "blobStoreName": "connectorprod",
-                "openIdMetadata": ""
-            }
-        },
         "botAppKinds": {
-            "function": "functionapp",
             "sdk": "app",
-            "designer": "app",
             "bot": ""
         },
         "botAppKind": "[variables('botAppKinds')[parameters('kind')]]",
-        "currentConfig": "[variables('config')[toLower(parameters('botEnv'))]]",
         "siteHost": "[concat(parameters('siteName'), '.azurewebsites.net')]",
         "botEndpointConfig": {
             "bot": "[parameters('endpoint')]",
-            "sdk": "[concat('https://', variables('siteHost'), '/api/messages')]",
-            "designer": "[concat('https://', variables('siteHost'), '/api/messages')]",
-            "function": "[concat('https://', variables('siteHost'), '/api/messages?code=', 'NYI')]"
+            "sdk": "[concat('https://', variables('siteHost'), '/api/messages')]"
         },
-        "botEndpoint": "[variables('botEndpointConfig')[parameters('kind')]]",
-        "luisApiName": "",
-        "luisApiResId": "[resourceId('Microsoft.CognitiveServices/accounts/', variables('luisApiName'))]"
+        "botEndpoint": "[variables('botEndpointConfig')[parameters('kind')]]"
     },
     "resources": [
-        {
-            "name": "[if(equals('', variables('luisApiName')), 'nosuch', variables('luisApiName'))]",
-            "apiVersion": "2017-04-18",
-            "condition": "[not(equals(variables('luisApiName'), ''))]",
-            "type": "Microsoft.CognitiveServices/accounts",
-            "location": "[parameters('luisApiLocation')]",
-            "sku": {
-                "name": "F0"
-            },
-            "kind": "LUIS",
-            "properties": {}
-        },
         {
             "type": "Microsoft.Web/serverfarms",
             "condition": "[parameters('createServerFarm')]",
@@ -149,7 +96,6 @@
             "name": "[parameters('siteName')]",
             "type": "Microsoft.Web/sites",
             "apiVersion": "2015-08-01",
-            "condition": "[not(equals(parameters('zipUrl'), ''))]",
             "location": "[parameters('location')]",
             "kind": "[variables('botAppKind')]",
             "dependsOn": [
@@ -163,26 +109,6 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "10.14.1"
-                        },
-                        {
-                            "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-                            "value": "true"
-                        },
-                        {
-                            "name": "BotEnv",
-                            "value": "[parameters('botEnv')]"
-                        },
-                        {
-                            "name": "BotOpenIdMetadata",
-                            "value": "[variables('currentConfig').openIdMetadata]"
-                        },
-                        {
-                            "name": "botFilePath",
-                            "value": "[concat('./', parameters('botId'), '.bot')]"
-                        },
-                        {
-                            "name": "botFileSecret",
-                            "value": "[parameters('botFileEncryptionKey')]"
                         },
                         {
                             "name": "MicrosoftAppId",
@@ -222,53 +148,6 @@
             ]
         },
         {
-            "apiVersion": "2016-03-01",
-            "type": "Microsoft.Web/sites",
-            "condition": "[not(equals(parameters('proactiveZipUrl'), ''))]",
-            "name": "[variables('proactiveFunctionName')]",
-            "location": "[parameters('location')]",
-            "kind": "functionapp",
-            "dependsOn": [
-                "[parameters('serverFarmId')]"
-            ],
-            "properties": {
-                "siteConfig": {
-                    "appSettings": [
-                        {
-                            "name": "WEBSITE_CONTENTSHARE",
-                            "value": "[toLower(variables('proactiveFunctionName'))]"
-                        },
-                        {
-                            "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~1"
-                        },
-                        {
-                            "name": "AzureWebJobsBotFrameworkDirectLineSecret",
-                            "value": "[parameters('azureWebJobsBotFrameworkDirectLineSecret')]"
-                        },
-                        {
-                            "name": "AzureWebJobsBotFrameworkDirectLineEndpoint",
-                            "value": "[variables('currentConfig').azureWebJobsBotFrameworkDirectLineEndpoint]"
-                        }
-                    ]
-                }
-            },
-            "resources": [
-                {
-                    "name": "MSDeploy",
-                    "type": "Extensions",
-                    "apiVersion": "2015-02-01",
-                    "condition": "[not(equals(parameters('proactiveZipUrl'), ''))]",
-                    "dependsOn": [
-                        "[concat('Microsoft.Web/Sites/', variables('proactiveFunctionName'))]"
-                    ],
-                    "properties": {
-                        "packageUri": "[parameters('proactiveZipUrl')]"
-                    }
-                }
-            ]
-        },
-        {
             "apiVersion": "2017-12-01",
             "type": "Microsoft.BotService/botServices",
             "name": "[parameters('botId')]",
@@ -286,12 +165,9 @@
                 "allSettings": {
                     "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
                     "SCM_DO_BUILD_DURING_DEPLOYMENT": "true",
-                    "BotEnv": "[parameters('botEnv')]",
                     "BotId": "[parameters('botId')]",
                     "MicrosoftAppId": "[parameters('appId')]",
                     "MicrosoftAppPassword": "[parameters('appSecret')]",
-                    "BotStateEndpoint": "[variables('currentConfig').stateEndpoint]",
-                    "BotOpenIdMetadata": "[variables('currentConfig').openIdMetadata]",
                     "botFilePath": "[concat('./', parameters('botId'), '.bot')]",
                     "botFileSecret": "[parameters('botFileEncryptionKey')]",
                     "description": "[parameters('description')]"
