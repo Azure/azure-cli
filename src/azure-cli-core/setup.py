@@ -104,7 +104,7 @@ setup(
     ],
     install_requires=DEPENDENCIES,
     dependency_links=[
-        'git+https://github.com/marstr/microsoft-authentication-extensions-for-python.git@ab92440c49a7c23b098f3d0bc10960a8b14c5d9f#egg=msal-extensions-0.0.1',
+        'git+https://github.com/marstr/microsoft-authentication-extensions-for-python.git@3a974f25607f776bfa7d38add77f906b38d19932#egg=msal-extensions-0.0.1',
     ],
     extras_require={
         ":python_version<'3.4'": ['enum34'],
