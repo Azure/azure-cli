@@ -9,6 +9,7 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest
 
+
 class TestConfigure(unittest.TestCase):
     def test_configure_output_options(self):
         from azure.cli.core._output import AzOutputProducer
@@ -34,7 +35,6 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
         self.cmd('configure --defaults local="" --scope local')
         shutil.rmtree(self.local_dir)
 
-
     def test_configure_global_defaults(self):
         import os
         # setiing the az configure defaults
@@ -45,7 +45,7 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
         os.chdir(self.local_dir)
         self.cmd('configure --defaults local=local1 --scope local')
 
-        # test listign defaults
+        # test listing defaults
         res = self.cmd('configure --list-defaults --scope local').get_output_in_json()
         self.assertTrue(len(res), 3)
         actual = set([(x['name'], x['value']) for x in res])
