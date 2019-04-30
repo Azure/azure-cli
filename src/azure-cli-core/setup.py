@@ -74,7 +74,8 @@ DEPENDENCIES = [
     'wheel==0.30.0',
     'azure-mgmt-resource==2.1.0',
     'pyperclip>=1.7.0',
-    'psutil>=5.6.1'
+    'psutil>=5.6.1',
+    'git+https://github.com/marstr/microsoft-authentication-extensions-for-python.git@e4135f201a6e68ab9e63713d792fbf5b557c9b00',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
