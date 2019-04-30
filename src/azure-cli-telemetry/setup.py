@@ -50,7 +50,7 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=[
         'applicationinsights>=0.11.1,<0.11.8',
-        'portalocker==1.2.1',
+        'portalocker~=1.2',
     ],
     packages=[
         'azure',
