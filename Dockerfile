@@ -41,6 +41,7 @@ ARG JP_VERSION="0.1.3"
 
 RUN curl https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp \
+ && pip install --upgrade pip \
  && pip install --no-cache-dir --upgrade jmespath-terminal
 
 WORKDIR azure-cli

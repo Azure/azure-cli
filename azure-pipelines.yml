@@ -90,7 +90,7 @@ jobs:
   - script: |
        set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
        set
-
+       pip install -U pip
        build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
