@@ -109,8 +109,8 @@ DEPENDENCIES = [
     'azure-cli-sqlvm==0.1.1',
     'azure-cli-storage==2.4.1',
     'azure-cli-telemetry==1.0.2',
-    'azure-cli-vm==2.2.20'
-    'urllib3==1.24.2'
+    'azure-cli-vm==2.2.20',
+    'urllib3==1.24.2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
