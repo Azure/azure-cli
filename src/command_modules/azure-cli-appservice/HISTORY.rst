@@ -2,6 +2,8 @@
 
 Release History
 ===============
+0.2.19
+++++++
 * functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
 * webapp: Fixing getting the correct username for cloudshell which was causing az webapp up to fail
 * appservice plan: az appservice plan --sku documentation updated to reflect the supported appserviceplans
