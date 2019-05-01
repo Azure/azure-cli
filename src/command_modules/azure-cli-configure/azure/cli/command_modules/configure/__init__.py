@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.configure._help  # pylint: disable=unused-import
 
@@ -15,19 +14,13 @@ class ConfigureCommandsLoader(AzCommandsLoader):
         super(ConfigureCommandsLoader, self).__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
-
-        configure_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.configure.custom#{}')
-
-        with self.command_group('', configure_custom) as g:
-            g.command('configure', 'handle_configure')
-
+        from azure.cli.command_modules.configure.commands import load_command_table
+        load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-
-        with self.argument_context('configure') as c:
-            c.argument('defaults', nargs='+', options_list=('--defaults', '-d'))
-            c.ignore('_subscription')  # ignore the global subscription param
+        from azure.cli.command_modules.configure._params import load_arguments
+        load_arguments(self, command)
 
 
 COMMAND_LOADER_CLS = ConfigureCommandsLoader

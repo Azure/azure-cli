@@ -1,4 +1,3 @@
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -95,17 +94,6 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
         if is_linux and not item.reserved:
             return False
         elif not is_linux and item.reserved:
-            return False
-    return True
-
-
-def should_create_new_asp(cmd, rg_name, asp_name, location):
-    # get all appservice plans from RG
-    client = web_client_factory(cmd.cli_ctx)
-    for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
-        if (item.name.lower() == asp_name.lower() and
-                item.location.replace(" ", "").lower() == location or
-                item.location == location):
             return False
     return True
 

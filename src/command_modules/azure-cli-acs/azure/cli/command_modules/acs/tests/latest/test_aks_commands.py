@@ -21,6 +21,7 @@ from azure.cli.command_modules.acs._format import version_to_tuple
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service(self, resource_group, resource_group_location, sp_name, sp_password):

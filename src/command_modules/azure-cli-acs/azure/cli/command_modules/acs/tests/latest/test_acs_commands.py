@@ -8,8 +8,8 @@ import tempfile
 import unittest
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
-                               RoleBasedServicePrincipalPreparer)
-
+                               RoleBasedServicePrincipalPreparer, live_only)
+from azure_devtools.scenario_tests import AllowLargeResponse
 # flake8: noqa
 
 AZURE_TEST_RUN_LIVE = bool(os.environ.get('AZURE_TEST_RUN_LIVE'))
@@ -76,6 +76,7 @@ class AzureContainerServiceKubernetesScenarioTest(ScenarioTest):
     # the length is set to avoid following error:
     # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
     # is invalid. The name can be up to 80 characters long.
+    @live_only()  # the test is flaky under recording that you have to pre-create a role assignment 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer(skip_assignment=not AZURE_TEST_RUN_LIVE)
     def test_acs_create_kubernetes(self, resource_group, sp_name, sp_password):

@@ -41,7 +41,10 @@ class TunnelServer(object):
         self.local_port = local_port
         if self.local_port != 0 and not self.is_port_open():
             raise CLIError('Defined port is currently unavailable')
-        self.remote_addr = remote_addr
+        if remote_addr.startswith("https://"):
+            self.remote_addr = remote_addr[8:]
+        else:
+            self.remote_addr = remote_addr
         self.remote_user_name = remote_user_name
         self.remote_password = remote_password
         self.client = None
@@ -84,7 +87,7 @@ class TunnelServer(object):
 
         http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
-        url = 'https://{}{}'.format(self.remote_addr, '.scm.azurewebsites.net/AppServiceTunnel/Tunnel.ashx?GetStatus')
+        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus')
         r = http.request(
             'GET',
             url,
@@ -110,7 +113,7 @@ class TunnelServer(object):
         while True:
             self.client, _address = self.sock.accept()
             self.client.settimeout(60 * 60)
-            host = 'wss://{}{}'.format(self.remote_addr, '.scm.azurewebsites.net/AppServiceTunnel/Tunnel.ashx')
+            host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
             basic_auth_header = 'Authorization: Basic {}'.format(basic_auth_string)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
             is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)

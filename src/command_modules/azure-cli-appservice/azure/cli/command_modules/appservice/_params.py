@@ -365,10 +365,12 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('launch_browser', help="Launch the created app using the default browser", default=False, action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
+        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none')
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
@@ -416,10 +418,12 @@ def load_arguments(self, _):
         c.argument('sku', required=False, help='The SKU of the app service plan.')
 
     with self.argument_context('functionapp devops-build create') as c:
-        c.argument('functionapp_name', help="Name of the Azure Function App that you want to use", required=False)
+        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False)
         c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
         c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
-        c.argument('repository_name', help="Name of the Azure Devops repository that you want to use", required=False)
+        c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
         c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?", arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('allow_force_push', help="If Azure Devops repository is not clean, should it overwrite remote content?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('allow_force_push', help="If Azure DevOps repository is not clean, should it overwrite remote content?", arg_type=get_three_state_flag(return_label=True), required=False)
         c.argument('use_local_settings', help="Use your local settings in your functionapp settings?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository", required=False)
+        c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)", required=False)

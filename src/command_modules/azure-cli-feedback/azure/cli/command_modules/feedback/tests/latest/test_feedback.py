@@ -104,7 +104,7 @@ class TestCommandLogFile(ScenarioTest):
         # check failed cli command:
         data_dict = command_log_files[0].command_data_dict
         self.assertTrue(data_dict["success"] is False)
-        self.assertEqual("There was an error during execution.", data_dict["errors"][0])
+        self.assertEqual("There was an error during execution.", data_dict["errors"][0].strip())
         self.assertEqual(data_dict["command_args"], "extension remove -n {}")
 
         # check successful cli command
@@ -134,21 +134,21 @@ class TestCommandLogFile(ScenarioTest):
         command_log_files = _get_command_log_files(self.cli_ctx)
 
         log_file = command_log_files[0]
-        issue_prefix, issue_body, _ = _build_issue_info_tup(log_file)
-        items.append((log_file, issue_body))
+        issue_prefix, _, original_issue_body = _build_issue_info_tup(log_file)
+        items.append((log_file, original_issue_body))
         self.assertTrue(_CLI_ISSUES_URL in issue_prefix)
 
         log_file = command_log_files[2]
-        issue_prefix, issue_body, _ = _build_issue_info_tup(log_file)
-        items.append((log_file, issue_body))
+        issue_prefix, _, original_issue_body = _build_issue_info_tup(log_file)
+        items.append((log_file, original_issue_body))
         self.assertTrue(_EXTENSIONS_ISSUES_URL in issue_prefix)
-        self.assertTrue(log_file.command_data_dict["extension_name"] in issue_body)
-        self.assertTrue(log_file.command_data_dict["extension_version"] in issue_body)
+        self.assertTrue(log_file.command_data_dict["extension_name"] in original_issue_body)
+        self.assertTrue(log_file.command_data_dict["extension_version"] in original_issue_body)
 
-        for log_file, issue_body in items:
-            self.assertTrue(log_file.get_command_name_str() in issue_body)
-            self.assertTrue(log_file.command_data_dict["command_args"] in issue_body)
-            self.assertTrue(log_file.command_data_dict["errors"][0] in issue_body)
+        for log_file, original_issue_body in items:
+            self.assertTrue(log_file.get_command_name_str() in original_issue_body)
+            self.assertTrue(log_file.command_data_dict["command_args"] in original_issue_body)
+            self.assertTrue(log_file.command_data_dict["errors"][0] in original_issue_body)
 
     @staticmethod
     def _ext_installed(ext):

@@ -457,7 +457,7 @@ examples:
 
 helps['aks remove-dev-spaces'] = """
 type: command
-short-summary: (PREVIEW) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+short-summary: Remove Azure Dev Spaces from a managed Kubernetes cluster.
 examples:
   - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
     text: |-
@@ -596,7 +596,7 @@ examples:
 
 helps['aks use-dev-spaces'] = """
 type: command
-short-summary: (PREVIEW) Use Azure Dev Spaces with a managed Kubernetes cluster.
+short-summary: Use Azure Dev Spaces with a managed Kubernetes cluster.
 parameters:
   - name: --update
     type: bool
