@@ -41,7 +41,8 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
+    ConfiguredDefaultSetter
 
 from .tunnel import TunnelServer
 
@@ -2344,14 +2345,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
     rg_str = "{}".format(rg_name)
     dry_run_str = r""" {
             "name" : "%s",
-            "serverfarm" : "%s",
+            "appserviceplan" : "%s",
             "resourcegroup" : "%s",
             "sku": "%s",
             "os": "%s",
             "location" : "%s",
             "src_path" : "%s",
             "version_detected": "%s",
-            "version_to_create": "%s"
+            "runtime_version": "%s"
             }
             """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
                    detected_version, runtime_version)
@@ -2379,7 +2380,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         # and get FirstOrDefault
         selected_asp = next((a for a in data if isinstance(a.sku, SkuDescription) and
                              a.sku.tier.lower() == full_sku.lower() and
-                             (a.location.replace(" ", "").lower() == location or a.location == location)), None)
+                             (a.location.replace(" ", "").lower() == location.lower() or a.location == location)), None)
         if selected_asp is not None:
             asp = selected_asp.name
             _create_new_asp = False
@@ -2398,6 +2399,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         logger.warning("Creating App service plan '%s' ...", asp)
         create_app_service_plan(cmd, rg_name, asp, is_linux, None, sku, 1 if is_linux else None, location)
         logger.warning("App service plan creation complete")
+        create_json['appserviceplan'] = plan
         _create_new_app = True
         _show_too_many_apps_warn = False
     else:
@@ -2409,6 +2411,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         logger.warning("Creating app '%s' ...", name)
         create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None, tags={"cli": 'webapp_up'})
         logger.warning("Webapp creation complete")
+        create_json['name'] = name
         _set_build_app_setting = True
         # Update appSettings for netcore apps
         if language == 'dotnetcore':
@@ -2435,6 +2438,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
             logger.warning('Updating runtime version from %s to %s',
                            site_config.windows_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
+        create_json['runtime_version'] = runtime_version
 
     if do_deployment and not is_skip_build:
         _set_build_app_setting = True
@@ -2469,16 +2473,23 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         except OSError:
             pass
     logger.warning("All done.")
+    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
+        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
+        cmd.cli_ctx.config.set_value('defaults', 'sku', full_sku)
+        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', asp)
+        cmd.cli_ctx.config.set_value('defaults', 'location', location)
+        cmd.cli_ctx.config.set_value('defaults', 'web', name)
     if launch_browser:
         logger.warning("Launching app using default browser")
         view_in_browser(cmd, rg_name, name, None, logs)
     else:
         _url = _get_url(cmd, rg_name, name)
         logger.warning("You can launch the app at '%s'", _url)
-    logger.warning('To redeploy the app run the command az webapp up -n %s -l "%s" ', name, location)
+        create_json.update({'app_url': _url})
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         return get_streaming_log(cmd, rg_name, name)
+    return create_json
 
 
 def _ping_scm_site(cmd, resource_group, name):
