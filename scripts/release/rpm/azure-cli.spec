@@ -60,6 +60,7 @@ do cd $d; %{buildroot}%{cli_lib_dir}/bin/python setup.py bdist_wheel -d $dist_di
 all_modules=`find $dist_dir -name "*.whl"`
 %{buildroot}%{cli_lib_dir}/bin/pip install --no-compile $all_modules
 %{buildroot}%{cli_lib_dir}/bin/pip install --no-compile --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
+%{buildroot}%{cli_lib_dir}/bin/pip install --no-compile --force-reinstall urllib3==1.24.2
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
