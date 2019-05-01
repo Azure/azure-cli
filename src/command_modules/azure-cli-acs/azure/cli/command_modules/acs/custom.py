@@ -1670,8 +1670,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
 
 
 def aks_get_versions(cmd, client, location):
-    print("HELLO ERROR ERROR ERRORE")
-    # return client.list_orchestrators(location, resource_type='managedClusters')
+    return client.list_orchestrators(location, resource_type='managedClusters')
 
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
