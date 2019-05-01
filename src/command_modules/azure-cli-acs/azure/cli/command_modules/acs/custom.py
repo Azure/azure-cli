@@ -1670,7 +1670,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
 
 
 def aks_get_versions(cmd, client, location):
-    return client.list_orchestrators(location, resource_type='managedClusters')
+    print("HELLO ERROR ERROR ERRORE")
+    # return client.list_orchestrators(location, resource_type='managedClusters')
 
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
@@ -2356,8 +2357,7 @@ def _ensure_service_principal(cli_ctx,
 
 def _create_client_secret():
     # Add a special character to satsify AAD SP secret requirements
-    special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
-    special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
+    special_char = '$'
     client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
     return client_secret
 
