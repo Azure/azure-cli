@@ -33,7 +33,7 @@ LABEL maintainer="Microsoft" \
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
-RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
+RUN apk update && apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
  && update-ca-certificates
 
@@ -49,6 +49,8 @@ COPY . /azure-cli
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
 # 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
+# 4. Set up bash auto-completion
+# 5. Install runtime dependencies, and .NET Core dependencies (needed by Azure Artifacts)
 RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     for d in src/azure-cli src/azure-cli-telemetry src/azure-cli-core src/azure-cli-nspkg src/azure-cli-command_modules-nspkg src/command_modules/azure-cli-*/; \
     do cd $d; echo $d; python setup.py bdist_wheel -d $TMP_PKG_DIR; cd -; \
@@ -65,7 +67,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
         | xargs -r apk info --installed \
         | sort -u \
     )" \
- && apk add --virtual .rundeps $runDeps
+ && apk add --virtual .rundeps $runDeps \
+ && apk add --virtual .netcoredeps libintl icu-libs
 
 WORKDIR /
 
