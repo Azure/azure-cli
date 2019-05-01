@@ -7,11 +7,10 @@ import re
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-
 class NatGatewayScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus2')
-    def test_create_natgateway(self, resource_group, resource_group_location):
+    def test_natgateway(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -25,7 +24,7 @@ class NatGatewayScenarioTests(ScenarioTest):
         })
 
         # create
-        create_cmd = 'az network nat-gateway create --resource-group {resource_group} --nat-gateway-name {name} --location {location} --public-ip-address  {publicipaddress} --public-ip-address {publicipprefix} --idle-timeout {idle_timeout}'
+        create_cmd = 'az network nat-gateway create --resource-group {resource_group} --nat-gateway-name {name} --location {location} --public-ip-address  {publicipaddress} --public-ip-prefix {publicipprefix} --idle-timeout {idle_timeout}'
 
         self.cmd(create_cmd, checks=[
             self.check('resourceGroup', '{resource_group}'),
@@ -36,7 +35,21 @@ class NatGatewayScenarioTests(ScenarioTest):
             self.check('location', '{location}')
         ])
 
+        # update
+        update_cmd = 'az network nat-gateway update -g {resource_group} --nat-gateway-name {name} --set idleTimeoutInMinutes=5'
+        result= self.cmd(update_cmd).get_output_in_json()
+        self.assertEqual(result['idleTimeoutInMinutes'], 5)
+
+        # list
+        list_cmd = 'az network nat-gateway list -g {resource_group}'
+        result = self.cmd(list_cmd).get_output_in_json()
+        self.assertTrue(result is not None);
+
+        # show
+        show_cmd = 'az network nat-gateway show --resource-group {resource_group} --nat-gateway-name {name}'
+        result = self.cmd(list_cmd).get_output_in_json()
+        self.assertTrue(result is not None);
+
         # delete
         delete_cmd = 'az network nat-gateway delete --resource-group {resource_group} --nat-gateway-name {name}'
-
         self.cmd(delete_cmd);

@@ -109,8 +109,7 @@ DEPENDENCIES = [
     'azure-cli-sqlvm',
     'azure-cli-storage',
     'azure-cli-telemetry',
-    'azure-cli-vm', 
-    'azure-cli-natgateway'
+    'azure-cli-vm'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
