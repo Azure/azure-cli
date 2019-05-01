@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource==2.1.0',
     'pyperclip>=1.7.0',
     'psutil>=5.6.1',
-    'msal-extensions @ git+https://github.com/marstr/microsoft-authentication-extensions-for-python.git@v0.0.1',
+    'marstr-msal-extensions~=0.0.1',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -103,9 +103,6 @@ setup(
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,
-    dependency_links=[
-        'https://github.com/marstr/microsoft-authentication-extensions-for-python/tarball/v0.0.1#egg=msal-extensions',
-    ],
     extras_require={
         ":python_version<'3.4'": ['enum34'],
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
