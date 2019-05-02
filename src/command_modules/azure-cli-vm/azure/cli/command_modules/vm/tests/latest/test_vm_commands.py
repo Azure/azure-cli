@@ -571,6 +571,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 class VMOSDiskSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
+    @AllowLargeResponse()
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
         self.kwargs.update({'sa': self.create_random_name(prefix='cli', length=12)})
@@ -1137,6 +1138,7 @@ class VMBootDiagnostics(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
     @StorageAccountPreparer(name_prefix='clitestbootdiag')
+    @AllowLargeResponse()
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
         self.kwargs.update({
@@ -3185,9 +3187,9 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --ssh-key-value \'{ssh_key}\' --ppg {ppg}').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username ubuntu-vm --ssh-key-value \'{ssh_key}\' --ppg {ppg}').get_output_in_json()['id']
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username ubuntu-vmss --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
