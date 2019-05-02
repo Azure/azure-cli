@@ -58,6 +58,7 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.storage',
+        'azure.cli.command_modules.storage.azcopy',
         'azure.cli.command_modules.storage.operations'
     ],
     install_requires=DEPENDENCIES,
