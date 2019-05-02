@@ -2,7 +2,8 @@
 
 Release History
 ===============
-
+2.0.64
+++++++
 * Upgrade to knack 0.6.1
 
 2.0.63
