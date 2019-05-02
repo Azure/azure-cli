@@ -236,8 +236,6 @@ class Profile(object):
         if is_service_principal:
             sp_id, sp_credential = sp_auth.get_entry_to_persist(username, tenant)
             self._creds_cache.save_service_principal_cred(sp_id, sp_credential)
-        if self._creds_cache.adal_token_cache.has_state_changed:
-            self._creds_cache.persist_cached_creds()
 
         if allow_no_subscriptions:
             t_list = [s.tenant_id for s in subscriptions]
@@ -679,7 +677,7 @@ class Profile(object):
         temp_app = self.aad_application_factory(self.cli_ctx)
         temp_app.get_accounts()
 
-        self._set_subscriptions(result, merge=False)
+        self._set_subscriptions(result, merge=True)
 
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
         from collections import OrderedDict
