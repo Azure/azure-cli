@@ -846,7 +846,7 @@ class SubscriptionFinder(object):
 
     def find_from_service_principal_id(self, client_id, sp_auth, tenant, resource):
         token_entry = sp_auth.acquire_token(self.cli_ctx, tenant, resource, self._adal_token_cache, client_id)
-        self.user_home_account = { _MSAL_ACCOUNT_USERNAME: client_id }
+        self.user_home_account = {_MSAL_ACCOUNT_USERNAME: client_id}
         result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
         self.tenants = [tenant]
         return result
@@ -855,11 +855,14 @@ class SubscriptionFinder(object):
         """Finds all subscriptions for accounts already populating the MSAL cache."""
         temp_app = self._create_aad_app(tenant=None)
 
-        users = set(account.get('username').lower() for account in temp_app.get_accounts())
-        subscription_lists = (self.find_from_user_account(username, None, None, resource) for username in users)
+        users = [
+            {'username': account.get('username').lower(), 'tenant': account.get('realm').lower()}
+            for account in temp_app.get_accounts()]
+        subscription_lists = (
+            self.find_from_user_account(entry.get('username'), None, entry.get('tenant'), resource)
+            for entry in users)
         subscriptions = [subscription for entry in subscription_lists for subscription in entry]
         return subscriptions
-
 
     #  only occur inside cloud console or VM with identity
     def find_from_raw_token(self, tenant, token):
@@ -982,7 +985,7 @@ class CredsCache(object):
     def load_adal_token_cache(self):
         if self._adal_token_cache is None:
             import msal
-            #all_entries = open(self._token_file)
+            # all_entries = open(self._token_file)
             self._adal_token_cache = get_protected_token_cache()
             temp = json.dumps(_load_tokens_from_file(self._token_file))
             self._adal_token_cache.deserialize(temp)
