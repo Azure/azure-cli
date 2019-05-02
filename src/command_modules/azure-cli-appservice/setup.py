@@ -34,7 +34,7 @@ DEPENDENCIES = [
     'azure-functions-devops-build==0.0.21',
     'azure-mgmt-web==0.41.0',
     'azure-mgmt-storage==3.1.1',
-    'azure-mgmt-containerregistry==2.7.0',
+    'azure-mgmt-containerregistry==2.8.0',
     'azure-mgmt-applicationinsights==0.1.1',
     # v1.17 breaks on wildcard cert https://github.com/shazow/urllib3/issues/981
     'urllib3[secure]>=1.18',

@@ -23,6 +23,8 @@ logger = get_logger(__name__)
 TASK_NOT_SUPPORTED = 'Task is only supported for managed registries.'
 DEFAULT_TOKEN_TYPE = 'PAT'
 NULL_CONTEXT = '/dev/null'
+IDENTITY_LOCAL_ID = '[system]'
+IDENTITY_GLOBAL_REMOVE = '[all]'
 
 DEFAULT_TIMEOUT_IN_SEC = 60 * 60  # 60 minutes
 DEFAULT_CPU = 2
@@ -59,6 +61,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
                     resource_group_name=None,
+                    assign_identity=None,
                     target=None,
                     auth_mode=None):
 
@@ -88,7 +91,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 values_file_path=values,
                 context_path=context_path,
                 context_access_token=git_access_token,
-                values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                values=(set_value if set_value else []) +
+                        (set_secret if set_secret else [])
             )
         else:
             DockerBuildStep = cmd.get_models('DockerBuildStep')
@@ -97,24 +101,30 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 is_push_enabled=not no_push,
                 no_cache=no_cache,
                 docker_file_path=file,
-                arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                arguments=(arg if arg else []) +
+                           (secret_arg if secret_arg else []),
                 context_path=context_path,
                 context_access_token=git_access_token,
                 target=target
             )
     else:
-        yaml_template, values_content = get_yaml_and_values(cmd_value, timeout, file)
+        yaml_template, values_content = get_yaml_and_values(
+            cmd_value, timeout, file)
         import base64
         EncodedTaskStep = cmd.get_models('EncodedTaskStep')
         step = EncodedTaskStep(
-            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
+            encoded_task_content=base64.b64encode(
+                yaml_template.encode()).decode(),
+            encoded_values_content=base64.b64encode(
+                values_content.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+            values=(set_value if set_value else []) +
+                    (set_secret if set_secret else [])
         )
 
-    SourceControlType, SourceTriggerEvent = cmd.get_models('SourceControlType', 'SourceTriggerEvent')
+    SourceControlType, SourceTriggerEvent = cmd.get_models(
+        'SourceControlType', 'SourceTriggerEvent')
     source_control_type = SourceControlType.visual_studio_team_service.value
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
@@ -149,19 +159,26 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     base_image_trigger = None
     if base_image_trigger_enabled:
-        BaseImageTrigger, TriggerStatus = cmd.get_models('BaseImageTrigger', 'TriggerStatus')
+        BaseImageTrigger, TriggerStatus = cmd.get_models(
+            'BaseImageTrigger', 'TriggerStatus')
         base_image_trigger = BaseImageTrigger(
             base_image_trigger_type=base_image_trigger_type,
             status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
             name=base_image_trigger_name
         )
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(
+        cmd, os_type, platform)
 
     Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
         'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties')
 
+    identity = None
+    if assign_identity is not None:
+        identity = _build_identities_info(cmd, assign_identity)
+
     task_create_parameters = Task(
+        identity=identity,
         location=registry.location,
         step=step,
         platform=PlatformProperties(
@@ -269,7 +286,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     if set_value is None and set_secret is None:
         set_values = None
     else:
-        set_values = (set_value if set_value else []) + (set_secret if set_secret else [])
+        set_values = (set_value if set_value else []) + \
+                      (set_secret if set_secret else [])
 
     FileTaskStepUpdateParameters, DockerBuildStepUpdateParameters = cmd.get_models(
         'FileTaskStepUpdateParameters', 'DockerBuildStepUpdateParameters')
@@ -293,7 +311,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             target=target
         )
     elif step:
-        DockerBuildStep, FileTaskStep = cmd.get_models('DockerBuildStep', 'FileTaskStep')
+        DockerBuildStep, FileTaskStep = cmd.get_models(
+            'DockerBuildStep', 'FileTaskStep')
         if isinstance(step, DockerBuildStep):
             step = DockerBuildStepUpdateParameters(
                 image_names=image_names,
@@ -356,7 +375,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             ]
 
         if base_image_trigger_enabled or base_image_trigger is not None:
-            BaseImageTriggerUpdateParameters = cmd.get_models('BaseImageTriggerUpdateParameters')
+            BaseImageTriggerUpdateParameters = cmd.get_models(
+                'BaseImageTriggerUpdateParameters')
 
             status = None
             if base_image_trigger_enabled is not None:
@@ -369,7 +389,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = None, None, None
     if os_type or platform:
-        platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+        platform_os, platform_arch, platform_variant = get_validate_platform(
+            cmd, os_type, platform)
 
     TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
         'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
@@ -396,6 +417,105 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     )
 
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_identity_assign(cmd,
+                             client,
+                             task_name,
+                             registry_name,
+                             identities,
+                             resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    # The system-assigned identity is default
+    if identities is None:
+        identities = IDENTITY_LOCAL_ID
+
+    identity = _build_identities_info(cmd, identities)
+
+    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
+        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    taskUpdateParameters = TaskUpdateParameters(
+        identity=identity,
+        status=None,
+        platform=PlatformUpdateParameters(
+            os=None
+        ),
+        agent_configuration=AgentProperties(
+            cpu=None
+        ),
+        timeout=None,
+        step=None,
+        trigger=TriggerUpdateParameters(
+            source_triggers=None,
+            base_image_trigger=None
+        )
+    )
+
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_identity_remove(cmd,
+                             client,
+                             task_name,
+                             registry_name,
+                             identities=None,
+                             resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    if identities is not None and IDENTITY_GLOBAL_REMOVE in identities:
+        if len(identities) > 1:
+            raise CLIError(
+                "Cannot specify additional identities when [all] is used in [--identities]")
+
+    IdentityProperties, ResourceIdentityType = cmd.get_models(
+        'IdentityProperies', 'ResourceIdentityType')
+    identity = None
+
+    # The system-assigned identity is default
+    if identities is None:
+        identities = IDENTITY_LOCAL_ID
+
+    if IDENTITY_GLOBAL_REMOVE in identities:
+        identity = IdentityProperties(
+            type=ResourceIdentityType.none
+        )
+    else:
+        identity = _build_identities_info(cmd, identities, True)
+
+    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
+        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    taskUpdateParameters = TaskUpdateParameters(
+        identity=identity,
+        status=None,
+        platform=PlatformUpdateParameters(
+            os=None
+        ),
+        agent_configuration=AgentProperties(
+            cpu=None
+        ),
+        timeout=None,
+        step=None,
+        trigger=TriggerUpdateParameters(
+            source_triggers=None,
+            base_image_trigger=None
+        )
+    )
+
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_identity_show(cmd,
+                           client,
+                           task_name,
+                           registry_name,
+                           resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    return client.get_details(resource_group_name, registry_name, task_name).additional_properties
 
 
 def acr_task_credential_add(cmd,
@@ -661,6 +781,28 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     if image:
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
+
+
+def _build_identities_info(cmd, identities, is_remove=None):
+    IdentityProperties, UserIdentityProperties, ResourceIdentityType = cmd.get_models(
+        'IdentityProperties', 'UserIdentityProperties', 'ResourceIdentityType')
+    identities = identities or []
+    identity_types = []
+    if not identities or IDENTITY_LOCAL_ID in identities:
+        identity_types.append(ResourceIdentityType.system_assigned.value)
+    external_identities = [x for x in identities if x != IDENTITY_LOCAL_ID]
+    if external_identities:
+        identity_types.append(ResourceIdentityType.user_assigned.value)
+    identity_types = ', '.join(identity_types)
+    if not identity_types:
+        identity_types = ResourceIdentityType.none.value
+    identity = IdentityProperties(type=identity_types)
+    if external_identities:
+        if is_remove is not None:
+            identity.user_assigned_identities = {e: None for e in external_identities}
+        else:
+            identity.user_assigned_identities = {e: UserIdentityProperties() for e in external_identities}
+    return identity
 
 
 def _get_trigger_event_list(cmd,

@@ -495,6 +495,15 @@ examples:
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
     text: >
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with the system-assigned managed identity
+    text: >
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --assign-identity
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with a user-assigned managed identity
+    text: >
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --assign-identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with both system-assigned and user-assigned managed identities
+    text: >
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
 helps['acr task credential'] = """

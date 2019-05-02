@@ -182,8 +182,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Run agent parameters
         c.argument('cpu', type=int, help='The CPU configuration in terms of number of cores required for the run.')
 
+        # MSI parameter
+        c.argument('assign_identity', nargs='*', help="Assigns a Managed Identity to the task. Use '[system]' to refer system assigned identity, or a resource id to refer tp user assigned identity.")
+
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
+
+    with self.argument_context('acr task identity') as c:
+        c.argument('identities', options_list=['--identities'], nargs='*', help="The identities to assign. Use '[system]' to refer to the system-assigned identity.")
 
     with self.argument_context('acr task credential') as c:
         # Custom registry credentials
