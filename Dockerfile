@@ -56,7 +56,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     [ -d privates ] && cp privates/*.whl $TMP_PKG_DIR; \
     all_modules=`find $TMP_PKG_DIR -name "*.whl"`; \
     pip install --no-cache-dir $all_modules; \
-    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;' \
+    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg; \
+    pip install --no-cache-dir --force-reinstall urllib3==1.24.2;' \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \
