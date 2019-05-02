@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 NODE_VERSION_DEFAULT = "10.14"
-NETCORE_VERSION_DEFAULT = "2.1"
+NETCORE_VERSION_DEFAULT = "2.2"
 DOTNET_VERSION_DEFAULT = "4.7"
 PYTHON_VERSION_DEFAULT = "3.7"
 NETCORE_RUNTIME_NAME = "dotnetcore"

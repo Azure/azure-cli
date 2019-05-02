@@ -2291,3 +2291,22 @@ def _get_list_of_databases_for_fg(
                       {x.lower() for x in add_db_ids}) - {x.lower() for x in remove_db_ids})
 
     return databases
+
+###############################################
+#                sql virtual cluster          #
+###############################################
+
+
+def virtual_cluster_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists virtual clusters in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all virtual clusters in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all virtual clusters in the subscription
+    return client.list()

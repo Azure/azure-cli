@@ -185,12 +185,12 @@ helps['sql db export'] = """
             az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" \\
                 --storage-key-type SharedAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
         - name: Export bacpac using a storage account key.
           text: |
             az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key MYKEY== --storage-key-type StorageAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
     """
 helps['sql db import'] = """
     type: command
@@ -205,12 +205,12 @@ helps['sql db import'] = """
             az sql db import -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" \\
                 --storage-key-type SharedAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
         - name: Import bacpac into an existing database using a storage account key.
           text: |
             az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key MYKEY== \\
                 --storage-key-type StorageAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
     """
 helps['sql db restore'] = """
     type: command
@@ -560,4 +560,31 @@ helps['sql midb delete'] = """
     examples:
         - name: Delete a managed database
           text: az sql midb delete -g mygroup --mi myinstance -n mymanageddb --yes
+    """
+helps['sql virtual-cluster'] = """
+    type: group
+    short-summary: Manage SQL virtual clusters.
+    """
+helps['sql virtual-cluster list'] = """
+    type: command
+    short-summary: List available virtual clusters.
+    examples:
+        - name: List all virtual clusters in the current subscription.
+          text: az sql virtual-cluster list
+        - name: List all virtual clusters in a resource group.
+          text: az sql virtual-cluster list -g mygroup
+    """
+helps['sql virtual-cluster show'] = """
+    type: command
+    short-summary: Get the details for a virtual cluster.
+    examples:
+        - name: Get the details for a virtual cluster
+          text: az sql virtual-cluster show -g mygroup -n mycluster
+    """
+helps['sql virtual-cluster delete'] = """
+    type: command
+    short-summary: Delete a virtual cluster.
+    examples:
+        - name: Delete a virtual cluster
+          text: az sql virtual-cluster delete -g mygroup -n mycluster
     """

@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.2.20
+++++++
+* vmss update: add `--protect-from-scale-in` and `--protect-from-scale-set-actions` to enable updates to the protection policy of VMSS VM instances.
+* vmss update: add `--instance-id` to enable generic update of VMSS VM instances.
+* vmss wait: add `--instance-id`.
+* [new command group] ppg: add `ppg create / delete / list / show / update` for managing Proximity Placement Groups.
+* ppg: add `--ppg` to `vm create`, `vmss create` and `vm availability-set create`
+* image create: expose `--hyper-v-generation` parameter.
+
 2.2.19
 ++++++
 * vm/vmss stop: expose --skip-shutdown. If used, the VM will be powered-off without shutting down. This is helpful if a VM crashes and/or cannot properly shutdown.
