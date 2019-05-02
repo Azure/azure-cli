@@ -156,6 +156,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         c.argument('account_name', acct_name_type, id_part=None)
 
+    with self.argument_context('storage account management-policy create') as c:
+        c.argument('policy', type=file_type, completer=FilesCompleter(),
+                   help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
+                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.')
+        c.argument('account_name', help='The name of the storage account within the specified resource group.')
+
+    with self.argument_context('storage account management-policy update') as c:
+        c.argument('account_name', help='The name of the storage account within the specified resource group.')
+
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
 
