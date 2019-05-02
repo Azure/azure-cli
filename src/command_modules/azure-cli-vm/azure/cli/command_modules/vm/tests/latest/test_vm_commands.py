@@ -3174,11 +3174,11 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('proximityPlacementGroupType', 'Ultra')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_ppg_resources_')
+    @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
     def test_ppg_with_related_resources(self, resource_group):
 
         self.kwargs.update({
-            'ppg': 'my_ppg_1',
+            'ppg': 'myppg',
             'vm': 'vm1',
             'vmss': 'vmss1',
             'avset': 'avset1',
@@ -3187,9 +3187,9 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
         self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username ubuntu-vm --ssh-key-value \'{ssh_key}\' --ppg {ppg}').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg}').get_output_in_json()['id']
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username ubuntu-vmss --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
@@ -3198,9 +3198,9 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
         # check that the compute resources are created with PPG
 
-        self._assert_ids_equal(ppg_resource['availabilitySets'][0]['id'], self.kwargs['avset_id'], rg_prefix='cli_test_ppg_resources_')
-        self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'], rg_prefix='cli_test_ppg_resources_')
-        self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'], 'cli_test_ppg_resources_')
+        self._assert_ids_equal(ppg_resource['availabilitySets'][0]['id'], self.kwargs['avset_id'], rg_prefix='cli_test_ppg_vm_vmss_')
+        self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'], rg_prefix='cli_test_ppg_vm_vmss_')
+        self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'], 'cli_test_ppg_vm_vmss_')
 
     # it would be simpler to do the following:
     # self.assertEqual(ppg_resource['availabilitySets'][0]['id'].lower(), self.kwargs['avset_id'].lower())
