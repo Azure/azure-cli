@@ -412,13 +412,37 @@ def get_yaml_and_values(cmd_value, timeout, file):
     return yaml_template, values_content
 
 
-def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, username=None, password=None):
+def get_custom_registry_credentials(cmd,
+                                    auth_mode=None,
+                                    login_server=None,
+                                    username=None,
+                                    password=None,
+                                    kv_username=None,
+                                    kv_password=None,
+                                    identity=None):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param str login_server: The login server of custom registry
     :param str username: The username for custom registry
     :param str password: The password for custom registry
+    :param str kv_username: The key vault secret URI of the username to login to the custom registry.
+    :param str kv_password: The key vault secret URI of the password to login to the custom registry.
+    :param str identity: The task managed identity used for the credential
     """
+
+    # Validate if username or password are used, exactly one of each type exist is given
+    if username is not None and kv_username is not None:
+        raise CLIError("Provide either username or kv_username.")
+    if (password is not None and kv_password is not None):
+        raise CLIError("Provide either password or kv_password.")
+
+    isIdentityCredential = False
+    if username is None and kv_username is None and password is None and kv_password is None:
+        if identity is None:
+            raise CLIError("If no username or password are used, provide a managed identity.")
+        else:
+            isIdentityCredential = True
+
     source_registry_credentials = None
     if auth_mode:
         SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
@@ -432,24 +456,22 @@ def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, user
             'SecretObjectType'
         )
 
-        # if Null username and password, then have it removed
-        custom_reg_credential = None
-        if (username and not password) or (password and not username):
-            raise CLIError("Please provide both username and password.")
-        elif username and password:
+        if isIdentityCredential:
+            custom_reg_credential = CustomRegistryCredentials(
+                identity=identity
+            )
+        else:
             custom_reg_credential = CustomRegistryCredentials(
                 user_name=SecretObject(
-                    type=SecretObjectType.opaque,
-                    value=username
+                    type=SecretObjectType.vaultsecret if kv_username else SecretObjectType.opaque,
+                    value=username if username is not None else kv_username
                 ),
                 password=SecretObject(
-                    type=SecretObjectType.opaque,
-                    value=password
-                )
+                    type=SecretObjectType.vaultsecret if kv_password else SecretObjectType.opaque,
+                    value=password if password is not None else kv_password
+                ),
+                identity=identity
             )
-        elif username is not None or password is not None:
-            # case where user passes empty strings: -u '' -p ''
-            raise CLIError("username and password cannot be empty")
 
         custom_registries = {login_server: custom_reg_credential}
 

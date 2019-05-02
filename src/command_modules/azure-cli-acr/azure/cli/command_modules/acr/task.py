@@ -91,8 +91,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 values_file_path=values,
                 context_path=context_path,
                 context_access_token=git_access_token,
-                values=(set_value if set_value else []) +
-                        (set_secret if set_secret else [])
+                values=(set_value if set_value else []) + (set_secret if set_secret else [])
             )
         else:
             DockerBuildStep = cmd.get_models('DockerBuildStep')
@@ -101,8 +100,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 is_push_enabled=not no_push,
                 no_cache=no_cache,
                 docker_file_path=file,
-                arguments=(arg if arg else []) +
-                           (secret_arg if secret_arg else []),
+                arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
                 context_path=context_path,
                 context_access_token=git_access_token,
                 target=target
@@ -119,8 +117,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 values_content.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
-            values=(set_value if set_value else []) +
-                    (set_secret if set_secret else [])
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
 
     SourceControlType, SourceTriggerEvent = cmd.get_models(
@@ -523,8 +520,11 @@ def acr_task_credential_add(cmd,
                             task_name,
                             registry_name,
                             login_server,
-                            username,
-                            password,
+                            username=None,
+                            password=None,
+                            kv_username=None,
+                            kv_password=None,
+                            use_identity=None,
                             resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -541,7 +541,10 @@ def acr_task_credential_add(cmd,
             cmd=cmd,
             login_server=login_server,
             username=username,
-            password=password
+            password=password,
+            kv_username=kv_username,
+            kv_password=kv_password,
+            identity=use_identity
         )
     )
 
@@ -557,8 +560,11 @@ def acr_task_credential_update(cmd,
                                task_name,
                                registry_name,
                                login_server,
-                               username,
-                               password,
+                               username=None,
+                               password=None,
+                               kv_username=None,
+                               kv_password=None,
+                               use_identity=None,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -575,7 +581,10 @@ def acr_task_credential_update(cmd,
             cmd=cmd,
             login_server=login_server,
             username=username,
-            password=password
+            password=password,
+            kv_username=kv_username,
+            kv_password=kv_password,
+            identity=use_identity
         )
     )
 
