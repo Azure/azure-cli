@@ -225,6 +225,8 @@ class Profile(object):
             else:
                 subscriptions = subscription_finder.find_from_user_account(
                     username, password, tenant, self._ad_resource_uri)
+                if not subscriptions:
+                    raise CLIError("No accounts were found")
 
         if not allow_no_subscriptions and not subscriptions:
             raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
@@ -785,7 +787,7 @@ class SubscriptionFinder(object):
         if len(matches) != 1:
             raise CLIError('token cache is in unexpected shape (TBD). Tokens Found: ' + str(len(matches)))
         home_accounts = self._adal_token_cache.find('Account', query={'home_account_id': matches[0]['home_account_id']})
-        if len(home_accounts) != 1:
+        if not home_accounts:
             raise CLIError('token cache is in unexpected shape (TBD). Home accounts Found: ' + str(len(home_accounts)))
         return home_accounts[0]
 
@@ -799,10 +801,9 @@ class SubscriptionFinder(object):
             token_entry = application.acquire_token_silent(scopes, accounts[0])
 
         accounts = application.get_accounts(username)
-        if not accounts: # verify multiple match as well
-            raise CLIError("No accounts were found")
-        if not token_entry:
+        if not accounts or not token_entry:  # verify multiple match as well
             return []
+
         self.user_home_account = accounts[0]
 
         if tenant is None:
@@ -1025,7 +1026,7 @@ class ServicePrincipalAuth(object):
     def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:
             raise CLIError('missing secret or certificate in order to '
-                           'authnenticate through a service principal')
+                           'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
