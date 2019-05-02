@@ -266,7 +266,7 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
-def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
+def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # pylint: disable=too-many-branches
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
