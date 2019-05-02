@@ -303,6 +303,8 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
                 except ValueError:
                     pass
                 if payload:
+                    if payload.get('properties') is None:
+                        continue
                     payload = payload['properties']
                     entry['principalId'] = payload['principalId']
                     if not entry['scope']:

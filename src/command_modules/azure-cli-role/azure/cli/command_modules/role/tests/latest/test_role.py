@@ -315,7 +315,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
                 else:
                     # NOTE: get the time range from the recording file and use them below for playback
-                    start_time, end_time = '2018-03-19T17:58:13Z', '2018-03-20T17:59:13Z'
+                    start_time, end_time = '2019-05-01T03:18:45Z', '2019-05-02T03:19:48Z'
                     result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
                                       start_time, end_time)).get_output_in_json()
 
