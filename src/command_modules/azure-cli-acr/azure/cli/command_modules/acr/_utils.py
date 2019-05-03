@@ -439,7 +439,7 @@ def get_custom_registry_credentials(cmd,
     isIdentityCredential = False
     if username is None and kv_username is None and password is None and kv_password is None:
         if identity is None:
-            raise CLIError("If no username or password are used, provide a managed identity.")
+            raise CLIError("If no username or password are used for the credential, provide a managed identity.")
         else:
             isIdentityCredential = True
 
@@ -464,11 +464,11 @@ def get_custom_registry_credentials(cmd,
             custom_reg_credential = CustomRegistryCredentials(
                 user_name=SecretObject(
                     type=SecretObjectType.vaultsecret if kv_username else SecretObjectType.opaque,
-                    value=username if username is not None else kv_username
+                    value=kv_username if kv_username is not None else username
                 ),
                 password=SecretObject(
                     type=SecretObjectType.vaultsecret if kv_password else SecretObjectType.opaque,
-                    value=password if password is not None else kv_password
+                    value=kv_password if kv_password is not None else password
                 ),
                 identity=identity
             )
