@@ -1007,17 +1007,19 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         self.kwargs.update({
             'username': 'ubuntu',
             'vm': 'cli-test-vm2',
+            'comp_name': 'my-computer',
             'image': 'UbuntuLTS',
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location
         })
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('osProfile.adminUsername', '{username}'),
-            self.check('osProfile.computerName', '{vm}'),
+            self.check('osProfile.computerName', '{comp_name}'),
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
             self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1027,7 +1029,8 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly  ')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
 
 class VMCreateEphemeralOsDisk(ScenarioTest):
@@ -1059,6 +1062,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('osProfile.computerName', '{vm_2}'),  # piggy-backing check that --computer-name defaults to --name here.
         ])
 
 
@@ -1124,12 +1128,13 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Debian --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
+        self.cmd('vm create -n {vm} -g {rg} --computer-name {quotes} --image Debian --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
 
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('availabilitySet', None),
             self.check('length(tags)', 0),
-            self.check('location', '{loc}')
+            self.check('location', '{loc}'),
+            self.check('osProfile.computerName', '{vm}')
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 

@@ -160,6 +160,7 @@ def load_arguments(self, _):
         c.argument('vm_name', existing_vm_name)
         c.argument('size', completer=get_vm_size_completion_list)
         c.argument('name', arg_type=name_arg_type)
+        c.argument('computer_name')
         c.argument('zone', zone_type, min_api='2017-03-30')
         c.argument('caching', help='Disk caching policy', arg_type=get_enum_type(CachingTypes))
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')

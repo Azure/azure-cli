@@ -247,14 +247,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         image_reference=None, os_disk_name=None, custom_image_os_type=None, authentication_type=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
-        disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None):
+        disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
+        computer_name=None):
 
     os_caching = disk_info['os'].get('caching')
 
     def _build_os_profile():
 
         os_profile = {
-            'computerName': name,
+            'computerName': computer_name or name,
             'adminUsername': admin_username
         }
 

@@ -469,6 +469,8 @@ parameters:
       - az vm image show
   - name: --ssh-key-value
     short-summary: The SSH public key or public key file path.
+  - name: --computer-name
+    short-summary: The host OS name of the virtual machine. Defaults to the name of the VM.
 examples:
   - name: Create a default Ubuntu VM with automatic SSH authentication.
     text: >

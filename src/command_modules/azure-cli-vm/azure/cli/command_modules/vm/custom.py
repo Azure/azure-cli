@@ -486,6 +486,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 # endregion
 
 
+# region VirtualMachines
 def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
     VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
@@ -501,7 +502,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
-              no_wait=False, authentication_type=None, admin_password=None,
+              no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
@@ -636,7 +637,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
-        proximity_placement_group=proximity_placement_group)
+        proximity_placement_group=proximity_placement_group, computer_name=computer_name)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2523,9 +2524,8 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
                               _set_vmss)
 # endregion
 
+
 # region image galleries
-
-
 def list_image_galleries(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
