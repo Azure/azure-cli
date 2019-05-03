@@ -50,9 +50,6 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    package_data={
-        'azcopy': ['azcopy/*/*']
-    },
     packages=[
         'azure',
         'azure.cli',

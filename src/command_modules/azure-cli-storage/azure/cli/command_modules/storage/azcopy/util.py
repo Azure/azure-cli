@@ -9,9 +9,15 @@ import json
 import platform
 import subprocess
 import datetime
+import ssl
+import sys
+import zipfile
 from six.moves.urllib.parse import urlparse
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from azure.cli.core._profile import Profile
+from azure.cli.core.util import in_cloud_console
 from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -22,16 +28,28 @@ AZCOPY_VERSION = '10.1.0'
 
 
 class AzCopy(object):
-    system_executable_path = {
-        'Darwin': ['azcopy_darwin_amd64_{}'.format(AZCOPY_VERSION), 'azcopy'],
-        'Linux': ['azcopy_linux_amd64_{}'.format(AZCOPY_VERSION), 'azcopy'],
-        'Windows': ['azcopy_windows_amd64_{}'.format(AZCOPY_VERSION), 'azcopy.exe']
-    }
-
     def __init__(self, creds=None):
         self.system = platform.system()
-        curr_path = os.path.dirname(os.path.realpath(__file__))
-        self.executable = os.path.join(curr_path, *AzCopy.system_executable_path[self.system])
+        install_location = _get_default_install_location()
+        if not os.path.isfile(install_location):
+            install_dir = os.path.dirname(install_location)
+            if not os.path.exists(install_dir):
+                os.makedirs(install_dir)
+            base_url = 'https://azcopyvnext.azureedge.net/release20190423/azcopy_{}_amd64_10.1.0.{}'
+            if self.system == 'Windows':
+                file_url = base_url.format('windows', 'zip')
+            elif self.system == 'Linux':
+                file_url = base_url.format('linux', 'tar.gz')
+            elif self.system == 'Darwin':
+                file_url = base_url.format('darwin', 'zip')
+            else:
+                raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
+            try:
+                _urlretrieve(file_url, install_location)
+            except IOError as err:
+                raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
+
+        self.executable = install_location
         self.creds = creds
 
     def run_command(self, args):
@@ -136,3 +154,42 @@ def _generate_sas_token(cmd, account_name, account_key, service):
         t_account_permissions(_str='rwdlacup'),
         datetime.datetime.utcnow() + datetime.timedelta(days=1)
     )
+
+
+def _get_default_install_location():
+    system = platform.system()
+    if system == 'Windows':
+        home_dir = os.environ.get('USERPROFILE')
+        if not home_dir:
+            return None
+        install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
+    elif system == 'Linux' or system == 'Darwin':
+        install_location = '/usr/local/bin/azcopy'
+    else:
+        install_location = None
+    return install_location
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def _urlretrieve(url, install_location):
+    req = urlopen(url, context=_ssl_context())
+    if sys.version_info.major >= 3:
+        import io
+        zip_file = zipfile.ZipFile(io.BytesIO(req.read()))
+    else:
+        # If Python version is 2.X, use StringIO instead.
+        import StringIO  # pylint: disable=import-error
+        zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
+    for fileName in zip_file.namelist():
+        if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
+            with open(install_location, 'wb') as f:
+                f.write(zip_file.read(fileName))
