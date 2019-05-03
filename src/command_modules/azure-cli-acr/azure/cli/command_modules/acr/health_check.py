@@ -7,13 +7,22 @@ import re
 from subprocess import getoutput
 from knack.util import CLIError
 from .custom import get_docker_command
+from .helm import _get_helm_command
 from ._utils import get_registry_by_name, get_resource_group_name_by_registry_name
 
 ## Checks for the environment ##
 
+DOCKER_DAEMON_NOT_RUNNING = "This error may also indicate that the docker daemon is not running."
+
 def _get_docker_version():
     docker_command = get_docker_command()
     output = getoutput(docker_command + ' system info')
+
+    if output.find(DOCKER_DAEMON_NOT_RUNNING) != -1:
+        raise CLIError("An error occured while running a docker command, which might indicate that docker daemon is not running. " +
+                       "Please try restarting docker client.")
+    else:
+        print('Docker daemon status: available')
 
     lines = output.splitlines()
     regex = re.compile(r'([0-9.b]+)')
@@ -23,10 +32,10 @@ def _get_docker_version():
         if line.startswith("Server Version"):
             docker_version = regex.search(line).group(1)
 
-    if docker_version == "":
+    if docker_version in ("", None):
         raise CLIError("Could not find which Docker Server version is running.")
     else:
-        print("Docker running with server version {}.".format(docker_version))
+        print('Docker server version: {}'.format(docker_version))
 
 def _get_cli_version():
     output = getoutput('az --version')
@@ -40,10 +49,34 @@ def _get_cli_version():
         if line.startswith('acr'):
             acr_cli_version = regex.search(line).group(1)
 
-    if acr_cli_version == "":
+    if acr_cli_version in ("", None):
         raise CLIError("Could not find which ACR CLI version is running.")
     else:
-        print('Azure Container Registry CLI is running with version {}.'.format(acr_cli_version))
+        print('Azure Container Registry CLI version: {}'.format(acr_cli_version))
+
+def _get_helm_version():
+    helm_command = _get_helm_command()
+    output = getoutput(helm_command + ' version')
+
+    lines = output.splitlines()
+    regex = re.compile(r'SemVer:"([0-9.vb]+)"')
+    client_version = ""
+    server_version = ""
+
+    for line in lines:
+        if line.startswith('Client'):
+            client_version = regex.search(line).group(1)
+        elif line.startswith('Server'):
+            server_version = regex.search(line).group(1)
+
+    if client_version in ("", None) and server_version in ("", None):
+        raise CLIError("Could not find which Helm version is running.")
+    else:
+        print('Helm client version: {}'.format(client_version))
+        if server_version in ("", None):
+            raise CLIError("Could not find which Helm server version is running. This might indicate a problem with kubectl")
+        print('Helm server version: {}'.format(server_version))
+
 
 def _health_check_environment():
     aggregated_exceptions = ""
@@ -59,6 +92,11 @@ def _health_check_environment():
     except CLIError as e:
         error = "Error while finding ACR CLI version: " + str(e) + "\n"
         aggregated_exceptions = aggregated_exceptions + error
+
+    try:
+        _get_helm_version()
+    except CLIError as e:
+        error = "Error while finding Helm version: " + str(e) + "\n"
 
     return aggregated_exceptions
 
@@ -83,7 +121,7 @@ def _get_registry_status(cmd, registry_name):
     else:
         print("DNS lookup to {} at IP {}: OK.".format(login_server, registry_ip))
 
-def _get_token_status(cmd, registry_name):
+def _get_endpoint_and_token_status(cmd, registry_name):
     registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
     login_server = registry.login_server
 
@@ -99,10 +137,12 @@ def _get_token_status(cmd, registry_name):
     challenge = requests.get(url)
 
     if challenge.status_code == 403:
-        raise CLIError("Looks like you don't have access to registry '{}'. "
+        raise CLIError("Challenge endpoint '{}' returned 403, which indicates that you don't have access to the registry. "
                        "Are firewalls and virtual networks enabled?".format(login_server))
     elif challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         raise CLIError("Registry '{}' did not issue a challenge.".format(login_server))
+
+    print("Challenge endpoint '{}' : OK".format(url))
 
     # Validate support for AAD login
     authenticate = challenge.headers['WWW-Authenticate']
@@ -188,7 +228,7 @@ def _health_check_connectivity(cmd, registry_name):
         return error
 
     try:
-        _get_token_status(cmd, registry_name)
+        _get_endpoint_and_token_status(cmd, registry_name)
     except CLIError as e:
         error = "Error while acquiring tokens: " + str(e) + "\n"
         aggregated_exceptions = aggregated_exceptions + error
