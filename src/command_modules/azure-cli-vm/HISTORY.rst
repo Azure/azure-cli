@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.21
+++++++
+* vm create: Added --computer-name for setting a vm's computer name.
+
 2.2.20
 ++++++
 * vmss update: add `--protect-from-scale-in` and `--protect-from-scale-set-actions` to enable updates to the protection policy of VMSS VM instances.

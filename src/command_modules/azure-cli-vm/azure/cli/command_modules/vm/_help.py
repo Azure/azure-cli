@@ -176,7 +176,7 @@ short-summary: create a new version from an image defintion
 
 helps['sig image-version create'] = """
 type: command
-short-summary: creat a new image version
+short-summary: create a new image version
 long-summary: this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
 examples:
   - name: Add a new image version
