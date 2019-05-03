@@ -2545,7 +2545,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     try:
         client.get(resource_group_name, name)
     except CloudError:
-         # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
+        # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
         if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
             create_aad = True
 
@@ -2603,6 +2603,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
             raise CLIError('Please make sure your subscription is whitelisted')
         else:
             raise ex
+
 
 def openshift_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
