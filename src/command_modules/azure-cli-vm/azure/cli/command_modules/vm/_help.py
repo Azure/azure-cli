@@ -243,12 +243,13 @@ type: command
 short-summary: Create a snapshot.
 examples:
   - name: Create a snapshot by importing from a blob uri.
-    text: >
-        az snapshot create -g MyResourceGroup -n MySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+    text: az snapshot create -g MyResourceGroup -n MySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
   - name: Create an empty snapshot.
     text: az snapshot create -g MyResourceGroup -n MySnapshot --size-gb 10
   - name: Create a snapshot by copying an existing disk in the same resource group.
     text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source MyDisk
+  - name: Create a snapshot from an existing disk in another resource group.
+    text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.Compute/disks/MyDisk"
 """
 
 helps['snapshot grant-access'] = """
