@@ -34,7 +34,8 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     :param str resource_type: The type of resource
     """
     result = get_resources_in_subscription(cli_ctx, resource_type)
-    elements = [item for item in result if item.name.lower() == resource_name.lower()]
+    elements = [item for item in result if item.name.lower() ==
+                resource_name.lower()]
 
     if not elements:
         from azure.cli.core._profile import Profile
@@ -42,12 +43,15 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
         message = "The resource with name '{}' and type '{}' could not be found".format(
             resource_name, resource_type)
         try:
-            subscription = profile.get_subscription(cli_ctx.data['subscription_id'])
+            subscription = profile.get_subscription(
+                cli_ctx.data['subscription_id'])
             raise ResourceNotFound(
                 "{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
         except (KeyError, TypeError) as e:
-            logger.debug("Could not get the current subscription. Exception: %s", str(e))
-            raise ResourceNotFound("{} in the current subscription.".format(message))
+            logger.debug(
+                "Could not get the current subscription. Exception: %s", str(e))
+            raise ResourceNotFound(
+                "{} in the current subscription.".format(message))
 
     elif len(elements) == 1:
         return elements[0]
@@ -74,8 +78,10 @@ def get_resource_group_name_by_registry_name(cli_ctx, registry_name,
     :param str resource_group_name: The name of resource group
     """
     if not resource_group_name:
-        arm_resource = _arm_get_resource_by_name(cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
-        resource_group_name = _get_resource_group_name_by_resource_id(arm_resource.id)
+        arm_resource = _arm_get_resource_by_name(
+            cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
+        resource_group_name = _get_resource_group_name_by_resource_id(
+            arm_resource.id)
     return resource_group_name
 
 
@@ -83,7 +89,8 @@ def get_resource_id_by_storage_account_name(cli_ctx, storage_account_name):
     """Returns the resource id for the storage account.
     :param str storage_account_name: The name of storage account
     """
-    arm_resource = _arm_get_resource_by_name(cli_ctx, storage_account_name, STORAGE_RESOURCE_TYPE)
+    arm_resource = _arm_get_resource_by_name(
+        cli_ctx, storage_account_name, STORAGE_RESOURCE_TYPE)
     return arm_resource.id
 
 
@@ -116,7 +123,8 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
     if len(elements) == 1:
         return elements[0]
     elif len(elements) > 1:
-        logger.warning("More than one registries were found by %s.", login_server)
+        logger.warning(
+            "More than one registries were found by %s.", login_server)
     return None
 
 
@@ -148,9 +156,11 @@ def arm_deploy_template_new_storage(cli_ctx,
         admin_user_enabled=admin_user_enabled,
         storage_account_name=storage_account_name)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'template_new_storage.json')
+    file_path = os.path.join(os.path.dirname(
+        __file__), 'template_new_storage.json')
     template = get_file_json(file_path)
-    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    properties = DeploymentProperties(
+        template=template, parameters=parameters, mode='incremental')
 
     return _arm_deploy_template(
         get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
@@ -177,7 +187,8 @@ def arm_deploy_template_existing_storage(cli_ctx,
     from azure.cli.core.util import get_file_json
     import os
 
-    storage_account_id = get_resource_id_by_storage_account_name(cli_ctx, storage_account_name)
+    storage_account_id = get_resource_id_by_storage_account_name(
+        cli_ctx, storage_account_name)
 
     parameters = _parameters(
         registry_name=registry_name,
@@ -186,9 +197,11 @@ def arm_deploy_template_existing_storage(cli_ctx,
         admin_user_enabled=admin_user_enabled,
         storage_account_id=storage_account_id)
 
-    file_path = os.path.join(os.path.dirname(__file__), 'template_existing_storage.json')
+    file_path = os.path.join(os.path.dirname(
+        __file__), 'template_existing_storage.json')
     template = get_file_json(file_path)
-    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    properties = DeploymentProperties(
+        template=template, parameters=parameters, mode='incremental')
 
     return _arm_deploy_template(
         get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
@@ -206,7 +219,8 @@ def _arm_deploy_template(deployments_client,
     """
     if deployment_name is None:
         import random
-        deployment_name = '{0}_{1}'.format(ACR_RESOURCE_PROVIDER, random.randint(100, 800))
+        deployment_name = '{0}_{1}'.format(
+            ACR_RESOURCE_PROVIDER, random.randint(100, 800))
 
     return deployments_client.create_or_update(resource_group_name, deployment_name, properties)
 
@@ -252,11 +266,13 @@ def random_storage_account_name(cli_ctx, registry_name):
     for x in range(10):
         time_stamp_suffix = datetime.utcnow().strftime('%H%M%S')
         storage_account_name = ''.join([prefix, time_stamp_suffix])[:24]
-        logger.debug("Checking storage account %s with name '%s'.", x, storage_account_name)
+        logger.debug("Checking storage account %s with name '%s'.",
+                     x, storage_account_name)
         if client.check_name_availability(storage_account_name).name_available:  # pylint: disable=no-member
             return storage_account_name
 
-    raise CLIError("Could not find an available storage account name. Please try again later.")
+    raise CLIError(
+        "Could not find an available storage account name. Please try again later.")
 
 
 def validate_managed_registry(cmd, registry_name, resource_group_name=None, message=None):
@@ -264,10 +280,12 @@ def validate_managed_registry(cmd, registry_name, resource_group_name=None, mess
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
-    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    registry, resource_group_name = get_registry_by_name(
+        cmd.cli_ctx, registry_name, resource_group_name)
 
     if not registry.sku or registry.sku.name not in get_managed_sku(cmd):
-        raise CLIError(message or "This operation is only supported for managed registries.")
+        raise CLIError(
+            message or "This operation is only supported for managed registries.")
 
     return registry, resource_group_name
 
@@ -277,10 +295,12 @@ def validate_premium_registry(cmd, registry_name, resource_group_name=None, mess
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
-    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    registry, resource_group_name = get_registry_by_name(
+        cmd.cli_ctx, registry_name, resource_group_name)
 
     if not registry.sku or registry.sku.name not in get_premium_sku(cmd):
-        raise CLIError(message or "This operation is only supported for managed registries in Premium SKU.")
+        raise CLIError(
+            message or "This operation is only supported for managed registries in Premium SKU.")
 
     return registry, resource_group_name
 
@@ -313,7 +333,8 @@ def _invalid_sku_update(cmd):
 
 
 def _invalid_sku_downgrade():
-    raise CLIError("Managed registries could not be downgraded to Classic SKU.")
+    raise CLIError(
+        "Managed registries could not be downgraded to Classic SKU.")
 
 
 def user_confirmation(message, yes=False):
@@ -323,7 +344,8 @@ def user_confirmation(message, yes=False):
         if not prompt_y_n(message):
             raise CLIError('Operation cancelled.')
     except NoTTYException:
-        raise CLIError('Unable to prompt for confirmation as no tty available. Use --yes.')
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
 
 
 def get_validate_platform(cmd, os_type, platform):
@@ -340,12 +362,15 @@ def get_validate_platform(cmd, os_type, platform):
     if platform:
         platform_split = platform.split('/')
         platform_os = platform_split[0]
-        platform_arch = platform_split[1] if len(platform_split) > 1 else Architecture.amd64.value
-        platform_variant = platform_split[2] if len(platform_split) > 2 else None
+        platform_arch = platform_split[1] if len(
+            platform_split) > 1 else Architecture.amd64.value
+        platform_variant = platform_split[2] if len(
+            platform_split) > 2 else None
 
     if os_type and platform:
         if os_type.lower() != platform_os.lower():
-            raise CLIError("The OS in '--platform' should exactly match the value provided in '--os'.")
+            raise CLIError(
+                "The OS in '--platform' should exactly match the value provided in '--os'.")
     elif os_type:
         platform_os = os_type
 
@@ -364,12 +389,14 @@ def get_validate_platform(cmd, os_type, platform):
     if platform_arch not in valid_arch:
         raise CLIError(
             "'{0}' is not a valid value for Architecture specified in --platform. "
-            "Valid options are {1}.".format(platform_arch, ','.join(valid_arch))
+            "Valid options are {1}.".format(
+                platform_arch, ','.join(valid_arch))
         )
     if platform_variant and (platform_variant not in valid_variant):
         raise CLIError(
             "'{0}' is not a valid value for Variant specified in --platform. "
-            "Valid options are {1}.".format(platform_variant, ','.join(valid_variant))
+            "Valid options are {1}.".format(
+                platform_variant, ','.join(valid_variant))
         )
 
     return platform_os, platform_arch, platform_variant
@@ -430,48 +457,53 @@ def get_custom_registry_credentials(cmd,
     :param str identity: The task managed identity used for the credential
     """
 
-    # Validate if username or password are used, exactly one of each type exist is given
-    if username is not None and kv_username is not None:
-        raise CLIError("Provide either username or kv_username.")
-    if (password is not None and kv_password is not None):
-        raise CLIError("Provide either password or kv_password.")
-
-    isIdentityCredential = False
-    if username is None and kv_username is None and password is None and kv_password is None:
-        if identity is None:
-            raise CLIError("If no username or password are used for the credential, provide a managed identity.")
-        else:
-            isIdentityCredential = True
-
     source_registry_credentials = None
     if auth_mode:
         SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
-        source_registry_credentials = SourceRegistryCredentials(login_mode=auth_mode)
+        source_registry_credentials = SourceRegistryCredentials(
+            login_mode=auth_mode)
 
+    is_remove = False
     custom_registries = None
     if login_server:
+        # if null username and password (or identity), then remove the credential
+        custom_reg_credential = None
+        # Validate if username or password are used, exactly one of each type exist is given
+        if username is not None and kv_username is not None:
+            raise CLIError("Provide either username or kv_username.")
+        if (password is not None and kv_password is not None):
+            raise CLIError("Provide either password or kv_password.")
+        
+        isIdentityCredential = False
+        if username is None and kv_username is None and password is None and kv_password is None:
+            if identity is not None:
+                isIdentityCredential = True
+            else:
+                is_remove = True
+
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
             'SecretObject',
             'SecretObjectType'
         )
 
-        if isIdentityCredential:
-            custom_reg_credential = CustomRegistryCredentials(
-                identity=identity
-            )
-        else:
-            custom_reg_credential = CustomRegistryCredentials(
-                user_name=SecretObject(
-                    type=SecretObjectType.vaultsecret if kv_username else SecretObjectType.opaque,
-                    value=kv_username if kv_username is not None else username
-                ),
-                password=SecretObject(
-                    type=SecretObjectType.vaultsecret if kv_password else SecretObjectType.opaque,
-                    value=kv_password if kv_password is not None else password
-                ),
-                identity=identity
-            )
+        if not is_remove:
+            if isIdentityCredential:
+                custom_reg_credential = CustomRegistryCredentials(
+                    identity=identity
+                )
+            else:
+                custom_reg_credential = CustomRegistryCredentials(
+                    user_name=SecretObject(
+                        type=SecretObjectType.vaultsecret if kv_username else SecretObjectType.opaque,
+                        value=kv_username if kv_username is not None else username
+                    ),
+                    password=SecretObject(
+                        type=SecretObjectType.vaultsecret if kv_password else SecretObjectType.opaque,
+                        value=kv_password if kv_password is not None else password
+                    ),
+                    identity=identity
+                )
 
         custom_registries = {login_server: custom_reg_credential}
 

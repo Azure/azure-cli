@@ -420,14 +420,10 @@ def acr_task_identity_assign(cmd,
                              client,
                              task_name,
                              registry_name,
-                             identities,
+                             identities=None,
                              resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-
-    # The system-assigned identity is default
-    if identities is None:
-        identities = IDENTITY_LOCAL_ID
 
     identity = _build_identities_info(cmd, identities)
 
@@ -467,18 +463,15 @@ def acr_task_identity_remove(cmd,
             raise CLIError(
                 "Cannot specify additional identities when [all] is used in [--identities]")
 
-    IdentityProperties, ResourceIdentityType = cmd.get_models(
-        'IdentityProperies', 'ResourceIdentityType')
     identity = None
-
-    # The system-assigned identity is default
-    if identities is None:
-        identities = IDENTITY_LOCAL_ID
-
-    if IDENTITY_GLOBAL_REMOVE in identities:
-        identity = IdentityProperties(
-            type=ResourceIdentityType.none
-        )
+    if not identities or IDENTITY_LOCAL_ID in identities:
+        # To remove only the system assigned identity if user-assigned identities also exist
+        # PATCH with the existing user-assigned identities
+        # If no user-assigned identities exist, set the type to None
+        existingUserIdentites = client.get_details(
+            resource_group_name, registry_name, task_name).identity.user_assigned_identities
+        identities = IDENTITY_GLOBAL_REMOVE if not existingUserIdentites else list(existingUserIdentites.keys())
+        identity = _build_identities_info(cmd, identities)
     else:
         identity = _build_identities_info(cmd, identities, True)
 
@@ -512,7 +505,7 @@ def acr_task_identity_show(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    return client.get_details(resource_group_name, registry_name, task_name).additional_properties
+    return client.get_details(resource_group_name, registry_name, task_name).identity
 
 
 def acr_task_credential_add(cmd,
@@ -797,14 +790,14 @@ def _build_identities_info(cmd, identities, is_remove=None):
         'IdentityProperties', 'UserIdentityProperties', 'ResourceIdentityType')
     identities = identities or []
     identity_types = []
+    if IDENTITY_GLOBAL_REMOVE in identities:
+        return IdentityProperties(type=ResourceIdentityType.none.value)
     if not identities or IDENTITY_LOCAL_ID in identities:
         identity_types.append(ResourceIdentityType.system_assigned.value)
     external_identities = [x for x in identities if x != IDENTITY_LOCAL_ID]
     if external_identities:
         identity_types.append(ResourceIdentityType.user_assigned.value)
     identity_types = ', '.join(identity_types)
-    if not identity_types:
-        identity_types = ResourceIdentityType.none.value
     identity = IdentityProperties(type=identity_types)
     if external_identities:
         if is_remove is not None:

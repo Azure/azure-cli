@@ -198,7 +198,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     for scope in ['acr task credential add', 'acr task credential update']:
         with self.argument_context(scope) as c:
             c.argument('username', options_list=['--username', '-u'], help="The username to login to the custom registry.")
-            c.argument('password', options_list=['--password', '-p'], help='The password to login to the custom registry.', required=True)
+            c.argument('password', options_list=['--password', '-p'], help="The password to login to the custom registry.")
             c.argument('password', options_list=['--password', '-p'], help="The password to login to the custom registry.")
             c.argument('kv_username', help="The key vault secret URI of the username to login to the custom registry.")
             c.argument('kv_password', help="The key vault secret URI of the password to login to the custom registry.")
