@@ -2600,7 +2600,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                         name=name, create=create_aad)
     except CloudError as ex:
         if "The resource type could not be found in the namespace 'Microsoft.ContainerService" in ex.message:
-            raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed') # pylint: disable=line-too-long
+            raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
         else:
             raise ex
 
