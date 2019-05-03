@@ -2539,16 +2539,16 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     )
     identity_providers = []
 
-    # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
     create_aad = False
-    if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
-        create_aad = True
 
     # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
     try:
         client.get(resource_group_name, name)
     except CloudError:
-        create_aad = True
+         # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
+        if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
+            create_aad = True
+
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
@@ -2597,10 +2597,12 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                         aad_client_app_id=osa_aad_identity.client_id,
                         aad_client_app_secret=osa_aad_identity.secret,
                         aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
-                        name=name, create=True)
+                        name=name, create=create_aad)
     except CloudError as ex:
-        raise ex
-
+        if json.loads(ex.response._content)["error"]["code"] == "InvalidResourceType":
+            raise CLIError('Please make sure your subscription is whitelisted')
+        else:
+            raise ex
 
 def openshift_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
