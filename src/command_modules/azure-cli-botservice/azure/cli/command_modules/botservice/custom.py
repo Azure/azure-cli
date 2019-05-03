@@ -80,6 +80,17 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
                 existing[key] = value
             f.write(json.dumps(existing))
 
+def _normalize_language(language):
+    languages = {
+        CSHARP.lower(): CSHARP,
+        JAVASCRIPT.lower(): JAVASCRIPT,
+        TYPESCRIPT.lower(): TYPESCRIPT,
+    }
+
+    try:
+        return languages[language.lower()]
+    except KeyError:
+        raise CLIError('Unsupported language. Supported languages: {0}'.format(', '.join(languages).title()))
 
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
            description=None, display_name=None, endpoint=None, tags=None, storageAccountName=None,
@@ -156,6 +167,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         if not language:
             raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
                            .format(webapp_kind, function_kind))
+        language = _normalize_language(language)
 
         bot_template_type = __bot_template_validator(version, deploy_echo)
 
@@ -510,6 +522,7 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
 
 
 def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
+    language = _normalize_language(language)
     if not code_dir:
         code_dir = os.getcwd()
         logger.info('--code-dir not provided, defaulting to current working directory: %s\n'
