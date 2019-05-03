@@ -2599,8 +2599,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                         aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
                         name=name, create=create_aad)
     except CloudError as ex:
-        if json.loads(ex.response._content)["error"]["code"] == "InvalidResourceType":
-            raise CLIError('Please make sure your subscription is whitelisted')
+        if "The resource type could not be found in the namespace 'Microsoft.ContainerService" in ex.message:
+            raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')
         else:
             raise ex
 
