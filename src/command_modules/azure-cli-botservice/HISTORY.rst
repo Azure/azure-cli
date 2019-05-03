@@ -23,6 +23,7 @@ Release History
     * This message only appears if the `--code-dir` doesn't contain a package.json.
 * `az bot prepare-deploy` returns `true` if successful and has helpful verbose logging.
 * Add more available Application Insights regions to `az bot create -v v3`
+* Normalize language input from CLI so user can use any case when entering Csharp, Javascript, Typescript
 
 0.1.10
 ++++++
