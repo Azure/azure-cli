@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* role assignment: support scope of management group
+
 2.6.1
 +++++
 * create-for-rbac: hide '--password' as the preparations to pull the plug completely in 2019 May
