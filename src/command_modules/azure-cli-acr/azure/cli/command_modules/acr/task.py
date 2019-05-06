@@ -505,7 +505,9 @@ def acr_task_identity_show(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    return client.get_details(resource_group_name, registry_name, task_name).identity
+    resp = client.get_details(resource_group_name, registry_name, task_name).identity
+
+    return {} if not resp else resp
 
 
 def acr_task_credential_add(cmd,

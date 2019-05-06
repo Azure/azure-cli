@@ -473,7 +473,7 @@ def get_custom_registry_credentials(cmd,
             raise CLIError("Provide either username or kv_username.")
         if (password is not None and kv_password is not None):
             raise CLIError("Provide either password or kv_password.")
-        
+
         isIdentityCredential = False
         if username is None and kv_username is None and password is None and kv_password is None:
             if identity is not None:
