@@ -1594,7 +1594,7 @@ examples:
 
 helps['vmss encryption'] = """
 type: group
-short-summary: "(PREVIEW) Manage encryption of VMSS."
+short-summary: "Manage encryption of VMSS."
 long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
@@ -1795,7 +1795,7 @@ examples:
 
 helps['vmss rolling-upgrade'] = """
 type: group
-short-summary: (PREVIEW) Manage rolling upgrades.
+short-summary: Manage rolling upgrades.
 """
 
 helps['vmss run-command'] = """
