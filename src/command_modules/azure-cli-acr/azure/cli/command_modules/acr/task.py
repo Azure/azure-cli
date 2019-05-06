@@ -283,8 +283,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     if set_value is None and set_secret is None:
         set_values = None
     else:
-        set_values = (set_value if set_value else []) + \
-                      (set_secret if set_secret else [])
+        set_values = (set_value if set_value else []) + (set_secret if set_secret else [])
 
     FileTaskStepUpdateParameters, DockerBuildStepUpdateParameters = cmd.get_models(
         'FileTaskStepUpdateParameters', 'DockerBuildStepUpdateParameters')

@@ -515,7 +515,7 @@ helps['acr task identity assign'] = """
 type: group
 short-summary: Update the managed service identity for a task.
 examples:
-  - name: Enable the system-assigned identity to an existing task. This will replace all existing user-assigned identities. 
+  - name: Enable the system-assigned identity to an existing task. This will replace all existing user-assigned identities.
     text: >
         az acr task identity assign -n MyTask -r MyRegistry
   - name: Assign user=assigned managed identities to an existing task. This will replace an existing system-assigned identity.
@@ -533,7 +533,7 @@ examples:
   - name: Remove the system-assigned identity from a task.
     text: >
         az acr task identity remove -n MyTask -r MyRegistry
-  - name: Remove a user-assigned identity from a task. 
+  - name: Remove a user-assigned identity from a task.
     text: >
         az acr task identity remove -n MyTask -r MyRegistry --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
   - name: Remove all managed identities from a task.
@@ -571,7 +571,7 @@ examples:
   - name: Add a registry login credential to a task using an opaque username and key vault secret URI for the password and the task user-assigned identity given by its client id.
     text: >
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -kv-password 'https://mykeyvault.vault.azure.net/secrets/secretpassword' --use-identity 00000000-0000-0000-0000-000000000000
-  - name: Add a registry login credential to a task that uses only the task system-assigned identity to authenticate to the registry. 
+  - name: Add a registry login credential to a task that uses only the task system-assigned identity to authenticate to the registry.
     text: >
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io --use-identity
 """
