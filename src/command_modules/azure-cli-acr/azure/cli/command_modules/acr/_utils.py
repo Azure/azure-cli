@@ -476,10 +476,8 @@ def get_custom_registry_credentials(cmd,
 
         isIdentityCredential = False
         if username is None and kv_username is None and password is None and kv_password is None:
-            if identity is not None:
-                isIdentityCredential = True
-            else:
-                is_remove = True
+            isIdentityCredential = identity is not None
+            is_remove = not isIdentityCredential
 
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',

@@ -512,7 +512,7 @@ short-summary: Managed Service Identities for Task.
 """
 
 helps['acr task identity assign'] = """
-type: group
+type: command
 short-summary: Update the managed service identity for a task.
 examples:
   - name: Enable the system-assigned identity on an existing task. This will replace all existing user-assigned identities for that task.
@@ -527,7 +527,7 @@ examples:
 """
 
 helps['acr task identity remove'] = """
-type: group
+type: command
 short-summary: Remove managed service identities for a task.
 examples:
   - name: Remove the system-assigned identity from a task.
@@ -542,7 +542,7 @@ examples:
 """
 
 helps['acr task identity show'] = """
-type: group
+type: command
 short-summary: Display the managed service identities for task.
 examples:
   - name: Display the managed service identities for a task.
