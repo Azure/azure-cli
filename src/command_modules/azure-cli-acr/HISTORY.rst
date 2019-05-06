@@ -3,9 +3,13 @@
 Release History
 ===============
 
-2.2.6
+2.2.7
 +++++
 * Support Managed Identities for Task
+
+2.2.6
++++++
+* Minor fixes
 
 2.2.5
 +++++
