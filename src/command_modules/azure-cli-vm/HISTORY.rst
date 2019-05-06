@@ -6,7 +6,8 @@ Release History
 2.2.21
 ++++++
 * vm create: Added --computer-name for setting a vm's computer name.
-* vm/vmss create: `--ssh-key-value` can now accept multiple ssh public key values or paths.
+* vm/vmss create: `--ssh-key-value` renamed to `--ssh-key-values` and can now accept multiple ssh public key values or paths.
+  Note: this is **not** a breaking change. `--ssh-key-value` will be parsed correctly as it matches only `--ssh-key-values`
 
 2.2.20
 ++++++

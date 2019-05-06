@@ -468,8 +468,8 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
-  - name: --ssh-key-value
-    short-summary: The SSH public key or public key file path. Space-separated list for multiple public keys.
+  - name: --ssh-key-values
+    short-summary: Space-separated list of SSH public keys or public key file paths.
   - name: --computer-name
     short-summary: The host OS name of the virtual machine. Defaults to the name of the VM.
 examples:
@@ -1481,8 +1481,8 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
-  - name: --ssh-key-value
-    short-summary: The SSH public key or public key file path. Space-separated list for multiple public keys.
+  - name: --ssh-key-values
+    short-summary: Space-separated list of SSH public keys or public key file paths.
 examples:
   - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
     text: >
