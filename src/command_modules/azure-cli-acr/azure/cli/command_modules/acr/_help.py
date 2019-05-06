@@ -515,13 +515,13 @@ helps['acr task identity assign'] = """
 type: group
 short-summary: Update the managed service identity for a task.
 examples:
-  - name: Enable the system-assigned identity to an existing task. This will replace all existing user-assigned identities.
+  - name: Enable the system-assigned identity on an existing task. This will replace all existing user-assigned identities for that task.
     text: >
         az acr task identity assign -n MyTask -r MyRegistry
-  - name: Assign user=assigned managed identities to an existing task. This will replace an existing system-assigned identity.
+  - name: Assign user-assigned managed identities to an existing task. This will remove the existing system-assigned identity.
     text: >
         az acr task identity assign -n MyTask -r MyRegistry --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Assign both system-assigned and user=assigned managed identities to an existing task.
+  - name: Assign both system-assigned and user-assigned managed identities to an existing task.
     text: >
         az acr task identity assign -n MyTask -r MyRegistry --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
