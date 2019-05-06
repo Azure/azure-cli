@@ -452,8 +452,8 @@ def get_custom_registry_credentials(cmd,
     :param str login_server: The login server of custom registry
     :param str username: The username for custom registry
     :param str password: The password for custom registry
-    :param str kv_username: The key vault secret URI of the username to login to the custom registry.
-    :param str kv_password: The key vault secret URI of the password to login to the custom registry.
+    :param str kv_username: The key vault secret URI of the username to login to the custom registry
+    :param str kv_password: The key vault secret URI of the password to login to the custom registry
     :param str identity: The task managed identity used for the credential
     """
 
