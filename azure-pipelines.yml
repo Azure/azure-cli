@@ -101,7 +101,37 @@ jobs:
 
       ArtifactName: msi
 
+- job: TestWindowsMSI
+  displayName: Test Windows MSI
 
+  dependsOn: BuildWindowsMSI
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: false
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: msi
+
+  - task: PowerShell@2
+    displayName: Install and Load CLI
+    inputs:
+      targetType: inline
+      script: |
+        $InstallArgs = @(
+          "/I"
+          '"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"'
+          "/norestart"
+          "/L*v"
+          ".\install_logs.txt"
+        )
+        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
+        Get-Content .\install_logs.txt
+
+        az --version
+        az self-test
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -478,37 +508,34 @@ jobs:
     inputs:
       ArtifactName: debian
 
+- job: BuildUbuntuDisco
+  displayName: Build Ubuntu Disco Package
+
+  dependsOn: BuildPythonWheel
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        artifactName: pypi
 
 
-# - job: BuildDebianWheezy
-#   displayName: Build Debian Wheezy Package
-
-#   dependsOn: BuildPythonWheel
-#   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-#   pool:
-#     vmImage: 'ubuntu-16.04'
-#   steps:
-#   - task: DownloadBuildArtifacts@0
-#     displayName: 'Download Build Artifacts'
-#     inputs:
-#       artifactName: pypi
+    - task: Bash@3
+      displayName: 'Build Ubuntu Disco Package'
+      inputs:
+        targetType: 'filePath'
+        filePath: scripts/release/debian/pipeline.sh
+      env:
+        DISTRO: disco
+        DISTRO_BASE_IMAGE: ubuntu:disco
 
 
-#   - task: Bash@3
-#     displayName: 'Build Debian Wheezy'
-#     inputs:
-#       targetType: 'filePath'
-#       filePath: scripts/release/debian/pipeline.sh
-#     env:
-#       DISTRO: wheezy
-#       DISTRO_BASE_IMAGE: debian:wheezy
-
-
-#   - task: PublishBuildArtifacts@1
-#     displayName: 'Publish Artifact: debian'
-#     inputs:
-#       ArtifactName: debian
-
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: debian'
+      inputs:
+        ArtifactName: debian
 
 
 - job: BuildDebianJessie

@@ -159,6 +159,11 @@ type: group
 short-summary: Manage secrets.
 """
 
+helps['keyvault secret set'] = """
+type: command
+short-summary: Create a secret (if one doesn't exist) or update a secret in a KeyVault.
+"""
+
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a key vault.

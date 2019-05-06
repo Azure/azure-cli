@@ -41,3 +41,6 @@ MSG_PROMPT_TELEMETRY = '\nMicrosoft would like to collect anonymous Azure CLI us
                        'about how you use Azure CLI.  To update your choice, run "az configure" ' \
                        'again.\nSelect y to enable data collection.'
 MSG_PROMPT_FILE_LOGGING = '\nWould you like to enable logging to file?'
+
+DEFAULT_CACHE_TTL = '10'
+MSG_PROMPT_CACHE_TTL = '\nCLI object cache time-to-live (TTL) in minutes [Default: {}]: '.format(DEFAULT_CACHE_TTL)

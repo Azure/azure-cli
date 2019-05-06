@@ -60,7 +60,7 @@ def environment_setting_format(value):
 def application_package_reference_format(value):
     """Space-separated application IDs with optional version in 'id[#version]' format."""
     app_reference = value.split('#', 1)
-    package = {'application_name': app_reference[0]}
+    package = {'application_id': app_reference[0]}
     try:
         package['version_name'] = app_reference[1]
     except IndexError:  # No specified version - ignore

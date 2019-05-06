@@ -43,12 +43,6 @@ def load_command_table(self, _):
         exception_handler=bot_exception_handler
     )
 
-    updateBotService_commandType = CliCommandType(
-        operations_tmpl='azure.mgmt.botservice.operations#BotsOperations.{}',
-        client_factory=get_botOperations_client,
-        exception_handler=bot_exception_handler
-    )
-
     with self.command_group('bot', botOperations_commandType) as g:
         g.custom_command('create', 'create')
         g.custom_command('publish', 'publish_app')
@@ -70,8 +64,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_connection')
         g.custom_command('list-providers', 'get_service_providers')
 
-    with self.command_group('bot', botServices_commandType) as g:
-        g.generic_update_command('update', setter_name='update', setter_type=updateBotService_commandType)
+    with self.command_group('bot', botOperations_commandType) as g:
+        g.custom_command('update', 'update')
 
     for channel in ['facebook', 'email', 'msteams', 'skype', 'kik', 'directline', 'telegram', 'sms', 'slack']:
         with self.command_group('bot {}'.format(channel), channelOperationsCreate_commandType) as g:

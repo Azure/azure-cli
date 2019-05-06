@@ -262,6 +262,7 @@ def load_arguments(self, _):
     with self.argument_context('openshift create') as c:
         c.argument('name', validator=validate_linux_host_name)
         c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
+        c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
 
 
 def _get_default_install_location(exe_name):
