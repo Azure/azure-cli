@@ -701,6 +701,11 @@ def iot_hub_devicestream_show(client, hub_name, resource_group_name=None):
     return hub.properties.device_streams
 
 
+def iot_hub_manual_failover(client, hub_name, failover_region, resource_group_name=None):
+    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    return client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region)
+
+
 def _get_device_client(client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     # Intermediate fix to support domains beyond azure-devices.net
