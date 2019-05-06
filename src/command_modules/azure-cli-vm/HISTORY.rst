@@ -6,6 +6,7 @@ Release History
 2.2.21
 ++++++
 * vm create: Added --computer-name for setting a vm's computer name.
+* vm/vmss create: `--ssh-key-value` can now accept multiple ssh public key values or paths.
 
 2.2.20
 ++++++

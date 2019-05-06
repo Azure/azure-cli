@@ -944,7 +944,18 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace):
-    string_or_file = (namespace.ssh_key_value or
+    if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
+        logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
+        namespace.generate_ssh_keys = False
+
+    processed_ssh_key_values = []
+    for ssh_key_value in namespace.ssh_key_value:
+        processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+    namespace.ssh_key_value = processed_ssh_key_values
+
+
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+    string_or_file = (ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -952,7 +963,7 @@ def validate_ssh_key(namespace):
         with open(string_or_file, 'r') as f:
             content = f.read()
     elif not keys.is_valid_ssh_rsa_public_key(content):
-        if namespace.generate_ssh_keys:
+        if should_generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
             public_key_filepath = string_or_file
@@ -968,7 +979,7 @@ def validate_ssh_key(namespace):
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
                            'You can use --generate-ssh-keys to let CLI generate one for you')
-    namespace.ssh_key_value = content
+    return content
 
 
 def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
