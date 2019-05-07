@@ -461,7 +461,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript --echo',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
@@ -710,7 +710,7 @@ class BotTests(ScenarioTest):
             # clean up the folder
             shutil.rmtree(dir_path)
 
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript --echo',
                  checks={
                      self.check('resourceGroup', '{rg}'),
                      self.check('id', '{botname}'),
