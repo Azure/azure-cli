@@ -221,8 +221,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vnet_name', help='Name of a virtual network.')
         c.argument('ip_address', help='IPv4 address or CIDR range.')
 
-    with self.argument_context('acr health-check') as c:
+    with self.argument_context('acr check-health') as c:
         c.argument('registry_name', options_list=['-n', '--name'], help='Name of target registry.', required=False)
-        c.argument('connectivity', options_list=['--connectivity'], help='Check health state for connectivity issues.', action='store_true', required=False)
-        c.argument('environment', options_list=['--environment'], help='Check health state for environment issues.', action='store_true', required=False)
-        c.argument('all_checks', options_list=['-a', '--all-checks'], help='Get all health reports supported.', action='store_true', required=False)
+        c.argument('connectivity', options_list=['--connectivity'], help='Checks health state for connectivity to a registry.', action='store_true', required=False)
+        c.argument('environment', options_list=['--environment'], help='Checks health state of docker and helm clients.', action='store_true', required=False)
+        c.argument('pull', options_list=['--pull'], help='Tries to pull the sample image mcr.microsoft.com/mcr/hello-world', action='store_true', required=False)
+        c.argument('all_checks', options_list=['-a', '--all-checks'], help='Gets all health reports supported.', action='store_true', required=False)
+        c.argument('skip_confirmation', options_list=['-y'], help='Skips confirmation, allowing to automatically pull the sample image', action='store_true', required=False)
+        c.argument('ignore_errors', options_list=['--ignore'], help='Ignore errors, displaying them only at the final', action='store_true', required=False)

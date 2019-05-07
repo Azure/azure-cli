@@ -102,8 +102,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_registries
     )
 
-    acr_health_check_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.acr.health_check#{}'
+    acr_check_health_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.check_health#{}'
     )
 
     with self.command_group('acr', acr_custom_util) as g:
@@ -210,6 +210,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'acr_network_rule_list')
         g.command('add', 'acr_network_rule_add')
         g.command('remove', 'acr_network_rule_remove')
-    
-    with self.command_group('acr', acr_health_check_util) as g:
-        g.command('health-check', 'acr_health_check')
+
+    with self.command_group('acr', acr_check_health_util) as g:
+        g.command('check-health', 'acr_check_health')
