@@ -444,7 +444,7 @@ def acr_task_identity_remove(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    if identities is not None and IDENTITY_GLOBAL_REMOVE in identities:
+    if identities and IDENTITY_GLOBAL_REMOVE in identities:
         if len(identities) > 1:
             raise CLIError(
                 "Cannot specify additional identities when [all] is used in [--identities]")
@@ -454,9 +454,10 @@ def acr_task_identity_remove(cmd,
         # To remove only the system assigned identity if user-assigned identities also exist
         # PATCH with the existing user-assigned identities
         # If no user-assigned identities exist, set the type to None
-        existingUserIdentites = client.get_details(
-            resource_group_name, registry_name, task_name).identity.user_assigned_identities
-        identities = IDENTITY_GLOBAL_REMOVE if not existingUserIdentites else list(existingUserIdentites.keys())
+        existingIdentity = client.get_details(
+            resource_group_name, registry_name, task_name).identity
+        identities = IDENTITY_GLOBAL_REMOVE if not existingIdentity else list(
+            existingIdentity.user_assigned_identities.keys())
         identity = _build_identities_info(cmd, identities)
     else:
         identity = _build_identities_info(cmd, identities, True)
