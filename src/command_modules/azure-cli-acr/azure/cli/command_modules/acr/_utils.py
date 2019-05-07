@@ -446,7 +446,8 @@ def get_custom_registry_credentials(cmd,
                                     password=None,
                                     kv_username=None,
                                     kv_password=None,
-                                    identity=None):
+                                    identity=None,
+                                    is_remove=False):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param str login_server: The login server of custom registry
@@ -463,7 +464,6 @@ def get_custom_registry_credentials(cmd,
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
-    is_remove = False
     custom_registries = None
     if login_server:
         # if null username and password (or identity), then remove the credential
@@ -477,7 +477,6 @@ def get_custom_registry_credentials(cmd,
         isIdentityCredential = False
         if username is None and kv_username is None and password is None and kv_password is None:
             isIdentityCredential = identity is not None
-            is_remove = not isIdentityCredential
 
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
