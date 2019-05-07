@@ -6,9 +6,10 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.extension import ExtensionNotInstalledException, get_extension_modname, get_extension
-from azure.cli.core.extension.operations import (reload_extension, update_extension,
-                                                 add_extension, add_extension_to_path, _validate_whl_cli_compat)
+from azure.cli.core.extension import (
+    ExtensionNotInstalledException, get_extension_modname, get_extension)
+from azure.cli.core.extension.operations import (
+    reload_extension, update_extension, add_extension, add_extension_to_path, check_version_compatibility)
 
 logger = get_logger(__name__)
 INTERACTIVE_EXTENSION_NAME = 'interactive'
@@ -16,7 +17,6 @@ INTERACTIVE_EXTENSION_NAME = 'interactive'
 
 def start_shell(cmd, update=None, style=None):
     from importlib import import_module
-    from packaging import version
 
     try:
         get_extension(INTERACTIVE_EXTENSION_NAME)
@@ -31,10 +31,9 @@ def start_shell(cmd, update=None, style=None):
 
     ext = get_extension(INTERACTIVE_EXTENSION_NAME)
     try:
-        _validate_whl_cli_compat(ext.get_metadata())
-    except CLIError as ex:
-        msg = '{}\n\nRun `az interactive --update` and try again.'.format(str(ex))
-        raise CLIError(msg)
+        check_version_compatibility(ext.get_metadata())
+    except CLIError:
+        raise CLIError('Run `az interactive --update` and try again.')
 
     add_extension_to_path(INTERACTIVE_EXTENSION_NAME, ext_dir=ext.path)
     interactive_module = get_extension_modname(ext_name=INTERACTIVE_EXTENSION_NAME, ext_dir=ext.path)
