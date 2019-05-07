@@ -411,7 +411,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             auth_mode=auth_mode
         )
     )
-    
+
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
