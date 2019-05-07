@@ -760,7 +760,7 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     return "{}.".format(base_message)
 
 
-def _build_identities_info(cmd, identities, is_remove=None):
+def _build_identities_info(cmd, identities, is_remove=False):
     IdentityProperties, UserIdentityProperties, ResourceIdentityType = cmd.get_models(
         'IdentityProperties', 'UserIdentityProperties', 'ResourceIdentityType')
     identities = identities or []
@@ -775,7 +775,7 @@ def _build_identities_info(cmd, identities, is_remove=None):
     identity_types = ', '.join(identity_types)
     identity = IdentityProperties(type=identity_types)
     if external_identities:
-        if is_remove is not None:
+        if is_remove:
             identity.user_assigned_identities = {e: None for e in external_identities}
         else:
             identity.user_assigned_identities = {e: UserIdentityProperties() for e in external_identities}

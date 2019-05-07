@@ -493,11 +493,11 @@ def get_custom_registry_credentials(cmd,
                 custom_reg_credential = CustomRegistryCredentials(
                     user_name=SecretObject(
                         type=SecretObjectType.vaultsecret if kv_username else SecretObjectType.opaque,
-                        value=kv_username if kv_username is not None else username
+                        value=kv_username if kv_username else username
                     ),
                     password=SecretObject(
                         type=SecretObjectType.vaultsecret if kv_password else SecretObjectType.opaque,
-                        value=kv_password if kv_password is not None else password
+                        value=kv_password if kv_password else password
                     ),
                     identity=identity
                 )
