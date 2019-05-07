@@ -411,7 +411,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             auth_mode=auth_mode
         )
     )
-
+    
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
 
 
@@ -426,23 +426,10 @@ def acr_task_identity_assign(cmd,
 
     identity = _build_identities_info(cmd, identities)
 
-    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
+
     taskUpdateParameters = TaskUpdateParameters(
-        identity=identity,
-        status=None,
-        platform=PlatformUpdateParameters(
-            os=None
-        ),
-        agent_configuration=AgentProperties(
-            cpu=None
-        ),
-        timeout=None,
-        step=None,
-        trigger=TriggerUpdateParameters(
-            source_triggers=None,
-            base_image_trigger=None
-        )
+        identity=identity
     )
 
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
@@ -474,23 +461,9 @@ def acr_task_identity_remove(cmd,
     else:
         identity = _build_identities_info(cmd, identities, True)
 
-    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
-        identity=identity,
-        status=None,
-        platform=PlatformUpdateParameters(
-            os=None
-        ),
-        agent_configuration=AgentProperties(
-            cpu=None
-        ),
-        timeout=None,
-        step=None,
-        trigger=TriggerUpdateParameters(
-            source_triggers=None,
-            base_image_trigger=None
-        )
+        identity=identity
     )
 
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
