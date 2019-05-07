@@ -405,24 +405,24 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
 
 # pylint: disable=inconsistent-return-statements
 def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
-                                   key_type=KeyType.primary.value, all=False):
+                                   key_type=KeyType.primary.value, show_all=False):
     if hub_name is None:
         hubs = iot_hub_list(client, resource_group_name)
         if hubs is None:
             raise CLIError("No IoT Hub found.")
 
         def conn_str_getter(h):
-            return _get_hub_connection_string(client, h.name, h.additional_properties['resourcegroup'], policy_name, key_type, all)
+            return _get_hub_connection_string(client, h.name, h.additional_properties['resourcegroup'], policy_name, key_type, show_all)
         return [{'name': h.name, 'connectionString': conn_str_getter(h)} for h in hubs]
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-        conn_str = _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, all)
-        return {'connectionString': conn_str if all else conn_str[0]}
+        conn_str = _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all)
+        return {'connectionString': conn_str if show_all else conn_str[0]}
 
 
-def _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, all):
+def _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all):
     policies = []
-    if all:
+    if show_all:
         policies.extend(iot_hub_policy_list(client, hub_name, resource_group_name))
     else:
         policies.append(iot_hub_policy_get(client, hub_name, policy_name, resource_group_name))

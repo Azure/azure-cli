@@ -11,7 +11,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 class IoTHubTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='centraluseuap')
+    @ResourceGroupPreparer()
     def test_iot_hub(self, resource_group, resource_group_location):
         hub = 'iot-hub-for-test-1'
         rg = resource_group
@@ -289,9 +289,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(storageContainers[*])', 1)])
 
         # Test 'az iot hub devicestream show'
-        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=[
-                 self.check('length(streamingEndpoints[*])', 1)
-                 ])
+        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
