@@ -469,14 +469,14 @@ def get_custom_registry_credentials(cmd,
         # if null username and password (or identity), then remove the credential
         custom_reg_credential = None
         # Validate if username or password are used, exactly one of each type exist is given
-        if username is not None and kv_username is not None:
-            raise CLIError("Provide either username or kv_username.")
-        if (password is not None and kv_password is not None):
-            raise CLIError("Provide either password or kv_password.")
+        if username and kv_username:
+            raise CLIError("Provide either username or kv-username.")
+        if password and kv_password:
+            raise CLIError("Provide either password or kv-password.")
 
-        isIdentityCredential = False
-        if username is None and kv_username is None and password is None and kv_password is None:
-            isIdentityCredential = identity is not None
+        is_identity_credential = False
+        if not username and not kv_username and not password and not kv_password:
+            is_identity_credential = identity is not None
 
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
@@ -485,7 +485,7 @@ def get_custom_registry_credentials(cmd,
         )
 
         if not is_remove:
-            if isIdentityCredential:
+            if is_identity_credential:
                 custom_reg_credential = CustomRegistryCredentials(
                     identity=identity
                 )

@@ -575,7 +575,8 @@ def acr_task_credential_remove(cmd,
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(
             cmd=cmd,
-            login_server=login_server
+            login_server=login_server,
+            is_remove=True
         )
     )
 
