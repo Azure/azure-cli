@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* auth: polish common AAD service errors with actionables to overcome
+
 2.0.64
 ++++++
 * Upgrade to knack 0.6.1
