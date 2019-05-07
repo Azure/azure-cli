@@ -499,3 +499,17 @@ def load_command_table(self, _):
         g.command('delete', 'delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'virtual_cluster_list')
+
+    ###############################################
+    #             sql instance failover group     #
+    ###############################################
+
+    instance_failover_groups_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#InstanceFailoverGroupsOperations.{}',
+        client_factory=get_sql_instance_failover_groups_operations)
+    with self.command_group('sql instance-failover-group', instance_failover_groups_operations, client_factory=get_sql_instance_failover_groups_operations) as g:
+        g.command('show', 'get')
+        g.custom_command('create', 'instance_failover_group_create')
+        g.generic_update_command('update', custom_func_name='instance_failover_group_update')
+        g.command('delete', 'delete')
+        g.custom_command('set-primary', 'instance_failover_group_failover')
