@@ -3554,16 +3554,23 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
                   route_table=None, service_endpoints=None, service_endpoint_policy=None,
-                  delegations=None):
+                  delegations=None, nat_gateway=None):
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
+
     if cmd.supported_api_version(min_api='2018-08-01'):
         subnet = Subnet(
             name=subnet_name,
             address_prefixes=address_prefix if len(address_prefix) > 1 else None,
             address_prefix=address_prefix[0] if len(address_prefix) == 1 else None
         )
+        if nat_gateway:
+            subnet.nat_gateway = SubResource(id=resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network', type='natGateways',
+                name=nat_gateway))
     else:
         subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
@@ -3589,7 +3596,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None, service_endpoints=None, delegations=None, service_endpoint_policy=None):
+                  route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
+                  service_endpoint_policy=None):
     NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
@@ -3599,6 +3607,13 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
             instance.address_prefix = address_prefix[0] if len(address_prefix) == 1 else None
         else:
             instance.address_prefix = address_prefix
+
+    if nat_gateway:
+        instance.nat_gateway = SubResource(id=resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Network', type='natGateways',
+            name=nat_gateway))
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)

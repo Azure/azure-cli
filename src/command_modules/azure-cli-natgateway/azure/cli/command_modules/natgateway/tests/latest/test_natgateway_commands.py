@@ -16,8 +16,11 @@ class NatGatewayScenarioTests(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': "ng1",
+            'vnetName': "vnet1",
+            'subnetName': "subnet1",
             'idle_timeout': 4,
             'sku': "Standard",
+            'addressPrefix': "10.0.0.0/12",
             'publicipaddress': "pip",
             'publicipprefix': "prefix",
             'idle_timeout_updated': 5,
