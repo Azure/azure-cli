@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+* webapp: webapp up returns a json output if --logs is not used
+* webapp: webapp up supports writing the default resources to local configuration
+* webapp: webapp up supports redeploying an app without using the --location argument
+* webapp: Fixed an issue where for Linux Free SKU ASP creation use Free as SKU value was not working
+
 0.2.19
 ++++++
 * functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`

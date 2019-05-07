@@ -2356,8 +2356,7 @@ def _ensure_service_principal(cli_ctx,
 
 def _create_client_secret():
     # Add a special character to satsify AAD SP secret requirements
-    special_chars = '!#$%&*-+_.:;<>=?@][^}{|~)('
-    special_char = special_chars[ord(os.urandom(1)) % len(special_chars)]
+    special_char = '$'
     client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
     return client_secret
 
@@ -2539,16 +2538,16 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     )
     identity_providers = []
 
-    # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
     create_aad = False
-    if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
-        create_aad = True
 
     # Validating if the cluster is not existing since we are not supporting the AAD rotation on OSA for now
     try:
         client.get(resource_group_name, name)
     except CloudError:
-        create_aad = True
+        # Validating if aad_client_app_id aad_client_app_secret aad_tenant_id are set
+        if aad_client_app_id is None and aad_client_app_secret is None and aad_tenant_id is None:
+            create_aad = True
+
     osa_aad_identity = _ensure_osa_aad(cmd.cli_ctx,
                                        aad_client_app_id=aad_client_app_id,
                                        aad_client_app_secret=aad_client_app_secret,
@@ -2597,9 +2596,12 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                         aad_client_app_id=osa_aad_identity.client_id,
                         aad_client_app_secret=osa_aad_identity.secret,
                         aad_tenant_id=osa_aad_identity.tenant_id, identifier=instance.public_hostname,
-                        name=name, create=True)
+                        name=name, create=create_aad)
     except CloudError as ex:
-        raise ex
+        if "The resource type could not be found in the namespace 'Microsoft.ContainerService" in ex.message:
+            raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
+        else:
+            raise ex
 
 
 def openshift_show(cmd, client, resource_group_name, name):
