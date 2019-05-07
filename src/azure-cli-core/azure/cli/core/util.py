@@ -23,7 +23,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
-    from msrest.exceptions import HttpOperationError
+    from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
 
     with CommandLoggerContext(logger):
@@ -31,6 +31,12 @@ def handle_exception(ex):
         if isinstance(ex, (CLIError, CloudError)):
             logger.error(ex.args[0])
             return ex.args[1] if len(ex.args) >= 2 else 1
+        if isinstance(ex, ValidationError):
+            logger.error('validation error: %s', ex)
+            return 1
+        if isinstance(ex, ClientRequestError):
+            logger.error("request failed: %s", ex)
+            return 1
         if isinstance(ex, KeyboardInterrupt):
             return 1
         if isinstance(ex, HttpOperationError):
@@ -483,3 +489,20 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     stop = timeit.default_timer()
     logger.debug('Connectivity check: %s sec', stop - start)
     return success
+
+
+class ConfiguredDefaultSetter(object):
+
+    def __init__(self, cli_config, use_local_config=None):
+        self.use_local_config = use_local_config
+        if self.use_local_config is None:
+            self.use_local_config = False
+        self.cli_config = cli_config
+        # here we use getattr/setattr to prepare the situation that "use_local_config" might not be available
+        self.original_use_local_config = getattr(cli_config, 'use_local_config', None)
+
+    def __enter__(self):
+        self.cli_config.use_local_config = self.use_local_config
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        setattr(self.cli_config, 'use_local_config', self.original_use_local_config)

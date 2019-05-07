@@ -259,14 +259,12 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         ])
 
 
-class VMVMSSWindowsLicenseTest(ScenarioTest):
+class VMWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_windows_license_type')
-    def test_vm_vmss_windows_license_type(self, resource_group):
-
+    def test_vm_windows_license_type(self, resource_group):
         self.kwargs.update({
-            'vm': 'winvm',
-            'vmss': 'winvmss'
+            'vm': 'winvm'
         })
         self.cmd('vm create -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -274,13 +272,6 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
         self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
             self.check('licenseType', 'None')
-        ])
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('virtualMachineProfile.licenseType', 'Windows_Server')
-        ])
-        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
-            self.check('virtualMachineProfile.licenseType', 'None')
         ])
 
 
@@ -388,17 +379,20 @@ class VMCustomImageTest(ScenarioTest):
         # Create image from vm
         self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
-            self.check("storageProfile.osDisk.managedDisk", None)
+            self.check("storageProfile.osDisk.managedDisk", None),
+            self.check('hyperVgeneration', 'V1')
         ])
         # Create image from vm id
         self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
-            self.check("storageProfile.osDisk.managedDisk", None)
+            self.check("storageProfile.osDisk.managedDisk", None),
+            self.check('hyperVgeneration', 'V1')
         ])
         # Create image from disk id
-        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux', checks=[
+        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux --hyper-v-generation "V1"', checks=[
             self.check("sourceVirtualMachine", None),
-            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
+            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}'),
+            self.check('hyperVgeneration', 'V1')
         ])
 
 
@@ -577,6 +571,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 class VMOSDiskSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
+    @AllowLargeResponse()
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
         self.kwargs.update({'sa': self.create_random_name(prefix='cli', length=12)})
@@ -1143,6 +1138,7 @@ class VMBootDiagnostics(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
     @StorageAccountPreparer(name_prefix='clitestbootdiag')
+    @AllowLargeResponse()
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
         self.kwargs.update({
@@ -1954,6 +1950,48 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
+
+
+class VMSSUpdateTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_')
+    def test_vmss_update(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'winvmss'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.licenseType', 'Windows_Server'),
+        ])
+
+        # test --license-type
+        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
+            self.check('virtualMachineProfile.licenseType', 'None')
+        ])
+
+        # test generic update on the vmss
+        self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.licenseType=Windows_Server', checks=[
+            self.check('virtualMachineProfile.licenseType', 'Windows_Server')
+        ])
+
+        # get the instance id of the VM instance
+        self.kwargs['instance_id'] = self.cmd('vmss list-instances -n {vmss} -g {rg}').get_output_in_json()[0]['instanceId']
+
+        # test updating a VM instance's protection policy
+        self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True --instance-id {instance_id}', checks=[
+            self.check('protectionPolicy.protectFromScaleIn', True),
+            self.check('protectionPolicy.protectFromScaleSetActions', True)
+        ])
+
+        # test generic update on a VM instance
+        self.cmd('vmss update -g {rg} -n {vmss} --set protectionPolicy.protectFromScaleIn=False protectionPolicy.protectFromScaleSetActions=False --instance-id {instance_id}', checks=[
+            self.check('protectionPolicy.protectFromScaleIn', False),
+            self.check('protectionPolicy.protectFromScaleSetActions', False)
+        ])
+
+        # test that cannot try to update protection policy on VMSS itself
+        self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
 
 class AcceleratedNetworkingTest(ScenarioTest):
@@ -3109,6 +3147,82 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+# endregion
+
+# region ppg tests
+
+
+class ProximityPlacementGroupScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix="cli_test_ppg_cmds_")
+    def test_proximity_placement_group(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'ppg1': 'my_ppg_1',
+            'ppg2': 'my_ppg_2',
+            'loc': resource_group_location
+        })
+
+        self.cmd('ppg create -n {ppg1} -t standard -g {rg}', checks=[
+            self.check('name', '{ppg1}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Standard')
+        ])
+
+        self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
+            self.check('name', '{ppg2}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Ultra')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
+    def test_ppg_with_related_resources(self, resource_group):
+
+        self.kwargs.update({
+            'ppg': 'myppg',
+            'vm': 'vm1',
+            'vmss': 'vmss1',
+            'avset': 'avset1',
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
+
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg}').get_output_in_json()['id']
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
+
+        ppg_resource = self.cmd('ppg show -n {ppg} -g {rg}').get_output_in_json()
+
+        # check that the compute resources are created with PPG
+
+        self._assert_ids_equal(ppg_resource['availabilitySets'][0]['id'], self.kwargs['avset_id'], rg_prefix='cli_test_ppg_vm_vmss_')
+        self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'], rg_prefix='cli_test_ppg_vm_vmss_')
+        self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'], 'cli_test_ppg_vm_vmss_')
+
+    # it would be simpler to do the following:
+    # self.assertEqual(ppg_resource['availabilitySets'][0]['id'].lower(), self.kwargs['avset_id'].lower())
+    # self.assertEqual(ppg_resource['virtualMachines'][0]['id'].lower(), self.kwargs['vm_id'].lower())
+    # self.assertEqual(ppg_resource['virtualMachineScaleSets'][0]['id'].lower(), self.kwargs['vmss_id'].lower())
+    #
+    # however, the CLI does not replace resource group values in payloads in the recordings.
+    def _assert_ids_equal(self, id_1, id_2, rg_prefix=None):
+        from msrestazure.tools import parse_resource_id
+
+        id_1, id_2, rg_prefix = id_1.lower(), id_2.lower(), rg_prefix.lower() if rg_prefix else rg_prefix
+
+        parsed_1, parsed_2 = parse_resource_id(id_1), parse_resource_id(id_2)
+
+        self.assertEqual(len(parsed_1.keys()), len(parsed_2.keys()))
+
+        for k1, k2 in zip(sorted(parsed_1.keys()), sorted(parsed_2.keys())):
+            if rg_prefix is not None and k1 == 'resource_group':
+                self.assertTrue(parsed_1[k1].startswith(rg_prefix))
+                self.assertTrue(parsed_2[k2].startswith(rg_prefix))
+            else:
+                self.assertEqual(parsed_1[k1], parsed_2[k2])
 # endregion
 
 

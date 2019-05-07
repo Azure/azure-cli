@@ -79,6 +79,8 @@ class TunnelServer(object):
     def is_webapp_up(self):
         import certifi
         import urllib3
+        from azure.cli.core.util import should_disable_connection_verify
+
         try:
             import urllib3.contrib.pyopenssl
             urllib3.contrib.pyopenssl.inject_into_urllib3()
@@ -86,6 +88,8 @@ class TunnelServer(object):
             pass
 
         http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+        if should_disable_connection_verify():
+            http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus')
         r = http.request(
@@ -102,7 +106,7 @@ class TunnelServer(object):
         if 'FAIL' in msg.upper():
             logger.info('WARNING - Remote debugging may not be setup properly. Reponse content: %s', msg)
             return False
-        if '2222' in msg:
+        if 'SUCCESS' in msg.upper():
             return True
         return False
 

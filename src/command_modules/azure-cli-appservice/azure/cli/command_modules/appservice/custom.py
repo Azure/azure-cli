@@ -12,14 +12,13 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 from binascii import hexlify
 from os import urandom
 import json
 import ssl
 import sys
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
-
 from fabric import Connection
 
 
@@ -42,7 +41,8 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
+    ConfiguredDefaultSetter
 
 from .tunnel import TunnelServer
 
@@ -82,6 +82,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
+    if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name not in ['F1', 'Free']:
+        site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
     helper = _StackRuntimeHelper(client, linux=is_linux)
 
@@ -287,7 +289,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
-        logger.warning("Starting zip deployment")
+        logger.warning("Starting zip deployment. This operation can take a while to complete ...")
         requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
     # check the status of async deployment
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
@@ -297,24 +299,23 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
 def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     tier = tier.upper()
-    if tier == 'F1' or tier == "FREE":
+    if tier in ['F1', 'FREE']:
         return 'FREE'
-    elif tier == 'D1' or tier == "SHARED":
+    if tier in ['D1', "SHARED"]:
         return 'SHARED'
-    elif tier in ['B1', 'B2', 'B3', 'BASIC']:
+    if tier in ['B1', 'B2', 'B3', 'BASIC']:
         return 'BASIC'
-    elif tier in ['S1', 'S2', 'S3']:
+    if tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
+    if tier in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
-    elif tier in ['P1V2', 'P2V2', 'P3V2']:
+    if tier in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
-    elif tier in ['PC2', 'PC3', 'PC4']:
+    if tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
-    elif tier in ['EP1', 'EP2', 'EP3']:
+    if tier in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
-    else:
-        raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -393,7 +394,7 @@ def validate_plan_switch_compatibility(client, src_functionapp_instance, dest_pl
                                                  src_parse_result['name'])
     if src_plan_info is None:
         raise CLIError('Could not determine the current plan of the functionapp')
-    elif not (is_plan_consumption(src_plan_info) or is_plan_elastic_premium(src_plan_info)):
+    if not (is_plan_consumption(src_plan_info) or is_plan_elastic_premium(src_plan_info)):
         raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
     if not (is_plan_consumption(dest_plan_instance) or is_plan_elastic_premium(dest_plan_instance)):
         raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
@@ -1182,6 +1183,14 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    # if is_linux and FREE SKU check the region is supported, FREE is supported on some select regions only
+    if is_linux and sku == 'F1':
+        geo_regions = list(filter(lambda x: location in x.name, list_locations(cmd, sku, is_linux)))
+        num_geo_regions = len(geo_regions)
+        if num_geo_regions == 0:
+            raise CLIError('Free SKU not supported in region "{}". Run the command with --location to use a '
+                           'supported region. See az appservice list-locations --sku F1 --linux-workers-enabled to see '
+                           'the list of supported regions'.format(location))
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
@@ -2265,7 +2274,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, launch_browser=False):  # pylint: disable=too-many-statements, too-many-branches
+def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable=too-many-statements, too-many-branches
+              location=None, sku=None, dryrun=False, logs=False, launch_browser=False):
     import os
     from azure.cli.core._profile import Profile
     client = web_client_factory(cmd.cli_ctx)
@@ -2273,6 +2283,9 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     src_dir = os.getcwd()
     user = Profile().get_current_account_user()
     user = user.split('@', 1)[0]
+    if len(user.split('#', 1)) > 1:  # on cloudShell user is in format live.com#user@domain.com
+        user = user.split('#', 1)[1]
+    logger.info("UserPrefix to use '%s'", user)
     # if dir is empty, show a message in dry run
     do_deployment = False if os.listdir(src_dir) == [] else True
     _create_new_rg = True
@@ -2284,7 +2297,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
     lang_details = get_lang_from_content(src_dir)
     # we support E2E create and deploy for selected stacks, any other stack, set defaults for os & runtime
     # and skip deployment
-    if lang_details['language'] is None:
+    language = lang_details.get('language')
+    if not language:
         do_deployment = False
         sku = sku or 'F1'
         os_val = OS_DEFAULT
@@ -2295,8 +2309,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         if sku is None:
             sku = lang_details.get("default_sku")
         else:
+            logger.info("Found sku argument, skipping use default sku")
             sku = sku
-        language = lang_details.get("language")
         is_skip_build = language.lower() == STATIC_RUNTIME_NAME
         os_val = "Linux" if language.lower() == NODE_RUNTIME_NAME \
             or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
@@ -2306,34 +2320,43 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         detected_version = data.get('detected')
         runtime_version = "{}|{}".format(language, version_used_create) if \
             version_used_create != "-" else version_used_create
-
     full_sku = get_sku_name(sku)
     location = set_location(cmd, sku, location)
     loc_name = location.replace(" ", "").lower()
     is_linux = True if os_val == 'Linux' else False
-    asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
-    rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
-    # Resource group: check if default RG is set
-    default_rg = cmd.cli_ctx.config.get('defaults', 'group', fallback=None)
-    _create_new_rg = should_create_new_rg(cmd, default_rg, rg_name, is_linux)
 
+    if resource_group_name is None:
+        logger.info('Using default ResourceGroup value')
+        rg_name = "{}_rg_{}_{}".format(user, os_val, loc_name)
+    else:
+        logger.info("Found user input for ResourceGroup %s", resource_group_name)
+        rg_name = resource_group_name
+
+    if plan is None:
+        logger.info('Using default appserviceplan value')
+        asp = "{}_asp_{}_{}_0".format(user, os_val, loc_name)
+        _asp_generic = asp[:-len(asp.split("_")[4])]  # used to determine if a new ASP needs to be created
+    else:
+        asp = plan
+        _asp_generic = asp
+    _create_new_rg = should_create_new_rg(cmd, rg_name, is_linux)
+    logger.info("Should create new RG %s", _create_new_rg)
     src_path = "{}".format(src_dir.replace("\\", "\\\\"))
     rg_str = "{}".format(rg_name)
     dry_run_str = r""" {
             "name" : "%s",
-            "serverfarm" : "%s",
+            "appserviceplan" : "%s",
             "resourcegroup" : "%s",
             "sku": "%s",
             "os": "%s",
             "location" : "%s",
             "src_path" : "%s",
             "version_detected": "%s",
-            "version_to_create": "%s"
+            "runtime_version": "%s"
             }
             """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
                    detected_version, runtime_version)
     create_json = json.loads(dry_run_str)
-
     if dryrun:
         logger.warning("Web app will be created with the below configuration,re-run command "
                        "without the --dryrun flag to create & deploy a new app")
@@ -2347,8 +2370,8 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         _create_new_asp = True
     else:
         logger.warning("Resource group '%s' already exists.", rg_name)
-        _asp_generic = asp[:-len(asp.split("_")[4])]
         # get all asp in the RG
+        logger.warning("Verifying if the plan with the same sku exists or should create a new plan")
         data = (list(filter(lambda x: _asp_generic in x.name,
                             client.app_service_plans.list_by_resource_group(rg_name))))
         data_sorted = (sorted(data, key=lambda x: x.name))
@@ -2357,7 +2380,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         # and get FirstOrDefault
         selected_asp = next((a for a in data if isinstance(a.sku, SkuDescription) and
                              a.sku.tier.lower() == full_sku.lower() and
-                             (a.location.replace(" ", "").lower() == location or a.location == location)), None)
+                             (a.location.replace(" ", "").lower() == location.lower() or a.location == location)), None)
         if selected_asp is not None:
             asp = selected_asp.name
             _create_new_asp = False
@@ -2365,29 +2388,36 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
             # from the sorted data pick the last one & check if a new ASP needs to be created
             # based on SKU or not
             _plan_info = data_sorted[num_asps - 1]
-            _asp_num = int(_plan_info.name.split('_')[4]) + 1
-            asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
+            if plan is None:
+                _asp_num = int(_plan_info.name.split('_')[4]) + 1
+                asp = "{}_asp_{}_{}_{}".format(user, os_val, loc_name, _asp_num)
+            else:
+                asp = plan
+
     # create new ASP if an existing one cannot be used
     if _create_new_asp:
         logger.warning("Creating App service plan '%s' ...", asp)
-        sku_def = SkuDescription(tier=full_sku, name=sku, capacity=(1 if is_linux else None))
-        plan_def = AppServicePlan(location=loc_name, app_service_plan_name=asp,
-                                  sku=sku_def, reserved=(is_linux or None))
-        client.app_service_plans.create_or_update(rg_name, asp, plan_def)
+        create_app_service_plan(cmd, rg_name, asp, is_linux, None, sku, 1 if is_linux else None, location)
         logger.warning("App service plan creation complete")
+        create_json['appserviceplan'] = plan
         _create_new_app = True
         _show_too_many_apps_warn = False
     else:
         logger.warning("App service plan '%s' already exists.", asp)
         _show_too_many_apps_warn = get_num_apps_in_asp(cmd, rg_name, asp) > 5
         _create_new_app = should_create_new_app(cmd, rg_name, name)
-
     # create the app
     if _create_new_app:
         logger.warning("Creating app '%s' ...", name)
-        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None)
+        create_webapp(cmd, rg_name, name, asp, runtime_version if is_linux else None, tags={"cli": 'webapp_up'})
         logger.warning("Webapp creation complete")
+        create_json['name'] = name
         _set_build_app_setting = True
+        # Update appSettings for netcore apps
+        if language == 'dotnetcore':
+            update_app_settings(cmd, rg_name, name, ['ANCM_ADDITIONAL_ERROR_PAGE_LINK=' +
+                                                     'https://{}.scm.azurewebsites.net/detectors'.format(name)])
+
         # Configure default logging
         _configure_default_logging(cmd, rg_name, name)
         if _show_too_many_apps_warn:
@@ -2408,6 +2438,7 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
             logger.warning('Updating runtime version from %s to %s',
                            site_config.windows_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
+        create_json['runtime_version'] = runtime_version
 
     if do_deployment and not is_skip_build:
         _set_build_app_setting = True
@@ -2426,33 +2457,44 @@ def webapp_up(cmd, name, location=None, sku=None, dryrun=False, logs=False, laun
         # setting to build after deployment
         logger.warning("Updating app settings to enable build after deployment")
         update_app_settings(cmd, rg_name, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
+        # wait for all the settings to completed
+        time.sleep(30)
 
     if do_deployment:
         logger.warning("Creating zip with contents of dir %s ...", src_dir)
         # zip contents & deploy
         zip_file_path = zip_contents_from_dir(src_dir, language)
 
-        logger.warning("Preparing to deploy %s contents to app."
-                       "This operation can take a while to complete ...",
-                       '' if is_skip_build else 'and build')
+        logger.warning("Preparing to deploy %s contents to app.", '' if is_skip_build else 'and build')
         enable_zip_deploy(cmd, rg_name, name, zip_file_path)
         # Remove the file after deployment, handling exception if user removed the file manually
         try:
             os.remove(zip_file_path)
         except OSError:
             pass
-    if logs:
-        _configure_default_logging(cmd, rg_name, name)
     logger.warning("All done.")
+    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
+        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
+        cmd.cli_ctx.config.set_value('defaults', 'sku', full_sku)
+        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', asp)
+        cmd.cli_ctx.config.set_value('defaults', 'location', location)
+        cmd.cli_ctx.config.set_value('defaults', 'web', name)
     if launch_browser:
         logger.warning("Launching app using default browser")
-        return view_in_browser(cmd, rg_name, name, None, logs)
-    _url = _get_url(cmd, rg_name, name)
-    return logger.warning("You can launch the app at '%s'. To redeploy the app run the command az webapp up -n "
-                          "%s -l %s", _url, name, location)
+        view_in_browser(cmd, rg_name, name, None, logs)
+    else:
+        _url = _get_url(cmd, rg_name, name)
+        logger.warning("You can launch the app at '%s'", _url)
+        create_json.update({'app_url': _url})
+    if logs:
+        _configure_default_logging(cmd, rg_name, name)
+        return get_streaming_log(cmd, rg_name, name)
+    return create_json
 
 
 def _ping_scm_site(cmd, resource_group, name):
+    from azure.cli.core.util import should_disable_connection_verify
+
     #  wake up kudu, by making an SCM call
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed
@@ -2460,14 +2502,14 @@ def _ping_scm_site(cmd, resource_group, name):
     scm_url = _get_scm_url(cmd, resource_group, name)
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
-    requests.get(scm_url + '/api/settings', headers=authorization)
+    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify())
 
 
 def is_webapp_up(tunnel_server):
     return tunnel_server.is_webapp_up()
 
 
-def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
+def get_tunnel(cmd, resource_group_name, name, port=None, slot=None):
     webapp = show_webapp(cmd, resource_group_name, name, slot)
     is_linux = webapp.reserved
     if not is_linux:
@@ -2476,9 +2518,6 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     profile_user_name = next(p['userName'] for p in profiles)
     profile_user_password = next(p['userPWD'] for p in profiles)
-
-    ssh_user_name = 'root'
-    ssh_user_password = 'Docker!'
 
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
@@ -2490,10 +2529,44 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     _ping_scm_site(cmd, resource_group_name, name)
 
     _wait_for_webapp(tunnel_server)
+    return tunnel_server
+
+
+def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
+
+    logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
+
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if config.remote_debugging_enabled:
+        logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
+    else:
+        ssh_user_name = 'root'
+        ssh_user_password = 'Docker!'
+        logger.warning('SSH is available { username: %s, password: %s }', ssh_user_name, ssh_user_password)
+
+    logger.warning('Ctrl + C to close')
+
+    if timeout:
+        time.sleep(int(timeout))
+    else:
+        while t.isAlive():
+            time.sleep(5)
+
+
+def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot)
+
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+
+    ssh_user_name = 'root'
+    ssh_user_password = 'Docker!'
 
     s = threading.Thread(target=_start_ssh_session,
                          args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
@@ -2553,12 +2626,16 @@ def _start_ssh_session(hostname, port, username, password):
         c.close()
 
 
-def ssh_webapp(cmd, resource_group_name, name, slot=None, timeout=None):  # pylint: disable=too-many-statements
+def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None):  # pylint: disable=too-many-statements
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if config.remote_debugging_enabled:
+        raise CLIError('remote debugging is enabled, please disable')
+
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
     else:
-        create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=slot, timeout=timeout)
+        create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
 def create_devops_build(

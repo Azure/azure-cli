@@ -48,6 +48,7 @@ fi
 find /mnt/artifacts/pypi -name '*.whl' | xargs pip3 install
 
 pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
+pip3 install --force-reinstall urllib3==1.24.2
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
