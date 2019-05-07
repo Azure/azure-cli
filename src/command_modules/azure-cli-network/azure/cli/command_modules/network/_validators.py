@@ -403,21 +403,6 @@ def validate_frontend_ip_configs(cmd, namespace):
                 config_ids.append(item)
         namespace.frontend_ip_configurations = config_ids
 
-def validate_public_ip_addresses(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.public_ip_addresess:
-        config_ids = []
-        for item in namespace.public_ip_addresses:
-            if not is_valid_resource_id(item):
-                config_ids.append(resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=item.resource_group_name,
-            name=item.public_ip_address,
-            namespace='Microsoft.Network',
-            type='publicIPAddresses'))
-            else:
-                config_ids.append(item)
-        namespace.f = config_ids
 
 def validate_local_gateway(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
