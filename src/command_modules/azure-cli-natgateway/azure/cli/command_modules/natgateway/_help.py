@@ -50,6 +50,8 @@ helps['network nat-gateway show'] = """
     examples:
       - name: Show Nat Gateway
         text: az network nat-gateway show --resource-group MyResourceGroup --name MyNatGateway
+      - name: Show Nat Gateway with Id
+        text: az network nat-gateway show --ids MyNatGatewayId
 """
 
 helps['network nat-gateway update'] = """

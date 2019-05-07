@@ -9,7 +9,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 def load_arguments(self, _):
     with self.argument_context('network nat-gateway') as c:
         c.argument('nat_gateway_name',
-                   id_part='child_name_1',
+                   id_part='name',
                    options_list=['--name', '-n'],
                    help='The name of the nat gateway')
         c.argument('location', validator=get_default_location_from_resource_group)
