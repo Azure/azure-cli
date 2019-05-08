@@ -3,6 +3,7 @@
 Release History
 ===============
 * webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
 
 0.2.18
 ++++++

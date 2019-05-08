@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.3
++++++
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+
 2.2.2
 +++++
 * Support for custom time zone on managed instance.

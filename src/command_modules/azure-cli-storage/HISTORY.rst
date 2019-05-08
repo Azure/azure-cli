@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.4.2
++++++
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+
 2.4.1
 +++++
 * `storage blob generate-sas`: Fix double url-encoded sas token
