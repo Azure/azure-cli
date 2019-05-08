@@ -32,6 +32,11 @@ from azure.mgmt.sql.models import (
     ServiceObjectiveName,
     Sku,
     StorageKeyType,
+    InstanceFailoverGroup,
+    ManagedInstancePairInfo,
+    PartnerRegionInfo,
+    InstanceFailoverGroupReadOnlyEndpoint,
+    InstanceFailoverGroupReadWriteEndpoint
 )
 
 from knack.log import get_logger
@@ -2321,6 +2326,7 @@ class InstanceFailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
 
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 def instance_failover_group_create(
         cmd,
@@ -2347,9 +2353,9 @@ def instance_failover_group_create(
         resource_group_name=partner_resource_group)
 
     # Build the partner server id
-    managed_server_info_pair = ManagedInstancePairInfo(primary_server.id, partner_server.id)
-    partner_region_info = PartnerRegionInfo(partner_server.location, "Secondary")
-    
+    managed_server_info_pair = ManagedInstancePairInfo(primary_managed_instance_id=primary_server.id, partner_managed_instance_id=partner_server.id)
+    partner_region_info = PartnerRegionInfo(location=partner_server.location)
+
     # Convert grace period from hours to minutes
     grace_period = int(grace_period) * 60
 
@@ -2358,8 +2364,8 @@ def instance_failover_group_create(
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
-        location=primary_server.location,
-        instance_failover_group_name=instance_failover_group_name,
+        location_name=primary_server.location,
+        failover_group_name=instance_failover_group_name,
         parameters=InstanceFailoverGroup(
             managed_instance_pairs=[managed_server_info_pair],
             partner_regions = [partner_region_info],

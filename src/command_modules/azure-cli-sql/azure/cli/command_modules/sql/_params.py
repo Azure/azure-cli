@@ -50,7 +50,8 @@ from .custom import (
     ClientType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
-    FailoverPolicyType
+    FailoverPolicyType,
+    InstanceFailoverPolicyType
 )
 
 from ._validators import (
@@ -1242,7 +1243,7 @@ def load_arguments(self, _):
         c.argument('partner_managed_instance', help="The name of the partner managed instance of a Instance Failover Group")
         c.argument('partner_resource_group', help="The name of the resource group of the partner managed instance")
         c.argument('failover_policy', help="The failover policy of the Instance Failover Group",
-                   arg_type=get_enum_type(FailoverPolicyType))
+                   arg_type=get_enum_type(InstanceFailoverPolicyType))
         c.argument('grace_period',
                    help='Interval in hours before automatic failover is initiated '
                         'if an outage occurs on the primary server. '

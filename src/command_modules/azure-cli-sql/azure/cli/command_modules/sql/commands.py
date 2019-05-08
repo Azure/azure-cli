@@ -47,6 +47,7 @@ from ._util import (
     get_sql_subscription_usages_operations,
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
+    get_sql_instance_failover_groups_operations,
 )
 
 from ._validators import (
