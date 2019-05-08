@@ -72,7 +72,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_mgmt_policy)
 
     with self.command_group('storage account management-policy', management_policy_sdk,
-                            resource_type=ResourceType.MGMT_STORAGE,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
                             custom_command_type=management_policy_custom_type) as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_management_policies')
