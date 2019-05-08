@@ -399,6 +399,16 @@ examples:
     text: az storage blob show -c MyContainer -n MyBlob
 """
 
+helps['storage blob sync'] = """
+    type: command
+    short-summary: Sync blobs recursively to a storage blob container.
+    examples:
+        - name: Sync a single blob to a container.
+          text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/file" -d NewBlob
+        - name: Sync a directory to a container.
+          text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/directory"
+"""
+
 helps['storage blob upload'] = """
 type: command
 short-summary: Upload a file to a storage blob.
