@@ -317,7 +317,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('configure --default group=""')
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
-
     @ResourceGroupPreparer(name_prefix='cli_role_audit')
     @AllowLargeResponse()
     def test_role_assignment_audits(self, resource_group):
