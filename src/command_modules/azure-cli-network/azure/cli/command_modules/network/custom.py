@@ -3605,7 +3605,7 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
             instance.address_prefix = address_prefix
 
     if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
-            instance.nat_gateway = SubResource(id=nat_gateway)
+        instance.nat_gateway = SubResource(id=nat_gateway)
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
