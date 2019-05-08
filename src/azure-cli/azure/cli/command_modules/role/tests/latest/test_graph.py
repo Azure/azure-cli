@@ -238,10 +238,10 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.kwargs['user1_id'] = user1_result['objectId']
 
             # update user1
-            self.cmd('ad user update --display-name {user1}_new --account-enabled false --upn-or-object-id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
-            user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}').get_output_in_json()
+            self.cmd('ad user update --display-name {user1}_new --account-enabled false --id {user1}@{domain} --mail-nickname {new_mail_nick_name}')
+            user1_update_result = self.cmd('ad user show --upn-or-object-id {user1}@{domain}', checks=[self.check("displayName", '{user1}_new'),
+                                                                                                       self.check("accountEnabled", False)]).get_output_in_json()
             self.kwargs['user1_id'] = user1_update_result['objectId']
-            self.assertEqual(user1_update_result['accountEnabled'], False)
 
             # create user2
             user2_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
@@ -283,6 +283,7 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.cmd('ad group member list -g {group}', checks=[
                 self.check("length([?displayName=='{user1}_new'])", 1),
                 self.check("length([?displayName=='{user2}'])", 1),
+                self.check("length([?displayName=='{user1}'])", 0),
                 self.check("length([])", 2),
             ])
             # remove user1
