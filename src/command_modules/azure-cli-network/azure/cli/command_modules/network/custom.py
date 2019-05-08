@@ -3565,12 +3565,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
             address_prefixes=address_prefix if len(address_prefix) > 1 else None,
             address_prefix=address_prefix[0] if len(address_prefix) == 1 else None
         )
-        if nat_gateway:
-            subnet.nat_gateway = SubResource(id=resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='natGateways',
-                name=nat_gateway))
+        if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
+            subnet.nat_gateway = SubResource(id=nat_gateway)
     else:
         subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
@@ -3608,12 +3604,8 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
         else:
             instance.address_prefix = address_prefix
 
-    if nat_gateway:
-        instance.nat_gateway = SubResource(id=resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=resource_group_name,
-            namespace='Microsoft.Network', type='natGateways',
-            name=nat_gateway))
+    if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
+            instance.nat_gateway = SubResource(id=nat_gateway)
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)

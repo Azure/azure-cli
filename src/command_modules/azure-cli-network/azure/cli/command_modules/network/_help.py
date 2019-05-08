@@ -3730,7 +3730,7 @@ examples:
   - name: Associate a network security group to a subnet.
     text: az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
   - name: Update subnet with Nat Gateway
-    text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway nat_gateway_test --address-prefixes "10.0.0.0/21"
+    text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
 """
 
 helps['network vnet update'] = """
