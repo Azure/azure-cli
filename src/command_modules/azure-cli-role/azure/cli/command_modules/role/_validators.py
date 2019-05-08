@@ -85,6 +85,18 @@ def validate_cert(namespace):
         namespace.cert = x509
 
 
+def process_assignment_namespace(cmd, namespace):
+    from azure.cli.core.util import ConfiguredDefaultSetter
+    if namespace.resource_group_name and namespace.scope:
+        with ConfiguredDefaultSetter(cmd.cli_ctx.config, 'local'):
+            defaults_result = cmd.cli_ctx.config.items(cmd.cli_ctx.config.defaults_section_name)
+        if next((x for x in defaults_result if x.get('value') == namespace.resource_group_name and
+                 x.get('name') == 'group'), None):
+            namespace.resource_group_name = None  # drop configured defaults
+        else:
+            raise CLIError('usage error: --resource RESOURCE_GROUP | --scope')
+
+
 def process_msi_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_tags(namespace)
