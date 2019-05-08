@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.4.2
+++++++
+* Fix 'az openshift create' command when used with customer aad client
+
+2.4.1
+++++++
+* Using Azure Red Hat Openshift GA API Version
+
 2.4.0
 ++++++
 * BREAKING CHANGE: Removing `--fqdn` flag on az openshift commands

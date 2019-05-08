@@ -900,7 +900,7 @@ examples:
     text: az network application-gateway waf-config list-rule-sets --group '*' --type OWASP --version 3.0
   - name: List available rules in the `crs_35_bad_robots` rule group.
     text: az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
-  - name: List available rules in table foramt.
+  - name: List available rules in table format.
     text: az network application-gateway waf-config list-rule-sets -o table
 """
 

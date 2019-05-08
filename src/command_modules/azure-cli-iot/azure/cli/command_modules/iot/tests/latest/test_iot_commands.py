@@ -41,6 +41,11 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString', conn_str_pattern)
         ])
 
+        self.cmd('iot hub show-connection-string -n {0} -g {1} --all'.format(hub, rg), checks=[
+            self.check('length(connectionString[*])', 5),
+            self.check_pattern('connectionString[0]', conn_str_pattern)
+        ])
+
         # Test 'az iot hub update'
         property_to_update = 'properties.operationsMonitoringProperties.events.DeviceTelemetry'
         updated_value = 'Error, Information'

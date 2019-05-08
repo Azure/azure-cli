@@ -131,7 +131,7 @@ We maintain a Docker image preconfigured with the Azure CLI.
 See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
 
 ```bash
-$ docker run -v ${HOME}:/root -it --rm microsoft/azure-cli:<version>
+$ docker run -v ${HOME}:/root -it --rm mcr.microsoft.com/azure-cli:<version>
 ```
 
 For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).

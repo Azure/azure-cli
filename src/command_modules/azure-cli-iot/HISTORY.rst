@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.3.9
++++++
+* Add support to list all keys 
+
 0.3.8
 +++++
 * Minor fixes

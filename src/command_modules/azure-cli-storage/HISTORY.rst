@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.4.2
++++++
+* `storage blob sync`: add sync command for storage blob
+
 2.4.1
 +++++
 * `storage blob generate-sas`: Fix double url-encoded sas token
