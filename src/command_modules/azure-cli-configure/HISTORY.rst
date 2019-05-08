@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.23
+++++++
+* Support folder based argument default value configurations
+
 2.0.22
 ++++++
 * Minor fixes

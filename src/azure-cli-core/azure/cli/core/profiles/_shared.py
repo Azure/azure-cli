@@ -49,6 +49,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
+    MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -86,8 +87,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-03-01', {
             'resource_skus': '2017-09-01',
             'disks': '2018-09-30',
-            'snapshots': '2018-09-30',
-            'images': '2018-10-01'
+            'snapshots': '2018-09-30'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -103,7 +103,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERREGISTRY: '2018-09-01',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-03-28',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_EVENTHUB: '2017-04-01'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',

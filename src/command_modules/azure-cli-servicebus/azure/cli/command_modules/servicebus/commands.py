@@ -49,6 +49,8 @@ def load_command_table(self, _):
         client_factory=migration_mgmt_client_factory
     )
 
+    from ._validators import validate_subnet
+
 # Namespace Region
     custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
@@ -141,3 +143,9 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('complete', 'complete_migration')
         g.command('abort', 'revert')
+
+# NetwrokRuleSet Region
+    with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
+        g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
+        g.command('list', 'get_network_rule_set')
+        g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)

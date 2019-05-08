@@ -145,7 +145,7 @@ class IoTHubTest(ScenarioTest):
             self.check('[0].name', 'TotalMessages'),
             self.check('[0].maxValue', 400000),
             self.check('[1].name', 'TotalDeviceCount'),
-            self.check('[1].maxValue', 500000)
+            self.check('[1].maxValue', 1000000)
         ])
 
         # Test 'az iot hub show-stats'
@@ -160,7 +160,7 @@ class IoTHubTest(ScenarioTest):
         endpoint_type = 'EventHub'
         storage_endpoint_name = 'Storage1'
         storage_endpoint_type = 'azurestoragecontainer'
-        storage_encoding_format = 'json'
+        storage_encoding_format = 'avro'
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
