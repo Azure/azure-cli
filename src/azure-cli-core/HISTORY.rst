@@ -3,6 +3,7 @@
 Release History
 ===============
 * auth: polish common AAD service errors with actionables to overcome
+* Fixed issue where the CLI would load extensions that were not compatible with its core version.
 
 2.0.64
 ++++++

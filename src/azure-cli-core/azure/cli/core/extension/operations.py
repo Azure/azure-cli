@@ -66,23 +66,6 @@ def _whl_download_from_url(url_parse_result, ext_file):
                 f.write(chunk)
 
 
-def _validate_whl_cli_compat(azext_metadata):
-    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
-    if not is_compatible:
-        min_max_msg_fmt = "The extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI core version {} and this extension " \
-                          "requires ".format(cli_core_version)
-        if min_required and max_required:
-            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
-        elif min_required:
-            min_max_msg_fmt += 'a min of {}.'.format(min_required)
-        elif max_required:
-            min_max_msg_fmt += 'a max of {}.'.format(max_required)
-        raise CLIError(min_max_msg_fmt)
-
-
 def _validate_whl_extension(ext_file):
     tmp_dir = tempfile.mkdtemp()
     zip_ref = zipfile.ZipFile(ext_file, 'r')
@@ -90,7 +73,7 @@ def _validate_whl_extension(ext_file):
     zip_ref.close()
     azext_metadata = WheelExtension.get_azext_metadata(tmp_dir)
     shutil.rmtree(tmp_dir)
-    _validate_whl_cli_compat(azext_metadata)
+    check_version_compatibility(azext_metadata)
 
 
 def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
@@ -191,6 +174,23 @@ def _augment_telemetry_with_ext_info(extension_name):
     except Exception:  # nopa pylint: disable=broad-except
         # Don't error on telemetry
         pass
+
+
+def check_version_compatibility(azext_metadata):
+    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
+    if not is_compatible:
+        min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
+                          "You have CLI core version {} and this extension " \
+                          "requires ".format(azext_metadata.get('name'), cli_core_version)
+        if min_required and max_required:
+            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
+        elif min_required:
+            min_max_msg_fmt += 'a min of {}.'.format(min_required)
+        elif max_required:
+            min_max_msg_fmt += 'a max of {}.'.format(max_required)
+        raise CLIError(min_max_msg_fmt)
 
 
 def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
