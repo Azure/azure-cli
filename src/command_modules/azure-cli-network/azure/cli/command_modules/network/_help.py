@@ -3673,11 +3673,15 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
+  - name: --nat-gateway
+    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Create new subnet attached to an NSG with a custom route table.
     text: |
         az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
             --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
+  - name: Create new subnet attached to Nat Gateway
+    text: az network vnet subnet create -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway nat_gateway_test --address-prefixes "10.0.0.0/21"
 """
 
 helps['network vnet subnet delete'] = """
@@ -3720,9 +3724,13 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
+  - name: --nat-gateway
+    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Associate a network security group to a subnet.
     text: az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
+  - name: Update subnet with Nat Gateway
+    text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
 """
 
 helps['network vnet update'] = """
