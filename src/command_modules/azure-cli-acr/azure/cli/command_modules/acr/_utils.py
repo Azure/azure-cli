@@ -495,9 +495,9 @@ def get_custom_registry_credentials(cmd,
 
 
 def is_vault_secret(cmd, credential):
-    keyvault_dns=None
+    keyvault_dns = None
     try:
-        keyvault_dns=cmd.cli_ctx.cloud.suffixes.keyvault_dns
+        keyvault_dns = cmd.cli_ctx.cloud.suffixes.keyvault_dns
     except:
         return False
     return keyvault_dns.upper() in credential.upper()
