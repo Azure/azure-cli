@@ -135,6 +135,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set_secret)
 
+    with self.argument_context('acr pack') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())
+        c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context. It can be '-' to pipe a file from the standard input.")
+
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())

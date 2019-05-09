@@ -432,6 +432,15 @@ examples:
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
 """
 
+helps['acr pack'] = """
+type: command
+short-summary: Queues a task that builds an app and pushes it into an Azure Container Registry.
+examples:
+  - name: Queue a build for the current directory with the default Oryx-based buildpack.
+    text: >
+        az acr pack -r MyRegistry .
+"""
+
 helps['acr show'] = """
 type: command
 short-summary: Get the details of an Azure Container Registry.

@@ -87,6 +87,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_runs
     )
 
+    acr_pack_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.pack#{}',
+        table_transformer=run_output_format,
+        client_factory=cf_acr_runs
+    )
+
     acr_task_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.task#{}',
         table_transformer=task_output_format,
@@ -167,6 +173,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr', acr_run_util) as g:
         g.command('run', 'acr_run', supports_no_wait=True)
+
+    with self.command_group('acr', acr_pack_util) as g:
+        g.command('run', 'acr_pack', supports_no_wait=True)
 
     with self.command_group('acr task', acr_task_util) as g:
         g.command('create', 'acr_task_create')
