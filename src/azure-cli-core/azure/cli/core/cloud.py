@@ -270,8 +270,8 @@ def get_clouds(cli_ctx):
     try:
         config.read(CLOUD_CONFIG_FILE)
     except configparser.MissingSectionHeaderError:
-        # clouds.config file is in bad format. Reomve it.
         os.remove(CLOUD_CONFIG_FILE)
+        logger.debug("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
