@@ -266,8 +266,8 @@ jobs:
     displayName: 'Test pip Install'
 
 
-- job: RunAutomationFull
-  displayName: Run Automation
+- job: RunAutomationFullPython2
+  displayName: Run Automation, Python 2
   dependsOn: BuildPythonWheel
 
   pool:
@@ -287,8 +287,8 @@ jobs:
       targetType: 'filePath'
       filePath: ./scripts/ci/test_automation.sh
 
-- job: RunAutomationFull
-  displayName: Run Automation
+- job: RunAutomationFullPython3
+  displayName: Run Automation, Python 3
   dependsOn: BuildPythonWheel
 
   pool:
