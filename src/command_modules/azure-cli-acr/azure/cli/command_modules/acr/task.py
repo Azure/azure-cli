@@ -83,6 +83,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             "--cmd myCommand -c /dev/null or "
             "-f myFile -c myContext, but not both.")
 
+    if os_type and platform:
+        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
+
     if context_path:
         if file.endswith(ALLOWED_TASK_FILE_TYPES):
             FileTaskStep = cmd.get_models('FileTaskStep')
@@ -164,8 +167,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             name=base_image_trigger_name
         )
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(
-        cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
         'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties')
@@ -179,9 +181,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         location=registry.location,
         step=step,
         platform=PlatformProperties(
-            os=platform_os,
+            os=os_type if os_type else platform_os,
             architecture=platform_arch,
-            variant=platform_variant
+            variant=None if os_type else platform_variant
         ),
         status=status,
         timeout=timeout,
@@ -271,6 +273,9 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     auth_mode=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    if os_type and platform:
+        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
 
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
@@ -384,16 +389,15 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             )
 
     platform_os, platform_arch, platform_variant = None, None, None
-    if os_type or platform:
-        platform_os, platform_arch, platform_variant = get_validate_platform(
-            cmd, os_type, platform)
+    if platform:
+        platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
         'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
-            os=platform_os if platform_os else os_type,
+            os=os_type if os_type else platform_os,
             architecture=platform_arch,
             variant=platform_variant
         ),

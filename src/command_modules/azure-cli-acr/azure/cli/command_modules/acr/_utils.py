@@ -348,9 +348,8 @@ def user_confirmation(message, yes=False):
             'Unable to prompt for confirmation as no tty available. Use --yes.')
 
 
-def get_validate_platform(cmd, os_type, platform):
+def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
-    :param str os_type: The name of OS passed by user in --os flag
     :param str platform: The name of Platform passed by user in --platform flag
     """
     OS, Architecture = cmd.get_models('OS', 'Architecture')
@@ -366,13 +365,6 @@ def get_validate_platform(cmd, os_type, platform):
             platform_split) > 1 else Architecture.amd64.value
         platform_variant = platform_split[2] if len(
             platform_split) > 2 else None
-
-    if os_type and platform:
-        if os_type.lower() != platform_os.lower():
-            raise CLIError(
-                "The OS in '--platform' should exactly match the value provided in '--os'.")
-    elif os_type:
-        platform_os = os_type
 
     platform_os = platform_os.lower()
     platform_arch = platform_arch.lower()
@@ -483,11 +475,11 @@ def get_custom_registry_credentials(cmd,
             else:
                 custom_reg_credential = CustomRegistryCredentials(
                     user_name=SecretObject(
-                        type=SecretObjectType.vaultsecret if is_vault_secret(username) else SecretObjectType.opaque,
+                        type=SecretObjectType.vaultsecret if is_vault_secret(cmd, username) else SecretObjectType.opaque,
                         value=username
                     ),
                     password=SecretObject(
-                        type=SecretObjectType.vaultsecret if is_vault_secret(password) else SecretObjectType.opaque,
+                        type=SecretObjectType.vaultsecret if is_vault_secret(cmd, password) else SecretObjectType.opaque,
                         value=password
                     ),
                     identity=identity
@@ -502,8 +494,13 @@ def get_custom_registry_credentials(cmd,
     )
 
 
-def is_vault_secret(credential):
-    return 'VAULT.AZURE.NET/SECRETS'in credential.upper()
+def is_vault_secret(cmd, credential):
+    keyvault_dns=None
+    try:
+        keyvault_dns=cmd.cli_ctx.cloud.suffixes.keyvault_dns
+    except:
+        return False
+    return keyvault_dns.upper() in credential.upper()
 
 
 class ResourceNotFound(CLIError):
