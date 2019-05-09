@@ -10,6 +10,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
+from ._constants import ACR_TASK_YAML_DEFAULT_NAME
 from ._stream_utils import stream_logs
 from ._utils import (
     validate_managed_registry,
@@ -89,7 +90,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if source_location:
         request = FileTaskRunRequest(
-            task_file_path=file if file else "acb.yaml",
+            task_file_path=file if file else ACR_TASK_YAML_DEFAULT_NAME,
             values_file_path=values,
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
