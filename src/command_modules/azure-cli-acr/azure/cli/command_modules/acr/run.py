@@ -55,7 +55,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             "-f myFile mySourceLocation, but not both.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
-    source_location = prepare_source_location(source_location, logger)
+    source_location = prepare_source_location(source_location)
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
 
@@ -118,7 +118,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
 
-def prepare_source_location(source_location, logger):   
+def prepare_source_location(source_location):   
     if source_location.lower() == NULL_SOURCE_LOCATION:
         source_location = None
     elif os.path.exists(source_location):
