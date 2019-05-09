@@ -444,17 +444,13 @@ def get_custom_registry_credentials(cmd,
                                     login_server=None,
                                     username=None,
                                     password=None,
-                                    kv_username=None,
-                                    kv_password=None,
                                     identity=None,
                                     is_remove=False):
     """Get the credential object from the input
     :param str auth_mode: The login mode for the source registry
     :param str login_server: The login server of custom registry
-    :param str username: The username for custom registry
-    :param str password: The password for custom registry
-    :param str kv_username: The key vault secret URI of the username to login to the custom registry
-    :param str kv_password: The key vault secret URI of the password to login to the custom registry
+    :param str username: The username for custom registry (plain text or a key vault secret URI)
+    :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
 
@@ -468,14 +464,9 @@ def get_custom_registry_credentials(cmd,
     if login_server:
         # if null username and password (or identity), then remove the credential
         custom_reg_credential = None
-        # Validate if username or password are used, exactly one of each type exist is given
-        if username and kv_username:
-            raise CLIError("Provide either username or kv-username.")
-        if password and kv_password:
-            raise CLIError("Provide either password or kv-password.")
 
         is_identity_credential = False
-        if not username and not kv_username and not password and not kv_password:
+        if not username and not password:
             is_identity_credential = identity is not None
 
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
@@ -492,12 +483,12 @@ def get_custom_registry_credentials(cmd,
             else:
                 custom_reg_credential = CustomRegistryCredentials(
                     user_name=SecretObject(
-                        type=SecretObjectType.vaultsecret if kv_username else SecretObjectType.opaque,
-                        value=kv_username if kv_username else username
+                        type=SecretObjectType.vaultsecret if is_vault_secret(username) else SecretObjectType.opaque,
+                        value=username
                     ),
                     password=SecretObject(
-                        type=SecretObjectType.vaultsecret if kv_password else SecretObjectType.opaque,
-                        value=kv_password if kv_password else password
+                        type=SecretObjectType.vaultsecret if is_vault_secret(password) else SecretObjectType.opaque,
+                        value=password
                     ),
                     identity=identity
                 )
@@ -509,6 +500,10 @@ def get_custom_registry_credentials(cmd,
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
     )
+
+
+def is_vault_secret(credential):
+    return 'VAULT.AZURE.NET/SECRETS'in credential.upper()
 
 
 class ResourceNotFound(CLIError):

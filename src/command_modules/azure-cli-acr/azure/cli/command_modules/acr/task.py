@@ -490,8 +490,6 @@ def acr_task_credential_add(cmd,
                             login_server,
                             username=None,
                             password=None,
-                            kv_username=None,
-                            kv_password=None,
                             use_identity=None,
                             resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -510,8 +508,6 @@ def acr_task_credential_add(cmd,
             login_server=login_server,
             username=username,
             password=password,
-            kv_username=kv_username,
-            kv_password=kv_password,
             identity=use_identity
         )
     )
@@ -530,8 +526,6 @@ def acr_task_credential_update(cmd,
                                login_server,
                                username=None,
                                password=None,
-                               kv_username=None,
-                               kv_password=None,
                                use_identity=None,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -550,8 +544,6 @@ def acr_task_credential_update(cmd,
             login_server=login_server,
             username=username,
             password=password,
-            kv_username=kv_username,
-            kv_password=kv_password,
             identity=use_identity
         )
     )
