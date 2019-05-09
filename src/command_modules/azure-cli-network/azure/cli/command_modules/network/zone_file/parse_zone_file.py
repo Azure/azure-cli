@@ -45,8 +45,6 @@ import re
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.command_modules.network.zone_file.configs import SUPPORTED_RECORDS
-from azure.cli.command_modules.network.zone_file.exceptions import InvalidLineException
 
 logger = get_logger(__name__)
 
@@ -59,102 +57,29 @@ date_regex_dict = {
     's': {'regex': re.compile(r'(\d*s)'), 'scale': 1}
 }
 
-# all regex require re.IGNORECASE
+
 _REGEX = {
     'ttl': r'(?P<delim>\$ttl)\s+(?P<val>\w+)',
     'origin': r'(?P<delim>\$origin)\s+(?P<val>[\w\.]+)',
-    'soa': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\d*)\s+(?P<retry>\d*)\s+(?P<expire>\d*)\s+(?P<minimum>\d*)?',
-    'a': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>a)\s+(?P<ip>[\d\.]+)',
-    'ns': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
-    'aaaa': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
-    'caa': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>[\w."\']+)',
-    'cname': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
-    'mx': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
-    'txt': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>txt)\s+(?P<text>.+)',
-    'ptr': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
-    'srv': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
-    'spf': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>spf)\s+(?P<text>.+)',
-    'uri': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
+    'soa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
+    'a': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>a)\s+(?P<ip>[\d\.]+)',
+    'ns': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
+    'aaaa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
+    'caa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>[\w."\']+)',
+    'cname': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
+    'mx': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
+    'txt': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
+    'ptr': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
+    'srv': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
+    'spf': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
+    'uri': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
 }
 
 _COMPILED_REGEX = {k: re.compile(v, re.IGNORECASE) for k, v in _REGEX.items()}
 
 
-# TODO: Remove once replaced
-#class ZonefileLineParser(argparse.ArgumentParser):
-#    def error(self, message):
-#        """
-#        Silent error message
-#        """
-#        raise InvalidLineException(message)
-
-
 class IncorrectParserException(Exception):
     pass
-
-
-# TODO: Remove once replaced
-#def _make_record_parser(parsers, rec_type, arg_defs):
-#    """
-#    Make a parser for a given type of DNS record
-#    """
-#    parser = ZonefileLineParser(rec_type)
-#    parser.add_argument('name', type=str)
-
-#    for arg in arg_defs:
-#        nargs = arg[2] if len(arg) > 2 else 1
-#        parser.add_argument(arg[0], type=arg[1], nargs=nargs)
-
-#    parsers.append(parser)
-
-
-# TODO: Remove once replaced
-#def _make_parser():
-#    """
-#    Make an array of parsers that can process different DNS record types
-#    """
-#    parsers = []
-
-#    # parse $ORIGIN
-#    origin = ZonefileLineParser('$ORIGIN')
-#    origin.add_argument('DELIM', type=str)
-#    origin.add_argument('value', type=str)
-#    parsers.append(origin)
-
-#    # parse $TTL
-#    ttl = ZonefileLineParser('$TTL')
-#    ttl.add_argument('DELIM', type=str)
-#    ttl.add_argument('value', type=str)
-#    parsers.append(ttl)
-
-#    # parse each RR
-#    _make_record_parser(parsers, 'SOA', [
-#        ('ttl', str), ('DELIM', str),
-#        ('host', str), ('email', str), ('serial', int), ('refresh', str),
-#        ('retry', str), ('expire', str), ('minimum', str)
-#    ])
-#    _make_record_parser(parsers, 'SOA', [
-#        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
-#        ('retry', str), ('expire', str), ('minimum', str)
-#    ])
-#    _make_record_parser(parsers, 'SOA', [
-#        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
-#        ('retry', str), ('expire', str)
-#    ])
-#    _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
-#    _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
-#    _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
-#    _make_record_parser(parsers, 'CAA', [('ttl', str, '?'), ('DELIM', str), ('flags', int), ('tag', str), ('value', str)])
-#    _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
-#    _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
-#    _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
-#    _make_record_parser(parsers, 'TXT', [('DELIM', str), ('txt', str, '+')])
-#    _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
-#    _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('port', int), ('target', str)])
-#    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('DELIM', str), ('txt', str)])
-#    _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('target', str)])
-
-#    return parsers
 
 
 def _tokenize_line(line, quote_strings=False, infer_name=True):
@@ -402,52 +327,6 @@ def _add_record_names(text):
     return "\n".join(ret)
 
 
-def _parse_record(parser, record_token):
-    global SUPPORTED_RECORDS
-
-    # match parser to record type
-    record_type = None
-    for i in range(3):
-        try:
-            if record_token[i].upper() in SUPPORTED_RECORDS:
-                record_type = record_token[i].upper()
-                break
-        except KeyError:
-            break
-
-    if not record_type:
-        from knack.util import CLIError
-        raise CLIError('Unable to determine record type: {}'.format(' '.join(record_token)))
-
-    # move the record type to the front of the token list so it will conform to argparse
-    if record_type != parser.prog:
-        raise IncorrectParserException
-
-    try:
-        rr, unmatched = parser.parse_known_args(record_token)
-        assert len(unmatched) == 0, "Unmatched fields: %s" % unmatched
-    except (SystemExit, AssertionError, InvalidLineException):
-        # invalid argument
-        raise InvalidLineException(' '.join(record_token))
-
-    record = rr.__dict__
-    record['type'] = record_type
-
-    # remove emtpy fields
-    for field in list(record.keys()):
-        if record[field] is None:
-            del record[field]
-
-    for key in record:
-        try:
-            if len(record[key]) == 1:
-                record[key] = record[key][0]
-        except TypeError:
-            continue
-
-    return record
-
-
 def _convert_to_seconds(value):
     """ Converts TTL strings into seconds """
     try:
@@ -510,7 +389,7 @@ def _pre_process_txt_records(text):
 def _post_process_txt_record(record, current_ttl):
     if not isinstance(record['txt'], list):
         record['txt'] = [record['txt']]
-    record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
+    record['ttl'] = _convert_to_seconds(record['ttl'] or current_ttl)
     long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
     original_len = len(long_text)
     record['txt'] = []
@@ -544,8 +423,6 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
     """
     Parse a zonefile into a dict
     """
-    # TODO: Remove once replaces
-    #parsers = _make_parser()
 
     text = _remove_comments(text)
     text = _flatten(text)
@@ -568,28 +445,19 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
                 continue
 
             parse_match = True
-            print('{} - {}'.format(record_type, match.groupdict()))
+            record = match.groupdict()
 
-            #record_tokens = _tokenize_line(record_line)
-            #try:
-            #    record = _parse_record(parser, record_tokens)
-            #    if record['DELIM'].lower() != record['type'].lower():
-            #        raise IncorrectParserException
-            #    parse_match = True
-            #    break
-            #except (InvalidLineException, IncorrectParserException) as ex:
-            #    continue
         if not parse_match and not ignore_invalid:
             raise CLIError('Unable to parse: {}'.format(record_line))
 
-        record_type = record['type'].lower()
-        if record_type.lower() == '$origin':
-            origin_value = record['value']
+        record_type = record['delim'].lower()
+        if record_type == '$origin':
+            origin_value = record['val']
             if not origin_value.endswith('.'):
                 logger.warning("$ORIGIN '{}' should have terminating dot.".format(origin_value))
             current_origin = origin_value.rstrip('.') + '.'
-        elif record_type.lower() == '$ttl':
-            current_ttl = _convert_to_seconds(record['value'])
+        elif record_type == '$ttl':
+            current_ttl = _convert_to_seconds(record['val'])
         else:
             record_name = record['name']
             if record_name == '@':
@@ -619,7 +487,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
                 # handle TXT concatenation and splitting separately
                 _post_process_txt_record(record, current_ttl)
             else:
-                record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
+                record['ttl'] = _convert_to_seconds(record['ttl'] or current_ttl)
 
             if record_name not in zone_obj:
                 zone_obj[record_name] = OrderedDict()
