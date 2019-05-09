@@ -266,6 +266,98 @@ jobs:
     displayName: 'Test pip Install'
 
 
+- job: RunAutomationFull
+  displayName: Run Automation
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+
+- job: RunAutomationFull
+  displayName: Run Automation
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+
+- job: RunAutomationReduced20190301
+  displayName: Run Automation Reduced
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+- job: RunAutomationReduced20180301
+  displayName: Run Automation Reduced
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+
+
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
@@ -284,6 +376,8 @@ jobs:
     displayName: 'Download PyPI Packages'
     inputs:
       artifactName: pypi
+
+
 
   - bash: |
        #!/bin/bash
