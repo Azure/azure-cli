@@ -280,15 +280,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
 
-    if arg is None and secret_arg is None:
-        arguments = None
-    else:
-        arguments = (arg if arg else []) + (secret_arg if secret_arg else [])
-
-    if set_value is None and set_secret is None:
-        set_values = None
-    else:
-        set_values = (set_value if set_value else []) + (set_secret if set_secret else [])
+    arguments = _get_all_override_arguments(arg, secret_arg)
+    set_values = _get_all_override_arguments(set_value, set_secret)
 
     FileTaskStepUpdateParameters, DockerBuildStepUpdateParameters = cmd.get_models(
         'FileTaskStepUpdateParameters', 'DockerBuildStepUpdateParameters')
@@ -755,6 +748,15 @@ def _get_list_runs_message(base_message, task_name=None, image=None):
     if image:
         base_message = "{} for image '{}'".format(base_message, image)
     return "{}.".format(base_message)
+
+
+def _get_all_override_arguments(argument=None, secret_argument=None):
+    arguments = None
+    if argument is None and secret_argument is None:
+        arguments = None
+    else:
+        arguments = (argument if argument else []) + (secret_argument if secret_argument else [])
+    return arguments
 
 
 def _build_identities_info(cmd, identities, is_remove=False):

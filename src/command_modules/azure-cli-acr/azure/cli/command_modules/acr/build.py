@@ -47,6 +47,9 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
+    if os_type and platform:
+        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
+
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):
             raise CLIError("Source location should be a local directory path or remote URL.")
@@ -103,7 +106,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
             is_push_enabled = False
             logger.warning("'--image or -t' is not provided. Skipping image push after build.")
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
     docker_build_request = DockerBuildRequest(
@@ -111,7 +114,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         is_push_enabled=is_push_enabled,
         source_location=source_location,
         platform=PlatformProperties(
-            os=platform_os,
+            os=os_type if os_type else platform_os,
             architecture=platform_arch,
             variant=platform_variant
         ),

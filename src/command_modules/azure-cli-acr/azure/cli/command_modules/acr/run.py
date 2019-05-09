@@ -52,6 +52,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             "Azure Container Registry can run with either "
             "--cmd myCommand /dev/null or "
             "-f myFile mySourceLocation, but not both.")
+    if os_type and platform:
+        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
@@ -82,7 +84,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
@@ -95,7 +97,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             source_location=source_location,
             timeout=timeout,
             platform=PlatformProperties(
-                os=platform_os,
+                os=os_type if os_type else platform_os,
                 architecture=platform_arch,
                 variant=platform_variant
             ),
