@@ -475,11 +475,13 @@ def get_custom_registry_credentials(cmd,
             else:
                 custom_reg_credential = CustomRegistryCredentials(
                     user_name=SecretObject(
-                        type=SecretObjectType.vaultsecret if is_vault_secret(cmd, username) else SecretObjectType.opaque,
+                        type=SecretObjectType.vaultsecret if is_vault_secret(
+                            cmd, username)else SecretObjectType.opaque,
                         value=username
                     ),
                     password=SecretObject(
-                        type=SecretObjectType.vaultsecret if is_vault_secret(cmd, password) else SecretObjectType.opaque,
+                        type=SecretObjectType.vaultsecret if is_vault_secret(
+                            cmd, password) else SecretObjectType.opaque,
                         value=password
                     ),
                     identity=identity
@@ -498,7 +500,7 @@ def is_vault_secret(cmd, credential):
     keyvault_dns = None
     try:
         keyvault_dns = cmd.cli_ctx.cloud.suffixes.keyvault_dns
-    except:
+    except ResourceNotFound:
         return False
     return keyvault_dns.upper() in credential.upper()
 
