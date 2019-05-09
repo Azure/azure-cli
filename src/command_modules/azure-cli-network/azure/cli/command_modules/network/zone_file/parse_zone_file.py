@@ -59,79 +59,102 @@ date_regex_dict = {
     's': {'regex': re.compile(r'(\d*s)'), 'scale': 1}
 }
 
+# all regex require re.IGNORECASE
+_REGEX = {
+    'ttl': r'(?P<delim>\$ttl)\s+(?P<val>\w+)',
+    'origin': r'(?P<delim>\$origin)\s+(?P<val>[\w\.]+)',
+    'soa': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\d*)\s+(?P<retry>\d*)\s+(?P<expire>\d*)\s+(?P<minimum>\d*)?',
+    'a': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>a)\s+(?P<ip>[\d\.]+)',
+    'ns': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
+    'aaaa': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
+    'caa': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>[\w."\']+)',
+    'cname': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
+    'mx': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
+    'txt': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>txt)\s+(?P<text>.+)',
+    'ptr': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
+    'srv': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
+    'spf': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>spf)\s+(?P<text>.+)',
+    'uri': r'(?P<name>[@\w]*)\s+(?P<ttl>\w+)?\s+(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
+}
 
-class ZonefileLineParser(argparse.ArgumentParser):
-    def error(self, message):
-        """
-        Silent error message
-        """
-        raise InvalidLineException(message)
+_COMPILED_REGEX = {k: re.compile(v, re.IGNORECASE) for k, v in _REGEX.items()}
+
+
+# TODO: Remove once replaced
+#class ZonefileLineParser(argparse.ArgumentParser):
+#    def error(self, message):
+#        """
+#        Silent error message
+#        """
+#        raise InvalidLineException(message)
 
 
 class IncorrectParserException(Exception):
     pass
 
 
-def _make_record_parser(parsers, rec_type, arg_defs):
-    """
-    Make a parser for a given type of DNS record
-    """
-    parser = ZonefileLineParser(rec_type)
-    parser.add_argument('name', type=str)
+# TODO: Remove once replaced
+#def _make_record_parser(parsers, rec_type, arg_defs):
+#    """
+#    Make a parser for a given type of DNS record
+#    """
+#    parser = ZonefileLineParser(rec_type)
+#    parser.add_argument('name', type=str)
 
-    for arg in arg_defs:
-        nargs = arg[2] if len(arg) > 2 else 1
-        parser.add_argument(arg[0], type=arg[1], nargs=nargs)
+#    for arg in arg_defs:
+#        nargs = arg[2] if len(arg) > 2 else 1
+#        parser.add_argument(arg[0], type=arg[1], nargs=nargs)
 
-    parsers.append(parser)
+#    parsers.append(parser)
 
 
-def _make_parser():
-    """
-    Make an array of parsers that can process different DNS record types
-    """
-    parsers = []
+# TODO: Remove once replaced
+#def _make_parser():
+#    """
+#    Make an array of parsers that can process different DNS record types
+#    """
+#    parsers = []
 
-    # parse $ORIGIN
-    origin = ZonefileLineParser('$ORIGIN')
-    origin.add_argument('DELIM', type=str)
-    origin.add_argument('value', type=str)
-    parsers.append(origin)
+#    # parse $ORIGIN
+#    origin = ZonefileLineParser('$ORIGIN')
+#    origin.add_argument('DELIM', type=str)
+#    origin.add_argument('value', type=str)
+#    parsers.append(origin)
 
-    # parse $TTL
-    ttl = ZonefileLineParser('$TTL')
-    ttl.add_argument('DELIM', type=str)
-    ttl.add_argument('value', type=str)
-    parsers.append(ttl)
+#    # parse $TTL
+#    ttl = ZonefileLineParser('$TTL')
+#    ttl.add_argument('DELIM', type=str)
+#    ttl.add_argument('value', type=str)
+#    parsers.append(ttl)
 
-    # parse each RR
-    _make_record_parser(parsers, 'SOA', [
-        ('ttl', str), ('DELIM', str),
-        ('host', str), ('email', str), ('serial', int), ('refresh', str),
-        ('retry', str), ('expire', str), ('minimum', str)
-    ])
-    _make_record_parser(parsers, 'SOA', [
-        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
-        ('retry', str), ('expire', str), ('minimum', str)
-    ])
-    _make_record_parser(parsers, 'SOA', [
-        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
-        ('retry', str), ('expire', str)
-    ])
-    _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
-    _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
-    _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
-    _make_record_parser(parsers, 'CAA', [('ttl', str, '?'), ('DELIM', str), ('flags', int), ('tag', str), ('value', str)])
-    _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
-    _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
-    _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
-    _make_record_parser(parsers, 'TXT', [('DELIM', str), ('txt', str, '+')])
-    _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
-    _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('port', int), ('target', str)])
-    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('DELIM', str), ('txt', str)])
-    _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('target', str)])
+#    # parse each RR
+#    _make_record_parser(parsers, 'SOA', [
+#        ('ttl', str), ('DELIM', str),
+#        ('host', str), ('email', str), ('serial', int), ('refresh', str),
+#        ('retry', str), ('expire', str), ('minimum', str)
+#    ])
+#    _make_record_parser(parsers, 'SOA', [
+#        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
+#        ('retry', str), ('expire', str), ('minimum', str)
+#    ])
+#    _make_record_parser(parsers, 'SOA', [
+#        ('DELIM', str), ('host', str), ('email', str), ('serial', int), ('refresh', str),
+#        ('retry', str), ('expire', str)
+#    ])
+#    _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
+#    _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+#    _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+#    _make_record_parser(parsers, 'CAA', [('ttl', str, '?'), ('DELIM', str), ('flags', int), ('tag', str), ('value', str)])
+#    _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
+#    _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
+#    _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
+#    _make_record_parser(parsers, 'TXT', [('DELIM', str), ('txt', str, '+')])
+#    _make_record_parser(parsers, 'PTR', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
+#    _make_record_parser(parsers, 'SRV', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('port', int), ('target', str)])
+#    _make_record_parser(parsers, 'SPF', [('ttl', str, '?'), ('DELIM', str), ('txt', str)])
+#    _make_record_parser(parsers, 'URI', [('ttl', str, '?'), ('DELIM', str), ('priority', int), ('weight', int), ('target', str)])
 
-    return parsers
+#    return parsers
 
 
 def _tokenize_line(line, quote_strings=False, infer_name=True):
@@ -501,6 +524,7 @@ def _post_process_txt_record(record, current_ttl):
 
 
 def _post_check_names(zone):
+
     # get the origin name that has the SOA record
     # ensure the origin is in each record set
     origin = None
@@ -520,7 +544,8 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
     """
     Parse a zonefile into a dict
     """
-    parsers = _make_parser()
+    # TODO: Remove once replaces
+    #parsers = _make_parser()
 
     text = _remove_comments(text)
     text = _flatten(text)
@@ -537,16 +562,23 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
     for record_line in record_lines:
         parse_match = False
         record = None
-        for parser in parsers:
-            record_tokens = _tokenize_line(record_line)
-            try:
-                record = _parse_record(parser, record_tokens)
-                if record['DELIM'].lower() != record['type'].lower():
-                    raise IncorrectParserException
-                parse_match = True
-                break
-            except (InvalidLineException, IncorrectParserException):
+        for record_type, regex in _COMPILED_REGEX.items():
+            match = regex.match(record_line)
+            if not match:
                 continue
+
+            parse_match = True
+            print('{} - {}'.format(record_type, match.groupdict()))
+
+            #record_tokens = _tokenize_line(record_line)
+            #try:
+            #    record = _parse_record(parser, record_tokens)
+            #    if record['DELIM'].lower() != record['type'].lower():
+            #        raise IncorrectParserException
+            #    parse_match = True
+            #    break
+            #except (InvalidLineException, IncorrectParserException) as ex:
+            #    continue
         if not parse_match and not ignore_invalid:
             raise CLIError('Unable to parse: {}'.format(record_line))
 

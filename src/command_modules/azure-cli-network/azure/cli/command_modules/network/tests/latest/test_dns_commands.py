@@ -605,6 +605,18 @@ class DnsParseZoneFiles(unittest.TestCase):
             (172800, 'ns4-03.azure-dns.info.'),
         ])
 
+    def test_zone_file_8(self):
+        zn = 'zone8.com.'
+        zone = self._get_zone_object('zone8.txt', zn)
+        self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
+        self._check_a(zone, 'ns.' + zn, [(3600, '1.2.3.4')])
+        self._check_ns(zone, zn, [
+            (172800, 'ns1-03.azure-dns.com.'),
+            (172800, 'ns2-03.azure-dns.net.'),
+            (172800, 'ns3-03.azure-dns.org.'),
+            (172800, 'ns4-03.azure-dns.info.'),
+        ])
+
     def test_zone_import_errors(self):
         from knack.util import CLIError
         for f in ['fail1', 'fail2', 'fail3', 'fail4', 'fail5']:
