@@ -35,7 +35,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         return volume1
 
     @ResourceGroupPreparer()
-    def atest_create_delete_snapshots(self):
+    def test_create_delete_snapshots(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
@@ -54,7 +54,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         assert len(snapshot_list) == 0
 
     @ResourceGroupPreparer()
-    def atest_list_snapshots(self):
+    def test_list_snapshots(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
