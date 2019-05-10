@@ -22,7 +22,11 @@ from ._client_factory import cf_acr_registries
 from ._archive_utils import upload_source_code, check_remote_source_code
 from .run import prepare_source_location
 
-RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
+PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
+PACK_TASK_YAML_FMT = '''steps:
+  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder mcr.microsoft.com/oryx/pack-builder:stable -p .
+  - push: ["{image_name}"]
+'''
 
 logger = get_logger(__name__)
 
@@ -30,11 +34,8 @@ logger = get_logger(__name__)
 def acr_pack(cmd,  # pylint: disable=too-many-locals
             client,
             registry_name,
+            image_name,
             source_location,
-            file=None,
-            values=None,
-            set_value=None,
-            set_secret=None,
             no_format=False,
             no_logs=False,
             no_wait=False,
@@ -45,56 +46,38 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
             auth_mode=None):
 
     _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
+        cmd, registry_name, resource_group_name, PACK_NOT_SUPPORTED)
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
     source_location = prepare_source_location(
         source_location, client_registries, registry_name, resource_group_name)
+    if not source_location:
+        raise CLIError('Building with Buildpacks requires a valid source location.')
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
     OS = cmd.get_models('OS')
-    if platform_os != OS.linux.value:
+    if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
-    if source_location:
-        request = FileTaskRunRequest(
-            task_file_path=file if file else ACR_TASK_YAML_DEFAULT_NAME,
-            values_file_path=values,
-            values=(set_value if set_value else []) + (set_secret if set_secret else []),
-            source_location=source_location,
-            timeout=timeout,
-            platform=PlatformProperties(
-                os=platform_os,
-                architecture=platform_arch,
-                variant=platform_variant
-            ),
-            credentials=get_custom_registry_credentials(
-                cmd=cmd,
-                auth_mode=auth_mode
-            )
+    yaml_body = PACK_TASK_YAML_FMT.format(image_name=image_name)
+    import base64
+    request = EncodedTaskRunRequest(
+        encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
+        source_location=source_location,
+        timeout=timeout,
+        platform=PlatformProperties(
+            os=platform_os,
+            architecture=platform_arch,
+            variant=platform_variant
+        ),
+        credentials=get_custom_registry_credentials(
+            cmd=cmd,
+            auth_mode=auth_mode
         )
-    else:
-        yaml_template, values_content = get_yaml_and_values(cmd_value, timeout, file)
-        import base64
-        request = EncodedTaskRunRequest(
-            encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(values_content.encode()).decode(),
-            values=(set_value if set_value else []) + (set_secret if set_secret else []),
-            source_location=source_location,
-            timeout=timeout,
-            platform=PlatformProperties(
-                os=platform_os,
-                architecture=platform_arch,
-                variant=platform_variant
-            ),
-            credentials=get_custom_registry_credentials(
-                cmd=cmd,
-                auth_mode=auth_mode
-            )
-        )
+    )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,

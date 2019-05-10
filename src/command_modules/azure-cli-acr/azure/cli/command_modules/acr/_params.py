@@ -137,8 +137,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr pack') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('image_name', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'.")
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz'). If '/dev/null' is specified, the value will be set to None and ignored.", completer=FilesCompleter())
-        c.argument('file', options_list=['--file', '-f'], help="The task template/definition file path relative to the source context. It can be '-' to pipe a file from the standard input.")
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
