@@ -1307,7 +1307,9 @@ def _build_record(cmd, data):
                              refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
                              minimum_ttl=data['minimum'])
         if record_type == 'srv':
-            return SrvRecord(priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']), target=data['target'])
+            return SrvRecord(
+                priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']),
+                target=data['target'])
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])

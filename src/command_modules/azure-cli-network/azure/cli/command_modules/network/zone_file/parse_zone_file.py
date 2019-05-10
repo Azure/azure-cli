@@ -57,22 +57,21 @@ date_regex_dict = {
     's': {'regex': re.compile(r'(\d*s)'), 'scale': 1}
 }
 
-
 _REGEX = {
-    'ttl': r'(?P<delim>\$ttl)\s+(?P<val>\w+)',
+    'ttl': r'(?P<delim>\$ttl)\s+(?P<val>\d+\w*)',
     'origin': r'(?P<delim>\$origin)\s+(?P<val>[\w\.]+)',
-    'soa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
-    'a': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>a)\s+(?P<ip>[\d\.]+)',
-    'ns': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
-    'aaaa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
-    'caa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>[\w."\']+)',
-    'cname': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
-    'mx': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
-    'txt': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
-    'ptr': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
-    'srv': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
-    'spf': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
-    'uri': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\w+)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
+    'soa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
+    'a': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>a)\s+(?P<ip>[\d\.]+)',
+    'ns': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
+    'aaaa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
+    'caa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>.+)',
+    'cname': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
+    'mx': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
+    'txt': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
+    'ptr': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
+    'srv': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
+    'spf': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
+    'uri': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
 }
 
 _COMPILED_REGEX = {k: re.compile(v, re.IGNORECASE) for k, v in _REGEX.items()}
@@ -281,25 +280,6 @@ def _flatten(text):
     return "\n".join(flattened)
 
 
-def _remove_class(text):
-    """
-    Remove the CLASS from each DNS record, if present.
-    The only class that gets used today (for all intents
-    and purposes) is 'IN'.
-    """
-    # see RFC 1035 for list of classes
-    lines = text.split("\n")
-    ret = []
-    for line in lines:
-        original_tokens = _tokenize_line(line)
-        tokens = []
-        for token in original_tokens:
-            if token.upper() != 'IN':
-                tokens.append(token)
-        ret.append(_serialize(tokens))
-    return "\n".join(ret)
-
-
 def _add_record_names(text):
     """
     Go through each line of the text and ensure that
@@ -376,21 +356,19 @@ def _post_process_ttl(zone):
                     record['ttl'] = ttl
 
 
-def _pre_process_txt_records(text):
-    """ This looks only for the cases of multiple text records not surrounded by quotes.
-    This must be done after flattening but before any tokenization occurs, as this strips out
-    the quotes. """
-    lines = text.split('\n')
-    for line in lines:
-        pass
-    return text
+def _post_process_txt_record(record):
 
+    def line_split(line):
+        return re.findall(r'"(?:\\.|[^"\\])*"|(?:\\.|[^"\s\\])+', line)
 
-def _post_process_txt_record(record, current_ttl):
-    if not isinstance(record['txt'], list):
-        record['txt'] = [record['txt']]
-    record['ttl'] = _convert_to_seconds(record['ttl'] or current_ttl)
-    long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
+    record_split = line_split(record['txt'])
+
+    # strip quotes
+    for i, val in enumerate(record_split):
+        if val.startswith('"') and val.endswith('"'):
+            record_split[i] = val[1:-1]
+
+    long_text = ''.join(record_split)
     original_len = len(long_text)
     record['txt'] = []
     while len(long_text) > 255:
@@ -400,6 +378,12 @@ def _post_process_txt_record(record, current_ttl):
     final_str = ''.join(record['txt'])
     final_len = len(final_str)
     assert (original_len == final_len)
+
+
+def _post_process_caa_record(record):
+    # strip quotes
+    if record['val'].startswith('"') and record['val'].endswith('"'):
+        record['val'] = record['val'][1:-1]
 
 
 def _post_check_names(zone):
@@ -426,8 +410,6 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
 
     text = _remove_comments(text)
     text = _flatten(text)
-    text = _remove_class(text)
-    text = _pre_process_txt_records(text)
     text = _add_record_names(text)
 
     zone_obj = OrderedDict()
@@ -482,12 +464,14 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
                 _expand_with_origin(record, 'target', current_origin)
             elif record_type == 'spf':
                 record_type = 'txt'
+            record['ttl'] = _convert_to_seconds(record['ttl'] or current_ttl)
 
-            if record_type == 'txt':
+            # handle quotes for CAA and TXT
+            if record_type == 'caa':
+                _post_process_caa_record(record)
+            elif record_type == 'txt':
                 # handle TXT concatenation and splitting separately
-                _post_process_txt_record(record, current_ttl)
-            else:
-                record['ttl'] = _convert_to_seconds(record['ttl'] or current_ttl)
+                _post_process_txt_record(record)
 
             if record_name not in zone_obj:
                 zone_obj[record_name] = OrderedDict()

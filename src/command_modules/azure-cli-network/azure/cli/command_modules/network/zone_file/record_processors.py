@@ -105,7 +105,7 @@ def process_aaaa(io, data, name, print_name=False):
 
 
 def process_caa(io, data, name, print_name=False):
-    process_rr(io, _quote_field(data, 'value'), 'CAA', ['flags', 'tag', 'value'], name, print_name)
+    process_rr(io, _quote_field(data, 'val'), 'CAA', ['flags', 'tag', 'val'], name, print_name)
 
 
 def process_cname(io, data, name, print_name=False):

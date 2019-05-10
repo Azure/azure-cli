@@ -271,7 +271,7 @@ class DnsParseZoneFiles(unittest.TestCase):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(record['flags'], records_to_check[i][1])
             self.assertEqual(record['tag'], records_to_check[i][2])
-            self.assertEqual(record['value'], records_to_check[i][3])
+            self.assertEqual(record['val'], records_to_check[i][3])
 
     def _check_cname(self, zone, name, ttl, alias):
         record = zone[name]['cname']

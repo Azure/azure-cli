@@ -83,6 +83,14 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_zone6_import(self, resource_group):
         self._test_zone('zone6.com', 'zone6.txt')
 
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone7_import')
+    def test_dns_zone7_import(self, resource_group):
+        self._test_zone('zone7.com', 'zone7.txt')
+
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone8_import')
+    def test_dns_zone8_import(self, resource_group):
+        self._test_zone('zone8.com', 'zone8.txt')
+
 
 class DnsScenarioTest(ScenarioTest):
 
@@ -327,7 +335,7 @@ class DnsParseZoneFiles(unittest.TestCase):
             self.assertEqual(record['ttl'], records_to_check[i][0])
             self.assertEqual(int(record['flags']), records_to_check[i][1])
             self.assertEqual(record['tag'], records_to_check[i][2])
-            self.assertEqual(record['value'], records_to_check[i][3])
+            self.assertEqual(record['val'], records_to_check[i][3])
 
     def _check_cname(self, zone, name, ttl, alias):
         record = zone[name]['cname']
