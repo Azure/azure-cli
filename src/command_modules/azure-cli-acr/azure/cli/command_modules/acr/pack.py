@@ -48,7 +48,8 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
-    source_location = prepare_source_location(source_location)
+    source_location = prepare_source_location(
+        source_location, client_registries, registry_name, resource_group_name)
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
     OS = cmd.get_models('OS')
