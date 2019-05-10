@@ -2,7 +2,7 @@
 
 set -ev
 
-. $(cd $(dirname $0); pwd)/artifacts.sh
+. $(dirname ${BASH_SOURCE[0]})/artifacts.sh
 
 ls -la $share_folder/build
 
@@ -37,7 +37,7 @@ then
     title 'azure.mgmt file counts'
     (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
 
-    python $(cd $(dirname $0); cd ..; pwd)/sdk_process/patch_models.py
+    python $(dirname ${BASH_SOURCE[0]})/../sdk_process/patch_models.py
 
     title 'azure.mgmt file counts after reduce'
     (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
