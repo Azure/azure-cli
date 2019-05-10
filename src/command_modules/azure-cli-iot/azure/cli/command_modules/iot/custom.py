@@ -515,7 +515,12 @@ def iot_hub_job_cancel(client, hub_name, job_id, resource_group_name=None):
 
 def iot_hub_get_quota_metrics(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.get_quota_metrics(resource_group_name, hub_name)
+    iotHubQuotaMetricCollection = []
+    iotHubQuotaMetricCollection.extend(client.iot_hub_resource.get_quota_metrics(resource_group_name, hub_name))
+    for quotaMetric in iotHubQuotaMetricCollection:
+        if quotaMetric.name == 'TotalDeviceCount':
+            quotaMetric.max_value = 'Unlimited'
+    return iotHubQuotaMetricCollection
 
 
 def iot_hub_get_stats(client, hub_name, resource_group_name=None):
