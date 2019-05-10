@@ -2,13 +2,13 @@
 
 Release History
 ===============
-0.1.18
+0.1.19
 ++++++
-* Minor fixes.
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
 
 0.1.18
 ++++++
-* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+* Minor fixes.
 
 0.1.17
 ++++++
