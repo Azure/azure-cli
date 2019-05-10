@@ -47,14 +47,14 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
-    client_registries = cf_acr_registries(cmd.cli_ctx)
-    source_location = prepare_source_location(
-        source_location, client_registries, registry_name, resource_group_name)
-
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
     OS = cmd.get_models('OS')
     if platform_os != OS.linux.value:
         raise CLIError('Building with Buildpacks is only supported on Linux.')
+
+    client_registries = cf_acr_registries(cmd.cli_ctx)
+    source_location = prepare_source_location(
+        source_location, client_registries, registry_name, resource_group_name)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
