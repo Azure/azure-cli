@@ -3,6 +3,7 @@
 Release History
 ===============
 * auth: polish common AAD service errors with actionables to overcome
+* Fix issue if clouds.config is corrupt
 
 2.0.64
 ++++++
