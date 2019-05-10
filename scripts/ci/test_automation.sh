@@ -35,12 +35,12 @@ pip freeze
 if [ "$REDUCE_SDK" == "True" ]
 then
     title 'azure.mgmt file counts'
-    (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
+    (find $(dirname $(which python))/../lib -name '*.py' | grep azure/mgmt/ | wc)
 
     python $(dirname ${BASH_SOURCE[0]})/../sdk_process/patch_models.py
 
     title 'azure.mgmt file counts after reduce'
-    (cd $(dirname $(which python)); cd ../lib/*/site-packages/azure/mgmt; find . -name '*.py' | wc)
+    (find $(dirname $(which python))/../lib -name '*.py' | grep azure/mgmt/ | wc)
 fi
 
 target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
