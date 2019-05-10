@@ -150,7 +150,7 @@ class IoTHubTest(ScenarioTest):
             self.check('[0].name', 'TotalMessages'),
             self.check('[0].maxValue', 400000),
             self.check('[1].name', 'TotalDeviceCount'),
-            self.check('[1].maxValue', 1000000)
+            self.check('[1].maxValue', 'Unlimited')
         ])
 
         # Test 'az iot hub show-stats'
