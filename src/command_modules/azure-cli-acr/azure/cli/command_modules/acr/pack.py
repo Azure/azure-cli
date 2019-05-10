@@ -10,7 +10,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._constants import ACR_TASK_YAML_DEFAULT_NAME
+from ._constants import ACR_TASK_YAML_DEFAULT_NAME, ORYX_PACK_BUILDER_IMAGE
 from ._stream_utils import stream_logs
 from ._utils import (
     validate_managed_registry,
@@ -24,7 +24,7 @@ from .run import prepare_source_location
 
 PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
 PACK_TASK_YAML_FMT = '''steps:
-  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder mcr.microsoft.com/oryx/pack-builder:stable -p .
+  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} -p .
   - push: ["{image_name}"]
 '''
 
@@ -36,6 +36,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
             registry_name,
             image_name,
             source_location,
+            builder=ORYX_PACK_BUILDER_IMAGE,
             no_format=False,
             no_logs=False,
             no_wait=False,
@@ -62,7 +63,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
-    yaml_body = PACK_TASK_YAML_FMT.format(image_name=image_name)
+    yaml_body = PACK_TASK_YAML_FMT.format(image_name=image_name, builder=builder)
     import base64
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
