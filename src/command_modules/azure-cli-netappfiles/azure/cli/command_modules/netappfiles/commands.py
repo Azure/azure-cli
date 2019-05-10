@@ -1,0 +1,108 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# pylint: disable=line-too-long
+
+from azure.cli.core.commands import CliCommandType
+from ._client_factory import (
+    accounts_mgmt_client_factory,
+    pools_mgmt_client_factory,
+    volumes_mgmt_client_factory,
+    mount_targets_mgmt_client_factory,
+    snapshots_mgmt_client_factory)
+from ._exception_handler import netappfiles_exception_handler
+
+
+def load_command_table(self, _):
+    netappfiles_accounts_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations.accounts_operations#AccountsOperations.{}',
+        client_factory=accounts_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+
+    netappfiles_pools_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations.pools_operations#PoolsOperations.{}',
+        client_factory=pools_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+
+    netappfiles_volumes_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations.volumes_operations#VolumesOperations.{}',
+        client_factory=volumes_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+
+    netappfiles_mount_targets_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations.mount_targets_operations#MountTargetsOperations.{}',
+        client_factory=mount_targets_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+
+    netappfiles_snapshots_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations.snapshots_operations#SnapshotsOperations.{}',
+        client_factory=snapshots_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+
+    with self.command_group('netappfiles account', netappfiles_accounts_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.custom_command('create', 'create_account',
+                         client_factory=accounts_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
+                         exception_handler=netappfiles_exception_handler)
+        g.custom_command('set', 'update_account',
+                         client_factory=accounts_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
+                         exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='update',
+                                 custom_func_name='patch_account',
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
+                                 exception_handler=netappfiles_exception_handler)
+
+    with self.command_group('netappfiles pool', netappfiles_pools_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.custom_command('create', 'create_pool',
+                         client_factory=pools_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#CapacityPool',
+                         exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='update',
+                                 custom_func_name='patch_pool',
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#CapacityPool',
+                                 exception_handler=netappfiles_exception_handler)
+
+    with self.command_group('netappfiles volume', netappfiles_volumes_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.custom_command('create', 'create_volume',
+                         client_factory=volumes_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#Volume',
+                         exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='update',
+                                 custom_func_name='patch_volume',
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#VolumePatch',
+                                 exception_handler=netappfiles_exception_handler)
+
+    with self.command_group('netappfiles mount-target', netappfiles_mount_targets_sdk) as g:
+        g.command('list', 'list')
+
+    with self.command_group('netappfiles snapshot', netappfiles_snapshots_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.custom_command('create', 'create_snapshot',
+                         client_factory=snapshots_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#Snapshot',
+                         exception_handler=netappfiles_exception_handler)
