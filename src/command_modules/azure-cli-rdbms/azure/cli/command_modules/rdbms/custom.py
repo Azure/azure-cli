@@ -220,8 +220,8 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except CloudError as e:
         raise CLIError('Unable to get source server: {}.'.format(str(e)))
-    
-    if location is None :
+
+    if location is None:
         location = source_server_object.location
 
     parameters = None
