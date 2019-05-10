@@ -438,7 +438,7 @@ short-summary: Queues a task that builds an app and pushes it into an Azure Cont
 examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
     text: >
-        az acr pack -r MyRegistry .
+        az acr pack -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
 """
 
 helps['acr show'] = """
