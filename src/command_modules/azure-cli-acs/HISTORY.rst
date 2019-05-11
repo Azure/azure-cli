@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.4.3
+++++++
+* Remove "(PREVIEW)" from Virtual Node commands, "az aks create --enable-addons" and "az aks enable-addons --addons".
+
 2.4.2
 ++++++
 * Fix 'az openshift create' command when used with customer aad client
