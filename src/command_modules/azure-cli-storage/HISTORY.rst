@@ -6,6 +6,7 @@ Release History
 2.4.2
 +++++
 * `storage blob sync`: add sync command for storage blob
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
 
 2.4.1
 +++++
