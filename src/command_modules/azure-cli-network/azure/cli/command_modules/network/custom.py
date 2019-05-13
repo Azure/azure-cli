@@ -1346,7 +1346,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
                 record = _build_record(cmd, entry)
                 if not record:
-                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
+                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
 
                 record_set = record_sets.get(record_set_key, None)
