@@ -39,13 +39,13 @@ class TestActions(unittest.TestCase):
         os.remove(private_key_file)
 
         args = mock.MagicMock()
-        args.ssh_key_value = public_key_file
+        args.ssh_key_value = [public_key_file]
         args.generate_ssh_keys = True
 
         # 1 verify we generate key files if not existing
         validate_ssh_key(args)
 
-        generated_public_key_string = args.ssh_key_value
+        generated_public_key_string = args.ssh_key_value[0]
         self.assertTrue(bool(args.ssh_key_value))
         self.assertTrue(is_valid_ssh_rsa_public_key(generated_public_key_string))
         self.assertTrue(os.path.isfile(private_key_file))
@@ -53,18 +53,18 @@ class TestActions(unittest.TestCase):
         # 2 verify we load existing key files
         # for convinience we will reuse the generated file in the previous step
         args2 = mock.MagicMock()
-        args2.ssh_key_value = generated_public_key_string
+        args2.ssh_key_value = [generated_public_key_string]
         args2.generate_ssh_keys = False
         validate_ssh_key(args2)
         # we didn't regenerate
-        self.assertEqual(generated_public_key_string, args.ssh_key_value)
+        self.assertEqual(generated_public_key_string, args.ssh_key_value[0])
 
         # 3 verify we do not generate unless told so
         fd, private_key_file2 = tempfile.mkstemp(dir=temp_dir_name)
         os.close(fd)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
-        args3.ssh_key_value = public_key_file2
+        args3.ssh_key_value = [public_key_file2]
         args3.generate_ssh_keys = False
         with self.assertRaises(CLIError):
             validate_ssh_key(args3)
@@ -74,7 +74,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
-        args4.ssh_key_value = public_key_file4
+        args4.ssh_key_value = [public_key_file4]
         args4.generate_ssh_keys = True
         validate_ssh_key(args4)
         self.assertTrue(os.path.isfile(public_key_file4 + '.private'))
