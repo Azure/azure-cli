@@ -7,6 +7,7 @@ Release History
 * webapp: webapp up supports writing the default resources to local configuration
 * webapp: webapp up supports redeploying an app without using the --location argument
 * webapp: Fixed an issue where for Linux Free SKU ASP creation use Free as SKU value was not working
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
 
 0.2.19
 ++++++
