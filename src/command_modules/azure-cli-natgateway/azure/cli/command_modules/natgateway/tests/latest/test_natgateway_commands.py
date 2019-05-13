@@ -23,12 +23,12 @@ class NatGatewayScenarioTests(ScenarioTest):
         })
 
         # create public ip address
-        self.cmd('az network public-ip create -g {rg} -n {ip_addr} --allocation-method Static --sku Standard')
+        self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --sku Standard')
 
         # create public ip prefix
         self.cmd('az network public-ip prefix create -g {rg} -n {ip_prefix} --length 31')
 
-        self.cmd('az network nat-gateway create --resource-group {rg} --name {name} --location {location} --public-ip-addresses  {ip_addr} --public-ip-prefixes  {ip_prefix} --idle-timeout {idle_timeout}', checks=[
+        self.cmd('az network nat-gateway create --resource-group {rg} --name {name} --location {location} --public-ip-addresses {ip_addr} --public-ip-prefixes {ip_prefix} --idle-timeout {idle_timeout}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('idleTimeoutInMinutes', '{idle_timeout}'),
             self.check("contains(publicIpAddresses[0].id, '{ip_addr}')", True),

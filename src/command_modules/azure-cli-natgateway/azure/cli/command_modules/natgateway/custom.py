@@ -24,9 +24,8 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
     if not public_ip_addresses and not public_ip_prefixes:
         raise CLIError('usage error: --public-ip-addresses ADDRESSES | --public-ip-prefixes PREFIXES')
 
-    SubResource = cmd.get_models('SubResource')
-    public_ip_prefixes_natgateway = [SubResource(id=x) for x in public_ip_prefixes] if public_ip_prefixes else None
-    public_ip_addresses_natgateway = [SubResource(id=x) for x in public_ip_addresses] if public_ip_addresses else None
+    if public_ip_addresses is not None and public_ip_prefixes is not None:
+        logger.error("public_ip_addresses OR public_ip_prefixes required")
 
     client = network_client_factory(cmd.cli_ctx).nat_gateways
     NatGateway, NatGatewaySku = cmd.get_models('NatGateway', 'NatGatewaySku')
@@ -35,8 +34,8 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                              location=location,
                              sku=NatGatewaySku(name='Standard'),
                              idle_timeout_in_minutes=idle_timeout,
-                             public_ip_addresses=public_ip_addresses_natgateway,
-                             public_ip_prefixes=public_ip_prefixes_natgateway)
+                             public_ip_addresses=public_ip_addresses,
+                             public_ip_prefixes=public_ip_prefixes)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
 
@@ -44,15 +43,12 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
 def update_nat_gateway(instance, cmd, public_ip_addresses=None,
                        public_ip_prefixes=None, idle_timeout=None):
 
-    SubResource = cmd.get_models('SubResource')
     with cmd.update_context(instance) as c:
         c.set_param('idle_timeout_in_minutes', idle_timeout)
         if public_ip_addresses is not None:
-            public_ip_addresses_natgateway = [SubResource(id=x) for x in public_ip_addresses]
-            c.set_param('public_ip_addresses', public_ip_addresses_natgateway)
+            c.set_param('public_ip_addresses', public_ip_addresses)
         if public_ip_prefixes is not None:
-            public_ip_prefixes_natgateway = [SubResource(id=x) for x in public_ip_prefixes]
-            c.set_param('public_ip_prefixes', public_ip_prefixes_natgateway)
+            c.set_param('public_ip_prefixes', public_ip_prefixes)
     return instance
 
 
