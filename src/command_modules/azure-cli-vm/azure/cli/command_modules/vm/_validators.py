@@ -944,17 +944,17 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace):
-    if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
-        logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
-        namespace.generate_ssh_keys = False
+    if namespace.ssh_key_value:
+        if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
+            logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
+            namespace.generate_ssh_keys = False
 
-    processed_ssh_key_values = []
-    for ssh_key_value in namespace.ssh_key_value:
-        processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
-    namespace.ssh_key_value = processed_ssh_key_values
-
+        processed_ssh_key_values = []
+        for ssh_key_value in namespace.ssh_key_value:
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+        namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
-    if not namespace.ssh_key_value:
+    else:
         namespace.ssh_key_value = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
 
 
