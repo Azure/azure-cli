@@ -88,6 +88,21 @@ examples:
     text: az storage account list -g MyResourceGroup
 """
 
+helps['storage account management-policy'] = """
+    type: group
+    short-summary: Manage storage account management policies.
+"""
+
+helps['storage account management-policy create'] = """
+    type: command
+    short-summary: Creates the data policy rules associated with the specified storage account.
+"""
+
+helps['storage account management-policy update'] = """
+    type: command
+    short-summary: Updates the data policy rules associated with the specified storage account.
+"""
+
 helps['storage account network-rule'] = """
 type: group
 short-summary: Manage network rules.
