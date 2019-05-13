@@ -486,6 +486,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 # endregion
 
 
+# region VirtualMachines
 def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
     VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
@@ -501,7 +502,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
-              no_wait=False, authentication_type=None, admin_password=None,
+              no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
@@ -630,13 +631,13 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     vm_resource = build_vm_resource(
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
         admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
-        ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
+        ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
         os_disk_name=os_disk_name, custom_image_os_type=os_type, authentication_type=authentication_type,
         os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
         attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
         license_type=license_type, zone=zone, disk_info=disk_info,
         boot_diagnostics_storage_uri=boot_diagnostics_storage, ultra_ssd_enabled=ultra_ssd_enabled,
-        proximity_placement_group=proximity_placement_group)
+        proximity_placement_group=proximity_placement_group, computer_name=computer_name)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -2055,7 +2056,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         accelerated_networking=accelerated_networking, admin_username=admin_username,
         authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
         disk_info=disk_info, os_type=os_type, image=image, admin_password=admin_password,
-        ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
+        ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
         os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
         inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
         single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
@@ -2523,9 +2524,8 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
                               _set_vmss)
 # endregion
 
+
 # region image galleries
-
-
 def list_image_galleries(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
