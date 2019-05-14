@@ -49,7 +49,7 @@ tar -xvzf $tmp_venv_archive -C %{_builddir}
 
 %install
 # Create the venv
-python %{_builddir}/virtualenv-15.0.0/virtualenv.py --python python %{buildroot}%{cli_lib_dir}
+%{python_cmd} %{_builddir}/virtualenv-15.0.0/virtualenv.py --python python %{buildroot}%{cli_lib_dir}
 
 # Build the wheels from the source
 source_dir=%{repo_path}
