@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.4
++++++
+* Added commands sql instance-failover-group create/show/delete/update/set-primary
+
 2.2.3
 +++++
 * Added commands sql virtual-cluster list/show/delete

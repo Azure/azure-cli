@@ -588,3 +588,19 @@ helps['sql virtual-cluster delete'] = """
         - name: Delete a virtual cluster
           text: az sql virtual-cluster delete -g mygroup -n mycluster
     """
+helps['sql instance-failover-group'] = """
+    type: group
+    short-summary: Manage SQL Instance Failover Groups.
+    """
+helps['sql instance-failover-group create'] = """
+    type: command
+    short-summary: Creates an instance failover group between two connected managed instances.
+    """
+helps['sql instance-failover-group update'] = """
+    type: command
+    short-summary: Updates the instance failover group.
+    """
+helps['sql instance-failover-group set-primary'] = """
+    type: command
+    short-summary: Set the primary of the instance failover group by failing over all databases from the current primary managed instance.
+    """

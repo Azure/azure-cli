@@ -2332,7 +2332,7 @@ def instance_failover_group_create(
         cmd,
         client,
         resource_group_name,
-        managed_instance_name,
+        managed_instance,
         instance_failover_group_name,
         partner_managed_instance_name,
         partner_resource_group,
@@ -2345,7 +2345,7 @@ def instance_failover_group_create(
     managed_instance_client = get_sql_managed_instances_operations(cmd.cli_ctx, None)
     # pylint: disable=no-member
     primary_server = managed_instance_client.get(
-        managed_instance_name=managed_instance_name,
+        managed_instance_name=managed_instance,
         resource_group_name=resource_group_name)
 
     partner_server = managed_instance_client.get(
@@ -2399,10 +2399,11 @@ def instance_failover_group_update(
 
 
 def instance_failover_group_failover(
+        cmd,
         client,
         resource_group_name,
-        server_name,
         instance_failover_group_name,
+        location_name,
         allow_data_loss=False):
     '''
     Failover a failover group.
@@ -2410,8 +2411,9 @@ def instance_failover_group_failover(
 
     failover_group = client.get(
         resource_group_name=resource_group_name,
-        managed_instance_name=server_name,
-        instance_failover_group_name=instance_failover_group_name)
+        subscription_id=get_subscription_id(cmd.cli_ctx),
+        failover_group_name=instance_failover_group_name,
+        location_name=location_name)
 
     if failover_group.replication_role == "Primary":
         return
@@ -2424,5 +2426,5 @@ def instance_failover_group_failover(
 
     return failover_func(
         resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=instance_failover_group_name)
+        failover_group_name=instance_failover_group_name,
+        location_name=location_name)
