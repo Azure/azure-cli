@@ -21,6 +21,8 @@ from azure.cli.command_modules.acs._format import version_to_tuple
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
+    # Remove when issue #9392 is addressed.
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
@@ -269,6 +271,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.cmd(create_cmd)
         self.assertIn('--max-pods', str(err.exception))
 
+    # Remove when issue #9392 is addressed.
+    @live_only()
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
@@ -312,6 +316,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
+    # Remove when issue #9392 is addressed.
+    @live_only()
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
@@ -339,6 +345,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
+    # Remove when issue #9392 is addressed.
+    @live_only()
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_aks_create_default_service_without_SP_and_with_role_assignment(self, resource_group, resource_group_location):
