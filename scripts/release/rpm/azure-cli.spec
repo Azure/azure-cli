@@ -6,6 +6,12 @@
   %define dist .el7
 %endif
 
+%if 0%{?rhel} >= 8
+  %define python_cmd python3
+%else
+  %define python_cmd python2
+%endif
+
 %define name           azure-cli
 %define release        1%{?dist}
 %define version        %{getenv:CLI_VERSION}
@@ -21,13 +27,10 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       python
+Requires:       %{python_cmd}
 
-BuildRequires:  gcc
-BuildRequires:  python
-BuildRequires:  libffi-devel
-BuildRequires:  python-devel
-BuildRequires:  openssl-devel
+BuildRequires:  gcc, libffi-devel, openssl-devel
+BuildRequires:  %{python_cmd}, %{python_cmd}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 
