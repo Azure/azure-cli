@@ -417,6 +417,8 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False):
+    if client.account_key is None:
+        raise CLIError("Missing --account-key to generate sas")
     sas_token = client.generate_blob_shared_access_signature(
         container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
         protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
