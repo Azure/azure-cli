@@ -13,8 +13,6 @@ import unittest
 import mock
 import uuid
 
-import six
-
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
@@ -27,6 +25,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # pylint: disable=too-many-lines
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
+TEST_SSH_KEY_PUB_2 = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCof7rG2sYVyHSDPp4lbrq5zu8N8D7inS4Qb+ZZ5Kh410znTcoVJSNsLOhrM2COxg5LXca3DQMBi4S/V8UmMnwxwDVf38GvU+0QVDR6vSO6lPlj2OpPLk4OEdTv3qcj/gpEBvv1RCacpFuu5bL546r4BqG4f0dJXqBd5tT4kjpO9ytOZ1Wkg8tA35UvbucVAsDBfOZ5GtsnflPtKCY9h20LeXEjyDZ8eFzAGH/vNrfWPiWWznwN9EoPghIQHCiC0mnJgdsABraUzeTTMjxahi0DXBxb5dsKd6YbJxQw/V+AohVMPfPvs9y95Aj7IxM2zrtgBswC8bT0z678svTJSFX9 test@example.com"
 
 
 def _write_config_file(user_name):
@@ -1007,17 +1006,19 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         self.kwargs.update({
             'username': 'ubuntu',
             'vm': 'cli-test-vm2',
+            'comp_name': 'my-computer',
             'image': 'UbuntuLTS',
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location
         })
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('osProfile.adminUsername', '{username}'),
-            self.check('osProfile.computerName', '{vm}'),
+            self.check('osProfile.computerName', '{comp_name}'),
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
             self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1027,7 +1028,8 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly  ')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
 
 class VMCreateEphemeralOsDisk(ScenarioTest):
@@ -1059,6 +1061,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
         ])
 
 
@@ -1124,12 +1127,13 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Debian --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
+        self.cmd('vm create -n {vm} -g {rg} --computer-name {quotes} --image Debian --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
 
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('availabilitySet', None),
             self.check('length(tags)', 0),
-            self.check('location', '{loc}')
+            self.check('location', '{loc}'),
+            self.check('osProfile.computerName', '{vm}')
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
@@ -1348,10 +1352,15 @@ class VMCreateExistingOptions(ScenarioTest):
             'vm_1': 'vm1',
             'vm_2': 'vm2',
             'ssh_key': TEST_SSH_KEY_PUB,
+            'ssh_key_2': self.create_temp_file(0),
+            'ssh_dest': '/home/myadmin/.ssh/authorized_keys'
         })
 
+        with open(self.kwargs['ssh_key_2'], 'w') as f:
+            f.write(TEST_SSH_KEY_PUB_2)
+
         self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_1} --authentication-type all '
-                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'')
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value "{ssh_key}"')
 
         self.cmd('vm show -n {vm_1} -g {rg}', checks=[
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', False),
@@ -1359,10 +1368,14 @@ class VMCreateExistingOptions(ScenarioTest):
         ])
 
         self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_2} --authentication-type ssh '
-                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'')
+                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}"')
 
         self.cmd('vm show -n {vm_2} -g {rg}', checks=[
-            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[1].keyData', TEST_SSH_KEY_PUB_2),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].path', '{ssh_dest}'),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[1].path', '{ssh_dest}')
         ])
 
 
@@ -1838,7 +1851,12 @@ class VMSSCreateOptions(ScenarioTest):
             'vmss_1': 'vmss1',
             'vmss_2': 'vmss2',
             'ssh_key': TEST_SSH_KEY_PUB,
+            'ssh_key_2': self.create_temp_file(0),
+            'ssh_dest': '/home/myadmin/.ssh/authorized_keys'
         })
+
+        with open(self.kwargs['ssh_key_2'], 'w') as f:
+            f.write(TEST_SSH_KEY_PUB_2)
 
         self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_1} --authentication-type all '
                  ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'',
@@ -1848,9 +1866,13 @@ class VMSSCreateOptions(ScenarioTest):
                  ])
 
         self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_2} --authentication-type ssh '
-                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'',
+                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}"',
                  checks=[
-                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[1].keyData', TEST_SSH_KEY_PUB_2),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].path', '{ssh_dest}'),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[1].path', '{ssh_dest}'),
                  ])
 
 

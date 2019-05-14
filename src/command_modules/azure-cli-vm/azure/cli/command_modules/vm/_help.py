@@ -176,7 +176,7 @@ short-summary: create a new version from an image defintion
 
 helps['sig image-version create'] = """
 type: command
-short-summary: creat a new image version
+short-summary: create a new image version
 long-summary: this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
 examples:
   - name: Add a new image version
@@ -243,12 +243,13 @@ type: command
 short-summary: Create a snapshot.
 examples:
   - name: Create a snapshot by importing from a blob uri.
-    text: >
-        az snapshot create -g MyResourceGroup -n MySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
+    text: az snapshot create -g MyResourceGroup -n MySnapshot --source https://vhd1234.blob.core.windows.net/vhds/osdisk1234.vhd
   - name: Create an empty snapshot.
     text: az snapshot create -g MyResourceGroup -n MySnapshot --size-gb 10
   - name: Create a snapshot by copying an existing disk in the same resource group.
     text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source MyDisk
+  - name: Create a snapshot from an existing disk in another resource group.
+    text: az snapshot create -g MyResourceGroup -n MySnapshot2 --source "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.Compute/disks/MyDisk"
 """
 
 helps['snapshot grant-access'] = """
@@ -467,8 +468,10 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
-  - name: --ssh-key-value
-    short-summary: The SSH public key or public key file path.
+  - name: --ssh-key-values
+    short-summary: Space-separated list of SSH public keys or public key file paths.
+  - name: --computer-name
+    short-summary: The host OS name of the virtual machine. Defaults to the name of the VM.
 examples:
   - name: Create a default Ubuntu VM with automatic SSH authentication.
     text: >
@@ -1478,6 +1481,8 @@ parameters:
     populator-commands:
       - az vm image list
       - az vm image show
+  - name: --ssh-key-values
+    short-summary: Space-separated list of SSH public keys or public key file paths.
 examples:
   - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
     text: >
@@ -1591,7 +1596,7 @@ examples:
 
 helps['vmss encryption'] = """
 type: group
-short-summary: "(PREVIEW) Manage encryption of VMSS."
+short-summary: "Manage encryption of VMSS."
 long-summary: "For more information, see: https://docs.microsoft.com/en-us/azure/security/azure-security-disk-encryption-overview"
 """
 
@@ -1792,7 +1797,7 @@ examples:
 
 helps['vmss rolling-upgrade'] = """
 type: group
-short-summary: (PREVIEW) Manage rolling upgrades.
+short-summary: Manage rolling upgrades.
 """
 
 helps['vmss run-command'] = """

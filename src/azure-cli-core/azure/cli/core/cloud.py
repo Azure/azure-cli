@@ -267,7 +267,11 @@ def get_clouds(cli_ctx):
     # Start off with known clouds and apply config file on top of current config
     for c in KNOWN_CLOUDS:
         _config_add_cloud(config, c)
-    config.read(CLOUD_CONFIG_FILE)
+    try:
+        config.read(CLOUD_CONFIG_FILE)
+    except configparser.MissingSectionHeaderError:
+        os.remove(CLOUD_CONFIG_FILE)
+        logger.warning("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):

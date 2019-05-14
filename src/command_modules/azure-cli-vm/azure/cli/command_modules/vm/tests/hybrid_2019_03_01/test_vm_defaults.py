@@ -268,6 +268,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.ssh_key_value = None
         ns.ssh_dest_key_path = None
         ns.admin_password = None
+        ns.generate_ssh_keys = None
         return ns
 
     @staticmethod
@@ -278,7 +279,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
             ns.admin_username = 'user12345'
             ns.admin_password = 'verySecret!!!'
         if authentication_type in ("ssh", "all"):
-            ns.ssh_key_value = TestVMDefaultAuthType._get_test_ssh_key()
+            ns.ssh_key_value = [TestVMDefaultAuthType._get_test_ssh_key()]
         ns.authentication_type = authentication_type
         return ns
 
@@ -297,7 +298,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         ns.authentication_type = None
         ns.admin_username = 'user12345'
         ns.admin_password = 'verySecret123'
-        ns.ssh_key_value = self._get_test_ssh_key()
+        ns.ssh_key_value = [self._get_test_ssh_key()]
 
         # test fails if authentication_type implicit
         with self.assertRaises(CLIError) as context:
@@ -317,7 +318,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         test_user = 'user12345'
         ns.admin_username = test_user
         ns.admin_password = None
-        ns.ssh_key_value = self._get_test_ssh_key()
+        ns.ssh_key_value = [self._get_test_ssh_key()]
         _validate_vm_vmss_create_auth(ns)
         self.assertEqual(ns.authentication_type, 'ssh')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(test_user))
@@ -333,7 +334,7 @@ class TestVMDefaultAuthType(unittest.TestCase):
         self.assertEqual(ns.authentication_type, 'password')
 
         # throw when conflict with ssh key value
-        ns.ssh_key_value = 'junk but does not matter'
+        ns.ssh_key_value = ['junk but does not matter']
         with self.assertRaises(CLIError) as context:
             _validate_vm_vmss_create_auth(ns)
             self.assertTrue("SSH key cannot be used with password authentication type." in str(context.exception))
