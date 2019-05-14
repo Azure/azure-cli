@@ -85,8 +85,7 @@ def validate_cert(namespace):
         namespace.cert = x509
 
 
-def process_assignment_namespace(cmd, namespace):
-    from azure.cli.core.util import ConfiguredDefaultSetter
+def process_assignment_namespace(_, namespace):
     resource_group = namespace.resource_group_name
     if namespace.scope and resource_group and getattr(resource_group, 'is_default', None):
         namespace.resource_group_name = None  # drop configured defaults
