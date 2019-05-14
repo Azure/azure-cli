@@ -2,14 +2,14 @@
 # Definition of macros used - https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros
 
 # .el7.centos -> .el7
-%if 0%{?rhel} == 7
-  %define dist .el7
+%if 0%{?rhel}
+  %define dist .el%{?rhel}
 %endif
 
-%if 0%{?rhel} >= 8
-  %define python_cmd python3
+%if 0%{?rhel} < 8
+    %define python_cmd python2
 %else
-  %define python_cmd python2
+    %define python_cmd python3
 %endif
 
 %define name           azure-cli
