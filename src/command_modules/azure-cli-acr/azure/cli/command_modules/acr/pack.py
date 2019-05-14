@@ -32,19 +32,19 @@ logger = get_logger(__name__)
 
 
 def acr_pack(cmd,  # pylint: disable=too-many-locals
-            client,
-            registry_name,
-            image_name,
-            source_location,
-            builder=ORYX_PACK_BUILDER_IMAGE,
-            no_format=False,
-            no_logs=False,
-            no_wait=False,
-            timeout=None,
-            resource_group_name=None,
-            os_type=None,
-            platform=None,
-            auth_mode=None):
+             client,
+             registry_name,
+             image_name,
+             source_location,
+             builder=ORYX_PACK_BUILDER_IMAGE,
+             no_format=False,
+             no_logs=False,
+             no_wait=False,
+             timeout=None,
+             resource_group_name=None,
+             os_type=None,
+             platform=None,
+             auth_mode=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, PACK_NOT_SUPPORTED)
