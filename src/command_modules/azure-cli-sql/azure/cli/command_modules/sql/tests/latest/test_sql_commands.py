@@ -3168,7 +3168,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Fail back to original server
         self.cmd('sql instance-failover-group set-primary --allow-data-loss -g {} -s {} -n {} -l {}'
-                 .format(resource_group_name, managed_instance_name_1, failover_group_name, mi1_location)
+                 .format(resource_group_name, managed_instance_name_1, failover_group_name, mi1_location))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
