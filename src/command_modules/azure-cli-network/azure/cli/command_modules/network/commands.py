@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
     cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
-    cf_service_endpoint_policy_definitions, cf_dns_references, cf_interface_endpoints, cf_network_profiles,
+    cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links)
 from azure.cli.command_modules.network._util import (
@@ -164,7 +164,7 @@ def load_command_table(self, _):
 
     network_private_endpoint_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#InterfaceEndpointsOperations.{}',
-        client_factory=cf_interface_endpoints,
+        client_factory=cf_private_endpoints,
         min_api='2018-08-01'
     )
 
