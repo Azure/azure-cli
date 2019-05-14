@@ -148,7 +148,7 @@ class AzureDevopsBuildInteractive(object):
         self.process_build('GITHUB_INTEGRATION')
         self.wait_for_build()
         self.process_release()
-        self.logger.warning("Setup continuous integration between {github_repo} and Azure DevOps pipelines".format(
+        self.logger.warning("Setup continuous integration between {github_repo} and Azure Pipelines".format(
             github_repo=self.github_repository
         ))
         return {
@@ -397,7 +397,7 @@ class AzureDevopsBuildInteractive(object):
         )
         if has_local_git_remote:
             raise CLIError("There's a git remote bound to {url}.{ls}"
-                           "To update the repository and trigger an Azure DevOps build, please use "
+                           "To update the repository and trigger an Azure Pipelines build, please use "
                            "'git push {remote} master'".format(
                                url=expected_remote_url,
                                remote=expected_remote_name,
@@ -629,7 +629,7 @@ class AzureDevopsBuildInteractive(object):
                 proj=self.project_name,
                 build_id=build.id
             )
-            raise CLIError("Sorry, your build has failed in Azure DevOps.{ls}"
+            raise CLIError("Sorry, your build has failed in Azure Pipelines.{ls}"
                            "To view details on why your build has failed please visit {url}".format(
                                url=url, ls=os.linesep
                            ))
@@ -663,7 +663,7 @@ class AzureDevopsBuildInteractive(object):
             try:
                 release = self.adbp.create_release(self.organization_name, self.project_name, self.release_definition_name)
             except ReleaseErrorException:
-                raise CLIError("Sorry, your release has failed in Azure DevOps.{ls}"
+                raise CLIError("Sorry, your release has failed in Azure Pipelines.{ls}"
                                "To view details on why your release has failed please visit "
                                "https://dev.azure.com/{org}/{proj}/_release".format(
                                    ls=os.linesep, org=self.organization_name, proj=self.project_name
