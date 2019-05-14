@@ -903,9 +903,8 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route get-stats --resource-group {rg} --name {er}',
                  checks=self.check('type(@)', 'object'))
 
-        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test --bandwidth 100', checks=[
-            self.check('tags.test', 'Test'),
-            self.check('serviceProviderProperties.bandwidthInMbps', 100)
+        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test', checks=[
+            self.check('tags.test', 'Test')
         ])
 
         self.cmd('network express-route update -g {rg} -n {er} --tags foo=boo',
@@ -964,7 +963,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(CLIError, 'An error occurred'):
+        with self.assertRaisesRegexp(CLIError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')

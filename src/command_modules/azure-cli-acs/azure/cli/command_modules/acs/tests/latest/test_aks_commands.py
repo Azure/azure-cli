@@ -33,7 +33,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': sp_name,
+            'service_principal': 'http://' + sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -119,7 +119,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': sp_name,
+            'service_principal': 'http://' + sp_name,
             'client_secret': sp_password,
             'k8s_version': create_version,
             'vm_size': 'Standard_DS1_v2'
@@ -201,7 +201,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': sp_name,
+            'service_principal': 'http://' + sp_name,
             'client_secret': sp_password,
             'k8s_version': create_version,
             'nodepool_name': self.create_random_name('np', 12)
@@ -278,7 +278,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
-            'service_principal': sp_name,
+            'service_principal': 'http://' + sp_name,
             'client_secret': sp_password,
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
@@ -321,7 +321,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
-            'service_principal': sp_name,
+            'service_principal': 'http://' + sp_name,
             'client_secret': sp_password,
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
@@ -375,7 +375,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': sp_name,
+            'service_principal': 'http://' + sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
