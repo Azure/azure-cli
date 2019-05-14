@@ -31,7 +31,6 @@ class TestDevopsBuildCommandsMocked(unittest.TestCase):
             repository_name=None,
             overwrite_yaml=None,
             allow_force_push=None,
-            use_local_settings=None,
             github_pat=None,
             github_repository=None
         )
