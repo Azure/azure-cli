@@ -107,7 +107,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_update(self, storage_account_for_create):
-        if sys.version_info.major == 2:
+        if sys.version_info.major == 2:  # azure-cli/issues/9386
             return
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=11)
@@ -387,7 +387,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_streaming_endpoint_stop_async(self, storage_account_for_create):
-        if sys.version_info.major == 2:
+        if sys.version_info.major == 2:  # azure-cli/issues/9386
             return
         amsname = self.create_random_name(prefix='ams', length=12)
         streaming_endpoint_name = self.create_random_name(prefix="strep", length=12)
