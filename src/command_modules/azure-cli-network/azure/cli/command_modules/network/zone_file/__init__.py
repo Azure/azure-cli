@@ -27,4 +27,3 @@
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.command_modules.network.zone_file.exceptions import InvalidLineException
