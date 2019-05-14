@@ -24,7 +24,7 @@ from .run import prepare_source_location
 
 PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
 PACK_TASK_YAML_FMT = '''steps:
-  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} -p .
+  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
   - push: ["{image_name}"]
 '''
 
