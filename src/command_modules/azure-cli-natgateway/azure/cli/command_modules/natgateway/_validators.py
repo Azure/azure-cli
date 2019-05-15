@@ -12,15 +12,16 @@ def validate_public_ip_prefixes(cmd, namespace):
         return
 
     public_ip_prefix_ids = []
+    SubResource = cmd.get_models('SubResource')
     for prefix in namespace.public_ip_prefixes:
-        if is_valid_resource_id(prefix):
+        if not is_valid_resource_id(prefix):
             prefix = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=namespace.resource_group_name,
                 name=prefix,
                 namespace='Microsoft.Network',
                 type='publicIPPrefixes')
-        public_ip_prefix_ids.append(prefix)
+        public_ip_prefix_ids.append(SubResource(id=prefix))
     namespace.public_ip_prefixes = public_ip_prefix_ids
 
 
@@ -30,13 +31,14 @@ def validate_public_ip_addresses(cmd, namespace):
         return
 
     public_ip_address_ids = []
+    SubResource = cmd.get_models('SubResource')
     for address in namespace.public_ip_addresses:
-        if is_valid_resource_id(address):
+        if not is_valid_resource_id(address):
             address = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=namespace.resource_group_name,
                 name=address,
                 namespace='Microsoft.Network',
                 type='publicIPAddresses')
-        public_ip_address_ids.append(address)
+        public_ip_address_ids.append(SubResource(id=address))
     namespace.public_ip_addresses = public_ip_address_ids
