@@ -2,7 +2,9 @@
 
 Release History
 ===============
-
+* functionapp: deprecated `az functionapp devops-build` command will be removed in next release
+* functionapp: `az functionapp devops-pipeline` fetches building log from Azure DevOps in verbose mode
+* functionapp: `az functionapp devops-pipeline` removes `--use_local_settings` flag, since it does not change Azure DevOps release definition
 * webapp: webapp up returns a json output if --logs is not used
 * webapp: webapp up supports writing the default resources to local configuration
 * webapp: webapp up supports redeploying an app without using the --location argument
