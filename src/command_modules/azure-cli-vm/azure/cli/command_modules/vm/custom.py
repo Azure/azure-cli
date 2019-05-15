@@ -2621,7 +2621,7 @@ def update_image_version(instance, target_regions=None, replica_count=None):
 
 # region Proximity Placement Group
 def create_proximity_placement_group(cmd, client, proximity_placement_group_name, resource_group_name,
-                                     ppg_type, location=None, tags=None):
+                                     ppg_type=None, location=None, tags=None):
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     ProximityPlacementGroup = cmd.get_models('ProximityPlacementGroup')
