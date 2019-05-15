@@ -289,6 +289,34 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_handle_conflicted_assignments(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'nsg': 'nsg1'
+            })
+
+            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+            try:
+                self.cmd('configure --default group=' + resource_group)
+                # test role assignments on a resource group
+                rg_id = self.cmd('group show -n {rg}').get_output_in_json()['id']
+                self.cmd('role assignment create --assignee {upn} --role reader --scope ' + rg_id)
+                self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 1))
+                self.cmd('role assignment delete --assignee {upn} --role reader --scope ' + rg_id)
+                self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
+            finally:
+                self.cmd('configure --default group=""')
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
     @ResourceGroupPreparer(name_prefix='cli_role_audit')
     @AllowLargeResponse()
     def test_role_assignment_audits(self, resource_group):

@@ -1244,7 +1244,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'a':
                 record_obj.update({'ip': record.ipv4_address})
             elif record_type == 'caa':
-                record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
+                record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
@@ -1257,7 +1257,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 record_obj.update({
                     'mname': record.host.rstrip('.') + '.',
                     'rname': record.email.rstrip('.') + '.',
-                    'serial': record.serial_number, 'refresh': record.refresh_time,
+                    'serial': int(record.serial_number), 'refresh': record.refresh_time,
                     'retry': record.retry_time, 'expire': record.expire_time,
                     'minimum': record.minimum_ttl
                 })
@@ -1285,7 +1285,7 @@ def _build_record(cmd, data):
     AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord, NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord = \
         cmd.get_models('AaaaRecord', 'ARecord', 'CaaRecord', 'CnameRecord', 'MxRecord', 'NsRecord',
                        'PtrRecord', 'SoaRecord', 'SrvRecord', 'TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record_type = data['type'].lower()
+    record_type = data['delim'].lower()
     try:
         if record_type == 'aaaa':
             return AaaaRecord(ipv6_address=data['ip'])
@@ -1293,7 +1293,7 @@ def _build_record(cmd, data):
             return ARecord(ipv4_address=data['ip'])
         if (record_type == 'caa' and
                 supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
-            return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
+            return CaaRecord(value=data['val'], flags=int(data['flags']), tag=data['tag'])
         if record_type == 'cname':
             return CnameRecord(cname=data['alias'])
         if record_type == 'mx':
@@ -1307,7 +1307,9 @@ def _build_record(cmd, data):
                              refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
                              minimum_ttl=data['minimum'])
         if record_type == 'srv':
-            return SrvRecord(priority=data['priority'], weight=data['weight'], port=data['port'], target=data['target'])
+            return SrvRecord(
+                priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']),
+                target=data['target'])
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
@@ -1344,7 +1346,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
                 record = _build_record(cmd, entry)
                 if not record:
-                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
+                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
 
                 record_set = record_sets.get(record_set_key, None)
