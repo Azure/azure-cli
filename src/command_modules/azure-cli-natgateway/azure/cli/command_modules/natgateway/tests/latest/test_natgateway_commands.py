@@ -28,7 +28,7 @@ class NatGatewayScenarioTests(ScenarioTest):
         # create public ip prefix
         self.cmd('az network public-ip prefix create -g {rg} -n {ip_prefix} --length 31')
 
-        self.cmd('az network nat-gateway create --resource-group {rg} --name {name} --location {location} --public-ip-addresses {ip_addr} --public-ip-prefixes {ip_prefix} --idle-timeout {idle_timeout}', checks=[
+        self.cmd('az network nat gateway create --resource-group {rg} --name {name} --location {location} --public-ip-addresses {ip_addr} --public-ip-prefixes {ip_prefix} --idle-timeout {idle_timeout}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('idleTimeoutInMinutes', '{idle_timeout}'),
             self.check("contains(publicIpAddresses[0].id, '{ip_addr}')", True),
@@ -36,14 +36,14 @@ class NatGatewayScenarioTests(ScenarioTest):
             self.check('sku.name', 'Standard'),
             self.check('location', '{location}')
         ])
-        self.cmd('az network nat-gateway update -g {rg} --name {name} --idle-timeout {idle_timeout_updated}',
+        self.cmd('az network nat gateway update -g {rg} --name {name} --idle-timeout {idle_timeout_updated}',
                  checks=self.check('idleTimeoutInMinutes', 5))
-        self.cmd('az network nat-gateway list -g {rg}',
+        self.cmd('az network nat gateway list -g {rg}',
                  checks=self.check('length(@)', 1))
-        self.cmd('az network nat-gateway show --resource-group {rg} --name {name}',
+        self.cmd('az network nat gateway show --resource-group {rg} --name {name}',
                  checks=self.check('name', '{name}'))
 
         # delete and verify item is removed
-        self.cmd('az network nat-gateway delete --resource-group {rg} --name {name}')
-        self.cmd('az network nat-gateway list -g {rg}',
+        self.cmd('az network nat gateway delete --resource-group {rg} --name {name}')
+        self.cmd('az network nat gateway list -g {rg}',
                  checks=self.check('length(@)', 0))

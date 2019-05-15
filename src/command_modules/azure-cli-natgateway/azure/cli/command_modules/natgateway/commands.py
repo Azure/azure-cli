@@ -12,7 +12,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#NatGatewaysOperations.{}',
         client_factory=cf_nat_gateways)
 
-    with self.command_group('network nat-gateway', nat_gateway_sdk) as g:
+    with self.command_group('network nat gateway', nat_gateway_sdk) as g:
         g.custom_command('create', 'create_nat_gateway', supports_no_wait=True)
         g.command('delete', 'delete')
         g.custom_command('list', 'list_nat_gateway')

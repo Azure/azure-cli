@@ -10,7 +10,7 @@ from .validators import (validate_public_ip_addresses, validate_public_ip_prefix
 
 
 def load_arguments(self, _):
-    with self.argument_context('network nat-gateway') as c:
+    with self.argument_context('network nat gateway') as c:
         c.argument('nat_gateway_name', id_part='name', options_list=['--name', '-n'], help='Name of the NAT gateway.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('public_ip_addresses', nargs='+', help='Space-separated list of public IP addresses (names or IDs).', validator=validate_public_ip_addresses('public_ip_addresses'))
