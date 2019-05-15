@@ -8,6 +8,14 @@ from ..linter import RuleError
 from ..util import LinterError
 import shlex
 import mock
+import re
+
+# 'az' space then repeating runs of quoted tokens or non quoted characters
+_az_pattern = 'az\s*' + '(([^\"\'])*|' + '((\"[^\"]*\"\s*)|(\'[^\']*\'\s*))' + ')'
+# match the two types of command substitutions
+_CMD_SUB_1 = re.compile("\$\(\s*" + "(" + _az_pattern + ")" + "\)")
+_CMD_SUB_2 = re.compile("`\s*" + "(" + _az_pattern + ")" + "`")
+
 from knack.log import get_logger
 logger = get_logger(__name__)
 
@@ -55,9 +63,16 @@ def faulty_help_example_parameters_rule(linter, help_entry):
     violations = []
 
     for example in linter.get_help_entry_examples(help_entry):
-        max_profile = example.get('max_profile')
-        if max_profile and max_profile != 'latest':
-            logger.warning("\n\tSKIPPING example: {}\n\tas its max profile is {}, instead of latest.".format(example['text'], example['max_profile']))
+        supported_profiles = example.get('supported-profiles')
+        if supported_profiles and 'latest' not in supported_profiles:
+            logger.warning("\n\tSKIPPING example: {}\n\tas 'latest' is not in its supported profiles."
+                           "\n\t\tsupported-profiles: {}.".format(example['text'], example['supported-profiles']))
+            continue
+
+        unsupported_profiles = example.get('unsupported-profiles')
+        if unsupported_profiles and 'latest' in unsupported_profiles:
+            logger.warning("\n\tSKIPPING example: {}\n\tas 'latest' is in its unsupported profiles."
+                           "\n\t\tunsupported-profiles: {}.".format(example['text'], example['unsupported-profiles']))
             continue
 
         example_text = example.get('text','')
@@ -93,7 +108,7 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
     nested_commands = []
 
     try:
-        command_args = shlex.split(command)[1:]
+        command_args = shlex.split(command, comments=True)[1:] # split commands into command args, ignore comments.
         command_args, nested_commands = _process_command_args(command_args)
         parser.parse_args(command_args)
     except ValueError as e:  # handle exception thrown by shlex.
@@ -111,23 +126,28 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
 
     return violation, nested_commands
 
+
 # return list of commands in the example text
 def _extract_commands_from_example(example_text):
 
     # fold commands spanning multiple lines into one line. Split commands that use pipes
-    example_text = example_text.replace("\\\n", " ")
-    example_text = example_text.replace("\\ ", " ")
-    example_text = example_text.replace(" | ", "\n")
+    example_text = example_text.replace("\\\n", " ") # wrap escaped newline into one line.
+    example_text = example_text.replace("\\ ", " ")  # remove left over escape after wrapping
 
     commands = example_text.splitlines()
     processed_commands = []
     for command in commands:  # filter out commands
-        if command.startswith("az"):
+        command.strip()
+        if command.startswith("az"): # if this is a single az command add it.
             processed_commands.append(command)
-        elif "az " in command:  # some commands start with "$(az ..." and even "`az in one case"
-            idx = command.find("az ")
-            command = command[idx:]
-            processed_commands.append(command)
+
+        for re_prog in [_CMD_SUB_1, _CMD_SUB_2]:
+            start = 0
+            match = re_prog.search(command, start)
+            while match:  # while there is a nested az command of type 1 $( az ...)
+                processed_commands.append(match.group(1).strip())  # add it
+                start = match.end(1)  # get index of rest of string
+                match = re_prog.search(command, start)  # attempt to get next match
 
     return processed_commands
 
@@ -135,11 +155,10 @@ def _extract_commands_from_example(example_text):
 def _process_command_args(command_args):
     result_args = []
     new_commands = []
-    unwanted_chars = "$()`"
-    control_operators = ["&&","||"]
+    operators = ["&&","||", "|"]
 
     for arg in command_args: # strip unnecessary punctuation, otherwise arg validation could fail.
-        if arg in control_operators: # handle cases where multiple commands are connected by control operators.
+        if arg in operators: # handle cases where multiple commands are connected by control operators or pipe.
             idx = command_args.index(arg)
             maybe_new_command = " ".join(command_args[idx:])
 
@@ -148,9 +167,6 @@ def _process_command_args(command_args):
                 new_commands.append(maybe_new_command[idx:])  # remaining command is in fact a new command / commands.
             break
 
-        arg = arg.strip(unwanted_chars)
-        if arg.startswith("az "):  # store any new commands
-            new_commands.append(arg)
         result_args.append(arg)
 
     return result_args, new_commands

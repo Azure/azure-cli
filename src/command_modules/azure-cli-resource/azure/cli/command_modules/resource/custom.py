@@ -19,11 +19,7 @@ import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
-
-from knack.log import get_logger
-from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from knack.util import CLIError
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource
 
@@ -40,9 +36,21 @@ from azure.cli.command_modules.resource._client_factory import (
     _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
+from knack.log import get_logger
+from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
+from knack.util import CLIError
+
 from ._validators import MSI_LOCAL_ID
 
 logger = get_logger(__name__)
+
+
+def _build_resource_id(**kwargs):
+    from msrestazure.tools import resource_id as resource_id_from_dict
+    try:
+        return resource_id_from_dict(**kwargs)
+    except KeyError:
+        return None
 
 
 def _process_parameters(template_param_defs, parameter_lists):
@@ -51,7 +59,7 @@ def _process_parameters(template_param_defs, parameter_lists):
         try:
             parsed = shell_safe_json_parse(value)
             return parsed.get('parameters', parsed)
-        except CLIError:
+        except Exception:  # pylint: disable=broad-except
             return None
 
     def _try_load_file_object(value):
@@ -87,7 +95,7 @@ def _process_parameters(template_param_defs, parameter_lists):
         param_type = param.get('type', None)
         if param_type:
             param_type = param_type.lower()
-        if param_type in ['object', 'array']:
+        if param_type in ['object', 'array', 'secureobject']:
             parameters[key] = {'value': shell_safe_json_parse(value)}
         elif param_type in ['string', 'securestring']:
             parameters[key] = {'value': value}
@@ -104,7 +112,11 @@ def _process_parameters(template_param_defs, parameter_lists):
     parameters = {}
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item) or _try_parse_json_object(item) or _try_load_uri(item)
+            param_obj = _try_load_file_object(item)
+            if param_obj is None:
+                param_obj = _try_parse_json_object(item)
+            if param_obj is None:
+                param_obj = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
             elif not _try_parse_key_value_object(template_param_defs, parameters, item):
@@ -139,7 +151,7 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
     no_tty = False
     for param_name in prompt_list:
         param = missing_parameters[param_name]
-        param_type = param.get('type', 'string')
+        param_type = param.get('type', 'string').lower()
         description = 'Missing description'
         metadata = param.get('metadata', None)
         if metadata is not None:
@@ -420,7 +432,6 @@ def _parse_management_group_reference(name):
 def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
     from msrest.exceptions import HttpOperationError
     from msrestazure.azure_exceptions import CloudError
-    ErrorResponseException = cmd.get_models('ErrorResponseException')
     policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
 
     if cmd.supported_api_version(min_api='2018-03-01'):
@@ -435,7 +446,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
             if management_group:
                 return policy_operations.get_at_management_group(name, management_group)
         return policy_operations.get(name)
-    except (CloudError, HttpOperationError, ErrorResponseException) as ex:
+    except (CloudError, HttpOperationError) as ex:
         status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
         if status_code == 404:
             return policy_operations.get_built_in(name)
@@ -612,8 +623,7 @@ def create_application(cmd, resource_group_name,
                 plan_publisher is None and plan_version is None):
             raise CLIError('--plan-name, --plan-product, --plan-publisher and \
             --plan-version are all required if kind is MarketPlace')
-        else:
-            application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
+        application.plan = Plan(name=plan_name, publisher=plan_publisher, product=plan_product, version=plan_version)
 
     applicationParameters = None
 
@@ -665,14 +675,12 @@ def create_applicationdefinition(cmd, resource_group_name,
     from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
-    elif package_file_uri:
+    if package_file_uri:
         if create_ui_definition or main_template:
-            raise CLIError('usage error: must not specify \
-            --create-ui-definition --main-template')
-    elif not package_file_uri:
+            raise CLIError('usage error: must not specify --create-ui-definition --main-template')
+    if not package_file_uri:
         if not create_ui_definition or not main_template:
-            raise CLIError('usage error: must specify \
-            --create-ui-definition --main-template')
+            raise CLIError('usage error: must specify --create-ui-definition --main-template')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
@@ -790,14 +798,17 @@ def _get_rsrc_util_from_parsed_id(cli_ctx, parsed_id, api_version):
                           api_version)
 
 
-def _create_parsed_id(resource_group_name=None, resource_provider_namespace=None, parent_resource_path=None,
+def _create_parsed_id(cli_ctx, resource_group_name=None, resource_provider_namespace=None, parent_resource_path=None,
                       resource_type=None, resource_name=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription = get_subscription_id(cli_ctx)
     return {
         'resource_group': resource_group_name,
         'resource_namespace': resource_provider_namespace,
         'resource_parent': parent_resource_path,
         'resource_type': resource_type,
-        'resource_name': resource_name
+        'resource_name': resource_name,
+        'subscription': subscription
     }
 
 
@@ -815,7 +826,8 @@ def _single_or_collection(obj, default=None):
 def show_resource(cmd, resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
                   resource_name=None, api_version=None, include_response_body=False):
-    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
                                                                               resource_provider_namespace,
                                                                               parent_resource_path,
                                                                               resource_type,
@@ -835,7 +847,8 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
     This function allows deletion of ids with dependencies on one another.
     This is done with multiple passes through the given ids.
     """
-    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
                                                                               resource_provider_namespace,
                                                                               parent_resource_path,
                                                                               resource_type,
@@ -852,7 +865,7 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
         for rsrc_utils, id_dict in to_be_deleted:
             try:
                 operations.append(rsrc_utils.delete())
-                resource = resource_dict_to_id(**id_dict) if id_dict.get("subscription") else resource_name
+                resource = _build_resource_id(**id_dict) or resource_name
                 logger.debug("deleting %s", resource)
             except CloudError as e:
                 # request to delete failed, add parsed id dict back to queue
@@ -869,10 +882,11 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
             results.append(operation.result())
 
     if to_be_deleted:
-        error_msg_builder = ['Some resources failed to be deleted:']
+        error_msg_builder = ['Some resources failed to be deleted (run with `--verbose` for more information):']
         for _, id_dict in to_be_deleted:
-            logger.debug(id_dict['exception'])
-            error_msg_builder.append(resource_dict_to_id(**id_dict))
+            logger.info(id_dict['exception'])
+            resource_id = _build_resource_id(**id_dict) or id_dict['resource_id']
+            error_msg_builder.append(resource_id)
         raise CLIError(os.linesep.join(error_msg_builder))
 
     return _single_or_collection(results)
@@ -882,7 +896,8 @@ def delete_resource(cmd, resource_ids=None, resource_group_name=None,
 def update_resource(cmd, parameters, resource_ids=None,
                     resource_group_name=None, resource_provider_namespace=None,
                     parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
-    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
                                                                               resource_provider_namespace,
                                                                               parent_resource_path,
                                                                               resource_type,
@@ -898,7 +913,8 @@ def tag_resource(cmd, tags, resource_ids=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
-    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
                                                                               resource_provider_namespace,
                                                                               parent_resource_path,
                                                                               resource_type,
@@ -914,7 +930,8 @@ def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                            parent_resource_path=None, resource_type=None, resource_name=None,
                            api_version=None):
     """ Invokes the provided action on an existing resource."""
-    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
                                                                               resource_provider_namespace,
                                                                               parent_resource_path,
                                                                               resource_type,
@@ -999,8 +1016,8 @@ def move_resource(cmd, ids, destination_group, destination_subscription_id=None)
         raise CLIError('All resources should be under the same group')
 
     rcf = _resource_client_factory(cmd.cli_ctx)
-    target = resource_dict_to_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
-                                 resource_group=destination_group)
+    target = _build_resource_id(subscription=(destination_subscription_id or rcf.config.subscription_id),
+                                resource_group=destination_group)
 
     return rcf.resources.move_resources(resources[0]['resource_group'], ids, target)
 
@@ -1725,52 +1742,31 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, lock_name, params)
-
 # endregion
 
+
 # region ResourceLinks
-
-
 def create_resource_link(cmd, link_id, target_id, notes=None):
-    """
-    :param target_id: The id of the resource link target.
-    :type target_id: str
-    :param notes: Notes for this link.
-    :type notes: str
-    """
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
-    properties = ResourceLinkProperties(target_id, notes)
+    properties = ResourceLinkProperties(target_id=target_id, notes=notes)
     links_client.create_or_update(link_id, properties)
 
 
 def update_resource_link(cmd, link_id, target_id=None, notes=None):
-    """
-    :param target_id: The id of the resource link target.
-    :type target_id: str
-    :param notes: Notes for this link.
-    :type notes: str
-    """
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     params = links_client.get(link_id)
     properties = ResourceLinkProperties(
-        target_id if target_id is not None else params.properties.target_id,
+        target_id=target_id if target_id is not None else params.properties.target_id,
         # pylint: disable=no-member
         notes=notes if notes is not None else params.properties.notes)  # pylint: disable=no-member
     links_client.create_or_update(link_id, properties)
 
 
 def list_resource_links(cmd, scope=None, filter_string=None):
-    """
-    :param scope: The scope for the links
-    :type scope: str
-    :param filter_string: A filter for restricting the results
-    :type filter_string: str
-    """
     links_client = _resource_links_client_factory(cmd.cli_ctx).resource_links
     if scope is not None:
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
-
 # endregion
 
 

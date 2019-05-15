@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.arguments import CLIArgumentType
-
 from azure.cli.core.util import get_json_object
 
 from azure.cli.core.commands.parameters import (
@@ -19,6 +17,8 @@ from azure.cli.command_modules.monitor.util import get_operator_map, get_aggrega
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
     get_action_group_id_validator, validate_metric_dimension)
+
+from knack.arguments import CLIArgumentType
 
 
 # pylint: disable=line-too-long, too-many-statements

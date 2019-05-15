@@ -23,32 +23,45 @@ COMPONENT_PREFIX = 'azure-cli-'
 def handle_exception(ex):
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from msrestazure.azure_exceptions import CloudError
-    from msrest.exceptions import HttpOperationError
-    if isinstance(ex, (CLIError, CloudError)):
-        logger.error(ex.args[0])
-        return ex.args[1] if len(ex.args) >= 2 else 1
-    if isinstance(ex, KeyboardInterrupt):
+    from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
+    from azure.cli.core.azlogging import CommandLoggerContext
+
+    with CommandLoggerContext(logger):
+
+        if isinstance(ex, (CLIError, CloudError)):
+            logger.error(ex.args[0])
+            return ex.args[1] if len(ex.args) >= 2 else 1
+        if isinstance(ex, ValidationError):
+            logger.error('validation error: %s', ex)
+            return 1
+        if isinstance(ex, ClientRequestError):
+            logger.error("request failed: %s", ex)
+            return 1
+        if isinstance(ex, KeyboardInterrupt):
+            return 1
+        if isinstance(ex, HttpOperationError):
+            try:
+                response_dict = json.loads(ex.response.text)
+                error = response_dict['error']
+
+                # ARM should use ODATA v4. So should try this first.
+                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+                if isinstance(error, dict):
+                    code = "{} - ".format(error.get('code', 'Unknown Code'))
+                    message = error.get('message', ex)
+                    logger.error("%s%s", code, message)
+                else:
+                    logger.error(error)
+
+            except (ValueError, KeyError):
+                logger.error(ex)
+            return 1
+
+        logger.error("The command failed with an unexpected error. Here is the traceback:\n")
+        logger.exception(ex)
+        logger.warning("\nTo open an issue, please run: 'az feedback'")
+
         return 1
-    if isinstance(ex, HttpOperationError):
-        try:
-            response_dict = json.loads(ex.response.text)
-            error = response_dict['error']
-
-            # ARM should use ODATA v4. So should try this first.
-            # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
-            if isinstance(error, dict):
-                code = "{} - ".format(error.get('code', 'Unknown Code'))
-                message = error.get('message', ex)
-                logger.error("%s%s", code, message)
-            else:
-                logger.error(error)
-
-        except (ValueError, KeyError):
-            logger.error(ex)
-        return 1
-
-    logger.exception(ex)
-    return 1
 
 
 # pylint: disable=inconsistent-return-statements
@@ -75,8 +88,13 @@ def _update_latest_from_pypi(versions):
     from subprocess import check_output, STDOUT, CalledProcessError
 
     success = False
+
+    if not check_connectivity(max_retries=0):
+        return versions, success
+
     try:
-        cmd = [sys.executable] + '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir'.split()
+        cmd = [sys.executable] + \
+            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
         logger.debug('Running: %s', cmd)
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
         success = True
@@ -185,7 +203,10 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     content = read_file_content(file_path)
     if not content and not throw_on_empty:
         return None
-    return shell_safe_json_parse(content, preserve_order)
+    try:
+        return shell_safe_json_parse(content, preserve_order)
+    except CLIError as ex:
+        raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -224,6 +245,9 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
             return ast.literal_eval(json_or_dict_string)
         except SyntaxError:
             raise CLIError(json_ex)
+        except ValueError as ex:
+            logger.debug(ex)  # log the exception which could be a python dict parsing error.
+            raise CLIError(json_ex)  # raise json_ex error which is more readable and likely.
 
 
 def b64encode(s):
@@ -333,7 +357,7 @@ def open_page_in_browser(url):
     if _is_wsl(platform_name, release):   # windows 10 linux subsystem
         try:
             return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
-        except FileNotFoundError:  # WSL might be too old
+        except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
         # handle 2 things:
@@ -404,3 +428,81 @@ def get_default_admin_username():
         return getpass.getuser()
     except KeyError:
         return None
+
+
+def _find_child(parent, *args, **kwargs):
+    # tuple structure (path, key, dest)
+    path = kwargs.get('path', None)
+    key_path = kwargs.get('key_path', None)
+    comps = zip(path.split('.'), key_path.split('.'), args)
+    current = parent
+    for path, key, val in comps:
+        current = getattr(current, path, None)
+        if current is None:
+            raise CLIError("collection '{}' not found".format(path))
+        match = next((x for x in current if getattr(x, key).lower() == val.lower()), None)
+        if match is None:
+            raise CLIError("item '{}' not found in {}".format(val, path))
+        current = match
+    return current
+
+
+def find_child_item(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    if len(args) != len(path.split('.')) != len(key_path.split('.')):
+        raise CLIError('command authoring error: args, path and key_path must have equal number of components.')
+    return _find_child(parent, *args, path=path, key_path=key_path)
+
+
+def find_child_collection(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    arg_len = len(args)
+    key_len = len(key_path.split('.'))
+    path_len = len(path.split('.'))
+    if arg_len != key_len and path_len != arg_len + 1:
+        raise CLIError('command authoring error: args and key_path must have equal number of components, and '
+                       'path must have one extra component (the path to the collection of interest.')
+    parent = _find_child(parent, *args, path=path, key_path=key_path)
+    collection_path = path.split('.')[-1]
+    collection = getattr(parent, collection_path, None)
+    if collection is None:
+        raise CLIError("collection '{}' not found".format(collection_path))
+    return collection
+
+
+def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+    import requests
+    import timeit
+    start = timeit.default_timer()
+    success = None
+    try:
+        s = requests.Session()
+        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+        s.head(url, timeout=timeout)
+        success = True
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
+        logger.info('Connectivity problem detected.')
+        logger.debug(ex)
+        success = False
+    stop = timeit.default_timer()
+    logger.debug('Connectivity check: %s sec', stop - start)
+    return success
+
+
+class ConfiguredDefaultSetter(object):
+
+    def __init__(self, cli_config, use_local_config=None):
+        self.use_local_config = use_local_config
+        if self.use_local_config is None:
+            self.use_local_config = False
+        self.cli_config = cli_config
+        # here we use getattr/setattr to prepare the situation that "use_local_config" might not be available
+        self.original_use_local_config = getattr(cli_config, 'use_local_config', None)
+
+    def __enter__(self):
+        self.cli_config.use_local_config = self.use_local_config
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        setattr(self.cli_config, 'use_local_config', self.original_use_local_config)

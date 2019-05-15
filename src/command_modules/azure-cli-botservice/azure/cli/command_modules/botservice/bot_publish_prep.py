@@ -78,9 +78,9 @@ class BotPublishPrep:
                     f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'
                             .format(BotPublishPrep.__find_proj(proj_file)))
 
-            else:
-                logger.info('Detected bot language Node, Bot Builder version v4. Fetching necessary deployment files '
-                            'for deploying on IIS.')
+            elif iis_info['lang'] == 'Javascript':
+                logger.info('Detected bot language JavaScript, Bot Builder version v4. Fetching necessary deployment '
+                            'files for deploying on IIS.')
 
                 # Retrieve iisnode.yml and web.config and hold in memory, then extract required missing files.
                 node_iis_zip = BotPublishPrep.__retrieve_node_v4_publish_zip()

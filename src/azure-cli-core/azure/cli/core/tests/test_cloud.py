@@ -23,13 +23,16 @@ from azure.cli.core.cloud import (Cloud,
                                   KNOWN_CLOUDS,
                                   update_cloud,
                                   CloudEndpointNotSetException,
-                                  CannotUnregisterCloudException)
+                                  CannotUnregisterCloudException,
+                                  switch_active_cloud)
 
 from azure.cli.core._profile import Profile
 
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
+
+from knack.config import get_config_parser
 
 
 def _helper_get_clouds(_):
@@ -60,7 +63,7 @@ class TestCloud(unittest.TestCase):
                 config_file:
             with mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: []):
                 add_cloud(cli, c)
-                config = cli.config.config_parser
+                config = get_config_parser()
                 config.read(config_file)
                 self.assertTrue(c.name in config.sections())
                 self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -89,7 +92,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = cli.config.config_parser
+            config = get_config_parser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -109,7 +112,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = cli.config.config_parser
+            config = get_config_parser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -128,7 +131,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = cli.config.config_parser
+            config = get_config_parser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'profile'), profile)
@@ -193,7 +196,7 @@ class TestCloud(unittest.TestCase):
     def test_modify_known_cloud(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
             cli = DummyCli()
-            config = cli.config.config_parser
+            config = get_config_parser()
             cloud_name = AZURE_PUBLIC_CLOUD.name
             cloud = get_cloud(cli, cloud_name)
             self.assertEqual(cloud.name, cloud_name)
@@ -223,8 +226,7 @@ class TestCloud(unittest.TestCase):
             p.join()
             # Check we can read the file with no exceptions
             cli = DummyCli()
-            config = cli.config
-            config.config_parser.read(config_file)
+            get_config_parser().read(config_file)
             for kc in KNOWN_CLOUDS:
                 get_cloud(cli, kc.name)
 
@@ -232,6 +234,15 @@ class TestCloud(unittest.TestCase):
         cli = DummyCli()
         self.assertTrue(cloud_is_registered(cli, AZURE_PUBLIC_CLOUD.name))
         self.assertFalse(cloud_is_registered(cli, 'MyUnknownCloud'))
+
+    @mock.patch('azure.cli.core.cloud._set_active_subscription', autospec=True)
+    def test_switch_active_cloud(self, subscription_setter):
+        cli = mock.MagicMock()
+        switch_active_cloud(cli, 'AzureGermanCloud')
+        self.assertEqual(cli.cloud.name, 'AzureGermanCloud')
+
+        switch_active_cloud(cli, 'AzureChinaCloud')
+        self.assertEqual(cli.cloud.name, 'AzureChinaCloud')
 
 
 if __name__ == '__main__':

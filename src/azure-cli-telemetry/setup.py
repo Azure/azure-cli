@@ -16,7 +16,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -49,7 +49,7 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     install_requires=[
-        'applicationinsights>=0.11.1',
+        'applicationinsights>=0.11.1,<0.11.8',
         'portalocker==1.2.1',
     ],
     packages=[

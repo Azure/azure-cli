@@ -24,7 +24,8 @@ from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_application,
                                                    _get_object_stubs,
                                                    list_service_principal_owners,
-                                                   list_application_owners)
+                                                   list_application_owners,
+                                                   delete_role_assignments)
 
 from knack.util import CLIError
 
@@ -350,6 +351,15 @@ class TestRoleMocked(unittest.TestCase):
 
         self.assertTrue(1 == len(res))
         self.assertTrue(test_user_object_id == res[0].object_id)
+
+    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
+    @mock.patch('knack.prompting.prompt_y_n', autospec=True)
+    def test_role_assignment_delete_prompt(self, prompt_mock, client_mock):
+        prompt_mock.return_value = False
+        # action
+        delete_role_assignments(mock.MagicMock())
+        # assert
+        prompt_mock.assert_called_once_with(mock.ANY, 'n')
 
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_role_list_app_owner(self, graph_client_mock):

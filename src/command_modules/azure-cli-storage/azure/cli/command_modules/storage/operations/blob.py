@@ -33,11 +33,10 @@ def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', ti
     if blob_type == 'block':
         return client.set_standard_blob_tier(container_name=container_name, blob_name=blob_name,
                                              standard_blob_tier=tier, timeout=timeout)
-    elif blob_type == 'page':
+    if blob_type == 'page':
         return client.set_premium_page_blob_tier(container_name=container_name, blob_name=blob_name,
                                                  premium_page_blob_tier=tier, timeout=timeout)
-    else:
-        raise ValueError('Blob tier is only applicable to block or page blob.')
+    raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
 def set_delete_policy(client, enable=None, days_retained=None):
@@ -122,7 +121,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                                                                                  source_container,
                                                                                  pattern)))
 
-    elif source_share:
+    if source_share:
         # copy blob from file share
 
         # if the source client is None, recreate one from the destination client.
@@ -145,8 +144,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                                                                                  source_client,
                                                                                  source_share,
                                                                                  pattern)))
-    else:
-        raise ValueError('Fail to find source. Neither blob container or file share is specified')
+    raise ValueError('Fail to find source. Neither blob container or file share is specified')
 
 
 # pylint: disable=unused-argument
@@ -186,8 +184,24 @@ def storage_blob_download_batch(client, source, destination, source_container_na
             logger.warning('  - %s', b)
         return []
 
-    return list(_download_blob(client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed])
-                for blob_normed in blobs_to_download)
+    # Tell progress reporter to reuse the same hook
+    if progress_callback:
+        progress_callback.reuse = True
+
+    results = []
+    for index, blob_normed in enumerate(blobs_to_download):
+        # add blob name and number to progress message
+        if progress_callback:
+            progress_callback.message = '{}/{}: "{}"'.format(
+                index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
+        results.append(_download_blob(
+            client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed]))
+
+    # end progress hook
+    if progress_callback:
+        progress_callback.hook.end()
+
+    return results
 
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals
@@ -206,6 +220,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'eTag': upload_result.etag if upload_result else None}
 
     logger = get_logger(__name__)
+    source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
     results = []
@@ -216,16 +231,26 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         logger.info('       type %s', blob_type)
         logger.info('      total %d', len(source_files))
         results = []
-        for src, dst in source_files or []:
+        for src, dst in source_files:
             results.append(_create_return_result(dst, guess_content_type(src, content_settings, t_content_settings)))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
             return upload_blob(*args, **kwargs)
 
-        for src, dst in source_files or []:
-            logger.warning('uploading %s', src)
+        # Tell progress reporter to reuse the same hook
+        if progress_callback:
+            progress_callback.reuse = True
+
+        for index, source_file in enumerate(source_files):
+            src, dst = source_file
+            # logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
+
+            # add blob name and number to progress message
+            if progress_callback:
+                progress_callback.message = '{}/{}: "{}"'.format(
+                    index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
 
             include, result = _upload_blob(cmd, client, destination_container_name,
                                            normalize_blob_file_path(destination_path, dst), src,
@@ -238,7 +263,9 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                                            if_none_match=if_none_match, timeout=timeout)
             if include:
                 results.append(_create_return_result(dst, guessed_content_settings, result))
-
+        # end progress hook
+        if progress_callback:
+            progress_callback.hook.end()
         num_failures = len(source_files) - len(results)
         if num_failures:
             logger.warning('%s of %s files not uploaded due to "Failed Precondition"', num_failures, len(source_files))
@@ -366,6 +393,10 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
     if dryrun:
+        if if_modified_since:
+            logger.warning('--if-modified-since argument is ignored when using --dry-run.')
+        if if_unmodified_since:
+            logger.warning('--if-unmodified-since argument is ignored when using --dry-run.')
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -379,6 +410,20 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))
+
+
+def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
+                          expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+                          protocol=None, cache_control=None, content_disposition=None,
+                          content_encoding=None, content_language=None,
+                          content_type=None, full_uri=False):
+    sas_token = client.generate_blob_shared_access_signature(
+        container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+        content_encoding=content_encoding, content_language=content_language, content_type=content_type)
+    if full_uri:
+        return client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token)
+    return sas_token
 
 
 def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):

@@ -62,18 +62,18 @@ def load_command_table(self, _):
         client_factory=cf_web_client
     )
     appservice_plan_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.{}',
+        operations_tmpl='azure.mgmt.web.operations#AppServicePlansOperations.{}',
         client_factory=cf_plans
     )
     webapp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.{}',
+        operations_tmpl='azure.mgmt.web.operations#WebAppsOperations.{}',
         client_factory=cf_webapps
     )
     appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
-        g.custom_command('up', 'create_deploy_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
@@ -86,6 +86,7 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
+        g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
         g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
@@ -183,6 +184,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+        g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
 
     with self.command_group('webapp deployment user', webclient_sdk) as g:
         g.show_command('show', 'get_publishing_user')
@@ -221,7 +223,8 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
-        g.generic_update_command('update', setter_name='set_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
+        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=ex_handler_factory(),
+                                 custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -260,14 +263,20 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
+        g.custom_command('list-publishing-credentials', 'list_publishing_credentials')
 
     with self.command_group('functionapp cors') as g:
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
         g.custom_command('show', 'show_cors')
 
-    with self.command_group('functionapp plan') as g:
-        g.custom_command('create', 'create_functionapp_app_service_plan')
+    with self.command_group('functionapp plan', appservice_plan_sdk) as g:
+        g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
+        g.generic_update_command('update', custom_func_name='update_functionapp_app_service_plan',
+                                 setter_arg_name='app_service_plan', exception_handler=ex_handler_factory())
+        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('list', 'list_app_service_plans')
+        g.show_command('show', 'get')
 
     with self.command_group('functionapp deployment container') as g:
         g.custom_command('config', 'enable_cd')
@@ -279,4 +288,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
     with self.command_group('functionapp devops-build') as g:
+        g.custom_command('create', 'create_devops_build')
+
+    with self.command_group('functionapp devops-pipeline') as g:
         g.custom_command('create', 'create_devops_build')

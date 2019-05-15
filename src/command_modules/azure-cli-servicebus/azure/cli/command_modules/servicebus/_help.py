@@ -27,6 +27,10 @@ helps['servicebus namespace authorization-rule keys'] = """
     type: group
     short-summary: Manage Azure Authorization Rule connection strings for Namespace
 """
+helps['servicebus namespace network-rule'] = """
+    type: group
+    short-summary: Manage Azure ServiceBus networkruleSet for namespace
+"""
 
 helps['servicebus queue'] = """
     type: group
@@ -567,4 +571,32 @@ helps['servicebus migration abort'] = """
     examples:
         - name:  Disable Service Bus Migration of Standard to Premium namespace
           text: az servicebus migration abort --resource-group myresourcegroup --name standardnamespace
+"""
+
+helps['servicebus namespace network-rule add'] = """
+    type: command
+    short-summary: Add a network rule for a namespace.
+    examples:
+        - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId} --ignore-missing-endpoint True
+        - name: add a IP rule in NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24 --action Allow
+"""
+
+helps['servicebus namespace network-rule list'] = """
+    type: command
+    short-summary: Show properties of Network rule of the given Namespace.
+    examples:
+        - name: Show properties of Network rule of the given Namespace
+          text: az servicebus namespace network-rule list --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['servicebus namespace network-rule remove'] = """
+    type: command
+    short-summary: Remove network rule for a namespace
+    examples:
+        - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId}
+        - name: remove IP rule from NetworkruleSet for a namespace
+          text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24
 """

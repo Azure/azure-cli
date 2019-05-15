@@ -4,16 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 
-def network_client_factory(cli_ctx, aux_subscriptions=None, **_):
+def network_client_factory(cli_ctx, **kwargs):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK,
-                                   aux_subscriptions=aux_subscriptions)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, **kwargs)
 
 
 def resource_client_factory(cli_ctx, **_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
@@ -55,6 +54,26 @@ def cf_express_route_circuits(cli_ctx, _):
 
 def cf_express_route_service_providers(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_service_providers
+
+
+def cf_express_route_connections(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_connections
+
+
+def cf_express_route_gateways(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_gateways
+
+
+def cf_express_route_ports(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_ports
+
+
+def cf_express_route_port_locations(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_ports_locations
+
+
+def cf_express_route_links(cli_ctx, _):
+    return network_client_factory(cli_ctx).express_route_links
 
 
 def cf_interface_endpoints(cli_ctx, _):

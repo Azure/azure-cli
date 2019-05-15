@@ -20,14 +20,18 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_vmss_disk,
-    validate_asg_names_or_ids, validate_keyvault, process_gallery_image_version_namespace)
+    validate_asg_names_or_ids, validate_keyvault, validate_proximity_placement_group,
+    process_gallery_image_version_namespace)
+
 from ._vm_utils import MSI_LOCAL_ID
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
-    StorageAccountTypes, UpgradeMode, CachingTypes = self.get_models('StorageAccountTypes', 'UpgradeMode', 'CachingTypes')
-    OperatingSystemTypes = self.get_models('OperatingSystemTypes')
+    # Model imports
+    StorageAccountTypes, DiskStorageAccountTypes, SnapshotStorageAccountTypes = self.get_models('StorageAccountTypes', 'DiskStorageAccountTypes', 'SnapshotStorageAccountTypes')
+    UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
+    ProximityPlacementGroupType, HyperVGenerationTypes, HyperVGeneration = self.get_models('ProximityPlacementGroupType', 'HyperVGenerationTypes', 'HyperVGeneration')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -46,16 +50,32 @@ def load_arguments(self, _):
 
     extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
 
-    if StorageAccountTypes:
-        disk_sku = CLIArgumentType(arg_type=get_enum_type(StorageAccountTypes))
+    # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
+    DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
+
+    if DiskStorageAccountTypes:
+        disk_sku = CLIArgumentType(arg_type=get_enum_type(DiskStorageAccountTypes))
     else:
         # StorageAccountTypes introduced in api version 2016_04_30_preview of Resource.MGMT.Compute package..
         # However, 2017-03-09-profile targets version 2016-03-30 of compute package.
         disk_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
+    if SnapshotStorageAccountTypes:
+        snapshot_sku = CLIArgumentType(arg_type=get_enum_type(SnapshotStorageAccountTypes))
+    else:
+        # SnapshotStorageAccountTypes introduced in api version 2018_04_01 of Resource.MGMT.Compute package..
+        # However, 2017-03-09-profile targets version 2016-03-30 of compute package.
+        snapshot_sku = CLIArgumentType(arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
+
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+
+    HyperVGenerationTypes = HyperVGenerationTypes or HyperVGeneration
+    if HyperVGenerationTypes:
+        hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(HyperVGenerationTypes, default="V1"))
+    else:
+        hyper_v_gen_sku = CLIArgumentType(arg_type=get_enum_type(["V1", "V2"], default="V1"))
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -68,6 +88,13 @@ def load_arguments(self, _):
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
+            if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
+                c.argument('access_level', arg_type=get_enum_type(['Read', 'Write']), default='Read', help='access level')
+                c.argument('for_upload', arg_type=get_three_state_flag(),
+                           help='Create the {0} for uploading blobs later on through storage commands. Run "az {0} grant-access --access-level Write" to retrieve the {0}\'s SAS token.'.format(scope))
+                c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
+            else:
+                c.ignore('access_level', 'for_upload', 'hyper_v_generation')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -89,16 +116,14 @@ def load_arguments(self, _):
     with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
-        if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
-            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
-        else:
-            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
+        c.argument('sku', arg_type=snapshot_sku)
     # endregion
 
     # region Images
     with self.argument_context('image') as c:
         c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']))
         c.argument('image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
+        c.argument('tags', tags_type)
 
     with self.argument_context('image create') as c:
         # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
@@ -109,6 +134,7 @@ def load_arguments(self, _):
                    'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.argument('storage_sku', arg_type=disk_sku, help='The SKU of the storage account with which to create the VM image. Unused if source VM is specified.')
         c.argument('os_disk_caching', arg_type=get_enum_type(CachingTypes), help="Storage caching type for the image's OS disk.")
+        c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
@@ -199,6 +225,11 @@ def load_arguments(self, _):
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+        # Place aad arguments in their own group
+        aad_arguments = 'Azure Active Directory'
+        c.argument('aad_client_id', arg_group=aad_arguments)
+        c.argument('aad_client_secret', arg_group=aad_arguments)
+        c.argument('aad_client_cert_thumbprint', arg_group=aad_arguments)
 
     with self.argument_context('vm extension') as c:
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), help='Name of the extension.', id_part='child_name_1')
@@ -268,7 +299,7 @@ def load_arguments(self, _):
         c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availability zones")
         c.argument('show_all', options_list=['--all'], arg_type=get_three_state_flag(),
                    help="show all information including vm sizes not available under the current subscription")
-        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disk", etc')
+        c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disks", etc')
 
     with self.argument_context('vm restart') as c:
         c.argument('force', action='store_true', help='Force the VM to restart by redeploying it. Use if the VM is unresponsive.')
@@ -303,7 +334,7 @@ def load_arguments(self, _):
         c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
         c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
-        c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
+        c.argument('health_probe', help='Probe name from the existing load balancer, mainly used for rolling upgrade')
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
@@ -331,6 +362,16 @@ def load_arguments(self, _):
         c.argument('dns_servers', nargs='+', help="space-separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
         c.argument('accelerated_networking', arg_type=get_three_state_flag(),
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
+
+    with self.argument_context('vmss update') as c:
+        protection_policy_type = CLIArgumentType(overrides=get_three_state_flag(), arg_group="Protection Policy", min_api='2019-03-01')
+
+        c.argument('protect_from_scale_in', arg_type=protection_policy_type, help="Protect the VM instance from scale-in operations.")
+        c.argument('protect_from_scale_set_actions', arg_type=protection_policy_type, help="Protect the VM instance from scale set actions (including scale-in).")
+
+    for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
+        with self.argument_context(scope) as c:
+            c.argument('instance_id', id_part='child_name_1', help="{0} VM instance with this ID. If missing, {0} VMSS.".format(help_prefix))
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
@@ -381,6 +422,9 @@ def load_arguments(self, _):
             c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
             c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
+        with self.argument_context('{} stop'.format(scope)) as c:
+            c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
+
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
@@ -415,13 +459,13 @@ def load_arguments(self, _):
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
             c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
-            c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
-            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
+            c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='*')
+            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file.')
             c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux. "all" enables both ssh and password authentication. ', arg_type=get_enum_type(['ssh', 'password', 'all']))
 
         with self.argument_context(scope, arg_group='Storage') as c:
-            if StorageAccountTypes:
-                allowed_values = ", ".join([sku.value for sku in StorageAccountTypes])
+            if DiskStorageAccountTypes:
+                allowed_values = ", ".join([sku.value for sku in DiskStorageAccountTypes])
             else:
                 allowed_values = ", ".join(['Premium_LRS', 'Standard_LRS'])
 
@@ -485,9 +529,9 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('volume_type', help='Type of volume that the encryption operation is performed on', arg_type=get_enum_type(['DATA', 'OS', 'ALL']))
             c.argument('force', action='store_true', help='continue by ignoring client side validation errors')
-            c.argument('disk_encryption_keyvault', help='The key vault where the generated encryption key will be placed.')
+            c.argument('disk_encryption_keyvault', help='Name or ID of the key vault where the generated encryption key will be placed.')
             c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
-            c.argument('key_encryption_keyvault', help='The key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
+            c.argument('key_encryption_keyvault', help='Name or ID of the key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
 
     for scope in ['vm extension', 'vmss extension']:
         with self.argument_context(scope) as c:
@@ -518,7 +562,11 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm update', 'vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
-            c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
+            license_msg = "Specifies that the Windows image or disk was licensed on-premises. " \
+                          "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
+                          "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
+                          "For more information see the Azure Windows VM online docs."
+            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
@@ -572,12 +620,30 @@ def load_arguments(self, _):
         c.argument('exclude_from_latest', arg_type=get_three_state_flag(), help='The flag means that if it is set to true, people deploying VMs with version omitted will not use this version.')
         c.argument('version', help='image version')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
+        c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions",
+                   arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS"]), min_api='2019-03-01')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
+
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
-                       help='Space-separated list of regions and their replica counts. Use "<region>=<replica count>" to set the replica count for each region. If only the region is specified, the default replica count will be used.')
+                       help='Space-separated list of regions and their replica counts. Use "<region>[=<replica count>][=<storage account type>]" to optionally set the replica count and/or storage account type for each region. '
+                            'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
+    # endregion
+
+    # region Proximity Placement Group
+    with self.argument_context('ppg', min_api='2018-04-01') as c:
+        c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
+
+    with self.argument_context('ppg create', min_api='2018-04-01') as c:
+        c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(ProximityPlacementGroupType), help="The type of the proximity placement group.")
+        c.argument('tags', tags_type)
+
+    for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'), ('vm availability-set create', 'availability set')]:
+        with self.argument_context(scope, min_api='2018-04-01') as c:
+            c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the {} should be associated with.".format(item),
+                       validator=validate_proximity_placement_group)    # only availability set does not have a command level validator, so this should be added.
     # endregion

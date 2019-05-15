@@ -234,7 +234,7 @@ class DnsParseZoneFiles(unittest.TestCase):
     def _check_soa(self, zone, zone_name, ttl, serial_number, refresh, retry, expire, min_ttl):
         record = zone[zone_name]['soa']
         self.assertEqual(record['ttl'], ttl)
-        self.assertEqual(record['serial'], serial_number)
+        self.assertEqual(int(record['serial']), serial_number)
         self.assertEqual(record['refresh'], refresh)
         self.assertEqual(record['retry'], retry)
         self.assertEqual(record['expire'], expire)
@@ -269,9 +269,9 @@ class DnsParseZoneFiles(unittest.TestCase):
         self.assertEqual(len(records_to_check), len(zone[name]['caa']))
         for i, record in enumerate(zone[name]['caa']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
-            self.assertEqual(record['flags'], records_to_check[i][1])
+            self.assertEqual(int(record['flags']), records_to_check[i][1])
             self.assertEqual(record['tag'], records_to_check[i][2])
-            self.assertEqual(record['value'], records_to_check[i][3])
+            self.assertEqual(record['val'], records_to_check[i][3])
 
     def _check_cname(self, zone, name, ttl, alias):
         record = zone[name]['cname']

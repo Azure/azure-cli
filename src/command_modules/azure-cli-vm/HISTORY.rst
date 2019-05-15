@@ -2,7 +2,39 @@
 
 Release History
 ===============
-* vm create: --accelerated-networking is now implicitly enabled for Ubuntu 18.0. It can still be explicitly disabled by setting the option to "false".
+
+2.2.21
+++++++
+* vm create: Added --computer-name for setting a vm's computer name.
+* vm/vmss create: `--ssh-key-value` renamed to `--ssh-key-values` and can now accept multiple ssh public key values or paths.
+  Note: this is **not** a breaking change. `--ssh-key-value` will be parsed correctly as it matches only `--ssh-key-values`
+
+2.2.20
+++++++
+* vmss update: add `--protect-from-scale-in` and `--protect-from-scale-set-actions` to enable updates to the protection policy of VMSS VM instances.
+* vmss update: add `--instance-id` to enable generic update of VMSS VM instances.
+* vmss wait: add `--instance-id`.
+* [new command group] ppg: add `ppg create / delete / list / show / update` for managing Proximity Placement Groups.
+* ppg: add `--ppg` to `vm create`, `vmss create` and `vm availability-set create`
+* image create: expose `--hyper-v-generation` parameter.
+
+2.2.19
+++++++
+* vm/vmss stop: expose --skip-shutdown. If used, the VM will be powered-off without shutting down. This is helpful if a VM crashes and/or cannot properly shutdown.
+* sig image-version create: expose --storage-account-type. Can now set the publishing profile's general storage account type to Standard_LRS or Standard_ZRS
+* sig image-version create: --target-regions updated to allow for setting region-specific storage account types
+
+2.2.18
+++++++
+* Minor fixes
+
+2.2.17
+++++++
+* Added `image update` command.
+
+2.2.16
+++++++
+* vm create: Fixed issue where --accelerated-networking was not enabled by default for Ubuntu 18.0.
 
 2.2.15
 ++++++

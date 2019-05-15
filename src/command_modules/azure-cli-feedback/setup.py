@@ -15,7 +15,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "2.1.4"
+VERSION = "2.2.1"
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
@@ -31,7 +31,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'applicationinsights',
     'azure-cli-core',
 ]
 

@@ -14,15 +14,7 @@ def _get_property(items, name):
     result = next((x for x in items if x.name.lower() == name.lower()), None)
     if not result:
         raise CLIError("Property '{}' does not exist".format(name))
-    else:
-        return result
-
-
-def _set_param(item, prop, value):
-    if value == '':
-        setattr(item, prop, None)
-    elif value is not None:
-        setattr(item, prop, value)
+    return result
 
 
 def list_network_resource_property(resource, prop):
@@ -42,14 +34,12 @@ def get_network_resource_property_entry(resource, prop):
 
     def get_func(cmd, resource_group_name, resource_name, item_name):
         client = getattr(network_client_factory(cmd.cli_ctx), resource)
-        items = getattr(client.get(resource_group_name, resource_name), prop)
-
-        result = next((x for x in items if x.name.lower() == item_name.lower()), None)
+        parent = getattr(client.get(resource_group_name, resource_name), prop)
+        result = next((x for x in parent if x.name.lower() == item_name.lower()), None)
         if not result:
             raise CLIError("Item '{}' does not exist on {} '{}'".format(
                 item_name, resource, resource_name))
-        else:
-            return result
+        return result
 
     func_name = 'get_network_resource_property_entry_{}_{}'.format(resource, prop)
     setattr(sys.modules[__name__], func_name, get_func)
@@ -64,7 +54,8 @@ def delete_network_resource_property_entry(resource, prop):
         item = client.get(resource_group_name, resource_name)
         keep_items = \
             [x for x in item.__getattribute__(prop) if x.name.lower() != item_name.lower()]
-        _set_param(item, prop, keep_items)
+        with cmd.update_context(item) as c:
+            c.set_param(prop, keep_items)
         if no_wait:
             sdk_no_wait(no_wait, client.create_or_update, resource_group_name, resource_name, item)
         else:

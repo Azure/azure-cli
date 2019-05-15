@@ -10,7 +10,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
-from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client
+from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client, blob_data_service_factory
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -167,16 +167,15 @@ def process_blob_source_uri(cmd, namespace):
         if any([container, blob, sas, snapshot, source_account_name, source_account_key]):
             raise ValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
-        else:
-            # simplest scenario--no further processing necessary
-            return
+        # simplest scenario--no further processing necessary
+        return
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
     # determine if the copy will happen in the same storage account
     if not source_account_name and source_account_key:
         raise ValueError(usage_string.format('Source account key is given but account name is not'))
-    elif not source_account_name and not source_account_key:
+    if not source_account_name and not source_account_key:
         # neither source account name or key is given, assume that user intends to copy blob in
         # the same account
         source_account_name = ns.get('account_name', None)
@@ -237,6 +236,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # source as file
     share = ns.pop('source_share', None)
     path = ns.pop('source_path', None)
+    file_snapshot = ns.pop('file_snapshot', None)
 
     # source credential clues
     source_account_name = ns.pop('source_account_name', None)
@@ -246,7 +246,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # source in the form of an uri
     uri = ns.get('copy_source', None)
     if uri:
-        if any([container, blob, snapshot, share, path, source_account_name,
+        if any([container, blob, snapshot, share, path, file_snapshot, source_account_name,
                 source_account_key]):
             raise ValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
@@ -257,12 +257,12 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         return
 
     # ensure either a file or blob source is specified
-    valid_blob_source = container and blob and not share and not path
+    valid_blob_source = container and blob and not share and not path and not file_snapshot
     valid_file_source = share and path and not container and not blob and not snapshot
 
     if not valid_blob_source and not valid_file_source:
         raise ValueError(usage_string.format('Neither a valid blob or file source is specified'))
-    elif valid_blob_source and valid_file_source:
+    if valid_blob_source and valid_file_source:
         raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
                                              'specified'))
 
@@ -305,6 +305,8 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         query_params.append(source_sas.lstrip('?'))
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
+    if file_snapshot:
+        query_params.append('sharesnapshot={}'.format(file_snapshot))
 
     uri = 'https://{0}.{1}.{6}/{2}/{3}{4}{5}'.format(
         source_account_name,
@@ -426,9 +428,9 @@ def validate_encryption_source(cmd, namespace):
                          'when --encryption-key-source=Microsoft.Keyvault is specified.')
 
     if key_name or key_version or key_vault_uri:
-        if namespace.encryption_key_source != 'Microsoft.Keyvault':
+        if namespace.encryption_key_source and namespace.encryption_key_source != 'Microsoft.Keyvault':
             raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
-                             'applicable when --encryption-key-source=Microsoft.Keyvault is not specified.')
+                             'applicable without Microsoft.Keyvault key-source.')
         KeyVaultProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE, 'KeyVaultProperties',
                                      mod='models')
         if not KeyVaultProperties:
@@ -674,8 +676,7 @@ def get_source_file_or_blob_service_client(cmd, namespace):
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
-        elif identifier.blob or identifier.directory or \
-                identifier.filename or nor_container_or_share:
+        if identifier.blob or identifier.directory or identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
 
         if identifier.sas_token:
@@ -699,12 +700,16 @@ def get_source_file_or_blob_service_client(cmd, namespace):
 
 def add_progress_callback(cmd, namespace):
     def _update_progress(current, total):
-        hook = cmd.cli_ctx.get_progress_controller(det=True)
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
 
         if total:
-            hook.add(message='Alive', value=current, total_val=total)
-            if total == current:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
                 hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
 
     if not namespace.no_progress:
         namespace.progress_callback = _update_progress
@@ -900,7 +905,7 @@ def validate_subnet(cmd, namespace):
 
     if (subnet_is_id and not vnet) or (not subnet and not vnet):
         return
-    elif subnet and not subnet_is_id and vnet:
+    if subnet and not subnet_is_id and vnet:
         namespace.subnet = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
@@ -942,7 +947,7 @@ def ipv4_range_type(string):
     import re
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
-        if not re.match("^{}-{}$".format(ip_format, ip_format), string):
+        if not re.match("^{ip_format}-{ip_format}$".format(ip_format=ip_format), string):
             raise ValueError
     return string
 
@@ -1026,3 +1031,15 @@ def blob_tier_validator(cmd, namespace):
         block_blob_tier_validator(cmd, namespace)
     else:
         raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def validate_azcopy_upload_destination_url(cmd, namespace):
+    client = blob_data_service_factory(cmd.cli_ctx, {
+        'account_name': namespace.account_name})
+    destination_path = namespace.destination_path
+    if not destination_path:
+        destination_path = ''
+    url = client.make_blob_url(namespace.destination_container, destination_path)
+    namespace.destination = url
+    del namespace.destination_container
+    del namespace.destination_path

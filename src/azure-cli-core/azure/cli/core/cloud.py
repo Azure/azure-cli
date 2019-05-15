@@ -7,12 +7,12 @@ import os
 from pprint import pformat
 from six.moves import configparser
 
+from azure.cli.core.profiles import API_PROFILES
+from azure.cli.core._config import GLOBAL_CONFIG_DIR
+
 from knack.log import get_logger
 from knack.util import CLIError
 from knack.config import get_config_parser
-
-from azure.cli.core.profiles import API_PROFILES
-from azure.cli.core._config import GLOBAL_CONFIG_DIR
 
 logger = get_logger(__name__)
 
@@ -233,11 +233,12 @@ KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE
 
 def _set_active_cloud(cli_ctx, cloud_name):
     cli_ctx.config.set_value('cloud', 'name', cloud_name)
+    cli_ctx.cloud = get_cloud(cli_ctx, cloud_name)
 
 
 def get_active_cloud_name(cli_ctx):
     try:
-        return cli_ctx.config.config_parser.get('cloud', 'name')
+        return cli_ctx.config.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
         _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
@@ -256,13 +257,21 @@ def get_custom_clouds(cli_ctx):
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
 
 
+def _get_cloud_name(cli_ctx, cloud_name):
+    return next((x.name for x in get_clouds(cli_ctx) if x.name.lower() == cloud_name.lower()), cloud_name)
+
+
 def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
     # Start off with known clouds and apply config file on top of current config
     for c in KNOWN_CLOUDS:
         _config_add_cloud(config, c)
-    config.read(CLOUD_CONFIG_FILE)
+    try:
+        config.read(CLOUD_CONFIG_FILE)
+    except configparser.MissingSectionHeaderError:
+        os.remove(CLOUD_CONFIG_FILE)
+        logger.warning("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):

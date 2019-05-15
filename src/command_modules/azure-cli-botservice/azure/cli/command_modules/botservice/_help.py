@@ -28,6 +28,21 @@ helps['bot prepare-publish'] = """
     short-summary: Add scripts to your local source code directory to
                    be able to publish back using `az bot publish`.
 """
+helps['bot prepare-deploy'] = """
+    type: command
+    short-summary: Add scripts/config files for publishing with `az webapp deployment`.
+    long-summary: Add scripts or configuration files to the root of your local source code directory to be able to
+                  publish using `az webapp deployment`. When your code is deployed to your App Service, the generated
+                  scripts or configuration files should be appear in D:\\home\\site\\wwwroot on App Service's Kudu web
+                  page.
+    examples:
+        - name: Prepare to use `az webapp` to deploy a Javascript bot by fetching a Node.js IIS web.config file.
+          text: |-
+            az bot prepare-deploy --lang Javascript --code-dir "MyBotCode"
+        - name: Prepare to use `az webapp` to deploy a Csharp bot by creating a .deployment file.
+          text: |-
+            az bot prepare-deploy --lang Csharp --code-dir "." --proj-file-path "MyBot.csproj"
+"""
 helps['bot delete'] = """
     type: command
     short-summary: Delete an existing bot.
@@ -38,12 +53,14 @@ helps['bot update'] = """
     examples:
         - name: Update description on a bot
           text: |-
-            az bot update -n botName -g MyResourceGroup --set properties.description="some description"
+            az bot update -n botName -g MyResourceGroup --endpoint "https://bing.com/api/messages" --display-name "Hello World"
 """
 helps['bot publish'] = """
     type: command
     short-summary: Publish to a bot's associated app service.
-    long-summary: Publish your source code to your bot's associated app service.
+    long-summary: Publish your source code to your bot's associated app service. This is DEPRECATED for v4 bots and no
+                  longer recommended for publishing v4 bots to Azure. Instead use `az bot prepare-deploy` and `az webapp
+                  deployment` to deploy your v4 bot. For more information see https://aka.ms/deploy-your-bot.
     examples:
         - name: Publish source code to your Azure App, from within the bot code folder
           text: |-

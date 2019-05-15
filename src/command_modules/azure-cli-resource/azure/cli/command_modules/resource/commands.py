@@ -40,9 +40,18 @@ def transform_resource_list(result):
 
 
 # Resource group deployment commands
+def transform_deployment(result):
+    r = result
+    return OrderedDict([('Name', r['name']),
+                        ('ResourceGroup', r['resourceGroup']),
+                        ('State', r['properties']['provisioningState']),
+                        ('Timestamp', r['properties']['timestamp']),
+                        ('Mode', r['properties']['mode'])])
+
+
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
-    return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
+    return [transform_deployment(r) for r in sort_list]
 
 
 # pylint: disable=too-many-statements
@@ -52,37 +61,37 @@ def load_command_table(self, _):
     resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
 
     resource_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#ResourceGroupsOperations.{}',
         client_factory=cf_resource_groups,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_provider_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#ProvidersOperations.{}',
         client_factory=cf_providers,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_feature_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.{}',
+        operations_tmpl='azure.mgmt.resource.features.operations#FeaturesOperations.{}',
         client_factory=cf_features,
         resource_type=ResourceType.MGMT_RESOURCE_FEATURES
     )
 
     resource_tag_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#TagsOperations.{}',
         client_factory=cf_tags,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_deployment_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentsOperations.{}',
         client_factory=cf_deployments,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
 
     resource_deployment_operation_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.{}',
+        operations_tmpl='azure.mgmt.resource.resources.operations#DeploymentOperations.{}',
         client_factory=cf_deployment_operations,
         resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
     )
@@ -122,13 +131,13 @@ def load_command_table(self, _):
     )
 
     resource_managementgroups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations.management_groups_operations#ManagementGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsOperations.{}',
         client_factory=cf_management_groups,
         exception_handler=managementgroups_exception_handler
     )
 
     resource_managementgroups_subscriptions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations.management_group_subscriptions_operations#ManagementGroupSubscriptionsOperations.{}',
+        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
         client_factory=cf_management_group_subscriptions,
         exception_handler=managementgroups_exception_handler
     )
@@ -193,7 +202,7 @@ def load_command_table(self, _):
 
     # Resource feature commands
     with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
-                            min_api='2018-03-02-hybrid') as g:
+                            min_api='2019-03-02-hybrid') as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
@@ -208,10 +217,11 @@ def load_command_table(self, _):
         g.command('remove-value', 'delete_value')
 
     with self.command_group('group deployment', resource_deployment_sdk) as g:
-        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace,
+                         table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
-        g.show_command('show', 'get')
+        g.show_command('show', 'get', table_transformer=transform_deployment)
         g.command('delete', 'delete', supports_no_wait=True)
         g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('export', 'export_deployment_as_template')

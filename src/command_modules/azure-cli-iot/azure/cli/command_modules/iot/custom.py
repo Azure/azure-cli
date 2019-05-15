@@ -404,30 +404,35 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
 
 
 # pylint: disable=inconsistent-return-statements
-def iot_hub_show_connection_string(client, hub_name, resource_group_name=None, policy_name='iothubowner',
-                                   key_type=KeyType.primary.value):
+def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
+                                   key_type=KeyType.primary.value, show_all=False):
     if hub_name is None:
         hubs = iot_hub_list(client, resource_group_name)
         if hubs is None:
             raise CLIError("No IoT Hub found.")
 
         def conn_str_getter(h):
-            return _get_single_hub_connection_string(client, h.name, h.additional_properties['resourcegroup'], policy_name, key_type)
+            return _get_hub_connection_string(client, h.name, h.additional_properties['resourcegroup'], policy_name, key_type, show_all)
         return [{'name': h.name, 'connectionString': conn_str_getter(h)} for h in hubs]
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-        conn_str = _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type)
-        return {'connectionString': conn_str}
+        conn_str = _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all)
+        return {'connectionString': conn_str if show_all else conn_str[0]}
 
 
-def _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type):
-    access_policy = iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
-    # Intermediate fix to support domains beyond azure-devices.net
+def _get_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type, show_all):
+    policies = []
+    if show_all:
+        policies.extend(iot_hub_policy_list(client, hub_name, resource_group_name))
+    else:
+        policies.append(iot_hub_policy_get(client, hub_name, policy_name, resource_group_name))
+    # Intermediate fix to support domains beyond azure-devices.netproperty
     hub = _get_iot_hub_by_name(client, hub_name)
     hostname = hub.properties.host_name
     conn_str_template = 'HostName={};SharedAccessKeyName={};SharedAccessKey={}'
-    key = access_policy.secondary_key if key_type == KeyType.secondary else access_policy.primary_key
-    return conn_str_template.format(hostname, policy_name, key)
+    return [conn_str_template.format(hostname,
+                                     p.key_name,
+                                     p.secondary_key if key_type == KeyType.secondary else p.primary_key) for p in policies]
 
 
 def iot_hub_sku_list(client, hub_name, resource_group_name=None):
@@ -510,7 +515,12 @@ def iot_hub_job_cancel(client, hub_name, job_id, resource_group_name=None):
 
 def iot_hub_get_quota_metrics(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.get_quota_metrics(resource_group_name, hub_name)
+    iotHubQuotaMetricCollection = []
+    iotHubQuotaMetricCollection.extend(client.iot_hub_resource.get_quota_metrics(resource_group_name, hub_name))
+    for quotaMetric in iotHubQuotaMetricCollection:
+        if quotaMetric.name == 'TotalDeviceCount':
+            quotaMetric.max_value = 'Unlimited'
+    return iotHubQuotaMetricCollection
 
 
 def iot_hub_get_stats(client, hub_name, resource_group_name=None):

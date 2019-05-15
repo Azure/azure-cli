@@ -3,6 +3,22 @@
 Release History
 ===============
 
+0.3.4
++++++
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+
+0.3.3
++++++
+* Minor fixes.
+
+0.3.2
++++++
+* `create`: added the `--storage-account-managed-identity` parameter to support ADLS Gen2 MSI.
+
+0.3.1
++++++
+* Minor fixes.
+
 0.3.0
 +++++
 

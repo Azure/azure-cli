@@ -2,6 +2,19 @@
 
 Release History
 ===============
+
+0.2.13
+++++++
+* Minor fixes
+
+0.2.12
+++++++
+* `metrics alert create/update`: Fixed issue where "count" was not a permitted value.
+
+0.2.11
+++++++
+* Minor fixes
+
 0.2.10
 ++++++
 * `monitor metrics alert create/update`: Allow dimension value '*'.

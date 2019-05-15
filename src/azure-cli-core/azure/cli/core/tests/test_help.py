@@ -75,6 +75,7 @@ def _get_parser_name(parser):
 
 def create_invoker_and_load_cmds_and_args(cli_ctx):
     from knack import events
+    from azure.cli.core.commands import register_cache_arguments
     from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
 
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
@@ -103,6 +104,7 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
 
     register_global_subscription_argument(cli_ctx)
     register_ids_argument(cli_ctx)  # global subscription must be registered first!
+    register_cache_arguments(cli_ctx)
     cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
     invoker.parser.load_command_table(invoker.commands_loader)
 
@@ -155,13 +157,10 @@ class HelpTest(unittest.TestCase):
 
 
 class TestHelpLoads(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        from knack.help_files import helps
-        cls.test_cli = DummyCli()
-        cls.helps = helps
-
     def setUp(self):
+        from knack.help_files import helps
+        self.test_cli = DummyCli()
+        self.helps = helps
         self._tempdirName = tempfile.mkdtemp(prefix="help_test_temp_dir_")
 
     def tearDown(self):
@@ -191,8 +190,10 @@ class TestHelpLoads(unittest.TestCase):
             examples:
                 - name: Alpha Example
                   text: az test alpha --arg1 a --arg2 b --arg3 c
-                  min_profile: 2017-03-09-profile
-                  max_profile: latest
+                  supported-profiles: 2018-03-01-hybrid, latest
+                - name: A simple example unsupported on latest
+                  text: az test alpha --arg1 a --arg2 b
+                  unsupported-profiles: 2017-03-09-profile
         """
 
     def set_help_yaml(self):
@@ -233,8 +234,11 @@ class TestHelpLoads(unittest.TestCase):
                 - summary: A simple example
                   description: More detail on the simple example.
                   command: az test alpha --arg1 apple --arg2 ball --arg3 cat
-                  min_profile: 2017-03-09-profile
-                  max_profile: latest
+                  supported-profiles: 2018-03-01-hybrid, latest
+                - summary: Another example unsupported on latest
+                  description: More detail on the unsupported example.
+                  command: az test alpha --arg1 apple --arg2 ball
+                  unsupported-profiles: 2017-03-09-profile
         """
         return self._create_new_temp_file(yaml_help, suffix="help.yaml")
 
@@ -306,8 +310,7 @@ class TestHelpLoads(unittest.TestCase):
                                     "summary": "A simple example from json",
                                     "description": "More detail on the simple example.",
                                     "command": "az test alpha --arg1 alpha --arg2 beta --arg3 chi",
-                                    "min_profile": "2018-03-01-hybrid",
-                                    "max_profile": "latest"
+                                    "supported-profiles": "2018-03-01-hybrid, latest"
                                 }
                             ]
                         }
@@ -364,8 +367,11 @@ class TestHelpLoads(unittest.TestCase):
 
         self.assertEqual(command_help_obj.examples[0].short_summary, "Alpha Example")
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 a --arg2 b --arg3 c")
-        self.assertEqual(command_help_obj.examples[0].min_profile, "2017-03-09-profile")
-        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+        self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
+        self.assertEqual(command_help_obj.examples[0].unsupported_profiles, None)
+
+        self.assertEqual(command_help_obj.examples[1].supported_profiles, None)
+        self.assertEqual(command_help_obj.examples[1].unsupported_profiles, "2017-03-09-profile")
 
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
@@ -422,8 +428,11 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example")
         self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 apple --arg2 ball --arg3 cat")
-        self.assertEqual(command_help_obj.examples[0].min_profile, "2017-03-09-profile")
-        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+        self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
+        self.assertEqual(command_help_obj.examples[0].unsupported_profiles, None)
+
+        self.assertEqual(command_help_obj.examples[1].supported_profiles, None)
+        self.assertEqual(command_help_obj.examples[1].unsupported_profiles, "2017-03-09-profile")
 
     @mock.patch('inspect.getmembers', side_effect=mock_inspect_getmembers)
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
@@ -480,8 +489,7 @@ class TestHelpLoads(unittest.TestCase):
         self.assertEqual(command_help_obj.examples[0].short_summary, "A simple example from json")
         self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
         self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 alpha --arg2 beta --arg3 chi")
-        self.assertEqual(command_help_obj.examples[0].min_profile, "2018-03-01-hybrid")
-        self.assertEqual(command_help_obj.examples[0].max_profile, "latest")
+        self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
 
         # validate other parameters, which have help from help.py and help.yamls
         self.assertEqual(obj_param_dict["--arg1 -a"].short_summary, "A short summary.")
@@ -500,6 +508,149 @@ class TestHelpLoads(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName, delete=False, suffix=suffix) as f:
             f.write(data)
             return f.name
+
+
+class TestHelpSupportedProfiles(unittest.TestCase):
+    def setUp(self):
+        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
+        self.test_cli = DummyCli()
+        self.all_profiles = AZURE_API_PROFILES
+        self.all_profiles_str = " {} ".format(" , ".join(AZURE_API_PROFILES.keys()))
+
+    def test_example_inclusion_basic(self):
+        from azure.cli.core._help import CliHelpFile
+
+        cli_ctx = self.test_cli
+        cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
+                                                    parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+        mock_help_file = CliHelpFile(cli_ctx.invocation.help, "")
+        mock_help_file.help_ctx = cli_ctx.invocation.help
+        ex_dict = {
+            'summary': "Example to test supported-profiles",
+            'command': "Az foo bar",
+            'supported-profiles': self.all_profiles_str
+        }
+
+        # example should be included in all profiles (implicit)
+        for profile in self.all_profiles.keys():
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+            self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+        ex_dict.update({
+            'supported-profiles': self.all_profiles_str,
+            'unsupported-profiles': self.all_profiles_str
+        })
+        # Assert that an help authoring exception is raised when both types of fields are used.
+        with self.assertRaises(HelpAuthoringException):
+            mock_help_file._should_include_example(ex_dict)
+
+        del ex_dict['supported-profiles']
+        del ex_dict['unsupported-profiles']
+
+        ex_dict['min_profile'] = "2017-03-09-profile"
+        # Assert that an help authoring exception is raised when min_profile is used.
+        with self.assertRaises(HelpAuthoringException):
+            mock_help_file._should_include_example(ex_dict)
+
+        del ex_dict['min_profile']
+        ex_dict['max_profile'] = "latest"
+        # Assert that an help authoring exception is raised when max_profile is used.
+        with self.assertRaises(HelpAuthoringException):
+            mock_help_file._should_include_example(ex_dict)
+
+    def test_example_supported_profiles(self):
+        from azure.cli.core._help import CliHelpFile
+
+        cli_ctx = self.test_cli
+        cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx,
+                                                    commands_loader_cls=cli_ctx.commands_loader_cls,
+                                                    parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+        mock_help_file = CliHelpFile(cli_ctx.invocation.help, "")
+        mock_help_file.help_ctx = cli_ctx.invocation.help
+        ex_dict = {
+            'summary': "Example to test supported-profiles",
+            'command': "Az foo bar",
+            'supported-profiles': self.all_profiles_str
+        }
+
+        # example should be included in all profiles (explicit)
+        for profile in self.all_profiles:
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+            self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+        # example should be included in all filtered profiles but not excluded profile
+        for excluded_profile in self.all_profiles:
+            filtered_profiles = [profile for profile in self.all_profiles if profile != excluded_profile]
+            ex_dict['supported-profiles'] = ", ".join(filtered_profiles)
+
+            # excluded profile is not in supported-profiles list and example should be excluded
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = excluded_profile
+            self.assertFalse(mock_help_file._should_include_example(ex_dict))
+
+            # for other profiles example should show be included.
+            for profile in filtered_profiles:
+                mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+                self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+        # example should be included in the sole supported profile
+        for sole_profile in self.all_profiles:
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = sole_profile
+
+            # try different supported profiles settings in example and handle accordingly
+            for profile in self.all_profiles:
+                ex_dict['supported-profiles'] = " {} ".format(profile)
+                should_include_example = mock_help_file._should_include_example(ex_dict)
+                if profile == sole_profile:
+                    self.assertTrue(should_include_example)
+                else:
+                    self.assertFalse(should_include_example)
+
+    def test_example_unsupported_profiles(self):
+        from azure.cli.core._help import CliHelpFile
+
+        cli_ctx = self.test_cli
+        cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx,
+                                                    commands_loader_cls=cli_ctx.commands_loader_cls,
+                                                    parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+        mock_help_file = CliHelpFile(cli_ctx.invocation.help, "")
+        mock_help_file.help_ctx = cli_ctx.invocation.help
+        ex_dict = {
+            'summary': "Example to test supported-profiles",
+            'command': "Az foo bar",
+            'unsupported-profiles': self.all_profiles_str
+        }
+
+        # example should be excluded from all profiles (explicit)
+        for profile in self.all_profiles:
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+            self.assertFalse(mock_help_file._should_include_example(ex_dict))
+
+        # example should be excluded in all filtered profiles
+        for included in self.all_profiles:
+            filtered_profiles = [profile for profile in self.all_profiles if profile != included]
+            ex_dict['unsupported-profiles'] = ", ".join(filtered_profiles)
+
+            # included profile is not in unsupported-profiles list and example should be included
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = included
+            self.assertTrue(mock_help_file._should_include_example(ex_dict))
+
+            # for other profiles example should show be excluded.
+            for profile in filtered_profiles:
+                mock_help_file.help_ctx.cli_ctx.cloud.profile = profile
+                self.assertFalse(mock_help_file._should_include_example(ex_dict))
+
+        # example should be excluded in the sole unsupported profile
+        for sole_profile in self.all_profiles:
+            mock_help_file.help_ctx.cli_ctx.cloud.profile = sole_profile
+
+            # try different unsupported profiles settings in example and handle accordingly
+            for profile in self.all_profiles:
+                ex_dict['unsupported-profiles'] = " {} ".format(profile)
+                should_include_example = mock_help_file._should_include_example(ex_dict)
+                if profile == sole_profile:
+                    self.assertFalse(should_include_example)
+                else:
+                    self.assertTrue(should_include_example)
 
 
 if __name__ == '__main__':

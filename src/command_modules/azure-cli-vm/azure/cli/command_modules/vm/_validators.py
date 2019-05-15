@@ -68,6 +68,21 @@ def validate_keyvault(cmd, namespace):
                                           'vaults', 'Microsoft.KeyVault')
 
 
+def validate_proximity_placement_group(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    if namespace.proximity_placement_group:
+        namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
+                                                               namespace.resource_group_name,
+                                                               'proximityPlacementGroups', 'Microsoft.Compute')
+
+        parsed = parse_resource_id(namespace.proximity_placement_group)
+        rg, name = parsed['resource_group'], parsed['name']
+
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
+            raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
+
+
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
     from azure.cli.core._output import (get_output_format, set_output_format)
@@ -585,7 +600,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
-        elif subnet_exists:
+        if subnet_exists:
             # 2 - user specified existing vnet/subnet
             namespace.vnet_type = 'existing'
             logger.debug("using specified vnet '%s' and subnet '%s'", namespace.vnet_name, namespace.subnet)
@@ -929,7 +944,22 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace):
-    string_or_file = (namespace.ssh_key_value or
+    if namespace.ssh_key_value:
+        if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
+            logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
+            namespace.generate_ssh_keys = False
+
+        processed_ssh_key_values = []
+        for ssh_key_value in namespace.ssh_key_value:
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+        namespace.ssh_key_value = processed_ssh_key_values
+    # if no ssh keys processed, try to generate new key / use existing at root.
+    else:
+        namespace.ssh_key_value = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+
+
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+    string_or_file = (ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -937,7 +967,7 @@ def validate_ssh_key(namespace):
         with open(string_or_file, 'r') as f:
             content = f.read()
     elif not keys.is_valid_ssh_rsa_public_key(content):
-        if namespace.generate_ssh_keys:
+        if should_generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
             public_key_filepath = string_or_file
@@ -953,7 +983,7 @@ def validate_ssh_key(namespace):
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
                            'You can use --generate-ssh-keys to let CLI generate one for you')
-    namespace.ssh_key_value = content
+    return content
 
 
 def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
@@ -1003,7 +1033,7 @@ def _resolve_role_id(cli_ctx, role, scope):
             role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
                 raise CLIError(err.format(role, ids))
@@ -1027,6 +1057,8 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
+    validate_proximity_placement_group(cmd, namespace)
+
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
@@ -1049,7 +1081,7 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
-    elif not values:
+    if not values:
         raise CLIError("No existing values found for '{0}'. Create one first and try "
                        "again.".format(option_name))
     return values[0]
@@ -1145,7 +1177,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     if len(lb.inbound_nat_pools) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
                             '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    elif not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
+                    if not lb.inbound_nat_pools:  # Associated scaleset will be missing ssh/rdp, so warn here.
                         logger.warning("No inbound nat pool was configured on '%s'", namespace.load_balancer)
                     else:
                         namespace.nat_pool_name = lb.inbound_nat_pools[0].name
@@ -1212,6 +1244,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    validate_proximity_placement_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1220,10 +1253,17 @@ def process_vmss_create_namespace(cmd, namespace):
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('Usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
+
+def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    if not namespace.instance_id:
+        if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
+            raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
+                           " Please use --instance-id to specify a VM instance")
 # endregion
 
 
@@ -1239,7 +1279,7 @@ def validate_vmss_disk(cmd, namespace):
                                           namespace.resource_group_name, 'disks', 'Microsoft.Compute')
     if bool(namespace.disk) == bool(namespace.size_gb):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GB')
-    elif bool(namespace.disk) != bool(namespace.instance_id):
+    if bool(namespace.disk) != bool(namespace.instance_id):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
@@ -1356,18 +1396,46 @@ def process_remove_identity_namespace(cmd, namespace):
 
 def process_gallery_image_version_namespace(cmd, namespace):
     TargetRegion = cmd.get_models('TargetRegion')
+    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS']]
+    storage_account_types_str = ", ".join(storage_account_types_list)
+
     if namespace.target_regions:
         regions_info = []
         for t in namespace.target_regions:
-            parts = t.split('=', 1)
-            if len(parts) == 1:
-                regions_info.append(TargetRegion(name=parts[0]))
-            else:
+            parts = t.split('=', 2)
+            replica_count = None
+            storage_account_type = None
+
+            # Region specified, but also replica count or storage account type
+            if len(parts) == 2:
                 try:
                     replica_count = int(parts[1])
                 except ValueError:
-                    raise CLIError("usage error: {}'s replica count must be an integer".format(parts[0]))
-                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count))
+                    storage_account_type = parts[1]
+                    if parts[1].lower() not in storage_account_types_list:
+                        raise CLIError("usage error: {} is an invalid target region argument. The second part is "
+                                       "neither an integer replica count or a valid storage account type. "
+                                       "Storage account types must be one of {}."
+                                       .format(t, storage_account_types_str))
+
+            # Region specified, but also replica count and storage account type
+            elif len(parts) == 3:
+                try:
+                    replica_count = int(parts[1])   # raises ValueError if this is not a replica count, try other order.
+                    storage_account_type = parts[2]
+                    if storage_account_type not in storage_account_types_list:
+                        raise CLIError("usage error: {} is an invalid target region argument. The third part is "
+                                       "not a valid storage account type. Storage account types must be one of {}."
+                                       .format(t, storage_account_types_str))
+                except ValueError:
+                    raise CLIError("usage error: {} is an invalid target region argument. "
+                                   "The second part must be a valid integer replica count.".format(t))
+
+            # At least the region is specified
+            if len(parts) >= 1:
+                regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
+                                                 storage_account_type=storage_account_type))
+
         namespace.target_regions = regions_info
 # endregion
 

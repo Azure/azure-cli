@@ -7,9 +7,9 @@
 def insert_table_entity(client, table_name, entity, if_exists='fail', timeout=None):
     if if_exists == 'fail':
         return client.insert_entity(table_name, entity, timeout)
-    elif if_exists == 'merge':
+    if if_exists == 'merge':
         return client.insert_or_merge_entity(table_name, entity, timeout)
-    elif if_exists == 'replace':
+    if if_exists == 'replace':
         return client.insert_or_replace_entity(table_name, entity, timeout)
     from knack.util import CLIError
     raise CLIError("Unrecognized value '{}' for --if-exists".format(if_exists))

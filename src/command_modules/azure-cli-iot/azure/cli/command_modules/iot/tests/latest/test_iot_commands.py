@@ -23,7 +23,7 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub create'
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4'.format(hub, rg),
-                 checks=[self.check('resourceGroup', rg),
+                 checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
                          self.check('sku.name', 'S1'),
@@ -41,11 +41,16 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString', conn_str_pattern)
         ])
 
+        self.cmd('iot hub show-connection-string -n {0} -g {1} --all'.format(hub, rg), checks=[
+            self.check('length(connectionString[*])', 5),
+            self.check_pattern('connectionString[0]', conn_str_pattern)
+        ])
+
         # Test 'az iot hub update'
         property_to_update = 'properties.operationsMonitoringProperties.events.DeviceTelemetry'
         updated_value = 'Error, Information'
         self.cmd('iot hub update -n {0} --set {1}="{2}"'.format(hub, property_to_update, updated_value),
-                 checks=[self.check('resourceGroup', rg),
+                 checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
                          self.check('sku.name', 'S1'),
@@ -53,7 +58,7 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
-            self.check('resourceGroup', rg),
+            self.check('resourcegroup', rg),
             self.check('location', location),
             self.check('name', hub),
             self.check('sku.name', 'S1'),
@@ -63,7 +68,7 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub list'
         self.cmd('iot hub list -g {0}'.format(rg), checks=[
             self.check('length([*])', 1),
-            self.check('[0].resourceGroup', rg),
+            self.check('[0].resourcegroup', rg),
             self.check('[0].location', location),
             self.check('[0].name', hub),
             self.check('[0].sku.name', 'S1')
@@ -145,7 +150,7 @@ class IoTHubTest(ScenarioTest):
             self.check('[0].name', 'TotalMessages'),
             self.check('[0].maxValue', 400000),
             self.check('[1].name', 'TotalDeviceCount'),
-            self.check('[1].maxValue', 500000)
+            self.check('[1].maxValue', 'Unlimited')
         ])
 
         # Test 'az iot hub show-stats'
@@ -160,7 +165,7 @@ class IoTHubTest(ScenarioTest):
         endpoint_type = 'EventHub'
         storage_endpoint_name = 'Storage1'
         storage_endpoint_type = 'azurestoragecontainer'
-        storage_encoding_format = 'json'
+        storage_encoding_format = 'avro'
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),

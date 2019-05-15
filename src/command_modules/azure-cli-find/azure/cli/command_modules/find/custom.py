@@ -2,115 +2,106 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from __future__ import print_function
 
-import os
-import textwrap
-import shutil
-
+import random
+import json
 import re
-import six
-
-from azure.cli.command_modules.find._gather_commands import build_command_table
-from azure.cli.core.api import get_config_dir
-
-INDEX_DIR_PREFIX = 'search_index'
-INDEX_VERSION = 'v1'
-INDEX_PATH = os.path.join(get_config_dir(), '{}_{}'.format(INDEX_DIR_PREFIX, INDEX_VERSION))
+import sys
+import platform
+import requests
+import colorama  # pylint: disable=import-error
 
 
-def _get_schema():
-    from whoosh.fields import TEXT, Schema
-    from whoosh.analysis import StemmingAnalyzer
-    stem_ana = StemmingAnalyzer()
-    return Schema(
-        cmd_name=TEXT(stored=True, analyzer=stem_ana, field_boost=1.3),
-        short_summary=TEXT(stored=True, analyzer=stem_ana),
-        long_summary=TEXT(stored=True, analyzer=stem_ana),
-        examples=TEXT(stored=True, analyzer=stem_ana))
+from azure.cli.core import telemetry as telemetry_core
+from azure.cli.core import __version__ as core_version
+from pkg_resources import parse_version
+from knack.log import get_logger
+logger = get_logger(__name__)
+
+WAIT_MESSAGE = ['I\'m an AI bot (learn more: aka.ms/aladdinkb); Let me see how I can help you...']
+
+EXTENSION_NAME = 'find'
 
 
-def _purge():
-    for f in os.listdir(get_config_dir()):
-        if re.search("^{}_*".format(INDEX_DIR_PREFIX), f):
-            shutil.rmtree(os.path.join(get_config_dir(), f))
+def process_query(cli_term):
+    print(random.choice(WAIT_MESSAGE), file=sys.stderr)
+    response = call_aladdin_service(cli_term)
 
-
-def _create_index(cli_ctx):
-    from whoosh import index
-    _purge()
-    os.mkdir(INDEX_PATH)
-    index.create_in(INDEX_PATH, _get_schema())
-
-    # index help
-    ix = index.open_dir(INDEX_PATH)
-    writer = ix.writer()
-    for command, document in build_command_table(cli_ctx).items():
-        writer.add_document(
-            cmd_name=six.u(command),
-            short_summary=six.u(document.get('short-summary', '')),
-            long_summary=six.u(document.get('long-summary', '')),
-            examples=six.u(document.get('examples', ''))
-        )
-    writer.commit()
-
-
-def _get_index(cli_ctx):
-    from whoosh import index
-
-    # create index if it does not exist already
-    if not os.path.exists(INDEX_PATH):
-        _create_index(cli_ctx)
-    return index.open_dir(INDEX_PATH)
-
-
-def _print_hit(hit):
-    def print_para(field):
-        if field not in hit:
-            print(hit)
-        print(textwrap.fill(
-            hit[field],
-            initial_indent='    ',
-            subsequent_indent='    '))
-
-    print('`az {0}`'.format(hit['cmd_name']))
-    print_para('short_summary')
-    if hit.get('long_summary', None):
-        print_para('long_summary')
-    print('')
-
-
-def find(cmd, criteria, reindex=False):
-    from whoosh.qparser import MultifieldParser
-    if reindex:
-        _create_index(cmd.cli_ctx)
-
-    try:
-        ix = _get_index(cmd.cli_ctx)
-    except ValueError:
-        # got a pickle error because the index was written by a different python version
-        # recreate the index and proceed
-        _create_index(cmd.cli_ctx)
-        ix = _get_index(cmd.cli_ctx)
-
-    qp = MultifieldParser(
-        ['cmd_name', 'short_summary', 'long_summary', 'examples'],
-        schema=_get_schema()
-    )
-
-    if 'OR' in criteria or 'AND' in criteria:
-        # looks more advanced, let's trust them to make a great query
-        q = qp.parse(" ".join(criteria))
+    if response.status_code != 200:
+        logger.error('[?] Unexpected Error: [HTTP %s]: Content: %s', response.status_code, response.content)
     else:
-        # let's help out with some OR's to provide a less restrictive search
-        expanded_query = " OR ".join(criteria) + " OR '{}'".format(criteria)
-        q = qp.parse(expanded_query)
+        if (platform.system() == 'Windows' and should_enable_styling()):
+            colorama.init(convert=True)
 
-    with ix.searcher() as searcher:
-        from whoosh.highlight import UppercaseFormatter, ContextFragmenter
-        results = searcher.search(q)
-        results.fragmenter = ContextFragmenter(maxchars=300, surround=200)
-        results.formatter = UppercaseFormatter()
-        for hit in results:
-            _print_hit(hit)
+        answer_list = json.loads(response.content.decode(response.encoding))
+        if (not answer_list or answer_list[0]['source'] == 'bing'):
+            print("\nSorry I am not able to help with [" + cli_term + "]."
+                  "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
+        else:
+            if answer_list[0]['source'] == 'pruned':
+                print("\nMore commands and examples are available in the latest version of the CLI,"
+                      "please update for the best experience.")
+                answer_list.pop(0)
+            print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
+            num_results_to_show = min(3, len(answer_list))
+            for i in range(num_results_to_show):
+                current_title = answer_list[i]['title'].strip()
+                current_snippet = answer_list[i]['snippet'].strip()
+                if current_title.startswith("az "):
+                    current_title, current_snippet = current_snippet, current_title
+                    current_title = current_title.split('\r\n')[0]
+                elif '```azurecli\r\n' in current_snippet:
+                    start_index = current_snippet.index('```azurecli\r\n') + len('```azurecli\r\n')
+                    current_snippet = current_snippet[start_index:]
+                current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
+                current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
+                print(style_message(current_title))
+                print(current_snippet + '\n')
+
+
+def style_message(msg):
+    if should_enable_styling():
+        try:
+            msg = colorama.Style.BRIGHT + msg + colorama.Style.RESET_ALL
+        except KeyError:
+            pass
+    return msg
+
+
+def should_enable_styling():
+    try:
+        # Style if tty stream is available
+        if sys.stdout.isatty():
+            return True
+    except AttributeError:
+        pass
+    return False
+
+
+def call_aladdin_service(query):
+    client_request_id = ''
+    if telemetry_core._session.application:  # pylint: disable=protected-access
+        client_request_id = telemetry_core._session.application.data['headers']['x-ms-client-request-id']  # pylint: disable=protected-access
+
+    context = {
+        'session_id': telemetry_core._session._get_base_properties()['Reserved.SessionId'],  # pylint: disable=protected-access
+        'subscription_id': telemetry_core._get_azure_subscription_id(),  # pylint: disable=protected-access
+        'client_request_id': client_request_id,  # pylint: disable=protected-access
+        'installation_id': telemetry_core._get_installation_id(),  # pylint: disable=protected-access
+        'version_number': str(parse_version(core_version))
+    }
+
+    service_input = {
+        'paragraphText': "<div id='dummyHeader'></div>",
+        'currentPageUrl': "",
+        'query': "ALADDIN-CLI:" + query,
+        'context': context
+    }
+
+    api_url = 'https://aladdinservice-prod.azurewebsites.net/api/aladdin/generateCards'
+    headers = {'Content-Type': 'application/json'}
+
+    response = requests.post(api_url, headers=headers, json=service_input)
+
+    return response

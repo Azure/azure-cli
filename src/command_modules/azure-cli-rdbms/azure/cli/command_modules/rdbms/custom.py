@@ -202,7 +202,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
-def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, **kwargs):
+def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, **kwargs):
     provider = 'Microsoft.DBForMySQL' if isinstance(client, MySqlServersOperations) else 'Microsoft.DBforPostgreSQL'
     # set source server id
     if not is_valid_resource_id(source_server):
@@ -221,13 +221,22 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
     except CloudError as e:
         raise CLIError('Unable to get source server: {}.'.format(str(e)))
 
+    if location is None:
+        location = source_server_object.location
+
     parameters = None
     if provider == 'Microsoft.DBForMySQL':
         from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
             sku=mysql.models.Sku(name=source_server_object.sku.name),
             properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
-            location=source_server_object.location)
+            location=location)
+    elif provider == 'Microsoft.DBforPostgreSQL':
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            sku=postgresql.models.Sku(name=source_server_object.sku.name),
+            properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
+            location=location)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
@@ -254,11 +263,10 @@ def _replica_stop(client, resource_group_name, server_name):
 def _server_update_custom_func(instance,
                                sku_name=None,
                                storage_mb=None,
-                               backup_retention_days=None,
+                               backup_retention=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None):
-    from azure.mgmt.rdbms.mysql.models import StorageProfile  # pylint: disable=unused-variable
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -275,8 +283,8 @@ def _server_update_custom_func(instance,
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb
 
-    if backup_retention_days:
-        instance.storage_profile.backup_retention_days = backup_retention_days
+    if backup_retention:
+        instance.storage_profile.backup_retention_days = backup_retention
 
     params = ServerUpdateParameters(sku=instance.sku,
                                     storage_profile=instance.storage_profile,

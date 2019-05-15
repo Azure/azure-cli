@@ -5,16 +5,18 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 
-from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, get_location_type, get_three_state_flag, get_resource_name_completion_list
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
-
 
 # pylint: disable=line-too-long
 def load_arguments_eh(self, _):
-    from knack.arguments import CLIArgumentType
-    from azure.mgmt.eventhub.models import KeyType, AccessRights, SkuName
-    from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
+    from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
+        get_location_type, get_three_state_flag, get_resource_name_completion_list
+    from azure.cli.core.commands.validators import get_default_location_from_resource_group
+    from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, \
+        get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
+    from knack.arguments import CLIArgumentType
+    from azure.cli.core.profiles import ResourceType
+    (KeyType, AccessRights, SkuName) = self.get_models('KeyType', 'AccessRights', 'SkuName', resource_type=ResourceType.MGMT_EVENTHUB)
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -41,6 +43,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
+        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
+                   help='Default Action for Network Rule Set.')
 
     with self.argument_context('eventhubs namespace update') as c:
         c.argument('tags', arg_type=tags_type)
@@ -48,6 +52,8 @@ def load_arguments_eh(self, _):
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
+        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
+                   help='Default Action for Network Rule Set.')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
@@ -70,7 +76,6 @@ def load_arguments_eh(self, _):
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
-
 # region - Eventhub Create
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
@@ -81,6 +86,7 @@ def load_arguments_eh(self, _):
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Status of Eventhub')
             c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture description is enabled.')
+            c.argument('skip_empty_archives', options_list=['--skip-empty-archives'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to Skip Empty.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
             c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination')
@@ -155,3 +161,18 @@ def load_arguments_eh(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+
+# Region Namespace NetworkRuleSet
+    with self.argument_context('eventhubs namespace network-rule', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace network-rule add', 'eventhubs namespace network-rule remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
+            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range - 10.6.0.0/24')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+
+    with self.argument_context('eventhubs namespace network-rule add', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
+        c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+        c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')

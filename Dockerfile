@@ -33,8 +33,8 @@ LABEL maintainer="Microsoft" \
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
-RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git \
- && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev \
+RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
+ && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
  && update-ca-certificates
 
 ARG JP_VERSION="0.1.3"
@@ -56,7 +56,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     [ -d privates ] && cp privates/*.whl $TMP_PKG_DIR; \
     all_modules=`find $TMP_PKG_DIR -name "*.whl"`; \
     pip install --no-cache-dir $all_modules; \
-    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;' \
+    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg; \
+    pip install --no-cache-dir --force-reinstall urllib3==1.24.2;' \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \

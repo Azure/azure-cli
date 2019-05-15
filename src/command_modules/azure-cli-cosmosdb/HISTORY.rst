@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.2.10
+++++++
+* Minor fixes.
+
+0.2.9
++++++
+* Introducing support for --enable-multiple-write-locations on account update
+
+0.2.8
++++++
+* Introduce `network-rule` subgroup with commands `add`, `remove`, and `list` for managing VNET rules of a Cosmos DB account
+
 0.2.7
 +++++
 * Added support for creating database with shared throughput

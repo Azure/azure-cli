@@ -377,8 +377,8 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
 
     try:
         with open(file, 'r') as f:
-            cg_defintion = yaml.load(f)
-    except FileNotFoundError:
+            cg_defintion = yaml.safe_load(f)
+    except OSError:  # FileNotFoundError introduced in Python 3
         raise CLIError("No such file or directory: " + file)
     except yaml.YAMLError as e:
         raise CLIError("Error while parsing yaml file:\n\n" + str(e))
@@ -578,14 +578,16 @@ def container_export(cmd, resource_group_name, name, file):
     resource['properties'].pop('provisioningState', None)
 
     # Correctly export the identity
-    if 'identity' in resource and resource['identity'].type != ResourceIdentityType.none:
-        resource['identity'] = resource['identity'].__dict__
-        identity_entry = {'type': resource['identity']['type'].value}
-        if resource['identity']['user_assigned_identities']:
-            identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
-        resource['identity'] = identity_entry
-    else:
-        resource.pop('identity', None)
+    try:
+        identity = resource['identity'].type
+        if identity != ResourceIdentityType.none:
+            resource['identity'] = resource['identity'].__dict__
+            identity_entry = {'type': resource['identity']['type'].value}
+            if resource['identity']['user_assigned_identities']:
+                identity_entry['user_assigned_identities'] = {k: {} for k in resource['identity']['user_assigned_identities']}
+            resource['identity'] = identity_entry
+    except (KeyError, AttributeError):
+        resource.pop('indentity', None)
 
     # Remove container instance views
     for i in range(len(resource['properties']['containers'])):
@@ -595,7 +597,7 @@ def container_export(cmd, resource_group_name, name, file):
     resource['apiVersion'] = container_group_client.api_version
 
     with open(file, 'w+') as f:
-        yaml.dump(resource, f, default_flow_style=False)
+        yaml.safe_dump(resource, f, default_flow_style=False)
 
 
 def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):

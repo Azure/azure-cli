@@ -12,7 +12,8 @@ def create_streaming_locator(client, resource_group_name, account_name,
                              streaming_locator_name, streaming_policy_name,
                              asset_name, start_time=None, default_content_key_policy_name=None,
                              end_time=None, streaming_locator_id=None, alternative_media_id=None,
-                             content_keys=None):
+                             content_keys=None,
+                             filters=None):
     from azure.mgmt.media.models import StreamingLocator
 
     if not _valid_content_keys(content_keys):
@@ -26,7 +27,8 @@ def create_streaming_locator(client, resource_group_name, account_name,
                                          default_content_key_policy_name=default_content_key_policy_name,
                                          streaming_locator_id=streaming_locator_id,
                                          alternative_media_id=alternative_media_id,
-                                         content_keys=content_keys)
+                                         content_keys=content_keys,
+                                         filters=filters)
 
     return client.create(resource_group_name, account_name, streaming_locator_name, streaming_locator)
 

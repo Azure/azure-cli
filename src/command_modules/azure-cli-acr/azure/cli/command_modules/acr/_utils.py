@@ -45,7 +45,8 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
             subscription = profile.get_subscription(cli_ctx.data['subscription_id'])
             raise ResourceNotFound(
                 "{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
-        except (KeyError, TypeError):
+        except (KeyError, TypeError) as e:
+            logger.debug("Could not get the current subscription. Exception: %s", str(e))
             raise ResourceNotFound("{} in the current subscription.".format(message))
 
     elif len(elements) == 1:
@@ -372,6 +373,91 @@ def get_validate_platform(cmd, os_type, platform):
         )
 
     return platform_os, platform_arch, platform_variant
+
+
+def get_yaml_and_values(cmd_value, timeout, file):
+    """Generates yaml template and its value content if applicable
+    :param str cmd_value: The command to execute in each step
+    :param str timeout: The timeout for each step
+    :param str file: The task definition
+    """
+    yaml_template = ""
+    values_content = ""
+    if cmd_value:
+        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
+        values_content = "command: {0}\n".format(cmd_value)
+        if timeout:
+            yaml_template += "    timeout: {{ .Values.timeout }}\n"
+            values_content += "timeout: {0}\n".format(timeout)
+    else:
+        if not file:
+            file = "acb.yaml"
+
+        if file == "-":
+            import sys
+            for s in sys.stdin.readlines():
+                yaml_template += s
+        else:
+            import os
+            if os.path.exists(file):
+                f = open(file, 'r')
+                for line in f:
+                    yaml_template += line
+            else:
+                raise CLIError("{0} does not exist.".format(file))
+
+    if not yaml_template:
+        raise CLIError("Failed to initialize yaml template.")
+
+    return yaml_template, values_content
+
+
+def get_custom_registry_credentials(cmd, auth_mode=None, login_server=None, username=None, password=None):
+    """Get the credential object from the input
+    :param str auth_mode: The login mode for the source registry
+    :param str login_server: The login server of custom registry
+    :param str username: The username for custom registry
+    :param str password: The password for custom registry
+    """
+    source_registry_credentials = None
+    if auth_mode:
+        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
+        source_registry_credentials = SourceRegistryCredentials(login_mode=auth_mode)
+
+    custom_registries = None
+    if login_server:
+        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
+            'CustomRegistryCredentials',
+            'SecretObject',
+            'SecretObjectType'
+        )
+
+        # if Null username and password, then have it removed
+        custom_reg_credential = None
+        if (username and not password) or (password and not username):
+            raise CLIError("Please provide both username and password.")
+        elif username and password:
+            custom_reg_credential = CustomRegistryCredentials(
+                user_name=SecretObject(
+                    type=SecretObjectType.opaque,
+                    value=username
+                ),
+                password=SecretObject(
+                    type=SecretObjectType.opaque,
+                    value=password
+                )
+            )
+        elif username is not None or password is not None:
+            # case where user passes empty strings: -u '' -p ''
+            raise CLIError("username and password cannot be empty")
+
+        custom_registries = {login_server: custom_reg_credential}
+
+    Credentials = cmd.get_models('Credentials')
+    return Credentials(
+        source_registry=source_registry_credentials,
+        custom_registries=custom_registries
+    )
 
 
 class ResourceNotFound(CLIError):

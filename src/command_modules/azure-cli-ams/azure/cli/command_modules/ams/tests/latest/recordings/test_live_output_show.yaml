@@ -1,192 +1,323 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-01-07T22:04:16Z"}}'
+      "date": "2019-05-08T21:53:20Z"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--location --name --tag]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '110'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-01-07T22:04:16Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-08T21:53:20Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 07 Jan 2019 22:04:17 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 May 2019 21:53:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 201
+      message: Created
 - request:
     body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account create]
-      Connection: [keep-alive]
-      Content-Length: ['74']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g -l --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '74'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -l --sku
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2018-11-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      content-type: [text/plain; charset=utf-8]
-      date: ['Mon, 07 Jan 2019 22:04:17 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/0f68409f-9ceb-4ed6-b2c8-40fdc44ffbca?monitor=true&api-version=2018-07-01']
-      pragma: [no-cache]
-      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
-          Microsoft-HTTPAPI/2.0']
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Wed, 08 May 2019 21:53:23 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/aa4b3672-a0bb-4b29-9005-c79860956aee?monitor=true&api-version=2018-11-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -l --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.53]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.64
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/0f68409f-9ceb-4ed6-b2c8-40fdc44ffbca?monitor=true&api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/aa4b3672-a0bb-4b29-9005-c79860956aee?monitor=true&api-version=2018-11-01
   response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-01-07T22:04:18.4285147Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-01-07T22:04:18.4285147Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-01-07T22:04:18.3347676Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-05-08T21:53:23.2139859Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-05-08T21:53:23.2139859Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-05-08T21:53:23.0420865Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1169']
-      content-type: [application/json]
-      date: ['Mon, 07 Jan 2019 22:04:35 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
-          Microsoft-HTTPAPI/2.0']
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1169'
+      content-type:
+      - application/json
+      date:
+      - Wed, 08 May 2019 21:53:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account keys list]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-n -g --query -o]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-storage/3.1.0 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.3.0
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2018-11-01
   response:
-    body: {string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'}
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['288']
-      content-type: [application/json]
-      date: ['Mon, 07 Jan 2019 22:04:36 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
-          Microsoft-HTTPAPI/2.0']
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Wed, 08 May 2019 21:53:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
 - request:
     body: 'b''b\''{"location": "southeastasia", "properties": {"storageAccounts":
       [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
       "type": "Primary"}]}}\'''''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams account create]
-      Connection: [keep-alive]
-      Content-Length: ['308']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g --storage-account -l]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '308'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --storage-account -l
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Southeast
-        Asia\",\"properties\":{\r\n    \"mediaServiceId\":\"9399fcd5-d382-43f8-bdc9-68e9ef3ff253\",\"storageAccounts\":[\r\n
+    body:
+      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Southeast
+        Asia\",\"properties\":{\r\n    \"mediaServiceId\":\"f5e156e5-58e0-40fb-bb0c-2a0eb0027d02\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"}
+        \     }\r\n    ]\r\n  }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['670']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:40 GMT']
-      expires: ['-1']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '670'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:53:45 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams live-event create]
-      Connection: [keep-alive]
-      ParameterSetName: [-a -n -g --ips --streaming-protocol]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams live-event create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -a -n -g --ips --streaming-protocol
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Southeast
-        Asia\",\"properties\":{\r\n    \"mediaServiceId\":\"9399fcd5-d382-43f8-bdc9-68e9ef3ff253\",\"storageAccounts\":[\r\n
+    body:
+      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Southeast
+        Asia\",\"properties\":{\r\n    \"mediaServiceId\":\"f5e156e5-58e0-40fb-bb0c-2a0eb0027d02\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"}
+        \     }\r\n    ]\r\n  }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['670']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:41 GMT']
-      expires: ['-1']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '670'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:53:46 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: 'b''{"location": "Southeast Asia", "properties": {"input": {"streamingProtocol":
       "FragmentedMP4", "accessControl": {"ip": {"allow": [{"name": "le000004_0.0.0.0",
@@ -194,248 +325,411 @@ interactions:
       {"ip": {"allow": []}}}, "encoding": {}, "crossSiteAccessPolicies": {}, "vanityUrl":
       false}}'''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams live-event create]
-      Connection: [keep-alive]
-      Content-Length: ['334']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-a -n -g --ips --streaming-protocol]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams live-event create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '334'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -a -n -g --ips --streaming-protocol
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveEvents/le000004?api-version=2018-07-01&autoStart=false
   response:
-    body: {string: "{\r\n  \"name\":\"le000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004\",\"type\":\"Microsoft.Media/mediaservices/liveevents\",\"location\":\"Southeast
-        Asia\",\"tags\":{\r\n    \r\n  },\"properties\":{\r\n    \"description\":\"\",\"resourceState\":\"Stopped\",\"provisioningState\":\"InProgress\",\"created\":\"2019-01-07T22:04:45.1237148Z\",\"lastModified\":\"2019-01-07T22:04:45.1237148Z\",\"vanityUrl\":false,\"streamOptions\":[\r\n
-        \     \r\n    ],\"input\":{\r\n      \"keyFrameIntervalDuration\":\"\",\"streamingProtocol\":\"FragmentedMP4\",\"accessToken\":\"c0bd9c00b63c4a059018617b742a5a82\",\"endpoints\":[\r\n
+    body:
+      string: "{\r\n  \"name\":\"le000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004\",\"type\":\"Microsoft.Media/mediaservices/liveevents\",\"location\":\"Southeast
+        Asia\",\"tags\":{\r\n    \r\n  },\"properties\":{\r\n    \"description\":\"\",\"resourceState\":\"Stopped\",\"provisioningState\":\"InProgress\",\"created\":\"2019-05-08T21:53:49.7322713Z\",\"lastModified\":\"2019-05-08T21:53:49.7322713Z\",\"vanityUrl\":false,\"streamOptions\":[\r\n
+        \     \r\n    ],\"input\":{\r\n      \"keyFrameIntervalDuration\":\"\",\"streamingProtocol\":\"FragmentedMP4\",\"accessToken\":\"b217170e16824dc3b284514dd15b56d4\",\"endpoints\":[\r\n
         \       \r\n      ],\"accessControl\":{\r\n        \"ip\":{\r\n          \"allow\":[\r\n
         \           {\r\n              \"name\":\"le000004_0.0.0.0\",\"address\":\"0.0.0.0\",\"subnetPrefixLength\":0\r\n
         \           }\r\n          ]\r\n        }\r\n      }\r\n    },\"preview\":{\r\n
-        \     \"previewLocator\":\"13817557-65b7-4cb1-a782-a3a391aef237\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"alternativeMediaId\":null,\"accessControl\":{\r\n
+        \     \"previewLocator\":\"5558153c-463d-4141-818f-2e002cb86bec\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"alternativeMediaId\":null,\"accessControl\":{\r\n
         \       \"ip\":{\r\n          \"allow\":[\r\n            \r\n          ]\r\n
         \       }\r\n      },\"endpoints\":[\r\n        \r\n      ]\r\n    },\"encoding\":{\r\n
         \     \"encodingType\":\"None\",\"presetName\":null\r\n    },\"crossSiteAccessPolicies\":{\r\n
         \     \"clientAccessPolicy\":null,\"crossDomainPolicy\":null\r\n    }\r\n
-        \ }\r\n}"}
+        \ }\r\n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/d69063ba-7c4e-4513-9608-706ac94d9c69?api-version=2018-07-01']
-      cache-control: [no-cache]
-      content-length: ['1428']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:45 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/d69063ba-7c4e-4513-9608-706ac94d9c69?api-version=2018-07-01']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/b05430cc-0183-4606-9a39-02a71156e6b0?api-version=2018-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1428'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:53:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/b05430cc-0183-4606-9a39-02a71156e6b0?api-version=2018-07-01
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams live-event create]
-      Connection: [keep-alive]
-      ParameterSetName: [-a -n -g --ips --streaming-protocol]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams live-event create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -a -n -g --ips --streaming-protocol
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/d69063ba-7c4e-4513-9608-706ac94d9c69?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/b05430cc-0183-4606-9a39-02a71156e6b0?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"d69063ba-7c4e-4513-9608-706ac94d9c69\",\"status\":\"Succeeded\",\"error\":{\r\n
-        \   \"code\":\"None\",\"message\":null,\"target\":\"a0fcd23e-f597-4018-a831-52eacf4ac117\"\r\n
-        \ }\r\n}"}
+    body:
+      string: "{\r\n  \"name\":\"b05430cc-0183-4606-9a39-02a71156e6b0\",\"status\":\"Succeeded\",\"error\":{\r\n
+        \   \"code\":\"None\",\"message\":null,\"target\":\"57c5e85e-bc14-40ed-9ad1-9a15b652bada\"\r\n
+        \ }\r\n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/d69063ba-7c4e-4513-9608-706ac94d9c69?api-version=2018-07-01']
-      cache-control: [no-cache]
-      content-length: ['171']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:48 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/d69063ba-7c4e-4513-9608-706ac94d9c69?api-version=2018-07-01']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/b05430cc-0183-4606-9a39-02a71156e6b0?api-version=2018-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '171'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:53:53 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveeventoperations/b05430cc-0183-4606-9a39-02a71156e6b0?api-version=2018-07-01
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams live-event create]
-      Connection: [keep-alive]
-      ParameterSetName: [-a -n -g --ips --streaming-protocol]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams live-event create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -a -n -g --ips --streaming-protocol
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveEvents/le000004?api-version=2018-07-01&autoStart=false
   response:
-    body: {string: "{\r\n  \"name\":\"le000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004\",\"type\":\"Microsoft.Media/mediaservices/liveevents\",\"location\":\"Southeast
-        Asia\",\"tags\":{\r\n    \r\n  },\"properties\":{\r\n    \"description\":\"\",\"resourceState\":\"Stopped\",\"provisioningState\":\"Succeeded\",\"created\":\"2019-01-07T22:04:45.2018571Z\",\"lastModified\":\"2019-01-07T22:04:45.2018571Z\",\"vanityUrl\":false,\"streamOptions\":[\r\n
-        \     \r\n    ],\"input\":{\r\n      \"keyFrameIntervalDuration\":\"\",\"streamingProtocol\":\"FragmentedMP4\",\"accessToken\":\"c0bd9c00b63c4a059018617b742a5a82\",\"endpoints\":[\r\n
+    body:
+      string: "{\r\n  \"name\":\"le000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004\",\"type\":\"Microsoft.Media/mediaservices/liveevents\",\"location\":\"Southeast
+        Asia\",\"tags\":{\r\n    \r\n  },\"properties\":{\r\n    \"description\":\"\",\"resourceState\":\"Stopped\",\"provisioningState\":\"Succeeded\",\"created\":\"2019-05-08T21:53:49.7790791Z\",\"lastModified\":\"2019-05-08T21:53:49.7790791Z\",\"vanityUrl\":false,\"streamOptions\":[\r\n
+        \     \r\n    ],\"input\":{\r\n      \"keyFrameIntervalDuration\":\"\",\"streamingProtocol\":\"FragmentedMP4\",\"accessToken\":\"b217170e16824dc3b284514dd15b56d4\",\"endpoints\":[\r\n
         \       \r\n      ],\"accessControl\":{\r\n        \"ip\":{\r\n          \"allow\":[\r\n
         \           {\r\n              \"name\":\"le000004_0.0.0.0\",\"address\":\"0.0.0.0\",\"subnetPrefixLength\":0\r\n
         \           }\r\n          ]\r\n        }\r\n      }\r\n    },\"preview\":{\r\n
-        \     \"previewLocator\":\"13817557-65b7-4cb1-a782-a3a391aef237\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"alternativeMediaId\":null,\"accessControl\":{\r\n
+        \     \"previewLocator\":\"5558153c-463d-4141-818f-2e002cb86bec\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"alternativeMediaId\":null,\"accessControl\":{\r\n
         \       \"ip\":{\r\n          \"allow\":[\r\n            \r\n          ]\r\n
         \       }\r\n      },\"endpoints\":[\r\n        \r\n      ]\r\n    },\"encoding\":{\r\n
         \     \"encodingType\":\"None\",\"presetName\":null\r\n    },\"crossSiteAccessPolicies\":{\r\n
         \     \"clientAccessPolicy\":null,\"crossDomainPolicy\":null\r\n    }\r\n
-        \ }\r\n}"}
+        \ }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['1427']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:50 GMT']
-      expires: ['-1']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1427'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:53:58 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams asset create]
-      Connection: [keep-alive]
-      Content-Length: ['2']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-a -n -g]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams asset create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -a -n -g
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000005?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"asset000005\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000005\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"b1c2c2ef-9242-429b-8a3e-80d3d6f6b5a6\",\"created\":\"2019-01-07T22:04:52.52Z\",\"lastModified\":\"2019-01-07T22:04:52.52Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
-        \ }\r\n}"}
+    body:
+      string: "{\r\n  \"name\":\"asset000005\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000005\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
+        \   \"assetId\":\"b7594ef4-15cc-44f4-8bd9-22cd12787293\",\"created\":\"2019-05-08T21:53:57.05Z\",\"lastModified\":\"2019-05-08T21:53:57.05Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \ }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['530']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:52 GMT']
-      expires: ['-1']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '530'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:53:57 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: 'b''b\''{"properties": {"assetName": "asset000005", "archiveWindowLength":
-      "PT2S", "manifestName": "man1000007"}}\'''''
+      "PT5M", "manifestName": "man1000007"}}\'''''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams live-output create]
-      Connection: [keep-alive]
-      Content-Length: ['108']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-a -n -g --asset-name --live-event-name --archive-window-length
-          --manifest-name]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams live-output create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '108'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -a -n -g --asset-name --live-event-name --archive-window-length --manifest-name
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveEvents/le000004/liveOutputs/lo000006?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"lo000006\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004/liveoutputs/lo000006\",\"type\":\"Microsoft.Media/mediaservices/liveevents/liveoutputs\",\"properties\":{\r\n
-        \   \"description\":null,\"assetName\":\"asset000005\",\"archiveWindowLength\":\"PT2S\",\"manifestName\":\"man1000007\",\"outputSnapTime\":0,\"resourceState\":\"Creating\",\"provisioningState\":\"Succeeded\",\"created\":\"2019-01-07T22:04:54.5739852Z\",\"lastModified\":\"2019-01-07T22:04:54.5739852Z\",\"hls\":null\r\n
-        \ }\r\n}"}
+    body:
+      string: "{\r\n  \"name\":\"lo000006\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004/liveoutputs/lo000006\",\"type\":\"Microsoft.Media/mediaservices/liveevents/liveoutputs\",\"properties\":{\r\n
+        \   \"description\":null,\"assetName\":\"asset000005\",\"archiveWindowLength\":\"PT5M\",\"manifestName\":\"man1000007\",\"outputSnapTime\":0,\"resourceState\":\"Running\",\"provisioningState\":\"Succeeded\",\"created\":\"2019-05-08T21:54:00.5461549Z\",\"lastModified\":\"2019-05-08T21:54:00.5461549Z\",\"hls\":null\r\n
+        \ }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['649']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:54 GMT']
-      expires: ['-1']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '648'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:54:01 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams live-output show]
-      Connection: [keep-alive]
-      ParameterSetName: [-a -n -g --live-event-name]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          azure-mgmt-media/1.0.1 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams live-output show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -a -n -g --live-event-name
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-media/1.1.1
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveEvents/le000004/liveOutputs/lo000006?api-version=2018-07-01
   response:
-    body: {string: "{\r\n  \"name\":\"lo000006\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004/liveoutputs/lo000006\",\"type\":\"Microsoft.Media/mediaservices/liveevents/liveoutputs\",\"properties\":{\r\n
-        \   \"description\":null,\"assetName\":\"asset000005\",\"archiveWindowLength\":\"PT2S\",\"manifestName\":\"man1000007\",\"outputSnapTime\":0,\"resourceState\":\"Running\",\"provisioningState\":\"Succeeded\",\"created\":\"2019-01-07T22:04:54.5739852Z\",\"lastModified\":\"2019-01-07T22:04:54.5739852Z\",\"hls\":null\r\n
-        \ }\r\n}"}
+    body:
+      string: "{\r\n  \"name\":\"lo000006\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/liveevents/le000004/liveoutputs/lo000006\",\"type\":\"Microsoft.Media/mediaservices/liveevents/liveoutputs\",\"properties\":{\r\n
+        \   \"description\":null,\"assetName\":\"asset000005\",\"archiveWindowLength\":\"PT5M\",\"manifestName\":\"man1000007\",\"outputSnapTime\":0,\"resourceState\":\"Running\",\"provisioningState\":\"Succeeded\",\"created\":\"2019-05-08T21:54:00.5461549Z\",\"lastModified\":\"2019-05-08T21:54:00.5461549Z\",\"hls\":null\r\n
+        \ }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['648']
-      content-type: [application/json; odata.metadata=minimal]
-      date: ['Mon, 07 Jan 2019 22:04:56 GMT']
-      expires: ['-1']
-      odata-version: ['4.0']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '648'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 08 May 2019 21:54:03 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.53]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.6.8 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.64
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Mon, 07 Jan 2019 22:04:57 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLNkVIV1U3NDU3SE5HR1VRQVJKR1A2VUo2TDNNV1BJNzQ2VHwwMTE1MDlFNjI4OTZDMzgzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 08 May 2019 21:54:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkcyQlNJVk1QRDYyUlNDVEtCTUJUWFgyRVJHWDJUWEdDRUpVSHwxNDhBMEY5N0Y4QTYyNTY2LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 202
+      message: Accepted
 version: 1

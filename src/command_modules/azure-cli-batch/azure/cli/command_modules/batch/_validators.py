@@ -62,7 +62,7 @@ def application_package_reference_format(value):
     app_reference = value.split('#', 1)
     package = {'application_id': app_reference[0]}
     try:
-        package['version'] = app_reference[1]
+        package['version_name'] = app_reference[1]
     except IndexError:  # No specified version - ignore
         pass
     return package
@@ -284,6 +284,11 @@ def validate_client_parameters(cmd, namespace):
     if not namespace.account_endpoint:
         namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
 
+    # Simple validation for account_endpoint
+    if not (namespace.account_endpoint.startswith('https://') or
+            namespace.account_endpoint.startswith('http://')):
+        namespace.account_endpoint = 'https://' + namespace.account_endpoint
+    namespace.account_endpoint = namespace.account_endpoint.rstrip('/')
     # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
         if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':

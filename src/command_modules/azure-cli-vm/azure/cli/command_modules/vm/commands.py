@@ -10,7 +10,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images, cf_run_commands,
                                                           cf_rolling_upgrade_commands, cf_galleries,
-                                                          cf_gallery_images, cf_gallery_image_versions)
+                                                          cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_proximity_placement_groups)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -18,7 +19,7 @@ from azure.cli.command_modules.vm._format import (
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
-    process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop)
+    process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
@@ -37,98 +38,102 @@ def load_command_table(self, _):
     )
 
     compute_availset_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#AvailabilitySetsOperations.{}',
         client_factory=cf_avail_set,
         operation_group='availability_sets'
     )
 
     compute_disk_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.disks_operations#DisksOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
         client_factory=cf_disks,
         operation_group='disks'
     )
 
     compute_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.images_operations#ImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#ImagesOperations.{}',
         client_factory=cf_images
     )
 
     compute_snapshot_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.snapshots_operations#SnapshotsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#SnapshotsOperations.{}',
         client_factory=cf_snapshots
     )
 
     compute_vm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachinesOperations.{}',
         client_factory=cf_vm
     )
 
     compute_vm_extension_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_extensions_operations#VirtualMachineExtensionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
         client_factory=cf_vm_ext
     )
 
     compute_vm_extension_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionImagesOperations.{}',
         client_factory=cf_vm_ext_image
     )
 
     compute_vm_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineImagesOperations.{}',
         client_factory=cf_vm_image
     )
 
     compute_vm_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.usage_operations#UsageOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#UsageOperations.{}',
         client_factory=cf_usage
     )
 
     compute_vm_run_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_run_commands_operations#VirtualMachineRunCommandsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineRunCommandsOperations.{}',
         client_factory=cf_run_commands
     )
 
     compute_vm_size_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_sizes_operations#VirtualMachineSizesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineSizesOperations.{}',
         client_factory=cf_vm_sizes
     )
 
     compute_vmss_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
         operation_group='virtual_machine_scale_sets'
     )
 
     compute_vmss_rolling_upgrade_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_rolling_upgrades_operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
         client_factory=cf_rolling_upgrade_commands,
         operation_group='virtual_machine_scale_sets'
     )
 
     compute_vmss_vm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVMsOperations.{}',
         client_factory=cf_vmss_vm,
         operation_group='virtual_machine_scale_sets'
     )
 
     network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
         client_factory=cf_ni
     )
 
     compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.galleries_operations#GalleriesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
         client_factory=cf_galleries,
     )
 
     compute_gallery_images_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.gallery_images_operations#GalleryImagesOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#GalleryImagesOperations.{}',
         client_factory=cf_gallery_images,
     )
 
     compute_gallery_image_versions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations.gallery_image_versions_operations#GalleryImageVersionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#GalleryImageVersionsOperations.{}',
         client_factory=cf_gallery_image_versions,
+    )
+
+    compute_proximity_placement_groups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}'
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -146,6 +151,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_images')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
+        g.generic_update_command('update', custom_func_name='update_image')
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)
@@ -280,10 +286,10 @@ def load_command_table(self, _):
         g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
-        g.custom_show_command('show', 'show_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
+        g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.generic_update_command('update', getter_name='get_vmss', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom)
+        g.generic_update_command('update', getter_name='get_vmss', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.command('get-os-upgrade-history', 'get_os_upgrade_history', min_api='2018-10-01')
@@ -349,3 +355,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_image_version', supports_no_wait=True)
         g.generic_update_command('update', setter_arg_name='gallery_image_version', custom_func_name='update_image_version', supports_no_wait=True)
         g.wait_command('wait')
+
+    with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
+        g.command('show', 'get')
+        g.custom_command('create', 'create_proximity_placement_group')
+        g.custom_command('list', 'list_proximity_placement_groups')
+        g.generic_update_command('update')
+        g.command('delete', 'delete')

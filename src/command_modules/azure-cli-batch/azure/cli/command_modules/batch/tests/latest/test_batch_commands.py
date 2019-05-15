@@ -65,10 +65,10 @@ class TestBatchValidators(unittest.TestCase):
         self.assertEqual(ref, {'application_id': 'app_1'})
 
         ref = _validators.application_package_reference_format("app#1")
-        self.assertEqual(ref, {'application_id': 'app', 'version': '1'})
+        self.assertEqual(ref, {'application_id': 'app', 'version_name': '1'})
 
         ref = _validators.application_package_reference_format("app#1#RC")
-        self.assertEqual(ref, {'application_id': 'app', 'version': '1#RC'})
+        self.assertEqual(ref, {'application_id': 'app', 'version_name': '1#RC'})
 
     def test_batch_certificate_reference_format(self):
         cert = _validators.certificate_reference_format("thumbprint_lkjsahakjg")
@@ -308,9 +308,6 @@ class TestBatchParser(unittest.TestCase):
     def test_batch_format_options_name(self):
         op = "azure.batch.operations.pool_opterations#PoolOperations.get"
         self.assertEqual(_command_type.format_options_name(op), "pool_get_options")
-
-        op = "azure.batch.operations.pool_opterations#PoolOperations.upgrade_os"
-        self.assertEqual(_command_type.format_options_name(op), "pool_upgrade_os_options")
 
         op = "azure.batch.operations.pool_opterations#JobScheduleOperations.get"
         self.assertEqual(_command_type.format_options_name(op), "job_schedule_get_options")
@@ -553,7 +550,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
     def test_batch_get_model_attrs(self):
         self.command_job.parser = mock.Mock(_request_param={'name': 'job'})
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
-        self.assertEqual(len(attrs), 3)
+        self.assertEqual(len(attrs), 6)
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
         self.assertEqual(len(attrs), 6)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
@@ -563,7 +560,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # pylint: disable=too-many-statements
         handler = operations.pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 27)
+        self.assertEqual(len(args), 28)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])

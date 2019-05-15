@@ -6,8 +6,6 @@
 # pylint: disable=C0302
 from enum import Enum
 
-from knack.log import get_logger
-
 from azure.cli.core.util import (
     CLIError,
     sdk_no_wait,
@@ -35,6 +33,8 @@ from azure.mgmt.sql.models import (
     Sku,
     StorageKeyType,
 )
+
+from knack.log import get_logger
 
 from ._util import (
     get_sql_capabilities_operations,
@@ -210,17 +210,16 @@ def _find_performance_level_capability(sku, supported_service_level_objectives, 
                         capacity=sku.capacity,
                         capacities=[slo.sku.capacity for slo in supported_service_level_objectives]
                     ))
-            else:
-                raise CLIError(
-                    "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
-                    " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
-                    " supported combinations of family and capacity.".format(
-                        tier=sku.tier,
-                        family=sku.family,
-                        capacity=sku.capacity,
-                        skus=[(slo.sku.family, slo.sku.capacity)
-                              for slo in supported_service_level_objectives]
-                    ))
+            raise CLIError(
+                "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
+                " Supported families & capacities for '{tier}' are: {skus}. Please specify one of these"
+                " supported combinations of family and capacity.".format(
+                    tier=sku.tier,
+                    family=sku.family,
+                    capacity=sku.capacity,
+                    skus=[(slo.sku.family, slo.sku.capacity)
+                          for slo in supported_service_level_objectives]
+                ))
     elif sku.family:
         # Error - cannot find based on family alone.
         raise CLIError('If --family is specified, --capacity must also be specified.')
@@ -1023,6 +1022,8 @@ def db_list(
 def db_update(
         cmd,
         instance,
+        server_name,
+        resource_group_name,
         elastic_pool_id=None,
         max_size_bytes=None,
         service_objective=None,
@@ -1033,7 +1034,6 @@ def db_update(
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
-
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -1054,12 +1054,18 @@ def db_update(
                        ' unspecified or equal \'{}\'.'.format(
                            ServiceObjectiveName.elastic_pool.value))
 
-    # Update instance pool and service objective. The service treats these properties like PATCH,
+    # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
     # except if pool is null/empty and service objective is a standalone SLO value (e.g. 'S0',
     # 'S1', etc), in which case the pool being null/empty is meaningful - it means remove from
     # pool.
-    instance.elastic_pool_id = elastic_pool_id
+
+    # Validate elastic pool id
+    instance.elastic_pool_id = _validate_elastic_pool_id(
+        cmd.cli_ctx,
+        elastic_pool_id,
+        server_name,
+        resource_group_name)
 
     # Update sku
     _db_elastic_pool_update_sku(
@@ -1639,6 +1645,7 @@ def server_create(
         resource_group_name,
         server_name,
         assign_identity=False,
+        no_wait=False,
         **kwargs):
     '''
     Creates a server.
@@ -1648,10 +1655,10 @@ def server_create(
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     # Create
-    return client.create_or_update(
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        parameters=kwargs)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=server_name,
+                       resource_group_name=resource_group_name,
+                       parameters=kwargs)
 
 
 def server_list(
@@ -1922,8 +1929,7 @@ def encryption_protector_update(
     else:
         if kid is None:
             raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
-        else:
-            key_name = _get_server_key_name_from_uri(kid)
+        key_name = _get_server_key_name_from_uri(kid)
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -2027,7 +2033,9 @@ def managed_instance_update(
         license_type=None,
         vcores=None,
         storage_size_in_gb=None,
-        assign_identity=False):
+        assign_identity=False,
+        proxy_override=None,
+        public_data_endpoint_enabled=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2045,6 +2053,11 @@ def managed_instance_update(
         vcores or instance.v_cores)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.proxy_override = (
+        proxy_override or instance.proxy_override)
+
+    if public_data_endpoint_enabled is not None:
+        instance.public_data_endpoint_enabled = public_data_endpoint_enabled
 
     return instance
 
@@ -2278,3 +2291,22 @@ def _get_list_of_databases_for_fg(
                       {x.lower() for x in add_db_ids}) - {x.lower() for x in remove_db_ids})
 
     return databases
+
+###############################################
+#                sql virtual cluster          #
+###############################################
+
+
+def virtual_cluster_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists virtual clusters in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all virtual clusters in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all virtual clusters in the subscription
+    return client.list()

@@ -3,12 +3,33 @@
 Release History
 ===============
 
-2.1.10
+2.1.14
 ++++++
+* `resource link`: Deprecate `--link-id`, `--target-id` and `--filter-string` in favor of
+                   `--link`, `--target`, and `--filter` respectively.
+* `resource link create/update`: Fix issue where these commands would not work.
+* `resource delete`: Fix issue where deleting using a resource ID could crash on error.
+
+2.1.13
+++++++
+* `deployment create`/`group deployment create`: Fixed issue where parameters file with an empty set of parameters would not work.
+
+2.1.12
+++++++
+* `deployment create/list/show`: improve table output
+* `deployment create/validate`: fix issue where type secureObject was not recognized.
+
+2.1.11
+++++++
+* `deployment create`: Fix issue where type field was case-sensitive.
 * `policy assignment create`: support uri based parameters file
 * `policy set-definition update`: support uri based parameters and definitions files
 * `policy definition update`: fix handling of parameters and rules files
 * `resource show/update/delete/tag/invoke-action`: Fix issue where cross-subscription IDs did not properly honor the subscription ID.
+
+2.1.10
+++++++
+* Minor fixes.
 
 2.1.9
 +++++

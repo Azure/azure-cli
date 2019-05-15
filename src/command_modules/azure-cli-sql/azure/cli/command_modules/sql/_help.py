@@ -56,9 +56,9 @@ helps['sql db list-editions'] = """
     long-summary: Includes available service objectives and storage limits. In order to reduce verbosity, settings to intentionally reduce storage limits are hidden by default.
     examples:
         - name: Show all database editions in a location.
-          text: az sql db list-editions -l westus
+          text: az sql db list-editions -l westus -o table
         - name: Show all available database service objectives for Standard edition.
-          text: az sql db list-editions -l westus --edition Standard
+          text: az sql db list-editions -l westus --edition Standard -o table
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
@@ -185,12 +185,12 @@ helps['sql db export'] = """
             az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" \\
                 --storage-key-type SharedAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
         - name: Export bacpac using a storage account key.
           text: |
             az sql db export -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key MYKEY== --storage-key-type StorageAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
     """
 helps['sql db import'] = """
     type: command
@@ -205,12 +205,12 @@ helps['sql db import'] = """
             az sql db import -s myserver -n mydatabase -g mygroup -p password -u login \\
                 --storage-key "?sr=b&sp=rw&se=2018-01-01T00%3A00%3A00Z&sig=mysignature&sv=2015-07-08" \\
                 --storage-key-type SharedAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
         - name: Import bacpac into an existing database using a storage account key.
           text: |
             az sql db import -s myserver -n mydatabase -g mygroup -p password -u login --storage-key MYKEY== \\
                 --storage-key-type StorageAccessKey \\
-                --storage-uri https://mystorageaccount.blob.core.windows.net/bacpacs/myBacpac.bacpac
+                --storage-uri https://myAccountName.blob.core.windows.net/myContainer/myBacpac.bacpac
     """
 helps['sql db restore'] = """
     type: command
@@ -304,13 +304,13 @@ helps['sql elastic-pool list-editions'] = """
                   database settings are hidden by default.
     examples:
         - name: Show all elastic pool editions and pool DTU limits in the West US region.
-          text: az sql elastic-pool list-editions -l westus
+          text: az sql elastic-pool list-editions -l westus -o table
         - name: Show all pool DTU limits for Standard edition in the West US region.
-          text: az sql elastic-pool list-editions -l westus --edition Standard
+          text: az sql elastic-pool list-editions -l westus --edition Standard -o table
         - name: Show available max sizes for elastic pools with at least 100 DTUs in the West US region.
-          text: az sql elastic-pool list-editions -l westus --dtu 100 --show-details max-size
+          text: az sql elastic-pool list-editions -l westus --dtu 100 --show-details max-size -o table
         - name: Show available per database settings for Standard 100 DTU elastic pools in the West US region.
-          text: az sql elastic-pool list-editions -l westus --edition Standard --dtu 100
+          text: az sql elastic-pool list-editions -l westus --edition Standard --dtu 100 -o table
                 --show-details db-min-dtu db-max-dtu db-max-size
     """
 helps['sql elastic-pool update'] = """
@@ -371,6 +371,10 @@ helps['sql server list'] = """
 helps['sql server update'] = """
     type: command
     short-summary: Update a server.
+    """
+helps['sql server wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the SQL server is met.
     """
 helps['sql server conn-policy'] = """
     type: group
@@ -556,4 +560,31 @@ helps['sql midb delete'] = """
     examples:
         - name: Delete a managed database
           text: az sql midb delete -g mygroup --mi myinstance -n mymanageddb --yes
+    """
+helps['sql virtual-cluster'] = """
+    type: group
+    short-summary: Manage SQL virtual clusters.
+    """
+helps['sql virtual-cluster list'] = """
+    type: command
+    short-summary: List available virtual clusters.
+    examples:
+        - name: List all virtual clusters in the current subscription.
+          text: az sql virtual-cluster list
+        - name: List all virtual clusters in a resource group.
+          text: az sql virtual-cluster list -g mygroup
+    """
+helps['sql virtual-cluster show'] = """
+    type: command
+    short-summary: Get the details for a virtual cluster.
+    examples:
+        - name: Get the details for a virtual cluster
+          text: az sql virtual-cluster show -g mygroup -n mycluster
+    """
+helps['sql virtual-cluster delete'] = """
+    type: command
+    short-summary: Delete a virtual cluster.
+    examples:
+        - name: Delete a virtual cluster
+          text: az sql virtual-cluster delete -g mygroup -n mycluster
     """

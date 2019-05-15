@@ -172,5 +172,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='The number of partitions of the backing Event Hub for device-to-cloud messages.', type=int)
 
     with self.argument_context('iot hub show-connection-string') as c:
+        c.argument('show_all', options_list=['--all'], help='Allow to show all shared access policies.')
+        c.argument('hub_name', options_list=['--hub-name', '--name', '-n'])
         c.argument('policy_name', help='Shared access policy to use.')
         c.argument('key_type', arg_type=get_enum_type(KeyType), options_list=['--key'], help='The key to use.')

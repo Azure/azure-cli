@@ -5,7 +5,9 @@
 
 """Custom operations for storage account commands"""
 
+import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
@@ -100,6 +102,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
+
     domain = instance.custom_domain
     if custom_domain is not None:
         domain = CustomDomain(name=custom_domain)
@@ -107,18 +110,16 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             domain.use_sub_domain_name = use_subdomain == 'true'
 
     encryption = instance.encryption
+    if not encryption and any((encryption_services, encryption_key_source, encryption_key_vault_properties)):
+        encryption = Encryption()
     if encryption_services:
-        if not encryption:
-            encryption = Encryption(services=encryption_services)
-        else:
-            encryption.services = encryption_services
-
-    if encryption_key_source or encryption_key_vault_properties:
-        if encryption:
-            encryption.key_source = encryption_key_source
-            encryption.key_vault_properties = encryption_key_vault_properties
-        else:
-            raise ValueError('--encryption-services is required when configure encryption key source')
+        encryption.services = encryption_services
+    if encryption_key_source:
+        encryption.key_source = encryption_key_source
+    if encryption_key_vault_properties:
+        if encryption.key_source != 'Microsoft.Keyvault':
+            raise ValueError('Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
+        encryption.key_vault_properties = encryption_key_vault_properties
 
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
@@ -194,3 +195,18 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, account_name, params)
+
+
+def create_management_policies(client, resource_group_name, account_name, policy=None):
+    if policy:
+        if os.path.exists(policy):
+            policy = get_file_json(policy)
+        else:
+            policy = shell_safe_json_parse(policy)
+    return client.create_or_update(resource_group_name, account_name, policy=policy)
+
+
+def update_management_policies(client, resource_group_name, account_name, parameters=None):
+    if parameters:
+        parameters = parameters.policy
+    return client.create_or_update(resource_group_name, account_name, policy=parameters)

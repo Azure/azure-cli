@@ -5,9 +5,7 @@ trigger:
   batch: true
   branches:
     include:
-    - master
-    - dev
-    - release
+    - '*'
 
 jobs:
 - job: ExtractMetadata
@@ -28,6 +26,52 @@ jobs:
     displayName: 'Publish Artifact: metadata'
     inputs:
       ArtifactName: metadata
+
+- job: VerifyVersions
+  displayName: Verify Command Module Versions
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+
+  - bash: |
+      #!/usr/bin/env bash
+
+      set -ev
+
+      pip install virtualenv
+      python -m virtualenv venv/
+      . ./venv/bin/activate
+      pip install azdev
+      azdev setup -c $(pwd)
+    displayName: 'Install azdev'
+
+  - bash: |
+      #!/usr/bin/env bash
+      . ./venv/bin/activate
+
+      set -ev
+
+      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
+      azdev verify history 2>&1 | grep -e "^OK$"
+
+    displayName: 'Verify History'
+
+  - bash: |
+      #!/usr/bin/env bash
+      . ./venv/bin/activate
+
+      set -ev
+
+      # TODO: once Azure/azure-cli-dev-tools#56 is fixed, remove grep component of check
+      azdev cli check-versions 2>&1 >/dev/null | grep "OK!"
+    displayName: 'Verify Versions'
+    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
@@ -57,7 +101,37 @@ jobs:
 
       ArtifactName: msi
 
+- job: TestWindowsMSI
+  displayName: Test Windows MSI
 
+  dependsOn: BuildWindowsMSI
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: false
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: msi
+
+  - task: PowerShell@2
+    displayName: Install and Load CLI
+    inputs:
+      targetType: inline
+      script: |
+        $InstallArgs = @(
+          "/I"
+          '"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"'
+          "/norestart"
+          "/L*v"
+          ".\install_logs.txt"
+        )
+        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
+        Get-Content .\install_logs.txt
+
+        az --version
+        az self-test
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -190,6 +264,106 @@ jobs:
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
+
+
+- job: RunAutomationFullPython2
+  displayName: Run Automation, Python 2
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+
+- job: RunAutomationReducedPython3
+  displayName: Run Automation, Python 3
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+
+- job: RunAutomationReduced20190301
+  displayName: Run Automation Reduced
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      REDUCE_SDK: 'True'
+      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+- job: RunAutomationReduced20180301
+  displayName: Run Automation, Profile 2018-03-01
+  dependsOn: BuildPythonWheel
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Python Wheels'
+    inputs:
+      artifactName: pypi
+  - bash: |
+      pip install --force-reinstall wheel
+  - task: Bash@3
+    displayName: 'Run Test Automation'
+    inputs:
+      targetType: 'filePath'
+      filePath: ./scripts/ci/test_automation.sh
+    env:
+      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
 
 
 - job: BuildHomebrewFormula
@@ -374,38 +548,6 @@ jobs:
     inputs:
       ArtifactName: debian
 
-
-
-- job: BuildUbuntuArtful
-  displayName: Build Ubuntu Artful Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Artful Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: artful
-      DISTRO_BASE_IMAGE: ubuntu:artful
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      ArtifactName: debian
-
-
-
 - job: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
 
@@ -466,37 +608,34 @@ jobs:
     inputs:
       ArtifactName: debian
 
-
-
-- job: BuildDebianWheezy
-  displayName: Build Debian Wheezy Package
+- job: BuildUbuntuDisco
+  displayName: Build Ubuntu Disco Package
 
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: pypi
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        artifactName: pypi
 
 
-  - task: Bash@3
-    displayName: 'Build Debian Wheezy'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: wheezy
-      DISTRO_BASE_IMAGE: debian:wheezy
+    - task: Bash@3
+      displayName: 'Build Ubuntu Disco Package'
+      inputs:
+        targetType: 'filePath'
+        filePath: scripts/release/debian/pipeline.sh
+      env:
+        DISTRO: disco
+        DISTRO_BASE_IMAGE: ubuntu:disco
 
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      ArtifactName: debian
-
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: debian'
+      inputs:
+        ArtifactName: debian
 
 
 - job: BuildDebianJessie
@@ -564,10 +703,8 @@ jobs:
 
   dependsOn:
    - BuildUbuntuXenial
-   - BuildUbuntuArtful
    - BuildUbuntuTrusty
    - BuildUbuntuBionic
-   - BuildDebianWheezy
    - BuildDebianJessie
    - BuildDebianStretch
    - BuildUbuntuCosmic
@@ -592,8 +729,8 @@ jobs:
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
-       DISTROS=(wheezy jessie stretch artful xenial trusty)
-       BASE_IMAGES=(debian:wheezy debian:jessie debian:stretch ubuntu:artful ubuntu:xenial ubuntu:trusty)
+       DISTROS=(jessie stretch xenial trusty)
+       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
 
        # Distros that don't require libssl1.1
        for i in ${!DISTROS[@]}; do

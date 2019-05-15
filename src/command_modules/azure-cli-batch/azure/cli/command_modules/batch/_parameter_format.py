@@ -89,7 +89,10 @@ IGNORE_PARAMETERS = [
     'job_schedule_update_parameter.job_specification.constraints',
     'job_schedule.job_specification.metadata',
     'job_schedule.job_specification.job_manager_task.application_package_references',
-    'job_schedule.job_specification.job_manager_task.environment_settings'
+    'job_schedule.job_specification.job_manager_task.environment_settings',
+    'resource_file.storage_container_url',
+    'resource_file.blob_prefix',
+    'resource_file.auto_storage_container_name'
 ]
 
 # Options to be flattened into multiple arguments.
