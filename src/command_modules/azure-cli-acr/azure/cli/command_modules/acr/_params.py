@@ -39,7 +39,7 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, OsType, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode = self.get_models('SkuName', 'PasswordName', 'OsType', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode')
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode = self.get_models('SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode')
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
@@ -57,8 +57,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_logs', help="Do not show logs after successfully queuing the build.", action='store_true')
         c.argument('no_wait', help="Do not wait for the run to complete and return immediately after queuing the run.", action='store_true')
         c.argument('no_format', help="Indicates whether the logs should be displayed in raw format", action='store_true')
-        c.argument('os_type', options_list=['--os'], help='The operating system type required for the build.', arg_type=get_enum_type(OsType), deprecate_info=c.deprecate(target='--os', redirect='--platform', hide=True))
-        c.argument('platform', help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
+        c.argument('platform', options_list=['--platform', c.deprecate(target='--os', redirect='--platform', hide=True)], help="The platform where build/task is run, Eg, 'windows' and 'linux'. When it's used in build commands, it also can be specified in 'os/arch/variant' format for the resulting image. Eg, linux/arm/v7. The 'arch' and 'variant' parts are optional.")
         c.argument('target', help='The name of the target build stage.')
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
         # Overwrite default shorthand of cmd to make availability for acr usage

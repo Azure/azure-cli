@@ -40,7 +40,6 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             no_wait=False,
             timeout=None,
             resource_group_name=None,
-            os_type=None,
             platform=None,
             auth_mode=None):
 
@@ -52,8 +51,6 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             "Azure Container Registry can run with either "
             "--cmd myCommand /dev/null or "
             "-f myFile mySourceLocation, but not both.")
-    if os_type and platform:
-        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
@@ -97,7 +94,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             source_location=source_location,
             timeout=timeout,
             platform=PlatformProperties(
-                os=os_type if os_type else platform_os,
+                os=platform_os,
                 architecture=platform_arch,
                 variant=platform_variant
             ),

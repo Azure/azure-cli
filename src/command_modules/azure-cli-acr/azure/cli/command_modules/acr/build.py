@@ -37,7 +37,6 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_push=False,
               no_logs=False,
               no_wait=False,
-              os_type=None,
               platform=None,
               target=None,
               auth_mode=None):
@@ -46,9 +45,6 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
-
-    if os_type and platform:
-        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
 
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):
@@ -106,7 +102,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         is_push_enabled=is_push_enabled,
         source_location=source_location,
         platform=PlatformProperties(
-            os=os_type if os_type else platform_os,
+            os=platform_os,
             architecture=platform_arch,
             variant=platform_variant
         ),

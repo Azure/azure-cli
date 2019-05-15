@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.4.9
++++++
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+
 0.4.8
 +++++
 * Minor fixes.

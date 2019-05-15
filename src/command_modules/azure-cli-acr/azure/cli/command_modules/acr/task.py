@@ -42,7 +42,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     git_access_token=None,
                     image_names=None,
                     status='Enabled',
-                    os_type=None,
                     platform=None,
                     cpu=DEFAULT_CPU,
                     timeout=DEFAULT_TIMEOUT_IN_SEC,
@@ -82,9 +81,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             "Task can be created with either "
             "--cmd myCommand -c /dev/null or "
             "-f myFile -c myContext, but not both.")
-
-    if os_type and platform:
-        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
 
     if context_path:
         if file.endswith(ALLOWED_TASK_FILE_TYPES):
@@ -181,9 +177,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         location=registry.location,
         step=step,
         platform=PlatformProperties(
-            os=os_type if os_type else platform_os,
+            os=platform_os,
             architecture=platform_arch,
-            variant=None if os_type else platform_variant
+            variant=platform_variant
         ),
         status=status,
         timeout=timeout,
@@ -249,7 +245,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     resource_group_name=None,
                     # task parameters
                     status=None,
-                    os_type=None,
                     platform=None,
                     cpu=None,
                     timeout=None,
@@ -273,9 +268,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     auth_mode=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-
-    if os_type and platform:
-        raise CLIError("[--os] has been depricated. Please use [--platform] instead.")
 
     task = client.get(resource_group_name, registry_name, task_name)
     step = task.step
@@ -390,7 +382,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
-            os=os_type if os_type else platform_os,
+            os=platform_os,
             architecture=platform_arch,
             variant=platform_variant
         ),

@@ -5,7 +5,9 @@
 
 """Custom operations for storage account commands"""
 
+import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
@@ -193,3 +195,18 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, account_name, params)
+
+
+def create_management_policies(client, resource_group_name, account_name, policy=None):
+    if policy:
+        if os.path.exists(policy):
+            policy = get_file_json(policy)
+        else:
+            policy = shell_safe_json_parse(policy)
+    return client.create_or_update(resource_group_name, account_name, policy=policy)
+
+
+def update_management_policies(client, resource_group_name, account_name, parameters=None):
+    if parameters:
+        parameters = parameters.policy
+    return client.create_or_update(resource_group_name, account_name, policy=parameters)

@@ -17,7 +17,7 @@ mkdir -p ./artifacts/testsrc
 output_dir=$(cd artifacts/build && pwd)
 sdist_dir=$(cd artifacts/source && pwd)
 testsrc_dir=$(cd artifacts/testsrc && pwd)
-script_dir=`cd $(dirname $0); pwd`
+script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
 
 target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
 if [ "$target_profile" != "latest" ]; then
@@ -45,7 +45,7 @@ echo -n $version > ./artifacts/version
 # build product packages
 title 'Build Azure CLI and its command modules'
 for setup_file in $(find src -name 'setup.py'); do
-    pushd $(dirname $setup_file) >/dev/null
+    pushd $(dirname ${setup_file}) >/dev/null
     echo "Building module at $(pwd) ..."
     python setup.py -q bdist_wheel -d $output_dir
     python setup.py -q sdist -d $sdist_dir

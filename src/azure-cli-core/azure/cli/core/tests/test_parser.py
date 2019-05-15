@@ -144,9 +144,9 @@ class TestParser(unittest.TestCase):
         return ext_name
 
     def _mock_get_extensions():
-        MockExtension = namedtuple('Extension', ['name', 'preview', 'path'])
-        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, path=None),
-                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, path=None)]
+        MockExtension = namedtuple('Extension', ['name', 'preview', 'path', 'get_metadata'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, path=None, get_metadata=lambda: {})]
 
     def _mock_load_command_loader(loader, args, name, prefix):
         from enum import Enum
