@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.4.3
++++++
+* `storage blob generate-sa`: check account_key  not None
+
 2.4.2
 +++++
 * `storage blob sync`: add sync command for storage blob
