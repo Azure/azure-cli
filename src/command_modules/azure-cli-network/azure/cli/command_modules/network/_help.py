@@ -2185,21 +2185,6 @@ examples:
     text: az network express-route wait -n MyCircuit -g MyResourceGroup --created
 """
 
-helps['network interface-endpoint'] = """
-type: group
-short-summary: Manage interface endpoints.
-"""
-
-helps['network interface-endpoint list'] = """
-type: command
-short-summary: List interface endpoints.
-"""
-
-helps['network interface-endpoint show'] = """
-type: command
-short-summary: Get the details of an interface endpoint.
-"""
-
 helps['network lb'] = """
 type: group
 short-summary: Manage and configure load balancers.

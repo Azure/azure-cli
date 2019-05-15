@@ -317,6 +317,48 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('configure --default group=""')
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_mgmt_grp(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            mgmt_grp = self.create_random_name('mgmt_grp', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'mgmt_grp': mgmt_grp
+            })
+
+            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+            mgmt_grp_created = False
+
+            try:
+                mgmt_grp_id = self.cmd('account management-group create -n {mgmt_grp}').get_output_in_json()['id']
+                self.kwargs['scope'] = mgmt_grp_id
+                mgmt_grp_created = True
+                time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+                # test role assignments on a resource group
+                self.cmd('role assignment create --assignee {upn} --role reader --scope {scope}',
+                         checks=self.check('scope', self.kwargs['scope']))
+
+                self.cmd('role assignment list --assignee {upn} --role reader --scope {scope}', checks=[
+                    self.check('length([])', 1),
+                    self.check('[0].scope', self.kwargs['scope'])
+                ])
+
+                self.cmd('role assignment delete --assignee {upn} --role reader --scope {scope}')
+
+                self.cmd('role assignment list --assignee {upn} --role reader --scope {scope}',
+                         checks=self.check('length([])', 0))
+            finally:
+                if mgmt_grp_created:
+                    self.cmd('account management-group delete -n {mgmt_grp}')
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
     @ResourceGroupPreparer(name_prefix='cli_role_audit')
     @AllowLargeResponse()
     def test_role_assignment_audits(self, resource_group):
