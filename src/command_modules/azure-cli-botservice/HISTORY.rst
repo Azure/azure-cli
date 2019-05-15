@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Allow all casing for `--lang` parameters for commands
+* Update description for command module
+
 0.2.0
 +++++
 * [Breaking Change]: `az bot create -v v4 -k webapp` now creates an empty Web App Bot by default (i.e. no bot is deployed to the App Service).
