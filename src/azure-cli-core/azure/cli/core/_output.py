@@ -17,8 +17,13 @@ class AzOutputProducer(knack.output.OutputProducer):
 
     @staticmethod
     def format_yaml(obj):
-        import yaml
-        return yaml.safe_dump(obj.result, default_flow_style=False)
+        from yaml import (safe_dump, representer)
+        import json
+
+        try:
+            return safe_dump(obj.result, default_flow_style=False)
+        except representer.RepresenterError:
+            return safe_dump(json.loads(json.dumps(obj.result)), default_flow_style=False)
 
     @staticmethod
     def format_none(_):
