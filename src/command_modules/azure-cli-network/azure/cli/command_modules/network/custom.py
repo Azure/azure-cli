@@ -1976,35 +1976,12 @@ def list_express_route_ports(cmd, resource_group_name=None):
 # endregion
 
 
-# region PrivateEndpoints
-def create_private_endpoint(cmd, resource_group_name, interface_endpoint_name, subnet, location=None, tags=None,
-                            fqdn=None, endpoint_service=None, nics=None):
-    client = network_client_factory(cmd.cli_ctx).interface_endpoints
-    InterfaceEndpoint, SubResource = cmd.get_models(
-        'InterfaceEndpoint', 'SubResource')
-    endpoint = InterfaceEndpoint(
-        tags=tags,
-        location=location,
-        fqdn=fqdn,
-        endpoint_service=SubResource(id=endpoint_service) if endpoint_service else None,
-        subnet=SubResource(id=subnet) if subnet else None,
-        network_interfaces=[SubResource(id=nics)] if nics else None
-    )
-    return client.create_or_update(resource_group_name, interface_endpoint_name, endpoint)
-
-
+# region PrivateEndpoint
 def list_private_endpoints(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).interface_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
-
-
-def update_interface_endpoint(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-
-    return instance
 # endregion
 
 

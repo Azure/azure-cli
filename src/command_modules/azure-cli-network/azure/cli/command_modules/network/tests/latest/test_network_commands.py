@@ -70,7 +70,8 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-class NetworkPrivateEndpoints(ScenarioTest):
+# TODO: revert to ScenarioTest once #9401 is addressed.
+class NetworkPrivateEndpoints(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):

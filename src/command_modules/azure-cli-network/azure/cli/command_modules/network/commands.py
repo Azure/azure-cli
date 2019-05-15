@@ -537,12 +537,7 @@ def load_command_table(self, _):
     # endregion
 
     # region PrivateEndpoint
-    with self.command_group('network interface-endpoint', network_private_endpoint_sdk, deprecate_info=self.deprecate(redirect='network private-endpoint', hide=True)) as g:
-        g.custom_command('list', 'list_private_endpoints')
-        g.show_command('show')
-
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
-        # TODO: Re-enable when service team asks. See issue #7271
         g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
     # endregion
