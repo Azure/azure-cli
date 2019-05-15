@@ -2649,7 +2649,7 @@ def create_devops_build(
         github_pat=None,
         github_repository=None
 ):
-    from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
+    from .azure_devops_build_interactive import AzureDevopsBuildInteractive
     azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
                                                                  organization_name, project_name, repository_name,
                                                                  overwrite_yaml, allow_force_push,
