@@ -16,8 +16,6 @@
 %define release        1%{?dist}
 %define version        %{getenv:CLI_VERSION}
 %define repo_path      %{getenv:REPO_PATH}
-%define venv_url       https://pypi.python.org/packages/source/v/virtualenv/virtualenv-15.0.0.tar.gz
-%define venv_sha256    70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19
 %define cli_lib_dir    %{_libdir}/az
 
 Summary:        Azure CLI
@@ -27,7 +25,7 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       %{python_cmd}
+Requires:       %{python_cmd}, %{python_cmd}-virtualenv
 
 BuildRequires:  gcc, libffi-devel, openssl-devel
 BuildRequires:  %{python_cmd}-devel
@@ -39,17 +37,9 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
 
 %prep
-# Create some tmp files
-tmp_venv_archive=$(mktemp)
-
-# Download, Extract Virtualenv
-wget %{venv_url} -qO $tmp_venv_archive
-echo "%{venv_sha256}  $tmp_venv_archive" | sha256sum -c -
-tar -xvzf $tmp_venv_archive -C %{_builddir}
-
 %install
 # Create the venv
-%{python_cmd} %{_builddir}/virtualenv-15.0.0/virtualenv.py --python %{python_cmd} %{buildroot}%{cli_lib_dir}
+%{python_cmd} -m virtualenv --python %{python_cmd} %{buildroot}%{cli_lib_dir}
 
 # Build the wheels from the source
 source_dir=%{repo_path}
