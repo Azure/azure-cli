@@ -3077,22 +3077,22 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
+
     def test_sql_instance_failover_group_mgmt(self):
 
         managed_instance_name_1 = "geodrmitestgp-01"
         managed_instance_name_2 = "geodrmitestgp-02"
         resource_group_name = "geodrCLtestRG"
-        mi1_location = "East US"
-        mi2_location = "West US"
-        
 
-        mi_1  =self.cmd('sql mi show -g {} -n {}'
-            .format(resource_group_name, managed_instance_name_1),checks=JMESPathCheck('name', managed_instance_name_1))
+        mi_1 = self.cmd('sql mi show -g {} -n {}'
+                .format(resource_group_name, managed_instance_name_1), checks=JMESPathCheck('name', managed_instance_name_1))
 
-        mi_2  =self.cmd('sql mi show -g {} -n {}'
-            .format(resource_group_name, managed_instance_name_2),checks=JMESPathCheck('name', managed_instance_name_2))
+        mi_2 = self.cmd('sql mi show -g {} -n {}'
+                .format(resource_group_name, managed_instance_name_2), checks=JMESPathCheck('name', managed_instance_name_2))
 
         failover_group_name = "fgclitest2019"
+        mi1_location = mi_1.location
+        mi2_location = mi_2.location
 
         # Create Failover Group
         self.cmd('sql instance-failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-managed-instance {} --failover-policy Automatic --grace-period 2'
@@ -3222,3 +3222,4 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('length(@)', 0)
                  ])
+                 
