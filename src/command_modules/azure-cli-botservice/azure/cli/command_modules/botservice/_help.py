@@ -7,7 +7,7 @@ from knack.help_files import helps
 
 helps['bot'] = """
     type: group
-    short-summary: Manage Microsoft Bot Services.
+    short-summary: Manage Microsoft Azure Bot Service.
 """
 helps['bot create'] = """
     type: command
