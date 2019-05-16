@@ -7,16 +7,14 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._constants import ACR_TASK_YAML_DEFAULT_NAME, ORYX_PACK_BUILDER_IMAGE
+from ._constants import ORYX_PACK_BUILDER_IMAGE
 from ._stream_utils import stream_logs
 from ._utils import (
     validate_managed_registry,
     get_validate_platform,
-    get_custom_registry_credentials,
-    get_yaml_and_values
+    get_custom_registry_credentials
 )
 from ._client_factory import cf_acr_registries
-from ._archive_utils import upload_source_code, check_remote_source_code
 from .run import prepare_source_location
 
 PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
