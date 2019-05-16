@@ -343,31 +343,15 @@ def _acr_repository_attributes_helper(cmd,
         path = _get_repository_path(repository)
         result_index = None
 
-    # Non-GET request doesn't return the entity so there is always a GET reqeust
-    if http_method != 'get':
-        try:
-            request_data_from_registry(
-                http_method=http_method,
-                login_server=login_server,
-                path=path,
-                username=username,
-                password=password,
-                result_index=result_index,
-                json_payload=json_payload)
-        except RegistryException as e:
-            # Check for Classic registry
-            if e.status_code == 405:
-                raise CLIError(ATTRIBUTES_NOT_SUPPORTED)
-            raise
-
     try:
         return request_data_from_registry(
-            http_method='get',
+            http_method=http_method,
             login_server=login_server,
             path=path,
             username=username,
             password=password,
-            result_index=result_index)[0]
+            result_index=result_index,
+            json_payload=json_payload)[0]
     except RegistryException as e:
         # Check for Classic registry
         if e.status_code == 405:
