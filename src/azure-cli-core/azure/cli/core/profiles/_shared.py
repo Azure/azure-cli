@@ -100,7 +100,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-01-01-preview', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2018-09-01',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
@@ -126,7 +126,7 @@ AZURE_API_PROFILES = {
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2018-09-01',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
@@ -145,7 +145,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2018-09-01',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
@@ -164,7 +164,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2018-09-01',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05'
     }
