@@ -20,7 +20,8 @@ from ._archive_utils import upload_source_code, check_remote_source_code
 from .run import prepare_source_location
 
 PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
-PACK_TASK_YAML_FMT = '''steps:
+PACK_TASK_YAML_FMT = '''version: v1.0.0
+steps:
   - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
     timeout: 28800
   - push: ["{image_name}"]
