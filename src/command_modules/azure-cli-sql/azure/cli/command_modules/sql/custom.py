@@ -878,7 +878,8 @@ def db_list_capabilities(
         for e in editions:
             e.supported_service_level_objectives = _filter_available(e.supported_service_level_objectives)
             for slo in e.supported_service_level_objectives:
-                slo.supported_max_sizes = _filter_available(slo.supported_max_sizes)
+                if slo.supported_max_sizes:
+                    slo.supported_max_sizes = _filter_available(slo.supported_max_sizes)
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if e.supported_service_level_objectives]
@@ -887,7 +888,8 @@ def db_list_capabilities(
     if DatabaseCapabilitiesAdditionalDetails.max_size.value not in show_details:
         for e in editions:
             for slo in e.supported_service_level_objectives:
-                slo.supported_max_sizes = []
+                if slo.supported_max_sizes:
+                    slo.supported_max_sizes = []
 
     return editions
 
