@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.4
++++++
+* Minor fixes
+
 2.2.3
 +++++
 * Added commands sql virtual-cluster list/show/delete
