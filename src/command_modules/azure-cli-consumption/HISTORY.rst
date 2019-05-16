@@ -2,7 +2,8 @@
 
 Release History
 ===============
-
+0.4.3
++++++
 * Added missing required parameter when running az consumption usage list --billing-period-name
 
 0.4.2

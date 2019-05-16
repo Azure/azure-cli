@@ -2,6 +2,8 @@
 
 Release History
 ===============
+0.2.20
+++++++
 * functionapp: deprecated `az functionapp devops-build` command will be removed in next release
 * functionapp: `az functionapp devops-pipeline` fetches building log from Azure DevOps in verbose mode
 * functionapp: `az functionapp devops-pipeline` removes `--use_local_settings` flag, since it does not change Azure DevOps release definition
