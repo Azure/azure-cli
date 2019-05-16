@@ -11,6 +11,7 @@ from uuid import UUID
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
+from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT, TYPESCRIPT
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -26,10 +27,6 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
-
-CSHARP = 'Csharp'
-JAVASCRIPT = 'Javascript'
-TYPESCRIPT = 'Typescript'
 
 
 def __bot_template_validator(version, deploy_echo):  # pylint: disable=inconsistent-return-statements
@@ -156,6 +153,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         if not language:
             raise CLIError("You must pass in a language when creating a {0} or {1} bot. See 'az bot create --help'."
                            .format(webapp_kind, function_kind))
+        language = language.lower()
 
         bot_template_type = __bot_template_validator(version, deploy_echo)
 
@@ -180,7 +178,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         subscription_id = get_subscription_id(cmd.cli_ctx)
         publish_cmd = "az bot publish --resource-group %s -n %s --subscription %s -v %s" % (
             resource_group_name, resource_name, subscription_id, version)
-        if language == 'Csharp':
+        if language == CSHARP:
             proj_file = '%s.csproj' % resource_name
             publish_cmd += " --proj-file-path %s" % proj_file
         creation_results['publishCommand'] = publish_cmd
@@ -521,6 +519,7 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
         if os.path.exists(os.path.join(code_dir, file_name)):
             raise CLIError('%s found in %s\nPlease delete this %s before calling "az bot '   # pylint:disable=logging-not-lazy
                            'prepare-deploy"' % (file_name, code_dir, file_name))
+    language = language.lower()
 
     if language == JAVASCRIPT or language == TYPESCRIPT:
         if proj_file_path:

@@ -8,6 +8,7 @@ import sys
 import zipfile
 import requests
 
+from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT
 from knack.util import CLIError
 
 
@@ -53,7 +54,7 @@ class BotPublishPrep:
 
     @staticmethod
     def prepare_publish_v4(logger, code_dir, proj_file, iis_info):
-        if iis_info['lang'] == 'Node' and iis_info['has_web_config'] and iis_info['has_iisnode_yml']:
+        if iis_info['lang'] == JAVASCRIPT and iis_info['has_web_config'] and iis_info['has_iisnode_yml']:
             logger.info("Necessary files for a Node.js deployment on IIS have been detected in the bot's folder. Not "
                         "retrieving required files from Azure.")
             return
@@ -65,7 +66,7 @@ class BotPublishPrep:
                     code_dir, proj_file or '')
 
         try:
-            if iis_info['lang'] == 'Csharp':
+            if iis_info['lang'] == CSHARP:
                 logger.info('Detected bot language C#, Bot Builder version v4.')
 
                 if proj_file is None:
@@ -78,7 +79,7 @@ class BotPublishPrep:
                     f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore {0}\n'
                             .format(BotPublishPrep.__find_proj(proj_file)))
 
-            elif iis_info['lang'] == 'Javascript':
+            elif iis_info['lang'] == JAVASCRIPT:
                 logger.info('Detected bot language JavaScript, Bot Builder version v4. Fetching necessary deployment '
                             'files for deploying on IIS.')
 
