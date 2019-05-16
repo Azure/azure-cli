@@ -53,7 +53,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     if not source_location:
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, None, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
     OS = cmd.get_models('OS')
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
