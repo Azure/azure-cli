@@ -243,7 +243,6 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             verify=mock.ANY)
 
-
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
     def test_repository_show(self, mock_requests_get, mock_get_access_credentials):
@@ -304,7 +303,6 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'writeEnabled': 'false'
             },
             verify=mock.ANY)
-
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
