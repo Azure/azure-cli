@@ -37,7 +37,6 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_push=False,
               no_logs=False,
               no_wait=False,
-              os_type=None,
               platform=None,
               target=None,
               auth_mode=None):
@@ -93,17 +92,9 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    if no_push:
-        is_push_enabled = False
-    else:
-        if image_names:
-            is_push_enabled = True
-            _warn_unsupported_image_name(image_names)
-        else:
-            is_push_enabled = False
-            logger.warning("'--image or -t' is not provided. Skipping image push after build.")
+    is_push_enabled = _get_push_enabled_status(no_push, image_names)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
     docker_build_request = DockerBuildRequest(
@@ -150,6 +141,19 @@ def _warn_unsupported_image_name(image_names):
         if ".Build.ID" in img:
             logger.warning(".Build.ID is no longer supported as a valid substitution, use .Run.ID instead.")
             break
+
+
+def _get_push_enabled_status(no_push, image_names):
+    if no_push:
+        is_push_enabled = False
+    else:
+        if image_names:
+            is_push_enabled = True
+            _warn_unsupported_image_name(image_names)
+        else:
+            is_push_enabled = False
+            logger.warning("'--image or -t' is not provided. Skipping image push after build.")
+    return is_push_enabled
 
 
 def _check_local_docker_file(docker_file_path):

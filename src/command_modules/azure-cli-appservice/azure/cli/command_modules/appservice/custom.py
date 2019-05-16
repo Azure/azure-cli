@@ -2399,7 +2399,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         logger.warning("Creating App service plan '%s' ...", asp)
         create_app_service_plan(cmd, rg_name, asp, is_linux, None, sku, 1 if is_linux else None, location)
         logger.warning("App service plan creation complete")
-        create_json['appserviceplan'] = plan
+        create_json['appserviceplan'] = asp
         _create_new_app = True
         _show_too_many_apps_warn = False
     else:
@@ -2646,14 +2646,13 @@ def create_devops_build(
         repository_name=None,
         overwrite_yaml=None,
         allow_force_push=None,
-        use_local_settings=None,
         github_pat=None,
         github_repository=None
 ):
-    from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
+    from .azure_devops_build_interactive import AzureDevopsBuildInteractive
     azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
                                                                  organization_name, project_name, repository_name,
-                                                                 overwrite_yaml, allow_force_push, use_local_settings,
+                                                                 overwrite_yaml, allow_force_push,
                                                                  github_pat, github_repository)
     return azure_devops_build_interactive.interactive_azure_devops_build()
 

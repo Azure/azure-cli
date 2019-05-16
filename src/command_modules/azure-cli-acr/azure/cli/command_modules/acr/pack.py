@@ -22,7 +22,9 @@ from .run import prepare_source_location
 PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
 PACK_TASK_YAML_FMT = '''steps:
   - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
+    timeout: 28800
   - push: ["{image_name}"]
+    timeout: 1800
 '''
 
 logger = get_logger(__name__)
@@ -39,7 +41,6 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
              no_wait=False,
              timeout=None,
              resource_group_name=None,
-             os_type=None,
              platform=None,
              auth_mode=None):
 
@@ -52,7 +53,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     if not source_location:
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, None, platform)
     OS = cmd.get_models('OS')
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')

@@ -31,7 +31,7 @@ from azure.cli.command_modules.network._validators import (
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
-    get_header_configuration_validator)
+    get_header_configuration_validator, validate_nat_gateway)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -1082,6 +1082,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet') as c:
         c.argument('subnet_name', arg_type=subnet_name_type, options_list=['--name', '-n'], id_part='child_name_1')
+        c.argument('nat_gateway', min_api='2019-02-01', validator=validate_nat_gateway, help='Name or ID of a NAT gateway to attach.')
         c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.', max_api='2018-07-01')
         c.argument('address_prefix', metavar='PREFIXES', options_list='--address-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format.', min_api='2018-08-01')
         c.argument('virtual_network_name', virtual_network_name_type)

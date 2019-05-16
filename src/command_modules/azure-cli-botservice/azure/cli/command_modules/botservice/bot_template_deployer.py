@@ -14,6 +14,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
+from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT
 
 
 class BotTemplateDeployer:
@@ -174,24 +175,24 @@ class BotTemplateDeployer:
         if version == 'v3':
             if kind == 'function':
                 template_name = BotTemplateDeployer.function_template_name
-                if language == 'Csharp':
+                if language == CSHARP:
                     cdn_link = cdn_link + 'csharp-abs-functions_emptybot.zip'
-                elif language == 'Javascript':
+                elif language == JAVASCRIPT:
                     cdn_link = cdn_link + 'node.js-abs-functions_emptybot_funcpack.zip'
             else:
                 template_name = BotTemplateDeployer.v3_webapp_template_name
-                if language == 'Csharp':
+                if language == CSHARP:
                     cdn_link = cdn_link + 'csharp-abs-webapp_simpleechobot_precompiled.zip'
-                elif language == 'Javascript':
+                elif language == JAVASCRIPT:
                     cdn_link = cdn_link + 'node.js-abs-webapp_hello-chatconnector.zip'
         else:
             if kind == 'function':
                 raise CLIError('Function bot creation is not supported for v4 bot sdk.')
 
             template_name = BotTemplateDeployer.v4_webapp_template_name
-            if language == 'Csharp' and bot_template_type == 'echo':
+            if language == CSHARP and bot_template_type == 'echo':
                 cdn_link = cdn_link + 'csharp-abs-webapp-v4_echobot_precompiled.zip'
-            elif language == 'Javascript' and bot_template_type == 'echo':
+            elif language == JAVASCRIPT and bot_template_type == 'echo':
                 cdn_link = cdn_link + 'node.js-abs-webapp-v4_echobot.zip'
 
         return cdn_link, template_name
