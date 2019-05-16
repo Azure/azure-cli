@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* `dns zone import`: Fix issue where record names could not match a record type.
+
 2.4.0
 +++++
 * [BREAKING CHANGE] `vnet create/update`: Replaced `--cache` arugment with `--defer`.
