@@ -12,6 +12,7 @@ from ._constants import (
     REGISTRY_RESOURCE_TYPE,
     ACR_RESOURCE_PROVIDER,
     STORAGE_RESOURCE_TYPE,
+    TASK_ID_TEMPLATE,
     get_classic_sku,
     get_managed_sku,
     get_premium_sku,
@@ -493,6 +494,14 @@ def get_custom_registry_credentials(cmd,
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
+    )
+
+def get_task_id_from_task_name(subscription_id, resource_group, registry_name, task_name):
+    return TASK_ID_TEMPLATE.format(
+        sub_id=subscription_id,
+        rg=resource_group,
+        reg=registry_name,
+        name=task_name
     )
 
 

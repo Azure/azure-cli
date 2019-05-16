@@ -12,7 +12,7 @@ REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
-
+TASK_ID_TEMPLATE='/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg}/tasks/{name}'
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

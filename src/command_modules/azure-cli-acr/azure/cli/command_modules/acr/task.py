@@ -7,13 +7,13 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_and_values
+    get_yaml_and_values,
+    get_task_id_from_task_name
 )
 from ._stream_utils import stream_logs
 
@@ -59,6 +59,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     base_image_trigger_name='defaultBaseimageTriggerName',
                     base_image_trigger_enabled=True,
                     base_image_trigger_type='Runtime',
+                    update_trigger_endpoint=None,
                     resource_group_name=None,
                     assign_identity=None,
                     target=None,
@@ -160,7 +161,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         base_image_trigger = BaseImageTrigger(
             base_image_trigger_type=base_image_trigger_type,
             status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
-            name=base_image_trigger_name
+            name=base_image_trigger_name,
+            update_trigger_endpoint=update_trigger_endpoint
         )
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
@@ -604,6 +606,12 @@ def acr_task_run(cmd,
                  registry_name,
                  set_value=None,
                  set_secret=None,
+                 file=None,
+                 context=None,
+                 arguments=None,
+                 secret_arguments=None,
+                 target=None,
+                 continuation_token=None,
                  no_logs=False,
                  no_wait=False,
                  resource_group_name=None):
@@ -612,15 +620,32 @@ def acr_task_run(cmd,
 
     from ._client_factory import cf_acr_registries
     client_registries = cf_acr_registries(cmd.cli_ctx)
-    TaskRunRequest = cmd.get_models('TaskRunRequest')
+    TaskRunRequest, OverrideTaskStepProperties = cmd.get_models('TaskRunRequest', 'OverrideTaskStepProperties')
+
+    import base64
+    if continuation_token:
+        continuation_token = base64.b64encode(continuation_token.encode()).decode()
+    
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    task_id=get_task_id_from_task_name(subscription_id, resource_group_name, registry_name, task_name)
+    logger.warning("taskid: %s", task_id)
+    override_task_step_properties = OverrideTaskStepProperties(
+                    file=file,
+                    context_path=context,
+                    target=target,
+                    # values=(set_value if set_value else []) + (set_secret if set_secret else []),
+                    # arguments=(arguments if arguments else []) + (secret_arguments if secret_arguments else [])
+    )
 
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(
             resource_group_name,
             registry_name,
             TaskRunRequest(
-                task_name=task_name,
-                values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                task_id=task_id,
+                override_task_step_properties=override_task_step_properties,
+                continuation_token=continuation_token if continuation_token else None
             )
         )
     )
