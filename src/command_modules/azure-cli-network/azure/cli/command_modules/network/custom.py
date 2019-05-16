@@ -1244,7 +1244,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
             elif record_type == 'a':
                 record_obj.update({'ip': record.ipv4_address})
             elif record_type == 'caa':
-                record_obj.update({'value': record.value, 'tag': record.tag, 'flags': record.flags})
+                record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname.rstrip('.') + '.'})
             elif record_type == 'mx':
@@ -1257,7 +1257,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 record_obj.update({
                     'mname': record.host.rstrip('.') + '.',
                     'rname': record.email.rstrip('.') + '.',
-                    'serial': record.serial_number, 'refresh': record.refresh_time,
+                    'serial': int(record.serial_number), 'refresh': record.refresh_time,
                     'retry': record.retry_time, 'expire': record.expire_time,
                     'minimum': record.minimum_ttl
                 })
@@ -1285,7 +1285,7 @@ def _build_record(cmd, data):
     AaaaRecord, ARecord, CaaRecord, CnameRecord, MxRecord, NsRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord = \
         cmd.get_models('AaaaRecord', 'ARecord', 'CaaRecord', 'CnameRecord', 'MxRecord', 'NsRecord',
                        'PtrRecord', 'SoaRecord', 'SrvRecord', 'TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record_type = data['type'].lower()
+    record_type = data['delim'].lower()
     try:
         if record_type == 'aaaa':
             return AaaaRecord(ipv6_address=data['ip'])
@@ -1293,7 +1293,7 @@ def _build_record(cmd, data):
             return ARecord(ipv4_address=data['ip'])
         if (record_type == 'caa' and
                 supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
-            return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
+            return CaaRecord(value=data['val'], flags=int(data['flags']), tag=data['tag'])
         if record_type == 'cname':
             return CnameRecord(cname=data['alias'])
         if record_type == 'mx':
@@ -1307,7 +1307,9 @@ def _build_record(cmd, data):
                              refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
                              minimum_ttl=data['minimum'])
         if record_type == 'srv':
-            return SrvRecord(priority=data['priority'], weight=data['weight'], port=data['port'], target=data['target'])
+            return SrvRecord(
+                priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']),
+                target=data['target'])
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
@@ -1344,7 +1346,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
                 record = _build_record(cmd, entry)
                 if not record:
-                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['type'].lower())
+                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
 
                 record_set = record_sets.get(record_set_key, None)
@@ -1976,35 +1978,12 @@ def list_express_route_ports(cmd, resource_group_name=None):
 # endregion
 
 
-# region PrivateEndpoints
-def create_private_endpoint(cmd, resource_group_name, interface_endpoint_name, subnet, location=None, tags=None,
-                            fqdn=None, endpoint_service=None, nics=None):
-    client = network_client_factory(cmd.cli_ctx).interface_endpoints
-    InterfaceEndpoint, SubResource = cmd.get_models(
-        'InterfaceEndpoint', 'SubResource')
-    endpoint = InterfaceEndpoint(
-        tags=tags,
-        location=location,
-        fqdn=fqdn,
-        endpoint_service=SubResource(id=endpoint_service) if endpoint_service else None,
-        subnet=SubResource(id=subnet) if subnet else None,
-        network_interfaces=[SubResource(id=nics)] if nics else None
-    )
-    return client.create_or_update(resource_group_name, interface_endpoint_name, endpoint)
-
-
+# region PrivateEndpoint
 def list_private_endpoints(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).interface_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
-
-
-def update_interface_endpoint(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-
-    return instance
 # endregion
 
 
@@ -2209,6 +2188,7 @@ def set_lb_frontend_ip_configuration(
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
         virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
+    public_ip_address = PublicIPAddress(id=public_ip_address)
     if private_ip_address == '':
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
@@ -3553,16 +3533,19 @@ def _set_route_table(ncf, resource_group_name, route_table, subnet):
 def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
                   address_prefix, network_security_group=None,
                   route_table=None, service_endpoints=None, service_endpoint_policy=None,
-                  delegations=None):
+                  delegations=None, nat_gateway=None):
     NetworkSecurityGroup, ServiceEndpoint, Subnet, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'Subnet', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
+
     if cmd.supported_api_version(min_api='2018-08-01'):
         subnet = Subnet(
             name=subnet_name,
             address_prefixes=address_prefix if len(address_prefix) > 1 else None,
             address_prefix=address_prefix[0] if len(address_prefix) == 1 else None
         )
+        if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
+            subnet.nat_gateway = SubResource(id=nat_gateway)
     else:
         subnet = Subnet(name=subnet_name, address_prefix=address_prefix)
 
@@ -3588,7 +3571,8 @@ def create_subnet(cmd, resource_group_name, virtual_network_name, subnet_name,
 
 
 def update_subnet(cmd, instance, resource_group_name, address_prefix=None, network_security_group=None,
-                  route_table=None, service_endpoints=None, delegations=None, service_endpoint_policy=None):
+                  route_table=None, service_endpoints=None, delegations=None, nat_gateway=None,
+                  service_endpoint_policy=None):
     NetworkSecurityGroup, ServiceEndpoint, SubResource = cmd.get_models(
         'NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat', 'SubResource')
 
@@ -3598,6 +3582,9 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
             instance.address_prefix = address_prefix[0] if len(address_prefix) == 1 else None
         else:
             instance.address_prefix = address_prefix
+
+    if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
+        instance.nat_gateway = SubResource(id=nat_gateway)
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)

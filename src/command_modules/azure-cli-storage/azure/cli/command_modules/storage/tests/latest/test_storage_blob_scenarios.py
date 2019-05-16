@@ -427,7 +427,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_uri = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                     'r --https-only --full-uri', account_info, b, c, expiry).output
         self.assertTrue(blob_uri)
-        self.assertIn('sig', blob_uri)
+        self.assertIn('&sig=', blob_uri)
         self.assertTrue(blob_uri.startswith('"https://clitest000002.blob.core.windows.net/cont000003/blob000004?s'))
 
 

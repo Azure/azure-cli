@@ -334,7 +334,7 @@ def load_arguments(self, _):
         c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
         c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
-        c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
+        c.argument('health_probe', help='Probe name from the existing load balancer, mainly used for rolling upgrade')
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
@@ -459,8 +459,8 @@ def load_arguments(self, _):
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
             c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
-            c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
-            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
+            c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='*')
+            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file.')
             c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux. "all" enables both ssh and password authentication. ', arg_type=get_enum_type(['ssh', 'password', 'all']))
 
         with self.argument_context(scope, arg_group='Storage') as c:

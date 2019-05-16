@@ -7,17 +7,17 @@ import unittest
 from mock import MagicMock, patch
 from knack.util import CLIError
 from azure.cli.core.mock import DummyCli
-from azure.cli.command_modules.appservice.azure_devops_build_iteractive import (
+from azure.cli.command_modules.appservice.azure_devops_build_interactive import (
     AzureDevopsBuildInteractive
 )
 
 
-def interactive_patch_path(iteractive_module):
-    return "azure.cli.command_modules.appservice.azure_devops_build_iteractive.{}".format(iteractive_module)
+def interactive_patch_path(interactive_module):
+    return "azure.cli.command_modules.appservice.azure_devops_build_interactive.{}".format(interactive_module)
 
 
 class TestDevopsBuildCommandsMocked(unittest.TestCase):
-    @patch("azure.cli.command_modules.appservice.azure_devops_build_iteractive.AzureDevopsBuildProvider", new=MagicMock())
+    @patch("azure.cli.command_modules.appservice.azure_devops_build_interactive.AzureDevopsBuildProvider", new=MagicMock())
     def setUp(self):
         mock_logger = MagicMock()
         mock_cmd = MagicMock()
@@ -31,7 +31,6 @@ class TestDevopsBuildCommandsMocked(unittest.TestCase):
             repository_name=None,
             overwrite_yaml=None,
             allow_force_push=None,
-            use_local_settings=None,
             github_pat=None,
             github_repository=None
         )

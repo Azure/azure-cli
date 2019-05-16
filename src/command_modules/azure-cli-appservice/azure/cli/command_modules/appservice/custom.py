@@ -2151,7 +2151,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
                                                                         storage_account)
     error_message = ''
     endpoints = storage_properties.primary_endpoints
-    sku = storage_properties.sku.name.value
+    sku = storage_properties.sku.name
     allowed_storage_types = ['Standard_GRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS']
 
     for e in ['blob', 'queue', 'table']:
@@ -2646,14 +2646,13 @@ def create_devops_build(
         repository_name=None,
         overwrite_yaml=None,
         allow_force_push=None,
-        use_local_settings=None,
         github_pat=None,
         github_repository=None
 ):
-    from .azure_devops_build_iteractive import AzureDevopsBuildInteractive
+    from .azure_devops_build_interactive import AzureDevopsBuildInteractive
     azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
                                                                  organization_name, project_name, repository_name,
-                                                                 overwrite_yaml, allow_force_push, use_local_settings,
+                                                                 overwrite_yaml, allow_force_push,
                                                                  github_pat, github_repository)
     return azure_devops_build_interactive.interactive_azure_devops_build()
 

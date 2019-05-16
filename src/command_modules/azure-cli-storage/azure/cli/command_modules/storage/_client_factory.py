@@ -138,6 +138,10 @@ def cf_sa(cli_ctx, _):
     return storage_client_factory(cli_ctx).storage_accounts
 
 
+def cf_mgmt_policy(cli_ctx, _):
+    return storage_client_factory(cli_ctx).management_policies
+
+
 def cf_blob_container_mgmt(cli_ctx, _):
     return storage_client_factory(cli_ctx).blob_containers
 

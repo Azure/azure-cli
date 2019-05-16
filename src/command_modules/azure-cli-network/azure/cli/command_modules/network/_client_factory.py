@@ -76,7 +76,7 @@ def cf_express_route_links(cli_ctx, _):
     return network_client_factory(cli_ctx).express_route_links
 
 
-def cf_interface_endpoints(cli_ctx, _):
+def cf_private_endpoints(cli_ctx, _):
     return network_client_factory(cli_ctx).interface_endpoints
 
 
