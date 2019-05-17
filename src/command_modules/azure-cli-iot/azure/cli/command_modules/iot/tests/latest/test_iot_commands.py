@@ -291,6 +291,10 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub devicestream show'
         self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
 
+        # Test 'az iot hub manual-failover'
+        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'east us'),
+                 checks=[self.check('location', resource_group_location)])
+
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
