@@ -159,7 +159,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
-                               custom_error_pages=None):
+                               custom_error_pages=None, firewall_policy=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
