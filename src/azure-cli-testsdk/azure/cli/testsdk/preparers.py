@@ -14,6 +14,8 @@ from .reverse_dependency import get_dummy_cli
 
 
 # Resource Group Preparer and its shorthand decorator
+# This preparer's traffic is not recorded. As a result when tests are run in record mode, sdk calls cannot be made.
+# Rather the deterministic resource group information is returned.
 
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest.rg',
@@ -21,8 +23,8 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
-                 random_name_length=75, key='rg'):
-        super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
+                 random_name_length=75, key='rg', disable_recording=True):
+        super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length, disable_recording)
         self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
@@ -41,14 +43,18 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
-
         template = 'az group create --location {} --name {} --tag ' + tags
-        execute(self.cli_ctx, template.format(self.location, name))
+
+        # create group if test is being recorded
+        if self.test_class_instance.in_recording:
+            execute(self.cli_ctx, template.format(self.location, name))
+
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
-        if not self.dev_setting_name:
+        # delete group if test is being recorded and if the group is not a dev rg
+        if not self.dev_setting_name and self.test_class_instance.in_recording:
             execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait'.format(name))
 
 
