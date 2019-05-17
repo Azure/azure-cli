@@ -955,7 +955,7 @@ def validate_ssh_key(namespace):
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
 
 
 def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
