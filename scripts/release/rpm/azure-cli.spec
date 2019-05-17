@@ -28,7 +28,7 @@ BuildArch:      x86_64
 Requires:       %{python_cmd}, %{python_cmd}-virtualenv
 
 BuildRequires:  gcc, libffi-devel, openssl-devel
-BuildRequires:  %{python_cmd}-devel
+# BuildRequires:  %{python_cmd}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 
