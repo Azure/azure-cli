@@ -3261,7 +3261,7 @@ examples:
 # region RouteFilters
 helps['network route-filter'] = """
 type: group
-short-summary: (PREVIEW) Manage route filters.
+short-summary: Manage route filters.
 long-summary: >
     To learn more about route filters with Microsoft peering with ExpressRoute, visit https://docs.microsoft.com/en-us/azure/expressroute/how-to-routefilter-cli
 """
@@ -3292,7 +3292,7 @@ examples:
 
 helps['network route-filter rule'] = """
 type: group
-short-summary: (PREVIEW) Manage rules in a route filter.
+short-summary: Manage rules in a route filter.
 long-summary: >
     To learn more about route filters with Microsoft peering with ExpressRoute, visit https://docs.microsoft.com/en-us/azure/expressroute/how-to-routefilter-cli
 """
@@ -4536,7 +4536,7 @@ examples:
 
 helps['network watcher test-connectivity'] = """
 type: command
-short-summary: (PREVIEW) Test if a connection can be established between a Virtual Machine and a given endpoint.
+short-summary: Test if a connection can be established between a Virtual Machine and a given endpoint.
 long-summary: >
     To check connectivity between two VMs in different regions, use the VM ids instead of the VM names for the source and destination resource arguments.
     To register for this feature or see additional examples visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli

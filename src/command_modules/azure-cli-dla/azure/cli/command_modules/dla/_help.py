@@ -9,17 +9,17 @@ from knack.help_files import helps
 
 helps['dla'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics accounts, jobs, and catalogs.
+short-summary: Manage Data Lake Analytics accounts, jobs, and catalogs.
 """
 
 helps['dla account'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics accounts.
+short-summary: Manage Data Lake Analytics accounts.
 """
 
 helps['dla account blob-storage'] = """
 type: group
-short-summary: (PREVIEW) Manage links between Data Lake Analytics accounts and Azure Storage.
+short-summary: Manage links between Data Lake Analytics accounts and Azure Storage.
 """
 
 helps['dla account blob-storage add'] = """
@@ -34,7 +34,7 @@ short-summary: Updates an Azure Storage account linked to the specified Data Lak
 
 helps['dla account compute-policy'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics account compute policies.
+short-summary: Manage Data Lake Analytics account compute policies.
 """
 
 helps['dla account compute-policy create'] = """
@@ -108,7 +108,7 @@ parameters:
 
 helps['dla account data-lake-store'] = """
 type: group
-short-summary: (PREVIEW) Manage links between Data Lake Analytics and Data Lake Store accounts.
+short-summary: Manage links between Data Lake Analytics and Data Lake Store accounts.
 """
 
 helps['dla account delete'] = """
@@ -118,7 +118,7 @@ short-summary: Delete a Data Lake Analytics account.
 
 helps['dla account firewall'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics account firewall rules.
+short-summary: Manage Data Lake Analytics account firewall rules.
 """
 
 helps['dla account firewall create'] = """
@@ -189,17 +189,17 @@ parameters:
 
 helps['dla catalog'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalogs.
+short-summary: Manage Data Lake Analytics catalogs.
 """
 
 helps['dla catalog assembly'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog assemblies.
+short-summary: Manage Data Lake Analytics catalog assemblies.
 """
 
 helps['dla catalog credential'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog credentials.
+short-summary: Manage Data Lake Analytics catalog credentials.
 """
 
 helps['dla catalog credential create'] = """
@@ -249,32 +249,32 @@ parameters:
 
 helps['dla catalog database'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog databases.
+short-summary: Manage Data Lake Analytics catalog databases.
 """
 
 helps['dla catalog external-data-source'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog external data sources.
+short-summary: Manage Data Lake Analytics catalog external data sources.
 """
 
 helps['dla catalog package'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog packages.
+short-summary: Manage Data Lake Analytics catalog packages.
 """
 
 helps['dla catalog procedure'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog stored procedures.
+short-summary: Manage Data Lake Analytics catalog stored procedures.
 """
 
 helps['dla catalog schema'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog schemas.
+short-summary: Manage Data Lake Analytics catalog schemas.
 """
 
 helps['dla catalog table'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog tables.
+short-summary: Manage Data Lake Analytics catalog tables.
 """
 
 helps['dla catalog table list'] = """
@@ -291,12 +291,12 @@ parameters:
 
 helps['dla catalog table-partition'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog table partitions.
+short-summary: Manage Data Lake Analytics catalog table partitions.
 """
 
 helps['dla catalog table-stats'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog table statistics.
+short-summary: Manage Data Lake Analytics catalog table statistics.
 """
 
 helps['dla catalog table-stats list'] = """
@@ -316,12 +316,12 @@ parameters:
 
 helps['dla catalog table-type'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog table types.
+short-summary: Manage Data Lake Analytics catalog table types.
 """
 
 helps['dla catalog tvf'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog table valued functions.
+short-summary: Manage Data Lake Analytics catalog table valued functions.
 """
 
 helps['dla catalog tvf list'] = """
@@ -338,7 +338,7 @@ parameters:
 
 helps['dla catalog view'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics catalog views.
+short-summary: Manage Data Lake Analytics catalog views.
 """
 
 helps['dla catalog view list'] = """
@@ -355,7 +355,7 @@ parameters:
 
 helps['dla job'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics jobs.
+short-summary: Manage Data Lake Analytics jobs.
 """
 
 helps['dla job cancel'] = """
@@ -370,7 +370,7 @@ short-summary: List Data Lake Analytics jobs.
 
 helps['dla job pipeline'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics job pipelines.
+short-summary: Manage Data Lake Analytics job pipelines.
 """
 
 helps['dla job pipeline list'] = """
@@ -385,7 +385,7 @@ short-summary: Retrieve a job pipeline in a Data Lake Analytics account.
 
 helps['dla job recurrence'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Analytics job recurrences.
+short-summary: Manage Data Lake Analytics job recurrences.
 """
 
 helps['dla job recurrence list'] = """
