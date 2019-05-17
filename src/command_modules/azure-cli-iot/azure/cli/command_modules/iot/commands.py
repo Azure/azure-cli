@@ -101,6 +101,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('list-skus', 'iot_hub_sku_list')
         g.custom_command('show-quota-metrics', 'iot_hub_get_quota_metrics')
         g.custom_command('show-stats', 'iot_hub_get_stats')
+        g.custom_command('manual-failover', 'iot_hub_manual_failover', supports_no_wait=True)
 
     # iot hub consumer group commands
     with self.command_group('iot hub consumer-group', client_factory=iot_hub_service_factory) as g:
