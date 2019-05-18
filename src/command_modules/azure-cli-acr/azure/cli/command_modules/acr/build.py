@@ -13,8 +13,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
-from ._utils import validate_managed_registry, get_validate_platform
-from ._run_polling import get_run_with_polling
+from ._utils import validate_managed_registry, get_validate_platform, get_custom_registry_credentials
 from ._stream_utils import stream_logs
 from ._archive_utils import upload_source_code, check_remote_source_code
 
@@ -37,9 +36,10 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_format=False,
               no_push=False,
               no_logs=False,
-              os_type=None,
+              no_wait=False,
               platform=None,
-              target=None):
+              target=None,
+              auth_mode=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
@@ -92,17 +92,9 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    if no_push:
-        is_push_enabled = False
-    else:
-        if image_names:
-            is_push_enabled = True
-            _warn_unsupported_image_name(image_names)
-        else:
-            is_push_enabled = False
-            logger.warning("'--image or -t' is not provided. Skipping image push after build.")
+    is_push_enabled = _get_push_enabled_status(no_push, image_names)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties')
     docker_build_request = DockerBuildRequest(
@@ -117,20 +109,29 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         docker_file_path=docker_file_path,
         timeout=timeout,
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-        target=target
+        target=target,
+        credentials=get_custom_registry_credentials(
+            cmd=cmd,
+            auth_mode=auth_mode
+        )
     )
 
-    queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
+    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         run_request=docker_build_request))
 
-    run_id = queued_build.run_id
+    run_id = queued.run_id
     logger.warning("Queued a build with ID: %s", run_id)
-    logger.warning("Waiting for agent...")
+
+    if no_wait:
+        return queued
+
+    logger.warning("Waiting for an agent...")
 
     if no_logs:
-        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
+        from ._run_polling import get_run_with_polling
+        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
 
@@ -140,6 +141,19 @@ def _warn_unsupported_image_name(image_names):
         if ".Build.ID" in img:
             logger.warning(".Build.ID is no longer supported as a valid substitution, use .Run.ID instead.")
             break
+
+
+def _get_push_enabled_status(no_push, image_names):
+    if no_push:
+        is_push_enabled = False
+    else:
+        if image_names:
+            is_push_enabled = True
+            _warn_unsupported_image_name(image_names)
+        else:
+            is_push_enabled = False
+            logger.warning("'--image or -t' is not provided. Skipping image push after build.")
+    return is_push_enabled
 
 
 def _check_local_docker_file(docker_file_path):

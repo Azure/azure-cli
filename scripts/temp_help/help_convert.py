@@ -69,6 +69,7 @@ def get_all_help(cli_ctx):
 def create_invoker_and_load_cmds_and_args(cli_ctx):
     global loaded_helps
     from knack import events
+    from azure.cli.core.commands import register_cache_arguments
     from azure.cli.core.commands.arm import register_global_subscription_argument, register_ids_argument
 
     invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
@@ -115,6 +116,7 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
 
     register_global_subscription_argument(cli_ctx)
     register_ids_argument(cli_ctx)  # global subscription must be registered first!
+    register_cache_arguments(cli_ctx)
     cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
     invoker.parser.load_command_table(invoker.commands_loader)
 
@@ -175,7 +177,7 @@ def _get_new_yaml_dict(help_dict):
     content = result['content']
 
     for command_or_group, yaml_text in help_dict.items():
-        help_dict = yaml.load(yaml_text)
+        help_dict = yaml.safe_load(yaml_text)
 
         type = help_dict["type"]
 
@@ -208,10 +210,11 @@ def _get_new_yaml_dict(help_dict):
                     new_ex["summary"] = ex["name"]
                 if "text" in ex:
                     new_ex["command"] = ex["text"]
-                if "min_profile" in ex:
-                    new_ex["min_profile"] = ex["min_profile"]
-                if "max_profile" in ex:
-                    new_ex["max_profile"] = ex["max_profile"]
+                supported_profiles, unsupported_profiles = "supported-profiles", "unsupported-profiles"
+                if supported_profiles in ex:
+                    new_ex[supported_profiles] = ex[supported_profiles]
+                if unsupported_profiles in ex:
+                    new_ex[unsupported_profiles] = ex[unsupported_profiles]
                 elem_examples.append(new_ex)
             elem_content["examples"] = elem_examples
 
@@ -360,7 +363,7 @@ if __name__ == "__main__":
         for file, help_dict in file_to_help.items():
             logger.warning("Writing {} ...".format(file))
             with open(file, "w") as f:
-                yaml.dump(help_dict, f)
+                yaml.safe_dump(help_dict, f)
 
         print("Loading all help again...")
         all_cli_help = get_all_help(az_cli)
@@ -383,7 +386,7 @@ if __name__ == "__main__":
             print("Generating help.yaml file...")
             out_file, result = convert(target_mods[0], mod_names[0])
             with open(out_file, "w") as f:
-                yaml.dump(result, f)
+                yaml.safe_dump(result, f)
             print("Done! Successfully generated {0}/help.yaml in {0} module.".format(mod_names[0]))
         else:
             print("Generating help.yaml files...")
@@ -392,6 +395,6 @@ if __name__ == "__main__":
                 if out_file is None or result is None:
                     continue
                 with open(out_file, "w") as f:
-                    yaml.dump(result, f)
+                    yaml.safe_dump(result, f)
                 print("Successfully generated {0}/help.yaml in {0} module.".format(mod_name))
 

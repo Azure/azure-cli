@@ -19,7 +19,7 @@ class EventhubCommandsLoader(AzCommandsLoader):
         eventhub_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.eventhubs.custom#{}')
         super(EventhubCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                      custom_command_type=eventhub_custom,
-                                                     min_profile='2017-03-10-profile',
+                                                     min_profile='2019-03-02-hybrid',
                                                      suppress_extension=ModExtensionSuppress(__name__, 'eventhubs', '0.0.1',
                                                                                              reason='These commands are now in the CLI.',
                                                                                              recommend_remove=True))

@@ -45,7 +45,7 @@ def main(args):
     # load yaml help
     help_file_entries = {}
     for entry_name, help_yaml in helps.items():
-        help_entry = yaml.load(help_yaml)
+        help_entry = yaml.safe_load(help_yaml)
         help_file_entries[entry_name] = help_entry
 
     if not args.rule_types_to_run:
@@ -60,7 +60,7 @@ def main(args):
         for _, path in gen:
             exclusion_path = os.path.join(path, 'linter_exclusions.yml')
             if os.path.isfile(exclusion_path):
-                mod_exclusions = yaml.load(open(exclusion_path))
+                mod_exclusions = yaml.safe_load(open(exclusion_path))
                 exclusions.update(mod_exclusions)
 
     # only run linter on modules and extensions specified

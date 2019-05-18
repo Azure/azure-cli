@@ -35,7 +35,7 @@ logger = get_logger(__name__)
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete']
-ACCESS_TOKEN_PERMISSION = ['*', 'pull']
+ACCESS_TOKEN_PERMISSION = ['pull', 'push', 'delete', 'push,pull', 'delete,pull']
 
 AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with message"
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
@@ -131,7 +131,7 @@ def _get_aad_token(cli_ctx,
     return loads(response.content.decode("utf-8"))["access_token"]
 
 
-def _get_credentials(cmd,
+def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      registry_name,
                      tenant_suffix,
                      username,
@@ -164,24 +164,31 @@ def _get_credentials(cmd,
                 "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
                 login_server, tenant_suffix)
     except (ResourceNotFound, CLIError) as e:
-        if not isinstance(e, ResourceNotFound) and _AZ_LOGIN_MESSAGE not in str(e):
+        resource_not_found = str(e)
+        logger.debug("Could not get registry from service. Exception: %s", resource_not_found)
+        if not isinstance(e, ResourceNotFound) and _AZ_LOGIN_MESSAGE not in resource_not_found:
             raise
         # Try to use the pre-defined login server suffix to construct login server from registry name.
         login_server_suffix = get_login_server_suffix(cli_ctx)
         if not login_server_suffix:
             raise
-        resource_not_found = str(e)
         login_server = '{}{}{}'.format(
             registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
 
     # Validate the login server is reachable
+    url = 'https://' + login_server + '/v2/'
     try:
-        requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
-    except RequestException:
+        challenge = requests.get(url, verify=(not should_disable_connection_verify()))
+        if challenge.status_code in [403]:
+            raise CLIError("Looks like you don't have access to registry '{}'. "
+                           "Are firewalls and virtual networks enabled?".format(login_server))
+    except RequestException as e:
+        logger.debug("Could not connect to registry login server. Exception: %s", str(e))
         if resource_not_found:
             logger.warning("%s\nUsing '%s' as the default registry login server.", resource_not_found, login_server)
-        raise CLIError("Could not connect to the registry '{}'. ".format(login_server) +
-                       "Please verify if the registry exists.")
+        raise CLIError("Could not connect to the registry login server '{}'. ".format(login_server) +
+                       "Please verify that the registry exists and " +
+                       "the URL '{}' is reachable from your environment.".format(url))
 
     # 1. if username was specified, verify that password was also specified
     if username:
@@ -259,7 +266,7 @@ def get_access_credentials(cmd,
     :param str password: The password used to log into the container registry
     :param str repository: Repository for which the access token is requested
     :param str artifact_repository: Artifact repository for which the access token is requested
-    :param str permission: The requested permission on the repository, '*' or 'pull'
+    :param str permission: The requested permission on the repository
     """
     return _get_credentials(cmd,
                             registry_name,
@@ -284,7 +291,8 @@ def get_login_server_suffix(cli_ctx):
     """Get the Azure Container Registry login server suffix in the current cloud."""
     try:
         return cli_ctx.cloud.suffixes.acr_login_server_endpoint
-    except CloudSuffixNotSetException:
+    except CloudSuffixNotSetException as e:
+        logger.debug("Could not get login server endpoint suffix. Exception: %s", str(e))
         # Ignore the error if the suffix is not set, the caller should then try to get login server from server.
         return None
 
@@ -370,8 +378,8 @@ def request_data_from_registry(http_method,
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
-                except ValueError:
-                    logger.debug('Response is empty or is not a valid json.')
+                except ValueError as e:
+                    logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
                 return result, None
             elif response.status_code == 204:
                 return None, None

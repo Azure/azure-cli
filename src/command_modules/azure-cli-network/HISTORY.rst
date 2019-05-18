@@ -2,9 +2,46 @@
 
 Release History
 ===============
+
+* [BREAKING CHANGE]: previously deprecated command group `network interface-endpoints` has been removed. Use `network private-endpoints` instead.
+* `network vnet subnet create/update`: Added `--nat-gateway` argument for attaching to a NAT gateway.
+* `dns zone import`: Fix issue where record names could not match a record type.
+
+2.4.0
++++++
+* [BREAKING CHANGE] `vnet create/update`: Replaced `--cache` arugment with `--defer`.
+
+2.3.7
++++++
+* `dns zone create`: Add auto name server delegation in parent during child zone creation
+
+2.3.6
++++++
+* `vnet-gateway list-bgp-peer-status`: Fix table format not displaying.
+* `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
+* `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
+* `express-route port update`: Fixed an issue where updating link state on an express-route port would throw an unknown attribute exception.
+
+2.3.5
++++++
+* `application-gateway`: Add `rewrite-rule` command group.
+
+2.3.4
++++++
+* `vpn-connection update`: Fix issue where updating a VPN connection between gateways in different subscriptions would fail.
+
+2.3.3
++++++
+* `vpn-connection create/update`: Add `--express-route-gateway-bypass` argument.
+* `express-route`: Port command groups from `express-route` extensions.
+* `express-route`: Added `express-route gateway` and `express-route port` command groups.
+* `express-route peering create/update`: Added argument `--legacy-mode`.
+* `express-route create/update`: Added argument `--allow-classic-operations` and `--express-route-port`.
+* `vnet-gateway create/update`: Add `--gateway-default-site` argument.
+* `vnet-gateway`: Added `ipsec-policy` commands.
+
 2.3.2
 +++++
-
 * `dns zone export`: Ensure exported CNAMEs are FQDNs.
 * `nic ip-config address-pool add/remove`: Add `--gateway-name` to support application gateway backend address pools.
 * `network watcher flow-log configure`: Add arguments `--traffic-analytics`, `--workspace` to support traffic analytics through a Log Analytics workspace.

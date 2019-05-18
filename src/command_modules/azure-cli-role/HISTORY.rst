@@ -2,6 +2,38 @@
 
 Release History
 ===============
+* role assignment: support scope of management group
+
+2.6.1
++++++
+* create-for-rbac: hide '--password' as the preparations to pull the plug completely in 2019 May
+
+2.6.0
++++++
+* [BREAKING CHANGE] 'group create'/'app create'/'sp create-for-rbac': supports idempotent, hence confliction error will not be surfaced
+
+2.5.0
++++++
+* create-for-rbac: handle --years correctly
+* [BREAKING CHANGE] `role assignment delete`: prompt when delete all assignments under the subscription unconditionally
+
+2.4.3
++++++
+* `ad app/sp credential reset`: support --end-date
+* `ad app permission add`: support to add permissions on existing api
+* `ad app permission list`: fix a bad error when there is no permissions
+* `ad sp delete`: skip role assignment delete if the current account has no subscription
+* `ad app create`: make --identifier-uris default to empty list if not provided
+
+2.4.2
++++++
+* `role definition update`: use id to resolve definition correctly
+* `ad app credential reset`: drop the assumption that app's service principal always exists
+
+2.4.1
++++++
+* `az ad app create/update`: support app roles
+
 2.4.0
 +++++
 * `az identity` moved here from inside of the `azure-cli-vm` command_module.

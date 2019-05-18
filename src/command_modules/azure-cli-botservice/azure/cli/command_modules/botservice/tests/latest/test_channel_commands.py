@@ -16,10 +16,10 @@ class ChannelTests(ScenarioTest):
             'app_id': str(uuid.uuid4()),
             'setting_name': self.create_random_name(prefix='auth', length=10),
             'clientid': 'clientid',
-            'secret': 'secret'
+            'password': str(uuid.uuid4())
         })
 
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id}', checks=[
+        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id} -p {password}', checks=[
             self.check('name', '{botname}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', 'global')

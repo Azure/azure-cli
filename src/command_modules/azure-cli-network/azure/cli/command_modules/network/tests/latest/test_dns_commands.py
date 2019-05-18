@@ -83,6 +83,14 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_zone6_import(self, resource_group):
         self._test_zone('zone6.com', 'zone6.txt')
 
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone7_import')
+    def test_dns_zone7_import(self, resource_group):
+        self._test_zone('zone7.com', 'zone7.txt')
+
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone8_import')
+    def test_dns_zone8_import(self, resource_group):
+        self._test_zone('zone8.com', 'zone8.txt')
+
 
 class DnsScenarioTest(ScenarioTest):
 
@@ -155,6 +163,35 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
 
         self.cmd('network dns zone delete -g {rg} -n {zone} -y',
+                 checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns')
+    def test_dns_delegation(self, resource_group):
+        self.kwargs['parent_zone_name'] = 'books.com'
+        self.cmd('network dns zone create -n {parent_zone_name} -g {rg}').get_output_in_json()
+
+        base_record_sets = 2
+        self.cmd('network dns zone show -n {parent_zone_name} -g {rg}',
+                 checks=self.check('numberOfRecordSets', base_record_sets))
+
+        self.kwargs['child_zone_name'] = 'nursery.books.com'
+        child_zone = self.cmd('network dns zone create -n {child_zone_name} -g {rg} -p {parent_zone_name}').get_output_in_json()
+        child_name_server_count = len(child_zone['nameServers'])
+
+        record_sets_with_ns_delegation = 3
+        self.cmd('network dns zone show -n {parent_zone_name} -g {rg}',
+                 checks=self.check('numberOfRecordSets', record_sets_with_ns_delegation)).get_output_in_json()
+
+        record_set_name = self.kwargs['child_zone_name'].replace('.' + self.kwargs['parent_zone_name'], '')
+        self.kwargs['record_set_name'] = record_set_name
+        self.cmd('network dns record-set ns show -n {record_set_name} -g {rg} --zone-name {parent_zone_name}',
+                 checks=self.check('length(nsRecords)', child_name_server_count))
+
+        # clean up by deleting the created resources
+        self.cmd('network dns zone delete -g {rg} -n {parent_zone_name} -y',
+                 checks=self.is_empty())
+
+        self.cmd('network dns zone delete -g {rg} -n {child_zone_name} -y',
                  checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns')
@@ -261,7 +298,7 @@ class DnsParseZoneFiles(unittest.TestCase):
     def _check_soa(self, zone, zone_name, ttl, serial_number, refresh, retry, expire, min_ttl):
         record = zone[zone_name]['soa']
         self.assertEqual(record['ttl'], ttl)
-        self.assertEqual(record['serial'], serial_number)
+        self.assertEqual(int(record['serial']), serial_number)
         self.assertEqual(record['refresh'], refresh)
         self.assertEqual(record['retry'], retry)
         self.assertEqual(record['expire'], expire)
@@ -296,9 +333,9 @@ class DnsParseZoneFiles(unittest.TestCase):
         self.assertEqual(len(records_to_check), len(zone[name]['caa']))
         for i, record in enumerate(zone[name]['caa']):
             self.assertEqual(record['ttl'], records_to_check[i][0])
-            self.assertEqual(record['flags'], records_to_check[i][1])
+            self.assertEqual(int(record['flags']), records_to_check[i][1])
             self.assertEqual(record['tag'], records_to_check[i][2])
-            self.assertEqual(record['value'], records_to_check[i][3])
+            self.assertEqual(record['val'], records_to_check[i][3])
 
     def _check_cname(self, zone, name, ttl, alias):
         record = zone[name]['cname']
@@ -569,6 +606,18 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_txt(zone, zn, [(60, None, 'a\\\\b\\255\\000\\;\\"\\"\\"testtesttest\\"\\"\\"')])
         self._check_txt(zone, 'txt1.' + zn, [(3600, None, 'ab\\ cd')])
         self._check_cname(zone, 'cn1.' + zn, 3600, 'contoso.com.')
+        self._check_ns(zone, zn, [
+            (172800, 'ns1-03.azure-dns.com.'),
+            (172800, 'ns2-03.azure-dns.net.'),
+            (172800, 'ns3-03.azure-dns.org.'),
+            (172800, 'ns4-03.azure-dns.info.'),
+        ])
+
+    def test_zone_file_8(self):
+        zn = 'zone8.com.'
+        zone = self._get_zone_object('zone8.txt', zn)
+        self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
+        self._check_a(zone, 'ns.' + zn, [(3600, '1.2.3.4')])
         self._check_ns(zone, zn, [
             (172800, 'ns1-03.azure-dns.com.'),
             (172800, 'ns2-03.azure-dns.net.'),

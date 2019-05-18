@@ -23,29 +23,12 @@ The commands for Command modules and Extensions are authored in the same way. Se
 Developing
 ----------
 
-**(Step 1)** Set the `AZURE_EXTENSION_DIR` environment variable to a directory that will hold the extension(s) being developed:
+Development of extensions have been simplified by the public release of the azdev CLI. Please visit https://github.com/Azure/azure-cli-dev-tools for more information.
 
-```
-export AZURE_EXTENSION_DIR=~/.azure/devcliextensions
-```
-
-The CLI will now look in this directory for extensions.
-
-**(Step 2)** Install your extension into the extensions directory:
-
-```
-pip install --upgrade --target ~/.azure/devcliextensions/myexampleextension ~/Dev/myexampleextension
-```
-
-- `~/.azure/devcliextensions/myexampleextension` is the directory `pip` will install the extension to. Notice that this value is `AZURE_EXTENSION_DIR` concatenated with the name of the extension.
-- `~/Dev/myexampleextension` is the directory with the source code of your extension. One of the files in this directory would be your `setup.py`.
-
-- The above two directories are *examples*. You can choose any directory you want. Just use the appropriate directories throughout when following this document.
-
-**(Step 3)** Continue to develop your extension:
-
-Any time you make changes to your extension and want to see them reflected in the CLI, run the command from step 2 again.
-
+1. In a new virtual environment, install the azdev tool with `pip install azdev`
+2. Setup your CLI and install your extension:
+  - If you are only developing your extension run: `azdev setup -r <PATH> -e <NAME>` where PATH is the path to the local git folder your extension resides in and NAME is the name of your extension.
+  - If you would like to develop for a CLI module and your extension, run the above, but include `-c [<CLI_PATH>]` where CLI_PATH is the path to your local Azure CLI repo. If omitted, the command will attempt to find the repo.
 
 Building
 --------
@@ -65,16 +48,13 @@ The `.whl` is the artifact that can be installed with the `az extension add` com
 Trying out your extension
 -------------------------
 
-**(Step 1)** Make sure that you aren't using the dev extension directory.
-
-One way to do this is to unset the `AZURE_EXTENSION_DIR` environment variable:
+**(Step 1)** Make sure that you aren't using the dev extension.
 
 ```
-unset AZURE_EXTENSION_DIR
+azdev extension remove myexampleextension
 ```
 
-You can verify that you're in a clean state as no extensions should be listed:
-
+Verify it is removed:
 ```
 az extension list -ojson
 []
@@ -124,9 +104,7 @@ Tips/Notes
 
 ### How do I know I'm using my dev extension(s)?
 
-- The debug log, `--debug`, prints the extension directory currently in use.
-- Use that if you aren't sure which extension directory the CLI is currently using.
-
+- When you run `az --version` it will list your normal extensions directory as well as any directories being used to find developer extensions. Developer extensions will appear in the output with a path next to the version number.
 
 ### Test your extension on both Python 2 & 3
 

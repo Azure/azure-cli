@@ -255,7 +255,7 @@ class TestProfile(unittest.TestCase):
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
         result = finder._arm_client_factory(mock.MagicMock())
-        self.assertEquals(result.config.base_url, 'http://foo_arm')
+        self.assertEqual(result.config.base_url, 'http://foo_arm')
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
@@ -317,13 +317,13 @@ class TestProfile(unittest.TestCase):
                                                      use_device_code=False,
                                                      allow_no_subscriptions=True,
                                                      subscription_finder=finder)
-
         # assert
         self.assertEqual(1, len(result))
         self.assertEqual(result[0]['id'], self.tenant_id)
         self.assertEqual(result[0]['state'], 'Enabled')
         self.assertEqual(result[0]['tenantId'], self.tenant_id)
         self.assertEqual(result[0]['name'], 'N/A(tenant level account)')
+        self.assertTrue(profile.is_tenant_level_account())
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_create_account_without_subscriptions_thru_common_tenant(self, mock_auth_context):

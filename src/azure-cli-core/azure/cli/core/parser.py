@@ -11,14 +11,15 @@ import difflib
 import argparse
 import argcomplete
 
-from knack.log import get_logger
-from knack.parser import CLICommandParser
-from knack.util import CLIError
-
 import azure.cli.core.telemetry as telemetry
+from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
+
+from knack.log import get_logger
+from knack.parser import CLICommandParser
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -27,7 +28,7 @@ class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
     '''
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 class AzCompletionFinder(argcomplete.CompletionFinder):
@@ -132,7 +133,8 @@ class AzCliCommandParser(CLICommandParser):
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
         args = {'prog': self.prog, 'message': message}
-        logger.error('%(prog)s: error: %(message)s', args)
+        with CommandLoggerContext(logger):
+            logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)
         self.exit(2)
 
@@ -172,7 +174,8 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
                     prog=self.prog, value=value, param=parameter)
             telemetry.set_user_fault(error_msg)
-            logger.error(error_msg)
+            with CommandLoggerContext(logger):
+                logger.error(error_msg)
             candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
             if candidates:
                 print_args = {

@@ -14,16 +14,15 @@ from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 import requests
-from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
-
-from knack.log import get_logger
 
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
-                                      WheelExtension, DevExtension, ExtensionNotInstalledException)
+                                      WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
+
+from knack.log import get_logger
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions
@@ -67,23 +66,6 @@ def _whl_download_from_url(url_parse_result, ext_file):
                 f.write(chunk)
 
 
-def _validate_whl_cli_compat(azext_metadata):
-    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
-    if not is_compatible:
-        min_max_msg_fmt = "The extension is not compatible with this version of the CLI.\n" \
-                          "You have CLI core version {} and this extension " \
-                          "requires ".format(cli_core_version)
-        if min_required and max_required:
-            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
-        elif min_required:
-            min_max_msg_fmt += 'a min of {}.'.format(min_required)
-        elif max_required:
-            min_max_msg_fmt += 'a max of {}.'.format(max_required)
-        raise CLIError(min_max_msg_fmt)
-
-
 def _validate_whl_extension(ext_file):
     tmp_dir = tempfile.mkdtemp()
     zip_ref = zipfile.ZipFile(ext_file, 'r')
@@ -91,10 +73,11 @@ def _validate_whl_extension(ext_file):
     zip_ref.close()
     azext_metadata = WheelExtension.get_azext_metadata(tmp_dir)
     shutil.rmtree(tmp_dir)
-    _validate_whl_cli_compat(azext_metadata)
+    check_version_compatibility(azext_metadata)
 
 
-def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
+def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
+    cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -115,6 +98,7 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
         ext_file = os.path.join(tmp_dir, whl_filename)
         logger.debug('Downloading %s to %s', source, ext_file)
         try:
+            cmd.cli_ctx.get_progress_controller().add(message='Downloading')
             _whl_download_from_url(url_parse_result, ext_file)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
             raise CLIError('Please ensure you have network connection. Error detail: {}'.format(str(err)))
@@ -136,6 +120,7 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
             raise CLIError("The checksum of the extension does not match the expected value. "
                            "Use --debug for more information.")
     try:
+        cmd.cli_ctx.get_progress_controller().add(message='Validating')
         _validate_whl_extension(ext_file)
     except AssertionError:
         logger.debug(traceback.format_exc())
@@ -145,6 +130,7 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
+    cmd.cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
@@ -190,10 +176,28 @@ def _augment_telemetry_with_ext_info(extension_name):
         pass
 
 
-def add_extension(source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+def check_version_compatibility(azext_metadata):
+    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
+    if not is_compatible:
+        min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
+                          "You have CLI core version {} and this extension " \
+                          "requires ".format(azext_metadata.get('name'), cli_core_version)
+        if min_required and max_required:
+            min_max_msg_fmt += 'a min of {} and max of {}.'.format(min_required, max_required)
+        elif min_required:
+            min_max_msg_fmt += 'a min of {}.'.format(min_required)
+        elif max_required:
+            min_max_msg_fmt += 'a max of {}.'.format(max_required)
+        raise CLIError(min_max_msg_fmt)
+
+
+def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
     if extension_name:
+        cmd.cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
         try:
             ext = get_extension(extension_name)
@@ -209,7 +213,8 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
+    _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls,
+                 pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
     try:
         if extension_name and get_extension(extension_name).preview:
@@ -253,7 +258,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
+def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
@@ -271,7 +276,7 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, 
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(download_url, ext_sha256=ext_sha256,
+            _add_whl_ext(cmd=cmd, source=download_url, ext_sha256=ext_sha256,
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
@@ -321,8 +326,8 @@ def reload_extension(extension_name, extension_module=None):
     return reload_module(extension_module if extension_module else get_extension_modname(ext_name=extension_name))
 
 
-def add_extension_to_path(extension_name):
-    ext_dir = get_extension_path(extension_name)
+def add_extension_to_path(extension_name, ext_dir=None):
+    ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
 
 

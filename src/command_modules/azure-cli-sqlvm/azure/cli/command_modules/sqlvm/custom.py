@@ -4,9 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from msrestazure.tools import is_valid_resource_id, resource_id
-from knack.prompting import prompt_pass
-from azure.cli.core.commands import LongRunningOperation
 
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
 )
@@ -27,6 +26,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     ServerConfigurationsManagementSettings,
     SqlVirtualMachine
 )
+
+from knack.prompting import prompt_pass
 
 
 def sqlvm_list(

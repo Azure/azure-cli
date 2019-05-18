@@ -77,3 +77,13 @@ def service_endpoint_completer(cmd, prefix, namespace, **kwargs):  # pylint: dis
     client = network_client_factory(cmd.cli_ctx).available_endpoint_services
     location = namespace.location
     return [x.name for x in client.list(location=location)]
+
+
+def get_sdk_completer(group, operation_name):
+
+    @Completer
+    def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+        client = getattr(network_client_factory(cmd.cli_ctx), group)
+        operation = getattr(client, operation_name)
+        return operation(**kwargs)
+    return completer

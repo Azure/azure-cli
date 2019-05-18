@@ -1,22 +1,22 @@
 ---
-name: "\U0001F6A7Service Team Feature Request"
-about: For select service teams to request CLI-team support for new service features.
+name: "\U0001F6A7Service Team Support Request"
+about: For select service teams to request CLI-team support for work such as new features, commands, etc.
 
 ---
 
 **Resource Provider**
 What is the Azure resource provider your feature is part of?
 
-**Description of Feature**
-Provide a brief description of the feature. A link to conceptual documentation may be helpful too.
+**Description of Feature or Work Requested**
+Provide a brief description of the feature or work requested. A link to conceptual documentation may be helpful too.
 
 **Minimum API Version Required**
 What is the minimum API version of your service required to implement your feature?
 
-**Swagger PR Link**
-Provide a link to the closed PR for the rest API specs repo. Note that this PR should be to the 
-master branch of the rest API specs repo.
+**Swagger Link**
+Provide a link to the location of your feature(s) in the REST API specs repo. This should be on the master branch
+of the REST API specs repo.
 
-**Target Date (Optional)**
-If you have a target date for release of this feature, please provide it. That will help us
-schedule the work.
+**Target Date**
+If you have a target date for release of this feature/work, please provide it. While we can't guarantee these dates,
+it will help us prioritize your request against other requests.

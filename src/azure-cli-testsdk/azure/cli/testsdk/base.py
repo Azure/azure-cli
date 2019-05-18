@@ -189,6 +189,7 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+        cli_ctx.data['_cache'] = None
 
         if os.environ.get(ENV_COMMAND_COVERAGE, None):
             with open(COVERAGE_FILE, 'a') as coverage_file:
@@ -203,7 +204,7 @@ class ExecutionResult(object):
             logger.error('Command "%s" => %d. (It did not fail as expected). %s\n', command,
                          self.exit_code, log_val)
             raise AssertionError('The command did not fail as it was expected.')
-        elif not expect_failure and self.exit_code != 0:
+        if not expect_failure and self.exit_code != 0:
             logger.error('Command "%s" => %d. %s\n', command, self.exit_code, log_val)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 

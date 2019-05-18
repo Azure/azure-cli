@@ -2,7 +2,7 @@
 
 root=$(cd $(dirname $0); pwd)
 
-pip install wheel==0.30.0
+pip install wheel
 pip install -U pip
 pip install -r $root/requirements.txt
 pip install azure-cli==$CLI_VERSION -f /mnt/pypi

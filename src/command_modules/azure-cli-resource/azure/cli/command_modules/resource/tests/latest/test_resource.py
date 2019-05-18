@@ -67,6 +67,33 @@ class ResourceGroupNoWaitScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
 
+class ResourceLinkScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_link_scenario')
+    def test_resource_link_scenario(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        rg_id = self.cmd('group show -g {rg}').get_output_in_json()['id']
+        self.kwargs['link_id'] = '{}/providers/Microsoft.Resources/links/link1'.format(rg_id)
+        self.cmd('resource link create --link {link_id} --target {vnet_id} --notes "blah notes"')
+        self.cmd('resource link show --link {link_id}', checks=[
+            self.check('name', 'link1'),
+            self.check('properties.notes', 'blah notes')
+        ])
+        self.cmd('resource link update --link {link_id} --target {vnet_id} --notes "group to vnet"')
+        num_link = int(self.cmd('resource link list --query length(@) -o tsv').output)
+        self.cmd('resource link show --link {link_id}', checks=[
+            self.check('name', 'link1'),
+            self.check('properties.notes', 'group to vnet')
+        ])
+        self.cmd('resource link delete --link {link_id}')
+        self.cmd('resource link list',
+                 checks=self.check('length(@)', num_link - 1))
+
+
 class ResourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
@@ -662,8 +689,8 @@ class PolicyScenarioTest(ScenarioTest):
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
             'mode': 'Indexed',
-            'metadata': {u'category': u'test'},
-            'updated_metadata': {u'category': u'test2'},
+            'metadata': 'test',
+            'updated_metadata': 'test2',
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
@@ -671,24 +698,24 @@ class PolicyScenarioTest(ScenarioTest):
             self.kwargs.update({'sub': subscription})
 
         # create a policy
-        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', management_group, subscription)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
             self.check('description', '{desc}'),
             self.check('mode', '{mode}'),
-            self.check('metadata', '{metadata}')
+            self.check('metadata.category', '{metadata}')
         ])
 
         # update it
         self.kwargs['desc'] = self.kwargs['desc'] + '_new'
         self.kwargs['pdn'] = self.kwargs['pdn'] + '_new'
 
-        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category=test2', management_group, subscription)
+        cmd = self.cmdstring('policy definition update -n {pn} --description {desc} --display-name {pdn} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
-            self.check('metadata', '{updated_metadata}')
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # update it with new parameters and a new rule
@@ -699,7 +726,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=[
             self.check('description', '{desc}'),
             self.check('displayName', '{pdn}'),
-            self.check('metadata', '{updated_metadata}'),
+            self.check('metadata.category', '{updated_metadata}'),
             self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
             self.check('policyRule.then.effect', 'audit')
         ])

@@ -26,10 +26,10 @@ from azure.graphrbac.models import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
-from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
-                                    KeyCredential, UserCreateParameters, PasswordProfile,
-                                    ServicePrincipalCreateParameters, RequiredResourceAccess,
-                                    ResourceAccess, GroupCreateParameters, CheckGroupMembershipParameters)
+from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
+                                    PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess,
+                                    GroupCreateParameters, CheckGroupMembershipParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
@@ -56,7 +56,6 @@ def update_role_definition(cmd, role_definition):
 
 
 def _create_update_role_definition(cmd, role_definition, for_update):
-    definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
@@ -70,28 +69,38 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         new_name = n[:1].lower() + n[1:]
         role_definition[new_name] = role_definition.pop(n)
 
-    role_name = role_definition.get('name', None)
-    if not role_name:
-        raise CLIError("please provide role name")
+    worker = MultiAPIAdaptor(cmd.cli_ctx)
     if for_update:  # for update, we need to use guid style unique name
+        role_resource_id = role_definition.get('id')
+        if not role_resource_id:
+            logger.warning('Role "id" is missing. Look for the role in the current subscription...')
+        definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scope = (scopes_in_definition[0] if scopes_in_definition else
                  '/subscriptions/' + definitions_client.config.subscription_id)
-        matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_name, scope)
-        if len(matched) != 1:
-            raise CLIError('Please provide the unique logic name of an existing role')
-        role_definition['name'] = matched[0].name
-        # ensure correct logical name and guid name. For update we accept both
-        worker = MultiAPIAdaptor(cmd.cli_ctx)
-        role_name = worker.get_role_property(matched[0], 'role_name')
-        role_id = matched[0].name
-    else:
+        if role_resource_id:
+            from msrestazure.tools import parse_resource_id
+            role_id = parse_resource_id(role_resource_id)['name']
+            role_name = role_definition['roleName']
+        else:
+            matched = _search_role_definitions(cmd.cli_ctx, definitions_client, role_definition['name'], scope)
+            if len(matched) > 1:
+                raise CLIError('More than 2 definitions are found with the name of "{}"'.format(
+                    role_definition['name']))
+            if not matched:
+                raise CLIError('No definition was found with the name of "{}"'.format(role_definition['name']))
+            role_id = role_definition['name'] = matched[0].name
+            role_name = worker.get_role_property(matched[0], 'role_name')
+    else:  # for create
+        definitions_client = _auth_client_factory(cmd.cli_ctx).role_definitions
         role_id = _gen_guid()
+        role_name = role_definition.get('name', None)
+        if not role_name:
+            raise CLIError("please provide role name")
 
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
 
-    worker = MultiAPIAdaptor(cmd.cli_ctx)
     return worker.create_role_definition(definitions_client, role_name, role_id, role_definition)
 
 
@@ -119,8 +128,14 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
                            scope=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
-    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
-                                   resolve_assignee=(not assignee_object_id))
+
+    try:
+        return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
+                                       resolve_assignee=(not assignee_object_id))
+    except Exception as ex:  # pylint: disable=broad-except
+        if _error_caused_by_role_assignment_exists(ex):  # for idempotent
+            return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
+        raise
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
@@ -251,7 +266,7 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
-def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
+def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # pylint: disable=too-many-branches
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
@@ -288,6 +303,8 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
                 except ValueError:
                     pass
                 if payload:
+                    if payload.get('properties') is None:
+                        continue
                     payload = payload['properties']
                     entry['principalId'] = payload['principalId']
                     if not entry['scope']:
@@ -396,8 +413,8 @@ def _get_displayable_name(graph_object):
     return graph_object.display_name or ''
 
 
-def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
-                            resource_group_name=None, scope=None, include_inherited=False):
+def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_group_name=None,
+                            scope=None, include_inherited=False, yes=None):
     factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -408,6 +425,11 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
         for i in ids:
             assignments_client.delete_by_id(i)
         return
+    if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
+        from knack.prompting import prompt_y_n
+        msg = 'This will delete all role assignments under the subscription. Are you sure?'
+        if not prompt_y_n(msg, default="n"):
+            return
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
@@ -428,15 +450,15 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     if assignee:
         assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
-    # combining filters is unsupported, so we pick the best, and do limited maunal filtering
-    if assignee_object_id:
+    # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
+    if scope:
+        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
+    elif assignee_object_id:
         if include_groups:
             f = "assignedTo('{}')".format(assignee_object_id)
         else:
             f = "principalId eq '{}'".format(assignee_object_id)
         assignments = list(assignments_client.list(filter=f))
-    elif scope:
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
     else:
         assignments = list(assignments_client.list())
 
@@ -451,6 +473,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
+
+        if assignee_object_id:
+            assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments
 
@@ -481,7 +506,7 @@ def _resolve_role_id(role, scope, definitions_client):
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
-            elif len(role_defs) > 1:
+            if len(role_defs) > 1:
                 ids = [r.id for r in role_defs]
                 err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
                 raise CLIError(err.format(role, ids))
@@ -605,12 +630,22 @@ def get_user_member_groups(cmd, upn_or_object_id, security_enabled_only=False):
     return [{'objectId': x, 'displayName': stubs.get(x)} for x in results]
 
 
-def create_group(cmd, display_name, mail_nickname):
+def create_group(cmd, display_name, mail_nickname, force=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
+
+    # workaround to ensure idempotent even AAD graph service doesn't support it
+    if not force:
+        matches = list(graph_client.groups.list(filter="displayName eq '{}' and mailNickname eq '{}'".format(
+            display_name, mail_nickname)))
+        if matches:
+            if len(matches) > 1:
+                err = ('There is more than one group with the same display and nick names: "{}". '
+                       'Please delete them first.')
+                raise CLIError(err.format(', '.join([x.object_id for x in matches])))
+            logger.warning('A group with the same display name and mail nickname already exists, returning.')
+            return matches[0]
     group = graph_client.groups.create(GroupCreateParameters(display_name=display_name,
                                                              mail_nickname=mail_nickname))
-    # TODO: uncomment once design reviewed with AAD team
-    # _set_owner(cmd.cli_ctx, graph_client, group.object_id, graph_client.groups.add_owner)
 
     return group
 
@@ -659,38 +694,63 @@ def _resolve_group(client, identifier):
     return identifier
 
 
-def create_application(cmd, display_name, homepage=None, identifier_uris=None,
+def create_application(cmd, display_name, homepage=None, identifier_uris=None,  # pylint: disable=too-many-locals
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None,
-                       credential_description=None):
+                       credential_description=None, app_roles=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
+    existing_apps = list_apps(cmd, display_name=display_name)
+    if existing_apps:
+        if identifier_uris:
+            existing_apps = [x for x in existing_apps if set(identifier_uris).issubset(set(x.identifier_uris))]
+        existing_apps = [x for x in existing_apps if x.display_name == display_name]
+        if native_app:
+            existing_apps = [x for x in existing_apps if x.public_client]
+        if len(existing_apps) > 1:
+            raise CLIError('More than one application have the same display name "{}", please remove '
+                           'them first'.format(', '.join([x.object_id for x in existing_apps])))
+        if len(existing_apps) == 1:
+            logger.warning('Found an existing application instance of "%s". We will patch it', existing_apps[0].app_id)
+            param = update_application(existing_apps[0], display_name=display_name, homepage=homepage,
+                                       identifier_uris=identifier_uris, password=password, reply_urls=reply_urls,
+                                       key_value=key_value, key_type=key_type, key_usage=key_usage,
+                                       start_date=start_date, end_date=end_date,
+                                       available_to_other_tenants=available_to_other_tenants,
+                                       oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                       required_resource_accesses=required_resource_accesses,
+                                       credential_description=credential_description, app_roles=app_roles)
+            patch_application(cmd, existing_apps[0].app_id, param)
+            return show_application(graph_client.applications, existing_apps[0].app_id)
+    if not identifier_uris:
+        identifier_uris = []
     if native_app:
         if identifier_uris:
             raise CLIError("'--identifier-uris' is not required for creating a native application")
-        identifier_uris = ['http://{}'.format(_gen_guid())]  # we will create a temporary one and remove it later
     else:
-        if not identifier_uris:
-            raise CLIError("'--identifier-uris' is required for creating an application")
         password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage,
                                                              start_date, end_date, credential_description)
 
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
 
-    app_patch_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
-                                                  display_name=display_name,
-                                                  identifier_uris=identifier_uris,
-                                                  homepage=homepage,
-                                                  reply_urls=reply_urls,
-                                                  key_credentials=key_creds,
-                                                  password_credentials=password_creds,
-                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
-                                                  required_resource_access=required_accesses)
+    if app_roles:
+        app_roles = _build_app_roles(app_roles)
+
+    app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                   display_name=display_name,
+                                                   identifier_uris=identifier_uris,
+                                                   homepage=homepage,
+                                                   reply_urls=reply_urls,
+                                                   key_credentials=key_creds,
+                                                   password_credentials=password_creds,
+                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                                   required_resource_access=required_accesses,
+                                                   app_roles=app_roles)
 
     try:
-        result = graph_client.applications.create(app_patch_param)
+        result = graph_client.applications.create(app_create_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -702,14 +762,22 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,
         # AAD graph doesn't have the API to create a native app, aka public client, the recommended hack is
         # to create a web app first, then convert to a native one
         # pylint: disable=protected-access
-        if 'public_client' not in ApplicationUpdateParameters._attribute_map:
-            ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
-        app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
-        setattr(app_patch_param, 'public_client', True)
+        app_patch_param = ApplicationUpdateParameters(public_client=True)
         graph_client.applications.patch(result.object_id, app_patch_param)
         result = graph_client.applications.get(result.object_id)
 
     return result
+
+
+def _get_grant_permissions(graph_client, client_sp_object_id=None, query_filter=None):
+    query_filter = query_filter or ("clientId eq '{}'".format(client_sp_object_id) if client_sp_object_id else None)
+    try:
+        grant_info = graph_client.oauth2_permission_grant.list(filter=query_filter)
+    except CloudError as ex:  # Graph doesn't follow the ARM error; otherwise would be caught by msrest-azure
+        if ex.status_code == 404:
+            return []
+        raise
+    return grant_info
 
 
 def list_permissions(cmd, identifier):
@@ -720,9 +788,7 @@ def list_permissions(cmd, identifier):
 
     # first get the permission grant history
     client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    grant_info = graph_client.oauth2.get(
-        filter="clientId eq '{}'".format(client_sp_object_id))  # pylint: disable=no-member
-    grant_histories = grant_info.additional_properties['value']
+    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
 
     # get original permissions required by the application, we will cross check the history
     # and mark out granted ones
@@ -732,12 +798,28 @@ def list_permissions(cmd, identifier):
     for p in permissions:
         result = list(graph_client.service_principals.list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
-        granted_times = 'N/A'
+        expiry_time = 'N/A'
         if result:
-            granted_times = ', '.join([x['startTime'] for x in grant_histories if
-                                       x['resourceId'] == result[0].object_id])
-        setattr(p, 'grantedTime', granted_times)
+            expiry_time = ', '.join([x.expiry_time for x in grant_permissions if
+                                     x.resource_id == result[0].object_id])
+        setattr(p, 'expiryTime', expiry_time)
     return permissions
+
+
+def list_permission_grants(cmd, identifier=None, query_filter=None, show_resource_name=None):
+    if identifier and query_filter:
+        raise CLIError('Please only use one of "--identifier" and "--filter", not both')
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    client_sp_object_id = None
+    if identifier:
+        client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+    result = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id, query_filter=query_filter)
+    result = list(result)
+    if show_resource_name:
+        for r in result:
+            sp = graph_client.service_principals.get(r.resource_id)
+            setattr(r, 'resource_display_name', sp.display_name)
+    return result
 
 
 def add_permission(cmd, identifier, api, api_permissions):
@@ -748,9 +830,14 @@ def add_permission(cmd, identifier, api, api_permissions):
     for e in api_permissions:
         access_id, access_type = e.split('=')
         resource_accesses.append(ResourceAccess(id=access_id, type=access_type))
-    required_resource_access = RequiredResourceAccess(resource_app_id=api,
-                                                      resource_access=resource_accesses)
-    existing.append(required_resource_access)
+
+    existing_resource_access = next((e for e in existing if e.resource_app_id == api), None)
+    if existing_resource_access:
+        existing_resource_access.resource_access += resource_accesses
+    else:
+        required_resource_access = RequiredResourceAccess(resource_app_id=api,
+                                                          resource_access=resource_accesses)
+        existing.append(required_resource_access)
     update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
     graph_client.applications.patch(application.object_id, update_parameter)
     logger.warning('Invoking "az ad app permission grant --id %s --api %s" is needed to make the '
@@ -766,7 +853,36 @@ def delete_permission(cmd, identifier, api):
     return graph_client.applications.patch(application.object_id, update_parameter)
 
 
-def grant_application(cmd, identifier, api, expires='1', scope='user_impersonation'):
+def admin_consent(cmd, identifier):
+    import requests
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import UA_AGENT
+    from azure.cli.core.util import should_disable_connection_verify
+    if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
+        raise CLIError('This command is not yet supported on sovereign clouds')
+    # we will leverage portal endpoints to get admin consent done
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    application = show_application(graph_client.applications, identifier)
+    url = 'https://main.iam.ad.ext.azure.com/api/RegisteredApplications/{}/Consent?onBehalfOfAll=true'.format(
+        application.app_id)
+    profile = Profile()
+
+    # the key is to get the access token to the portal resource:
+    access_token = profile.get_raw_token('74658136-14ec-4630-ad9b-26e160ff0fc6')
+    headers = {
+        'Authorization': "Bearer " + access_token[0][1],
+        'Accept-Encoding': 'gzip, deflate, br',
+        'x-ms-client-request-id': str(uuid.uuid4()),
+        'User-Agent': UA_AGENT
+    }
+    response = requests.post(url, headers=headers, verify=not should_disable_connection_verify())
+    if not response.ok:
+        raise CLIError(response.reason)
+
+
+def grant_application(cmd, identifier, api, consent_type=None, principal_id=None,
+                      expires='1', scope='user_impersonation'):
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     # Get the Service Principal ObjectId for the client app
@@ -774,6 +890,13 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
 
     # Get the Service Principal ObjectId for associated app
     associated_sp_object_id = _resolve_service_principal(graph_client.service_principals, api)
+
+    # ensure to remove the older grant
+    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
+    to_delete = [p.object_id for p in grant_permissions if p.client_id == client_sp_object_id and
+                 p.resource_id == associated_sp_object_id]
+    for p in to_delete:
+        graph_client.oauth2_permission_grant.delete(p)
 
     # Build payload
     start_date = datetime.datetime.utcnow()
@@ -790,49 +913,45 @@ def grant_application(cmd, identifier, api, expires='1', scope='user_impersonati
     payload = {
         "odata.type": "Microsoft.DirectoryServices.OAuth2PermissionGrant",
         "clientId": client_sp_object_id,
-        "consentType": "AllPrincipals",
+        "consentType": consent_type,
         "resourceId": associated_sp_object_id,
         "scope": scope,
+        'principalId': principal_id,
         "startTime": start_date.isoformat(),
         "expiryTime": end_date.isoformat()
     }
 
     # Grant OAuth2 permissions
-    response = graph_client.oauth2.grant(payload)  # pylint: disable=no-member
-
-    return response
+    return graph_client.oauth2_permission_grant.create(payload)  # pylint: disable=no-member
 
 
 def update_application(instance, display_name=None, homepage=None,  # pylint: disable=unused-argument
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
-    from azure.cli.core.commands.arm import make_camel_case, make_snake_case
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None,
+                       credential_description=None, app_roles=None):
     password_creds, key_creds, required_accesses = None, None, None
     if any([password, key_value]):
-        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                             key_usage, start_date, end_date)
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage, start_date,
+                                                             end_date, credential_description)
 
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
 
-    # Workaround until https://github.com/Azure/azure-rest-api-specs/issues/3437 is fixed
-    def _get_property(name):
-        try:
-            return getattr(instance, make_snake_case(name))
-        except AttributeError:
-            return instance.additional_properties.get(make_camel_case(name), None)
+    if app_roles:
+        app_roles = _build_app_roles(app_roles)
 
     app_patch_param = ApplicationUpdateParameters(
-        display_name=display_name or _get_property('display_name'),
-        homepage=homepage or _get_property('homepage'),
-        identifier_uris=identifier_uris or _get_property('identifier_uris'),
-        reply_urls=reply_urls or _get_property('reply_urls'),
-        key_credentials=key_creds or None,
-        password_credentials=password_creds or None,
-        available_to_other_tenants=available_to_other_tenants or _get_property('available_to_other_tenants'),
-        required_resource_access=required_accesses or _get_property('required_resource_access'),
-        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow or _get_property('oauth2_allow_implicit_flow'))
+        display_name=display_name,
+        homepage=homepage,
+        identifier_uris=identifier_uris,
+        reply_urls=reply_urls,
+        key_credentials=key_creds,
+        password_credentials=password_creds,
+        available_to_other_tenants=available_to_other_tenants,
+        required_resource_access=required_accesses,
+        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+        app_roles=app_roles)
 
     return app_patch_param
 
@@ -843,15 +962,39 @@ def patch_application(cmd, identifier, parameters):
     return graph_client.applications.patch(object_id, parameters)
 
 
+def patch_service_principal(cmd, identifier, parameters):
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    object_id = _resolve_service_principal(graph_client.service_principals, identifier)
+    return graph_client.service_principals.update(object_id, parameters)
+
+
 def _build_application_accesses(required_resource_accesses):
-    required_accesses = None
+    if not required_resource_accesses:
+        return None
+    required_accesses = []
+    if isinstance(required_resource_accesses, dict):
+        logger.info('Getting "requiredResourceAccess" from a full manifest')
+        required_resource_accesses = required_resource_accesses.get('requiredResourceAccess', [])
     for x in required_resource_accesses:
         accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
-        if required_accesses is None:
-            required_accesses = []
         required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
                                                         resource_access=accesses))
     return required_accesses
+
+
+def _build_app_roles(app_roles):
+    if not app_roles:
+        return None
+    result = []
+    if isinstance(app_roles, dict):
+        logger.info('Getting "appRoles" from a full manifest')
+        app_roles = app_roles.get('appRoles', [])
+    for x in app_roles:
+        role = AppRole(id=x.get('id', None) or _gen_guid(), allowed_member_types=x.get('allowedMemberTypes', None),
+                       description=x.get('description', None), display_name=x.get('displayName', None),
+                       is_enabled=x.get('isEnabled', None), value=x.get('value', None))
+        result.append(role)
+    return result
 
 
 def show_application(client, identifier):
@@ -940,14 +1083,17 @@ def show_service_principal(client, identifier):
 
 
 def delete_service_principal(cmd, identifier):
+    from azure.cli.core._profile import Profile
     client = _graph_client_factory(cmd.cli_ctx)
     sp_object_id = _resolve_service_principal(client.service_principals, identifier)
     app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
 
-    assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
-    if assignments:
-        logger.warning('Removing role assignments')
-        delete_role_assignments(cmd, [a['id'] for a in assignments])
+    profile = Profile()
+    if not profile.is_tenant_level_account():
+        assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
+        if assignments:
+            logger.warning('Removing role assignments')
+            delete_role_assignments(cmd, [a['id'] for a in assignments])
 
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
         client.applications.delete(app_object_id)
@@ -1063,6 +1209,10 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
     return (password, public_cert_string, cert_file, cert_start_date, cert_end_date)
 
 
+def _error_caused_by_role_assignment_exists(ex):
+    return getattr(ex, 'status_code', None) == 409 and 'role assignment already exists' in ex.message
+
+
 def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date):
 
     if not cert_start_date and not cert_end_date:
@@ -1094,8 +1244,7 @@ def create_service_principal_for_rbac(
     years = years or 1
     sp_oid = None
     _RETRY_TIMES = 36
-
-    app_display_name = None
+    app_display_name, existing_sps = None, None
     if name and '://' not in name:
         prefix = "http://"
         app_display_name = name
@@ -1105,10 +1254,10 @@ def create_service_principal_for_rbac(
 
     if name:
         query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(name)
-        aad_sps = list(graph_client.service_principals.list(filter=query_exp))
-        if aad_sps:
-            raise CLIError("'{}' already exists.".format(name))
-        app_display_name = name.split('://')[-1]
+        existing_sps = list(graph_client.service_principals.list(filter=query_exp))
+        if existing_sps:
+            app_display_name = existing_sps[0].display_name
+            name = existing_sps[0].service_principal_names[0]
 
     app_start_date = datetime.datetime.now(TZ_UTC)
     app_end_date = app_start_date + relativedelta(years=years or 1)
@@ -1139,25 +1288,24 @@ def create_service_principal_for_rbac(
     app_id = aad_application.app_id
 
     # retry till server replication is done
-    for l in range(0, _RETRY_TIMES):
-        try:
-            aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
-            break
-        except Exception as ex:  # pylint: disable=broad-except
-            if l < _RETRY_TIMES and (
-                    ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
-                time.sleep(5)
-                logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
-            else:
-                logger.warning(
-                    "Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                    name, ex.response.headers if hasattr(ex,
-                                                         'response') else ex)  # pylint: disable=no-member
-                raise
+    aad_sp = existing_sps[0] if existing_sps else None
+    if not aad_sp:
+        for l in range(0, _RETRY_TIMES):
+            try:
+                aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
+                break
+            except Exception as ex:  # pylint: disable=broad-except
+                if l < _RETRY_TIMES and (
+                        ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
+                    time.sleep(5)
+                    logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                else:
+                    logger.warning(
+                        "Creating service principal failed for appid '%s'. Trace followed:\n%s",
+                        name, ex.response.headers if hasattr(ex,
+                                                             'response') else ex)  # pylint: disable=no-member
+                    raise
     sp_oid = aad_sp.object_id
-
-    # TODO: uncomment once design reviewed with AAD team
-    # _set_owner(cmd.cli_ctx, graph_client, aad_application.object_id, graph_client.applications.add_owner)
 
     # retry while server replication is done
     if not skip_assignment:
@@ -1172,6 +1320,9 @@ def create_service_principal_for_rbac(
                         logger.warning('Retrying role assignment creation: %s/%s', l + 1,
                                        _RETRY_TIMES)
                         continue
+                    elif _error_caused_by_role_assignment_exists(ex):
+                        logger.warning('Role assignment already exits.\n')
+                        break
                     else:
                         # dump out history for diagnoses
                         logger.warning('Role assignment creation failed.\n')
@@ -1308,7 +1459,7 @@ def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_ce
                 'keyCertSign'
             ],
             'subject': 'CN=KeyVault Generated',
-            'validity_in_months': ((years * 12) + 1)
+            'validity_in_months': int((years * 12) + 1)
         }
     }
     vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
@@ -1362,26 +1513,35 @@ def _get_public(x509):
 
 
 def reset_service_principal_credential(cmd, name, password=None, create_cert=False, cert=None, years=None,
-                                       keyvault=None, append=False, credential_description=None):
+                                       end_date=None, keyvault=None, append=False, credential_description=None):
     client = _graph_client_factory(cmd.cli_ctx)
 
     # pylint: disable=no-member
-
-    years = years or 1
+    app_start_date = datetime.datetime.now(TZ_UTC)
+    if years is not None and end_date is not None:
+        raise CLIError('usage error: --years | --end-date')
+    if end_date is None:
+        years = years or 1
+        app_end_date = app_start_date + relativedelta(years=years)
+    else:
+        app_end_date = dateutil.parser.parse(end_date)
+        if app_end_date.tzinfo is None:
+            app_end_date = app_end_date.replace(tzinfo=TZ_UTC)
+        years = (app_end_date - app_start_date).days / 365
 
     # look for the existing application
     query_exp = "servicePrincipalNames/any(x:x eq \'{0}\') or displayName eq '{0}'".format(name)
     aad_sps = list(client.service_principals.list(filter=query_exp))
-    if not aad_sps:
-        raise CLIError("can't find a service principal matching '{}'".format(name))
+
     if len(aad_sps) > 1:
         raise CLIError(
             'more than one entry matches the name, please provide unique names like '
             'app id guid, or app id uri')
-    app = show_application(client.applications, aad_sps[0].app_id)
+    app = (show_application(client.applications, aad_sps[0].app_id) if aad_sps else
+           show_application(client.applications, name))  # possible there is no SP created for the app
 
-    app_start_date = datetime.datetime.now(TZ_UTC)
-    app_end_date = app_start_date + relativedelta(years=years or 1)
+    if not app:
+        raise CLIError("can't find an application matching '{}'".format(name))
 
     # build a new password/cert credential and patch it
     public_cert_string = None
@@ -1427,9 +1587,9 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             custom_key_identifier=custom_key_identifier
         ))
 
-    app_create_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
+    app_patch_param = ApplicationUpdateParameters(password_credentials=app_creds, key_credentials=cert_creds)
 
-    client.applications.patch(app.object_id, app_create_param)
+    client.applications.patch(app.object_id, app_patch_param)
 
     result = {
         'appId': app.app_id,

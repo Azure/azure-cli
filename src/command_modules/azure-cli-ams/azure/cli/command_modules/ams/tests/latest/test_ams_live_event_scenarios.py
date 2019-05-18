@@ -164,7 +164,7 @@ class AmsLiveEventTests(ScenarioTest):
             'assetName': assetName,
             'liveOutputName1': live_output_name1,
             'liveOutputName2': live_output_name2,
-            'archiveWindowLength': 'PT2S',
+            'archiveWindowLength': 'PT5M',
             'manifestName1': manifest_name1,
             'manifestName2': manifest_name2
         })

@@ -85,7 +85,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         sas = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                'r --https-only', account_info, blob_name, container, expiry).output
         self.assertTrue(sas)
-        self.assertIn('sig', sas)
+        self.assertIn('&sig=', sas)
 
         self.storage_cmd('storage blob update -n {} -c {} --content-type application/test-content',
                          account_info, blob_name, container)
@@ -402,6 +402,33 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('staticWebsite.indexDocument', 'index.html'),
                                 JMESPathCheck('deleteRetentionPolicy.enabled', True),
                                 JMESPathCheck('deleteRetentionPolicy.days', 1))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_copy_cancel_nopendingcopyoperation_error(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+        local_file = self.create_temp_file(1)
+        copy_id = 'abcdabcd-abcd-abcd-abcd-abcdabcdabcd'
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
+        with self.assertRaisesRegexp(TypeError, "'CommandResultItem' object is not iterable"):
+            self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_generate_sas_full_uri(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        blob_uri = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
+                                    'r --https-only --full-uri', account_info, b, c, expiry).output
+        self.assertTrue(blob_uri)
+        self.assertIn('&sig=', blob_uri)
+        self.assertTrue(blob_uri.startswith('"https://clitest000002.blob.core.windows.net/cont000003/blob000004?s'))
 
 
 if __name__ == '__main__':

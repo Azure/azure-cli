@@ -1,4 +1,3 @@
-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -60,8 +59,12 @@ def get_runtime_version_details(file_path, lang_name):
         version_detected = parse_dotnet_version(file_path)
         version_to_create = detect_dotnet_version_tocreate(version_detected)
     elif lang_name.lower() == NODE_RUNTIME_NAME:
-        version_detected = parse_node_version(file_path)[0]
-        version_to_create = detect_node_version_tocreate(version_detected)
+        if file_path == '':
+            version_detected = "-"
+            version_to_create = NODE_VERSION_DEFAULT
+        else:
+            version_detected = parse_node_version(file_path)[0]
+            version_to_create = detect_node_version_tocreate(version_detected)
     elif lang_name.lower() == PYTHON_RUNTIME_NAME:
         version_detected = "-"
         version_to_create = PYTHON_VERSION_DEFAULT
@@ -90,18 +93,7 @@ def _check_resource_group_supports_os(cmd, rg_name, is_linux):
         # for Linux if an app with reserved==False exists, ASP doesn't support Linux
         if is_linux and not item.reserved:
             return False
-        elif not is_linux and item.reserved:
-            return False
-    return True
-
-
-def should_create_new_asp(cmd, rg_name, asp_name, location):
-    # get all appservice plans from RG
-    client = web_client_factory(cmd.cli_ctx)
-    for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
-        if (item.name.lower() == asp_name.lower() and
-                item.location.replace(" ", "").lower() == location or
-                item.location == location):
+        if not is_linux and item.reserved:
             return False
     return True
 
@@ -114,6 +106,11 @@ def should_create_new_app(cmd, rg_name, app_name):
     return True
 
 
+def get_num_apps_in_asp(cmd, rg_name, asp_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return len(list(client.app_service_plans.list_web_apps(rg_name, asp_name)))
+
+
 # pylint:disable=unexpected-keyword-arg
 def get_lang_from_content(src_path):
     import glob
@@ -123,16 +120,16 @@ def get_lang_from_content(src_path):
     # DOTNET: <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     runtime_details_dict = dict.fromkeys(['language', 'file_loc', 'default_sku'])
     package_json_file = os.path.join(src_path, 'package.json')
-    package_python_file = glob.glob("**/*.py", recursive=True)
+    package_python_file = os.path.join(src_path, 'requirements.txt')
     package_netlang_glob = glob.glob("**/*.csproj", recursive=True)
     static_html_file = glob.glob("**/*.html", recursive=True)
-    if os.path.isfile(package_json_file):
-        runtime_details_dict['language'] = NODE_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = package_json_file
-        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
-    elif package_python_file:
+    if os.path.isfile(package_python_file):
         runtime_details_dict['language'] = PYTHON_RUNTIME_NAME
-        runtime_details_dict['file_loc'] = os.path.join(src_path, package_json_file[0])
+        runtime_details_dict['file_loc'] = package_python_file
+        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
+    elif os.path.isfile(package_json_file) or os.path.isfile('server.js') or os.path.isfile('index.js'):
+        runtime_details_dict['language'] = NODE_RUNTIME_NAME
+        runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netlang_glob:
         package_netcore_file = os.path.join(src_path, package_netlang_glob[0])
@@ -193,17 +190,22 @@ def parse_netcore_version(file_path):
 
 
 def parse_node_version(file_path):
+    # from node experts the node value in package.json can be found here   "engines": { "node":  ">=10.6.0"}
     import json
     import re
+    version_detected = []
     with open(file_path) as data_file:
-        data = []
-        for d in find_key_in_json(json.load(data_file), 'node'):
-            non_decimal = re.compile(r'[^\d.]+')
-            # remove the string ~ or  > that sometimes exists in version value
-            c = non_decimal.sub('', d)
-            # reduce the version to '6.0' from '6.0.0'
-            data.append(c[:3])
-        version_detected = sorted(data, key=float, reverse=True)
+        data = json.load(data_file)
+        for key, value in data.items():
+            if key == 'engines' and 'node' in value:
+                value_detected = value['node']
+                non_decimal = re.compile(r'[^\d.]+')
+                # remove the string ~ or  > that sometimes exists in version value
+                c = non_decimal.sub('', value_detected)
+                # reduce the version to '6.0' from '6.0.0'
+                num_array = c.split('.')
+                num = num_array[0] + "." + num_array[1]
+                version_detected.append(num)
     return version_detected or ['0.0']
 
 
@@ -217,7 +219,7 @@ def detect_dotnet_version_tocreate(detected_ver):
     min_ver = DOTNET_VERSIONS[0]
     if detected_ver in DOTNET_VERSIONS:
         return detected_ver
-    elif detected_ver < min_ver:
+    if detected_ver < min_ver:
         return min_ver
     return DOTNET_VERSION_DEFAULT
 
@@ -226,14 +228,19 @@ def detect_node_version_tocreate(detected_ver):
     if detected_ver in NODE_VERSIONS:
         return detected_ver
     # get major version & get the closest version from supported list
-    major_ver = float(detected_ver.split('.')[0])
+    major_ver = int(detected_ver.split('.')[0])
+    node_ver = NODE_VERSION_DEFAULT
     if major_ver < 4:
-        return NODE_VERSION_DEFAULT
+        node_ver = NODE_VERSION_DEFAULT
     elif major_ver >= 4 and major_ver < 6:
-        return '4.5'
+        node_ver = '4.5'
     elif major_ver >= 6 and major_ver < 8:
-        return '6.9'
-    return NODE_VERSION_DEFAULT
+        node_ver = '6.9'
+    elif major_ver >= 8 and major_ver < 10:
+        node_ver = NODE_VERSION_DEFAULT
+    elif major_ver >= 10:
+        node_ver = '10.14'
+    return node_ver
 
 
 def find_key_in_json(json_data, key):
@@ -256,11 +263,9 @@ def set_location(cmd, sku, location):
     return location
 
 
-def should_create_new_rg(cmd, default_rg, rg_name, is_linux):
-    if (default_rg and _check_resource_group_exists(cmd, default_rg) and
-            _check_resource_group_supports_os(cmd, default_rg, is_linux)):
-        return False
-    elif (_check_resource_group_exists(cmd, rg_name) and
-          _check_resource_group_supports_os(cmd, rg_name, is_linux)):
+# check if the RG value to use already exists and follows the OS requirements or new RG to be created
+def should_create_new_rg(cmd, rg_name, is_linux):
+    if (_check_resource_group_exists(cmd, rg_name) and
+            _check_resource_group_supports_os(cmd, rg_name, is_linux)):
         return False
     return True

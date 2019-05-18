@@ -61,7 +61,8 @@ def collect_resources() -> str:
 
 
 def resource_filter(name: str) -> bool:
-    return not name.startswith('azure-cli') and name not in ('futures')
+    # TODO remove need for any filters and delete this method.
+    return not name.startswith('azure-cli') and name not in ('futures', 'jeepney', 'entrypoints')
 
 
 def last_bottle_hash():

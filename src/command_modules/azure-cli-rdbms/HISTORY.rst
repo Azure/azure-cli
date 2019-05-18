@@ -2,6 +2,23 @@
 
 Release History
 ===============
+
+0.3.11
+++++++
+* Add postgres and mysql support for geo replication
+
+0.3.10
+++++++
+* Minor fixes
+
+0.3.9
++++++
+* Add postgresql replica commands and restart server command
+
+0.3.8
++++++
+* Minor fixes: Get default location from resource group when not provided for creating servers and add validation for retention days. 
+
 0.3.7
 +++++
 * Improve help message and command parameters

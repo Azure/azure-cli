@@ -62,7 +62,6 @@
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_application.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_cloud.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_command_registration.py" />
-    <Compile Include="azure-cli-core\azure\cli\core\tests\test_command_with_configured_defaults.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_connection_verify.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_extension.py" />
     <Compile Include="azure-cli-core\azure\cli\core\tests\test_generic_update.py" />
@@ -248,13 +247,20 @@
     <Compile Include="command_modules\azure-cli-ams\azure\__init__.py" />
     <Compile Include="command_modules\azure-cli-ams\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-ams\setup.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\azure_devops_build_interactive.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\azure_devops_build_provider.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\custom.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_devops_build_commands.py" />
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_devops_build_commands_thru_mock.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\test_webapp_commands_thru_mock.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tunnel.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\utils.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\vsts_cd_provider.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_appservice_utils.py" />
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\_client_factory.py" />
@@ -347,6 +353,7 @@
     <Compile Include="command_modules\azure-cli-cdn\azure_bdist_wheel.py" />
     <Compile Include="command_modules\azure-cli-cdn\setup.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\custom.py" />
+    <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\tests\latest\test_cloud.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\_completers.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\_help.py" />
     <Compile Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\__init__.py" />
@@ -403,6 +410,16 @@
     <Compile Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\_validators.py" />
     <Compile Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\__init__.py" />
     <Compile Include="command_modules\azure-cli-cosmosdb\setup.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\commands.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\custom.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\latest\recording_processors.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\latest\test_deploymentmanager_scenario.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\_help.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\_params.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\__init__.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\azure_bdist_wheel.py" />
+    <Compile Include="command_modules\azure-cli-deploymentmanager\setup.py" />
     <Compile Include="command_modules\azure-cli-dla\azure\cli\command_modules\dla\commands.py" />
     <Compile Include="command_modules\azure-cli-dla\azure\cli\command_modules\dla\custom.py" />
     <Compile Include="command_modules\azure-cli-dla\azure\cli\command_modules\dla\tests\latest\recording_processors.py" />
@@ -626,11 +643,26 @@
     <Compile Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\_params.py" />
     <Compile Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\__init__.py" />
     <Compile Include="command_modules\azure-cli-monitor\setup.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\commands.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\custom.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\latest\test_natgateway_commands.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\latest\__init__.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\validators.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\_help.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\_params.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\__init__.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\setup.py" />
+    <Compile Include="command_modules\azure-cli-natgateway\__init__.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\test_dns_commands.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\test_network_commands.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\test_network_unit_tests.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\configs.py" />
-    <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\exceptions.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\make_zone_file.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\parse_zone_file.py" />
     <Compile Include="command_modules\azure-cli-network\azure\cli\command_modules\network\zone_file\record_processors.py" />
@@ -657,6 +689,23 @@
     <Compile Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\_validators.py" />
     <Compile Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\__init__.py" />
     <Compile Include="command_modules\azure-cli-policyinsights\setup.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\commands.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\custom.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\test_privatedns_commands.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\_test_data_generator.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_client_factory.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_format.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_help.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_params.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\_validators.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\cli\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure\__init__.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\azure_bdist_wheel.py" />
+    <Compile Include="command_modules\azure-cli-privatedns\setup.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\tests\latest\test_profile_custom.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\_format.py" />
     <Compile Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\_help.py">
@@ -779,9 +828,12 @@
     <Compile Include="command_modules\azure-cli-sql\azure\cli\command_modules\sql\_validators.py" />
     <Compile Include="command_modules\azure-cli-sql\azure\cli\command_modules\sql\__init__.py" />
     <Compile Include="command_modules\azure-cli-sql\setup.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\azcopy\util.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\azcopy\__init__.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\completers.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\account.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\acl.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\azcopy.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\blob.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\cors.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\directory.py" />
@@ -795,12 +847,14 @@
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\storage_test_util.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_account_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_acl_scenarios.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_azcopy_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_batch_operations.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_blob_copy_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_blob_live_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_blob_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_cors_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_file_scenarios.py" />
+    <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_oauth.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_queue_scenarios.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_scenarios_non_ascii_chars.py" />
     <Compile Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\test_storage_table_scenarios.py" />
@@ -964,6 +1018,7 @@
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\" />
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\" />
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\" />
     <Folder Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\" />
     <Folder Include="command_modules\azure-cli-backup\" />
     <Folder Include="command_modules\azure-cli-backup\azure\" />
@@ -1012,6 +1067,8 @@
     <Folder Include="command_modules\azure-cli-cloud\azure\cli\" />
     <Folder Include="command_modules\azure-cli-cloud\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\" />
+    <Folder Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\tests\" />
+    <Folder Include="command_modules\azure-cli-cloud\azure\cli\command_modules\cloud\tests\latest\" />
     <Folder Include="command_modules\azure-cli-cognitiveservices\" />
     <Folder Include="command_modules\azure-cli-cognitiveservices\azure\" />
     <Folder Include="command_modules\azure-cli-cognitiveservices\azure\cli\" />
@@ -1045,6 +1102,13 @@
     <Folder Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\" />
     <Folder Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\tests\" />
     <Folder Include="command_modules\azure-cli-cosmosdb\azure\cli\command_modules\cosmosdb\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\" />
+    <Folder Include="command_modules\azure-cli-deploymentmanager\azure\cli\command_modules\deploymentmanager\tests\latest\" />
     <Folder Include="command_modules\azure-cli-dla\" />
     <Folder Include="command_modules\azure-cli-dla\azure\" />
     <Folder Include="command_modules\azure-cli-dla\azure\cli\" />
@@ -1172,6 +1236,24 @@
     <Folder Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\operations\" />
     <Folder Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\tests\" />
     <Folder Include="command_modules\azure-cli-monitor\azure\cli\command_modules\monitor\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-natgateway\" />
+    <Folder Include="command_modules\azure-cli-natgateway\.pytest_cache\" />
+    <Folder Include="command_modules\azure-cli-natgateway\.pytest_cache\v\" />
+    <Folder Include="command_modules\azure-cli-natgateway\.pytest_cache\v\cache\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\latest\recordings\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\latest\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\tests\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\natgateway\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\command_modules\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\cli\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure\__pycache__\" />
+    <Folder Include="command_modules\azure-cli-natgateway\azure_cli_natgateway.egg-info\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\" />
     <Folder Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\zone_files\" />
@@ -1183,6 +1265,13 @@
     <Folder Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\" />
     <Folder Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\tests\" />
     <Folder Include="command_modules\azure-cli-policyinsights\azure\cli\command_modules\policyinsights\tests\latest\" />
+    <Folder Include="command_modules\azure-cli-privatedns\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\" />
+    <Folder Include="command_modules\azure-cli-privatedns\azure\cli\command_modules\privatedns\tests\latest\" />
     <Folder Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\tests\" />
     <Folder Include="command_modules\azure-cli-profile\azure\cli\command_modules\profile\tests\latest\" />
     <Folder Include="command_modules\azure-cli-rdbms\" />
@@ -1275,6 +1364,7 @@
     <Folder Include="command_modules\azure-cli-storage\azure\cli\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\" />
+    <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\azcopy\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\operations\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\" />
     <Folder Include="command_modules\azure-cli-storage\azure\cli\command_modules\storage\tests\latest\" />
@@ -1450,6 +1540,11 @@
     <Content Include="command_modules\azure-cli-ams\MANIFEST.in" />
     <Content Include="command_modules\azure-cli-ams\README.rst" />
     <Content Include="command_modules\azure-cli-ams\setup.cfg" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\.gitignore" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\host.json" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\HttpTrigger.cs" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\local.settings.json" />
+    <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_dotnet_function\sample_dotnet_function.csproj" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\.gitignore" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\package.json" />
     <Content Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\tests\latest\sample_web\server.js" />
@@ -1588,6 +1683,9 @@
     </Content>
     <Content Include="command_modules\azure-cli-monitor\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-monitor\linter_exclusions.yml" />
+    <Content Include="command_modules\azure-cli-natgateway\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-natgateway\README.rst" />
+    <Content Include="command_modules\azure-cli-natgateway\setup.cfg" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\zone_files\fail1.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\zone_files\fail2.txt" />
     <Content Include="command_modules\azure-cli-network\azure\cli\command_modules\network\tests\latest\zone_files\fail3.txt" />
@@ -1602,6 +1700,10 @@
     <Content Include="command_modules\azure-cli-network\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-network\linter_exclusions.yml" />
     <Content Include="command_modules\azure-cli-policyinsights\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-privatedns\HISTORY.rst" />
+    <Content Include="command_modules\azure-cli-privatedns\MANIFEST.in" />
+    <Content Include="command_modules\azure-cli-privatedns\README.rst" />
+    <Content Include="command_modules\azure-cli-privatedns\setup.cfg" />
     <Content Include="command_modules\azure-cli-profile\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-rdbms\HISTORY.rst" />
     <Content Include="command_modules\azure-cli-rdbms\MANIFEST.in" />
@@ -1664,13 +1766,19 @@
     <Content Include="command_modules\azure-cli-vm\linter_exclusions.yml" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.6" />
-  </ItemGroup>
-  <ItemGroup>
-    <Interpreter Include="..\env\">
+    <Interpreter Include="..\..\env2\">
+      <Id>env2</Id>
+      <Version>2.7</Version>
+      <Description>env2 (Python 2.7 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
+    <Interpreter Include="..\..\env\">
       <Id>env</Id>
-      <Version>3.6</Version>
-      <Description>env (Python 3.6 (64-bit))</Description>
+      <Version>3.7</Version>
+      <Description>env (Python 3.7 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>

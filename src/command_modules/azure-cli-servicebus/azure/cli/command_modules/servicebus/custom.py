@@ -13,9 +13,10 @@ import re
 
 # Namespace Region
 def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None):
+                         capacity=None, default_action=None):
+
     from azure.mgmt.servicebus.models import SBNamespace, SBSku
-    return client.create_or_update(
+    client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
         parameters=SBNamespace(
@@ -26,10 +27,18 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
                 tier=sku,
                 capacity=capacity)
         )
-    )
+    ).result()
+
+    if default_action:
+        netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+        netwrokruleset.default_action = default_action
+        client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+    return client.get(resource_group_name, namespace_name)
 
 
-def cli_namespace_update(instance, tags=None, sku=None, capacity=None):
+def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, default_action=None):
+    from msrestazure.tools import parse_resource_id
 
     if tags is not None:
         instance.tags = tags
@@ -40,6 +49,12 @@ def cli_namespace_update(instance, tags=None, sku=None, capacity=None):
 
     if capacity is not None:
         instance.sku.capacity = capacity
+
+    if default_action:
+        resourcegroup = parse_resource_id(instance.id)['resource_group']
+        netwrokruleset = client.get_network_rule_set(resourcegroup, instance.name)
+        netwrokruleset.default_action = default_action
+        client.create_or_update_network_rule_set(resourcegroup, instance.name, netwrokruleset)
 
     return instance
 
@@ -168,6 +183,11 @@ def cli_sbtopic_create(client, resource_group_name, namespace_name, topic_name, 
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
     from azure.mgmt.servicebus.models import SBTopic
+    from knack.util import CLIError
+    if max_size_in_megabytes:
+        getnamespace = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name)
+        if getnamespace.sku.name == 'Standard' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120]:
+            raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GB')
     topic_params = SBTopic(
         default_message_time_to_live=return_valid_duration_create(default_message_time_to_live),
         max_size_in_megabytes=max_size_in_megabytes,
@@ -458,3 +478,49 @@ def return_valid_duration_create(update_value):
                 return None
     else:
         return None
+
+
+# NetwrokRuleSet Region
+def cli_networkrule_createupdate(client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
+    from azure.mgmt.servicebus.models import NWRuleSetVirtualNetworkRules, Subnet, NWRuleSetIpRules
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if netwrokruleset.virtual_network_rules is None:
+        netwrokruleset.virtual_network_rules = []
+
+    if netwrokruleset.ip_rules is None:
+        netwrokruleset.ip_rules = []
+
+    if subnet:
+        netwrokruleset.virtual_network_rules.append(NWRuleSetVirtualNetworkRules(subnet=Subnet(id=subnet),
+                                                                                 ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
+
+    if ip_mask:
+        netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action=action))
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_networkrule_delete(client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
+    from azure.mgmt.servicebus.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
+    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
+
+    if subnet:
+        virtualnetworkrule = NWRuleSetVirtualNetworkRules()
+        virtualnetworkrule.subnet = subnet
+
+        for vnetruletodelete in netwrokruleset.virtual_network_rules:
+            if vnetruletodelete.subnet.id.lower() == subnet.lower():
+                virtualnetworkrule.ignore_missing_vnet_service_endpoint = vnetruletodelete.ignore_missing_vnet_service_endpoint
+                netwrokruleset.virtual_network_rules.remove(vnetruletodelete)
+                break
+
+    if ip_mask:
+        ipruletodelete = NWRuleSetIpRules()
+        ipruletodelete.ip_mask = ip_mask
+        ipruletodelete.action = "Allow"
+
+        if ipruletodelete in netwrokruleset.ip_rules:
+            netwrokruleset.ip_rules.remove(ipruletodelete)
+
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)

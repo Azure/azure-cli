@@ -45,6 +45,7 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_server_usages_operations,
     get_sql_subscription_usages_operations,
+    get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
 )
 
@@ -61,7 +62,7 @@ def load_command_table(self, _):
     ###############################################
 
     subscription_usages_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.subscription_usages_operations#SubscriptionUsagesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#SubscriptionUsagesOperations.{}',
         client_factory=get_sql_subscription_usages_operations)
 
     with self.command_group('sql',
@@ -82,7 +83,7 @@ def load_command_table(self, _):
         g.custom_command('show-connection-string', 'db_show_conn_str')
 
     database_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
 
     database_lro_transform = LongRunningOperationResultTransform(
@@ -125,7 +126,7 @@ def load_command_table(self, _):
         g.custom_command('export', 'db_export')
 
     capabilities_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.capabilities_operations#CapabilitiesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#CapabilitiesOperations.{}',
         client_factory=get_sql_capabilities_operations)
 
     with self.command_group('sql db',
@@ -168,7 +169,7 @@ def load_command_table(self, _):
                                  transform=database_lro_transform)
 
     database_operations_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.database_operations#DatabaseOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseOperations.{}',
         client_factory=get_sql_database_operations_operations)
 
     with self.command_group('sql db op', database_operations_operations) as g:
@@ -177,7 +178,7 @@ def load_command_table(self, _):
         g.command('cancel', 'cancel')
 
     transparent_data_encryptions_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.transparent_data_encryptions_operations#TransparentDataEncryptionsOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionsOperations.{}',
         client_factory=get_sql_database_transparent_data_encryptions_operations)
 
     with self.command_group('sql db tde', transparent_data_encryptions_operations) as g:
@@ -186,7 +187,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
 
     transparent_data_encryption_activities_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.transparent_data_encryption_activities_operations#TransparentDataEncryptionActivitiesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#TransparentDataEncryptionActivitiesOperations.{}',
         client_factory=get_sql_database_transparent_data_encryption_activities_operations)
 
     with self.command_group('sql db tde', transparent_data_encryption_activities_operations) as g:
@@ -194,7 +195,7 @@ def load_command_table(self, _):
         g.command('list-activity', 'list_by_configuration')
 
     replication_links_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.replication_links_operations#ReplicationLinksOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',
         client_factory=get_sql_replication_links_operations)
 
     with self.command_group('sql db replica',
@@ -207,7 +208,7 @@ def load_command_table(self, _):
         g.custom_command('set-primary', 'db_failover')
 
     restorable_dropped_databases_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.restorable_dropped_databases_operations#RestorableDroppedDatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedDatabasesOperations.{}',
         client_factory=get_sql_restorable_dropped_databases_operations)
 
     with self.command_group('sql db', restorable_dropped_databases_operations) as g:
@@ -215,7 +216,7 @@ def load_command_table(self, _):
         g.command('list-deleted', 'list_by_server')
 
     database_blob_auditing_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.database_blob_auditing_policies_operations#DatabaseBlobAuditingPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseBlobAuditingPoliciesOperations.{}',
         client_factory=get_sql_database_blob_auditing_policies_operations)
 
     with self.command_group('sql db audit-policy',
@@ -227,7 +228,7 @@ def load_command_table(self, _):
                                  custom_func_name='db_audit_policy_update')
 
     database_threat_detection_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.database_threat_detection_policies_operations#DatabaseThreatDetectionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
         client_factory=get_sql_database_threat_detection_policies_operations)
 
     with self.command_group('sql db threat-policy',
@@ -239,7 +240,7 @@ def load_command_table(self, _):
                                  custom_func_name='db_threat_detection_policy_update')
 
     database_usages_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.database_usages_operations#DatabaseUsagesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseUsagesOperations.{}',
         client_factory=get_sql_database_usages_operations)
 
     with self.command_group('sql db', database_usages_operations) as g:
@@ -251,7 +252,7 @@ def load_command_table(self, _):
     ###############################################
 
     elastic_pools_ops = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.elastic_pools_operations#ElasticPoolsOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ElasticPoolsOperations.{}',
         client_factory=get_sql_elastic_pools_operations)
 
     elastic_pool_lro_transform = LongRunningOperationResultTransform(
@@ -293,7 +294,7 @@ def load_command_table(self, _):
                          table_transformer=elastic_pool_edition_table_format)
 
     elastic_pool_operations_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.elastic_pool_operations#ElasticPoolOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ElasticPoolOperations.{}',
         client_factory=get_sql_elastic_pool_operations_operations)
 
     with self.command_group('sql elastic-pool op',
@@ -308,7 +309,7 @@ def load_command_table(self, _):
     ###############################################
 
     failover_groups_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.failover_groups_operations#FailoverGroupsOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#FailoverGroupsOperations.{}',
         client_factory=get_sql_failover_groups_operations)
     with self.command_group('sql failover-group', failover_groups_operations, client_factory=get_sql_failover_groups_operations) as g:
         g.command('show', 'get')
@@ -323,7 +324,7 @@ def load_command_table(self, _):
     ###############################################
 
     servers_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.servers_operations#ServersOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServersOperations.{}',
         client_factory=get_sql_servers_operations)
 
     with self.command_group('sql server',
@@ -331,7 +332,8 @@ def load_command_table(self, _):
                             client_factory=get_sql_servers_operations) as g:
 
         g.custom_command('create', 'server_create',
-                         table_transformer=server_table_format)
+                         table_transformer=server_table_format,
+                         supports_no_wait=True)
         g.command('delete', 'delete',
                   confirmation=True)
         g.show_command('show', 'get',
@@ -339,17 +341,19 @@ def load_command_table(self, _):
         g.custom_command('list', 'server_list',
                          table_transformer=server_table_format)
         g.generic_update_command('update',
-                                 custom_func_name='server_update')
+                                 custom_func_name='server_update',
+                                 supports_no_wait=True)
+        g.wait_command('wait')
 
     server_usages_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.server_usages_operations#ServerUsagesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServerUsagesOperations.{}',
         client_factory=get_sql_server_usages_operations)
 
     with self.command_group('sql server', server_usages_operations) as g:
         g.command('list-usages', 'list_by_server')
 
     firewall_rules_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.firewall_rules_operations#FirewallRulesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#FirewallRulesOperations.{}',
         client_factory=get_sql_firewall_rules_operations)
 
     with self.command_group('sql server firewall-rule',
@@ -367,7 +371,7 @@ def load_command_table(self, _):
                   table_transformer=firewall_rule_table_format)
 
     aadadmin_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.server_azure_ad_administrators_operations#ServerAzureADAdministratorsOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServerAzureADAdministratorsOperations.{}',
         client_factory=get_sql_server_azure_ad_administrators_operations)
 
     with self.command_group('sql server ad-admin',
@@ -381,7 +385,7 @@ def load_command_table(self, _):
                                  setter_arg_name='properties')
 
     server_keys_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.server_keys_operations#ServerKeysOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServerKeysOperations.{}',
         client_factory=get_sql_server_keys_operations)
 
     with self.command_group('sql server key',
@@ -394,7 +398,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_server')
 
     encryption_protectors_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.encryption_protectors_operations#EncryptionProtectorsOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#EncryptionProtectorsOperations.{}',
         client_factory=get_sql_encryption_protectors_operations)
 
     with self.command_group('sql server tde-key',
@@ -405,7 +409,7 @@ def load_command_table(self, _):
         g.custom_command('set', 'encryption_protector_update')
 
     virtual_network_rules_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#VirtualNetworkRulesOperations.{}',
         client_factory=get_sql_virtual_network_rules_operations)
 
     with self.command_group('sql server vnet-rule',
@@ -420,7 +424,7 @@ def load_command_table(self, _):
         g.generic_update_command('update')
 
     server_connection_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.server_connection_policies_operations#ServerConnectionPoliciesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServerConnectionPoliciesOperations.{}',
         client_factory=get_sql_server_connection_policies_operations)
 
     with self.command_group('sql server conn-policy',
@@ -431,7 +435,7 @@ def load_command_table(self, _):
         c.generic_update_command('update')
 
     server_dns_aliases_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.server_dns_aliases_operations#ServerDnsAliasesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ServerDnsAliasesOperations.{}',
         client_factory=get_sql_server_dns_aliases_operations)
 
     with self.command_group('sql server dns-alias',
@@ -449,7 +453,7 @@ def load_command_table(self, _):
     ###############################################
 
     managed_instances_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.managed_instances_operations#ManagedInstancesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstancesOperations.{}',
         client_factory=get_sql_managed_instances_operations)
 
     with self.command_group('sql mi',
@@ -467,7 +471,7 @@ def load_command_table(self, _):
     ###############################################
 
     managed_databases_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations.managed_databases_operations#ManagedDatabasesOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#ManagedDatabasesOperations.{}',
         client_factory=get_sql_managed_databases_operations)
 
     with self.command_group('sql midb',
@@ -479,3 +483,19 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+
+    ###############################################
+    #                sql virtual cluster         #
+    ###############################################
+
+    virtual_clusters_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#VirtualClustersOperations.{}',
+        client_factory=get_sql_virtual_clusters_operations)
+
+    with self.command_group('sql virtual-cluster',
+                            virtual_clusters_operations,
+                            client_factory=get_sql_virtual_clusters_operations) as g:
+
+        g.command('delete', 'delete', supports_no_wait=True)
+        g.show_command('show', 'get')
+        g.custom_command('list', 'virtual_cluster_list')

@@ -11,6 +11,7 @@ from azure.cli.core.cloud import (Cloud,
                                   get_cloud,
                                   remove_cloud,
                                   add_cloud,
+                                  _get_cloud_name,
                                   switch_active_cloud,
                                   update_cloud,
                                   get_active_cloud_name,
@@ -134,6 +135,7 @@ def unregister_cloud(cmd, cloud_name):
 
 def set_cloud(cmd, cloud_name, profile=None):
     try:
+        cloud_name = _get_cloud_name(cmd.cli_ctx, cloud_name)
         switch_active_cloud(cmd.cli_ctx, cloud_name)
         if profile:
             modify_cloud(cmd, cloud_name=cloud_name, profile=profile)
