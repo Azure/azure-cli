@@ -3076,20 +3076,10 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         self.cmd('sql virtual-cluster show -g {rg} -n {vc_name}', expect_failure=True)
 
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
-
-
     def test_sql_instance_failover_group_mgmt(self):
-
         managed_instance_name_1 = "geodrmitestgp-01"
         managed_instance_name_2 = "geodrmitestgp-secondary"
         resource_group_name = "geodrCLtestRG"
-
-        mi_1 = self.cmd('sql mi show -g {} -n {}'
-                .format(resource_group_name, managed_instance_name_1), checks=JMESPathCheck('name', managed_instance_name_1))
-
-        mi_2 = self.cmd('sql mi show -g {} -n {}'
-                .format(resource_group_name, managed_instance_name_2), checks=JMESPathCheck('name', managed_instance_name_2))
-
         failover_group_name = "fgtest2019"
         mi1_location = "EastUS"
         mi2_location = "WestUS"

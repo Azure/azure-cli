@@ -2326,7 +2326,6 @@ class InstanceFailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
 
-from azure.cli.core.commands.client_factory import get_subscription_id
 
 def instance_failover_group_create(
         cmd,
@@ -2341,6 +2340,8 @@ def instance_failover_group_create(
     '''
     Creates a failover group.
     '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
 
     managed_instance_client = get_sql_managed_instances_operations(cmd.cli_ctx, None)
     # pylint: disable=no-member
@@ -2368,7 +2369,7 @@ def instance_failover_group_create(
         failover_group_name=instance_failover_group_name,
         parameters=InstanceFailoverGroup(
             managed_instance_pairs=[managed_server_info_pair],
-            partner_regions = [partner_region_info],
+            partner_regions=[partner_region_info],
             read_write_endpoint=InstanceFailoverGroupReadWriteEndpoint(
                 failover_policy=failover_policy,
                 failover_with_data_loss_grace_period_minutes=grace_period),
