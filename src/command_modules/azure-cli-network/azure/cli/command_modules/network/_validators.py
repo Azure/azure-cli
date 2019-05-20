@@ -439,6 +439,17 @@ def validate_public_ip_prefix(cmd, namespace):
             type='publicIPPrefixes')
 
 
+def validate_nat_gateway(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.nat_gateway and not is_valid_resource_id(namespace.nat_gateway):
+        namespace.nat_gateway = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            name=namespace.nat_gateway,
+            namespace='Microsoft.Network',
+            type='natGateways')
+
+
 def validate_private_ip_address(namespace):
     if namespace.private_ip_address and hasattr(namespace, 'private_ip_address_allocation'):
         namespace.private_ip_address_allocation = 'static'

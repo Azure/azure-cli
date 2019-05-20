@@ -2,9 +2,10 @@
 
 Release History
 ===============
+
 2.2.7
 +++++
-* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+* Support Managed Identities for Task
 
 2.2.6
 +++++

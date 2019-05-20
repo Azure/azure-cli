@@ -2399,7 +2399,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         logger.warning("Creating App service plan '%s' ...", asp)
         create_app_service_plan(cmd, rg_name, asp, is_linux, None, sku, 1 if is_linux else None, location)
         logger.warning("App service plan creation complete")
-        create_json['appserviceplan'] = plan
+        create_json['appserviceplan'] = asp
         _create_new_app = True
         _show_too_many_apps_warn = False
     else:
