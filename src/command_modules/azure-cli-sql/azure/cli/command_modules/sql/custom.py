@@ -2341,8 +2341,6 @@ def instance_failover_group_create(
     Creates a failover group.
     '''
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
     managed_instance_client = get_sql_managed_instances_operations(cmd.cli_ctx, None)
     # pylint: disable=no-member
     primary_server = managed_instance_client.get(
@@ -2409,6 +2407,8 @@ def instance_failover_group_failover(
     '''
     Failover a failover group.
     '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
 
     failover_group = client.get(
         resource_group_name=resource_group_name,

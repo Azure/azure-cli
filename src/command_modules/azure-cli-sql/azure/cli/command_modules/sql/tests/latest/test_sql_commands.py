@@ -3075,6 +3075,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         # test show sql virtual cluster doesn't return anything
         self.cmd('sql virtual-cluster show -g {rg} -n {vc_name}', expect_failure=True)
 
+
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
     def test_sql_instance_failover_group_mgmt(self):
         managed_instance_name_1 = "geodrmitestgp-01"
