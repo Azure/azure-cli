@@ -6,6 +6,8 @@ Release History
 * Fixed issue where the CLI would load extensions that were not compatible with its core version.
 * Fix issue if clouds.config is corrupt
 
+* output: Fix bug where commands fail if `--output yaml` is used with `--query`
+
 2.0.64
 ++++++
 * Upgrade to knack 0.6.1
