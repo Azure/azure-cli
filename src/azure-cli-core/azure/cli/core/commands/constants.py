@@ -15,7 +15,7 @@ CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'excepti
                       'supports_local_cache'] + CLI_COMMON_KWARGS
 CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type',
-     'deprecate_info'] \
+     'deprecate_info', 'preview_info'] \
     + CLI_COMMON_KWARGS + ARGPARSE_SUPPORTED_KWARGS
 
 CLI_POSITIONAL_PARAM_KWARGS = \

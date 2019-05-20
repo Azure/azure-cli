@@ -419,6 +419,8 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             kwargs['command_type'] = command_type
         if 'deprecate_info' in kwargs:
             kwargs['deprecate_info'].target = group_name
+        if 'preview_info' in kwargs:
+            kwargs['preview_info'].target = group_name
         return self._command_group_cls(self, group_name, **kwargs)
 
     def argument_context(self, scope, **kwargs):
