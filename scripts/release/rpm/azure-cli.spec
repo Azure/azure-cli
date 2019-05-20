@@ -6,7 +6,7 @@
   %define dist .el%{?rhel}
 %endif
 
-%if 0%{?rhel} < 8
+%if 0%{?rhel} && 0%{?rhel} < 8
     %define python_cmd python2
 %else
     %define python_cmd python3
@@ -28,7 +28,7 @@ BuildArch:      x86_64
 Requires:       %{python_cmd}, %{python_cmd}-virtualenv
 
 BuildRequires:  gcc, libffi-devel, openssl-devel
-# BuildRequires:  %{python_cmd}-devel
+BuildRequires:  %{python_cmd}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 
