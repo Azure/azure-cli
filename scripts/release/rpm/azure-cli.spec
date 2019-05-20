@@ -27,7 +27,7 @@ Url:            https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 BuildArch:      x86_64
 Requires:       %{python_cmd}, %{python_cmd}-virtualenv
 
-BuildRequires:  gcc, libffi-devel, openssl-devel
+BuildRequires:  gcc, libffi-devel, openssl-devel, perl
 BuildRequires:  %{python_cmd}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
@@ -67,6 +67,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/
 cat $source_dir/az.completion > %{buildroot}%{_sysconfdir}/bash_completion.d/azure-cli
 
 %files
+%exclude %{_bindir}/python
+%exclude %{_bindir}/%{python_cmd}
 %attr(-,root,root) %{cli_lib_dir}
 %config(noreplace) %{_sysconfdir}/bash_completion.d/azure-cli
 %attr(0755,root,root) %{_bindir}/az
