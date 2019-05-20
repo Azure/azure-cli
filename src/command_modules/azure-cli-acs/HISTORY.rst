@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.4.3
+++++++
+* Print a friendly message when subscription is not whitellisted to use Azure Red Hat OpenShift
+
 2.4.2
 ++++++
 * Fix 'az openshift create' command when used with customer aad client
