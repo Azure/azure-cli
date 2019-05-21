@@ -36,7 +36,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
              image_name,
              source_location,
              builder=ORYX_PACK_BUILDER_IMAGE,
-             no_pull=True,
+             pull=False,
              no_format=False,
              no_logs=False,
              no_wait=False,
@@ -62,7 +62,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties')
 
     yaml_body = PACK_TASK_YAML_FMT.format(
-        image_name=image_name, builder=builder, no_pull='--no-pull' if no_pull else '')
+        image_name=image_name, builder=builder, no_pull='--no-pull' if not pull else '')
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
