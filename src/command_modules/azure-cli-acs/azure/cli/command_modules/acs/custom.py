@@ -1392,7 +1392,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
                        'To use "az aks browse" first enable the add-on\n'
-                       'by running "az aks enable-addons --addons kube-bashboard".')
+                       'by running "az aks enable-addons --addons kube-dashboard".')
 
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
     _, browse_path = tempfile.mkstemp()
@@ -1848,7 +1848,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     addon_args = addons.split(',')
 
     addon_profiles = instance.addon_profiles or {}
-    if 'kubeDashboard' in addon_args and not 'kubeDashboard' in addon_profiles:
+    if 'kube-dashboard' in addon_args and 'kubeDashboard' not in addon_profiles:
         addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
 
     os_type = 'Linux'
