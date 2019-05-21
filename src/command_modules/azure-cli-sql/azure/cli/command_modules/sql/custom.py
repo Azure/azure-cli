@@ -2355,7 +2355,6 @@ def instance_failover_group_create(
     managed_server_info_pair = ManagedInstancePairInfo(
         primary_managed_instance_id=primary_server.id,
         partner_managed_instance_id=partner_server.id)
-        
     partner_region_info = PartnerRegionInfo(location=partner_server.location)
 
     # Convert grace period from hours to minutes
