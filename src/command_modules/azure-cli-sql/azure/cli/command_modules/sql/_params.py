@@ -1236,13 +1236,22 @@ def load_arguments(self, _):
     ###############################################
 
     with self.argument_context('sql instance-failover-group') as c:
-        c.argument('instance_failover_group_name', options_list=['--name', '-n'], help="The name of the Instance Failover Group")
-        c.argument('failover_group_name', options_list=['--name', '-n'], help="The name of the Instance Failover Group")
-        c.argument('managed_instance', arg_type=managed_instance_param_type, options_list=['-s'])
-        c.argument('partner_managed_instance', help="The name of the partner managed instance of a Instance Failover Group")
-        c.argument('partner_resource_group', help="The name of the resource group of the partner managed instance")
-        c.argument('failover_policy', help="The failover policy of the Instance Failover Group",
-                   arg_type=get_enum_type(InstanceFailoverPolicyType))
+        c.argument('instance_failover_group_name',
+                    options_list=['--name', '-n'],
+                    help="The name of the Instance Failover Group")
+        c.argument('failover_group_name',
+                    options_list=['--name', '-n'],
+                    help="The name of the Instance Failover Group")
+        c.argument('managed_instance',
+                    arg_type=managed_instance_param_type,
+                    options_list=['-s'])
+        c.argument('partner_managed_instance',
+                    help="The name of the partner managed instance of a Instance Failover Group")
+        c.argument('partner_resource_group',
+                    help="The name of the resource group of the partner managed instance")
+        c.argument('failover_policy',
+                    help="The failover policy of the Instance Failover Group",
+                    arg_type=get_enum_type(InstanceFailoverPolicyType))
         c.argument('grace_period',
                    help='Interval in hours before automatic failover is initiated '
                         'if an outage occurs on the primary server. '
