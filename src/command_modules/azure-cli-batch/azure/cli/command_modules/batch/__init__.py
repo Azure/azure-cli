@@ -14,13 +14,14 @@ class BatchCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         batch_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.batch.custom#{}',
             exception_handler=batch_exception_handler)
         super(BatchCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=batch_custom,
                                                   command_group_cls=BatchCommandGroup,
-                                                  min_profile='2017-03-10-profile')
+                                                  resource_type=ResourceType.MGMT_BATCH)
         self.module_name = __name__
 
     def load_command_table(self, args):

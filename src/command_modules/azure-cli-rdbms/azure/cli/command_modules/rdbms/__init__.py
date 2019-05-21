@@ -13,12 +13,13 @@ class RdbmsCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
 
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
         super(RdbmsCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
-            min_profile='2017-03-10-profile',
+            resource_type=ResourceType.MGMT_RDBMS,
             custom_command_type=rdbms_custom,
             argument_context_cls=RdbmsArgumentContext,
             suppress_extension=ModExtensionSuppress(

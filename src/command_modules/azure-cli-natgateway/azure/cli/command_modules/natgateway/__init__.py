@@ -19,8 +19,7 @@ class NatGatewayCommandsLoader(AzCommandsLoader):
         super(NatGatewayCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_NETWORK,
-            custom_command_type=natgateway_custom,
-            min_profile='2019-03-02-hybrid'
+            custom_command_type=natgateway_custom
         )
 
     def load_command_table(self, args):
