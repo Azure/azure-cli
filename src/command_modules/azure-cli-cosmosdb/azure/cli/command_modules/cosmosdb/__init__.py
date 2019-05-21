@@ -22,6 +22,7 @@ class CosmosDbCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.cosmosdb._client_factory import cf_cosmosdb_document
         from azure.cli.command_modules.cosmosdb._command_type import CosmosDbCommandGroup
+        from azure.cli.core.profiles import ResourceType
         cosmosdb_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.cosmosdb.custom#{}',
             client_factory=cf_cosmosdb_document)
@@ -29,7 +30,7 @@ class CosmosDbCommandsLoader(AzCommandsLoader):
         cli_ctx.register_event(EVENT_INVOKER_PRE_PARSE_ARGS, _documentdb_deprecate)
 
         super(CosmosDbCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                     min_profile='2017-03-10-profile',
+                                                     resource_type=ResourceType.MGMT_COSMOSDB,
                                                      custom_command_type=cosmosdb_custom,
                                                      command_group_cls=CosmosDbCommandGroup)
 

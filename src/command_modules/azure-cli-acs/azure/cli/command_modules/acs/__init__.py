@@ -13,10 +13,11 @@ class ContainerServiceCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         acs_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.acs.custom#{}')
         super(ContainerServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                              custom_command_type=acs_custom,
-                                                             min_profile='2017-03-10-profile')
+                                                             resource_type=ResourceType.MGMT_CONTAINERSERVICE)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.acs.commands import load_command_table
