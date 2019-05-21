@@ -6,6 +6,7 @@
 import os
 import time
 import json
+import logging
 from knack.prompting import prompt_choice_list, prompt_y_n, prompt
 from knack.util import CLIError
 from azure_functions_devops_build.constants import (
@@ -41,6 +42,8 @@ SUPPORTED_LANGUAGES = {
     'dotnet': DOTNET,
     'powershell': POWERSHELL,
 }
+BUILD_QUERY_FREQUENCY = 5  # sec
+RELEASE_COMPOSITION_DELAY = 1  # sec
 
 
 class AzureDevopsBuildInteractive(object):
@@ -52,7 +55,7 @@ class AzureDevopsBuildInteractive(object):
     """
 
     def __init__(self, cmd, logger, functionapp_name, organization_name, project_name, repository_name,
-                 overwrite_yaml, allow_force_push, use_local_settings, github_pat, github_repository):
+                 overwrite_yaml, allow_force_push, github_pat, github_repository):
         self.adbp = AzureDevopsBuildProvider(cmd.cli_ctx)
         self.cmd = cmd
         self.logger = logger
@@ -80,14 +83,12 @@ class AzureDevopsBuildInteractive(object):
 
         self.settings = []
         self.build = None
-        self.release = None
         # These are used to tell if we made new objects
         self.scenario = None  # see SUPPORTED_SCENARIOS
         self.created_organization = False
         self.created_project = False
         self.overwrite_yaml = str2bool(overwrite_yaml)
         self.allow_force_push = allow_force_push
-        self.use_local_settings = str2bool(use_local_settings)
 
     def interactive_azure_devops_build(self):
         """Main interactive flow which is the only function that should be used outside of this
@@ -112,8 +113,9 @@ class AzureDevopsBuildInteractive(object):
         self.process_extensions()
         self.process_build_and_release_definition_name('AZURE_DEVOPS')
         self.process_build('AZURE_DEVOPS')
+        self.wait_for_build()
         self.process_release()
-        self.logger.warning("To trigger a function build again, please use 'git push {remote} master'".format(
+        self.logger.warning("Pushing your code to master will now trigger another build.".format(
             remote=self.repository_remote_name
         ))
         return {
@@ -144,8 +146,9 @@ class AzureDevopsBuildInteractive(object):
         self.process_extensions()
         self.process_build_and_release_definition_name('GITHUB_INTEGRATION')
         self.process_build('GITHUB_INTEGRATION')
+        self.wait_for_build()
         self.process_release()
-        self.logger.warning("Setup continuous integration between {github_repo} and Azure DevOps pipelines".format(
+        self.logger.warning("Setup continuous integration between {github_repo} and Azure Pipelines".format(
             github_repo=self.github_repository
         ))
         return {
@@ -253,7 +256,7 @@ class AzureDevopsBuildInteractive(object):
     def process_organization(self):
         """Helper to retrieve information about an organization / create a new one"""
         if self.organization_name is None:
-            response = prompt_y_n('Would you like to use an existing Azure Devops organization? ')
+            response = prompt_y_n('Would you like to use an existing Azure DevOps organization? ')
             if response:
                 self._select_organization()
             else:
@@ -268,7 +271,7 @@ class AzureDevopsBuildInteractive(object):
         if (self.project_name is None) and (self.created_organization):
             self._create_project()
         elif self.project_name is None:
-            use_existing_project = prompt_y_n('Would you like to use an existing Azure Devops project? ')
+            use_existing_project = prompt_y_n('Would you like to use an existing Azure DevOps project? ')
             if use_existing_project:
                 self._select_project()
             else:
@@ -276,28 +279,14 @@ class AzureDevopsBuildInteractive(object):
         else:
             self.cmd_selector.cmd_project(self.organization_name, self.project_name)
 
+        self.logger.warning("To view your Azure DevOps project, "
+                            "please visit https://dev.azure.com/{org}/{proj}".format(
+                                org=self.organization_name,
+                                proj=self.project_name
+                            ))
+
     def process_yaml_local(self):
         """Helper to create the local azure-pipelines.yml file"""
-        # Try and get what the app settings are
-        with open('local.settings.json') as f:
-            data = json.load(f)
-
-        default = ['FUNCTIONS_WORKER_RUNTIME', 'AzureWebJobsStorage']
-        settings = []
-        for key, value in data['Values'].items():
-            if key not in default:
-                settings.append((key, value))
-
-        if settings:
-            if self.use_local_settings is None:
-                use_local_settings = prompt_y_n("Would you like to copy your local settings "
-                                                "to your application in Azure?")
-            else:
-                use_local_settings = self.use_local_settings
-            if not use_local_settings:
-                settings = []
-
-        self.settings = settings
 
         if os.path.exists('azure-pipelines.yml'):
             if self.overwrite_yaml is None:
@@ -309,7 +298,7 @@ class AzureDevopsBuildInteractive(object):
                 response = self.overwrite_yaml
 
         if (not os.path.exists('azure-pipelines.yml')) or response:
-            self.logger.warning('Creating new azure-pipelines.yml')
+            self.logger.warning('Creating a new azure-pipelines.yml')
             try:
                 self.adbp.create_yaml(self.functionapp_language, self.functionapp_type)
             except LanguageNotSupportException as lnse:
@@ -331,7 +320,7 @@ class AzureDevopsBuildInteractive(object):
         # Create and commit the new yaml file to Github without asking
         if not does_yaml_file_exist:
             if self.github_repository:
-                self.logger.warning("Creating new azure-pipelines.yml for Github repository")
+                self.logger.warning("Creating a new azure-pipelines.yml for Github repository")
             try:
                 AzureDevopsBuildProvider.create_github_yaml(
                     pat=self.github_pat,
@@ -381,7 +370,7 @@ class AzureDevopsBuildInteractive(object):
 
         # Collect repository name on Azure Devops
         if not self.repository_name:
-            self.repository_name = prompt("Push to which Azure Devops repository (default: {repo}): ".format(
+            self.repository_name = prompt("Push to which Azure DevOps repository (default: {repo}): ".format(
                 repo=self.project_name
             ))
             if not self.repository_name:  # Select default value
@@ -408,7 +397,7 @@ class AzureDevopsBuildInteractive(object):
         )
         if has_local_git_remote:
             raise CLIError("There's a git remote bound to {url}.{ls}"
-                           "To update the repository and trigger an Azure Devops build, please use "
+                           "To update the repository and trigger an Azure Pipelines build, please use "
                            "'git push {remote} master'".format(
                                url=expected_remote_url,
                                remote=expected_remote_name,
@@ -469,7 +458,7 @@ class AzureDevopsBuildInteractive(object):
                                url=remote_url, ls=os.linesep
                            ))
 
-        self.logger.warning("Local branches has been pushed to {url}".format(url=remote_url))
+        self.logger.warning("Local branches have been pushed to {url}".format(url=remote_url))
 
     def process_github_personal_access_token(self):
         if not self.github_pat:
@@ -525,6 +514,7 @@ class AzureDevopsBuildInteractive(object):
         # If there is no matching service endpoint, we need to create a new one
         if not service_endpoints:
             try:
+                self.logger.warning("Creating a service principle (this may take a minute or two)")
                 service_endpoint = self.adbp.create_service_endpoint(
                     self.organization_name, self.project_name, repository
                 )
@@ -607,20 +597,31 @@ class AzureDevopsBuildInteractive(object):
             proj=self.project_name,
             build_id=self.build.id
         )
+        self.logger.warning("The build for the function app has been initiated (this may take a few minutes)")
         self.logger.warning("To follow the build process go to {url}".format(url=url))
 
-    def process_release(self):
-        # wait for artifacts / build to complete
-        counter = 0
+    def wait_for_build(self):
         build = None
+        prev_log_status = None
+
+        self.logger.info("========== Build Log ==========")
         while build is None or build.result is None:
-            time.sleep(5)
+            time.sleep(BUILD_QUERY_FREQUENCY)
             build = self._get_build_by_id(self.organization_name, self.project_name, self.build.id)
-            self.logger.warning("building artifacts ... {counter}s ({status})".format(
-                counter=counter,
-                status=build.status
-            ))
-            counter += 5
+
+            # Log streaming
+            if self.logger.isEnabledFor(logging.INFO):
+                curr_log_status = self.adbp.get_build_logs_status(self.organization_name, self.project_name, self.build.id)
+                log_content = self.adbp.get_build_logs_content_from_statuses(
+                    organization_name=self.organization_name,
+                    project_name=self.project_name,
+                    build_id=self.build.id,
+                    prev_log=prev_log_status,
+                    curr_log=curr_log_status
+                )
+                if log_content:
+                    self.logger.info(log_content)
+                prev_log_status = curr_log_status
 
         if build.result == 'failed':
             url = "https://dev.azure.com/{org}/{proj}/_build/results?buildId={build_id}".format(
@@ -628,13 +629,14 @@ class AzureDevopsBuildInteractive(object):
                 proj=self.project_name,
                 build_id=build.id
             )
-            raise CLIError("Sorry, your build has failed in Azure Devops.{ls}"
+            raise CLIError("Sorry, your build has failed in Azure Pipelines.{ls}"
                            "To view details on why your build has failed please visit {url}".format(
                                url=url, ls=os.linesep
                            ))
         if build.result == 'succeeded':
-            self.logger.warning("Your build has completed. Composing a release definition...")
+            self.logger.warning("Your build has completed.")
 
+    def process_release(self):
         # need to check if the release definition already exists
         release_definitions = self.adbp.list_release_definitions(self.organization_name, self.project_name)
         release_definition_match = [
@@ -643,6 +645,7 @@ class AzureDevopsBuildInteractive(object):
         ]
 
         if not release_definition_match:
+            self.logger.warning("Composing a release definition...")
             self.adbp.create_release_definition(self.organization_name, self.project_name,
                                                 self.build_definition_name, self.artifact_name,
                                                 self.release_pool_name, self.service_endpoint_name,
@@ -653,31 +656,27 @@ class AzureDevopsBuildInteractive(object):
             self.logger.warning("Detected a release definition already exists: {name}".format(
                                 name=self.release_definition_name))
 
-        # The build artifact takes some time to propagate
-        self.logger.warning("Prepare to release the artifact...")
-        time.sleep(5)
+        # Check if a release is automatically triggered. If not, create a new release.
+        time.sleep(RELEASE_COMPOSITION_DELAY)
+        release = self.adbp.get_latest_release(self.organization_name, self.project_name, self.release_definition_name)
+        if release is None:
+            try:
+                release = self.adbp.create_release(self.organization_name, self.project_name, self.release_definition_name)
+            except ReleaseErrorException:
+                raise CLIError("Sorry, your release has failed in Azure Pipelines.{ls}"
+                               "To view details on why your release has failed please visit "
+                               "https://dev.azure.com/{org}/{proj}/_release".format(
+                                   ls=os.linesep, org=self.organization_name, proj=self.project_name
+                               ))
 
-        try:
-            release = self.adbp.create_release(self.organization_name, self.project_name, self.release_definition_name)
-        except ReleaseErrorException:
-            url = "https://dev.azure.com/{org}/{proj}/_release".format(
-                org=self.organization_name,
-                proj=self.project_name
-            )
-            raise CLIError("Sorry, your release has failed in Azure Devops.{ls}"
-                           "To view details on why your release has failed please visit {url}".format(
-                               url=url, ls=os.linesep
-                           ))
-
-        url = (
-            "https://dev.azure.com/{org}/{proj}/_releaseProgress?_a"
-            "=release-environment-logs&releaseId={release_id}".format(
-                org=self.organization_name,
-                proj=self.project_name,
-                release_id=release.id
-            ))
-        self.logger.warning("To follow the release process go to {url}".format(url=url))
-        self.release = release
+        self.logger.warning("To follow the release process go to "
+                            "https://dev.azure.com/{org}/{proj}/_releaseProgress?"
+                            "_a=release-environment-logs&releaseId={release_id}".format(
+                                org=self.organization_name,
+                                proj=self.project_name,
+                                release_id=release.id
+                            ))
+        return
 
     def _check_if_force_push_required(self, remote_url, remote_branches):
         force_push_required = False
@@ -690,7 +689,7 @@ class AzureDevopsBuildInteractive(object):
             ))
 
             if self.allow_force_push is None:
-                consent = prompt_y_n("I consent to force push all local branches to Azure Devops repository")
+                consent = prompt_y_n("I consent to force push all local branches to Azure DevOps repository")
             else:
                 consent = str2bool(self.allow_force_push)
 
@@ -712,7 +711,7 @@ class AzureDevopsBuildInteractive(object):
             org=self.organization_name,
         ))
         self.logger.warning('Check "Enable alternate authentication credentials" and save your username and password.')
-        self.logger.warning("You may need to use this credential when pushing your code to Azure Devops repository.")
+        self.logger.warning("You may need to use this credential when pushing your code to Azure DevOps repository.")
         consent = prompt_y_n("I have setup alternative authentication credentials for {repo}".format(
             repo=self.repository_name
         ))
@@ -839,15 +838,14 @@ class AzureDevopsBuildInteractive(object):
         region = [region for region in regions.value if region.display_name == region_names[choice_index]][0]
 
         while True:
-            organization_name = prompt("Please enter the name of the new organization: ")
+            organization_name = prompt("Please enter a name for your new organization: ")
             new_organization = self.adbp.create_organization(organization_name, region.name)
             if new_organization.valid is False:
                 self.logger.warning(new_organization.message)
-                self.logger.warning("Note: any name must be globally unique")
+                self.logger.warning("Note: all names must be globally unique")
             else:
                 break
-        url = "https://dev.azure.com/" + new_organization.name + "/"
-        self.logger.info("Finished creating the new organization. Click the link to see your new organization: %s", url)
+
         self.organization_name = new_organization.name
 
     def _select_project(self):
@@ -863,16 +861,14 @@ class AzureDevopsBuildInteractive(object):
             self._create_project()
 
     def _create_project(self):
-        project_name = prompt("Please enter the name of the new project: ")
+        project_name = prompt("Please enter a name for your new project: ")
         project = self.adbp.create_project(self.organization_name, project_name)
         # Keep retrying to create a new project if it fails
         while not project.valid:
             self.logger.error(project.message)
-            project_name = prompt("Please enter the name of the new project: ")
+            project_name = prompt("Please enter a name for your new project: ")
             project = self.adbp.create_project(self.organization_name, project_name)
 
-        url = "https://dev.azure.com/" + self.organization_name + "/" + project.name + "/"
-        self.logger.info("Finished creating the new project. Click the link to see your new project: %s", url)
         self.project_name = project.name
         self.created_project = True
 
@@ -894,7 +890,7 @@ class CmdSelectors(object):
                              if functionapp.name == functionapp_name]
         if not functionapp_match:
             raise CLIError("Error finding functionapp. "
-                           "Please check that the functionapp exists using 'az functionapp list")
+                           "Please check that the function app exists by calling 'az functionapp list'")
 
         return functionapp_match[0]
 
@@ -904,7 +900,7 @@ class CmdSelectors(object):
                               if organization.accountName == organization_name]
         if not organization_match:
             raise CLIError("Error finding organization. "
-                           "Please check that the organization exists by logging onto your dev.azure.com acocunt")
+                           "Please check that the organization exists by navigating to the Azure DevOps portal at dev.azure.com")
 
         return organization_match[0]
 
@@ -915,6 +911,6 @@ class CmdSelectors(object):
 
         if not project_match:
             raise CLIError("Error finding project. "
-                           "Please check that the project exists by logging onto your dev.azure.com acocunt")
+                           "Please check that the project exists by navigating to the Azure DevOps portal at dev.azure.com")
 
         return project_match[0]
