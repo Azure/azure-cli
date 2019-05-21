@@ -1000,22 +1000,125 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, enabled=None, mode=None, location=None, tags=None):
-    PolicySettings, WebApplicationFirewallPolicy = cmd.get_models('PolicySettings', 'WebApplicationFirewallPolicy')
-    waf_policy = WebApplicationFirewallPolicy(
-        policy_settings=PolicySettings(enabled_state=enabled, mode=mode),
-        location=location,
-        tags=tags
-    )
+def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location=None, tags=None):
+    WebApplicationFirewallPolicy = cmd.get_models('WebApplicationFirewallPolicy')
+    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags)
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 
-def update_ag_waf_policy(instance, tags=None, enabled=None, mode=None):
+def update_ag_waf_policy(cmd, instance, tags=None, enabled=None, mode=None):
+    if enabled or mode and not getattr(instance, 'policy_settings'):
+        PolicySettings = cmd.get_models('PolicySettings')
+        instance.policy_settings = PolicySettings(enabled_state=enabled, mode=mode)
     return instance
 
 
 def list_ag_waf_policies(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'web_application_firewall_policies', resource_group_name)
+# endregion
+
+
+#region ApplicationGatewayWAFPolicyRules
+def create_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
+                       action=None):
+    WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
+    waf_policy = client.get(resource_group_name, policy_name)
+    new_rule = WebApplicationFirewallCustomRule(
+        name=rule_name,
+        action=action,
+        match_conditions=[],
+        priority=priority,
+        rule_type=rule_type
+    )
+    _upsert(waf_policy, 'custom_rules', new_rule, 'name')
+    parent = client.create_or_update(resource_group_name, policy_name, waf_policy).result()
+    return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
+
+def update_ag_waf_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None,
+                       request_headers=None, response_headers=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('rule_sequence', sequence)
+        c.set_param('action_set.request_header_configurations', request_headers)
+        c.set_param('action_set.response_header_configurations', response_headers)
+    return parent
+
+
+def show_ag_waf_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
+    client = network_client_factory(cmd.cli_ctx).application_gateways
+    gateway = client.get(resource_group_name, application_gateway_name)
+    return find_child_item(gateway, rule_set_name, rule_name,
+                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+
+
+def list_ag_waf_rules(cmd, resource_group_name, application_gateway_name, rule_set_name):
+    client = network_client_factory(cmd.cli_ctx).application_gateways
+    gateway = client.get(resource_group_name, application_gateway_name)
+    return find_child_collection(gateway, rule_set_name, path='rewrite_rule_sets.rewrite_rules', key_path='name')
+
+
+def delete_ag_waf_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name, no_wait=None):
+    client = network_client_factory(cmd.cli_ctx).application_gateways
+    gateway = client.get(resource_group_name, application_gateway_name)
+    rule_set = find_child_item(gateway, rule_set_name, path='rewrite_rule_sets', key_path='name')
+    rule = find_child_item(rule_set, rule_name, path='rewrite_rules', key_path='name')
+    rule_set.rewrite_rules.remove(rule)
+    sdk_no_wait(no_wait, client.create_or_update, resource_group_name, application_gateway_name, gateway)
+# endregion
+
+
+# region ApplicationGatewayWAFPolicyRuleMatchConditions
+def create_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, operator, match_values,
+                                  match_variables, negation_conditon=None, transforms=None):
+    ApplicationGatewayRewriteRuleCondition = cmd.get_models(
+        'ApplicationGatewayRewriteRuleCondition')
+    waf_policy = client.get(resource_group_name, policy_name)
+    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+    new_rule = ApplicationGatewayRewriteRuleCondition(
+        variable=variable,
+        pattern=pattern,
+        ignore_case=ignore_case,
+        negate=negate
+    )
+    _upsert(rule, 'conditions', new_condition, 'variable')
+    if no_wait:
+        return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
+    parent = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag).result()
+    return find_child_item(parent, rule_set_name, rule_name, variable,
+                           path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
+    pass
+
+
+def update_ag_waf_rule_match_cond(instance, parent, cmd, rule_set_name, rule_name):
+    # with cmd.update_context(instance) as c:
+    #     c.set_param('pattern', pattern)
+    #     c.set_param('ignore_case', ignore_case)
+    #     c.set_param('negate', negate)
+    return parent
+
+
+def show_ag_waf_rule_match_cond(cmd, resource_group_name, application_gateway_name):
+    client = network_client_factory(cmd.cli_ctx).application_gateways
+    gateway = client.get(resource_group_name, application_gateway_name)
+    return find_child_item(gateway, rule_set_name, rule_name, variable,
+                           path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name.variable')
+
+
+def list_ag_waf_rule_match_cond(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name):
+    client = network_client_factory(cmd.cli_ctx).application_gateways
+    gateway = client.get(resource_group_name, application_gateway_name)
+    return find_child_collection(gateway, rule_set_name, rule_name,
+                                 path='rewrite_rule_sets.rewrite_rules.conditions', key_path='name.name')
+
+
+def delete_ag_waf_rule_match_cond(cmd, resource_group_name, application_gateway_name, rule_set_name,
+                                     rule_name, variable, no_wait=None):
+    client = network_client_factory(cmd.cli_ctx).application_gateways
+    gateway = client.get(resource_group_name, application_gateway_name)
+    rule = find_child_item(gateway, rule_set_name, rule_name,
+                           path='rewrite_rule_sets.rewrite_rules', key_path='name.name')
+    condition = find_child_item(rule, variable, path='conditions', key_path='variable')
+    rule.conditions.remove(condition)
+    sdk_no_wait(no_wait, client.create_or_update, resource_group_name, application_gateway_name, gateway)
 # endregion
 
 

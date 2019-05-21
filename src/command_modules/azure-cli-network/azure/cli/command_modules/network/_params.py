@@ -50,8 +50,7 @@ def load_arguments(self, _):
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, WebApplicationFirewallMode,
-     WebApplicationFirewallEnabledState, ZoneType) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -59,8 +58,7 @@ def load_arguments(self, _):
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'WebApplicationFirewallMode',
-         'WebApplicationFirewallEnabledState', 'ZoneType')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
 
     if self.supported_api_version(min_api='2018-02-01'):
         ExpressRoutePeeringType = self.get_models('ExpressRoutePeeringType')
@@ -359,13 +357,35 @@ def load_arguments(self, _):
     # endregion
 
     # region ApplicationGatewayWAFPolicies
+    (WebApplicationFirewallAction, WebApplicationFirewallEnabledState, WebApplicationFirewallMatchVariable,
+     WebApplicationFirewallOperator, WebApplicationFirewallMode, WebApplicationFirewallRuleType,
+     WebApplicationFirewallTransform) = self.get_models(
+        'WebApplicationFirewallAction', 'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMatchVariable',
+        'WebApplicationFirewallOperator', 'WebApplicationFirewallMode', 'WebApplicationFirewallRuleType',
+        'WebApplicationFirewallTransform'
+    )
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
         c.argument('mode', get_enum_type(WebApplicationFirewallMode), help='Describes the mode of operation at the policy level.')
 
     for scope in ['create', 'update']:
         with self.argument_context('network application-gateway waf-policy {}'.format(scope), min_api='2018-12-01') as c:
-            c.argument('enabled', get_enum_type(WebApplicationFirewallEnabledState, default='Enabled' if scope == 'create' else None), help='Enabled state.')
+            c.argument('enabled', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True), default='Enabled' if scope == 'create' else None, help='Enabled state.')
+
+    with self.argument_context('network application-gateway waf-policy rule', min_api='2018-12-01') as c:
+        c.argument('policy_name', options_list='--policy-name')
+        c.argument('rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='Name of the WAF policy rule.')
+        c.argument('priority', type=int, help='Rule priority. Lower values are evaluated prior to higher values.')
+        c.argument('action', arg_type=get_enum_type(WebApplicationFirewallAction), help='Action to take.')
+        c.argument('rule_type', arg_type=get_enum_type(WebApplicationFirewallRuleType), help='Type of rule.')
+
+    with self.argument_context('network application-gateway waf-policy rule match-condition', min_api='2018-12-01') as c:
+        c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
+        c.argument('negation_conditon', options_list='--negate', arg_type=get_three_state_flag(), help='Match the negative of the condition.')
+        c.argument('match_values', options_list='--values', nargs='+', help='Space-separated list of values to match.')
+        c.argument('transforms', arg_type=get_enum_type(WebApplicationFirewallTransform), nargs='+', help='Space-separated list of transforms to apply when matching.')
+        help_string = 'Space-separated list of `VARIABLE[.SELECTOR]` variables to use when matching. Variable values: {}'.format(', '.join(x for x in WebApplicationFirewallMatchVariable))
+        c.argument('match_variables', nargs='+', help=help_string)
     # region
 
     # region ApplicationSecurityGroups
