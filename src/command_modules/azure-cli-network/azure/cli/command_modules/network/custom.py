@@ -999,6 +999,26 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicy
+def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, enabled=None, mode=None, location=None, tags=None):
+    PolicySettings, WebApplicationFirewallPolicy = cmd.get_models('PolicySettings', 'WebApplicationFirewallPolicy')
+    waf_policy = WebApplicationFirewallPolicy(
+        policy_settings=PolicySettings(enabled_state=enabled, mode=mode),
+        location=location,
+        tags=tags
+    )
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def update_ag_waf_policy(instance, tags=None, enabled=None, mode=None):
+    return instance
+
+
+def list_ag_waf_policies(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'web_application_firewall_policies', resource_group_name)
+# endregion
+
+
 # region ApplicationSecurityGroups
 def create_asg(cmd, client, resource_group_name, application_security_group_name, location=None, tags=None):
     ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup')
@@ -1010,7 +1030,6 @@ def update_asg(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
-
 # endregion
 
 

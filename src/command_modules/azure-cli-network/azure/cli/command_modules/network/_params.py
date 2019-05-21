@@ -50,7 +50,8 @@ def load_arguments(self, _):
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, WebApplicationFirewallMode,
+     WebApplicationFirewallEnabledState, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -58,7 +59,8 @@ def load_arguments(self, _):
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'WebApplicationFirewallMode',
+         'WebApplicationFirewallEnabledState', 'ZoneType')
 
     if self.supported_api_version(min_api='2018-02-01'):
         ExpressRoutePeeringType = self.get_models('ExpressRoutePeeringType')
@@ -355,6 +357,16 @@ def load_arguments(self, _):
         c.argument('redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
 
     # endregion
+
+    # region ApplicationGatewayWAFPolicies
+    with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
+        c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
+        c.argument('mode', get_enum_type(WebApplicationFirewallMode), help='Describes the mode of operation at the policy level.')
+
+    for scope in ['create', 'update']:
+        with self.argument_context('network application-gateway waf-policy {}'.format(scope), min_api='2018-12-01') as c:
+            c.argument('enabled', get_enum_type(WebApplicationFirewallEnabledState, default='Enabled' if scope == 'create' else None), help='Enabled state.')
+    # region
 
     # region ApplicationSecurityGroups
     with self.argument_context('network asg') as c:
