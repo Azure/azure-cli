@@ -17,6 +17,7 @@ class DataLakeStoreCommandsLoader(AzCommandsLoader):
         super(DataLakeStoreCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                           min_profile='2017-03-10-profile',
                                                           custom_command_type=dls_custom)
+
     def load_command_table(self, args):
         from azure.cli.command_modules.dls.commands import load_command_table
         load_command_table(self, args)
