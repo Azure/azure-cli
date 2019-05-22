@@ -6,6 +6,7 @@
 # pylint: disable=protected-access
 import json
 import os
+import sys
 import unittest
 import mock
 import re
@@ -105,6 +106,21 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(expected, consolidated[0])
         # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
+
+    def test_normalize_with_unicode_in_subscription_name(self):
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        test_display_name = 'sub' + chr(255)
+        polished_display_name = 'sub?'
+        test_subscription = SubscriptionStub('sub1',
+                                             test_display_name,
+                                             SubscriptionState.enabled,
+                                             'tenant1')
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [test_subscription],
+                                                     False)
+        self.assertTrue(consolidated[0]['name'] in [polished_display_name, test_display_name])
 
     def test_update_add_two_different_subscriptions(self):
         cli = DummyCli()
