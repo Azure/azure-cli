@@ -33,7 +33,7 @@ from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup
 from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
-from knack.preview import ImplicitPreviewItem, resolve_preview_info
+from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.log import get_logger
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
@@ -1102,8 +1102,11 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
-
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(
+                self.command_loader.cli_ctx,
+                object_type='command'
+            )
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access

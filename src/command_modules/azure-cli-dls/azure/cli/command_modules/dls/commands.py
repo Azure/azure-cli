@@ -103,5 +103,5 @@ def load_command_table(self, _):
         g.command('remove-entry', 'remove_adls_item_acl_entry')
         g.command('remove-all', 'remove_adls_item_acl')
 
-    with self.command_group('dls', preview_info=self.preview()):
+    with self.command_group('dls', is_preview=True):
         pass

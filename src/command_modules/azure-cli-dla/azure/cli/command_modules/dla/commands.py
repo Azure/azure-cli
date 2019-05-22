@@ -187,5 +187,5 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('delete', 'delete')
 
-    with self.command_group('dla', preview_info=self.preview()):
+    with self.command_group('dla', is_preview=True):
         pass

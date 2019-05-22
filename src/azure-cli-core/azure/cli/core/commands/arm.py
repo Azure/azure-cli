@@ -215,14 +215,13 @@ def register_ids_argument(cli_ctx):
             # retrieve existing `ids` arg if it exists
             id_arg = command.loader.argument_registry.arguments[command.name].get('ids', None)
             deprecate_info = id_arg.settings.get('deprecate_info', None) if id_arg else None
-            preview_info = id_arg.settings.get('preview_info', None) if id_arg else None
             id_kwargs = {
                 'metavar': 'ID',
                 'help': "One or more resource IDs (space-delimited). If provided, "
                         "no other 'Resource Id' arguments should be specified.",
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
-                'preview_info': preview_info,
+                'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
                 'nargs': '+',
                 'arg_group': group_name
             }
