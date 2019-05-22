@@ -7,6 +7,7 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
@@ -630,13 +631,8 @@ def acr_task_run(cmd,
     subscription_id = get_subscription_id(cmd.cli_ctx)
     task_id=get_task_id_from_task_name(subscription_id, resource_group_name, registry_name, task_name)
     logger.warning("taskid: %s", task_id)
-    override_task_step_properties = OverrideTaskStepProperties(
-                    file=file,
-                    context_path=context,
-                    target=target,
-                    # values=(set_value if set_value else []) + (set_secret if set_secret else []),
-                    # arguments=(arguments if arguments else []) + (secret_arguments if secret_arguments else [])
-    )
+    
+    override_task_step_properties = None
 
     queued_run = LongRunningOperation(cmd.cli_ctx)(
         client_registries.schedule_run(
