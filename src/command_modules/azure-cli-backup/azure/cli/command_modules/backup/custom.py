@@ -112,9 +112,15 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 
 def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
+    if policy_object.properties.retentionPolicy.dailySchedule.retentionDuration.count < 7 or \
+    policy_object.properties.retentionPolicy.dailySchedule.retentionDuration.count > 9999:
+        raise CLIError(
+            """
+            RetentionDuration in Days should be from 7 - 9999.
+            Use the relevant get-default policy command and use it to protect the workload.
+            """)
 
     return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object)
-
 
 def delete_policy(client, resource_group_name, vault_name, name):
     client.delete(vault_name, resource_group_name, name)
