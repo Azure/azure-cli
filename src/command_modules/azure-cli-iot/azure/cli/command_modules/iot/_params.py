@@ -176,3 +176,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', options_list=['--hub-name', '--name', '-n'])
         c.argument('policy_name', help='Shared access policy to use.')
         c.argument('key_type', arg_type=get_enum_type(KeyType), options_list=['--key'], help='The key to use.')
+
+    with self.argument_context('iot hub manual-failover') as c:
+        c.argument('failover_region', options_list=['--failover-region', '--fr'], help='The region that the IoT hub'
+                   'fails over to. Must be the paired region to the current IoT hub region.')

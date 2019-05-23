@@ -428,7 +428,7 @@ short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. 
 
 helps['functionapp devops-pipeline'] = """
 type: group
-short-summary: Azure Function specific integration with Azure DevOps.
+short-summary: Azure Function specific integration with Azure DevOps. Please visit https://aka.ms/functions-azure-devops for more information.
 """
 
 helps['functionapp devops-pipeline create'] = """

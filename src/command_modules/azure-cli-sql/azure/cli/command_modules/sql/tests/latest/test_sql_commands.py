@@ -6,7 +6,7 @@
 import time
 import os
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import AllowLargeResponse, live_only
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
@@ -2985,6 +2985,9 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
 
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
+
+    # Remove when issue #9393 is fixed.
+    @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_virtual_cluster_mgmt(self, resource_group, resource_group_location):
         self.kwargs.update({

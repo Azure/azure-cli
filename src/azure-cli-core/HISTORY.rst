@@ -2,9 +2,13 @@
 
 Release History
 ===============
+2.0.65
+++++++
 * auth: polish common AAD service errors with actionables to overcome
 * Fixed issue where the CLI would load extensions that were not compatible with its core version.
 * Fix issue if clouds.config is corrupt
+
+* output: Fix bug where commands fail if `--output yaml` is used with `--query`
 
 2.0.64
 ++++++

@@ -40,7 +40,6 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             no_wait=False,
             timeout=None,
             resource_group_name=None,
-            os_type=None,
             platform=None,
             auth_mode=None):
 
@@ -82,7 +81,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         source_location = check_remote_source_code(source_location)
         logger.warning("Sending context to registry: %s...", registry_name)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')

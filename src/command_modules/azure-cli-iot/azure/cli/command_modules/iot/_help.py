@@ -683,3 +683,12 @@ examples:
     text: >
         az iot hub update --name MyIotHub --add properties.ipFilterRules filter_name=test-rule action=Accept ip_mask=127.0.0.0/31
 """
+
+helps['iot hub manual-failover'] = """
+type: command
+short-summary: Initiate a manual failover for the IoT Hub to the geo-paired disaster recovery region.
+examples:
+  - name: This fails over “myhub” from East US to West US.
+    text: >
+        az iot hub manual-failover -n myhub --fr "West US"
+"""

@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-04-16T16:56:08Z"}}'
+      "date": "2019-04-19T22:31:30Z"}}'
     headers:
       Accept:
       - application/json
@@ -26,7 +26,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-16T16:56:08Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-04-19T22:31:30Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 16:56:08 GMT
+      - Fri, 19 Apr 2019 22:31:30 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1193'
     status:
       code: 201
       message: Created
@@ -77,22 +77,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServer","startTime":"2019-04-16T16:56:10.457Z"}'
+      string: '{"operation":"UpsertElasticServer","startTime":"2019-04-19T22:31:32.51Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '74'
+      - '73'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 16:56:10 GMT
+      - Fri, 19 Apr 2019 22:31:31 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -102,7 +102,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1191'
     status:
       code: 202
       message: Accepted
@@ -123,198 +123,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5","status":"InProgress","startTime":"2019-04-16T16:56:10.457Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 16:57:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mysql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
-        Azure-SDK-For-Python AZURECLI/2.0.62
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
-  response:
-    body:
-      string: '{"name":"94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5","status":"InProgress","startTime":"2019-04-16T16:56:10.457Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 16:58:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mysql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
-        Azure-SDK-For-Python AZURECLI/2.0.62
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
-  response:
-    body:
-      string: '{"name":"94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5","status":"InProgress","startTime":"2019-04-16T16:56:10.457Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 16:59:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mysql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
-        Azure-SDK-For-Python AZURECLI/2.0.62
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
-  response:
-    body:
-      string: '{"name":"94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5","status":"InProgress","startTime":"2019-04-16T16:56:10.457Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 Apr 2019 17:00:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mysql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
-        Azure-SDK-For-Python AZURECLI/2.0.62
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5?api-version=2017-12-01
-  response:
-    body:
-      string: '{"name":"94209ad6-c8f9-4da8-b4a5-2de2b7d56cf5","status":"Succeeded","startTime":"2019-04-16T16:56:10.457Z"}'
+      string: '{"name":"06b53cb9-6990-40ac-99a4-897206c88650","status":"InProgress","startTime":"2019-04-19T22:31:32.51Z"}'
     headers:
       cache-control:
       - no-cache
@@ -323,7 +135,195 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:13 GMT
+      - Fri, 19 Apr 2019 22:32:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"06b53cb9-6990-40ac-99a4-897206c88650","status":"InProgress","startTime":"2019-04-19T22:31:32.51Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 22:33:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"06b53cb9-6990-40ac-99a4-897206c88650","status":"InProgress","startTime":"2019-04-19T22:31:32.51Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 22:34:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"06b53cb9-6990-40ac-99a4-897206c88650","status":"InProgress","startTime":"2019-04-19T22:31:32.51Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 22:35:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.0.62
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/06b53cb9-6990-40ac-99a4-897206c88650?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"06b53cb9-6990-40ac-99a4-897206c88650","status":"Succeeded","startTime":"2019-04-19T22:31:32.51Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Apr 2019 22:36:36 GMT
       expires:
       - '-1'
       pragma:
@@ -361,16 +361,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutoGrow":"Disabled"},"version":"5.7","sslEnforcement":"Enabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2019-04-16T17:06:10.8+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5},"location":"koreasouth","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutoGrow":"Disabled"},"version":"5.7","sslEnforcement":"Enabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2019-04-19T22:41:32.853+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5},"location":"koreasouth","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '941'
+      - '943'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:14 GMT
+      - Fri, 19 Apr 2019 22:36:37 GMT
       expires:
       - '-1'
       pragma:
@@ -414,10 +414,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-16T17:01:16.967Z"}'
+      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-19T22:36:39.877Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/2bd68124-153b-4eab-8f2b-07bb7b25d39d?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/ca7da242-2975-4c99-ba57-e9bcfcbac7f3?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -425,11 +425,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:16 GMT
+      - Fri, 19 Apr 2019 22:36:39 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/2bd68124-153b-4eab-8f2b-07bb7b25d39d?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/ca7da242-2975-4c99-ba57-e9bcfcbac7f3?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -439,7 +439,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1195'
     status:
       code: 202
       message: Accepted
@@ -460,10 +460,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/2bd68124-153b-4eab-8f2b-07bb7b25d39d?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/ca7da242-2975-4c99-ba57-e9bcfcbac7f3?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"2bd68124-153b-4eab-8f2b-07bb7b25d39d","status":"Succeeded","startTime":"2019-04-16T17:01:16.967Z"}'
+      string: '{"name":"ca7da242-2975-4c99-ba57-e9bcfcbac7f3","status":"Succeeded","startTime":"2019-04-19T22:36:39.877Z"}'
     headers:
       cache-control:
       - no-cache
@@ -472,7 +472,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:32 GMT
+      - Fri, 19 Apr 2019 22:36:55 GMT
       expires:
       - '-1'
       pragma:
@@ -519,7 +519,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:33 GMT
+      - Fri, 19 Apr 2019 22:36:56 GMT
       expires:
       - '-1'
       pragma:
@@ -568,7 +568,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:34 GMT
+      - Fri, 19 Apr 2019 22:36:57 GMT
       expires:
       - '-1'
       pragma:
@@ -617,7 +617,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:36 GMT
+      - Fri, 19 Apr 2019 22:36:59 GMT
       expires:
       - '-1'
       pragma:
@@ -661,10 +661,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-16T17:01:36.997Z"}'
+      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-19T22:37:00.723Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/289725f2-0e0d-407e-995f-c06038aaaee6?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/42915758-2465-48ac-b7c0-a31a760ab4f2?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -672,11 +672,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:36 GMT
+      - Fri, 19 Apr 2019 22:37:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/289725f2-0e0d-407e-995f-c06038aaaee6?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/42915758-2465-48ac-b7c0-a31a760ab4f2?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -686,7 +686,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1190'
     status:
       code: 202
       message: Accepted
@@ -707,10 +707,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/289725f2-0e0d-407e-995f-c06038aaaee6?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/42915758-2465-48ac-b7c0-a31a760ab4f2?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"289725f2-0e0d-407e-995f-c06038aaaee6","status":"Succeeded","startTime":"2019-04-16T17:01:36.997Z"}'
+      string: '{"name":"42915758-2465-48ac-b7c0-a31a760ab4f2","status":"Succeeded","startTime":"2019-04-19T22:37:00.723Z"}'
     headers:
       cache-control:
       - no-cache
@@ -719,7 +719,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:52 GMT
+      - Fri, 19 Apr 2019 22:37:16 GMT
       expires:
       - '-1'
       pragma:
@@ -766,7 +766,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:52 GMT
+      - Fri, 19 Apr 2019 22:37:16 GMT
       expires:
       - '-1'
       pragma:
@@ -815,7 +815,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:53 GMT
+      - Fri, 19 Apr 2019 22:37:18 GMT
       expires:
       - '-1'
       pragma:
@@ -859,10 +859,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-16T17:01:55.293Z"}'
+      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-19T22:37:19.537Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/9904f5f7-2173-415e-9630-7b0952f616d6?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a2e66fdf-2033-407c-9ec1-e7e10c59d0ab?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -870,11 +870,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:01:54 GMT
+      - Fri, 19 Apr 2019 22:37:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/9904f5f7-2173-415e-9630-7b0952f616d6?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/a2e66fdf-2033-407c-9ec1-e7e10c59d0ab?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -884,7 +884,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1192'
     status:
       code: 202
       message: Accepted
@@ -905,10 +905,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/9904f5f7-2173-415e-9630-7b0952f616d6?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a2e66fdf-2033-407c-9ec1-e7e10c59d0ab?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"9904f5f7-2173-415e-9630-7b0952f616d6","status":"Succeeded","startTime":"2019-04-16T17:01:55.293Z"}'
+      string: '{"name":"a2e66fdf-2033-407c-9ec1-e7e10c59d0ab","status":"Succeeded","startTime":"2019-04-19T22:37:19.537Z"}'
     headers:
       cache-control:
       - no-cache
@@ -917,7 +917,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:10 GMT
+      - Fri, 19 Apr 2019 22:37:34 GMT
       expires:
       - '-1'
       pragma:
@@ -964,7 +964,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:11 GMT
+      - Fri, 19 Apr 2019 22:37:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1013,7 +1013,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:11 GMT
+      - Fri, 19 Apr 2019 22:37:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1057,10 +1057,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-16T17:02:13.013Z"}'
+      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-19T22:37:37.853Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/70da0a99-11a1-4c9b-97ac-a241ed8598cb?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/4506fcfa-efde-469f-bc27-3975faa764b5?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -1068,11 +1068,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:13 GMT
+      - Fri, 19 Apr 2019 22:37:37 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/70da0a99-11a1-4c9b-97ac-a241ed8598cb?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/4506fcfa-efde-469f-bc27-3975faa764b5?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -1082,7 +1082,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1188'
     status:
       code: 202
       message: Accepted
@@ -1103,10 +1103,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/70da0a99-11a1-4c9b-97ac-a241ed8598cb?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/4506fcfa-efde-469f-bc27-3975faa764b5?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"70da0a99-11a1-4c9b-97ac-a241ed8598cb","status":"Succeeded","startTime":"2019-04-16T17:02:13.013Z"}'
+      string: '{"name":"4506fcfa-efde-469f-bc27-3975faa764b5","status":"Succeeded","startTime":"2019-04-19T22:37:37.853Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1115,7 +1115,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:28 GMT
+      - Fri, 19 Apr 2019 22:37:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1162,7 +1162,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:29 GMT
+      - Fri, 19 Apr 2019 22:37:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1206,22 +1206,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-16T17:02:30.7Z"}'
+      string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2019-04-19T22:37:55.663Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/eca3ed5d-1733-426d-8f2d-3d146aae020f?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/f1e58ab9-e46e-4297-8432-80cdc5bae6b7?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '85'
+      - '87'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:29 GMT
+      - Fri, 19 Apr 2019 22:37:55 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/eca3ed5d-1733-426d-8f2d-3d146aae020f?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/f1e58ab9-e46e-4297-8432-80cdc5bae6b7?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -1231,7 +1231,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1195'
     status:
       code: 202
       message: Accepted
@@ -1252,19 +1252,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/eca3ed5d-1733-426d-8f2d-3d146aae020f?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/f1e58ab9-e46e-4297-8432-80cdc5bae6b7?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"eca3ed5d-1733-426d-8f2d-3d146aae020f","status":"Succeeded","startTime":"2019-04-16T17:02:30.7Z"}'
+      string: '{"name":"f1e58ab9-e46e-4297-8432-80cdc5bae6b7","status":"Succeeded","startTime":"2019-04-19T22:37:55.663Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '105'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:46 GMT
+      - Fri, 19 Apr 2019 22:38:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1311,7 +1311,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:47 GMT
+      - Fri, 19 Apr 2019 22:38:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1360,7 +1360,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:48 GMT
+      - Fri, 19 Apr 2019 22:38:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1402,22 +1402,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"DropElasticServerFirewallRule","startTime":"2019-04-16T17:02:50.343Z"}'
+      string: '{"operation":"DropElasticServerFirewallRule","startTime":"2019-04-19T22:38:14.87Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/5f43c120-5f92-4de8-8d00-67e275252675?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/5542bcb2-3c20-43fe-a151-d5a7112ee0c2?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '84'
+      - '83'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:02:50 GMT
+      - Fri, 19 Apr 2019 22:38:15 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/5f43c120-5f92-4de8-8d00-67e275252675?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/5542bcb2-3c20-43fe-a151-d5a7112ee0c2?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -1448,19 +1448,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/5f43c120-5f92-4de8-8d00-67e275252675?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/5542bcb2-3c20-43fe-a151-d5a7112ee0c2?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"5f43c120-5f92-4de8-8d00-67e275252675","status":"Succeeded","startTime":"2019-04-16T17:02:50.343Z"}'
+      string: '{"name":"5542bcb2-3c20-43fe-a151-d5a7112ee0c2","status":"Succeeded","startTime":"2019-04-19T22:38:14.87Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:05 GMT
+      - Fri, 19 Apr 2019 22:38:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1509,7 +1509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:06 GMT
+      - Fri, 19 Apr 2019 22:38:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1551,10 +1551,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"DropElasticServerFirewallRule","startTime":"2019-04-16T17:03:08.043Z"}'
+      string: '{"operation":"DropElasticServerFirewallRule","startTime":"2019-04-19T22:38:33.243Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/77aaf8cc-79d6-4531-9476-d7672d3afdaf?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/1d76bc80-3e74-4603-bb53-90d3b9de3e01?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -1562,11 +1562,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:07 GMT
+      - Fri, 19 Apr 2019 22:38:33 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/77aaf8cc-79d6-4531-9476-d7672d3afdaf?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/1d76bc80-3e74-4603-bb53-90d3b9de3e01?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -1576,7 +1576,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -1597,10 +1597,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/77aaf8cc-79d6-4531-9476-d7672d3afdaf?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/1d76bc80-3e74-4603-bb53-90d3b9de3e01?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"77aaf8cc-79d6-4531-9476-d7672d3afdaf","status":"Succeeded","startTime":"2019-04-16T17:03:08.043Z"}'
+      string: '{"name":"1d76bc80-3e74-4603-bb53-90d3b9de3e01","status":"Succeeded","startTime":"2019-04-19T22:38:33.243Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1609,7 +1609,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:23 GMT
+      - Fri, 19 Apr 2019 22:38:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1658,7 +1658,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:24 GMT
+      - Fri, 19 Apr 2019 22:38:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1701,19 +1701,19 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"4e33b371-731b-41eb-9167-cb4d09b12d6b\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"38de8481-eedb-4a80-a146-fd56886d3a1d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"4e33b371-731b-41eb-9167-cb4d09b12d6b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"38de8481-eedb-4a80-a146-fd56886d3a1d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -1721,7 +1721,7 @@ interactions:
         false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/fa94ea34-2a7b-4b5b-99d9-751ea839faca?api-version=2018-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/03a9aeb2-dcd8-45fd-9315-8105a8b8e40e?api-version=2019-02-01
       cache-control:
       - no-cache
       content-length:
@@ -1729,7 +1729,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:26 GMT
+      - Fri, 19 Apr 2019 22:38:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1742,7 +1742,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1187'
     status:
       code: 201
       message: Created
@@ -1763,7 +1763,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/fa94ea34-2a7b-4b5b-99d9-751ea839faca?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/03a9aeb2-dcd8-45fd-9315-8105a8b8e40e?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1775,7 +1775,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:30 GMT
+      - Fri, 19 Apr 2019 22:38:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1811,19 +1811,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"e0011233-b6f6-4789-a5c7-c36c1dda5538\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"31c8c5e8-947b-4180-8240-27b45e5e08d9\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"e0011233-b6f6-4789-a5c7-c36c1dda5538\\\"\",\r\n
+        \       \"etag\": \"W/\\\"31c8c5e8-947b-4180-8240-27b45e5e08d9\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -1837,9 +1837,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:30 GMT
+      - Fri, 19 Apr 2019 22:38:57 GMT
       etag:
-      - W/"e0011233-b6f6-4789-a5c7-c36c1dda5538"
+      - W/"31c8c5e8-947b-4180-8240-27b45e5e08d9"
       expires:
       - '-1'
       pragma:
@@ -1877,19 +1877,19 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"e0011233-b6f6-4789-a5c7-c36c1dda5538\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"31c8c5e8-947b-4180-8240-27b45e5e08d9\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"e0011233-b6f6-4789-a5c7-c36c1dda5538\\\"\",\r\n
+        \       \"etag\": \"W/\\\"31c8c5e8-947b-4180-8240-27b45e5e08d9\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -1903,9 +1903,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:31 GMT
+      - Fri, 19 Apr 2019 22:38:58 GMT
       etag:
-      - W/"e0011233-b6f6-4789-a5c7-c36c1dda5538"
+      - W/"31c8c5e8-947b-4180-8240-27b45e5e08d9"
       expires:
       - '-1'
       pragma:
@@ -1929,11 +1929,11 @@ interactions:
       "location": "koreasouth", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1",
       "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "provisioningState":
-      "Succeeded"}, "name": "clitestsubnet1", "etag": "W/\\"e0011233-b6f6-4789-a5c7-c36c1dda5538\\""},
+      "Succeeded"}, "name": "clitestsubnet1", "etag": "W/\\"31c8c5e8-947b-4180-8240-27b45e5e08d9\\""},
       {"properties": {"addressPrefix": "10.0.1.0/24"}, "name": "clitestsubnet2"}],
-      "virtualNetworkPeerings": [], "resourceGuid": "cf21d27a-a9b2-4e65-b037-39aec8c0e31b",
+      "virtualNetworkPeerings": [], "resourceGuid": "dbd64850-2ea9-4b1f-bff3-7f3021977def",
       "provisioningState": "Succeeded", "enableDdosProtection": false, "enableVmProtection":
-      false}, "etag": "W/\\"e0011233-b6f6-4789-a5c7-c36c1dda5538\\""}'''
+      false}, "etag": "W/\\"31c8c5e8-947b-4180-8240-27b45e5e08d9\\""}'''
     headers:
       Accept:
       - application/json
@@ -1955,25 +1955,25 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"09e9c321-9567-4d8e-9f39-1759003a5a04\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"afdf92d5-cb1f-4459-b4db-6dc0e19d9c18\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"09e9c321-9567-4d8e-9f39-1759003a5a04\\\"\",\r\n
+        \       \"etag\": \"W/\\\"afdf92d5-cb1f-4459-b4db-6dc0e19d9c18\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet2\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet2\",\r\n
-        \       \"etag\": \"W/\\\"09e9c321-9567-4d8e-9f39-1759003a5a04\\\"\",\r\n
+        \       \"etag\": \"W/\\\"afdf92d5-cb1f-4459-b4db-6dc0e19d9c18\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -1981,7 +1981,7 @@ interactions:
         false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/404e8a0c-08a4-4cb4-b985-60b2a70d4caf?api-version=2018-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/8bdf2414-0e15-43b8-af76-688911d6856b?api-version=2019-02-01
       cache-control:
       - no-cache
       content-length:
@@ -1989,7 +1989,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:32 GMT
+      - Fri, 19 Apr 2019 22:38:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2006,7 +2006,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2027,7 +2027,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/404e8a0c-08a4-4cb4-b985-60b2a70d4caf?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/8bdf2414-0e15-43b8-af76-688911d6856b?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2039,7 +2039,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:35 GMT
+      - Fri, 19 Apr 2019 22:39:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2075,25 +2075,25 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"0969bbb7-9557-4f8e-b48e-69d099796285\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a97a8923-d0c7-4450-a271-c0a78efe09ff\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"0969bbb7-9557-4f8e-b48e-69d099796285\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a97a8923-d0c7-4450-a271-c0a78efe09ff\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet2\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet2\",\r\n
-        \       \"etag\": \"W/\\\"0969bbb7-9557-4f8e-b48e-69d099796285\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a97a8923-d0c7-4450-a271-c0a78efe09ff\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -2107,9 +2107,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:36 GMT
+      - Fri, 19 Apr 2019 22:39:03 GMT
       etag:
-      - W/"0969bbb7-9557-4f8e-b48e-69d099796285"
+      - W/"a97a8923-d0c7-4450-a271-c0a78efe09ff"
       expires:
       - '-1'
       pragma:
@@ -2155,10 +2155,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/virtualNetworkRules/vnet_rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerVnetFirewallRule","startTime":"2019-04-16T17:03:38.617Z"}'
+      string: '{"operation":"UpsertElasticServerVnetFirewallRule","startTime":"2019-04-19T22:39:04.823Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/6a365535-075d-4b72-b8f0-dd47d8f940a1?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/7f9571d2-e6ab-430c-b2ef-a3eaac7a9e31?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -2166,11 +2166,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:03:39 GMT
+      - Fri, 19 Apr 2019 22:39:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/6a365535-075d-4b72-b8f0-dd47d8f940a1?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/7f9571d2-e6ab-430c-b2ef-a3eaac7a9e31?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -2180,7 +2180,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1191'
     status:
       code: 202
       message: Accepted
@@ -2201,10 +2201,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/6a365535-075d-4b72-b8f0-dd47d8f940a1?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/7f9571d2-e6ab-430c-b2ef-a3eaac7a9e31?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"6a365535-075d-4b72-b8f0-dd47d8f940a1","status":"Succeeded","startTime":"2019-04-16T17:03:38.617Z"}'
+      string: '{"name":"7f9571d2-e6ab-430c-b2ef-a3eaac7a9e31","status":"Succeeded","startTime":"2019-04-19T22:39:04.823Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2213,7 +2213,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:09 GMT
+      - Fri, 19 Apr 2019 22:39:36 GMT
       expires:
       - '-1'
       pragma:
@@ -2260,7 +2260,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:11 GMT
+      - Fri, 19 Apr 2019 22:39:37 GMT
       expires:
       - '-1'
       pragma:
@@ -2309,7 +2309,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:12 GMT
+      - Fri, 19 Apr 2019 22:39:38 GMT
       expires:
       - '-1'
       pragma:
@@ -2354,22 +2354,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/virtualNetworkRules/vnet_rule2?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerVnetFirewallRule","startTime":"2019-04-16T17:04:13.99Z"}'
+      string: '{"operation":"UpsertElasticServerVnetFirewallRule","startTime":"2019-04-19T22:39:40.363Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/3525329a-6d3f-4691-998b-447871a50baf?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/f28abad1-c4c5-42e3-9bc4-48adcba9caca?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '89'
+      - '90'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:14 GMT
+      - Fri, 19 Apr 2019 22:39:41 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/3525329a-6d3f-4691-998b-447871a50baf?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/f28abad1-c4c5-42e3-9bc4-48adcba9caca?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -2400,19 +2400,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/3525329a-6d3f-4691-998b-447871a50baf?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/f28abad1-c4c5-42e3-9bc4-48adcba9caca?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"3525329a-6d3f-4691-998b-447871a50baf","status":"Succeeded","startTime":"2019-04-16T17:04:13.99Z"}'
+      string: '{"name":"f28abad1-c4c5-42e3-9bc4-48adcba9caca","status":"Succeeded","startTime":"2019-04-19T22:39:40.363Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '106'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:45 GMT
+      - Fri, 19 Apr 2019 22:40:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2459,7 +2459,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:45 GMT
+      - Fri, 19 Apr 2019 22:40:13 GMT
       expires:
       - '-1'
       pragma:
@@ -2496,25 +2496,25 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"5c31250f-d0dd-4996-9ea3-003e6123a4ad\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"5c31250f-d0dd-4996-9ea3-003e6123a4ad\\\"\",\r\n
+        \       \"etag\": \"W/\\\"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet2\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet2\",\r\n
-        \       \"etag\": \"W/\\\"5c31250f-d0dd-4996-9ea3-003e6123a4ad\\\"\",\r\n
+        \       \"etag\": \"W/\\\"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -2528,9 +2528,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:47 GMT
+      - Fri, 19 Apr 2019 22:40:14 GMT
       etag:
-      - W/"5c31250f-d0dd-4996-9ea3-003e6123a4ad"
+      - W/"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f"
       expires:
       - '-1'
       pragma:
@@ -2554,14 +2554,14 @@ interactions:
       "location": "koreasouth", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1",
       "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "provisioningState":
-      "Succeeded"}, "name": "clitestsubnet1", "etag": "W/\\"5c31250f-d0dd-4996-9ea3-003e6123a4ad\\""},
+      "Succeeded"}, "name": "clitestsubnet1", "etag": "W/\\"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f\\""},
       {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet2",
       "properties": {"addressPrefix": "10.0.1.0/24", "delegations": [], "provisioningState":
-      "Succeeded"}, "name": "clitestsubnet2", "etag": "W/\\"5c31250f-d0dd-4996-9ea3-003e6123a4ad\\""},
+      "Succeeded"}, "name": "clitestsubnet2", "etag": "W/\\"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f\\""},
       {"properties": {"addressPrefix": "10.0.3.0/24"}, "name": "clitestsubnet3"}],
-      "virtualNetworkPeerings": [], "resourceGuid": "cf21d27a-a9b2-4e65-b037-39aec8c0e31b",
+      "virtualNetworkPeerings": [], "resourceGuid": "dbd64850-2ea9-4b1f-bff3-7f3021977def",
       "provisioningState": "Succeeded", "enableDdosProtection": false, "enableVmProtection":
-      false}, "etag": "W/\\"5c31250f-d0dd-4996-9ea3-003e6123a4ad\\""}'''
+      false}, "etag": "W/\\"2687a027-0664-49a4-b5e8-b5fe7d5f5d3f\\""}'''
     headers:
       Accept:
       - application/json
@@ -2583,31 +2583,31 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"08869bea-f85c-4bbb-b14c-8ca03169fbbc\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"26455138-c37c-454c-806a-57c0291047bd\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"08869bea-f85c-4bbb-b14c-8ca03169fbbc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"26455138-c37c-454c-806a-57c0291047bd\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet2\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet2\",\r\n
-        \       \"etag\": \"W/\\\"08869bea-f85c-4bbb-b14c-8ca03169fbbc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"26455138-c37c-454c-806a-57c0291047bd\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet3\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet3\",\r\n
-        \       \"etag\": \"W/\\\"08869bea-f85c-4bbb-b14c-8ca03169fbbc\\\"\",\r\n
+        \       \"etag\": \"W/\\\"26455138-c37c-454c-806a-57c0291047bd\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.3.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -2615,7 +2615,7 @@ interactions:
         false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/4bd1d6fc-f2c3-4681-9167-b1e1035d3a32?api-version=2018-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/851393ea-4a26-4ff4-8ad5-e481a4cdf435?api-version=2019-02-01
       cache-control:
       - no-cache
       content-length:
@@ -2623,7 +2623,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:48 GMT
+      - Fri, 19 Apr 2019 22:40:15 GMT
       expires:
       - '-1'
       pragma:
@@ -2640,7 +2640,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -2661,7 +2661,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/4bd1d6fc-f2c3-4681-9167-b1e1035d3a32?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/851393ea-4a26-4ff4-8ad5-e481a4cdf435?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2673,7 +2673,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:52 GMT
+      - Fri, 19 Apr 2019 22:40:19 GMT
       expires:
       - '-1'
       pragma:
@@ -2709,31 +2709,31 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet\",\r\n
-        \ \"etag\": \"W/\\\"98e5dc66-7f1c-4691-8325-ea5b7023605e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"52c29f8f-608c-4c75-afaf-84d2fe84a20e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"koreasouth\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"cf21d27a-a9b2-4e65-b037-39aec8c0e31b\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"dbd64850-2ea9-4b1f-bff3-7f3021977def\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet1\",\r\n
-        \       \"etag\": \"W/\\\"98e5dc66-7f1c-4691-8325-ea5b7023605e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"52c29f8f-608c-4c75-afaf-84d2fe84a20e\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet2\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet2\",\r\n
-        \       \"etag\": \"W/\\\"98e5dc66-7f1c-4691-8325-ea5b7023605e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"52c29f8f-608c-4c75-afaf-84d2fe84a20e\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"clitestsubnet3\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet/subnets/clitestsubnet3\",\r\n
-        \       \"etag\": \"W/\\\"98e5dc66-7f1c-4691-8325-ea5b7023605e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"52c29f8f-608c-4c75-afaf-84d2fe84a20e\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.3.0/24\",\r\n          \"delegations\":
         []\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
@@ -2747,9 +2747,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:53 GMT
+      - Fri, 19 Apr 2019 22:40:20 GMT
       etag:
-      - W/"98e5dc66-7f1c-4691-8325-ea5b7023605e"
+      - W/"52c29f8f-608c-4c75-afaf-84d2fe84a20e"
       expires:
       - '-1'
       pragma:
@@ -2799,7 +2799,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:54 GMT
+      - Fri, 19 Apr 2019 22:40:21 GMT
       expires:
       - '-1'
       pragma:
@@ -2844,22 +2844,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/virtualNetworkRules/vnet_rule2?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServerVnetFirewallRule","startTime":"2019-04-16T17:04:56.1Z"}'
+      string: '{"operation":"UpsertElasticServerVnetFirewallRule","startTime":"2019-04-19T22:40:22.987Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a4a9532e-93dc-4aa5-86fd-f331a42a2159?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/1f78d768-7faa-4d0c-a65c-5068b0914894?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '88'
+      - '90'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:04:57 GMT
+      - Fri, 19 Apr 2019 22:40:23 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/a4a9532e-93dc-4aa5-86fd-f331a42a2159?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/1f78d768-7faa-4d0c-a65c-5068b0914894?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -2869,7 +2869,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1187'
     status:
       code: 202
       message: Accepted
@@ -2890,19 +2890,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a4a9532e-93dc-4aa5-86fd-f331a42a2159?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/1f78d768-7faa-4d0c-a65c-5068b0914894?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"a4a9532e-93dc-4aa5-86fd-f331a42a2159","status":"Succeeded","startTime":"2019-04-16T17:04:56.1Z"}'
+      string: '{"name":"1f78d768-7faa-4d0c-a65c-5068b0914894","status":"Succeeded","startTime":"2019-04-19T22:40:22.987Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '105'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:28 GMT
+      - Fri, 19 Apr 2019 22:40:54 GMT
       expires:
       - '-1'
       pragma:
@@ -2949,7 +2949,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:29 GMT
+      - Fri, 19 Apr 2019 22:40:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2998,7 +2998,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:30 GMT
+      - Fri, 19 Apr 2019 22:40:56 GMT
       expires:
       - '-1'
       pragma:
@@ -3040,10 +3040,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/virtualNetworkRules/vnet_rule1?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"DropElasticServerVnetFirewallRule","startTime":"2019-04-16T17:05:31.337Z"}'
+      string: '{"operation":"DropElasticServerVnetFirewallRule","startTime":"2019-04-19T22:40:58.337Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a1f72372-cef6-4404-8e10-9ba8ad99cdac?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a0344109-4d61-4b16-a691-541deff13b9f?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -3051,11 +3051,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:31 GMT
+      - Fri, 19 Apr 2019 22:40:58 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/a1f72372-cef6-4404-8e10-9ba8ad99cdac?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/a0344109-4d61-4b16-a691-541deff13b9f?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -3065,7 +3065,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14996'
     status:
       code: 202
       message: Accepted
@@ -3086,10 +3086,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a1f72372-cef6-4404-8e10-9ba8ad99cdac?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/a0344109-4d61-4b16-a691-541deff13b9f?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"a1f72372-cef6-4404-8e10-9ba8ad99cdac","status":"Succeeded","startTime":"2019-04-16T17:05:31.337Z"}'
+      string: '{"name":"a0344109-4d61-4b16-a691-541deff13b9f","status":"Succeeded","startTime":"2019-04-19T22:40:58.337Z"}'
     headers:
       cache-control:
       - no-cache
@@ -3098,7 +3098,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:47 GMT
+      - Fri, 19 Apr 2019 22:41:15 GMT
       expires:
       - '-1'
       pragma:
@@ -3147,7 +3147,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:48 GMT
+      - Fri, 19 Apr 2019 22:41:15 GMT
       expires:
       - '-1'
       pragma:
@@ -3189,10 +3189,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/virtualNetworkRules/vnet_rule2?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"DropElasticServerVnetFirewallRule","startTime":"2019-04-16T17:05:50.847Z"}'
+      string: '{"operation":"DropElasticServerVnetFirewallRule","startTime":"2019-04-19T22:41:17.533Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/0c3402ec-fccb-4baa-9850-26ab2a88331f?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/4539a4cf-20fc-42db-a724-8b11f25ee71c?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -3200,11 +3200,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:05:51 GMT
+      - Fri, 19 Apr 2019 22:41:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/0c3402ec-fccb-4baa-9850-26ab2a88331f?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/4539a4cf-20fc-42db-a724-8b11f25ee71c?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -3214,7 +3214,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14996'
     status:
       code: 202
       message: Accepted
@@ -3235,10 +3235,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/0c3402ec-fccb-4baa-9850-26ab2a88331f?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/4539a4cf-20fc-42db-a724-8b11f25ee71c?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"0c3402ec-fccb-4baa-9850-26ab2a88331f","status":"Succeeded","startTime":"2019-04-16T17:05:50.847Z"}'
+      string: '{"name":"4539a4cf-20fc-42db-a724-8b11f25ee71c","status":"Succeeded","startTime":"2019-04-19T22:41:17.533Z"}'
     headers:
       cache-control:
       - no-cache
@@ -3247,7 +3247,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:07 GMT
+      - Fri, 19 Apr 2019 22:41:34 GMT
       expires:
       - '-1'
       pragma:
@@ -3296,7 +3296,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:08 GMT
+      - Fri, 19 Apr 2019 22:41:36 GMT
       expires:
       - '-1'
       pragma:
@@ -3335,23 +3335,23 @@ interactions:
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet?api-version=2019-02-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/bbfb414d-3e5b-4cd9-aa4f-3b54b90c143d?api-version=2018-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/25bd8025-b6f9-479a-b914-01040d98ab72?api-version=2019-02-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 16 Apr 2019 17:06:10 GMT
+      - Fri, 19 Apr 2019 22:41:37 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operationResults/bbfb414d-3e5b-4cd9-aa4f-3b54b90c143d?api-version=2018-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operationResults/25bd8025-b6f9-479a-b914-01040d98ab72?api-version=2019-02-01
       pragma:
       - no-cache
       server:
@@ -3362,7 +3362,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14997'
     status:
       code: 202
       message: Accepted
@@ -3383,7 +3383,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/2.6.0
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/bbfb414d-3e5b-4cd9-aa4f-3b54b90c143d?api-version=2018-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/koreasouth/operations/25bd8025-b6f9-479a-b914-01040d98ab72?api-version=2019-02-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3395,7 +3395,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:21 GMT
+      - Fri, 19 Apr 2019 22:41:48 GMT
       expires:
       - '-1'
       pragma:
@@ -3445,7 +3445,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:22 GMT
+      - Fri, 19 Apr 2019 22:41:49 GMT
       expires:
       - '-1'
       pragma:
@@ -3495,7 +3495,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:24 GMT
+      - Fri, 19 Apr 2019 22:41:50 GMT
       expires:
       - '-1'
       pragma:
@@ -3539,22 +3539,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/log_slow_admin_statements?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpdateElasticServerConfig","startTime":"2019-04-16T17:06:25.14Z"}'
+      string: '{"operation":"UpdateElasticServerConfig","startTime":"2019-04-19T22:41:52.137Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/04fe67cd-2e30-4a86-97c1-7e75adcbe196?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/3b9396dd-f04a-4f48-8405-cebc4bff6f4f?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '79'
+      - '80'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:25 GMT
+      - Fri, 19 Apr 2019 22:41:52 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/04fe67cd-2e30-4a86-97c1-7e75adcbe196?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/3b9396dd-f04a-4f48-8405-cebc4bff6f4f?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -3564,7 +3564,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1188'
     status:
       code: 202
       message: Accepted
@@ -3585,19 +3585,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/04fe67cd-2e30-4a86-97c1-7e75adcbe196?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/3b9396dd-f04a-4f48-8405-cebc4bff6f4f?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"04fe67cd-2e30-4a86-97c1-7e75adcbe196","status":"Succeeded","startTime":"2019-04-16T17:06:25.14Z"}'
+      string: '{"name":"3b9396dd-f04a-4f48-8405-cebc4bff6f4f","status":"Succeeded","startTime":"2019-04-19T22:41:52.137Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '106'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:40 GMT
+      - Fri, 19 Apr 2019 22:42:08 GMT
       expires:
       - '-1'
       pragma:
@@ -3645,7 +3645,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:41 GMT
+      - Fri, 19 Apr 2019 22:42:08 GMT
       expires:
       - '-1'
       pragma:
@@ -3689,22 +3689,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/log_slow_admin_statements?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpdateElasticServerConfig","startTime":"2019-04-16T17:06:43.46Z"}'
+      string: '{"operation":"UpdateElasticServerConfig","startTime":"2019-04-19T22:42:11.387Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/288dfd28-cb49-4cdc-98c9-8218c5175ca5?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/adaa12e7-dc7c-4265-9fda-d84046a2f608?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '79'
+      - '80'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:43 GMT
+      - Fri, 19 Apr 2019 22:42:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/288dfd28-cb49-4cdc-98c9-8218c5175ca5?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/adaa12e7-dc7c-4265-9fda-d84046a2f608?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -3714,7 +3714,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1194'
     status:
       code: 202
       message: Accepted
@@ -3735,19 +3735,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/288dfd28-cb49-4cdc-98c9-8218c5175ca5?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/adaa12e7-dc7c-4265-9fda-d84046a2f608?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"288dfd28-cb49-4cdc-98c9-8218c5175ca5","status":"Succeeded","startTime":"2019-04-16T17:06:43.46Z"}'
+      string: '{"name":"adaa12e7-dc7c-4265-9fda-d84046a2f608","status":"Succeeded","startTime":"2019-04-19T22:42:11.387Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '106'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:58 GMT
+      - Fri, 19 Apr 2019 22:42:26 GMT
       expires:
       - '-1'
       pragma:
@@ -3795,7 +3795,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:06:59 GMT
+      - Fri, 19 Apr 2019 22:42:27 GMT
       expires:
       - '-1'
       pragma:
@@ -4041,7 +4041,7 @@ interactions:
         operations.","defaultValue":"8192","dataType":"Integer","allowedValues":"8192-16384","source":"system-default","isConfigPendingRestart":"False","isDynamicConfig":"True"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/query_prealloc_size","name":"query_prealloc_size","type":"Microsoft.DBforMySQL/servers/configurations"},{"properties":{"value":"4096","description":"The
         size of blocks that are allocated when doing range optimization.","defaultValue":"4096","dataType":"Integer","allowedValues":"4096-16384","source":"system-default","isConfigPendingRestart":"False","isDynamicConfig":"True"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/range_alloc_block_size","name":"range_alloc_block_size","type":"Microsoft.DBforMySQL/servers/configurations"},{"properties":{"value":"8388608","description":"The
         limit on memory consumption for the range optimizer. A value of 0 means ''no
-        limit.''","defaultValue":"8388608","dataType":"Integer","allowedValues":"4096-16777216","source":"system-default","isConfigPendingRestart":"False","isDynamicConfig":"True"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/range_optimizer_max_mem_size","name":"range_optimizer_max_mem_size","type":"Microsoft.DBforMySQL/servers/configurations"},{"properties":{"value":"412199423","description":"The
+        limit.''","defaultValue":"8388608","dataType":"Integer","allowedValues":"4096-16777216","source":"system-default","isConfigPendingRestart":"False","isDynamicConfig":"True"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/range_optimizer_max_mem_size","name":"range_optimizer_max_mem_size","type":"Microsoft.DBforMySQL/servers/configurations"},{"properties":{"value":"3159184643","description":"The
         server ID, used in replication to give each master and slave a unique identity.","defaultValue":"1000","dataType":"Integer","allowedValues":"1000-4294967295","source":"user-override","isConfigPendingRestart":"False","isDynamicConfig":"True"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/server_id","name":"server_id","type":"Microsoft.DBforMySQL/servers/configurations"},{"properties":{"value":"ON","description":"Controls
         whether the server tracks changes to the default schema (database) name within
         the current session and makes this information available to the client when
@@ -4077,11 +4077,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '85116'
+      - '85117'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:07:01 GMT
+      - Fri, 19 Apr 2019 22:42:29 GMT
       expires:
       - '-1'
       pragma:
@@ -4125,10 +4125,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/configurations/slow_query_log?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpdateElasticServerConfig","startTime":"2019-04-16T17:07:03.767Z"}'
+      string: '{"operation":"UpdateElasticServerConfig","startTime":"2019-04-19T22:42:30.727Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/1ac47c14-4ff0-4712-a956-1ebba27cc3a7?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94646bd3-d64c-4e74-ad25-f892e3d7f324?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
@@ -4136,11 +4136,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:07:03 GMT
+      - Fri, 19 Apr 2019 22:42:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/1ac47c14-4ff0-4712-a956-1ebba27cc3a7?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/operationResults/94646bd3-d64c-4e74-ad25-f892e3d7f324?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -4150,7 +4150,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1189'
     status:
       code: 202
       message: Accepted
@@ -4171,10 +4171,10 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-rdbms/2017-12-01
         Azure-SDK-For-Python AZURECLI/2.0.62
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/1ac47c14-4ff0-4712-a956-1ebba27cc3a7?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/koreasouth/azureAsyncOperation/94646bd3-d64c-4e74-ad25-f892e3d7f324?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"1ac47c14-4ff0-4712-a956-1ebba27cc3a7","status":"Succeeded","startTime":"2019-04-16T17:07:03.767Z"}'
+      string: '{"name":"94646bd3-d64c-4e74-ad25-f892e3d7f324","status":"Succeeded","startTime":"2019-04-19T22:42:30.727Z"}'
     headers:
       cache-control:
       - no-cache
@@ -4183,7 +4183,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:07:19 GMT
+      - Fri, 19 Apr 2019 22:42:45 GMT
       expires:
       - '-1'
       pragma:
@@ -4231,7 +4231,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:07:20 GMT
+      - Fri, 19 Apr 2019 22:42:46 GMT
       expires:
       - '-1'
       pragma:
@@ -4271,16 +4271,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/logFiles?api-version=2017-12-01
   response:
     body:
-      string: '{"value":[{"properties":{"name":"mysql-slow-azuredbclitest000002-2019041616.log","sizeInKB":1,"createdTime":"0001-01-01T00:00:00+00:00","lastModifiedTime":"2019-04-16T17:07:03+00:00","type":"slowlog","url":"https://wasd2prodkoso1afse14.file.core.windows.net/f80cea2c451747ef9b622ad99328527f/serverlogs/mysql-slow-azuredbclitest000002-2019041616.log?sv=2017-07-29&sr=f&sig=ee3seU41jGbWHyO57t1%2BorvmqDrE0N9V2Rx6Z3BjN4g%3D&se=2019-04-16T18%3A07%3A22Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/logFiles/mysql-slow-azuredbclitest000002-2019041616.log","name":"mysql-slow-azuredbclitest000002-2019041616.log","type":"Microsoft.DBforMySQL/servers/logFiles"}]}'
+      string: '{"value":[{"properties":{"name":"mysql-slow-azuredbclitest000002-2019041922.log","sizeInKB":1,"createdTime":"0001-01-01T00:00:00+00:00","lastModifiedTime":"2019-04-19T22:42:30+00:00","type":"slowlog","url":"https://wasd2prodkoso1afse26.file.core.windows.net/8247b32d48314c6182ae37e0f2661c2d/serverlogs/mysql-slow-azuredbclitest000002-2019041922.log?sv=2017-07-29&sr=f&sig=eDLNlwakJHWw99L1kV6S%2BkDVqG%2BmXM%2FbgjcLZ5AXKq8%3D&se=2019-04-19T23%3A42%3A49Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/logFiles/mysql-slow-azuredbclitest000002-2019041922.log","name":"mysql-slow-azuredbclitest000002-2019041922.log","type":"Microsoft.DBforMySQL/servers/logFiles"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1042'
+      - '1046'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 Apr 2019 17:07:21 GMT
+      - Fri, 19 Apr 2019 22:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -4329,11 +4329,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 16 Apr 2019 17:07:22 GMT
+      - Fri, 19 Apr 2019 22:42:49 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkcyS1I2MlM2V1JVTU5INk9ON0lQVkFZUllaWFlHQTZNNEdRRnwzNjhFQ0Y3NzdBMDk1QzRFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdWMkxSR0g0N0k0SFEyWE1HVFFSQjZFRk5XNjVTMkRGWkRUWnxBNDBEQUEwRTY5MkU2ODBELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -4341,7 +4341,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14993'
     status:
       code: 202
       message: Accepted
