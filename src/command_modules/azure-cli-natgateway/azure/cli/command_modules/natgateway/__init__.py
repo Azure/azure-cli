@@ -18,6 +18,7 @@ class NatGatewayCommandsLoader(AzCommandsLoader):
         natgateway_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.natgateway.custom#{}')
         super(NatGatewayCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
+            min_api='2019-02-01',
             resource_type=ResourceType.MGMT_NETWORK,
             custom_command_type=natgateway_custom
         )

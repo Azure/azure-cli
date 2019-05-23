@@ -862,7 +862,6 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
 
 def _load_command_loader(loader, args, name, prefix):
-    from azure.cli.core.profiles import PROFILE_TYPE
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     command_table = {}
