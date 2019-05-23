@@ -37,7 +37,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        cookie_based_affinity, http_settings_protocol, http_settings_port,
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
-                                       custom_error_pages):
+                                       custom_error_pages, firewall_policy):
 
     # set the default names
     frontend_ip_name = 'appGatewayFrontendIP'
@@ -148,6 +148,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         del ag_properties['sku']['capacity']
     if custom_error_pages and cmd.supported_api_version(min_api='2018-08-01'):
         ag_properties.update({'customErrorConfigurations': custom_error_pages})
+    if firewall_policy and cmd.supported_api_version(min_api='2018-12-01'):
+        ag_properties.update({'firewallPolicy': {'id': firewall_policy}})
 
     ag = {
         'type': 'Microsoft.Network/applicationGateways',

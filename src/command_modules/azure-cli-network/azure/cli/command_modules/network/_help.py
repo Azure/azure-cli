@@ -1043,6 +1043,56 @@ helps['network application-gateway waf-policy wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the application gateway WAF policy is met.
 """
+
+helps['network application-gateway waf-policy rule'] = """
+type: group
+short-summary: Manage application gateway web application firewall (WAF) policy custom rules.
+"""
+
+helps['network application-gateway waf-policy rule create'] = """
+type: command
+short-summary: Create an application gateway WAF policy custom rule.
+"""
+
+helps['network application-gateway waf-policy rule delete'] = """
+type: command
+short-summary: Delete an application gateway WAF policy custom rule.
+"""
+
+helps['network application-gateway waf-policy rule list'] = """
+type: command
+short-summary: List application gateway WAF policy custom rules.
+"""
+
+helps['network application-gateway waf-policy rule show'] = """
+type: command
+short-summary: Get the details of an application gateway WAF policy custom rule.
+"""
+
+helps['network application-gateway waf-policy rule update'] = """
+type: command
+short-summary: Update an application gateway WAF policy custom rule.
+"""
+
+helps['network application-gateway waf-policy rule match-condition'] = """
+type: group
+short-summary: Manage application gateway web application firewall (WAF) policies.
+"""
+
+helps['network application-gateway waf-policy rule match-condition add'] = """
+type: command
+short-summary: A match condition to an application gateway WAF policy custom rule.
+"""
+
+helps['network application-gateway waf-policy rule match-condition remove'] = """
+type: command
+short-summary: Remove a match condition from an application gateway WAF policy custom rule.
+"""
+
+helps['network application-gateway waf-policy rule match-condition list'] = """
+type: command
+short-summary: List application gateway WAF policy custom rule match conditions.
+"""
 # endregion
 
 # region ApplicationSecurityGroups

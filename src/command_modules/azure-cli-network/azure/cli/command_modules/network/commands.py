@@ -432,10 +432,13 @@ def load_command_table(self, _):
         g.generic_update_command('update', command_type=network_ag_waf_sdk,
                                  client_factory=cf_app_gateway_waf_policy,
                                  custom_func_name='update_ag_waf_rule',
-                                 child_collection_prop_name='custom_rules')
+                                 child_collection_prop_name='custom_rules',
+                                 child_arg_name='rule_name')
 
     with self.command_group('network application-gateway waf-policy rule match-condition', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_waf_rule_match_cond')
+        g.custom_command('add', 'add_ag_waf_rule_match_cond')
+        g.custom_command('list', 'list_ag_waf_rule_match_cond')
+        g.custom_command('remove', 'remove_ag_waf_rule_match_cond')
     # endregion
 
     # region ApplicationSecurityGroups
