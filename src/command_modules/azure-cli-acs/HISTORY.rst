@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.4.3
+++++++
+* Allow enabling/disabling AKS kube-dashboard addon
+
 2.4.2
 ++++++
 * Fix 'az openshift create' command when used with customer aad client
