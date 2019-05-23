@@ -16,7 +16,7 @@ class KustoCommandsLoader(AzCommandsLoader):
         kusto_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.kusto.custom#{}')
         super(KustoCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=kusto_custom,
-                                                 resource_type=ResourceType.MGMT_KUSTO)
+                                                  resource_type=ResourceType.MGMT_KUSTO)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.kusto.commands import load_command_table

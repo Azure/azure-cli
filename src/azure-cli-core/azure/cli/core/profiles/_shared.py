@@ -392,8 +392,7 @@ def supported_resource_type(api_profile, resource_type):
     if api_profile == 'latest' or resource_type is None:
         return True
     try:
-        api_version = AZURE_API_PROFILES[api_profile][resource_type]
-        return True
+        return True if AZURE_API_PROFILES[api_profile][resource_type] else False
     except KeyError:
         return False
 
