@@ -59,9 +59,12 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
-    registry_prefix = registry_name + '/'
-    if not image_name.startswith(registry_prefix):
-        image_name = registry_prefix + image_name
+    registry_prefixes = '{{.Run.Registry}}/', registry_name + '/'
+    # If the image name doesn't have any required prefix, add it
+    if all((not image_name.startswith(prefix) for prefix in registry_prefixes)):
+        original_image_name = image_name
+        image_name = registry_prefixes[0] + image_name
+        logger.debug("Modified image name from %s to %s", original_image_name, image_name)
 
     yaml_body = PACK_TASK_YAML_FMT.format(
         image_name=image_name, builder=builder, no_pull='--no-pull' if not pull else '')
