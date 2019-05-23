@@ -160,3 +160,32 @@ class AzCliCommandParser(CLICommandParser):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
                                  default_completer=lambda _: ())
+
+    def _check_value(self, action, value):
+        # Override to customize the error message when a argument is not among the available choices
+        # converted value must be one of the choices (if specified)
+        if action.choices is not None and value not in action.choices:
+            if not self.command_source:
+                # parser has no `command_source`, value is part of command itself
+                error_msg = "{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'.".format(
+                    prog=self.prog, value=value)
+            else:
+                # `command_source` indicates command values have been parsed, value is an argument
+                parameter = action.option_strings[0] if action.option_strings else action.dest
+                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
+                    prog=self.prog, value=value, param=parameter)
+            telemetry.set_user_fault(error_msg)
+            with CommandLoggerContext(logger):
+                logger.error(error_msg)
+            candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+            if candidates:
+                print_args = {
+                    's': 's' if len(candidates) > 1 else '',
+                    'verb': 'are' if len(candidates) > 1 else 'is',
+                    'value': value
+                }
+                suggestion_msg = "\nThe most similar choice{s} to '{value}' {verb}:\n".format(**print_args)
+                suggestion_msg += '\n'.join(['\t' + candidate for candidate in candidates])
+                print(suggestion_msg, file=sys.stderr)
+
+            self.exit(2)
