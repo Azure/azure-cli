@@ -59,10 +59,14 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
-    EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties')
+    registry_prefix = registry_name + '/'
+    if not image_name.startswith(registry_prefix):
+        image_name = registry_prefix + image_name
 
     yaml_body = PACK_TASK_YAML_FMT.format(
         image_name=image_name, builder=builder, no_pull='--no-pull' if not pull else '')
+
+    EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties')
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
