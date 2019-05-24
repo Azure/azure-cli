@@ -60,15 +60,16 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 
 # Create executable
 mkdir -p %{buildroot}%{_bindir}
-printf '#!/usr/bin/env bash\n%{cli_lib_dir}/bin/python -Esm azure.cli "$@"' > %{buildroot}%{_bindir}/az
+python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
+printf "#!/usr/bin/env bash\nPYTHONPATH=%{cli_lib_dir}/lib/${python_version}/site-packages %{python_cmd} -m azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
+rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/
 cat $source_dir/az.completion > %{buildroot}%{_sysconfdir}/bash_completion.d/azure-cli
 
 %files
-%exclude %{_bindir}/python
-%exclude %{_bindir}/%{python_cmd}
+%exclude %{cli_lib_dir}/bin/
 %attr(-,root,root) %{cli_lib_dir}
 %config(noreplace) %{_sysconfdir}/bash_completion.d/azure-cli
 %attr(0755,root,root) %{_bindir}/az
