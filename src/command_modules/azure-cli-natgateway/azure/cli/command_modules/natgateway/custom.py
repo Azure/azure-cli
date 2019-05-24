@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.log import get_logger
-from msrestazure.tools import resource_id
-
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.commands.client_factory import get_subscription_id
+
+from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -20,30 +19,10 @@ def network_client_factory(cli_ctx, **kwargs):
 
 def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                        location=None, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None, zone=None, no_wait=False):
+                       public_ip_prefixes=None, idle_timeout=None, no_wait=False, zone=None):
 
-    SubResource = cmd.get_models('SubResource')
-    public_ip_prefixes_natgateway = []
-    public_ip_addresses_natgateway = []
-
-    if public_ip_addresses is not None and public_ip_prefixes is not None:
-        logger.error("public_ip_addresses OR public_ip_prefixes required")
-
-    if public_ip_addresses is not None:
-        for i in public_ip_addresses.split(','):
-            public_ip_addresses_natgateway.append(SubResource(id=resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='publicIPAddresses',
-                name=i)))
-
-    if public_ip_prefixes is not None:
-        for i in public_ip_prefixes.split(','):
-            public_ip_prefixes_natgateway.append(SubResource(id=resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='publicIPPrefixes',
-                name=i)))
+    if not public_ip_addresses and not public_ip_prefixes:
+        raise CLIError('usage error: --public-ip-addresses ADDRESSES | --public-ip-prefixes PREFIXES')
 
     client = network_client_factory(cmd.cli_ctx).nat_gateways
     NatGateway, NatGatewaySku = cmd.get_models('NatGateway', 'NatGatewaySku')
@@ -51,47 +30,24 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
     nat_gateway = NatGateway(name=nat_gateway_name,
                              location=location,
                              sku=NatGatewaySku(name='Standard'),
-                             zones=zone,
                              idle_timeout_in_minutes=idle_timeout,
-                             public_ip_addresses=public_ip_addresses_natgateway,
-                             public_ip_prefixes=public_ip_prefixes_natgateway)
+                             zones=zone,
+                             public_ip_addresses=public_ip_addresses,
+                             public_ip_prefixes=public_ip_prefixes)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
 
 
-def update_nat_gateway(instance, cmd, resource_group_name, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None, zone=None):
-
-    SubResource = cmd.get_models('SubResource')
-    public_ip_prefixes_natgateway = []
-    public_ip_addresses_natgateway = []
-
-    if public_ip_addresses is not None and public_ip_prefixes is not None:
-        logger.error("public_ip_addresses OR public_ip_prefixes required")
-
-    if public_ip_addresses is not None:
-        for i in public_ip_addresses.split(','):
-            public_ip_addresses_natgateway.append(SubResource(id=resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='publicIPAddresses',
-                name=i)))
-
-    if public_ip_prefixes is not None:
-        for i in public_ip_prefixes.split(','):
-            public_ip_prefixes_natgateway.append(SubResource(id=resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network', type='publicIPPrefixes',
-                name=i)))
+def update_nat_gateway(instance, cmd, public_ip_addresses=None,
+                       public_ip_prefixes=None, idle_timeout=None):
 
     with cmd.update_context(instance) as c:
         c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('zones')
+        c.set_param('zones', zone)
         if public_ip_addresses is not None:
-            c.set_param('public_ip_addresses', public_ip_addresses_natgateway)
-        if public_ip_prefixes_natgateway is not None:
-            c.set_param('public_ip_prefixes', public_ip_prefixes_natgateway)
+            c.set_param('public_ip_addresses', public_ip_addresses)
+        if public_ip_prefixes is not None:
+            c.set_param('public_ip_prefixes', public_ip_prefixes)
     return instance
 
 
@@ -100,8 +56,3 @@ def list_nat_gateway(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_all()
-
-
-def show_nat_gateway(cmd, resource_group_name, nat_gateway_name):
-    client = network_client_factory(cmd.cli_ctx).nat_gateways
-    return client.get(resource_group_name, nat_gateway_name)
