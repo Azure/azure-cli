@@ -743,8 +743,9 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
         self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {wafp} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
-        self.cmd('network application-gateway show -g {rg} -n {ag}'),
+        self.cmd('network application-gateway show -g {rg} -n {ag}',
                  checks=self.check("firewallPolicy.contains(id, '{wafp}')", True))
+        self.cmd('network application-gateway delete -g {rg} -n {ag}')
 
         self.cmd('network application-gateway waf-policy delete -g {rg} -n {wafp}')
         self.cmd('network application-gateway waf-policy list -g {rg}',

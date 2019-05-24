@@ -1018,7 +1018,7 @@ def list_ag_waf_policies(cmd, resource_group_name=None):
 # endregion
 
 
-#region ApplicationGatewayWAFPolicyRules
+# region ApplicationGatewayWAFPolicyRules
 def create_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
                        action=None):
     WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
@@ -1076,7 +1076,7 @@ def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, ru
     )
     rule.match_conditions.append(new_cond)
     _upsert(waf_policy, 'custom_rules', rule, 'name', warn=False)
-    parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
+    client.create_or_update(resource_group_name, policy_name, waf_policy)
     return new_cond
 
 
