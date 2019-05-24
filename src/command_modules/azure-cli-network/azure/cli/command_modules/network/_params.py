@@ -103,6 +103,7 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type, options_list=['--name', '-n'])
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
+        c.argument('max_capacity', min_api='2018-12-01', help='Upper bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
         c.argument('zones', zones_type)
         c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)

@@ -159,7 +159,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
-                               custom_error_pages=None, firewall_policy=None):
+                               custom_error_pages=None, firewall_policy=None, max_capacity=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -211,7 +211,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy)
+        firewall_policy, max_capacity)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -236,21 +236,17 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
-                               custom_error_pages=None):
-    if sku is not None:
-        instance.sku.name = sku
-        instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
-    if capacity is not None:
-        instance.sku.capacity = capacity
-    if tags is not None:
-        instance.tags = tags
-    if enable_http2 is not None:
-        instance.enable_http2 = enable_http2
-    if min_capacity is not None:
-        instance.autoscale_configuration.min_capacity = min_capacity
-    if custom_error_pages is not None:
-        instance.custom_error_configurations = custom_error_pages
+def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
+                               custom_error_pages=None, max_capacity=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('sku.name', sku)
+        c.set_param('sku.tier', sku.split('_', 1)[0] if 'v2' not in sku else sku)
+        c.set_param('sku.capacity', capacity)
+        c.set_param('tags', tags)
+        c.set_param('enable_http2', enable_http2)
+        c.set_param('autoscale_configuration.min_capacity', min_capacity)
+        c.set_param('autoscale_configuration.max_capacity', max_capacity)
+        c.set_param('custom_error_configurations', custom_error_pages)
     return instance
 
 
