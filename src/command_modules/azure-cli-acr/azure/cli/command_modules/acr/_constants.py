@@ -13,6 +13,10 @@ REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 
+ACR_TASK_YAML_DEFAULT_NAME = 'acb.yaml'
+
+ORYX_PACK_BUILDER_IMAGE = 'mcr.microsoft.com/oryx/pack-builder:stable'
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')
