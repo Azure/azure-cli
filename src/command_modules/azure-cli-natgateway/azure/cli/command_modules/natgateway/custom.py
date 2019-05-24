@@ -39,7 +39,7 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
 
 
 def update_nat_gateway(instance, cmd, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None):
+                       public_ip_prefixes=None, idle_timeout=None, zone=None):
 
     with cmd.update_context(instance) as c:
         c.set_param('idle_timeout_in_minutes', idle_timeout)
