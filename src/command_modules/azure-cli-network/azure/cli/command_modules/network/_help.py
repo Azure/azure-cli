@@ -2240,7 +2240,7 @@ examples:
         az network lb create -g MyResourceGroup -n MyLb --sku Basic --vnet-name MyVnet --subnet MySubnet
   - name: Create a basic load balancer on a subnet of a pre-existing virtual network.
     text: >
-        az network lb create -g MyResourceGroup -n MyLb --sku Basic --subnet MySubnetID
+        az network lb create -g MyResourceGroup -n MyLb --sku Basic --subnet {subnetID}
   - name: Create a basic zone flavored internal load balancer, through provisioning a zonal public ip.
     text: >
         az network lb create -g MyResourceGroup -n MyLb --sku Basic --public-ip-zone 2
