@@ -941,6 +941,7 @@ def load_arguments(self, _):
     with self.argument_context('network public-ip prefix') as c:
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
         c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. XX.XX.XX.XX/<Length>)')
+        c.argument('zones', nargs='+', help='Zone of the public ip prefix')
     # endregion
 
     # region RouteFilters

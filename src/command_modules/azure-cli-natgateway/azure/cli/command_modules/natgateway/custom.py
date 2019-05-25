@@ -19,7 +19,7 @@ def network_client_factory(cli_ctx, **kwargs):
 
 def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                        location=None, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None, no_wait=False, zone=None):
+                       public_ip_prefixes=None, idle_timeout=None, no_wait=False, zones=None):
 
     if not public_ip_addresses and not public_ip_prefixes:
         raise CLIError('usage error: --public-ip-addresses ADDRESSES | --public-ip-prefixes PREFIXES')
@@ -31,7 +31,7 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                              location=location,
                              sku=NatGatewaySku(name='Standard'),
                              idle_timeout_in_minutes=idle_timeout,
-                             zones=zone,
+                             zones=zones,
                              public_ip_addresses=public_ip_addresses,
                              public_ip_prefixes=public_ip_prefixes)
 
@@ -39,11 +39,11 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
 
 
 def update_nat_gateway(instance, cmd, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None, zone=None):
+                       public_ip_prefixes=None, idle_timeout=None, zones=None):
 
     with cmd.update_context(instance) as c:
         c.set_param('idle_timeout_in_minutes', idle_timeout)
-        c.set_param('zones', zone)
+        c.set_param('zones', zones)
         if public_ip_addresses is not None:
             c.set_param('public_ip_addresses', public_ip_addresses)
         if public_ip_prefixes is not None:

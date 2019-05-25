@@ -3186,21 +3186,24 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            location=None, tags=None):
+                            location=None, tags=None, zones=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
         prefix_length=prefix_length,
         sku=PublicIPPrefixSku(name='Standard'),
         tags=tags,
+        zones=zones
     )
     return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
 
 
-def update_public_ip_prefix(instance, tags=None):
+def update_public_ip_prefix(instance, tags=None, zones=None):
     if tags is not None:
         instance.tags = tags
+        instance.zones = zones
     return instance
+
 # endregion
 
 

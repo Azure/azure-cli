@@ -18,16 +18,16 @@ class NatGatewayScenarioTests(ScenarioTest):
             'ip_addr': "pip",
             'ip_prefix': "prefix",
             'idle_timeout_updated': 5,
-            'zones' : 2,
+            'zones': 2,
             'location': resource_group_location,
             'resource_type': 'Microsoft.Network/NatGateways'
         })
 
         # create public ip address
-        self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --sku Standard')
+        self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --sku Standard --zone 2')
 
         # create public ip prefix
-        self.cmd('az network public-ip prefix create -g {rg} -n {ip_prefix} --length 31')
+        self.cmd('az network public-ip prefix create -g {rg} -n {ip_prefix} --length 31 --zones 2')
 
         self.cmd('az network nat gateway create --resource-group {rg} --name {name} --location {location} --public-ip-addresses {ip_addr} --public-ip-prefixes {ip_prefix} --idle-timeout {idle_timeout} --zone {zones}', checks=[
             self.check('resourceGroup', '{rg}'),
@@ -36,7 +36,7 @@ class NatGatewayScenarioTests(ScenarioTest):
             self.check("contains(publicIpPrefixes[0].id, '{ip_prefix}')", True),
             self.check('sku.name', 'Standard'),
             self.check('location', '{location}'),
-            self.check('zones', '{zones}')
+            self.check('zones', "['2']")
         ])
         self.cmd('az network nat gateway update -g {rg} --name {name} --idle-timeout {idle_timeout_updated}',
                  checks=self.check('idleTimeoutInMinutes', 5))
