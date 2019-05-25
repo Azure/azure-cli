@@ -16,4 +16,5 @@ def load_arguments(self, _):
         c.argument('public_ip_addresses', nargs='+', help='Space-separated list of public IP addresses (names or IDs).', validator=validate_public_ip_addresses)
         c.argument('public_ip_prefixes', nargs='+', help='Space-separated list of public IP prefixes (names or IDs).', validator=validate_public_ip_prefixes)
         c.argument('idle_timeout', help='Idle timeout in minutes.')
+        c.argument('zones', help='Zone of the nat gateway.')
         c.ignore('expand')
