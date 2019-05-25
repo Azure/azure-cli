@@ -8,9 +8,8 @@ import unittest
 import datetime
 import dateutil
 import dateutil.parser
-from msrest.serialization import TZ_UTC
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
+from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):

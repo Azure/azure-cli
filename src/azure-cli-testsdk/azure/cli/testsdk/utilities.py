@@ -50,8 +50,9 @@ def force_progress_logging():
 class StorageAccountKeyReplacer(RecordingProcessor):
     """Replace the access token for service principal authentication in a response body."""
 
-    def __init__(self, replacement='veryFakedStorageAccountKey=='):
-        self._replacement = replacement
+    KEY_REPLACEMENT = 'veryFakedStorageAccountKey=='
+
+    def __init__(self):
         self._activated = False
         self._candidates = []
 
@@ -70,7 +71,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         for candidate in self._candidates:
             if request.body:
                 body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
-                request.body = body_string.replace(candidate, self._replacement)
+                request.body = body_string.replace(candidate, self.KEY_REPLACEMENT)
         return request
 
     def process_response(self, response):
@@ -88,5 +89,79 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             if response['body']['string']:
                 body = response['body']['string']
                 response['body']['string'] = str(body, 'utf-8') if isinstance(body, bytes) else body
-                response['body']['string'] = response['body']['string'].replace(candidate, self._replacement)
+                response['body']['string'] = response['body']['string'].replace(candidate, self.KEY_REPLACEMENT)
+        return response
+
+
+class GraphClientPasswordReplacer(RecordingProcessor):
+    """Replace the access token for service principal authentication in a response body."""
+
+    PWD_REPLACEMENT = 'ReplacedSPPassword123*'
+
+    def __init__(self):
+        self._activated = False
+
+    def reset(self):
+        self._activated = False
+
+    def process_request(self, request):  # pylint: disable=no-self-use
+        try:
+            import re, json
+
+            # issue with how vcr.Request.body adds b' to text types if self.body is used.
+            if request.body and self.PWD_REPLACEMENT in str(request.body):
+                return request
+
+            pattern = r"[^/]+/applications$"
+            if re.search(pattern, request.path, re.I) and request.method.lower() == 'post':
+                self._activated = True
+                body = json.loads(str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body)
+                for password_cred in body['passwordCredentials']:
+                    password_cred['value'] = password_cred['value'] or self.PWD_REPLACEMENT
+                request.body = json.dumps(body)
+
+        except (AttributeError, KeyError):
+            pass
+
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            try:
+                import json
+
+                body = json.loads(response['body']['string'])
+                for password_cred in body['passwordCredentials']:
+                    password_cred['value'] = password_cred['value'] or self.PWD_REPLACEMENT
+
+                response['body']['string'] = json.dumps(body)
+                self._activated = False
+
+            except (AttributeError, KeyError):
+                pass
+
+        return response
+
+
+class AADGraphUserReplacer:
+    def __init__(self, test_user, mock_user):
+        self.test_user = test_user
+        self.mock_user = mock_user
+
+    def process_request(self, request):
+        test_user_encoded = self.test_user.replace('@', '%40')
+        if test_user_encoded in request.uri:
+            request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
+
+        if request.body:
+            body = str(request.body)
+            if self.test_user in body:
+                request.body = body.replace(self.test_user, self.mock_user)
+
+        return request
+
+    def process_response(self, response):
+        if response['body']['string']:
+            response['body']['string'] = response['body']['string'].replace(self.test_user,
+                                                                            self.mock_user)
         return response
