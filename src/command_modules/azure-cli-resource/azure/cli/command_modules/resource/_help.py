@@ -1193,3 +1193,15 @@ helps['tag'] = """
 type: group
 short-summary: Manage resource tags.
 """
+
+helps['rest'] = """
+    type: command
+    short-summary: invoke custom request
+    examples:
+       - name: Get Audit log through Microsoft Graph
+         text: >
+             az rest --method get --url https://graph.microsoft.com/beta/auditLogs/directoryAudits
+       - name: Update a Azure Active Directory Graph User's display name
+         text: >
+             az rest --method patch --headers "{\"Content-Type\": \"application/json\"}" --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\"displayName\":\"jondoe2\"}"
+"""

@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* 'az rest': new command to sent out any REST request 
 
 2.1.15
 ++++++
