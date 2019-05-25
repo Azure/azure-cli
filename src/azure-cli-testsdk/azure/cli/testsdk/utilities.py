@@ -106,7 +106,8 @@ class GraphClientPasswordReplacer(RecordingProcessor):
 
     def process_request(self, request):  # pylint: disable=no-self-use
         try:
-            import re, json
+            import re
+            import json
 
             # issue with how vcr.Request.body adds b' to text types if self.body is used.
             if request.body and self.PWD_REPLACEMENT in str(request.body):

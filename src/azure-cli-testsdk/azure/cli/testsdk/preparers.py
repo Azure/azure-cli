@@ -25,7 +25,7 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
     def live_only_execute(self, cli_ctx, command, expect_failure=False):
         if self.test_class_instance.in_recording:
             return self._raw_execute(cli_ctx, command, expect_failure)
-
+        return None
 
 # Resource Group Preparer and its shorthand decorator
 
@@ -56,7 +56,6 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
         template = 'az group create --location {} --name {} --tag ' + tags
-
         self.live_only_execute(self.cli_ctx, template.format(self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
@@ -95,11 +94,11 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             name = self.dev_setting_name
 
         try:
-            account_key = self.live_only_execute(self.cli_ctx, 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
+            account_key = self.live_only_execute(self.cli_ctx,
+                                                 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
                                                  .format(name, group)).output
-        except AttributeError: # live_only_execute might return None
+        except AttributeError:  # live only execute returns None if playing from record
             account_key = None
-            pass
 
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name,
@@ -185,7 +184,7 @@ class RoleBasedServicePrincipalPreparer(NoTrafficRecordingPreparer, SingleValueR
 
             try:
                 self.result = self.live_only_execute(self.cli_ctx, command).get_output_in_json()
-            except AttributeError:
+            except AttributeError:  # live only execute returns None if playing from record
                 pass
 
             self.test_class_instance.kwargs[self.key] = name
