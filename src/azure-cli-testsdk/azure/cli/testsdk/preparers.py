@@ -8,6 +8,7 @@ from datetime import datetime
 
 from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
 
+from .base import LiveScenarioTest
 from .exceptions import CliTestError
 from .reverse_dependency import get_dummy_cli
 from .utilities import StorageAccountKeyReplacer, GraphClientPasswordReplacer
@@ -23,9 +24,16 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
         super(NoTrafficRecordingPreparer, self).__init__(disable_recording=True, *args, **kwargs)
 
     def live_only_execute(self, cli_ctx, command, expect_failure=False):
-        if self.test_class_instance.in_recording:
-            return self._raw_execute(cli_ctx, command, expect_failure)
+        try:
+            if self.test_class_instance.in_recording:
+                return self._raw_execute(cli_ctx, command, expect_failure)
+        except AttributeError:
+            # A test might not have an in_recording attribute. Run live if this is an instance of LiveScenarioTest
+            if isinstance(self.test_class_instance, LiveScenarioTest):
+                return self._raw_execute(cli_ctx, command, expect_failure)
+
         return None
+
 
 # Resource Group Preparer and its shorthand decorator
 

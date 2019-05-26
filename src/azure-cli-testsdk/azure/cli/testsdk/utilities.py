@@ -7,7 +7,8 @@ import os
 import logging
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor, GeneralNameReplacer as _BuggyGeneralNameReplacer
+from azure_devtools.scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor,
+                                           GeneralNameReplacer as _BuggyGeneralNameReplacer)
 from azure_devtools.scenario_tests.utilities import is_text_payload
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -74,7 +75,10 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             pass
         for candidate in self._candidates:
             if request.body:
-                body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                try:
+                    body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                except TypeError:  # python 2 doesn't allow decoding through str
+                    body_string = str(request.body)
                 request.body = body_string.replace(candidate, self.KEY_REPLACEMENT)
         return request
 
@@ -120,7 +124,11 @@ class GraphClientPasswordReplacer(RecordingProcessor):
             pattern = r"[^/]+/applications$"
             if re.search(pattern, request.path, re.I) and request.method.lower() == 'post':
                 self._activated = True
-                body = json.loads(str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body)
+                try:
+                    body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                except TypeError:  # python 2 doesn't allow decoding through str
+                    body = str(request.body)
+                body = json.loads(body)
                 for password_cred in body['passwordCredentials']:
                     if password_cred['value']:
                         body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
@@ -160,7 +168,10 @@ class AADGraphUserReplacer:
             request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
 
         if request.body:
-            body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
+            try:
+                body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
+            except TypeError:  # python 2 doesn't allow decoding through str
+                body = str(request.body)
             if self.test_user in body:
                 request.body = body.replace(self.test_user, self.mock_user)
 
@@ -181,7 +192,10 @@ class GeneralNameReplacer(_BuggyGeneralNameReplacer):
             request.uri = request.uri.replace(old, new)
 
             if is_text_payload(request) and request.body:
-                body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
+                try:
+                    body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
+                except TypeError:  # python 2 doesn't allow decoding through str
+                    body = str(request.body)
                 if old in body:
                     request.body = body.replace(old, new)
 
