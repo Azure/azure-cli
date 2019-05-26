@@ -4,9 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import logging
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor
+from azure_devtools.scenario_tests import create_random_name as create_random_name_base, RecordingProcessor, GeneralNameReplacer as _BuggyGeneralNameReplacer
+from azure_devtools.scenario_tests.utilities import is_text_payload
+
+logger = logging.getLogger('azure.cli.testsdk')
 
 
 def create_random_name(prefix='clitest', length=24):
@@ -105,10 +109,10 @@ class GraphClientPasswordReplacer(RecordingProcessor):
         self._activated = False
 
     def process_request(self, request):  # pylint: disable=no-self-use
-        try:
-            import re
-            import json
+        import re
+        import json
 
+        try:
             # issue with how vcr.Request.body adds b' to text types if self.body is used.
             if request.body and self.PWD_REPLACEMENT in str(request.body):
                 return request
@@ -118,8 +122,9 @@ class GraphClientPasswordReplacer(RecordingProcessor):
                 self._activated = True
                 body = json.loads(str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body)
                 for password_cred in body['passwordCredentials']:
-                    password_cred['value'] = password_cred['value'] or self.PWD_REPLACEMENT
-                request.body = json.dumps(body)
+                    if password_cred['value']:
+                        body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                        request.body = body_string.replace(password_cred['value'], self.PWD_REPLACEMENT)
 
         except (AttributeError, KeyError):
             pass
@@ -155,7 +160,7 @@ class AADGraphUserReplacer:
             request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
 
         if request.body:
-            body = str(request.body)
+            body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
             if self.test_user in body:
                 request.body = body.replace(self.test_user, self.mock_user)
 
@@ -166,3 +171,18 @@ class AADGraphUserReplacer:
             response['body']['string'] = response['body']['string'].replace(self.test_user,
                                                                             self.mock_user)
         return response
+
+
+# Override until this is fixed in azure_devtools
+class GeneralNameReplacer(_BuggyGeneralNameReplacer):
+
+    def process_request(self, request):
+        for old, new in self.names_name:
+            request.uri = request.uri.replace(old, new)
+
+            if is_text_payload(request) and request.body:
+                body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
+                if old in body:
+                    request.body = body.replace(old, new)
+
+        return request
