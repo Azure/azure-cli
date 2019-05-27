@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 2.2.8
 +++++
 * Add 'az acr check-health' command.

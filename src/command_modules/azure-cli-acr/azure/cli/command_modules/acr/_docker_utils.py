@@ -111,7 +111,8 @@ def _get_aad_token(cli_ctx,
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code)
-        raise CLIError(CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code).get_error_message())
+        raise CLIError(CONNECTIVITY_REFRESH_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+                       .get_error_message())
 
     refresh_token = loads(response.content.decode("utf-8"))["refresh_token"]
     if only_refresh_token:
@@ -140,8 +141,8 @@ def _get_aad_token(cli_ctx,
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
-        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code) \
-            .get_error_message())
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
+                       .get_error_message())
 
     return loads(response.content.decode("utf-8"))["access_token"]
 

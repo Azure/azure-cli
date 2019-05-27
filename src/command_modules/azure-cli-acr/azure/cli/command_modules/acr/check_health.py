@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 from knack.util import CLIError
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
@@ -18,7 +17,7 @@ IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
 FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/faq for more informations."
 
 
-## Utilities functions ##
+# Utilities functions
 
 
 def print_pass(message):
@@ -66,7 +65,7 @@ def _subprocess_communicate(command_parts, shell=False):
     return output, stderr
 
 
-## Checks for the environment ##
+# Checks for the environment
 
 
 # Checks docker command, docker daemon, docker version and docker pull
@@ -80,7 +79,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
     if error:
         _handle_error(error, ignore_errors)
         if error.error_title != DOCKER_DAEMON_ERROR.error_title:
-            return # We cannot proceed if the error is unexpected or with docker command
+            return  # We cannot proceed if the error is unexpected or with docker command
         else:
             docker_daemon_available = False
 
@@ -109,7 +108,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if output.find(DOCKER_PULL_SUCCEEDED.format(IMAGE)) != -1 or \
-                output.find(DOCKER_IMAGE_UP_TO_DATE.format(IMAGE)) != -1:
+               output.find(DOCKER_IMAGE_UP_TO_DATE.format(IMAGE)) != -1:
                 print_pass("Docker pull of '{}'".format(IMAGE))
             else:
                 _handle_error(DOCKER_PULL_ERROR, ignore_errors)
@@ -156,7 +155,7 @@ def _check_health_environment(ignore_errors, yes):
     _get_helm_version(ignore_errors)
 
 
-## Checks for the connectivity ##
+# Checks for the connectivity
 
 
 # Check DNS lookup
@@ -252,10 +251,10 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
 
-## General command ##
+# General command
 
 
-def acr_check_health(cmd,
+def acr_check_health(cmd,  # pylint: disable useless-return
                      ignore_errors=False,
                      yes=False,
                      registry_name=None):
@@ -263,3 +262,5 @@ def acr_check_health(cmd,
     _check_health_environment(ignore_errors, yes)
     _check_health_connectivity(cmd, registry_name, ignore_errors)
     print(FAQ_MESSAGE)
+
+    return None

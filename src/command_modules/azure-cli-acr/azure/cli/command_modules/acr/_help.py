@@ -827,6 +827,7 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+
 helps['acr check-health'] = """
 type: command
 short-summary: Gets health information on the environment and, optionally, a target registry.
