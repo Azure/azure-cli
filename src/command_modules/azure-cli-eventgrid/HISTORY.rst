@@ -3,7 +3,7 @@
 Release History
 ===============
 0.2.4
-+++++;>
++++++
 * `domain create/update/delete/get/list`: Added new commands for the domain related CRUD operations.
 * `domain topic create/update/delete/get/list`: Added new commands for the domain topics related CRUD operations.
 * `topic list": Added --odata-query for filtering the list results using OData syntax.
