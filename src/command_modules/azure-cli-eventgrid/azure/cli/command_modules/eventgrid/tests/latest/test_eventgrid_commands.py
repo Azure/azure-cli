@@ -146,7 +146,6 @@ class EventGridTests(ScenarioTest):
         ])
 
         # Create domain topics under domain
-
         self.kwargs['resource_id_domain_topic2'] = self.cmd('az eventgrid domain topic create --resource-group {rg} --domain-name {domain_name} --name {domain_topic_name2}', checks=[
             self.check('type', 'Microsoft.EventGrid/domains/topics'),
             self.check('name', self.kwargs['domain_topic_name2']),
