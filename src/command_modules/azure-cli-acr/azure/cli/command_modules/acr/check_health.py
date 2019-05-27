@@ -118,7 +118,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
 # Get current CLI version
 def _get_cli_version():
 
-    acr_cli_version = "2.2.4"
+    acr_cli_version = "2.2.8"
     print('ACR CLI version: {}'.format(acr_cli_version))
 
     return 0

@@ -152,7 +152,7 @@ def acr_helm_repo_add(cmd,
                       tenant_suffix=None,
                       username=None,
                       password=None):
-    helm_command = get_helm_command()
+    helm_command, _ = get_helm_command()
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
