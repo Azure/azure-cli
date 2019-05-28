@@ -2,16 +2,20 @@
 # Definition of macros used - https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros
 
 # .el7.centos -> .el7
-%if 0%{?rhel} == 7
-  %define dist .el7
+%if 0%{?rhel}
+  %define dist .el%{?rhel}
+%endif
+
+%if 0%{?rhel} && 0%{?rhel} < 8
+    %define python_cmd python2
+%else
+    %define python_cmd python3
 %endif
 
 %define name           azure-cli
 %define release        1%{?dist}
 %define version        %{getenv:CLI_VERSION}
 %define repo_path      %{getenv:REPO_PATH}
-%define venv_url       https://pypi.python.org/packages/source/v/virtualenv/virtualenv-15.0.0.tar.gz
-%define venv_sha256    70d63fb7e949d07aeb37f6ecc94e8b60671edb15b890aa86dba5dfaf2225dc19
 %define cli_lib_dir    %{_libdir}/az
 
 Summary:        Azure CLI
@@ -21,13 +25,10 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       python
+Requires:       %{python_cmd}, %{python_cmd}-virtualenv
 
-BuildRequires:  gcc
-BuildRequires:  python
-BuildRequires:  libffi-devel
-BuildRequires:  python-devel
-BuildRequires:  openssl-devel
+BuildRequires:  gcc, libffi-devel, openssl-devel, perl
+BuildRequires:  %{python_cmd}-devel
 
 %global _python_bytecompile_errors_terminate_build 0
 
@@ -36,17 +37,9 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
 
 %prep
-# Create some tmp files
-tmp_venv_archive=$(mktemp)
-
-# Download, Extract Virtualenv
-wget %{venv_url} -qO $tmp_venv_archive
-echo "%{venv_sha256}  $tmp_venv_archive" | sha256sum -c -
-tar -xvzf $tmp_venv_archive -C %{_builddir}
-
 %install
 # Create the venv
-python %{_builddir}/virtualenv-15.0.0/virtualenv.py --python python %{buildroot}%{cli_lib_dir}
+%{python_cmd} -m virtualenv --python %{python_cmd} %{buildroot}%{cli_lib_dir}
 
 # Build the wheels from the source
 source_dir=%{repo_path}
@@ -67,13 +60,16 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 
 # Create executable
 mkdir -p %{buildroot}%{_bindir}
-printf '#!/usr/bin/env bash\n%{cli_lib_dir}/bin/python -Esm azure.cli "$@"' > %{buildroot}%{_bindir}/az
+python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
+printf "#!/usr/bin/env bash\nPYTHONPATH=%{cli_lib_dir}/lib/${python_version}/site-packages %{python_cmd} -sm azure.cli \"\$@\"" > %{buildroot}%{_bindir}/az
+rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/
 cat $source_dir/az.completion > %{buildroot}%{_sysconfdir}/bash_completion.d/azure-cli
 
 %files
+%exclude %{cli_lib_dir}/bin/
 %attr(-,root,root) %{cli_lib_dir}
 %config(noreplace) %{_sysconfdir}/bash_completion.d/azure-cli
 %attr(0755,root,root) %{_bindir}/az
