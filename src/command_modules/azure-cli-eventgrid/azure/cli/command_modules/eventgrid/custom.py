@@ -50,6 +50,7 @@ EVENTTYPE = "eventtype"
 DATAVERSION = "dataversion"
 DEFAULT_TOP = 100
 
+
 def cli_topic_list(
         client,
         resource_group_name=None,
