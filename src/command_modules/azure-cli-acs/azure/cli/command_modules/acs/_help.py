@@ -340,7 +340,7 @@ parameters:
   - name: --admin -a
     type: bool
     short-summary: "Get cluster administrator credentials.  Default: cluster user credentials."
-  - name: --file -f
+  - name: --path
     type: string
     short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
   - name: --overwrite-existing
