@@ -6,7 +6,6 @@ Release History
 0.4.6
 +++++
 * Return ISO 8601 time strings for archive-window-length and key-frame-interval-duration.
-* Tests updated for new SDK requirements.
 
 0.4.5
 +++++
