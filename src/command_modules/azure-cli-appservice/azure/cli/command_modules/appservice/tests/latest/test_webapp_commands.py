@@ -173,14 +173,14 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-linux-cd', length=24)
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|6.11"'.format(resource_group, webapp_name,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|10.14"'.format(resource_group, webapp_name,
                                                                                    plan, TEST_REPO_URL))
         time.sleep(45)  # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        if 'Your App Service app is up and running' not in str(r.content):
+        if 'Hello world' not in str(r.content):
             # dump out more info for diagnose
-            self.fail("'Your App Service app is up and running' is not found in the web page. We get instead:" + str(r.content))
+            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -273,7 +273,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # verify the baseline
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck('alwaysOn', False),
+            JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', False),
             JMESPathCheck('phpVersion', '5.6'),
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
