@@ -110,7 +110,8 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription show --resource-id {resource_id} --name {event_subscription_name} --include-full-endpoint-url', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
             self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
@@ -176,7 +177,8 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription show --resource-id {domain_topic_resource_id} --name {event_subscription_name} --include-full-endpoint-url', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
             self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
@@ -289,7 +291,8 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription show --source-resource-id {scope} --name {event_subscription_name} --include-full-endpoint-url', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
             self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
@@ -338,7 +341,8 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription show --topic-name {topic_name} -g {rg} --name {event_subscription_name} --include-full-endpoint-url', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
             self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
@@ -372,7 +376,8 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription show --resource-id {scope} --name {event_subscription_name} --include-full-endpoint-url', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
             self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
@@ -436,7 +441,9 @@ class EventGridTests(ScenarioTest):
             self.check('filter.subjectBeginsWith', 'mysubject_prefix')
         ])
         self.cmd('az eventgrid event-subscription show --source-resource-id {scope} --include-full-endpoint-url --name {event_subscription_name}', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
         self.cmd('az eventgrid event-subscription update --source-resource-id {scope} --name {event_subscription_name}  --endpoint {endpoint_url} --subject-ends-with .jpg', checks=[
@@ -493,7 +500,9 @@ class EventGridTests(ScenarioTest):
             self.check('filter.subjectBeginsWith', 'mysubject_prefix')
         ])
         self.cmd('az eventgrid event-subscription show --resource-id {scope} --include-full-endpoint-url --name {event_subscription_name}', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
         self.cmd('az eventgrid event-subscription update --resource-id {scope} --name {event_subscription_name}  --endpoint {endpoint_url} --subject-ends-with .jpg', checks=[
@@ -549,7 +558,9 @@ class EventGridTests(ScenarioTest):
             self.check('filter.subjectBeginsWith', 'mysubject_prefix')
         ])
         self.cmd('az eventgrid event-subscription show --include-full-endpoint-url --resource-group {rg} --name {event_subscription_name}', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
         self.cmd('az eventgrid event-subscription update -g {rg} --name {event_subscription_name}  --endpoint {endpoint_url} --subject-ends-with .jpg', checks=[
@@ -604,7 +615,9 @@ class EventGridTests(ScenarioTest):
             self.check('name', self.kwargs['event_subscription_name']),
         ])
         self.cmd('az eventgrid event-subscription show --include-full-endpoint-url --resource-id {source_resource_id} --name {event_subscription_name}', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
         self.cmd('az eventgrid event-subscription update --source-resource-id {source_resource_id} --name {event_subscription_name} --endpoint {endpoint_url} --subject-ends-with .jpg', checks=[
@@ -683,7 +696,9 @@ class EventGridTests(ScenarioTest):
             self.check('name', self.kwargs['event_subscription_name']),
         ])
         self.cmd('az eventgrid event-subscription show --include-full-endpoint-url --resource-id {resource_id} --name {event_subscription_name}', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
         self.cmd('az eventgrid event-subscription update --resource-id {resource_id} --name {event_subscription_name} --endpoint {endpoint_url} --subject-ends-with .jpg', checks=[
@@ -787,7 +802,9 @@ class EventGridTests(ScenarioTest):
         ])
 
         self.cmd('az eventgrid event-subscription show --include-full-endpoint-url --source-resource-id {scope} --name {event_subscription_name}', checks=[
-            self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            # Remove for now as offline test will fail due to hiding the secret part of the URL
+            # self.check('destination.endpointUrl', self.kwargs['endpoint_url']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_baseurl'])
         ])
 
         self.cmd('az eventgrid event-subscription list --source-resource-id {scope}', checks=[
