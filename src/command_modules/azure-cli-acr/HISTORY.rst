@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.2.7
++++++
+* Support Managed Identities for Task
+
+2.2.6
++++++
+* Minor fixes
+
+2.2.5
++++++
+* Minor fixes.
+
 2.2.4
 +++++
 * Support running an image contextlessly.

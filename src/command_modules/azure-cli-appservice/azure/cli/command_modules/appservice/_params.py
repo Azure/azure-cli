@@ -29,7 +29,7 @@ MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
 LINUX_RUNTIMES = ['dotnet', 'node', 'python']
-WINDOWS_RUNTIMES = ['dotnet', 'node', 'java']
+WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 
 # pylint: disable=too-many-statements
 
@@ -39,8 +39,8 @@ def load_arguments(self, _):
     # pylint: disable=line-too-long
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1(Premium Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
-                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1', 'P2', 'P3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4']))
+    sku_arg_type = CLIArgumentType(help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large)',
+                                   arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                                            help="name of the web app. You can configure the default using 'az configure --defaults web=<name>'")
@@ -362,6 +362,10 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp up') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   help="name of the appserviceplan associated with the webapp")
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -369,8 +373,14 @@ def load_arguments(self, _):
         c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
-        c.argument('slot', options_list=['--slot', '-s'], help='the name of the slot. Default to the productions slot if not specified')
-        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none')
+        c.argument('port', options_list=['--port', '-p'],
+                   help='Port for the remote connection. Default: Random available port', type=int)
+        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+
+    with self.argument_context('webapp create-remote-connection') as c:
+        c.argument('port', options_list=['--port', '-p'],
+                   help='Port for the remote connection. Default: Random available port', type=int)
+        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
@@ -424,6 +434,15 @@ def load_arguments(self, _):
         c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
         c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?", arg_type=get_three_state_flag(return_label=True), required=False)
         c.argument('allow_force_push', help="If Azure DevOps repository is not clean, should it overwrite remote content?", arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('use_local_settings', help="Use your local settings in your functionapp settings?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository", required=False)
+        c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)", required=False)
+
+    with self.argument_context('functionapp devops-pipeline create') as c:
+        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False)
+        c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
+        c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
+        c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
+        c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?", arg_type=get_three_state_flag(return_label=True), required=False)
+        c.argument('allow_force_push', help="If Azure DevOps repository is not clean, should it overwrite remote content?", arg_type=get_three_state_flag(return_label=True), required=False)
         c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository", required=False)
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)", required=False)

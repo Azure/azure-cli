@@ -2,6 +2,15 @@
 
 Release History
 ===============
+2.2.4
++++++
+* Minor fixes
+
+2.2.3
++++++
+* Added commands sql virtual-cluster list/show/delete
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+
 2.2.2
 +++++
 * Support for custom time zone on managed instance.

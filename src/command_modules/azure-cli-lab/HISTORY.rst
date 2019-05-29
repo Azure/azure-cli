@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.7
++++++
+* Fixed error: 'ObjectsOperations' object has no attribute 'get_current_user'
+
 0.1.6
 +++++
 * Minor fixes

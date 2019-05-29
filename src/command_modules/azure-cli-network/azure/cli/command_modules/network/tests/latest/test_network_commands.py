@@ -70,7 +70,8 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-class NetworkPrivateEndpoints(ScenarioTest):
+# TODO: revert to ScenarioTest once #9401 is addressed.
+class NetworkPrivateEndpoints(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):
@@ -903,9 +904,8 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route get-stats --resource-group {rg} --name {er}',
                  checks=self.check('type(@)', 'object'))
 
-        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test --bandwidth 100', checks=[
-            self.check('tags.test', 'Test'),
-            self.check('serviceProviderProperties.bandwidthInMbps', 100)
+        self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test', checks=[
+            self.check('tags.test', 'Test')
         ])
 
         self.cmd('network express-route update -g {rg} -n {er} --tags foo=boo',
@@ -964,7 +964,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(CLIError, 'An error occurred'):
+        with self.assertRaisesRegexp(CLIError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
@@ -1404,8 +1404,8 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
             'config2': 'ipconfig2'
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --cache write')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --cache read')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --defer')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
@@ -1529,8 +1529,8 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
             'pool': 'pool1'
         })
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --cache write')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24 --cache read')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} --defer')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
@@ -1780,28 +1780,32 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_cache_test')
     def test_network_vnet_caching(self, resource_group):
+        from time import sleep
 
         self.kwargs.update({
             'vnet': 'vnet1'
         })
+
         # test that custom commands work with caching
-        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --cache write')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --cache read write')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --cache read write')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24 --cache read')
-        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-            self.check('length(subnets)', 3)
-        ])
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --defer')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --defer')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --defer')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            # ensure vnet has not been created
+            self.cmd('network vnet show -g {rg} -n {vnet}')
+        self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
+        self.cmd('network vnet show -g {rg} -n {vnet}',
+                 checks=self.check('length(subnets)', 3))
+        with self.assertRaisesRegexp(CLIError, 'Not found in cache'):
+            self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
 
         # test that generic update works with caching
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --cache write')
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2 --cache read write-through')
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.a=1 --defer')
+        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.b=2')
         self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-            self.check('length(tags)', 2)
-        ])
-        self.cmd('network vnet update -g {rg} -n {vnet} --set tags.c=3 --cache read')
-        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
-            self.check('length(tags)', 3)
+            self.check('length(tags)', 2),
+            self.check('length(subnets)', 3)  # should reflect the write-through behavior from the earlier PUT
         ])
 
     @live_only()

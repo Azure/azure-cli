@@ -10,6 +10,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 
+from ._constants import ACR_TASK_YAML_DEFAULT_NAME
 from ._stream_utils import stream_logs
 from ._utils import (
     validate_managed_registry,
@@ -40,7 +41,6 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             no_wait=False,
             timeout=None,
             resource_group_name=None,
-            os_type=None,
             platform=None,
             auth_mode=None):
 
@@ -54,42 +54,17 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             "-f myFile mySourceLocation, but not both.")
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
+    source_location = prepare_source_location(
+        source_location, client_registries, registry_name, resource_group_name)
 
-    if source_location.lower() == NULL_SOURCE_LOCATION:
-        source_location = None
-    elif os.path.exists(source_location):
-        if not os.path.isdir(source_location):
-            raise CLIError(
-                "Source location should be a local directory path or remote URL.")
-
-        tar_file_path = os.path.join(tempfile.gettempdir(
-        ), 'run_archive_{}.tar.gz'.format(uuid.uuid4().hex))
-
-        try:
-            source_location = upload_source_code(
-                client_registries, registry_name, resource_group_name,
-                source_location, tar_file_path, "", "")
-        except Exception as err:
-            raise CLIError(err)
-        finally:
-            try:
-                logger.debug(
-                    "Deleting the archived source code from '%s'...", tar_file_path)
-                os.remove(tar_file_path)
-            except OSError:
-                pass
-    else:
-        source_location = check_remote_source_code(source_location)
-        logger.warning("Sending context to registry: %s...", registry_name)
-
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, os_type, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
     if source_location:
         request = FileTaskRunRequest(
-            task_file_path=file if file else "acb.yaml",
+            task_file_path=file if file else ACR_TASK_YAML_DEFAULT_NAME,
             values_file_path=values,
             values=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
@@ -142,3 +117,34 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
+
+
+def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
+    if source_location.lower() == NULL_SOURCE_LOCATION:
+        source_location = None
+    elif os.path.exists(source_location):
+        if not os.path.isdir(source_location):
+            raise CLIError(
+                "Source location should be a local directory path or remote URL.")
+
+        tar_file_path = os.path.join(tempfile.gettempdir(
+        ), 'run_archive_{}.tar.gz'.format(uuid.uuid4().hex))
+
+        try:
+            source_location = upload_source_code(
+                client_registries, registry_name, resource_group_name,
+                source_location, tar_file_path, "", "")
+        except Exception as err:
+            raise CLIError(err)
+        finally:
+            try:
+                logger.debug(
+                    "Deleting the archived source code from '%s'...", tar_file_path)
+                os.remove(tar_file_path)
+            except OSError:
+                pass
+    else:
+        source_location = check_remote_source_code(source_location)
+        logger.warning("Sending context to registry: %s...", registry_name)
+
+    return source_location

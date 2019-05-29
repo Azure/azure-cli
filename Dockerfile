@@ -39,7 +39,7 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
 
 ARG JP_VERSION="0.1.3"
 
-RUN curl https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
+RUN curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp \
  && pip install --no-cache-dir --upgrade jmespath-terminal
 
@@ -56,7 +56,8 @@ RUN /bin/bash -c 'TMP_PKG_DIR=$(mktemp -d); \
     [ -d privates ] && cp privates/*.whl $TMP_PKG_DIR; \
     all_modules=`find $TMP_PKG_DIR -name "*.whl"`; \
     pip install --no-cache-dir $all_modules; \
-    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg;' \
+    pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg; \
+    pip install --no-cache-dir --force-reinstall urllib3==1.24.2;' \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \

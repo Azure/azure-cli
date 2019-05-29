@@ -2,6 +2,19 @@
 
 Release History
 ===============
+2.5.0
++++++
+* [BREAKING CHANGE]: previously deprecated command group `network interface-endpoints` has been removed. Use `network private-endpoints` instead.
+* `network vnet subnet create/update`: Added `--nat-gateway` argument for attaching to a NAT gateway.
+* `dns zone import`: Fix issue where record names could not match a record type.
+
+2.4.0
++++++
+* [BREAKING CHANGE] `vnet create/update`: Replaced `--cache` arugment with `--defer`.
+
+2.3.7
++++++
+* `dns zone create`: Add auto name server delegation in parent during child zone creation
 
 2.3.6
 +++++
@@ -9,7 +22,6 @@ Release History
 * `application-gateway rewrite-rule`: Add `list-request-headers` and `list-response-headers` commands.
 * `application-gateway rewrite-rule condition`: Add `list-server-variables` command.
 * `express-route port update`: Fixed an issue where updating link state on an express-route port would throw an unknown attribute exception.
-* `dns zone create`: Add auto name server delegation in parent during child zone creation 
 
 2.3.5
 +++++

@@ -14,7 +14,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
-                          validate_storage_data_plane_list)
+                          validate_storage_data_plane_list, validate_azcopy_upload_destination_url)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -155,6 +155,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_name', options_list=['--key'], help='The key to regenerate.', validator=validate_key,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         c.argument('account_name', acct_name_type, id_part=None)
+
+    with self.argument_context('storage account management-policy create') as c:
+        c.argument('policy', type=file_type, completer=FilesCompleter(),
+                   help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
+                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.')
+        c.argument('account_name', help='The name of the storage account within the specified resource group.')
+
+    with self.argument_context('storage account management-policy update') as c:
+        c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
@@ -386,6 +395,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
                    help='Name of the destination blob. If the exists, it will be overwritten.')
         c.argument('source_lease_id', arg_group='Copy Source')
+
+    with self.argument_context('storage blob sync') as c:
+        c.extra('destination_container', options_list=['--container', '-c'], required=True,
+                help='The sync destination container.')
+        c.extra('destination_path', options_list=['--destination', '-d'],
+                validator=validate_azcopy_upload_destination_url,
+                help='The sync destination path.')
+        c.argument('source', options_list=['--source', '-s'],
+                   help='The source file path to sync from.')
+        c.ignore('destination')
 
     with self.argument_context('storage container') as c:
         from .sdkutil import get_container_access_type_names

@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
-[![Build Status](https://dev.azure.com/azure-public/azcli/_apis/build/status/azcli-CI?branchName=dev)](https://dev.azure.com/azure-public/azcli/_build/latest?definitionId=18&branchName=dev)
+[![Build Status](https://dev.azure.com/azure-sdk/public/_apis/build/status/cli/Azure.azure-cli?branchName=dev)](https://dev.azure.com/azure-sdk/public/_build/latest?definitionId=246&branchName=dev)
 [![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
@@ -131,13 +131,13 @@ We maintain a Docker image preconfigured with the Azure CLI.
 See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
 
 ```bash
-$ docker run -v ${HOME}:/root -it microsoft/azure-cli:<version>
+$ docker run -v ${HOME}:/root -it --rm mcr.microsoft.com/azure-cli:<version>
 ```
 
 For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
 For example:
 ```bash
-docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
+docker run -v ${HOME}:/root -it --rm azuresdk/azure-cli-python:dev
 ```
 
 ### Edge Builds

@@ -2,6 +2,18 @@
 
 Release History
 ===============
+0.3.10
+++++++
+* Add support for manual-failover
+
+0.3.9
++++++
+* Add support to list all keys
+
+0.3.8
++++++
+* Minor fixes
+
 0.3.7
 +++++
 * Minor fixes

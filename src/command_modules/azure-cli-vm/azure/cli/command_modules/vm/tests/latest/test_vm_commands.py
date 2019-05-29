@@ -13,8 +13,6 @@ import unittest
 import mock
 import uuid
 
-import six
-
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType
@@ -27,6 +25,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # pylint: disable=too-many-lines
 
 TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"
+TEST_SSH_KEY_PUB_2 = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCof7rG2sYVyHSDPp4lbrq5zu8N8D7inS4Qb+ZZ5Kh410znTcoVJSNsLOhrM2COxg5LXca3DQMBi4S/V8UmMnwxwDVf38GvU+0QVDR6vSO6lPlj2OpPLk4OEdTv3qcj/gpEBvv1RCacpFuu5bL546r4BqG4f0dJXqBd5tT4kjpO9ytOZ1Wkg8tA35UvbucVAsDBfOZ5GtsnflPtKCY9h20LeXEjyDZ8eFzAGH/vNrfWPiWWznwN9EoPghIQHCiC0mnJgdsABraUzeTTMjxahi0DXBxb5dsKd6YbJxQw/V+AohVMPfPvs9y95Aj7IxM2zrtgBswC8bT0z678svTJSFX9 test@example.com"
 
 
 def _write_config_file(user_name):
@@ -259,14 +258,12 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         ])
 
 
-class VMVMSSWindowsLicenseTest(ScenarioTest):
+class VMWindowsLicenseTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_windows_license_type')
-    def test_vm_vmss_windows_license_type(self, resource_group):
-
+    def test_vm_windows_license_type(self, resource_group):
         self.kwargs.update({
-            'vm': 'winvm',
-            'vmss': 'winvmss'
+            'vm': 'winvm'
         })
         self.cmd('vm create -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
@@ -274,13 +271,6 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
         self.cmd('vm update -g {rg} -n {vm} --license-type None', checks=[
             self.check('licenseType', 'None')
-        ])
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('virtualMachineProfile.licenseType', 'Windows_Server')
-        ])
-        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
-            self.check('virtualMachineProfile.licenseType', 'None')
         ])
 
 
@@ -388,17 +378,20 @@ class VMCustomImageTest(ScenarioTest):
         # Create image from vm
         self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
-            self.check("storageProfile.osDisk.managedDisk", None)
+            self.check("storageProfile.osDisk.managedDisk", None),
+            self.check('hyperVgeneration', 'V1')
         ])
         # Create image from vm id
         self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
-            self.check("storageProfile.osDisk.managedDisk", None)
+            self.check("storageProfile.osDisk.managedDisk", None),
+            self.check('hyperVgeneration', 'V1')
         ])
         # Create image from disk id
-        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux', checks=[
+        self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux --hyper-v-generation "V1"', checks=[
             self.check("sourceVirtualMachine", None),
-            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}')
+            self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}'),
+            self.check('hyperVgeneration', 'V1')
         ])
 
 
@@ -577,6 +570,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
 class VMOSDiskSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
+    @AllowLargeResponse()
     def test_vm_set_os_disk_size(self, resource_group):
         # test unmanaged disk
         self.kwargs.update({'sa': self.create_random_name(prefix='cli', length=12)})
@@ -1012,17 +1006,19 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         self.kwargs.update({
             'username': 'ubuntu',
             'vm': 'cli-test-vm2',
+            'comp_name': 'my-computer',
             'image': 'UbuntuLTS',
             'auth': 'ssh',
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location
         })
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('osProfile.adminUsername', '{username}'),
-            self.check('osProfile.computerName', '{vm}'),
+            self.check('osProfile.computerName', '{comp_name}'),
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
             self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
@@ -1032,7 +1028,8 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly  ')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --computer-name {comp_name} '
+                 ' --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
 
 class VMCreateEphemeralOsDisk(ScenarioTest):
@@ -1064,6 +1061,7 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('storageProfile.osDisk.caching', 'ReadOnly'),
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
         ])
 
 
@@ -1129,12 +1127,13 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image Debian --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
+        self.cmd('vm create -n {vm} -g {rg} --computer-name {quotes} --image Debian --availability-set {quotes} --nsg {quotes} --ssh-key-value \'{ssh_key}\' --public-ip-address {quotes} --tags {quotes} --location {loc} --admin-username user11')
 
         self.cmd('vm show -n {vm} -g {rg}', checks=[
             self.check('availabilitySet', None),
             self.check('length(tags)', 0),
-            self.check('location', '{loc}')
+            self.check('location', '{loc}'),
+            self.check('osProfile.computerName', '{vm}')
         ])
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', expect_failure=True)
 
@@ -1143,6 +1142,7 @@ class VMBootDiagnostics(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
     @StorageAccountPreparer(name_prefix='clitestbootdiag')
+    @AllowLargeResponse()
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
         self.kwargs.update({
@@ -1352,10 +1352,15 @@ class VMCreateExistingOptions(ScenarioTest):
             'vm_1': 'vm1',
             'vm_2': 'vm2',
             'ssh_key': TEST_SSH_KEY_PUB,
+            'ssh_key_2': self.create_temp_file(0),
+            'ssh_dest': '/home/myadmin/.ssh/authorized_keys'
         })
 
+        with open(self.kwargs['ssh_key_2'], 'w') as f:
+            f.write(TEST_SSH_KEY_PUB_2)
+
         self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_1} --authentication-type all '
-                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'')
+                 ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value "{ssh_key}"')
 
         self.cmd('vm show -n {vm_1} -g {rg}', checks=[
             self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', False),
@@ -1363,10 +1368,14 @@ class VMCreateExistingOptions(ScenarioTest):
         ])
 
         self.cmd('vm create --image Debian -l westus -g {rg} -n {vm_2} --authentication-type ssh '
-                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'')
+                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}"')
 
         self.cmd('vm show -n {vm_2} -g {rg}', checks=[
-            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+            self.check('osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[1].keyData', TEST_SSH_KEY_PUB_2),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].path', '{ssh_dest}'),
+            self.check('osProfile.linuxConfiguration.ssh.publicKeys[1].path', '{ssh_dest}')
         ])
 
 
@@ -1842,7 +1851,12 @@ class VMSSCreateOptions(ScenarioTest):
             'vmss_1': 'vmss1',
             'vmss_2': 'vmss2',
             'ssh_key': TEST_SSH_KEY_PUB,
+            'ssh_key_2': self.create_temp_file(0),
+            'ssh_dest': '/home/myadmin/.ssh/authorized_keys'
         })
+
+        with open(self.kwargs['ssh_key_2'], 'w') as f:
+            f.write(TEST_SSH_KEY_PUB_2)
 
         self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_1} --authentication-type all '
                  ' --admin-username myadmin --admin-password testPassword0 --ssh-key-value \'{ssh_key}\'',
@@ -1852,9 +1866,13 @@ class VMSSCreateOptions(ScenarioTest):
                  ])
 
         self.cmd('vmss create --image Debian -l westus -g {rg} -n {vmss_2} --authentication-type ssh '
-                 ' --admin-username myadmin --ssh-key-value \'{ssh_key}\'',
+                 ' --admin-username myadmin --ssh-key-value "{ssh_key}" "{ssh_key_2}" --ssh-dest-key-path "{ssh_dest}"',
                  checks=[
-                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True)
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.disablePasswordAuthentication', True),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', TEST_SSH_KEY_PUB),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[1].keyData', TEST_SSH_KEY_PUB_2),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[0].path', '{ssh_dest}'),
+                     self.check('vmss.virtualMachineProfile.osProfile.linuxConfiguration.ssh.publicKeys[1].path', '{ssh_dest}'),
                  ])
 
 
@@ -1954,6 +1972,48 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
+
+
+class VMSSUpdateTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_')
+    def test_vmss_update(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'winvmss'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --instance-count 1')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.licenseType', 'Windows_Server'),
+        ])
+
+        # test --license-type
+        self.cmd('vmss update -g {rg} -n {vmss} --license-type None', checks=[
+            self.check('virtualMachineProfile.licenseType', 'None')
+        ])
+
+        # test generic update on the vmss
+        self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.licenseType=Windows_Server', checks=[
+            self.check('virtualMachineProfile.licenseType', 'Windows_Server')
+        ])
+
+        # get the instance id of the VM instance
+        self.kwargs['instance_id'] = self.cmd('vmss list-instances -n {vmss} -g {rg}').get_output_in_json()[0]['instanceId']
+
+        # test updating a VM instance's protection policy
+        self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True --instance-id {instance_id}', checks=[
+            self.check('protectionPolicy.protectFromScaleIn', True),
+            self.check('protectionPolicy.protectFromScaleSetActions', True)
+        ])
+
+        # test generic update on a VM instance
+        self.cmd('vmss update -g {rg} -n {vmss} --set protectionPolicy.protectFromScaleIn=False protectionPolicy.protectFromScaleSetActions=False --instance-id {instance_id}', checks=[
+            self.check('protectionPolicy.protectFromScaleIn', False),
+            self.check('protectionPolicy.protectFromScaleSetActions', False)
+        ])
+
+        # test that cannot try to update protection policy on VMSS itself
+        self.cmd('vmss update -g {rg} -n {vmss} --protect-from-scale-in True --protect-from-scale-set-actions True', expect_failure=True)
 
 
 class AcceleratedNetworkingTest(ScenarioTest):
@@ -3109,6 +3169,82 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
+# endregion
+
+# region ppg tests
+
+
+class ProximityPlacementGroupScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix="cli_test_ppg_cmds_")
+    def test_proximity_placement_group(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'ppg1': 'my_ppg_1',
+            'ppg2': 'my_ppg_2',
+            'loc': resource_group_location
+        })
+
+        self.cmd('ppg create -n {ppg1} -t standard -g {rg}', checks=[
+            self.check('name', '{ppg1}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Standard')
+        ])
+
+        self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
+            self.check('name', '{ppg2}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Ultra')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
+    def test_ppg_with_related_resources(self, resource_group):
+
+        self.kwargs.update({
+            'ppg': 'myppg',
+            'vm': 'vm1',
+            'vmss': 'vmss1',
+            'avset': 'avset1',
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
+
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg}').get_output_in_json()['id']
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id}')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
+
+        ppg_resource = self.cmd('ppg show -n {ppg} -g {rg}').get_output_in_json()
+
+        # check that the compute resources are created with PPG
+
+        self._assert_ids_equal(ppg_resource['availabilitySets'][0]['id'], self.kwargs['avset_id'], rg_prefix='cli_test_ppg_vm_vmss_')
+        self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'], rg_prefix='cli_test_ppg_vm_vmss_')
+        self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'], 'cli_test_ppg_vm_vmss_')
+
+    # it would be simpler to do the following:
+    # self.assertEqual(ppg_resource['availabilitySets'][0]['id'].lower(), self.kwargs['avset_id'].lower())
+    # self.assertEqual(ppg_resource['virtualMachines'][0]['id'].lower(), self.kwargs['vm_id'].lower())
+    # self.assertEqual(ppg_resource['virtualMachineScaleSets'][0]['id'].lower(), self.kwargs['vmss_id'].lower())
+    #
+    # however, the CLI does not replace resource group values in payloads in the recordings.
+    def _assert_ids_equal(self, id_1, id_2, rg_prefix=None):
+        from msrestazure.tools import parse_resource_id
+
+        id_1, id_2, rg_prefix = id_1.lower(), id_2.lower(), rg_prefix.lower() if rg_prefix else rg_prefix
+
+        parsed_1, parsed_2 = parse_resource_id(id_1), parse_resource_id(id_2)
+
+        self.assertEqual(len(parsed_1.keys()), len(parsed_2.keys()))
+
+        for k1, k2 in zip(sorted(parsed_1.keys()), sorted(parsed_2.keys())):
+            if rg_prefix is not None and k1 == 'resource_group':
+                self.assertTrue(parsed_1[k1].startswith(rg_prefix))
+                self.assertTrue(parsed_2[k2].startswith(rg_prefix))
+            else:
+                self.assertEqual(parsed_1[k1], parsed_2[k2])
 # endregion
 
 

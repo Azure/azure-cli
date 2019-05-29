@@ -3,6 +3,22 @@
 Release History
 ===============
 
+2.2.21
+++++++
+* vm create: Added --computer-name for setting a vm's computer name.
+* vm/vmss create: `--ssh-key-value` renamed to `--ssh-key-values` and can now accept multiple ssh public key values or paths.
+  Note: this is **not** a breaking change. `--ssh-key-value` will be parsed correctly as it matches only `--ssh-key-values`
+* ppg create: `--type`, the proximity placement group type, is now optional.
+
+2.2.20
+++++++
+* vmss update: add `--protect-from-scale-in` and `--protect-from-scale-set-actions` to enable updates to the protection policy of VMSS VM instances.
+* vmss update: add `--instance-id` to enable generic update of VMSS VM instances.
+* vmss wait: add `--instance-id`.
+* [new command group] ppg: add `ppg create / delete / list / show / update` for managing Proximity Placement Groups.
+* ppg: add `--ppg` to `vm create`, `vmss create` and `vm availability-set create`
+* image create: expose `--hyper-v-generation` parameter.
+
 2.2.19
 ++++++
 * vm/vmss stop: expose --skip-shutdown. If used, the VM will be powered-off without shutting down. This is helpful if a VM crashes and/or cannot properly shutdown.

@@ -2,11 +2,29 @@
 
 Release History
 ===============
+2.4.3
+++++++
+* Allow enabling/disabling AKS kube-dashboard addon
+* Print a friendly message when subscription is not whitellisted to use Azure Red Hat OpenShift
+
+2.4.2
+++++++
+* Fix 'az openshift create' command when used with customer aad client
+
+2.4.1
+++++++
+* Using Azure Red Hat Openshift GA API Version
+
+2.4.0
+++++++
+* BREAKING CHANGE: Removing `--fqdn` flag on az openshift commands
 
 2.3.22
 ++++++
 * "az aks get-credentials" will prompt to overwrite duplicated values
 * Remove "(PREVIEW)" from Dev Spaces commands, "az aks use-dev-spaces" and "az aks remove-dev-spaces".
+* adding customer-admin-group-id flag to "az openshift create"
+* Remove "(PREVIEW)" from "az aks create" option "--network-policy".
 
 2.3.21
 ++++++

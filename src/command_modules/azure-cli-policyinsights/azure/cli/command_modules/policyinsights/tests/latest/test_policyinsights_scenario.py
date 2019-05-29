@@ -15,19 +15,19 @@ class PolicyInsightsTests(ScenarioTest):
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2018-04-04T00:00:00"'
-        to_clause = '--to "2018-05-22T00:00:00"'
+        from_clause = '--from "2019-03-01T00:00:00"'
+        to_clause = '--to "2019-04-17T00:00:00"'
         scopes = [
-            '-m "azgovtest4"',
+            '-m "azgovtest5"',
             '',
             '-g "defaultresourcegroup-eus"',
-            '--resource "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/eastusnsggroup/providers/microsoft.network/networksecuritygroups/eastusnsg/securityrules/allow-joba"',
-            '--resource "omssecuritydevkeyvalut" --namespace "microsoft.keyvault" --resource-type "vaults" -g "omssecurityintresourcegroup"',
-            '--resource "default" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/mms-wcus-vnet" -g "mms-wcus"',
-            '-s "335cefd2-ab16-430f-b364-974a170eb1d5"',
-            '-d "25bf1e2a-6004-47ad-9bd1-2a40dd6de016"',
-            '-a "96e22f7846e94bb186ae3a01"',
-            '-a "bc916e4f3ab54030822a11b3" -g "tipkeyvaultresourcegroup" '
+            '--resource "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/govintpolicyrp/providers/microsoft.network/trafficmanagerprofiles/gov-int-policy-rp"',
+            '--resource "cluster-test" --namespace "microsoft.keyvault" --resource-type "vaults" -g "akhe-sf-test"',
+            '--resource "Subnet-0" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/VNet-test-1" -g "akhe-sf-test-cluster-1"',
+            '-s "762007ec-c5ba-41ae-a52d-db0834bea096"',
+            '-d "796de0a7-4bc4-40e4-98b2-1ee2bf359207"',
+            '-a "3c3059c96b0940f0995f9464"',
+            '-a "1c95b94c9c394a8eb4f1d8a6" -g "jilimpolicytest" '
         ]
 
         for scope in scopes:
@@ -66,6 +66,14 @@ class PolicyInsightsTests(ScenarioTest):
                 assert len(summary["policyAssignments"][0]["policyDefinitions"]) >= 0
                 if len(summary["policyAssignments"][0]["policyDefinitions"]) > 0:
                     assert summary["policyAssignments"][0]["policyDefinitions"][0]["results"] is not None
+
+        states = self.cmd('az policy state list {} {} {}'.format(
+            scopes[3],
+            '--expand PolicyEvaluationDetails',
+            top_clause
+        ), checks=[
+            self.check('length([?complianceState==`NonCompliant`].policyEvaluationDetails)', 2)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')
     @StorageAccountPreparer(name_prefix='cliremediation')

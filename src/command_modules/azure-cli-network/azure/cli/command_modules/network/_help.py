@@ -900,7 +900,7 @@ examples:
     text: az network application-gateway waf-config list-rule-sets --group '*' --type OWASP --version 3.0
   - name: List available rules in the `crs_35_bad_robots` rule group.
     text: az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
-  - name: List available rules in table foramt.
+  - name: List available rules in table format.
     text: az network application-gateway waf-config list-rule-sets -o table
 """
 
@@ -2183,21 +2183,6 @@ short-summary: Place the CLI in a waiting state until a condition of the Express
 examples:
   - name: Pause executing next line of CLI script until the ExpressRoute circuit is successfully provisioned.
     text: az network express-route wait -n MyCircuit -g MyResourceGroup --created
-"""
-
-helps['network interface-endpoint'] = """
-type: group
-short-summary: Manage interface endpoints.
-"""
-
-helps['network interface-endpoint list'] = """
-type: command
-short-summary: List interface endpoints.
-"""
-
-helps['network interface-endpoint show'] = """
-type: command
-short-summary: Get the details of an interface endpoint.
 """
 
 helps['network lb'] = """
@@ -3673,11 +3658,15 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
+  - name: --nat-gateway
+    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Create new subnet attached to an NSG with a custom route table.
     text: |
         az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
             --address-prefixes 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
+  - name: Create new subnet attached to a NAT gateway.
+    text: az network vnet subnet create -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
 """
 
 helps['network vnet subnet delete'] = """
@@ -3720,9 +3709,13 @@ parameters:
     short-summary: Space-separated list of services allowed private access to this subnet.
     populator-commands:
       - az network vnet list-endpoint-services
+  - name: --nat-gateway
+    short-summary: Attach Nat Gateway to subnet
 examples:
   - name: Associate a network security group to a subnet.
     text: az network vnet subnet update -g MyResourceGroup -n MySubnet --vnet-name MyVNet --network-security-group MyNsg
+  - name: Update subnet with NAT gateway.
+    text: az network vnet subnet update -n MySubnet --vnet-name MyVnet -g MyResourceGroup --nat-gateway MyNatGateway --address-prefixes "10.0.0.0/21"
 """
 
 helps['network vnet update'] = """

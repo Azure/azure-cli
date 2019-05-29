@@ -592,6 +592,37 @@ class LinuxASESSHScenarioTest(ScenarioTest):
         time.sleep(30)
 
 
+class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    def test_linux_webapp_remote_ssh(self, resource_group):
+        runtime = 'node|8.11'
+        plan = self.create_random_name(prefix='webapp-remote-ssh-plan', length=40)
+        webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
+        time.sleep(30)
+        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
+        time.sleep(30)
+        self.cmd('webapp create-remote-connection -g {} -n {} --timeout 5'.format(resource_group, webapp))
+        time.sleep(30)
+
+
+class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='japanwest')
+    def test_linux_webapp_remote_debug(self, resource_group):
+        runtime = 'node|8.11'
+        plan = self.create_random_name(prefix='webapp-remote-debug-plan', length=40)
+        webapp = self.create_random_name(prefix='webapp-remote-debug', length=40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
+        time.sleep(30)
+        self.cmd('webapp config set --remote-debugging-enabled true -g {} -n {}'.format(resource_group, webapp))
+        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
+        time.sleep(30)
+        self.cmd('webapp create-remote-connection -g {} -n {} --timeout 5'.format(resource_group, webapp))
+        time.sleep(30)
+
+
 class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_linux_webapp_multicontainer_slot(self, resource_group):
@@ -1130,7 +1161,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0')])
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 

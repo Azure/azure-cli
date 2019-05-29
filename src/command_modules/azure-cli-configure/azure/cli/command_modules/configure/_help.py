@@ -23,7 +23,7 @@ helps['configure'] = """
 
 helps['cache'] = """
     type: group
-    short-summary: Commands to manage the CLI's on-disk object cache.
+    short-summary: Commands to manage CLI objects cached using the `--defer` argument.
 """
 
 helps['cache list'] = """
@@ -39,4 +39,9 @@ helps['cache show'] = """
 helps['cache delete'] = """
     type: command
     short-summary: Delete an object from the cache.
+"""
+
+helps['cache purge'] = """
+    type: command
+    short-summary: Clear the entire CLI object cache.
 """

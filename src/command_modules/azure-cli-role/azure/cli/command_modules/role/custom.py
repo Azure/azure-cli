@@ -266,7 +266,7 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
-def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
+def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # pylint: disable=too-many-branches
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
@@ -303,6 +303,8 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
                 except ValueError:
                     pass
                 if payload:
+                    if payload.get('properties') is None:
+                        continue
                     payload = payload['properties']
                     entry['principalId'] = payload['principalId']
                     if not entry['scope']:
@@ -448,15 +450,15 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     if assignee:
         assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
-    # combining filters is unsupported, so we pick the best, and do limited maunal filtering
-    if assignee_object_id:
+    # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
+    if scope:
+        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
+    elif assignee_object_id:
         if include_groups:
             f = "assignedTo('{}')".format(assignee_object_id)
         else:
             f = "principalId eq '{}'".format(assignee_object_id)
         assignments = list(assignments_client.list(filter=f))
-    elif scope:
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
     else:
         assignments = list(assignments_client.list())
 
@@ -471,6 +473,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
+
+        if assignee_object_id:
+            assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments
 

@@ -2,6 +2,14 @@
 
 Release History
 ===============
+0.3.6
++++++
+* Minor fixes.
+
+0.3.5
++++++
+* namespace: Added network-rule commands.
+* namespace create/update: Added --default-action argument for network rules.
 
 0.3.4
 +++++

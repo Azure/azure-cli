@@ -68,6 +68,21 @@ def validate_keyvault(cmd, namespace):
                                           'vaults', 'Microsoft.KeyVault')
 
 
+def validate_proximity_placement_group(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    if namespace.proximity_placement_group:
+        namespace.proximity_placement_group = _get_resource_id(cmd.cli_ctx, namespace.proximity_placement_group,
+                                                               namespace.resource_group_name,
+                                                               'proximityPlacementGroups', 'Microsoft.Compute')
+
+        parsed = parse_resource_id(namespace.proximity_placement_group)
+        rg, name = parsed['resource_group'], parsed['name']
+
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
+            raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
+
+
 def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
     from azure.cli.core._output import (get_output_format, set_output_format)
@@ -929,7 +944,22 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace):
-    string_or_file = (namespace.ssh_key_value or
+    if namespace.ssh_key_value:
+        if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
+            logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
+            namespace.generate_ssh_keys = False
+
+        processed_ssh_key_values = []
+        for ssh_key_value in namespace.ssh_key_value:
+            processed_ssh_key_values.append(_validate_ssh_key_helper(ssh_key_value, namespace.generate_ssh_keys))
+        namespace.ssh_key_value = processed_ssh_key_values
+    # if no ssh keys processed, try to generate new key / use existing at root.
+    else:
+        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
+
+
+def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):
+    string_or_file = (ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -937,7 +967,7 @@ def validate_ssh_key(namespace):
         with open(string_or_file, 'r') as f:
             content = f.read()
     elif not keys.is_valid_ssh_rsa_public_key(content):
-        if namespace.generate_ssh_keys:
+        if should_generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
             public_key_filepath = string_or_file
@@ -953,7 +983,7 @@ def validate_ssh_key(namespace):
         else:
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
                            'You can use --generate-ssh-keys to let CLI generate one for you')
-    namespace.ssh_key_value = content
+    return content
 
 
 def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
@@ -1027,6 +1057,8 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
+    validate_proximity_placement_group(cmd, namespace)
+
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
@@ -1212,6 +1244,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
     _validate_vm_vmss_create_auth(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    validate_proximity_placement_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1220,10 +1253,17 @@ def process_vmss_create_namespace(cmd, namespace):
         raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('Usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+
+
+def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    if not namespace.instance_id:
+        if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
+            raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
+                           " Please use --instance-id to specify a VM instance")
 # endregion
 
 

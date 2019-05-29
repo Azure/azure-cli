@@ -10,7 +10,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
-from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client
+from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client, blob_data_service_factory
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
@@ -1031,3 +1031,15 @@ def blob_tier_validator(cmd, namespace):
         block_blob_tier_validator(cmd, namespace)
     else:
         raise ValueError('Blob tier is only applicable to block or page blob.')
+
+
+def validate_azcopy_upload_destination_url(cmd, namespace):
+    client = blob_data_service_factory(cmd.cli_ctx, {
+        'account_name': namespace.account_name})
+    destination_path = namespace.destination_path
+    if not destination_path:
+        destination_path = ''
+    url = client.make_blob_url(namespace.destination_container, destination_path)
+    namespace.destination = url
+    del namespace.destination_container
+    del namespace.destination_path

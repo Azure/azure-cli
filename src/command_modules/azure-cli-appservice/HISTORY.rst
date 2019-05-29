@@ -2,6 +2,31 @@
 
 Release History
 ===============
+0.2.20
+++++++
+* functionapp: deprecated `az functionapp devops-build` command will be removed in next release
+* functionapp: `az functionapp devops-pipeline` fetches building log from Azure DevOps in verbose mode
+* functionapp: `az functionapp devops-pipeline` removes `--use_local_settings` flag, since it does not change Azure DevOps release definition
+* webapp: webapp up returns a json output if --logs is not used
+* webapp: webapp up supports writing the default resources to local configuration
+* webapp: webapp up supports redeploying an app without using the --location argument
+* webapp: Fixed an issue where for Linux Free SKU ASP creation use Free as SKU value was not working
+* Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+
+0.2.19
+++++++
+* functionapp: deprecate `az functionapp devops-build` command. Rename it to `az functionapp devops-pipeline`
+* webapp: Fixing getting the correct username for cloudshell which was causing az webapp up to fail
+* appservice plan: az appservice plan --sku documentation updated to reflect the supported appserviceplans
+* webapp: az webapp up supports optional arguments resourcegroup & plan to override the defaults offered by the command
+* webapp: az webapp ssh handles 'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION' environment variable
+* appserviceplan: az appserviceplan create support for Linux FREE sku
+* webapp: az webapp up now has a 30s sleep after setting SCM_DO_BUILD_DURING_DEPLOYMENT=true appsetting to handle kudu cold start
+* functionapp: `az functionapp create` supports a runtime of `powershell` on Windows
+* webapp: add create-remote-connection command
+
+0.2.18
+++++++
 * webapp: az webapp ssh now support ASE and a timeout parameter
 * functionapp: add feature for establishing CI CD to an Azure DevOps pipeline from a Github repository
 * functionapp: in `az functionapp devops-build create`, added `--github-pat` flag to accept Github personal access token

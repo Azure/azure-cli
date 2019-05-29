@@ -41,6 +41,11 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString', conn_str_pattern)
         ])
 
+        self.cmd('iot hub show-connection-string -n {0} -g {1} --all'.format(hub, rg), checks=[
+            self.check('length(connectionString[*])', 5),
+            self.check_pattern('connectionString[0]', conn_str_pattern)
+        ])
+
         # Test 'az iot hub update'
         property_to_update = 'properties.operationsMonitoringProperties.events.DeviceTelemetry'
         updated_value = 'Error, Information'
@@ -145,7 +150,7 @@ class IoTHubTest(ScenarioTest):
             self.check('[0].name', 'TotalMessages'),
             self.check('[0].maxValue', 400000),
             self.check('[1].name', 'TotalDeviceCount'),
-            self.check('[1].maxValue', 500000)
+            self.check('[1].maxValue', 'Unlimited')
         ])
 
         # Test 'az iot hub show-stats'
@@ -160,7 +165,7 @@ class IoTHubTest(ScenarioTest):
         endpoint_type = 'EventHub'
         storage_endpoint_name = 'Storage1'
         storage_endpoint_type = 'azurestoragecontainer'
-        storage_encoding_format = 'json'
+        storage_encoding_format = 'avro'
         # Test 'az iot hub routing-endpoint create'
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
@@ -285,6 +290,10 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub devicestream show'
         self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
+
+        # Test 'az iot hub manual-failover'
+        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'east us'),
+                 checks=[self.check('location', resource_group_location)])
 
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())

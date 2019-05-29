@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.62"
+__version__ = "2.0.65"
 
 import os
 import sys
@@ -163,6 +163,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
         def _update_command_table_from_extensions(ext_suppressions):
 
+            from azure.cli.core.extension.operations import check_version_compatibility
+
             def _handle_extension_suppressions(extensions):
                 filtered_extensions = []
                 for ext in extensions:
@@ -180,6 +182,12 @@ class MainCommandsLoader(CLICommandsLoader):
                 allowed_extensions = _handle_extension_suppressions(extensions)
                 module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
+                    try:
+                        check_version_compatibility(ext.get_metadata())
+                    except CLIError as ex:
+                        # issue warning and skip loading extensions that aren't compatible with the CLI core
+                        logger.warning(ex)
+                        continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
                     sys.path.append(ext_dir)
