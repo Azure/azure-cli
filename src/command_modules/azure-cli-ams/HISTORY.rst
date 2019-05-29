@@ -2,13 +2,13 @@
 
 Release History
 ===============
-0.4.6
+0.4.7
 +++++
-* Minor fixes.
+* Return ISO 8601 time strings for archive-window-length and key-frame-interval-duration.
 
 0.4.6
 +++++
-* Return ISO 8601 time strings for archive-window-length and key-frame-interval-duration.
+* Minor fixes.
 
 0.4.5
 +++++
