@@ -436,7 +436,7 @@ class TestActions(unittest.TestCase):
 
         # data disks from image
         self.assertEqual(r[2], {
-            'lun': image_data_disks[0]['lun'], # ensure that list was not modified
+            'lun': image_data_disks[0]['lun'],  # ensure that list was not modified
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'fromImage'
         })
@@ -469,7 +469,6 @@ class TestActions(unittest.TestCase):
         })
 
         self.assertEqual(len(r), 8)  # length of data and os disks
-
 
         image_data_disks.extend([{'lun': 10}, {'lun': 0}, {'lun': 15}])
 
@@ -544,7 +543,6 @@ class TestActions(unittest.TestCase):
         })
 
         self.assertEqual(len(r), 11)  # length of data and os disks
-
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):

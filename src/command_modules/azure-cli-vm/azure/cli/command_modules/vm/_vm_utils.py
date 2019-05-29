@@ -140,7 +140,6 @@ def normalize_disk_info(image_data_disks=None,
     # }
     info = {}
     used_luns = set()
-    min_free_lun = 0
 
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
@@ -165,8 +164,8 @@ def normalize_disk_info(image_data_disks=None,
         used_luns.add(i)
 
     # add empty data disks, do not use existing luns
-    i = min_free_lun
-    sizes_copy = data_disk_sizes_gb.copy()
+    i = 0
+    sizes_copy = list(data_disk_sizes_gb)
     while sizes_copy:
         # get free lun
         while i in used_luns:
@@ -181,8 +180,6 @@ def normalize_disk_info(image_data_disks=None,
             'diskSizeGB': sizes_copy.pop(0)
         }
 
-    min_free_lun = i + 1
-
     # update storage skus for managed data disks
     if storage_sku is not None:
         update_disk_sku_info(info, storage_sku)
@@ -193,8 +190,8 @@ def normalize_disk_info(image_data_disks=None,
         info['os']['storageAccountType'] = None
 
     # add attached data disks
-    i = min_free_lun
-    attach_data_disks_copy = attach_data_disks.copy()
+    i = 0
+    attach_data_disks_copy = list(attach_data_disks)
     while attach_data_disks_copy:
         # get free lun
         while i in used_luns:
@@ -235,7 +232,7 @@ def normalize_disk_info(image_data_disks=None,
     result_info = {'os': info['os']}
 
     # in python 3 insertion order matters during iteration. This ensures that luns are retrieved in numerical order
-    for key in sorted([key for key in info.keys() if key != 'os']):
+    for key in sorted([key for key in info if key != 'os']):
         result_info[key] = info[key]
 
     return result_info
@@ -249,7 +246,7 @@ def update_disk_caching(model, caching_settings):
             for l in luns:
                 if l not in model:
                     raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
-                                   .format(lun, list(luns)))
+                                   .format(lun, list(model.keys())))
                 model[l]['caching'] = value
         else:
             if lun is None:
