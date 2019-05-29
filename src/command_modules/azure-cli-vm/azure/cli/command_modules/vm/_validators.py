@@ -428,7 +428,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
-    image_data_disks = 0
+    image_data_disks = []
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)

@@ -231,7 +231,14 @@ def normalize_disk_info(image_data_disks=None,
         for v in info.values():
             if v.get('caching', 'None').lower() != 'none':
                 raise CLIError('usage error: for Lv series of machines, "None" is the only supported caching mode')
-    return info
+
+    result_info = {'os': info['os']}
+
+    # in python 3 insertion order matters during iteration. This ensures that luns are retrieved in numerical order
+    for key in sorted([key for key in info.keys() if key != 'os']):
+        result_info[key] = info[key]
+
+    return result_info
 
 
 def update_disk_caching(model, caching_settings):
@@ -242,7 +249,7 @@ def update_disk_caching(model, caching_settings):
             for l in luns:
                 if l not in model:
                     raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
-                                   .format(lun, luns))
+                                   .format(lun, list(luns)))
                 model[l]['caching'] = value
         else:
             if lun is None:
