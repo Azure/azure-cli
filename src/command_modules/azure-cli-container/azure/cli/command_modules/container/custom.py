@@ -692,7 +692,7 @@ def _cycle_exec_pipe(ws):
     return True
 
 
-def attach_to_container(cmd, resource_group_name, name, container_name=None):
+def attach_to_container(cmd, resource_group_name, name, container_name=None, no_move_cursor=False):
     """Attach to a container. """
     container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
@@ -707,7 +707,7 @@ def attach_to_container(cmd, resource_group_name, name, container_name=None):
         terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
         shupdown_grace_period=5,
         stream_target=_stream_container_events_and_logs,
-        stream_args=(container_group_client, container_client, resource_group_name, name, container_name))
+        stream_args=(container_group_client, container_client, resource_group_name, name, container_name, no_move_cursor))
 
 
 def _start_streaming(terminate_condition, terminate_condition_args, shupdown_grace_period, stream_target, stream_args):
@@ -729,7 +729,7 @@ def _start_streaming(terminate_condition, terminate_condition_args, shupdown_gra
         colorama.deinit()
 
 
-def _stream_logs(client, resource_group_name, name, container_name, restart_policy):
+def _stream_logs(client, resource_group_name, name, container_name, restart_policy, no_move_cursor):
     """Stream logs for a container. """
     lastOutputLines = 0
     while True:
@@ -742,14 +742,20 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
             print("Warning: you're having '--restart-policy={}'; the container '{}' was just restarted; the tail of the current log might be missing. Exiting...".format(restart_policy, container_name))
             break
 
-        _move_console_cursor_up(lastOutputLines)
-        print(log.content)
+        if no_move_cursor:
+            # do not move cursor up and mess up the output when piping
+            if currentOutputLines != lastOutputLines
+                line_to_print = currentOutputLines - lastOutputLines
+                print(line[:-line_to_print])
+        else:
+            _move_console_cursor_up(lastOutputLines)
+            print(log.content)
 
         lastOutputLines = currentOutputLines
         time.sleep(2)
 
 
-def _stream_container_events_and_logs(container_group_client, container_client, resource_group_name, name, container_name):
+def _stream_container_events_and_logs(container_group_client, container_client, resource_group_name, name, container_name, no_move_cursor):
     """Stream container events and logs. """
     lastOutputLines = 0
     lastContainerState = None
@@ -780,7 +786,7 @@ def _stream_container_events_and_logs(container_group_client, container_client, 
 
         time.sleep(2)
 
-    _stream_logs(container_client, resource_group_name, name, container_name, container_group.restart_policy)
+    _stream_logs(container_client, resource_group_name, name, container_name, container_group.restart_policy, no_move_cursor)
 
 
 def _is_container_terminated(client, resource_group_name, name, container_name):

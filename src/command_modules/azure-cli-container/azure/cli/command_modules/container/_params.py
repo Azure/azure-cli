@@ -129,3 +129,6 @@ def load_arguments(self, _):
 
     with self.argument_context('container attach') as c:
         c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')
+        c.argument('no_move_cursor', options_list=['--no-move-cursor'], help='Do not move cursor up, useful when piping', action='store_true')
+
+        
