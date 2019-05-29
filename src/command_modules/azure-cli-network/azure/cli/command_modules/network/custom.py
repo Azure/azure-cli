@@ -238,9 +238,11 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
                                custom_error_pages=None, max_capacity=None):
+    if sku is not None:
+        instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+
     with cmd.update_context(instance) as c:
         c.set_param('sku.name', sku)
-        c.set_param('sku.tier', sku.split('_', 1)[0] if 'v2' not in sku else sku)
         c.set_param('sku.capacity', capacity)
         c.set_param('tags', tags)
         c.set_param('enable_http2', enable_http2)
