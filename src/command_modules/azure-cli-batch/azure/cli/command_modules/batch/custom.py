@@ -5,6 +5,7 @@
 
 import base64
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+from six.moves import configparser
 
 from knack.log import get_logger
 
@@ -51,15 +52,21 @@ def get_account(cmd, client, resource_group_name=None, account_name=None):
     if resource_group_name and account_name:
         return client.get(resource_group_name, account_name)
     else:
-        account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint')
-        if not account_endpoint:
+        try:
+            account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint')
+            if not account_endpoint:
+                raise ValueError(
+                    "Missing required arguments. Either specify --resource-group-name and "
+                    "--account-name or must be logged into a batch account")
+            account_list = list_accounts(client)
+            for account in account_list:
+                if account.account_endpoint in account_endpoint:
+                    return account
+        except configparser.NoSectionError:
             raise ValueError(
                 "Missing required arguments. Either specify --resource-group-name and "
                 "--account-name or must be logged into a batch account")
-        account_list = list_accounts(client)
-        for account in account_list:
-            if account.account_endpoint in account_endpoint:
-                return account
+
     raise ValueError("Missing required arguments. Either specify --resource-group-name and "
                      "--account-name or must be logged into a batch account")
 
