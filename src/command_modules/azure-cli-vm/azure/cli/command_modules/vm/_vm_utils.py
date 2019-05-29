@@ -127,22 +127,26 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-def normalize_disk_info(image_data_disks_num=0,
+def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False):
+    from msrestazure.tools import is_valid_resource_id
     is_lv_size = re.search('_L[0-9]+s', size, re.I)
-    # we should return a dictionary with info like below and will omit when we see conflictions
+    # we should return a dictionary with info like below
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
     #   0: { caching: 'None', write_accelerator: True},
     #   1: { caching: 'None', write_accelerator: True},
     # }
-    from msrestazure.tools import is_valid_resource_id
     info = {}
+    used_luns = set()
+    min_free_lun = 0
+
     attach_data_disks = attach_data_disks or []
     data_disk_sizes_gb = data_disk_sizes_gb or []
-    info['os'] = {}
+    image_data_disks = image_data_disks or []
 
+    info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
         info['os']['diffDiskSettings'] = {'option': 'Local'}
@@ -150,12 +154,34 @@ def normalize_disk_info(image_data_disks_num=0,
         if not os_disk_caching:
             os_disk_caching = 'ReadOnly'
 
-    # add unmanaged data disk luns.
-    for i in range(image_data_disks_num + len(data_disk_sizes_gb)):
+    # add managed image data disks
+    for data_disk in image_data_disks:
+        i = data_disk['lun']
         info[i] = {
             'lun': i,
-            'managedDisk': {'storageAccountType': None}
+            'managedDisk': {'storageAccountType': None},
+            'createOption': 'fromImage'
         }
+        used_luns.add(i)
+
+    # add empty data disks, do not use existing luns
+    i = min_free_lun
+    sizes_copy = data_disk_sizes_gb.copy()
+    while sizes_copy:
+        # get free lun
+        while i in used_luns:
+            i += 1
+
+        used_luns.add(i)
+
+        info[i] = {
+            'lun': i,
+            'managedDisk': {'storageAccountType': None},
+            'createOption': 'empty',
+            'diskSizeGB': sizes_copy.pop(0)
+        }
+
+    min_free_lun = i + 1
 
     # update storage skus for managed data disks
     if storage_sku is not None:
@@ -166,32 +192,29 @@ def normalize_disk_info(image_data_disks_num=0,
         logger.warning("Managed os disk storage account sku cannot be UltraSSD_LRS. Using service default.")
         info['os']['storageAccountType'] = None
 
-    # fill in createOption for image and new data disks
-    for i in range(image_data_disks_num):
-        info[i]['createOption'] = 'fromImage'
-    base = image_data_disks_num
-    for i in range(base, base + len(data_disk_sizes_gb)):
-        info[i]['createOption'] = 'empty'
-        info[i]['diskSizeGB'] = data_disk_sizes_gb[i - base]
+    # add attached data disks
+    i = min_free_lun
+    attach_data_disks_copy = attach_data_disks.copy()
+    while attach_data_disks_copy:
+        # get free lun
+        while i in used_luns:
+            i += 1
 
-    # add managed data disk luns.
-    base = image_data_disks_num + len(data_disk_sizes_gb)
-    for i in range(base, base + len(attach_data_disks)):
-        info[i] = {'lun': i}
+        used_luns.add(i)
 
-    # fill in createOption for attached data disks
-    base = image_data_disks_num + len(data_disk_sizes_gb)
-    for i in range(base, base + len(attach_data_disks)):
-        info[i]['createOption'] = 'attach'
+        # use free lun
+        info[i] = {
+            'lun': i,
+            'createOption': 'attach'
+        }
 
-    # fill in attached data disks details
-    base = image_data_disks_num + len(data_disk_sizes_gb)
-    for i, d in enumerate(attach_data_disks):
+        d = attach_data_disks_copy.pop(0)
+
         if is_valid_resource_id(d):
-            info[base + i]['managedDisk'] = {'id': d}
+            info[i]['managedDisk'] = {'id': d}
         else:
-            info[base + i]['vhd'] = {'uri': d}
-            info[base + i]['name'] = d.split('/')[-1].split('.')[0]
+            info[i]['vhd'] = {'uri': d}
+            info[i]['name'] = d.split('/')[-1].split('.')[0]
 
     # fill in data disk caching
     if data_disk_cachings:
@@ -218,7 +241,8 @@ def update_disk_caching(model, caching_settings):
             luns = model.keys() if lun is None else [lun]
             for l in luns:
                 if l not in model:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                    raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
+                                   .format(lun, luns))
                 model[l]['caching'] = value
         else:
             if lun is None:
@@ -303,7 +327,7 @@ def update_disk_sku_info(info_dict, skus):
     def _update(info, lun, value):
         luns = info.keys()
         if lun not in luns:
-            raise CLIError("Data disk with lun of {} doesn't exist".format(lun))
+            raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}.".format(lun, luns))
         if lun == 'os':
             info[lun]['storageAccountType'] = value
         else:
