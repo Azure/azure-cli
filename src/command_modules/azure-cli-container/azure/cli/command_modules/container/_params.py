@@ -117,6 +117,7 @@ def load_arguments(self, _):
     with self.argument_context('container logs') as c:
         c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
         c.argument('follow', help='Indicate to stream the tailing logs', action='store_true')
+        c.argument('no_move_cursor', options_list=['--no-move-cursor'], help='Do not move cursor up, useful when piping', action='store_true')
 
     with self.argument_context('container export') as c:
         c.argument('file', options_list=['--file', '-f'], help="The file path to export the container group.")
@@ -130,5 +131,3 @@ def load_arguments(self, _):
     with self.argument_context('container attach') as c:
         c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')
         c.argument('no_move_cursor', options_list=['--no-move-cursor'], help='Do not move cursor up, useful when piping', action='store_true')
-
-        
