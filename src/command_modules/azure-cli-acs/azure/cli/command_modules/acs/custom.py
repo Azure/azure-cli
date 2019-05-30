@@ -1385,6 +1385,15 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
+    # verify the kube-dashboard addon was not disabled
+    instance = client.get(resource_group_name, name)
+    addon_profiles = instance.addon_profiles or {}
+    addon_profile = addon_profiles.get("kubeDashboard", ManagedClusterAddonProfile(enabled=True))
+    if not addon_profile.enabled:
+        raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
+                       'To use "az aks browse" first enable the add-on\n'
+                       'by running "az aks enable-addons --addons kube-dashboard".')
+
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
     _, browse_path = tempfile.mkstemp()
     # TODO: need to add an --admin option?
@@ -1695,7 +1704,8 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 ADDONS = {
     'http_application_routing': 'httpApplicationRouting',
     'monitoring': 'omsagent',
-    'virtual-node': 'aciConnector'
+    'virtual-node': 'aciConnector',
+    'kube-dashboard': 'kubeDashboard'
 }
 
 
@@ -1838,6 +1848,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
     addon_args = addons.split(',')
 
     addon_profiles = instance.addon_profiles or {}
+    if 'kube-dashboard' in addon_args and 'kubeDashboard' not in addon_profiles:
+        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
 
     os_type = 'Linux'
 
@@ -1915,6 +1927,9 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     if 'http_application_routing' in addons:
         addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('http_application_routing')
+    if 'kube-dashboard' in addons:
+        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
+        addons.remove('kube-dashboard')
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
         if not workspace_resource_id:
@@ -1983,47 +1998,63 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # log analytics workspaces cannot be created in WCUS region due to capacity limits
     # so mapped to EUS per discussion with log analytics team
     AzureCloudLocationToOmsRegionCodeMap = {
-        "eastus": "EUS",
-        "westeurope": "WEU",
-        "southeastasia": "SEA",
         "australiasoutheast": "ASE",
-        "usgovvirginia": "USGV",
-        "westcentralus": "EUS",
-        "japaneast": "EJP",
-        "uksouth": "SUK",
+        "australiaeast": "AEA",
+        "australiacentral": "ACE",
         "canadacentral": "CCA",
         "centralindia": "CIN",
-        "eastus2euap": "EAP"
+        "centralus": "CUS",
+        "eastasia": "EAS",
+        "eastus": "EUS",
+        "eastus2": "EUS2",
+        "eastus2euap": "EAP",
+        "francecentral": "FCN",
+        "japaneast": "EJP",
+        "koreacentral": "KCN",
+        "northcentralus": "NUS",
+        "northeurope": "NEU",
+        "southcentralus": "SUS",
+        "southeastasia": "SEA",
+        "uksouth": "SUK",
+        "usgovvirginia": "USGV",
+        "westcentralus": "EUS",
+        "westeurope": "WEU",
+        "westus": "WUS",
+        "westus2": "WUS2"
     }
     AzureCloudRegionToOmsRegionMap = {
-        "australiaeast": "australiasoutheast",
+        "australiacentral": "australiacentral",
+        "australiacentral2": "australiacentral",
+        "australiaeast": "australiaeast",
         "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "eastus",
+        "brazilsouth": "southcentralus",
         "canadacentral": "canadacentral",
         "canadaeast": "canadacentral",
-        "centralus": "eastus",
-        "eastasia": "southeastasia",
+        "centralus": "centralus",
+        "centralindia": "centralindia",
+        "eastasia": "eastasia",
         "eastus": "eastus",
-        "eastus2": "eastus",
+        "eastus2": "eastus2",
+        "francecentral": "francecentral",
+        "francesouth": "francecentral",
         "japaneast": "japaneast",
         "japanwest": "japaneast",
-        "northcentralus": "eastus",
-        "northeurope": "westeurope",
-        "southcentralus": "eastus",
+        "koreacentral": "koreacentral",
+        "koreasouth": "koreacentral",
+        "northcentralus": "northcentralus",
+        "northeurope": "northeurope",
+        "southafricanorth": "westeurope",
+        "southafricawest": "westeurope",
+        "southcentralus": "southcentralus",
         "southeastasia": "southeastasia",
+        "southindia": "centralindia",
         "uksouth": "uksouth",
         "ukwest": "uksouth",
         "westcentralus": "eastus",
         "westeurope": "westeurope",
-        "westus": "eastus",
-        "westus2": "eastus",
-        "centralindia": "centralindia",
-        "southindia": "centralindia",
         "westindia": "centralindia",
-        "koreacentral": "southeastasia",
-        "koreasouth": "southeastasia",
-        "francecentral": "westeurope",
-        "francesouth": "westeurope"
+        "westus": "westus",
+        "westus2": "westus2"
     }
 
     # mapping for azure china cloud
@@ -2599,6 +2630,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                         name=name, create=create_aad)
     except CloudError as ex:
         if "The resource type could not be found in the namespace 'Microsoft.ContainerService" in ex.message:
+            raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
+        if "No registered resource provider found for location" in ex.message:
             raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
         else:
             raise ex

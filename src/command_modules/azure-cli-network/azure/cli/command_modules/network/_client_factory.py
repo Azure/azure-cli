@@ -20,6 +20,10 @@ def cf_application_gateways(cli_ctx, _):
     return network_client_factory(cli_ctx).application_gateways
 
 
+def cf_app_gateway_waf_policy(cli_ctx, _):
+    return network_client_factory(cli_ctx).web_application_firewall_policies
+
+
 def cf_application_security_groups(cli_ctx, _):
     return network_client_factory(cli_ctx).application_security_groups
 

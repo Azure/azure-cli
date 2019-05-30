@@ -423,7 +423,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             app_id2 = result['appId']
             result = self.cmd('ad sp credential list --id {app2}', checks=self.check('length([*])', 1)).get_output_in_json()
             diff = dateutil.parser.parse(result[0]['endDate']).replace(tzinfo=None) - datetime.datetime.utcnow()
-            self.assertTrue(diff.days > 9.9 * 365)
+            self.assertTrue(diff.days > 1)  # it is just a smoke test to verify the credential does get applied
         finally:
             if app_id:
                 self.cmd('ad app delete --id ' + app_id)
