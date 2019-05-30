@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.3.18
+++++++
+* Added --no-move-cursor to 'az container log' and 'az container attach' to prevent duplicate lines when piping
+
 0.3.17
 ++++++
 * Minor fixes.
