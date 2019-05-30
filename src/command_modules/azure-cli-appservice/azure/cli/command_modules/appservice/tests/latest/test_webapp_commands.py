@@ -1064,35 +1064,6 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
-class FunctionAppKeyManagementE2ETest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli-function-key-e2e', location='westus')
-    @StorageAccountPreparer()
-    def test_functionapp_key_management(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name('cli-function-key-e2e', 40)
-        id = self.cmd('functionapp create -g {} -n {} -c westus -s {}'
-                      .format(resource_group, functionapp_name, storage_account)).get_output_in_json()['id']
-        self.kwargs.update({
-            'key_name': 'key',
-            'key_value': 'password',
-            'key_name2': 'key2',
-            'id': id,
-            'rg': resource_group,
-            'func_app': functionapp_name,
-        })
-
-        self.cmd('functionapp key update -g {rg} --functionapp-name {func_app} -k {key_name} -v {key_value} --use-host-keys-collection')
-        self.cmd('functionapp key update -g {rg} --functionapp-name {func_app} -k {key_name2} --use-host-keys-collection ')
-        self.cmd('functionapp key list -g {rg} --functionapp-name {func_app} --use-host-keys-collection --query keys', checks=[
-            self.check("[?name=='{key_name}']|[0].value", self.kwargs['key_value']),
-            self.check("length([?name=='{key_name2}'])", 1)
-        ])
-        self.cmd('functionapp key delete -g {rg} --functionapp-name {func_app} -k {key_name} --use-host-keys-collection')
-        self.cmd('functionapp key list -g {rg} --functionapp-name {func_app} --use-host-keys-collection --query keys', checks=[
-            self.check("length([?name=='{key_name}'])", 0),
-            self.check("length([?name=='{key_name2}'])", 1)
-        ])
-
-
 class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location='westus')
     @StorageAccountPreparer()
