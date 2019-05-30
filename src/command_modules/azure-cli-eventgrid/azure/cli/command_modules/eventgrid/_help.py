@@ -156,7 +156,7 @@ helps['eventgrid domain topic list'] = """
         - name: List all domain topics in a domain whose name contains the pattern "XYZ"
           text: az eventgrid domain topic list -g rg1 --domain-name domain1 --odata-query "Contains(name, 'XYZ')"
         - name: List all domain topics in a domain except the domain topic with name "name1"
-          text: az eventgrid domain topic list -g rg1 --odata-query "NOT (name eq 'name1')"
+          text: az eventgrid domain topic list -g rg1 --domain-name domain1 --odata-query "NOT (name eq 'name1')"
     """
 helps['eventgrid domain topic show'] = """
     type: command
