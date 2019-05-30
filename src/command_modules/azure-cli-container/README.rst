@@ -164,6 +164,7 @@ Commands to tail the logs of a Azure container group
 
     Arguments
         --container-name   : The container name to tail the logs.
+        --no-move-cursor   : Do not move cursor up, useful when piping.
 
     Resource Id Arguments
         --ids              : One or more resource IDs (space-delimited). If provided, no other 'Resource
@@ -275,6 +276,7 @@ Commands to attach to a container in a container group
     Arguments
         --container-name   : The container to attach to. If omitted, the first container in the
                             container group will be chosen.
+        --no-move-cursor   : Do not move cursor up, useful when piping.
 
     Resource Id Arguments
         --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource

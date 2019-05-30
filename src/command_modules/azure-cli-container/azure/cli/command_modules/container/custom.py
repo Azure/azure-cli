@@ -536,7 +536,7 @@ def _create_ip_address(ip_address, ports, protocol, dns_name_label, network_prof
 
 
 # pylint: disable=inconsistent-return-statements
-def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):
+def container_logs(cmd, resource_group_name, name, container_name=None, follow=False, no_move_cursor=False):
     """Tail a container instance log. """
     container_client = cf_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
@@ -555,7 +555,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
             shupdown_grace_period=5,
             stream_target=_stream_logs,
-            stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy))
+            stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy, no_move_cursor))
 
 
 def container_export(cmd, resource_group_name, name, file):
@@ -734,6 +734,10 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
     lastOutputLines = 0
     while True:
         log = client.list_logs(resource_group_name, name, container_name)
+        if no_move_cursor and log.content.endswith('\n'):
+            # trim the last newline which was added by list_logs and allowing
+            # more accurate line counting later
+            log.content = log.content[:-1]
         lines = log.content.split('\n')
         currentOutputLines = len(lines)
 
@@ -744,9 +748,10 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
 
         if no_move_cursor:
             # do not move cursor up and mess up the output when piping
-            if currentOutputLines != lastOutputLines
-                line_to_print = currentOutputLines - lastOutputLines
-                print(line[:-line_to_print])
+            if currentOutputLines != lastOutputLines:
+                lines_to_print = currentOutputLines - lastOutputLines
+                for line in lines[-lines_to_print:]:
+                    print(line)
         else:
             _move_console_cursor_up(lastOutputLines)
             print(log.content)
