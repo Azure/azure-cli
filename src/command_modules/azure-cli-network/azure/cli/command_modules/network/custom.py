@@ -2288,7 +2288,6 @@ def set_lb_frontend_ip_configuration(
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
         virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    public_ip_address = PublicIPAddress(id=public_ip_address)
     if private_ip_address == '':
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
