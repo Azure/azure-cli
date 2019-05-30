@@ -241,13 +241,22 @@ def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None
     if sku is not None:
         instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
 
+    try:
+        if min_capacity is not None:
+            instance.autoscale_configuration.min_capacity = min_capacity
+        if max_capacity is not None:
+            instance.autoscale_configuration.max_capacity = max_capacity
+    except AttributeError:
+        instance.autoscale_configuration = {
+            'min_capacity': min_capacity,
+            'max_capacity': max_capacity
+        }
+
     with cmd.update_context(instance) as c:
         c.set_param('sku.name', sku)
         c.set_param('sku.capacity', capacity)
         c.set_param('tags', tags)
         c.set_param('enable_http2', enable_http2)
-        c.set_param('autoscale_configuration.min_capacity', min_capacity)
-        c.set_param('autoscale_configuration.max_capacity', max_capacity)
         c.set_param('custom_error_configurations', custom_error_pages)
     return instance
 
