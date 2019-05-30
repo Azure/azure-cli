@@ -5,6 +5,8 @@ Release History
 2.5.0
 +++++
 * [BREAKING CHANGE]: previously deprecated command group `network interface-endpoints` has been removed. Use `network private-endpoints` instead.
+* `application-gateway`: Added `waf-policy` commands to support custom WAF rules.
+* `application-gateway create/update`: Added `--waf-policy` and `--max-capacity` arguments.
 * `network vnet subnet create/update`: Added `--nat-gateway` argument for attaching to a NAT gateway.
 * `dns zone import`: Fix issue where record names could not match a record type.
 

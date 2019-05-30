@@ -379,20 +379,26 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[1]['caching'], 'None')
         self.assertEqual(r['os']['caching'], 'ReadOnly')
 
-        r = normalize_disk_info(data_disk_cachings=['0=None', '1=ReadOnly'], data_disk_sizes_gb=[1, 2])
+        r = normalize_disk_info(data_disk_cachings=['0=None', '1=ReadOnly'], data_disk_sizes_gb=[1, 2], storage_sku=['premium_lrs'])
         self.assertEqual(r[0]['caching'], 'None')
         self.assertEqual(r[1]['caching'], 'ReadOnly')
         self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
+        self.assertEqual(r['os']['storageAccountType'], 'premium_lrs')
+        for i in range(2):
+            self.assertEqual(r[i]['managedDisk']['storageAccountType'], 'premium_lrs')
 
         # CLI will not tweak any casing from the values
-        r = normalize_disk_info(data_disk_cachings=['0=none', '1=readonly'], data_disk_sizes_gb=[1, 2])
+        r = normalize_disk_info(data_disk_cachings=['0=none', '1=readonly'], data_disk_sizes_gb=[1, 2], storage_sku=['os=standard_lrs', '0=premium_lrs', '1=standard_lrs'])
+        self.assertEqual(r['os']['storageAccountType'], 'standard_lrs')
         self.assertEqual(r[0]['caching'], 'none')
+        self.assertEqual(r[0]['managedDisk']['storageAccountType'], 'premium_lrs')
         self.assertEqual(r[1]['caching'], 'readonly')
+        self.assertEqual(r[1]['managedDisk']['storageAccountType'], 'standard_lrs'),
 
         # error on configuring non-existing disks
         with self.assertRaises(CLIError) as err:
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
-        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
+        self.assertTrue("Data disk with lun of '0' doesn't exist" in str(err.exception))
 
         # default to "None" across for Lv/Lv2 machines
         r = normalize_disk_info(data_disk_sizes_gb=[1], size='standard_L8s')
@@ -403,6 +409,140 @@ class TestActions(unittest.TestCase):
         with self.assertRaises(CLIError) as err:
             normalize_disk_info(data_disk_cachings=['ReadWrite'], data_disk_sizes_gb=[1, 2], size='standard_L16s_v2')
         self.assertTrue('for Lv series of machines, "None" is the only supported caching mode' in str(err.exception))
+
+    def test_normalize_disk_info_from_images(self):
+        # test create from data disk image
+
+        image_data_disks = [{'lun': 2}, {'lun': 3}, {'lun': 6}]
+        attach_data_disks = ['https://azure.blob.net/vhds/foo', '/subscriptions/00000/resourceGroups/OVA-TEST/providers/Microsoft.Compute/disks/disk']
+        data_disk_sizes = [5, 10]
+
+        r = normalize_disk_info(image_data_disks=image_data_disks, data_disk_sizes_gb=data_disk_sizes, attach_data_disks=attach_data_disks, storage_sku=['premium_lrs'])
+
+        # empty managed data disks
+        self.assertEqual(r[0], {
+            'lun': 0,
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'empty',
+            'diskSizeGB': data_disk_sizes[0]
+        })
+
+        self.assertEqual(r[1], {
+            'lun': 1,
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'empty',
+            'diskSizeGB': data_disk_sizes[1]
+        })
+
+        # data disks from image
+        self.assertEqual(r[2], {
+            'lun': image_data_disks[0]['lun'],  # ensure that list was not modified
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(r[3], {
+            'lun': image_data_disks[1]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        # attached data disks
+        self.assertEqual(r[4], {
+            'lun': 4,
+            'vhd': {'uri': attach_data_disks[0]},
+            'name': 'foo',
+            'createOption': 'attach'
+        })
+
+        self.assertEqual(r[5], {
+            'lun': 5,
+            'managedDisk': {'id': attach_data_disks[1]},
+            'createOption': 'attach'
+        })
+
+        # last image data disk
+        self.assertEqual(r[6], {
+            'lun': image_data_disks[2]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(len(r), 8)  # length of data and os disks
+
+        image_data_disks.extend([{'lun': 10}, {'lun': 0}, {'lun': 15}])
+
+        r = normalize_disk_info(image_data_disks=image_data_disks, data_disk_sizes_gb=data_disk_sizes, attach_data_disks=attach_data_disks, storage_sku=['premium_lrs'])
+
+        self.assertEqual(r['os'], {
+            'storageAccountType': 'premium_lrs',
+            'caching': 'ReadWrite'
+        })
+
+        self.assertEqual(r[0], {
+            'lun': image_data_disks[4]['lun'],  # ensure that list was not modified
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(r[1], {
+            'lun': 1,
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'empty',
+            'diskSizeGB': data_disk_sizes[0]
+        })
+
+        self.assertEqual(r[2], {
+            'lun': image_data_disks[0]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(r[3], {
+            'lun': image_data_disks[1]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(r[4], {
+            'lun': 4,
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'empty',
+            'diskSizeGB': data_disk_sizes[1]
+        })
+
+        self.assertEqual(r[5], {
+            'lun': 5,
+            'vhd': {'uri': attach_data_disks[0]},
+            'name': 'foo',
+            'createOption': 'attach'
+        })
+
+        self.assertEqual(r[6], {
+            'lun': image_data_disks[2]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(r[7], {
+            'lun': 7,
+            'managedDisk': {'id': attach_data_disks[1]},
+            'createOption': 'attach'
+        })
+
+        self.assertEqual(r[10], {
+            'lun': image_data_disks[3]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(r[15], {
+            'lun': image_data_disks[5]['lun'],
+            'managedDisk': {'storageAccountType': 'premium_lrs'},
+            'createOption': 'fromImage'
+        })
+
+        self.assertEqual(len(r), 11)  # length of data and os disks
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):
