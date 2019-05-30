@@ -576,11 +576,11 @@ def _warn_if_manual_handshake_needed(endpoint_type, endpoint):
        "eventgridextension" not in endpoint.lower() and \
        "logic.azure" not in endpoint.lower():
 
-        logger.warning("If the provided endpoint doesn't support subscription validation " +
-                       "handshake, navigate to the validation URL that you receive in the " +
-                       "subscription validation event, in order to complete the event " +
-                       "subscription creation or update. For more details, " +
-                       "please visit http://aka.ms/esvalidation")
+        logger.warning('If the provided endpoint does not support subscription validation '
+                       'handshake, navigate to the validation URL that you receive in the '
+                       'subscription validation event, in order to complete the event '
+                       'subscription creation or update. For more details, '
+                       'please visit http://aka.ms/esvalidation')
 
 
 def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, top):
