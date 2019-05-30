@@ -11,14 +11,13 @@ from azure.cli.core.commands import LongRunningOperation
 from ._constants import ORYX_PACK_BUILDER_IMAGE
 from ._stream_utils import stream_logs
 from ._utils import (
-    validate_managed_registry,
+    get_registry_by_name,
     get_validate_platform,
     get_custom_registry_credentials
 )
 from ._client_factory import cf_acr_registries
 from .run import prepare_source_location
 
-PACK_NOT_SUPPORTED = 'Pack is only available for managed registries.'
 PACK_TASK_YAML_FMT = '''version: v1.0.0
 steps:
   - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name} --builder {builder} {no_pull} --env REGISTRY_NAME={{{{.Run.Registry}}}} -p .
@@ -44,9 +43,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
              resource_group_name=None,
              platform=None,
              auth_mode=None):
-
-    _, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name, PACK_NOT_SUPPORTED)
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name)
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
     source_location = prepare_source_location(
@@ -59,7 +56,7 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
-    registry_prefixes = '{{.Run.Registry}}/', registry_name + '/'
+    registry_prefixes = '{{.Run.Registry}}/', registry.login_server + '/'
     # If the image name doesn't have any required prefix, add it
     if all((not image_name.startswith(prefix) for prefix in registry_prefixes)):
         original_image_name = image_name
