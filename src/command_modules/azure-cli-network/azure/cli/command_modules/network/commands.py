@@ -25,7 +25,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
-    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links)
+    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -61,6 +61,11 @@ def load_command_table(self, _):
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
         client_factory=cf_application_gateways
+    )
+
+    network_ag_waf_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#WebApplicationFirewallPoliciesOperations.{}',
+        client_factory=cf_app_gateway_waf_policy
     )
 
     network_util = CliCommandType(
@@ -410,6 +415,32 @@ def load_command_table(self, _):
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
     # endregion
 
+    # region ApplicationGatewayWAFPolicy
+    with self.command_group('network application-gateway waf-policy', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+        g.custom_command('create', 'create_ag_waf_policy')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_ag_waf_policies')
+        g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
+        g.wait_command('wait')
+
+    with self.command_group('network application-gateway waf-policy rule', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+        g.custom_command('create', 'create_ag_waf_rule')
+        g.custom_command('delete', 'delete_ag_waf_rule')
+        g.custom_command('list', 'list_ag_waf_rules')
+        g.custom_show_command('show', 'show_ag_waf_rule')
+        g.generic_update_command('update', command_type=network_ag_waf_sdk,
+                                 client_factory=cf_app_gateway_waf_policy,
+                                 custom_func_name='update_ag_waf_rule',
+                                 child_collection_prop_name='custom_rules',
+                                 child_arg_name='rule_name')
+
+    with self.command_group('network application-gateway waf-policy rule match-condition', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+        g.custom_command('add', 'add_ag_waf_rule_match_cond')
+        g.custom_command('list', 'list_ag_waf_rule_match_cond')
+        g.custom_command('remove', 'remove_ag_waf_rule_match_cond')
+    # endregion
+
     # region ApplicationSecurityGroups
     with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
         g.custom_command('create', 'create_asg')
@@ -472,7 +503,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
         g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
         g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
-
     # endregion
 
     # region ExpressRoutes

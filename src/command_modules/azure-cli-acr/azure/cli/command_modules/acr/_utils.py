@@ -12,6 +12,7 @@ from ._constants import (
     REGISTRY_RESOURCE_TYPE,
     ACR_RESOURCE_PROVIDER,
     STORAGE_RESOURCE_TYPE,
+    ACR_TASK_YAML_DEFAULT_NAME,
     get_classic_sku,
     get_managed_sku,
     get_premium_sku,
@@ -410,7 +411,7 @@ def get_yaml_and_values(cmd_value, timeout, file):
             values_content += "timeout: {0}\n".format(timeout)
     else:
         if not file:
-            file = "acb.yaml"
+            file = ACR_TASK_YAML_DEFAULT_NAME
 
         if file == "-":
             import sys

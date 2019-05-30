@@ -386,7 +386,7 @@ class TestActions(unittest.TestCase):
         # error on configuring non-existing disks
         with self.assertRaises(CLIError) as err:
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
-        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
+        self.assertTrue("Data disk with lun of '0' doesn't exist" in str(err.exception))
 
         # default to "None" across for Lv/Lv2 machines
         r = normalize_disk_info(data_disk_sizes_gb=[1], size='standard_L8s')

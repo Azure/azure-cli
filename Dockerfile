@@ -39,7 +39,7 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
 
 ARG JP_VERSION="0.1.3"
 
-RUN curl https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
+RUN curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
  && chmod +x /usr/local/bin/jp \
  && pip install --no-cache-dir --upgrade jmespath-terminal
 

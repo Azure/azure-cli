@@ -31,7 +31,8 @@ from azure.cli.command_modules.network._validators import (
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
-    get_header_configuration_validator, validate_nat_gateway)
+    get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
+    validate_waf_policy)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -102,9 +103,11 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type, options_list=['--name', '-n'])
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
+        c.argument('max_capacity', min_api='2018-12-01', help='Upper bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
         c.argument('zones', zones_type)
         c.argument('custom_error_pages', min_api='2018-08-01', nargs='+', help='Space-separated list of custom error pages in `STATUS_CODE=URL` format.', validator=validate_custom_error_pages)
+        c.argument('firewall_policy', options_list='--waf-policy', min_api='2018-12-01', help='Name or ID of a web application firewall (WAF) policy.', validator=validate_waf_policy)
 
     with self.argument_context('network application-gateway', arg_group='Network') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
@@ -354,6 +357,40 @@ def load_arguments(self, _):
         c.argument('redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
 
     # endregion
+
+    # region ApplicationGatewayWAFPolicies
+    (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
+     WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
+     WebApplicationFirewallTransform) = self.get_models(
+         'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
+         'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
+         'WebApplicationFirewallTransform')
+    with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
+        c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
+
+    with self.argument_context('network application-gateway waf-policy rule', min_api='2018-12-01') as c:
+        c.argument('policy_name', options_list='--policy-name')
+        c.argument('rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='Name of the WAF policy rule.')
+        c.argument('priority', type=int, help='Rule priority. Lower values are evaluated prior to higher values.')
+        c.argument('action', arg_type=get_enum_type(WebApplicationFirewallAction), help='Action to take.')
+        c.argument('rule_type', arg_type=get_enum_type(WebApplicationFirewallRuleType), help='Type of rule.')
+
+    with self.argument_context('network application-gateway waf-policy rule list', min_api='2018-12-01') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None)
+
+    with self.argument_context('network application-gateway waf-policy rule match-condition', min_api='2018-12-01') as c:
+        c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
+        c.argument('negation_condition', options_list='--negate', arg_type=get_three_state_flag(), help='Match the negative of the condition.')
+        c.argument('match_values', options_list='--values', nargs='+', help='Space-separated list of values to match.')
+        c.argument('transforms', arg_type=get_enum_type(WebApplicationFirewallTransform), nargs='+', help='Space-separated list of transforms to apply when matching.')
+        if WebApplicationFirewallMatchVariable:
+            help_string = 'Space-separated list of `VARIABLE[.SELECTOR]` variables to use when matching. Variable values: {}'.format(', '.join(x for x in WebApplicationFirewallMatchVariable))
+            c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
+        c.argument('index', type=int, help='Index of the match condition to remove.')
+
+    with self.argument_context('network application-gateway waf-policy rule match-condition list', min_api='2018-12-01') as c:
+        c.argument('policy_name', options_list='--policy-name', id_part=None)
+    # region
 
     # region ApplicationSecurityGroups
     with self.argument_context('network asg') as c:
@@ -931,7 +968,7 @@ def load_arguments(self, _):
     for item in ['create', 'update']:
         with self.argument_context('network public-ip {}'.format(item)) as c:
             c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-            c.argument('sku', min_api='2017-08-01', help='Public IP SKU', default=PublicIPAddressSkuName.basic.value if PublicIPAddressSkuName is not None and item == 'create' else None, arg_type=get_enum_type(PublicIPAddressSkuName))
+            c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
 
     for scope in ['public-ip', 'lb frontend-ip']:
