@@ -17,12 +17,6 @@ from ._docker_utils import request_data_from_registry, get_access_credentials, R
 logger = get_logger(__name__)
 
 
-UNTAG_NOT_SUPPORTED = 'Untag is only supported for managed registries.'
-DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
-SHOW_MANIFESTS_NOT_SUPPORTED = 'Show manifests is only supported for managed registries.'
-ATTRIBUTES_NOT_SUPPORTED = 'Attributes are only supported for managed registries.'
-METADATA_NOT_SUPPORTED = 'Metadata is only supported for managed registries.'
-
 ORDERBY_PARAMS = {
     'time_asc': 'timeasc',
     'time_desc': 'timedesc'
@@ -214,20 +208,14 @@ def acr_repository_show_manifests(cmd,
         repository=repository,
         permission='pull')
 
-    try:
-        raw_result = _obtain_data_from_registry(
-            login_server=login_server,
-            path=_get_manifest_path(repository),
-            username=username,
-            password=password,
-            result_index='manifests',
-            top=top,
-            orderby=orderby)
-    except RegistryException as e:
-        # Check for Classic registry
-        if e.status_code == 405:
-            raise CLIError(SHOW_MANIFESTS_NOT_SUPPORTED)
-        raise
+    raw_result = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_manifest_path(repository),
+        username=username,
+        password=password,
+        result_index='manifests',
+        top=top,
+        orderby=orderby)
 
     # For backward compatibility, convert the results to the old schema
     if not detail:
@@ -343,36 +331,14 @@ def _acr_repository_attributes_helper(cmd,
         path = _get_repository_path(repository)
         result_index = None
 
-    # Non-GET request doesn't return the entity so there is always a GET reqeust
-    if http_method != 'get':
-        try:
-            request_data_from_registry(
-                http_method=http_method,
-                login_server=login_server,
-                path=path,
-                username=username,
-                password=password,
-                result_index=result_index,
-                json_payload=json_payload)
-        except RegistryException as e:
-            # Check for Classic registry
-            if e.status_code == 405:
-                raise CLIError(ATTRIBUTES_NOT_SUPPORTED)
-            raise
-
-    try:
-        return request_data_from_registry(
-            http_method='get',
-            login_server=login_server,
-            path=path,
-            username=username,
-            password=password,
-            result_index=result_index)[0]
-    except RegistryException as e:
-        # Check for Classic registry
-        if e.status_code == 405:
-            raise CLIError(ATTRIBUTES_NOT_SUPPORTED)
-        raise
+    return request_data_from_registry(
+        http_method=http_method,
+        login_server=login_server,
+        path=path,
+        username=username,
+        password=password,
+        result_index=result_index,
+        json_payload=json_payload)[0]
 
 
 def acr_repository_untag(cmd,
@@ -393,18 +359,12 @@ def acr_repository_untag(cmd,
         repository=repository,
         permission='delete')
 
-    try:
-        return request_data_from_registry(
-            http_method='delete',
-            login_server=login_server,
-            path=_get_tag_path(repository, tag),
-            username=username,
-            password=password)[0]
-    except RegistryException as e:
-        # Check for Classic registry
-        if e.status_code == 405:
-            raise CLIError(UNTAG_NOT_SUPPORTED)
-        raise
+    return request_data_from_registry(
+        http_method='delete',
+        login_server=login_server,
+        path=_get_tag_path(repository, tag),
+        username=username,
+        password=password)[0]
 
 
 def acr_repository_delete(cmd,
@@ -449,18 +409,12 @@ def acr_repository_delete(cmd,
                           "and all images under it?".format(repository), yes)
         path = _get_repository_path(repository)
 
-    try:
-        return request_data_from_registry(
-            http_method='delete',
-            login_server=login_server,
-            path=path,
-            username=username,
-            password=password)[0]
-    except RegistryException as e:
-        # Check for Classic registry
-        if e.status_code == 405:
-            raise CLIError(DELETE_NOT_SUPPORTED)
-        raise
+    return request_data_from_registry(
+        http_method='delete',
+        login_server=login_server,
+        path=path,
+        username=username,
+        password=password)[0]
 
 
 def _validate_parameters(repository, image):
@@ -499,35 +453,22 @@ def _delete_manifest_confirmation(login_server,
                                   manifest,
                                   yes):
     # Always query manifest if it is empty
-    try:
-        manifest = manifest or _get_manifest_digest(
-            login_server=login_server,
-            repository=repository,
-            tag=tag,
-            username=username,
-            password=password)
-    except RegistryException as e:
-        # Check for Classic registry
-        if e.status_code == 405:
-            raise CLIError(DELETE_NOT_SUPPORTED)
-        raise
+    manifest = manifest or _get_manifest_digest(
+        login_server=login_server,
+        repository=repository,
+        tag=tag,
+        username=username,
+        password=password)
 
     if yes:
         return manifest
 
-    try:
-        tags = _obtain_data_from_registry(
-            login_server=login_server,
-            path=_get_tag_path(repository),
-            username=username,
-            password=password,
-            result_index='tags'
-        )
-    except RegistryException as e:
-        # Check for Classic registry
-        if e.status_code == 405:
-            raise CLIError(DELETE_NOT_SUPPORTED)
-        raise
+    tags = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_tag_path(repository),
+        username=username,
+        password=password,
+        result_index='tags')
 
     filter_by_manifest = [x['name'] for x in tags if manifest == x['digest']]
     message = "This operation will delete the manifest '{}'".format(manifest)

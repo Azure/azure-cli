@@ -19,6 +19,7 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_show_tags,
     acr_repository_show_manifests,
     acr_repository_show,
+    acr_repository_update,
     acr_repository_delete,
     acr_repository_untag
 )
@@ -240,6 +241,67 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=get_authorization_header('username', 'password'),
             params=None,
             json=None,
+            verify=mock.ANY)
+
+    @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
+    @mock.patch('requests.request', autospec=True)
+    def test_repository_show(self, mock_requests_get, mock_get_access_credentials):
+        cmd = self._setup_cmd()
+
+        response = mock.MagicMock()
+        response.headers = {}
+        response.status_code = 200
+        response.content = json.dumps({
+            'registry': 'testregistry.azurecr.io',
+            'imageName': 'testrepository'
+        }).encode()
+        mock_requests_get.return_value = response
+
+        mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
+
+        # Update attributes for a repository
+        acr_repository_update(cmd,
+                              registry_name='testregistry',
+                              repository='testrepository',
+                              write_enabled='false')
+        mock_requests_get.assert_called_with(
+            method='patch',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository',
+            headers=get_authorization_header('username', 'password'),
+            params=None,
+            json={
+                'writeEnabled': 'false'
+            },
+            verify=mock.ANY)
+
+        # Update attributes for an image by tag
+        acr_repository_update(cmd,
+                              registry_name='testregistry',
+                              image='testrepository:testtag',
+                              write_enabled='false')
+        mock_requests_get.assert_called_with(
+            method='patch',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
+            headers=get_authorization_header('username', 'password'),
+            params=None,
+            json={
+                'writeEnabled': 'false'
+            },
+            verify=mock.ANY)
+
+        # Update attributes for an image by manifest digest
+        acr_repository_update(cmd,
+                              registry_name='testregistry',
+                              image='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                              write_enabled='false')
+        mock_requests_get.assert_called_with(
+            method='patch',
+            url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            headers=get_authorization_header('username', 'password'),
+            params=None,
+            json={
+                'writeEnabled': 'false'
+            },
             verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
