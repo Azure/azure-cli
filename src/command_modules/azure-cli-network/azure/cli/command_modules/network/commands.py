@@ -169,7 +169,7 @@ def load_command_table(self, _):
     )
 
     network_private_endpoint_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#InterfaceEndpointsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2018-08-01'
     )
