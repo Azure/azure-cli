@@ -4,6 +4,7 @@ Release History
 ===============
 
 * Added command `list-service-tags`.
+* `dns zone import`: Fix issue where users could not import wildcard A records.
 
 2.5.0
 +++++

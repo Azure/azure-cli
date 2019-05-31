@@ -624,6 +624,7 @@ class DnsParseZoneFiles(unittest.TestCase):
             (172800, 'ns3-03.azure-dns.org.'),
             (172800, 'ns4-03.azure-dns.info.'),
         ])
+        self._check_a(zone, '*.' + zn, [(3600, '2.3.4.5')])
 
     def test_zone_import_errors(self):
         from knack.util import CLIError
