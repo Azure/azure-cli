@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* Added command `list-service-tags`.
+
 2.5.0
 +++++
 * [BREAKING CHANGE]: previously deprecated command group `network interface-endpoints` has been removed. Use `network private-endpoints` instead.
