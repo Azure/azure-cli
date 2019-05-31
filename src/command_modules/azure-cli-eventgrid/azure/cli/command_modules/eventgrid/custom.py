@@ -71,12 +71,10 @@ def cli_topic_create_or_update(
     topic_info = Topic(
         location=location,
         tags=tags)
-    async_topic_create = client.create_or_update(
+    return client.create_or_update(
         resource_group_name,
         topic_name,
         topic_info)
-    created_topic = async_topic_create.result()
-    return created_topic
 
 
 def cli_domain_list(
@@ -100,12 +98,10 @@ def cli_domain_create_or_update(
         location=location,
         tags=tags)
 
-    async_domain_create = client.create_or_update(
+    return client.create_or_update(
         resource_group_name,
         domain_name,
         domain_info)
-    created_domain = async_domain_create.result()
-    return created_domain
 
 
 def cli_domain_topic_create_or_update(
@@ -113,11 +109,10 @@ def cli_domain_topic_create_or_update(
         resource_group_name,
         domain_name,
         domain_topic_name):
-    async_domain_topic_create = client.create_or_update(
+    return client.create_or_update(
         resource_group_name,
         domain_name,
         domain_topic_name)
-    return async_domain_topic_create.result()
 
 
 def cli_domain_topic_delete(
@@ -125,11 +120,10 @@ def cli_domain_topic_delete(
         resource_group_name,
         domain_name,
         domain_topic_name):
-    async_domain_topic_delete = client.delete(
+    return client.delete(
         resource_group_name,
         domain_name,
         domain_topic_name)
-    return async_domain_topic_delete.result()
 
 
 def cli_domain_topic_list(
@@ -211,7 +205,7 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
     return client.create_or_update(
         scope,
         event_subscription_name,
-        event_subscription_info).result()
+        event_subscription_info)
 
 
 def cli_eventgrid_event_subscription_delete(
@@ -228,10 +222,9 @@ def cli_eventgrid_event_subscription_delete(
         resource_id=resource_id,
         topic_name=topic_name,
         resource_group_name=resource_group_name)
-    async_event_subscription_delete = client.delete(
+    return client.delete(
         scope,
         event_subscription_name)
-    return async_event_subscription_delete.result()
 
 
 def event_subscription_setter(
@@ -249,13 +242,10 @@ def event_subscription_setter(
         resource_id=resource_id,
         topic_name=topic_name,
         resource_group_name=resource_group_name)
-
-    async_event_subscription_update = client.update(
+    return client.update(
         scope,
         event_subscription_name,
         parameters)
-    updated_event_subscription = async_event_subscription_update.result()
-    return updated_event_subscription
 
 
 def cli_eventgrid_event_subscription_get(
