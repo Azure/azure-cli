@@ -113,6 +113,20 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 
 def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
+    retention_range_in_days = policy_object.properties.instant_rp_retention_range_in_days
+    schedule_run_frequency = policy_object.properties.schedule_policy.schedule_run_frequency
+
+    # Validating range of days input
+    if schedule_run_frequency == 'Weekly' and retention_range_in_days != 5:
+        raise CLIError(
+            """
+            Retention policy range must be equal to 5.
+            """)
+    if schedule_run_frequency == 'Daily' and (retention_range_in_days > 5 or retention_range_in_days < 1):
+        raise CLIError(
+            """
+            Retention policy range must be between 1 to 5.
+            """)
 
     error_message = "For SnapshotRetentionRangeInDays, the minimum value is 1 and"\
                     "maximum is 5. For weekly backup policies, the only allowed value is 5 "\
@@ -520,6 +534,14 @@ def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
 
 def _is_native_name(name):
     return ";" in name
+
+
+def _is_range_valid(start_date, end_date):
+    if start_date > end_date:
+        raise CLIError(
+                    """
+                    Start date must be earlier than end date.
+                    """)
 
 
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):
