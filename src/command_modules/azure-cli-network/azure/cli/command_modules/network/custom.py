@@ -2080,7 +2080,7 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 # region PrivateEndpoint
 def list_private_endpoints(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).interface_endpoints
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
@@ -2288,7 +2288,6 @@ def set_lb_frontend_ip_configuration(
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
         virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    public_ip_address = PublicIPAddress(id=public_ip_address)
     if private_ip_address == '':
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
