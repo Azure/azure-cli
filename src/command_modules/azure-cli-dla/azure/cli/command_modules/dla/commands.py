@@ -186,3 +186,6 @@ def load_command_table(self, _):
         g.command('list', 'list_by_account')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
+
+    with self.command_group('dla', is_preview=True):
+        pass

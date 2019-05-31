@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* BatchAI commands are now deprecated and hidden.
+
 0.4.9
 +++++
 * Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
