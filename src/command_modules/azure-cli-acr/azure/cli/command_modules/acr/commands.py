@@ -174,8 +174,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr', acr_run_util) as g:
         g.command('run', 'acr_run', supports_no_wait=True)
 
-    with self.command_group('acr', acr_pack_util) as g:
-        g.command('pack', 'acr_pack', supports_no_wait=True)
+    with self.command_group('acr pack', acr_pack_util) as g:
+        g.command('build', 'acr_pack_build', supports_no_wait=True)
 
     with self.command_group('acr task', acr_task_util) as g:
         g.command('create', 'acr_task_create')
