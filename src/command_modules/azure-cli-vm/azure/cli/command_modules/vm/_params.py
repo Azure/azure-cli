@@ -340,7 +340,7 @@ def load_arguments(self, _):
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
                    help="Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
-                   help="(PREVIEW) The eviction policy for virtual machines in a low priority scale set.")
+                   help="The eviction policy for virtual machines in a low priority scale set.", is_preview=True)
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -487,9 +487,9 @@ def load_arguments(self, _):
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
             c.argument('ultra_ssd_enabled', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='(PREVIEW) Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account')
+                       help='Enables or disables the capability to have 1 or more managed data disks with UltraSSD_LRS storage account', is_preview=True)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='(Preview) Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
+                       help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')

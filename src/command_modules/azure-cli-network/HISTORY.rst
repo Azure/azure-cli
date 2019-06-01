@@ -2,6 +2,10 @@
 
 Release History
 ===============
+
+* Added command `list-service-tags`.
+* `dns zone import`: Fix issue where users could not import wildcard A records.
+
 2.5.0
 +++++
 * [BREAKING CHANGE]: previously deprecated command group `network interface-endpoints` has been removed. Use `network private-endpoints` instead.

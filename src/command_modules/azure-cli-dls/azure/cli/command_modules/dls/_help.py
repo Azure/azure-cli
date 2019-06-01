@@ -9,12 +9,12 @@ from knack.help_files import helps
 
 helps['dls'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Store accounts and filesystems.
+short-summary: Manage Data Lake Store accounts and filesystems.
 """
 
 helps['dls account'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Store accounts.
+short-summary: Manage Data Lake Store accounts.
 """
 
 helps['dls account create'] = """
@@ -51,7 +51,7 @@ short-summary: Enable the use of Azure Key Vault for encryption of a Data Lake S
 
 helps['dls account firewall'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Store account firewall rules.
+short-summary: Manage Data Lake Store account firewall rules.
 """
 
 helps['dls account firewall create'] = """
@@ -100,7 +100,7 @@ examples:
 
 helps['dls account network-rule'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Store account virtual network rules.
+short-summary: Manage Data Lake Store account virtual network rules.
 """
 
 helps['dls account network-rule create'] = """
@@ -146,7 +146,7 @@ examples:
 
 helps['dls account trusted-provider'] = """
 type: group
-short-summary: (PREVIEW) Manage Data Lake Store account trusted identity providers.
+short-summary: Manage Data Lake Store account trusted identity providers.
 """
 
 helps['dls account update'] = """
@@ -156,7 +156,7 @@ short-summary: Updates a Data Lake Store account.
 
 helps['dls fs'] = """
 type: group
-short-summary: (PREVIEW) Manage a Data Lake Store filesystem.
+short-summary: Manage a Data Lake Store filesystem.
 """
 
 helps['dls fs access'] = """
