@@ -4,8 +4,8 @@ Release History
 ===============
 0.2.4
 +++++
-* `domain create/update/delete/get/list`: Added new commands for the domain related CRUD operations.
-* `domain topic create/update/delete/get/list`: Added new commands for the domain topics related CRUD operations.
+* `domain create/update/delete/get/list`: Added new commands for the domain CRUD operations.
+* `domain topic create/update/delete/get/list`: Added new commands for the domain topics CRUD operations.
 * `topic list`: Added --odata-query for filtering the results using OData syntax.
 * `event-subscription list`: Added --odata-query for filtering the results using OData syntax.
 * `event-subscription create/update`: Added servicebusqueue as new values for the `--endpoint-type` parameter.
