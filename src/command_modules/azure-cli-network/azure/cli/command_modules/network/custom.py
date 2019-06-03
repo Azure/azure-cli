@@ -2080,7 +2080,7 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 # region PrivateEndpoint
 def list_private_endpoints(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).interface_endpoints
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
@@ -2288,7 +2288,6 @@ def set_lb_frontend_ip_configuration(
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
         virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    public_ip_address = PublicIPAddress(id=public_ip_address)
     if private_ip_address == '':
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
@@ -3121,7 +3120,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
         if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
             config.flow_analytics_configuration = None
     except AttributeError:
-        pass
+        config.flow_analytics_configuration = None
 
     with cmd.update_context(config) as c:
         c.set_param('enabled', enabled if enabled is not None else config.enabled)
@@ -3136,10 +3135,11 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
             'type': log_format,
             'version': log_version
         }
+
     if cmd.supported_api_version(min_api='2018-10-01') and \
             any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
-
         workspace = None
+
         if traffic_analytics_workspace:
             from azure.cli.core.commands.arm import get_arm_resource_by_id
             workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
@@ -3149,9 +3149,6 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
             if not workspace:
                 raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
                                '[--enabled {true|false}]')
-            # if not all([workspace, traffic_analytics_interval]):
-                # raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
-                #               '--interval INT [--enabled {true|false}]')
             if traffic_analytics_enabled is None:
                 traffic_analytics_enabled = True
             config.flow_analytics_configuration = {
@@ -3159,8 +3156,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     'enabled': traffic_analytics_enabled,
                     'workspace_id': workspace.properties['customerId'],
                     'workspace_region': workspace.location,
-                    'workspace_resource_id': traffic_analytics_workspace,
-                    # 'traffic_analytics_interval': traffic_analytics_interval,
+                    'workspace_resource_id': traffic_analytics_workspace
                 }
             }
         else:
@@ -3168,13 +3164,13 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
             with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
                 # update object
                 c.set_param('enabled', traffic_analytics_enabled)
-                # c.set_param('traffic_analytics_interval', traffic_analytics_interval)
                 if traffic_analytics_workspace == "":
                     config.flow_analytics_configuration = None
                 elif workspace:
                     c.set_param('workspace_id', workspace.properties['customerId'])
                     c.set_param('workspace_region', workspace.location)
                     c.set_param('workspace_resource_id', traffic_analytics_workspace)
+
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 

@@ -70,8 +70,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-# TODO: revert to ScenarioTest once #9401 is addressed.
-class NetworkPrivateEndpoints(LiveScenarioTest):
+class NetworkPrivateEndpoints(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):
@@ -2381,8 +2380,8 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw', location='westcentralus')
     def test_network_watcher_configure(self, resource_group):
-        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
-        self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
+        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus eastus canadaeast --enabled')
+        self.cmd('network watcher configure --locations westus westus2 eastus canadaeast --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
 
@@ -2447,6 +2446,19 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace ""', checks=[
             self.check('flowAnalyticsConfiguration', None)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast')
+    def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'nsg': 'nsg1',
+            'sa': storage_account
+        })
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')

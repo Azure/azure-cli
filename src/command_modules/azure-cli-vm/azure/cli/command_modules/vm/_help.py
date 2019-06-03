@@ -1727,7 +1727,7 @@ examples:
 
 helps['vmss identity remove'] = """
 type: command
-short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
+short-summary: Remove user assigned identities from a VM scaleset.
 examples:
   - name: Remove system assigned identity
     text: az vmss identity remove -g MyResourceGroup -n MyVmss

@@ -109,5 +109,5 @@ def load_command_table(self, _):
         g.show_command('show', 'get', table_transformer=file_server_show_table_format)
         g.command('list', 'list_by_workspace', table_transformer=file_server_list_table_format)
 
-    with self.command_group('batchai', batchai_usage_sdk, client_factory=usage_client_factory) as g:
+    with self.command_group('batchai', batchai_usage_sdk, client_factory=usage_client_factory, deprecate_info=self.deprecate(hide=True)) as g:
         g.command('list-usages', 'list', table_transformer=usage_table_format)
