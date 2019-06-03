@@ -64,6 +64,9 @@ helps['sql vm create'] = """
         - name: Create a SQL virtual machine with AHUB billing tag.
           text: >
             az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type AHUB
+        - name: Create a SQL virtual machine with specific sku type and license type.
+          text: >
+            az sql vm create -n sqlvm -g myresourcegroup -l eastus --image-sku Enterprise --license-type AHUB
         - name: Enable R services in SQL2016 onwards.
           text: >
             az sql vm create -n sqlvm -g myresourcegroup -l eastus --enable-r-services true
@@ -88,6 +91,9 @@ helps['sql vm update'] = """
         - name: Remove a tag.
           text: >
             az sql vm update -n sqlvm -g myresourcegroup --remove tags.tagName
+        - name: Update a SQL virtual machine with specific sku type.
+          text: >
+            az sql vm update -n sqlvm -g myresourcegroup --image-sku Enterprise
         - name: Update SQL virtual machine auto backup settings.
           text: >
             az sql vm update -n sqlvm -g myresourcegroup --backup-schedule-type manual --full-backup-frequency Weekly --full-backup-start-hour 2 --full-backup-duration 2

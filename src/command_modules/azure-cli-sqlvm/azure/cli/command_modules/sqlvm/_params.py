@@ -15,7 +15,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlWorkloadType,
     DiskConfigurationType,
     DayOfWeek,
-    SqlVmGroupImageSku
+    SqlVmGroupImageSku,
+    SqlImageSku
 )
 
 from azure.cli.core.commands.parameters import (
@@ -163,6 +164,10 @@ def load_arguments(self, _):
                    help='SQL Server license type.',
                    options_list=['--license-type'],
                    arg_type=get_enum_type(SqlServerLicenseType))
+        c.argument('sql_image_sku',
+                   options_list=['--image-sku'],
+                   help='SQL image sku.',
+                   arg_type=get_enum_type(SqlImageSku))
 
     with self.argument_context('sql vm add-to-group') as c:
         c.argument('sql_virtual_machine_group_resource_id',

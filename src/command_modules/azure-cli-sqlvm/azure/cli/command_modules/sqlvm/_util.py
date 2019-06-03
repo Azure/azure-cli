@@ -12,6 +12,14 @@ def get_sqlvirtualmachine_management_client(cli_ctx):
     return get_mgmt_service_client(cli_ctx, SqlVirtualMachineManagementClient)
 
 
+def get_compute_client_factory(cli_ctx, **_):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    # Get the compute sdk
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
+
+
 def get_sqlvirtualmachine_availability_group_listeners_operations(cli_ctx, _):
     return get_sqlvirtualmachine_management_client(cli_ctx).availability_group_listeners
 

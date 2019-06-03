@@ -302,6 +302,78 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
 
+    @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_license')
+    @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
+    def test_sqlvm_update_license_and_sku(self, resource_group, resource_group_location, sqlvm1):
+
+        # test create sqlvm with no sql license type.
+        self.cmd('sql vm create -n {} -g {} -l {}'
+                 .format(sqlvm1, resource_group, resource_group_location),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG')
+                 ])
+
+        # delete sqlvm
+        self.cmd('sql vm delete -n {} -g {} --yes'
+                 .format(sqlvm1, resource_group),
+                 checks=NoneCheck())
+
+        # test create sqlvm with AHUB changes, it should not change the license.
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
+                 .format(sqlvm1, resource_group, resource_group_location, 'AHUB'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'AHUB')
+                 ])
+
+        # test sku change without license change.
+        self.cmd('sql vm update -n {} -g {} --image-sku {}'
+                 .format(sqlvm1, resource_group, 'Enterprise'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlImageSku', 'Enterprise'),
+                     JMESPathCheck('sqlServerLicenseType', 'AHUB')
+                 ])
+
+        # delete sqlvm
+        self.cmd('sql vm delete -n {} -g {} --yes'
+                 .format(sqlvm1, resource_group),
+                 checks=NoneCheck())
+
+        # test create sqlvm with no sql license type and sku type.
+        self.cmd('sql vm create -n {} -g {} -l {} --image-sku {}'
+                 .format(sqlvm1, resource_group, resource_group_location, 'Enterprise'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                     JMESPathCheck('sqlImageSku', 'Enterprise'),
+                 ])
+
+        # delete sqlvm
+        self.cmd('sql vm delete -n {} -g {} --yes'
+                 .format(sqlvm1, resource_group),
+                 checks=NoneCheck())
+
+        # test create sqlvm with sql license type and sku type.
+        self.cmd('sql vm create -n {} -g {} -l {} --image-sku {} --license-type {}'
+                 .format(sqlvm1, resource_group, resource_group_location, 'Enterprise', 'AHUB'),
+                 checks=[
+                     JMESPathCheck('name', sqlvm1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('provisioningState', "Succeeded"),
+                     JMESPathCheck('sqlServerLicenseType', 'AHUB'),
+                     JMESPathCheck('sqlImageSku', 'Enterprise'),
+                 ])
+
 
 class SqlVmGroupScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()

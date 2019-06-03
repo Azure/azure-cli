@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from msrestazure.tools import is_valid_resource_id, resource_id
-
+from knack.prompting import prompt_pass
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
@@ -26,8 +26,6 @@ from azure.mgmt.sqlvirtualmachine.models import (
     ServerConfigurationsManagementSettings,
     SqlVirtualMachine
 )
-
-from knack.prompting import prompt_pass
 
 
 def sqlvm_list(
@@ -173,7 +171,7 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, location=None,
-                 sql_server_license_type=None, enable_auto_patching=None,
+                 sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
@@ -185,12 +183,29 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
     Creates a SQL virtual machine.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from ._util import get_compute_client_factory
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     virtual_machine_resource_id = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Compute', type='virtualMachines', name=sql_virtual_machine_name)
+
+    # If customer has not provided license type, infer it from the compute image reference
+    if sql_server_license_type is None:
+        compute_client = get_compute_client_factory(cmd.cli_ctx)
+        vm = compute_client.virtual_machines.get(resource_group_name, sql_virtual_machine_name)
+
+        if (vm.storage_profile is not None and vm.storage_profile.image_reference is not None):
+
+            image_reference = vm.storage_profile.image_reference
+            if (image_reference.publisher is not None and image_reference.publisher.lower() == "microsoftsqlserver" and
+                    image_reference.offer is not None and image_reference.offer.lower() != 'byol'):
+                sql_server_license_type = 'PAYG'
+            else:
+                sql_server_license_type = 'AHUB'
+        else:
+            sql_server_license_type = 'AHUB'
 
     tags = tags or {}
 
@@ -254,6 +269,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
+                                     sql_image_sku=sql_image_sku,
                                      auto_patching_settings=auto_patching_object,
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
@@ -268,7 +284,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
 
 
 # pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
-def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=None,
+def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
@@ -282,6 +298,8 @@ def sqlvm_update(instance, sql_server_license_type=None, enable_auto_patching=No
         instance.tags = tags
     if sql_server_license_type is not None:
         instance.sql_server_license_type = sql_server_license_type
+    if sql_image_sku is not None:
+        instance.sql_image_sku = sql_image_sku
 
     if (enable_auto_patching is not None or day_of_week is not None or maintenance_window_starting_hour is not None or maintenance_window_duration is not None):
 
