@@ -313,6 +313,7 @@ class TestVMImageDefaults(unittest.TestCase):
 
         data_disk = mock.MagicMock()
         data_disk.storage_account_type = 'Standard_LRS'
+        data_disk.lun = 0
         image_info = mock.MagicMock()
         client_mock = mock.MagicMock()
         image_info.storage_profile.os_disk.os_type.value = 'someOS'

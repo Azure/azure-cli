@@ -25,7 +25,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_ddos_protection_plans, cf_public_ip_prefixes, cf_service_endpoint_policies,
     cf_service_endpoint_policy_definitions, cf_dns_references, cf_private_endpoints, cf_network_profiles,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
-    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links)
+    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
+    cf_service_tags)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -61,6 +62,11 @@ def load_command_table(self, _):
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
         client_factory=cf_application_gateways
+    )
+
+    network_ag_waf_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#WebApplicationFirewallPoliciesOperations.{}',
+        client_factory=cf_app_gateway_waf_policy
     )
 
     network_util = CliCommandType(
@@ -163,7 +169,7 @@ def load_command_table(self, _):
     )
 
     network_private_endpoint_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#InterfaceEndpointsOperations.{}',
+        operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2018-08-01'
     )
@@ -225,6 +231,12 @@ def load_command_table(self, _):
     network_rt_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#RouteTablesOperations.{}',
         client_factory=cf_route_tables
+    )
+
+    network_service_tags_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#ServiceTagsOperations.{}',
+        client_factory=cf_service_tags,
+        min_api='2019-04-01'
     )
 
     network_subnet_sdk = CliCommandType(
@@ -294,10 +306,12 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkRoot
-    usage_path = 'azure.mgmt.network.operations.usages_operations#UsagesOperations.{}'
+    usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
     with self.command_group('network') as g:
         g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
 
+    with self.command_group('network', network_service_tags_sdk) as g:
+        g.command('list-service-tags', 'list')
     # endregion
 
     # region ApplicationGateways
@@ -410,6 +424,32 @@ def load_command_table(self, _):
         g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
     # endregion
 
+    # region ApplicationGatewayWAFPolicy
+    with self.command_group('network application-gateway waf-policy', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+        g.custom_command('create', 'create_ag_waf_policy')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_ag_waf_policies')
+        g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
+        g.wait_command('wait')
+
+    with self.command_group('network application-gateway waf-policy rule', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+        g.custom_command('create', 'create_ag_waf_rule')
+        g.custom_command('delete', 'delete_ag_waf_rule')
+        g.custom_command('list', 'list_ag_waf_rules')
+        g.custom_show_command('show', 'show_ag_waf_rule')
+        g.generic_update_command('update', command_type=network_ag_waf_sdk,
+                                 client_factory=cf_app_gateway_waf_policy,
+                                 custom_func_name='update_ag_waf_rule',
+                                 child_collection_prop_name='custom_rules',
+                                 child_arg_name='rule_name')
+
+    with self.command_group('network application-gateway waf-policy rule match-condition', network_ag_waf_sdk, client_factory=cf_app_gateway_waf_policy, min_api='2018-12-01') as g:
+        g.custom_command('add', 'add_ag_waf_rule_match_cond')
+        g.custom_command('list', 'list_ag_waf_rule_match_cond')
+        g.custom_command('remove', 'remove_ag_waf_rule_match_cond')
+    # endregion
+
     # region ApplicationSecurityGroups
     with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
         g.custom_command('create', 'create_asg')
@@ -472,7 +512,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
         g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
         g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
-
     # endregion
 
     # region ExpressRoutes
@@ -678,7 +717,7 @@ def load_command_table(self, _):
         g.custom_command('configure', 'configure_network_watcher')
         g.command('list', 'list_all')
         g.custom_command('test-ip-flow', 'check_nw_ip_flow', client_factory=cf_network_watcher)
-        g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace)
+        g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace, is_preview=True)
         g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
         g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
@@ -731,7 +770,7 @@ def load_command_table(self, _):
     # endregion
 
     # region RouteFilters
-    with self.command_group('network route-filter', network_rf_sdk, min_api='2016-12-01') as g:
+    with self.command_group('network route-filter', network_rf_sdk, min_api='2016-12-01', is_preview=True) as g:
         g.custom_command('create', 'create_route_filter', client_factory=cf_route_filters)
         g.custom_command('list', 'list_route_filters', client_factory=cf_route_filters)
         g.show_command('show', 'get')

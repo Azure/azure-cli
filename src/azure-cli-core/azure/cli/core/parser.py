@@ -118,6 +118,7 @@ class AzCliCommandParser(CLICommandParser):
                         command_name, ex.args[0].dest, ex.message))  # pylint: disable=no-member
                 param.completer = arg.completer
                 param.deprecate_info = arg.deprecate_info
+                param.preview_info = arg.preview_info
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,

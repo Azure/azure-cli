@@ -2,6 +2,9 @@
 
 Release History
 ===============
+
+* Deprecated ACS commands are now hidden from help view.
+
 2.4.3
 ++++++
 * Allow enabling/disabling AKS kube-dashboard addon

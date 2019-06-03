@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.22
+++++++
+* vm create: allows for more flexibility with image data-disk luns. Image data-disk luns do not have to start from 0 and can skip numbers.
+
 2.2.21
 ++++++
 * vm create: Added --computer-name for setting a vm's computer name.

@@ -36,7 +36,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
-        DirectoryType, DiskEncryptionProperties, Tier
+        DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -157,7 +157,11 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         linux_operating_system_profile=LinuxOperatingSystemProfile(
             username=ssh_username,
             password=ssh_password,
-            ssh_public_key=ssh_public_key
+            ssh_profile=ssh_public_key and SshProfile(
+                public_keys=[SshPublicKey(
+                    certificate_data=ssh_public_key
+                )]
+            )
         )
     )
 
