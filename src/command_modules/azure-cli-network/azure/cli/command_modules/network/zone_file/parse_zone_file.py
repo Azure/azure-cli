@@ -60,18 +60,18 @@ date_regex_dict = {
 _REGEX = {
     'ttl': r'(?P<delim>\$ttl)\s+(?P<val>\d+\w*)',
     'origin': r'(?P<delim>\$origin)\s+(?P<val>[\w\.]+)',
-    'soa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
-    'a': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>a)\s+(?P<ip>[\d\.]+)',
-    'ns': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
-    'aaaa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
-    'caa': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>.+)',
-    'cname': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
-    'mx': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
-    'txt': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
-    'ptr': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
-    'srv': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
-    'spf': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
-    'uri': r'(?P<name>[@\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
+    'soa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>soa)\s+(?P<host>[\w\.-]+)\s+(?P<email>[\w\.-]+)\s+(?P<serial>\d*)\s+(?P<refresh>\w*)\s+(?P<retry>\w*)\s+(?P<expire>\w*)\s+(?P<minimum>\w*)?',
+    'a': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>a)\s+(?P<ip>[\d\.]+)',
+    'ns': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ns)\s+(?P<host>[\w\.-]+)',
+    'aaaa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>aaaa)\s+(?P<ip>[\w:]+)',
+    'caa': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>caa)\s+(?P<flags>\d+)\s+(?P<tag>\w+)\s+(?P<val>.+)',
+    'cname': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>cname)\s+(?P<alias>[\w\.]+)',
+    'mx': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>mx)\s+(?P<preference>\d+)\s+(?P<host>[\w\.-]+)',
+    'txt': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>txt)\s+(?P<txt>.+)',
+    'ptr': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>ptr)\s+(?P<host>[\w\.-]+)',
+    'srv': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>srv)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<port>\d+)\s+(?P<target>[\w\.]+)',
+    'spf': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>spf)\s+(?P<txt>.+)',
+    'uri': r'(?P<name>[@\*\w\.-]*)\s+(?:(?P<ttl>\d+\w*)\s+)?(?:(?P<class>in)\s+)?(?P<delim>uri)\s+(?P<priority>\d+)\s+(?P<weight>\d+)\s+(?P<target>[\w\.]+)'
 }
 
 _COMPILED_REGEX = {k: re.compile(v, re.IGNORECASE) for k, v in _REGEX.items()}

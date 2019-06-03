@@ -1328,7 +1328,7 @@ examples:
 
 helps['webapp ssh'] = """
 type: command
-short-summary: (Preview) SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.
+short-summary: SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.
 examples:
   - name: ssh into a web app
     text: >

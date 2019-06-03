@@ -130,7 +130,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Queue
         self.cmd(
-            'servicebus queue create --resource-group {rg} --namespace-name {namespacename} --name {queuename} --auto-delete-on-idle {lockduration} ',
+            'servicebus queue create --resource-group {rg} --namespace-name {namespacename} --name {queuename} --auto-delete-on-idle {lockduration} --max-size 1024 ',
             checks=[self.check('name', '{queuename}')])
 
         # Get Queue

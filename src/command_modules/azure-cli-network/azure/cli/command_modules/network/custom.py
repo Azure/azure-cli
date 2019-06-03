@@ -159,7 +159,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
-                               custom_error_pages=None):
+                               custom_error_pages=None, firewall_policy=None, max_capacity=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -210,7 +210,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_ip_address, private_ip_allocation, cert_data, cert_password,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
-        connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages)
+        connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
+        firewall_policy, max_capacity)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -235,21 +236,28 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
-def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
-                               custom_error_pages=None):
+def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
+                               custom_error_pages=None, max_capacity=None):
     if sku is not None:
-        instance.sku.name = sku
         instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
-    if capacity is not None:
-        instance.sku.capacity = capacity
-    if tags is not None:
-        instance.tags = tags
-    if enable_http2 is not None:
-        instance.enable_http2 = enable_http2
-    if min_capacity is not None:
-        instance.autoscale_configuration.min_capacity = min_capacity
-    if custom_error_pages is not None:
-        instance.custom_error_configurations = custom_error_pages
+
+    try:
+        if min_capacity is not None:
+            instance.autoscale_configuration.min_capacity = min_capacity
+        if max_capacity is not None:
+            instance.autoscale_configuration.max_capacity = max_capacity
+    except AttributeError:
+        instance.autoscale_configuration = {
+            'min_capacity': min_capacity,
+            'max_capacity': max_capacity
+        }
+
+    with cmd.update_context(instance) as c:
+        c.set_param('sku.name', sku)
+        c.set_param('sku.capacity', capacity)
+        c.set_param('tags', tags)
+        c.set_param('enable_http2', enable_http2)
+        c.set_param('custom_error_configurations', custom_error_pages)
     return instance
 
 
@@ -999,6 +1007,99 @@ def list_ag_waf_rule_sets(client, _type=None, version=None, group=None):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicy
+def create_ag_waf_policy(cmd, client, resource_group_name, policy_name, location=None, tags=None):
+    WebApplicationFirewallPolicy = cmd.get_models('WebApplicationFirewallPolicy')
+    waf_policy = WebApplicationFirewallPolicy(location=location, tags=tags)
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def update_ag_waf_policy(cmd, instance, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+    return instance
+
+
+def list_ag_waf_policies(cmd, resource_group_name=None):
+    return _generic_list(cmd.cli_ctx, 'web_application_firewall_policies', resource_group_name)
+# endregion
+
+
+# region ApplicationGatewayWAFPolicyRules
+def create_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, priority=None, rule_type=None,
+                       action=None):
+    WebApplicationFirewallCustomRule = cmd.get_models('WebApplicationFirewallCustomRule')
+    waf_policy = client.get(resource_group_name, policy_name)
+    new_rule = WebApplicationFirewallCustomRule(
+        name=rule_name,
+        action=action,
+        match_conditions=[],
+        priority=priority,
+        rule_type=rule_type
+    )
+    _upsert(waf_policy, 'custom_rules', new_rule, 'name')
+    parent = client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return find_child_item(parent, rule_name, path='custom_rules', key_path='name')
+
+
+# pylint: disable=unused-argument
+def update_ag_waf_rule(instance, parent, cmd, rule_name, priority=None, rule_type=None, action=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('priority', priority)
+        c.set_param('rule_type', rule_type)
+        c.set_param('action', action)
+    return parent
+
+
+def show_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+
+
+def list_ag_waf_rules(cmd, client, resource_group_name, policy_name):
+    return client.get(resource_group_name, policy_name).custom_rules
+
+
+def delete_ag_waf_rule(cmd, client, resource_group_name, policy_name, rule_name, no_wait=None):
+    waf_policy = client.get(resource_group_name, policy_name)
+    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+    waf_policy.custom_rules.remove(rule)
+    sdk_no_wait(no_wait, client.create_or_update, resource_group_name, policy_name, waf_policy)
+# endregion
+
+
+# region ApplicationGatewayWAFPolicyRuleMatchConditions
+def add_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, match_variables,
+                               operator, match_values, negation_condition=None, transforms=None):
+    MatchCondition = cmd.get_models('MatchCondition')
+    waf_policy = client.get(resource_group_name, policy_name)
+    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+    new_cond = MatchCondition(
+        match_variables=match_variables,
+        operator=operator,
+        match_values=match_values,
+        negation_conditon=negation_condition,
+        transforms=transforms
+    )
+    rule.match_conditions.append(new_cond)
+    _upsert(waf_policy, 'custom_rules', rule, 'name', warn=False)
+    client.create_or_update(resource_group_name, policy_name, waf_policy)
+    return new_cond
+
+
+def list_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name').match_conditions
+
+
+def remove_ag_waf_rule_match_cond(cmd, client, resource_group_name, policy_name, rule_name, index):
+    waf_policy = client.get(resource_group_name, policy_name)
+    rule = find_child_item(waf_policy, rule_name, path='custom_rules', key_path='name')
+    rule.match_conditions.pop(index)
+    client.create_or_update(resource_group_name, policy_name, waf_policy)
+# endregion
+
+
 # region ApplicationSecurityGroups
 def create_asg(cmd, client, resource_group_name, application_security_group_name, location=None, tags=None):
     ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup')
@@ -1010,7 +1111,6 @@ def update_asg(instance, tags=None):
     if tags is not None:
         instance.tags = tags
     return instance
-
 # endregion
 
 
@@ -1980,7 +2080,7 @@ def list_express_route_ports(cmd, resource_group_name=None):
 
 # region PrivateEndpoint
 def list_private_endpoints(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).interface_endpoints
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
@@ -2188,7 +2288,6 @@ def set_lb_frontend_ip_configuration(
         private_ip_address_allocation=None, public_ip_address=None, subnet=None,
         virtual_network_name=None, public_ip_prefix=None):
     PublicIPAddress, Subnet, SubResource = cmd.get_models('PublicIPAddress', 'Subnet', 'SubResource')
-    public_ip_address = PublicIPAddress(id=public_ip_address)
     if private_ip_address == '':
         instance.private_ip_allocation_method = 'dynamic'
         instance.private_ip_address = None
@@ -3021,7 +3120,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
         if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
             config.flow_analytics_configuration = None
     except AttributeError:
-        pass
+        config.flow_analytics_configuration = None
 
     with cmd.update_context(config) as c:
         c.set_param('enabled', enabled if enabled is not None else config.enabled)
@@ -3036,10 +3135,11 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
             'type': log_format,
             'version': log_version
         }
+
     if cmd.supported_api_version(min_api='2018-10-01') and \
             any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
-
         workspace = None
+
         if traffic_analytics_workspace:
             from azure.cli.core.commands.arm import get_arm_resource_by_id
             workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
@@ -3049,9 +3149,6 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
             if not workspace:
                 raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
                                '[--enabled {true|false}]')
-            # if not all([workspace, traffic_analytics_interval]):
-                # raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
-                #               '--interval INT [--enabled {true|false}]')
             if traffic_analytics_enabled is None:
                 traffic_analytics_enabled = True
             config.flow_analytics_configuration = {
@@ -3059,8 +3156,7 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
                     'enabled': traffic_analytics_enabled,
                     'workspace_id': workspace.properties['customerId'],
                     'workspace_region': workspace.location,
-                    'workspace_resource_id': traffic_analytics_workspace,
-                    # 'traffic_analytics_interval': traffic_analytics_interval,
+                    'workspace_resource_id': traffic_analytics_workspace
                 }
             }
         else:
@@ -3068,13 +3164,13 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
             with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
                 # update object
                 c.set_param('enabled', traffic_analytics_enabled)
-                # c.set_param('traffic_analytics_interval', traffic_analytics_interval)
                 if traffic_analytics_workspace == "":
                     config.flow_analytics_configuration = None
                 elif workspace:
                     c.set_param('workspace_id', workspace.properties['customerId'])
                     c.set_param('workspace_region', workspace.location)
                     c.set_param('workspace_resource_id', traffic_analytics_workspace)
+
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 

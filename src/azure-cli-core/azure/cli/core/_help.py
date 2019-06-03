@@ -266,6 +266,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
                 param_kwargs = {
                     'name_source': [action.metavar or action.dest],
                     'deprecate_info': getattr(action, 'deprecate_info', None),
+                    'preview_info': getattr(action, 'preview_info', None),
                     'description': action.help,
                     'choices': action.choices,
                     'required': False,

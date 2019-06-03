@@ -428,7 +428,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
-    image_data_disks_num = 0
+    image_data_disks = []
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
@@ -437,7 +437,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
             namespace.os_type = image_info.storage_profile.os_disk.os_type.value
-            image_data_disks_num = len(image_info.storage_profile.data_disks or [])
+            image_data_disks = image_info.storage_profile.data_disks or []
+            image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
         elif res['type'].lower() == 'galleries':
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
@@ -457,9 +458,11 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 image_version_info = compute_client.gallery_image_versions.get(
                     resource_group_name=res['resource_group'], gallery_name=res['name'],
                     gallery_image_name=res['child_name_1'], gallery_image_version_name=res['child_name_2'])
-            image_data_disks_num = len(image_version_info.storage_profile.data_disk_images or [])
+            image_data_disks = image_version_info.storage_profile.data_disk_images or []
+            image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
+
         else:
-            raise CLIError('usage error: unrecognized image informations "{}"'.format(namespace.image))
+            raise CLIError('usage error: unrecognized image information "{}"'.format(namespace.image))
 
         # pylint: disable=no-member
 
@@ -480,7 +483,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
     namespace.disk_info = normalize_disk_info(size=vm_size,
-                                              image_data_disks_num=image_data_disks_num,
+                                              image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
@@ -955,7 +958,7 @@ def validate_ssh_key(namespace):
         namespace.ssh_key_value = processed_ssh_key_values
     # if no ssh keys processed, try to generate new key / use existing at root.
     else:
-        namespace.ssh_key_value = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+        namespace.ssh_key_value = [_validate_ssh_key_helper("", namespace.generate_ssh_keys)]
 
 
 def _validate_ssh_key_helper(ssh_key_value, should_generate_ssh_keys):

@@ -70,8 +70,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-# TODO: revert to ScenarioTest once #9401 is addressed.
-class NetworkPrivateEndpoints(LiveScenarioTest):
+class NetworkPrivateEndpoints(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoints')
     def test_network_private_endpoints(self, resource_group):
@@ -227,7 +226,7 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
             'ip': 'pubip1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
-        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --zones 1 3 --public-ip-address {ip} --no-wait')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --sku Standard_v2 --min-capacity 2 --max-capacity 4 --zones 1 3 --public-ip-address {ip} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway show -g {rg} -n {gateway}', checks=[
             self.check('zones[0]', 1),
@@ -700,6 +699,56 @@ class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
             self.check('enabled', True),
             self.check('length(exclusions)', 2)
         ])
+
+
+class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy')
+    def test_network_app_gateway_waf_policy(self, resource_group):
+
+        self.kwargs.update({
+            'wafp': 'agp1',
+            'rule': 'rule1',
+            'ip': 'pip1',
+            'ag': 'ag1'
+        })
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {wafp}')
+        self.cmd('network application-gateway waf-policy update -g {rg} -n {wafp} --tags test=best',
+                 checks=self.check('tags.test', 'best'))
+        self.cmd('network application-gateway waf-policy show -g {rg} -n {wafp}')
+        self.cmd('network application-gateway waf-policy list -g {rg}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway waf-policy rule create -g {rg} --policy-name {wafp} -n {rule} --priority 50 --action log --rule-type matchrule',
+                 checks=self.check('priority', 50))
+        self.cmd('network application-gateway waf-policy rule create -g {rg} --policy-name {wafp} -n rule2 --priority 100 --action log --rule-type matchrule')
+        self.cmd('network application-gateway waf-policy rule update -g {rg} --policy-name {wafp} -n {rule} --priority 75',
+                 checks=self.check('priority', 75))
+        self.cmd('network application-gateway waf-policy rule show -g {rg} --policy-name {wafp} -n {rule}')
+        self.cmd('network application-gateway waf-policy rule list -g {rg} --policy-name {wafp}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network application-gateway waf-policy rule delete -g {rg} --policy-name {wafp} -n rule2')
+        self.cmd('network application-gateway waf-policy rule list -g {rg} --policy-name {wafp}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway waf-policy rule match-condition add -g {rg} --policy-name {wafp} -n {rule} --match-variables RequestHeaders.value --operator contains --values foo boo --transform lowercase')
+        self.cmd('network application-gateway waf-policy rule match-condition add -g {rg} --policy-name {wafp} -n {rule} --match-variables RequestHeaders.value --operator contains --values remove this --transform lowercase')
+        self.cmd('network application-gateway waf-policy rule match-condition remove -g {rg} --policy-name {wafp} -n {rule} --index 1')
+        self.cmd('network application-gateway waf-policy rule match-condition list -g {rg} --policy-name {wafp} -n {rule}', checks=[
+            self.check('length(@)', 1),
+            self.check('@[0].matchValues[0]', 'foo')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --waf-policy {wafp} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway show -g {rg} -n {ag}',
+                 checks=self.check("firewallPolicy.contains(id, '{wafp}')", True))
+        self.cmd('network application-gateway delete -g {rg} -n {ag}')
+
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {wafp}')
+        self.cmd('network application-gateway waf-policy list -g {rg}',
+                 checks=self.is_empty())
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
@@ -2331,8 +2380,8 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw', location='westcentralus')
     def test_network_watcher_configure(self, resource_group):
-        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
-        self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
+        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus eastus canadaeast --enabled')
+        self.cmd('network watcher configure --locations westus westus2 eastus canadaeast --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
 
@@ -2397,6 +2446,19 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace ""', checks=[
             self.check('flowAnalyticsConfiguration', None)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast')
+    def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'nsg': 'nsg1',
+            'sa': storage_account
+        })
+
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westcentralus')

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.8
++++++
+* Add 'acr pack' command group for creating quick build Tasks using Buildpacks.
+
 2.2.7
 +++++
 * Support Managed Identities for Task
