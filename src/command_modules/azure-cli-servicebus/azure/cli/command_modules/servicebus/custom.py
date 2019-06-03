@@ -85,7 +85,7 @@ def cli_namespaceautho_update(instance, rights):
 
 
 # Queue Region
-def cli_sbqueue_create(client, resource_group_name, namespace_name, queue_name, lock_duration=None,
+def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_name, lock_duration=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None, requires_session=None,
                        default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                        duplicate_detection_history_time_window=None, max_delivery_count=None, status=None,
@@ -93,6 +93,9 @@ def cli_sbqueue_create(client, resource_group_name, namespace_name, queue_name, 
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
     from azure.mgmt.servicebus.models import SBQueue
+
+    if max_size_in_megabytes:
+        cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
 
     queue_params = SBQueue(
         lock_duration=return_valid_duration_create(lock_duration),
@@ -177,17 +180,16 @@ def cli_sbqueue_update(instance, lock_duration=None,
 
 
 # Topic Region
-def cli_sbtopic_create(client, resource_group_name, namespace_name, topic_name, default_message_time_to_live=None,
+def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_name, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
     from azure.mgmt.servicebus.models import SBTopic
-    from knack.util import CLIError
+
     if max_size_in_megabytes:
-        getnamespace = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name)
-        if getnamespace.sku.name == 'Standard' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120]:
-            raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GB')
+        cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
+
     topic_params = SBTopic(
         default_message_time_to_live=return_valid_duration_create(default_message_time_to_live),
         max_size_in_megabytes=max_size_in_megabytes,
@@ -524,3 +526,18 @@ def cli_networkrule_delete(client, resource_group_name, namespace_name, subnet=N
             netwrokruleset.ip_rules.remove(ipruletodelete)
 
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+
+
+def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes):
+    from knack.util import CLIError
+    from azure.mgmt.servicebus import ServiceBusManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    nsclient = get_mgmt_service_client(cmd.cli_ctx, ServiceBusManagementClient).namespaces
+    getnamespace = nsclient.get(resource_group_name=resource_group_name, namespace_name=namespace_name)
+    if getnamespace.sku.name == 'Standard' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120]:
+        raise CLIError('--max-size on Standard sku namespace only supports upto [1024, 2048, 3072, 4096, 5120] GB')
+
+    if getnamespace.sku.name == 'Premium' and max_size_in_megabytes not in [1024, 2048, 3072, 4096, 5120, 10240, 20480,
+                                                                            40960, 81920]:
+        raise CLIError(
+            '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
