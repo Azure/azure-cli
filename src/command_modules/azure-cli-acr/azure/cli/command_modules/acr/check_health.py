@@ -14,12 +14,10 @@ from ._errors import ErrorClass
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
 IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
-FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/faq for more informations."
+FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/faq for more information."
 
 
 # Utilities functions
-
-
 def print_pass(message):
     from colorama import Fore, Style, init
     init()
@@ -57,17 +55,20 @@ def _subprocess_communicate(command_parts, shell=False):
     except CalledProcessError as e:
         stderr = str(e)
 
+    warning = None
+    if stderr.lower().startswith("warning"):
+        warning = stderr
+        stderr = None
+
     if stderr:
         stderr = "Failed to run command '{}'. {}".format(
             ' '.join(command_parts),
             stderr
         )
-    return output, stderr
+    return output, warning, stderr
 
 
 # Checks for the environment
-
-
 # Checks docker command, docker daemon, docker version and docker pull
 def _get_docker_status_and_version(ignore_errors, yes):
     from ._errors import DOCKER_DAEMON_ERROR, DOCKER_PULL_ERROR, DOCKER_VERSION_ERROR
@@ -87,10 +88,12 @@ def _get_docker_status_and_version(ignore_errors, yes):
         print("Docker daemon status: available")
 
     # Docker version check
-    output, stderr = _subprocess_communicate([docker_command, "--version"])
+    output, warning, stderr = _subprocess_communicate([docker_command, "--version"])
     if stderr:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
+        if warning:
+            print_warning(warning)
         print("Docker version: {}".format(output))
 
     # Docker pull check - only if docker daemon is available
@@ -102,11 +105,13 @@ def _get_docker_status_and_version(ignore_errors, yes):
                 print_warning("Skipping pull check.")
                 return
 
-        output, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
+        output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
 
         if stderr:
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
+            if warning:
+                print_warning(warning)
             if output.find(DOCKER_PULL_SUCCEEDED.format(IMAGE)) != -1 or \
                output.find(DOCKER_IMAGE_UP_TO_DATE.format(IMAGE)) != -1:
                 print_pass("Docker pull of '{}'".format(IMAGE))
@@ -116,8 +121,12 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
 # Get current CLI version
 def _get_cli_version():
+    acr_component_name = "azure-cli-acr"
+    from pkg_resources import working_set
+    for component in list(working_set):
+        if component.key == acr_component_name:
+            acr_cli_version = component.version
 
-    acr_cli_version = "2.2.8"
     print('ACR CLI version: {}'.format(acr_cli_version))
 
     return 0
@@ -135,12 +144,14 @@ def _get_helm_version(ignore_errors):
         return
 
     # Helm version check
-    output, stderr = _subprocess_communicate([helm_command, "version", "--client"])
+    output, warning, stderr = _subprocess_communicate([helm_command, "version", "--client"])
 
     if stderr:
         _handle_error(HELM_VERSION_ERROR.append_error_message(stderr), ignore_errors)
         return
 
+    if warning:
+        print_warning(warning)
     print("Helm version:\n{}".format(output))
 
 
@@ -156,9 +167,7 @@ def _check_health_environment(ignore_errors, yes):
 
 
 # Checks for the connectivity
-
-
-# Check DNS lookup
+# Check DNS lookup and access to challenge endpoint
 def _get_registry_status(login_server, ignore_errors):
     import socket
 
@@ -210,20 +219,20 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
             _handle_error(result_from_token, ignore_errors)
             return
 
-        print_pass("Obtain refresh token for registry '{}'".format(login_server))
+        print_pass("Fetch refresh token for registry '{}'".format(login_server))
 
         if result_from_token.error_title == CONNECTIVITY_ACCESS_TOKEN_ERROR.error_title:
             _handle_error(result_from_token, ignore_errors)
             return
 
-        print_pass("Obtain access token for registry '{}'".format(login_server))
+        print_pass("Fetch access token for registry '{}'".format(login_server))
 
         return
 
     # If return is not of type ErrorClass, then it is the token
     print_pass("Challenge endpoint {}".format(url))
-    print_pass("Obtain refresh token for registry '{}'".format(login_server))
-    print_pass("Obtain access token for registry '{}'".format(login_server))
+    print_pass("Fetch refresh token for registry '{}'".format(login_server))
+    print_pass("Fetch access token for registry '{}'".format(login_server))
 
 
 def _check_health_connectivity(cmd, registry_name, ignore_errors):
@@ -244,7 +253,6 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
             return
 
         login_server = registry_name + suffix
-        print_warning('Could not load login server for {}, using default {}.'.format(registry_name, login_server))
 
     status_validated = _get_registry_status(login_server, ignore_errors)
     if status_validated:
@@ -252,8 +260,6 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
 
 
 # General command
-
-
 def acr_check_health(cmd,  # pylint: disable useless-return
                      ignore_errors=False,
                      yes=False,

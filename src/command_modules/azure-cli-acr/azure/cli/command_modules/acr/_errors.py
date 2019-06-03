@@ -17,8 +17,8 @@ class ErrorClass:
     def get_error_message(self, additional_message=None):
         if additional_message:
             return "An error occurred: {}\n{}\n{}".format(self.error_title, self.error_message, additional_message)
-        else:
-            return "An error occurred: {}\n{}".format(self.error_title, self.error_message)
+
+        return "An error occurred: {}\n{}".format(self.error_title, self.error_message)
 
     def set_error_message(self, message):
         return ErrorClass(self.error_title, message)
@@ -31,8 +31,6 @@ class ErrorClass:
 
 
 # DOCKER ERRORS
-
-
 DOCKER_COMMAND_ERROR = ErrorClass(
     "DOCKER_COMMAND_ERROR",
     "Please verify if Docker client is installed and running."
@@ -53,13 +51,11 @@ DOCKER_VERSION_ERROR = ErrorClass(
 
 DOCKER_PULL_ERROR = ErrorClass(
     "DOCKER_PULL_ERROR",
-    "An error occurred while pulling a sample image. Please validate if all necessary components to pull an image are running properly."
+    "An error occurred while pulling a sample image. Please validate your network connection and verify if docker daemon is running properly."
 )
 
 
 # HELM ERRORS
-
-
 HELM_COMMAND_ERROR = ErrorClass(
     "HELM_COMMAND_ERROR",
     "Please verify if Helm is installed."
@@ -72,11 +68,9 @@ HELM_VERSION_ERROR = ErrorClass(
 
 
 # CONNECTIVITY ERRORS
-
-
 CONNECTIVITY_DNS_ERROR = ErrorClass(
     "CONNECTIVITY_DNS_ERROR",
-    "Failed to reach DNS for registry '{}'. Please check if the spelling is correct, if the CLI environment is on correct cloud and if you have the right permissions on it."
+    "Failed to reach DNS for registry '{}'. Please check if the spelling is correct, if the CLI environment is on correct cloud and your network connectivity."
 )
 
 
@@ -111,8 +105,6 @@ CONNECTIVITY_ACCESS_TOKEN_ERROR = ErrorClass(
 
 
 # GENERAL ERRORS
-
-
 LOGIN_SERVER_ERROR = ErrorClass(
     "LOGIN_SERVER_ERROR",
     "An error occurred while retrieving the login server for registry '{}'. Please check if the spelling is correct, if the CLI environment is on correct cloud and if you have the right permissions on it."

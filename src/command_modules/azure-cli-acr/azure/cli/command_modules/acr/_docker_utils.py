@@ -41,55 +41,15 @@ AAD_TOKEN_BASE_ERROR_MESSAGE = "Unable to get AAD authorization tokens with mess
 ADMIN_USER_BASE_ERROR_MESSAGE = "Unable to get admin user credentials with message"
 
 
-def _get_aad_token(cli_ctx,
-                   login_server,
-                   only_refresh_token,
-                   repository=None,
-                   artifact_repository=None,
-                   permission=None,
-                   is_diagnostics_context=False):
-    """Obtains refresh and access tokens for an AAD-enabled registry.
-    :param str login_server: The registry login server URL to log in to
-    :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
-    :param str repository: Repository for which the access token is requested
-    :param str artifact_repository: Artifact repository for which the access token is requested
-    :param str permission: The requested permission on the repository, '*' or 'pull'
-    """
-    if repository and artifact_repository:
-        raise ValueError("Only one of repository and artifact_repository can be provided.")
-
-    if (repository or artifact_repository) and permission not in ACCESS_TOKEN_PERMISSION:
-        raise ValueError(
-            "Permission is required for a repository or artifact_repository. Allowed access token permission: {}"
-            .format(ACCESS_TOKEN_PERMISSION))
-
-    login_server = login_server.rstrip('/')
-
-    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
-    if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
-        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
-        if is_diagnostics_context:
-            return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server).get_error_message())
-
-    authenticate = challenge.headers['WWW-Authenticate']
-
-    tokens = authenticate.split(' ', 2)
-    if len(tokens) < 2 or tokens[0].lower() != 'bearer':
-        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
-        if is_diagnostics_context:
-            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
-
-    params = {y[0]: y[1].strip('"') for y in
-              (x.strip().split('=', 2) for x in tokens[1].split(','))}
-    if 'realm' not in params or 'service' not in params:
-        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
-        if is_diagnostics_context:
-            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
-
-    authurl = urlparse(params['realm'])
+def _get_aad_token_after_challenge(cli_ctx,
+                                   token_params,
+                                   login_server,
+                                   only_refresh_token,
+                                   repository,
+                                   artifact_repository,
+                                   permission,
+                                   is_diagnostics_context):
+    authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
     from azure.cli.core._profile import Profile
@@ -99,7 +59,7 @@ def _get_aad_token(cli_ctx,
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
         'grant_type': 'access_token',
-        'service': params['service'],
+        'service': token_params['service'],
         'tenant': tenant,
         'access_token': creds[1]
     }
@@ -145,6 +105,63 @@ def _get_aad_token(cli_ctx,
                        .get_error_message())
 
     return loads(response.content.decode("utf-8"))["access_token"]
+
+def _get_aad_token(cli_ctx,
+                   login_server,
+                   only_refresh_token,
+                   repository=None,
+                   artifact_repository=None,
+                   permission=None,
+                   is_diagnostics_context=False):
+    """Obtains refresh and access tokens for an AAD-enabled registry.
+    :param str login_server: The registry login server URL to log in to
+    :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
+    :param str repository: Repository for which the access token is requested
+    :param str artifact_repository: Artifact repository for which the access token is requested
+    :param str permission: The requested permission on the repository, '*' or 'pull'
+    """
+    if repository and artifact_repository:
+        raise ValueError("Only one of repository and artifact_repository can be provided.")
+
+    if (repository or artifact_repository) and permission not in ACCESS_TOKEN_PERMISSION:
+        raise ValueError(
+            "Permission is required for a repository or artifact_repository. Allowed access token permission: {}"
+            .format(ACCESS_TOKEN_PERMISSION))
+
+    login_server = login_server.rstrip('/')
+
+    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
+    if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
+        from ._errors import CONNECTIVITY_CHALLENGE_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server).get_error_message())
+
+    authenticate = challenge.headers['WWW-Authenticate']
+
+    tokens = authenticate.split(' ', 2)
+    if len(tokens) < 2 or tokens[0].lower() != 'bearer':
+        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
+
+    token_params = {y[0]: y[1].strip('"') for y in
+                    (x.strip().split('=', 2) for x in tokens[1].split(','))}
+    if 'realm' not in token_params or 'service' not in token_params:
+        from ._errors import CONNECTIVITY_AAD_LOGIN_ERROR
+        if is_diagnostics_context:
+            return CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server)
+        raise CLIError(CONNECTIVITY_AAD_LOGIN_ERROR.format_error_message(login_server).get_error_message())
+
+    return _get_aad_token_after_challenge(cli_ctx,
+                                          token_params,
+                                          login_server,
+                                          only_refresh_token,
+                                          repository,
+                                          artifact_repository,
+                                          permission,
+                                          is_diagnostics_context)
 
 
 def _get_credentials(cmd,  # pylint: disable=too-many-statements
