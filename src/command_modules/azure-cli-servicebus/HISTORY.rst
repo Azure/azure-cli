@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.6
++++++
+* Fix for #9319 - az servicebus topic create --max-size
+
 0.3.5
 +++++
 * namespace: Added network-rule commands.
