@@ -377,7 +377,7 @@ class TestActions(unittest.TestCase):
         # error on configuring non-existing disks
         with self.assertRaises(CLIError) as err:
             normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
-        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
+        self.assertTrue("Data disk with lun of '0' doesn't exist" in str(err.exception))
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):

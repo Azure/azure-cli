@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.64"
+__version__ = "2.0.65"
 
 import os
 import sys
@@ -17,6 +17,7 @@ from knack.commands import CLICommandsLoader
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
+from knack.preview import PreviewItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 
@@ -419,6 +420,11 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             kwargs['command_type'] = command_type
         if 'deprecate_info' in kwargs:
             kwargs['deprecate_info'].target = group_name
+        if kwargs.get('is_preview', False):
+            kwargs['preview_info'] = PreviewItem(
+                target=group_name,
+                object_type='command group'
+            )
         return self._command_group_cls(self, group_name, **kwargs)
 
     def argument_context(self, scope, **kwargs):

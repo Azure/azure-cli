@@ -224,11 +224,15 @@ def _prompt_for_parameters(missing_parameters, fail_on_no_tty=True):  # pylint: 
 def _get_missing_parameters(parameters, template, prompt_fn):
     missing = _find_missing_parameters(parameters, template)
     if missing:
-        prompt_parameters = prompt_fn(missing)
-        for param_name in prompt_parameters:
-            parameters[param_name] = {
-                "value": prompt_parameters[param_name]
-            }
+        try:
+            prompt_parameters = prompt_fn(missing)
+            for param_name in prompt_parameters:
+                parameters[param_name] = {
+                    "value": prompt_parameters[param_name]
+                }
+        except NoTTYException:
+            raise CLIError("Missing input parameters: {}"
+                           .format(', '.join(sorted(missing.keys()))))
     return parameters
 
 

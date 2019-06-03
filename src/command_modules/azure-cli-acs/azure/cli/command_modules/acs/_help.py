@@ -380,7 +380,7 @@ short-summary: Download and install kubectl, the Kubernetes command-line tool.
 
 helps['aks install-connector'] = """
 type: command
-short-summary: (PREVIEW) Install the ACI Connector on a managed Kubernetes cluster.
+short-summary: Install the ACI Connector on a managed Kubernetes cluster.
 parameters:
   - name: --chart-url
     type: string
@@ -437,7 +437,7 @@ short-summary: List managed Kubernetes clusters.
 
 helps['aks remove-connector'] = """
 type: command
-short-summary: (PREVIEW) Remove the ACI Connector from a managed Kubernetes cluster.
+short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
 parameters:
   - name: --connector-name
     type: string
@@ -543,7 +543,7 @@ examples:
 
 helps['aks upgrade-connector'] = """
 type: command
-short-summary: (PREVIEW) Upgrade the ACI Connector on a managed Kubernetes cluster.
+short-summary: Upgrade the ACI Connector on a managed Kubernetes cluster.
 parameters:
   - name: --chart-url
     type: string

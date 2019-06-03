@@ -284,6 +284,11 @@ def validate_client_parameters(cmd, namespace):
     if not namespace.account_endpoint:
         namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
 
+    # Verify all values are populated and display readable error
+    if not all([namespace.account_name, namespace.account_key, namespace.account_endpoint]):
+        raise ValueError(
+            'usage error: --account-name NAME --account-key KEY --account-endpoint ENDPOINT')
+
     # Simple validation for account_endpoint
     if not (namespace.account_endpoint.startswith('https://') or
             namespace.account_endpoint.startswith('http://')):

@@ -9,6 +9,7 @@ import unittest
 
 from six.moves.urllib.request import pathname2url  # pylint: disable=import-error
 from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
+from six import assertRaisesRegex
 
 try:
     import unittest.mock as mock
@@ -193,6 +194,33 @@ class TestCustom(unittest.TestCase):
         }
 
         self.assertDictEqual(out_params, expected)
+
+    def test_resource_missing_parameters_no_tty(self):
+        template = {
+            "parameters": {
+                "def": {
+                    "type": "string",
+                    "defaultValue": "default"
+                },
+                "present": {
+                    "type": "string",
+                },
+                "missing": {
+                    "type": "string",
+                }
+            }
+        }
+        parameters = {
+            "present": {
+                "value": "foo"
+            }
+        }
+
+        def prompt_function(x):
+            from knack.prompting import NoTTYException
+            raise NoTTYException
+        with assertRaisesRegex(self, CLIError, "Missing input parameters: missing"):
+            _get_missing_parameters(parameters, template, prompt_function)
 
     def test_deployment_parameters(self):
 

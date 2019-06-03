@@ -221,6 +221,7 @@ def register_ids_argument(cli_ctx):
                         "no other 'Resource Id' arguments should be specified.",
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
+                'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
                 'nargs': '+',
                 'arg_group': group_name
             }

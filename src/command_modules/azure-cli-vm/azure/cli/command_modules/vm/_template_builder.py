@@ -784,7 +784,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         vmss_properties['platformFaultDomainCount'] = platform_fault_domain_count
 
     if ultra_ssd_enabled is not None:
-        vmss_properties['virtualMachineProfile']['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
+            vmss_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+        else:
+            vmss_properties['virtualMachineProfile']['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
 
     if proximity_placement_group:
         vmss_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}

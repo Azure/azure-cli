@@ -2,6 +2,14 @@
 
 Release History
 ===============
+
+* Deprecated ACS commands are now hidden from help view.
+
+2.4.3
+++++++
+* Allow enabling/disabling AKS kube-dashboard addon
+* Print a friendly message when subscription is not whitellisted to use Azure Red Hat OpenShift
+
 2.4.2
 ++++++
 * Fix 'az openshift create' command when used with customer aad client
