@@ -41,3 +41,13 @@ class EncodingFormat(Enum):
     """
     JSON = 'json'
     AVRO = 'avro'
+
+
+# pylint: disable=too-few-public-methods
+class UserRole(Enum):
+    """
+    Type of the user role for the repository key.
+    """
+    Admin = 'admin'
+    Reader = 'reader'
+    Contributer = 'contributer'

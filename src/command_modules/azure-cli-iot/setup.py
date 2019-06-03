@@ -62,6 +62,8 @@ setup(
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.operations',
+        'azure.cli.command_modules.iot.digitaltwinrepositoryprovisioningservice',
+        'azure.cli.command_modules.iot.digitaltwinrepositoryprovisioningservice.models',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

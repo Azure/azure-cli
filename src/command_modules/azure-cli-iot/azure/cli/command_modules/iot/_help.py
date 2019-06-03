@@ -7,6 +7,7 @@
 from knack.help_files import helps
 # pylint: disable=line-too-long, too-many-lines
 
+
 helps['iot'] = """
 type: group
 short-summary: Manage Internet of Things (IoT) assets.
@@ -16,6 +17,11 @@ long-summary: Comprehensive IoT data-plane functionality is available in the Azu
 helps['iot dps'] = """
 type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
+"""
+
+helps['iot pnp'] = """
+type: group
+short-summary: Manage DigitalTwin repository service. Provisions Repository and Access keys to a repository.
 """
 
 helps['iot dps access-policy'] = """
@@ -691,4 +697,113 @@ examples:
   - name: This fails over “myhub” from East US to West US.
     text: >
         az iot hub manual-failover -n myhub --fr "West US"
+"""
+
+helps['iot pnp repository'] = """
+type: group
+short-summary: Manage DigitalTwin repository.
+"""
+
+helps['iot pnp repository create'] = """
+type: command
+short-summary: Create a repository.
+examples:
+  - name: Create a new repository "myrepo"
+    text: >
+        az iot pnp repository create -e "https://provider.azureiotrepository-test.com" --name myrepo
+"""
+
+helps['iot pnp repository list'] = """
+type: command
+short-summary: Gets all the repositories metadata belong to the user's tenant.
+examples:
+  - name: Get all the repositories.
+    text: >
+        az iot pnp repository list -e "https://provider.azureiotrepository-test.com"
+"""
+
+helps['iot pnp repository show'] = """
+type: command
+short-summary: Gets the repository metadata for the given repository id.
+examples:
+  - name: Gets the repository metadata for the given repository id.
+    text: >
+        az iot pnp repository show -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222
+"""
+
+helps['iot pnp repository remove'] = """
+type: command
+short-summary: Deletes the repository for given repository id.
+examples:
+  - name: Deletes the repository for given repository id.
+    text: >
+        az iot pnp repository remove -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222
+"""
+
+helps['iot pnp repository update'] = """
+type: command
+short-summary: Updates a repository.
+examples:
+  - name: Updates a repository.
+    text: >
+        az iot pnp repository update -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --name updatedreponame
+"""
+
+helps['iot pnp repository get-provision-status'] = """
+type: command
+short-summary: Returns the repository provisioning status.
+examples:
+  - name: Returns the repository provisioning status.
+    text: >
+        az iot pnp repository get-provision-status -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --track-id  aaaabbbb11112222aaaabbbb1111333
+"""
+
+helps['iot pnp authkey'] = """
+type: group
+short-summary: Manage access keys to a repository.
+"""
+
+helps['iot pnp authkey create'] = """
+type: command
+short-summary: Creates a key for the given repository.
+examples:
+  - name: Creates a key for the given repository
+    text: >
+        az iot pnp authkey create -e "https://provider.azureiotrepository-test.com" --user-role Reader
+"""
+
+helps['iot pnp authkey list'] = """
+type: command
+short-summary: Gets all the keys associated to a repository.
+examples:
+  - name: Gets all the keys associated to a repository.
+    text: >
+        az iot pnp authkey list -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222
+"""
+
+helps['iot pnp authkey show'] = """
+type: command
+short-summary: Gets a key metadata information for the given key.
+examples:
+  - name: Gets a key metadata information for the given key.
+    text: >
+        az iot pnp authkey show -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --kid 12345
+"""
+
+helps['iot pnp authkey remove'] = """
+type: command
+short-summary: Deletes a key from the given repository.
+examples:
+  - name: Deletes a key from the given repository.
+    text: >
+        az iot pnp authkey remove -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --kid 12345
+"""
+
+helps['iot pnp authkey update'] = """
+type: command
+short-summary: Updates a key for the given repository.
+examples:
+  - name: Updates a key for the given repository.
+    text: >
+        az iot pnp authkey update -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --kid 12345 --user-role admin
 """

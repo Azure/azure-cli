@@ -6,6 +6,7 @@
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
+from ._client_factory import iot_pnp_service_factory
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -144,3 +145,19 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     # iot hub device stream commands
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory) as g:
         g.custom_command('show', 'iot_hub_devicestream_show')
+
+    # iot digital twin commands
+    with self.command_group('iot pnp repository', client_factory=iot_pnp_service_factory) as g:
+        g.custom_command('list', 'pnp_list_repository')
+        g.custom_show_command('show', 'pnp_get_repository')
+        g.custom_command('create', 'pnp_create_repository')
+        g.custom_command('remove', 'pnp_remove_repository')
+        g.custom_command('update', 'pnp_update_repository')
+        g.custom_command('get-provision-status', 'pnp_track_provision_status')
+
+    with self.command_group('iot pnp authkey', client_factory=iot_pnp_service_factory) as g:
+        g.custom_command('list', 'pnp_list_authkeys')
+        g.custom_show_command('show', 'pnp_get_authkeys')
+        g.custom_command('create', 'pnp_create_authkeys')
+        g.custom_command('remove', 'pnp_remove_authkeys')
+        g.custom_command('update', 'pnp_update_authkeys')
