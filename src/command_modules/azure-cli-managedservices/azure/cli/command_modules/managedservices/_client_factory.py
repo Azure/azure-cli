@@ -9,6 +9,7 @@ def cf_managedservices(cli_ctx, **_):
     from azure.mgmt.managedservices import ManagedServicesClient
     return get_mgmt_service_client(cli_ctx, ManagedServicesClient, subscription_bound=False)
 
+
 def cf_registration_definitions(cli_ctx, _):
     return cf_managedservices(cli_ctx).registration_definitions
 

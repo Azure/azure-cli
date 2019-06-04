@@ -24,10 +24,10 @@ helps['managedservices definitions create'] = """
              The managed by tenant id.
         - name: --principal-id
           long-summary: |
-             The principal id.       
-        - name: --role-definition-id  
+             The principal id.
+        - name: --role-definition-id
           long-summary: |
-             The role definition id.                          
+             The role definition id.
         - name: --api-version
           long-summary: |
              Optional: The API version to target.
@@ -51,7 +51,7 @@ helps['managedservices definitions create'] = """
              Optional: Used to override the default subscription.
         - name: --registration-definition-id
           long-summary: |
-             Optional:  Can be used to override the generated registration definition id.           
+             Optional:  Can be used to override the generated registration definition id.
     examples:
         - name: Creates a registration definition under the default subscription scope with the required parameters.
           text: az managedservices definitions create --name mydef --managed-by-tenant-id dab3375b-6197-4a15-a44b-16c41faa91d7 --principal-id b6f6c88a-5b7a-455e-ba40-ce146d4d3671 --role-definition-id ccdd72a7-3385-48ef-bd42-f606fba81ae7
@@ -96,7 +96,7 @@ helps['managedservices definitions delete'] = """
         - name: Deletes the registration definition given its identifier and subscription id.
           text: az managedservices definitions delete --name-or-id af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd --subscription 39033314-9b39-4c7b-84fd-0e26e55f15dc
         - name: Deletes the registration definition given its fully qualified resource id.
-          text: az managedservices definitions delete --name-or-id /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec           
+          text: az managedservices definitions delete --name-or-id /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec
 """
 
 helps['managedservices definitions list'] = """
@@ -216,5 +216,5 @@ helps['managedservices assignments list'] = """
         - name: Lists all the registration assignments under the given subscription and resource group.
           text: az managedservices assignments list --subscription 06bff45d-bf7d-4c1f-b826-f95cd6f34f4a --resource-group mygroup
         - name: Lists all the registration assignments under the default scope along with the associated registration definition details.
-          text: az managedservices assignments list --expand-registration-definition               
+          text: az managedservices assignments list --expand-registration-definition
 """
