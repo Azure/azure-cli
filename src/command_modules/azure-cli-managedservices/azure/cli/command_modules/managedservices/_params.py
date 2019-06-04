@@ -9,10 +9,6 @@ from azure.cli.core.commands.parameters import get_resource_name_completion_list
 
 
 def load_arguments(self, _):
-    #with self.argument_context('managedservices') as c:
-    #    c.ignore('_subscription')  # hide global subscription param
-    #    c.ignore('subscription')  # hide global subscription param
-
     with self.argument_context('managedservices definitions') as c:
         c.argument('name_or_id', id_part='child_name_1',
                    help='The registration definition name or the fully qualified resource id.')

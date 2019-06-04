@@ -126,7 +126,8 @@ def cli_assignment_get(cmd, client,
         if not bool(expand_registration_definition):
             raise ValueError("expand_registration_definition should either be set to True or False")
 
-    registration_assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, name_or_id, subscription, resource_group_name)
+    registration_assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, name_or_id, subscription,
+                                                                         resource_group_name)
     scope = _get_scope(sub_id, rg_name)
     return client.get(
         scope=scope,
@@ -187,7 +188,7 @@ def _get_api_version(api_version=None):
 
 
 def _get_resource_id_parts(cmd, name_or_id, subscription=None, resource_group_name=None):
-    rg_name=None
+    rg_name = None
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)
         sub_id = id_parts['subscription']

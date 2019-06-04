@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 
 # pylint: disable=line-too-long
-from azure.cli.command_modules.managedservices._client_factory import cf_registration_definitions,cf_registration_assignments
+from azure.cli.command_modules.managedservices._client_factory import cf_registration_definitions, cf_registration_assignments
 
 
 def load_command_table(self, _):
@@ -19,7 +19,7 @@ def load_command_table(self, _):
         client_factory=cf_registration_assignments)
 
     with self.command_group('managedservices definitions', msp_registration_definitions) as g:
-        g.custom_command('create','cli_definition_create', client_factory=cf_registration_definitions)
+        g.custom_command('create', 'cli_definition_create', client_factory=cf_registration_definitions)
         g.custom_show_command('show', 'cli_definition_get', client_factory=cf_registration_definitions)
         g.custom_command('list', 'cli_definition_list', client_factory=cf_registration_definitions)
         g.custom_command('delete', 'cli_definition_delete', client_factory=cf_registration_definitions)

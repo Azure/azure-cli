@@ -22,9 +22,9 @@ helps['managedservices definitions create'] = """
         - name: --managed-by-tenant-id
           long-summary: |
              The managed by tenant id.
-        - name: --principal-id 
+        - name: --principal-id
           long-summary: |
-             The principal id.             
+             The principal id.       
         - name: --role-definition-id  
           long-summary: |
              The role definition id.                          
@@ -47,7 +47,7 @@ helps['managedservices definitions create'] = """
           long-summary: |
              Optional: The plan version.
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional: Used to override the default subscription.
         - name: --registration-definition-id
           long-summary: |
@@ -66,9 +66,9 @@ helps['managedservices definitions show'] = """
     parameters:
         - name: --api-version
           long-summary: |
-             Optional: The API version to target.   
+             Optional: The API version to target.
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
     examples:
         - name: Gets the registration definition given its identifier under the default subscription scope.
@@ -86,9 +86,9 @@ helps['managedservices definitions delete'] = """
     parameters:
         - name: --api-version
           long-summary: |
-             Optional: The API version to target.   
+             Optional: The API version to target.
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
     examples:
         - name: Deletes the registration definition given its identifier under the default subscription scope.
@@ -96,7 +96,7 @@ helps['managedservices definitions delete'] = """
         - name: Deletes the registration definition given its identifier and subscription id.
           text: az managedservices definitions delete --name-or-id af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd --subscription 39033314-9b39-4c7b-84fd-0e26e55f15dc
         - name: Deletes the registration definition given its fully qualified resource id.
-          text: az managedservices definitions delete --name-or-id /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec             
+          text: az managedservices definitions delete --name-or-id /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec           
 """
 
 helps['managedservices definitions list'] = """
@@ -106,9 +106,9 @@ helps['managedservices definitions list'] = """
     parameters:
         - name: --api-version
           long-summary: |
-             Optional: The API version to target.   
+             Optional: The API version to target.
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
     examples:
         - name: Lists all the registration definitions under the default subscription scope.
@@ -126,17 +126,17 @@ helps['managedservices assignments create'] = """
           long-summary: |
              The fully qualified resource id of the registration definition.
         - name: --registration-assignment-id
-          long-summary: | 
+          long-summary: |
              Optional: Can be used to override the generated registration assignment id.
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
         - name: --resource-group -g
-          long-summary: | 
+          long-summary: |
              Optional. When provided the assignment will be created under the resource group scope. Ex: /subscriptions/id/resourceGroups/rgName/
         - name: --api-version
           long-summary: |
-             Optional: The API version to target.             
+             Optional: The API version to target.
     examples:
         - name: Create an assignment under the default subscription scope.
           text: az managedservices assignments create --registration-definition-id "/subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationDefinitions/0c3e9687-b461-4615-b6e4-74d54998d6e4"
@@ -150,10 +150,10 @@ helps['managedservices assignments show'] = """
     long-summary: Gets the registration assignment given its identifier (guid) or the fully qualified resource id. When resource id is used, subscription id and resource group parameters are ignored.
     parameters:
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
         - name: --resource-group -g
-          long-summary: | 
+          long-summary: |
              Optional. When provided the assignment will be created under the resource group scope. Ex: /subscriptions/id/resourceGroups/rgName/
         - name: --api-version
           long-summary: |
@@ -176,10 +176,10 @@ helps['managedservices assignments delete'] = """
     long-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id. When resource id is used, subscription id and resource group parameters are ignored.
     parameters:
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
         - name: --resource-group -g
-          long-summary: | 
+          long-summary: |
              Optional. When provided the assignment will be created under the resource group scope. Ex: /subscriptions/id/resourceGroups/rgName/
         - name: --api-version
           long-summary: |
@@ -197,17 +197,17 @@ helps['managedservices assignments list'] = """
     long-summary: List all the registration assignments. Subscription id and resource group parameters can be used to override default values.
     parameters:
         - name: --subscription
-          long-summary: | 
+          long-summary: |
              Optional, but can be used to override the default subscription.
         - name: --resource-group -g
-          long-summary: | 
+          long-summary: |
              Optional. When provided the assignment will be created under the resource group scope. Ex: /subscriptions/id/resourceGroups/rgName/
         - name: --api-version
           long-summary: |
              Optional: The API version to target.
         - name: --expand-registration-definition
           long-summary: |
-            Optional: When provided, gets the associated registration definition details.             
+            Optional: When provided, gets the associated registration definition details.
     examples:
         - name: Lists all the registration assignments under the default scope.
           text: az managedservices assignments list
@@ -216,5 +216,5 @@ helps['managedservices assignments list'] = """
         - name: Lists all the registration assignments under the given subscription and resource group.
           text: az managedservices assignments list --subscription 06bff45d-bf7d-4c1f-b826-f95cd6f34f4a --resource-group mygroup
         - name: Lists all the registration assignments under the default scope along with the associated registration definition details.
-          text: az managedservices assignments list --expand-registration-definition                    
+          text: az managedservices assignments list --expand-registration-definition               
 """
