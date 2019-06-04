@@ -7,7 +7,7 @@
 
 from __future__ import print_function
 from codecs import open
-from setuptools import setup
+from setuptools import setup, find_packages
 
 try:
     from azure_bdist_wheel import cmdclass
@@ -134,10 +134,7 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    packages=[
-        'azure',
-        'azure.cli',
-    ],
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
 )
