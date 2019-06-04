@@ -3,9 +3,10 @@
 Release History
 ===============
 
-2.2.8
+2.2.9
 +++++
 * Add 'az acr check-health' command.
+* Fix error handling for aad tokens, docker command and error command.
 
 2.2.8
 +++++
