@@ -11,6 +11,16 @@ helps['managedservices'] = """
     short-summary: Manage the registration assignments and definitions in Azure.
 """
 
+helps['managedservices definitions'] = """
+    type: group
+    short-summary: Manage the registration definitions in Azure.
+"""
+
+helps['managedservices assignments'] = """
+    type: group
+    short-summary: Manage the registration assignments in Azure.
+"""
+
 helps['managedservices definitions create'] = """
     type: command
     short-summary: Creates a new registration definition.
