@@ -441,6 +441,18 @@ type: group
 short-summary: Manage Azure Active Directory users and user authentication.
 """
 
+helps['ad user create'] = """
+type: command
+short-summary: Create an Azure Active Directory user.
+parameters:
+    - name: --force-change-password-next-login
+      short-summary: |
+        Marks this user as needing to update their password the next time they
+        authenticate.
+    - name: --password
+      short-summary: The password that should be assigned to the user for authentication.
+"""
+
 helps['ad user get-member-groups'] = """
 type: command
 short-summary: Get groups of which the user is a member
