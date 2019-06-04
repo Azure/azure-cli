@@ -63,7 +63,6 @@ COMMAND_MODULES = [
     'azure-cli-billing',
     'azure-cli-botservice',
     'azure-cli-cdn',
-    'azure-cli-cloud',
     'azure-cli-cognitiveservices',
     'azure-cli-configure',
     'azure-cli-consumption',
