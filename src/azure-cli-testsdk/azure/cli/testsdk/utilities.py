@@ -49,6 +49,16 @@ def force_progress_logging():
     az_logger.handlers[0].level = old_az_level
 
 
+def _py3_byte_to_str(byte_or_str):
+    import logging
+    logger = logging.getLogger()
+    logger.warning(type(byte_or_str))
+    try:
+        return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
+    except TypeError:  # python 2 doesn't allow decoding through str
+        return str(byte_or_str)
+
+
 class StorageAccountKeyReplacer(RecordingProcessor):
     """Replace the access token for service principal authentication in a response body."""
 
@@ -72,10 +82,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
             pass
         for candidate in self._candidates:
             if request.body:
-                try:
-                    body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
-                except TypeError:  # python 2 doesn't allow decoding through str
-                    body_string = str(request.body)
+                body_string = _py3_byte_to_str(request.body)
                 request.body = body_string.replace(candidate, self.KEY_REPLACEMENT)
         return request
 
@@ -93,7 +100,7 @@ class StorageAccountKeyReplacer(RecordingProcessor):
         for candidate in self._candidates:
             if response['body']['string']:
                 body = response['body']['string']
-                response['body']['string'] = str(body, 'utf-8') if isinstance(body, bytes) else body
+                response['body']['string'] = _py3_byte_to_str(body)
                 response['body']['string'] = response['body']['string'].replace(candidate, self.KEY_REPLACEMENT)
         return response
 
@@ -121,14 +128,11 @@ class GraphClientPasswordReplacer(RecordingProcessor):
             pattern = r"[^/]+/applications$"
             if re.search(pattern, request.path, re.I) and request.method.lower() == 'post':
                 self._activated = True
-                try:
-                    body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
-                except TypeError:  # python 2 doesn't allow decoding through str
-                    body = str(request.body)
+                body = _py3_byte_to_str(request.body)
                 body = json.loads(body)
                 for password_cred in body['passwordCredentials']:
                     if password_cred['value']:
-                        body_string = str(request.body, 'utf-8') if isinstance(request.body, bytes) else request.body
+                        body_string = _py3_byte_to_str(request.body)
                         request.body = body_string.replace(password_cred['value'], self.PWD_REPLACEMENT)
 
         except (AttributeError, KeyError):
@@ -165,10 +169,7 @@ class AADGraphUserReplacer:
             request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
 
         if request.body:
-            try:
-                body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
-            except TypeError:  # python 2 doesn't allow decoding through str
-                body = str(request.body)
+            body = _py3_byte_to_str(request.body)
             if self.test_user in body:
                 request.body = body.replace(self.test_user, self.mock_user)
 
