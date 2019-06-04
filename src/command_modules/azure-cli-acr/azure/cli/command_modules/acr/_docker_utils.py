@@ -106,6 +106,7 @@ def _get_aad_token_after_challenge(cli_ctx,
 
     return loads(response.content.decode("utf-8"))["access_token"]
 
+
 def _get_aad_token(cli_ctx,
                    login_server,
                    only_refresh_token,
