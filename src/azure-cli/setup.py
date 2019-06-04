@@ -51,7 +51,7 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
 ]
 
-DEPENDENCIES = [
+COMMAND_MODULES = [
     'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-advisor',
@@ -65,11 +65,9 @@ DEPENDENCIES = [
     'azure-cli-cdn',
     'azure-cli-cloud',
     'azure-cli-cognitiveservices',
-    'azure-cli-command_modules-nspkg',
     'azure-cli-configure',
     'azure-cli-consumption',
     'azure-cli-container',
-    'azure-cli-core',
     'azure-cli-cosmosdb',
     'azure-cli-deploymentmanager',
     'azure-cli-dla',
@@ -109,8 +107,15 @@ DEPENDENCIES = [
     'azure-cli-sql',
     'azure-cli-sqlvm',
     'azure-cli-storage',
-    'azure-cli-telemetry',
     'azure-cli-vm',
+]
+
+
+DEPENDENCIES = [
+    'azure-cli-command_modules-nspkg~=2.0',
+    'azure-cli-core',
+    'azure-cli-telemetry>=1.0.2,<2.0',
+    'knack~=0.6.2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -135,6 +140,6 @@ setup(
         'az.bat',
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-    install_requires=DEPENDENCIES,
+    install_requires=COMMAND_MODULES + DEPENDENCIES,
     cmdclass=cmdclass
 )
