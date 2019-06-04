@@ -115,7 +115,12 @@ DEPENDENCIES = [
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core',
     'azure-cli-telemetry>=1.0.2,<2.0',
+    'azure-graphrbac~=0.60.0',
+    'azure-keyvault~=1.1',
+    'azure-mgmt-authorization~=0.50.0',
+    'azure-mgmt-monitor~=0.5.2',
     'knack~=0.6.2',
+    'pytz==2019.1',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
