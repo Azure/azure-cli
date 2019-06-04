@@ -212,7 +212,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('create', 'create_container',
                                 transform=create_boolean_result_output_transformer('created'),
                                 table_transformer=transform_boolean_for_table)
-        g.storage_command_oauth('generate-sas', 'generate_container_shared_access_signature')
+        g.storage_command('generate-sas', 'generate_container_shared_access_signature')
         g.storage_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'),
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('set-permission', 'set_container_acl')
