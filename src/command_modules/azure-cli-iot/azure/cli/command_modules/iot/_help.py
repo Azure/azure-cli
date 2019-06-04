@@ -769,7 +769,7 @@ short-summary: Creates a key for the given repository.
 examples:
   - name: Creates a key for the given repository
     text: >
-        az iot pnp authkey create -e "https://provider.azureiotrepository-test.com" --user-role Reader
+        az iot pnp authkey create -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --user-role Reader
 """
 
 helps['iot pnp authkey list'] = """
