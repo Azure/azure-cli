@@ -57,7 +57,7 @@ helps['network nat gateway update'] = """
     short-summary: Update a NAT gateway.
     examples:
       - name: Update a NAT gateway.
-        text: az network nat gateway update -g MyResourceGroup --name MyNatGateway --idle-timeout 5 --zone 2
+        text: az network nat gateway update -g MyResourceGroup --name MyNatGateway --idle-timeout 5
 """
 
 helps['network nat gateway wait'] = """
