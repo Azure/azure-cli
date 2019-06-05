@@ -4,20 +4,24 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-from six.moves.urllib.parse import quote  # pylint: disable=import-error
+from six.moves.urllib.parse import quote  # pylint: disable=import-error,relative-import
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
+from dateutil.parser import parse   # pylint: disable=import-error,relative-import
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionUpdateParameters,
     WebHookEventSubscriptionDestination,
+    Topic,
+    Domain,
     RetryPolicy,
     EventHubEventSubscriptionDestination,
     StorageQueueEventSubscriptionDestination,
     HybridConnectionEventSubscriptionDestination,
+    ServiceBusQueueEventSubscriptionDestination,
     StorageBlobDeadLetterDestination,
     EventSubscriptionFilter)
 
@@ -27,21 +31,35 @@ EVENTGRID_NAMESPACE = "Microsoft.EventGrid"
 RESOURCES_NAMESPACE = "Microsoft.Resources"
 SUBSCRIPTIONS = "subscriptions"
 RESOURCE_GROUPS = "resourcegroups"
+EVENTGRID_DOMAINS = "domains"
 EVENTGRID_TOPICS = "topics"
+EVENTGRID_DOMAIN_TOPICS = "domaintopics"
 WEBHOOK_DESTINATION = "webhook"
 EVENTHUB_DESTINATION = "eventhub"
 STORAGEQUEUE_DESTINATION = "storagequeue"
 HYBRIDCONNECTION_DESTINATION = "hybridconnection"
+SERVICEBUSQUEUE_DESTINATION = "servicebusqueue"
 GLOBAL = "global"
+
+# Constants for the target field names of the mapping
+TOPIC = "topic"
+SUBJECT = "subject"
+ID = "id"
+EVENTTIME = "eventtime"
+EVENTTYPE = "eventtype"
+DATAVERSION = "dataversion"
+DEFAULT_TOP = 100
 
 
 def cli_topic_list(
         client,
-        resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
+        resource_group_name=None,
+        odata_query=None):
 
-    return client.list_by_subscription()
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name, odata_query, DEFAULT_TOP)
+
+    return client.list_by_subscription(odata_query, DEFAULT_TOP)
 
 
 def cli_topic_create_or_update(
@@ -50,15 +68,70 @@ def cli_topic_create_or_update(
         topic_name,
         location,
         tags=None):
-    async_topic_create = client.create_or_update(
+    topic_info = Topic(
+        location=location,
+        tags=tags)
+    return client.create_or_update(
         resource_group_name,
         topic_name,
+        topic_info)
+
+
+def cli_domain_list(
+        client,
+        resource_group_name=None,
+        odata_query=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name, odata_query, DEFAULT_TOP)
+
+    return client.list_by_subscription(odata_query, DEFAULT_TOP)
+
+
+def cli_domain_create_or_update(
+        client,
+        resource_group_name,
+        domain_name,
         location,
-        tags)
+        tags=None):
+    domain_info = Domain(
+        location=location,
+        tags=tags)
 
-    created_topic = async_topic_create.result()
+    return client.create_or_update(
+        resource_group_name,
+        domain_name,
+        domain_info)
 
-    return created_topic
+
+def cli_domain_topic_create_or_update(
+        client,
+        resource_group_name,
+        domain_name,
+        domain_topic_name):
+    return client.create_or_update(
+        resource_group_name,
+        domain_name,
+        domain_topic_name)
+
+
+def cli_domain_topic_delete(
+        client,
+        resource_group_name,
+        domain_name,
+        domain_topic_name):
+    return client.delete(
+        resource_group_name,
+        domain_name,
+        domain_topic_name)
+
+
+def cli_domain_topic_list(
+        client,
+        resource_group_name,
+        domain_name,
+        odata_query=None):
+    return client.list_by_domain(resource_group_name, domain_name, odata_query, DEFAULT_TOP)
 
 
 def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
@@ -78,7 +151,18 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         max_delivery_attempts=30,
         event_ttl=1440,
         deadletter_endpoint=None,
-        labels=None):
+        labels=None,
+        expiration_date=None,
+        advanced_filter=None):
+
+    if included_event_types is not None and len(included_event_types) == 1 and included_event_types[0].lower() == 'all':
+        logger.warning('The usage of \"All\" for --included-event-types is not allowed starting from Azure Event Grid'
+                       ' API Version 2019-02-01-preview. However, the call here is still permitted by replacing'
+                       ' \"All\" with None in order to return all the event types (for the custom topics and'
+                       ' domains case) or default event types (for other topic types case). In any future calls,'
+                       ' please consider leaving --included-event-types unspecified or use None instead.')
+        included_event_types = None
+
     scope = _get_scope_for_event_subscription(
         cli_ctx=cmd.cli_ctx,
         source_resource_id=source_resource_id,
@@ -98,17 +182,22 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
         subject_begins_with=subject_begins_with,
         subject_ends_with=subject_ends_with,
         included_event_types=included_event_types,
-        is_subject_case_sensitive=is_subject_case_sensitive)
+        is_subject_case_sensitive=is_subject_case_sensitive,
+        advanced_filters=advanced_filter)
 
     deadletter_destination = None
     if deadletter_endpoint is not None:
         deadletter_destination = _get_deadletter_destination(deadletter_endpoint)
+
+    if expiration_date is not None:
+        expiration_date = parse(expiration_date)
 
     event_subscription_info = EventSubscription(
         destination=destination,
         filter=event_subscription_filter,
         labels=labels,
         retry_policy=retry_policy,
+        expiration_time_utc=expiration_date,
         dead_letter_destination=deadletter_destination)
 
     _warn_if_manual_handshake_needed(endpoint_type, endpoint)
@@ -116,7 +205,7 @@ def cli_eventgrid_event_subscription_create(   # pylint: disable=too-many-locals
     return client.create_or_update(
         scope,
         event_subscription_name,
-        event_subscription_info).result()
+        event_subscription_info)
 
 
 def cli_eventgrid_event_subscription_delete(
@@ -133,10 +222,9 @@ def cli_eventgrid_event_subscription_delete(
         resource_id=resource_id,
         topic_name=topic_name,
         resource_group_name=resource_group_name)
-    async_event_subscription_delete = client.delete(
+    return client.delete(
         scope,
         event_subscription_name)
-    return async_event_subscription_delete.result()
 
 
 def event_subscription_setter(
@@ -154,13 +242,10 @@ def event_subscription_setter(
         resource_id=resource_id,
         topic_name=topic_name,
         resource_group_name=resource_group_name)
-
-    async_event_subscription_update = client.update(
+    return client.update(
         scope,
         event_subscription_name,
         parameters)
-    updated_event_subscription = async_event_subscription_update.result()
-    return updated_event_subscription
 
 
 def cli_eventgrid_event_subscription_get(
@@ -195,7 +280,8 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
         topic_name=None,
         resource_group_name=None,
         location=None,
-        topic_type_name=None):
+        topic_type_name=None,
+        odata_query=None):
     if source_resource_id is not None:
         # If Source Resource ID is specified, we need to list event subscriptions for that particular resource.
         # Since a full resource ID is specified, it should override all other defaults such as default location and RG
@@ -204,7 +290,7 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
             raise CLIError('usage error: Since --source-resource-id is specified, none of the other parameters must '
                            'be specified.')
 
-        return _list_event_subscriptions_by_resource_id(client, source_resource_id)
+        return _list_event_subscriptions_by_resource_id(client, source_resource_id, odata_query, DEFAULT_TOP)
 
     if resource_id is not None:
         # DEPRECATED
@@ -215,7 +301,7 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
             raise CLIError('usage error: Since --resource-id is specified, none of the other parameters must '
                            'be specified.')
 
-        return _list_event_subscriptions_by_resource_id(client, resource_id)
+        return _list_event_subscriptions_by_resource_id(client, resource_id, odata_query, DEFAULT_TOP)
 
     if topic_name:
         # DEPRECATED
@@ -226,10 +312,13 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
             resource_group_name,
             EVENTGRID_NAMESPACE,
             EVENTGRID_TOPICS,
-            topic_name)
+            topic_name,
+            odata_query,
+            DEFAULT_TOP)
 
     if location is None:
-        # Since resource-id was not specified, location must be specified: e.g. "westus2" or "global". If not error OUT.
+        # Since resource-id was not specified, location must be specified: e.g. "westus2" or "global". If not error
+        # OUT.
         raise CLIError('usage error: --source-resource-id ID | --location LOCATION'
                        ' [--resource-group RG] [--topic-type-name TOPIC_TYPE_NAME]')
 
@@ -237,12 +326,12 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
         # No topic-type is specified: return event subscriptions across all topic types for this location.
         if location.lower() == GLOBAL.lower():
             if resource_group_name:
-                return client.list_global_by_resource_group(resource_group_name)
-            return client.list_global_by_subscription()
+                return client.list_global_by_resource_group(resource_group_name, odata_query, DEFAULT_TOP)
+            return client.list_global_by_subscription(odata_query, DEFAULT_TOP)
 
         if resource_group_name:
-            return client.list_regional_by_resource_group(resource_group_name, location)
-        return client.list_regional_by_subscription(location)
+            return client.list_regional_by_resource_group(resource_group_name, location, odata_query, DEFAULT_TOP)
+        return client.list_regional_by_subscription(location, odata_query, DEFAULT_TOP)
 
     # Topic type name is specified
     if location.lower() == GLOBAL.lower():
@@ -253,12 +342,25 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
                            'as westus. Global can be used only for global topic types: '
                            'Microsoft.Resources.Subscriptions and Microsoft.Resources.ResourceGroups.')
         if resource_group_name:
-            return client.list_global_by_resource_group_for_topic_type(resource_group_name, topic_type_name)
-        return client.list_global_by_subscription_for_topic_type(topic_type_name)
+            return client.list_global_by_resource_group_for_topic_type(
+                resource_group_name,
+                topic_type_name,
+                odata_query,
+                DEFAULT_TOP)
+        return client.list_global_by_subscription_for_topic_type(topic_type_name, odata_query, DEFAULT_TOP)
 
     if resource_group_name:
-        return client.list_regional_by_resource_group_for_topic_type(resource_group_name, location, topic_type_name)
-    return client.list_regional_by_subscription_for_topic_type(location, topic_type_name)
+        return client.list_regional_by_resource_group_for_topic_type(
+            resource_group_name,
+            location,
+            topic_type_name,
+            odata_query,
+            DEFAULT_TOP)
+    return client.list_regional_by_subscription_for_topic_type(
+        location,
+        topic_type_name,
+        odata_query,
+        DEFAULT_TOP)
 
 
 def _get_scope(
@@ -409,6 +511,8 @@ def _get_endpoint_destination(endpoint_type, endpoint):
         destination = HybridConnectionEventSubscriptionDestination(resource_id=endpoint)
     elif endpoint_type.lower() == STORAGEQUEUE_DESTINATION.lower():
         destination = _get_storage_queue_destination(endpoint)
+    elif endpoint_type.lower() == SERVICEBUSQUEUE_DESTINATION.lower():
+        destination = ServiceBusQueueEventSubscriptionDestination(resource_id=endpoint)
 
     return destination
 
@@ -426,7 +530,10 @@ def _get_storage_queue_destination(endpoint):
                        '/subscriptions/id/resourceGroups/rg/providers/Microsoft.Storage/' +
                        'storageAccounts/sa1/queueServices/default/queues/queueName')
 
-    return StorageQueueEventSubscriptionDestination(resource_id=queue_items[0], queue_name=queue_items[1])
+    destination = StorageQueueEventSubscriptionDestination(
+        resource_id=queue_items[0], queue_name=queue_items[1])
+
+    return destination
 
 
 def _get_deadletter_destination(deadletter_endpoint):
@@ -466,7 +573,7 @@ def _warn_if_manual_handshake_needed(endpoint_type, endpoint):
                        'please visit http://aka.ms/esvalidation')
 
 
-def _list_event_subscriptions_by_resource_id(client, resource_id):
+def _list_event_subscriptions_by_resource_id(client, resource_id, oDataQuery, top):
     # parse_resource_id doesn't handle resource_ids for Azure subscriptions and RGs
     # so, first try to look for those two patterns.
     if resource_id is not None:
@@ -483,7 +590,10 @@ def _list_event_subscriptions_by_resource_id(client, resource_id):
                 provided_subscription_id=subscription_id)
 
             if len(id_parts) == 2:
-                return client.list_global_by_subscription_for_topic_type("Microsoft.Resources.Subscriptions")
+                return client.list_global_by_subscription_for_topic_type(
+                    "Microsoft.Resources.Subscriptions",
+                    oDataQuery,
+                    top)
 
             if len(id_parts) == 4 and id_parts[2].lower() == "resourcegroups":
                 resource_group_name = id_parts[3]
@@ -493,7 +603,9 @@ def _list_event_subscriptions_by_resource_id(client, resource_id):
                                    ' resource group must be provided.')
                 return client.list_global_by_resource_group_for_topic_type(
                     resource_group_name,
-                    "Microsoft.Resources.ResourceGroups")
+                    "Microsoft.Resources.ResourceGroups",
+                    oDataQuery,
+                    top)
 
     id_parts = parse_resource_id(resource_id)
     subscription_id = id_parts.get('subscription')
@@ -511,12 +623,23 @@ def _list_event_subscriptions_by_resource_id(client, resource_id):
         raise CLIError('The specified value for resource-id is not'
                        ' in the expected format.')
 
-    # Invoke the standard list_by_resource
+    # If this is for a domain topic, invoke the appropriate operation
+    if (namespace.lower() == EVENTGRID_NAMESPACE.lower() and resource_type.lower() == EVENTGRID_DOMAINS.lower()):
+        child_resource_type = id_parts.get('child_type_1')
+        child_resource_name = id_parts.get('child_name_1')
+
+        if (child_resource_type is not None and child_resource_type.lower() == EVENTGRID_TOPICS.lower() and
+                child_resource_name is not None):
+            return client.list_by_domain_topic(rg_name, resource_name, child_resource_name, oDataQuery, top)
+
+    # Not a domain topic, invoke the standard list_by_resource
     return client.list_by_resource(
         rg_name,
         namespace,
         resource_type,
-        resource_name)
+        resource_name,
+        oDataQuery,
+        top)
 
 
 def _is_topic_type_global_resource(topic_type_name):
