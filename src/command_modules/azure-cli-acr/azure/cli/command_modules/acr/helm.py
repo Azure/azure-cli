@@ -152,7 +152,7 @@ def acr_helm_repo_add(cmd,
                       tenant_suffix=None,
                       username=None,
                       password=None):
-    helm_command = _get_helm_command()
+    helm_command, _ = get_helm_command()
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -170,8 +170,8 @@ def acr_helm_repo_add(cmd,
     p.wait()
 
 
-def _get_helm_command():
-    helm_not_installed = "Please verify if helm is installed."
+def get_helm_command(is_diagnostics_context=False):
+    from ._errors import HELM_COMMAND_ERROR
     helm_command = 'helm'
 
     from subprocess import PIPE, Popen
@@ -187,12 +187,16 @@ def _get_helm_command():
             _, stderr = p.communicate()
         except OSError as inner:
             logger.debug("Could not run '%s' command. Exception: %s", helm_command, str(inner))
-            raise CLIError(helm_not_installed)
+            if is_diagnostics_context:
+                return None, HELM_COMMAND_ERROR
+            raise CLIError(HELM_COMMAND_ERROR.get_error_message())
 
     if stderr:
-        raise CLIError(stderr.decode())
+        if is_diagnostics_context:
+            return None, HELM_COMMAND_ERROR.append_error_message(stderr.decode())
+        raise CLIError(HELM_COMMAND_ERROR.append_error_message(stderr.decode()).get_error_message())
 
-    return helm_command
+    return helm_command, None
 
 
 def _get_charts_path(repository, chart=None, version=None):

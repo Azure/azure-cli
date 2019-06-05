@@ -2,6 +2,8 @@
 
 Release History
 ===============
+* webapp, functionapp: Updating to the latest Python SDK version
+
 0.2.20
 ++++++
 * functionapp: deprecated `az functionapp devops-build` command will be removed in next release
