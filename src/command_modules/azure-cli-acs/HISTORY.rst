@@ -8,7 +8,7 @@ Release History
 2.4.3
 ++++++
 * Allow enabling/disabling AKS kube-dashboard addon
-* Print a friendly message when subscription is not whitellisted to use Azure Red Hat OpenShift
+* Print a friendly message when the subscription is not whitelisted to use Azure Red Hat OpenShift
 
 2.4.2
 ++++++
