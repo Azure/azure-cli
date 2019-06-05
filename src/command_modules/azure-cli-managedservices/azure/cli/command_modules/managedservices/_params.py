@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import get_resource_name_completion_list
 
 

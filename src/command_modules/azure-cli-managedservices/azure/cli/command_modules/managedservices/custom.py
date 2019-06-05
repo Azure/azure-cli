@@ -3,10 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.log import get_logger
-from knack.util import CLIError
-from azure.cli.command_modules.managedservices._client_factory import cf_registration_definitions
 import uuid
+from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 logger = get_logger(__name__)
@@ -20,7 +18,7 @@ def cli_definition_create(cmd, client,
                           name, managed_by_tenant_id, principal_id, role_definition_id,
                           plan_name=None, plan_product=None, plan_publisher=None, plan_version=None, description=None,
                           api_version=None, registration_definition_id=None, subscription=None):
-    from azure.mgmt.managedservices.models import RegistrationDefinitionProperties, RegistrationDefinition, Plan, \
+    from azure.mgmt.managedservices.models import RegistrationDefinitionProperties, Plan, \
         Authorization
 
     if not registration_definition_id:
