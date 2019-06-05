@@ -1014,6 +1014,8 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     site = client.web_apps.get(resource_group_name, webapp)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(webapp))
+    if 'functionapp' in site.kind:
+        raise CLIError("'{}' is a function app. Please use `az functionapp deployment slot create`.".format(webapp))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
