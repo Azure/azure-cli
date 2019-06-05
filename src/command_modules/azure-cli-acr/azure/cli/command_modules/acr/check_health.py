@@ -122,6 +122,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
 # Get current CLI version
 def _get_cli_version():
     acr_component_name = "azure-cli-acr"
+    acr_cli_version = "not found"
     from pkg_resources import working_set
     for component in list(working_set):
         if component.key == acr_component_name:
