@@ -433,6 +433,11 @@ examples:
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
 """
 
+helps['acr pack'] = """
+type: group
+short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
+"""
+
 helps['acr pack build'] = """
 type: command
 short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
