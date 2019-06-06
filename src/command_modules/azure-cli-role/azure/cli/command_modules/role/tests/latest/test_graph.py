@@ -8,9 +8,8 @@ import unittest
 import datetime
 import dateutil
 import dateutil.parser
-from msrest.serialization import TZ_UTC
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
+from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
@@ -375,17 +374,19 @@ class GraphAppCredsScenarioTest(ScenarioTest):
         self.kwargs = {
             'display_name': self.create_random_name('cli-app-', 15),
             'display_name2': self.create_random_name('cli-app-', 15),
+            'test_pwd': 'verysecretpwd123*'
         }
         self.kwargs['app'] = 'http://' + self.kwargs['display_name']
         self.kwargs['app2'] = 'http://' + self.kwargs['display_name2']
         app_id = None
+        app_id2 = None
         try:
             result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
             app_id = result['appId']
 
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append --credential-description newCred1')
+            self.cmd('ad sp credential reset -n {app} --password {test_pwd} --append --credential-description newCred1')
             self.cmd('ad sp credential list --id {app}', checks=[
                 self.check('length([*])', 2),
                 self.check('[0].customKeyIdentifier', 'newCred1'),
@@ -398,7 +399,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             # try the same through app commands
             result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad app credential reset --id {app} --password verySecert123 --append --credential-description newCred2')
+            self.cmd('ad app credential reset --id {app} --password {test_pwd} --append --credential-description newCred2')
             result = self.cmd('ad app credential list --id {app}', checks=[
                 self.check('length([*])', 2),
                 self.check('[0].customKeyIdentifier', 'newCred2'),
@@ -408,8 +409,8 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
             # try use --end-date
-            self.cmd('ad sp credential reset -n {app} --password verySecert123 --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
-            self.cmd('ad app credential reset --id {app} --password verySecert123 --end-date "2100-12-31" --credential-description newCred4')
+            self.cmd('ad sp credential reset -n {app} --password {test_pwd} --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
+            self.cmd('ad app credential reset --id {app} --password {test_pwd} --end-date "2100-12-31" --credential-description newCred4')
 
             # ensure we can update other properties #7728
             self.cmd('ad app update --id {app} --set groupMembershipClaims=All')
