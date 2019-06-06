@@ -98,7 +98,6 @@ COMMAND_MODULES = [
     'azure-cli-servicefabric',
     'azure-cli-signalr',
     'azure-cli-sqlvm',
-    'azure-cli-vm',
 ]
 
 
@@ -116,7 +115,9 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-keyvault~=1.1',
     'azure-mgmt-managementgroups~=0.1',
+    'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-monitor~=0.5.2',
+    'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=3.0',
     'azure-mgmt-sql~=0.12',
     'azure-mgmt-storage~=3.3',
