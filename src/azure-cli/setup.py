@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-advisor',
     'azure-cli-ams',
     'azure-cli-appservice',
     'azure-cli-backup',
@@ -114,6 +113,7 @@ DEPENDENCIES = [
     'azure-cli-telemetry>=1.0.2,<2.0',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
+    'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-authorization~=0.50.0',
     'azure-mgmt-containerregistry~=2.8',
     'azure-mgmt-containerservice~=5.2',
