@@ -49,6 +49,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=True,
+                    schedules=None,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -152,6 +153,18 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 name=source_trigger_name
             )
         ]
+    
+    timer_triggers = None
+    if schedules:
+        TimerTrigger, TriggerStatus = cmd.get_models(
+            'TimerTrigger', 'TriggerStatus')
+        timer_triggers = [
+            TimerTrigger(
+                name="MyTimerTrigger",
+                status=TriggerStatus.enabled.value if schedules else TriggerStatus.disabled.value,
+                schedule=schedules
+            )
+        ]
 
     base_image_trigger = None
     if base_image_trigger_enabled:
@@ -188,6 +201,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         ),
         trigger=TriggerProperties(
             source_triggers=source_triggers,
+            timer_triggers=timer_triggers,
             base_image_trigger=base_image_trigger
         ),
         credentials=get_custom_registry_credentials(
@@ -579,6 +593,86 @@ def acr_task_credential_list(cmd,
 
     resp = client.get_details(resource_group_name, registry_name, task_name).credentials
     return {} if not resp else resp.custom_registries
+
+
+def acr_task_timer_add(cmd,
+                       client,
+                       task_name,
+                       registry_name,
+                       timer_name,
+                       schedule,
+                       timer_enabled=True,
+                       resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
+        'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus')
+    taskUpdateParameters = TaskUpdateParameters(
+        trigger=TriggerUpdateParameters(
+            timer_triggers=[
+                TimerTriggerUpdateParameters(
+                    name=timer_name,
+                    status=TriggerStatus.enabled.value if timer_enabled else TriggerStatus.disabled.value,
+                    schedule=schedule
+                )
+            ]
+        )
+    )
+
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_timer_update(cmd,
+                          client,
+                          task_name,
+                          registry_name,
+                          timer_name,
+                          schedule=None,
+                          timer_enabled=None,
+                          resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
+        'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus')
+    taskUpdateParameters = TaskUpdateParameters(
+        trigger=TriggerUpdateParameters(
+            timer_triggers=[
+                TimerTriggerUpdateParameters(
+                    name=timer_name,
+                    status=TriggerStatus.enabled.value if timer_enabled else TriggerStatus.disabled.value,
+                    schedule=schedule
+                )
+            ]
+        )
+    )
+
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_timer_remove(cmd,
+                          client,
+                          task_name,
+                          registry_name,
+                          resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    resp = client.get_details(resource_group_name, registry_name, task_name).trigger
+    return {} if not resp else resp.timer_triggers
+
+
+def acr_task_timer_list(cmd,
+                        client,
+                        task_name,
+                        registry_name,
+                        resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    resp = client.get_details(resource_group_name, registry_name, task_name).trigger
+    return {} if not resp else resp.timer_triggers
 
 
 def acr_task_update_run(cmd,

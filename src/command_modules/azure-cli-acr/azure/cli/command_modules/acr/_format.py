@@ -193,7 +193,8 @@ def _run_format_group(item):
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
         ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
-                                       _get_value(item, 'sourceTrigger', 'eventType'))),
+                                       _get_value(item, 'sourceTrigger', 'eventType'),
+                                       _get_value(item, 'timerTrigger'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
     ])
@@ -224,9 +225,11 @@ def _get_value(item, *args):
         return ' '
 
 
-def _get_build_trigger(image_update_trigger, git_source_trigger):
+def _get_build_trigger(image_update_trigger, git_source_trigger, timer_trigger=None):
     if git_source_trigger.strip():
         return git_source_trigger
+    if timer_trigger.strip():
+        return 'Timer'
     if image_update_trigger.strip():
         return 'Image Update'
     return 'Manual'
