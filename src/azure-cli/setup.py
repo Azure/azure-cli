@@ -98,7 +98,6 @@ COMMAND_MODULES = [
     'azure-cli-servicefabric',
     'azure-cli-signalr',
     'azure-cli-sqlvm',
-    'azure-cli-storage',
     'azure-cli-vm',
 ]
 
@@ -122,6 +121,7 @@ DEPENDENCIES = [
     'azure-mgmt-sql~=0.12',
     'azure-mgmt-storage~=3.3',
     'azure-mgmt-trafficmanager~=0.51.0',
+    'azure-multiapi-storage~=0.2.3',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'knack~=0.6.2',
     'paramiko>=2.0.8,<3.0.0',
