@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-acr',
     'azure-cli-acs',
     'azure-cli-advisor',
     'azure-cli-ams',
@@ -117,7 +116,10 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-authorization~=0.50.0',
+    'azure-mgmt-containerregistry~=2.8'
     'azure-mgmt-monitor~=0.5.2',
+    'azure-mgmt-storage~=3.3',
+    'azure-storage-blob>=1.3.1,<2.0.0',
     'knack~=0.6.2',
     'pytz==2019.1',
 ]
