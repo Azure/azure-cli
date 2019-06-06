@@ -3682,14 +3682,16 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
 
     if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
         instance.nat_gateway = SubResource(id=nat_gateway)
+    elif nat_gateway == '':
+        instance.nat_gateway = None
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
     elif network_security_group == '':  # clear it
         instance.network_security_group = None
-
+        
     _set_route_table(network_client_factory(cmd.cli_ctx), resource_group_name, route_table, instance)
-
+    
     if service_endpoints == ['']:
         instance.service_endpoints = None
     elif service_endpoints:
