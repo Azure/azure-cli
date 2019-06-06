@@ -35,10 +35,10 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
 
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat
+from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType
 
 from ._client_factory import resource_service_factory
-from ._utils import open_certificate
+from ._utils import open_certificate, generateKey
 
 
 # CUSTOM TYPE
@@ -491,6 +491,33 @@ def iot_hub_policy_delete(client, hub_name, policy_name, resource_group_name=Non
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     hub.properties.authorization_policies = updated_policies
     return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+
+
+def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key, resource_group_name=None, no_wait=False):
+    hub = iot_hub_get(client, hub_name, resource_group_name)
+    policies = []
+    policies.extend(iot_hub_policy_list(client, hub_name, hub.additional_properties['resourcegroup']))
+    if not _is_policy_existed(policies, policy_name):
+        raise CLIError("Policy {0} not found.".format(policy_name))
+    updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
+    requested_policy = [p for p in policies if p.key_name.lower() == policy_name.lower()]
+    if regenerate_key == RenewKeyType.Primary.value:
+        requested_policy[0].primary_key = generateKey()
+    if regenerate_key == RenewKeyType.Secondary.value:
+        requested_policy[0].secondary_key = generateKey()
+    if regenerate_key == RenewKeyType.Swap.value:
+        temp = requested_policy[0].primary_key
+        requested_policy[0].primary_key = requested_policy[0].secondary_key
+        requested_policy[0].secondary_key = temp
+    updated_policies.append(SharedAccessSignatureAuthorizationRule(key_name=requested_policy[0].key_name,
+                                                                   rights=requested_policy[0].rights,
+                                                                   primary_key=requested_policy[0].primary_key,
+                                                                   secondary_key=requested_policy[0].secondary_key))
+    hub.properties.authorization_policies = updated_policies
+    if no_wait:
+        return client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag})
+    LongRunningOperation(cmd.cli_ctx)(client.iot_hub_resource.create_or_update(hub.additional_properties['resourcegroup'], hub_name, hub, {'IF-MATCH': hub.etag}))
+    return iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
 
 
 def _is_policy_existed(policies, policy_name):
