@@ -561,34 +561,34 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
-class LinuxWebappSSHScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='japanwest')
-    def test_linux_webapp_ssh(self, resource_group):
-        runtime = 'node|8.11'
-        plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
-        webapp = self.create_random_name(prefix='webapp-ssh', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
-        time.sleep(30)
-        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
-        time.sleep(30)
-        self.cmd('webapp ssh -g {} -n {} --timeout 5'.format(resource_group, webapp))
-        time.sleep(30)
+# class LinuxWebappSSHScenarioTest(ScenarioTest):
+#    @ResourceGroupPreparer(location='japanwest')
+#    def test_linux_webapp_ssh(self, resource_group):
+#        runtime = 'node|8.11'
+#        plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
+#        webapp = self.create_random_name(prefix='webapp-ssh', length=24)
+#        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+#        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
+#        time.sleep(30)
+#        requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
+#        time.sleep(30)
+#        self.cmd('webapp ssh -g {} -n {} --timeout 5'.format(resource_group, webapp))
+#        time.sleep(30)
 
 
 # takes too long to make a ASE, use a premade one
-@live_only()
-class LinuxASESSHScenarioTest(ScenarioTest):
-    def test_linux_ASE_ssh(self):
-        sub = '"Ranjith Linux Test Sub"'
-        resource_group = 'cli-ase-ssh-test'
-        ase = 'cli-ase-ssh-test'
-        webapp = 'cli-ase-ssh-test'
-        time.sleep(30)
-        requests.get('http://{}.{}.p.azurewebsites.net/'.format(webapp, ase), timeout=240)
-        time.sleep(30)
-        self.cmd('webapp ssh -g {} -n {} --subscription {} --timeout 5'.format(resource_group, webapp, sub))
-        time.sleep(30)
+# @live_only()
+# class LinuxASESSHScenarioTest(ScenarioTest):
+#    def test_linux_ASE_ssh(self):
+#        sub = '"Ranjith Linux Test Sub"'
+#        resource_group = 'cli-ase-ssh-test'
+#        ase = 'cli-ase-ssh-test'
+#        webapp = 'cli-ase-ssh-test'
+#        time.sleep(30)
+#        requests.get('http://{}.{}.p.azurewebsites.net/'.format(webapp, ase), timeout=240)
+#        time.sleep(30)
+#        self.cmd('webapp ssh -g {} -n {} --subscription {} --timeout 5'.format(resource_group, webapp, sub))
+#        time.sleep(30)
 
 
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
@@ -623,7 +623,7 @@ class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
 
 
 class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='westus2')
     def test_linux_webapp_multicontainer_slot(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-linux-multi', length=24)
         plan = self.create_random_name(prefix='plan-linux-multi', length=24)
@@ -1497,6 +1497,32 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('windowsFxVersion', "DOCKER|microsoft/iis"),
             JMESPathCheck('linuxFxVersion', "")
         ])
+
+    # Always on is not supported on all SKUs this is to test that we don't fail create trying to enable AlwaysOn
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_alwaysOn')
+    def test_webapp_create_noAlwaysOn(self, resource_group):
+        webapp_name = self.create_random_name('webapp-create-alwaysOn-e2e', 44)
+        plan = self.create_random_name('plan-create-alwaysOn-e2e', 44)
+
+        self.cmd('appservice plan create -g {} -n {} --sku SHARED'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        # verify alwaysOn
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck('alwaysOn', False)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_linux_free')
+    def test_webapp_create_linux_free(self, resource_group):
+        webapp_name = self.create_random_name('webapp-linux-free', 24)
+        plan = self.create_random_name('plan-linux-free', 24)
+
+        self.cmd('appservice plan create -g {} -n {} --sku F1 --is-linux'.format(resource_group, plan), checks=[
+            JMESPathCheck('reserved', True),  # this weird field means it is a linux
+            JMESPathCheck('sku.name', 'F1')])
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|10.14"'.format(resource_group, webapp_name, plan,
+                                                                                    TEST_REPO_URL))
+        # verify alwaysOn
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck('alwaysOn', False)])
 
 
 if __name__ == '__main__':
