@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-acs',
     'azure-cli-advisor',
     'azure-cli-ams',
     'azure-cli-appservice',
@@ -116,12 +115,19 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-authorization~=0.50.0',
-    'azure-mgmt-containerregistry~=2.8'
+    'azure-mgmt-containerregistry~=2.8',
+    'azure-mgmt-containerservice~=5.2',
+    'azure-mgmt-compute~=5.0',
     'azure-mgmt-monitor~=0.5.2',
     'azure-mgmt-storage~=3.3',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'knack~=0.6.2',
+    'paramiko>=2.0.8,<3.0.0',
     'pytz==2019.1',
+    'pyyaml~=5.1',
+    'scp~=0.13.2',
+    'six~=1.12',
+    'sshtunnel~=0.1.4',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
