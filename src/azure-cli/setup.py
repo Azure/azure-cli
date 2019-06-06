@@ -111,6 +111,7 @@ COMMAND_MODULES = [
 
 
 DEPENDENCIES = [
+    'applicationinsights~=0.11.1,!=0.11.8',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core',
     'azure-cli-telemetry>=1.0.2,<2.0',
@@ -119,6 +120,7 @@ DEPENDENCIES = [
     'azure-mgmt-authorization~=0.50.0',
     'azure-mgmt-monitor~=0.5.2',
     'knack~=0.6.2',
+    'portalocker~=1.2',
     'pytz==2019.1',
 ]
 
