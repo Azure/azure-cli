@@ -5,8 +5,8 @@ Release History
 
 4.0.2
 +++++
-* Improve error handling in `az account show` when not logged in to an account and none are specified.
-* Improve error handling in all operations when not logged in to an account and none are specified.
+* Improve error handling in `az batch account show` when not logged in to an account. see #9180
+* Improve general error handling when not logged in to an account. see #9180
 
 4.0.1
 +++++

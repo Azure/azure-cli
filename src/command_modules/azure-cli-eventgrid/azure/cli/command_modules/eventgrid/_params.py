@@ -53,7 +53,6 @@ key_name_type = CLIArgumentType(
     options_list=['--key-name'],
     completer=get_keys_completion_list)
 
-
 def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
