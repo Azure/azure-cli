@@ -5,7 +5,7 @@ Release History
 0.1.2
 +++++
 * Now customer can set sql image sku type when creating or updating a sql vm.
-* If sql server license type has not been provided, create command will infer it from Compute's image offering.
+* Breaking change: --license-type is a required parameter for sql vm create.
 
 0.1.1
 +++++

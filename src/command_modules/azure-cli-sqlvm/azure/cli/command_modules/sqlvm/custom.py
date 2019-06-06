@@ -170,8 +170,8 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
-def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, location=None,
-                 sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
+def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type,
+                 location=None, sql_image_sku=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
@@ -183,29 +183,12 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, loc
     Creates a SQL virtual machine.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from ._util import get_compute_client_factory
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     virtual_machine_resource_id = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
         namespace='Microsoft.Compute', type='virtualMachines', name=sql_virtual_machine_name)
-
-    # If customer has not provided license type, infer it from the compute image reference
-    if sql_server_license_type is None:
-        compute_client = get_compute_client_factory(cmd.cli_ctx)
-        vm = compute_client.virtual_machines.get(resource_group_name, sql_virtual_machine_name)
-
-        if (vm.storage_profile is not None and vm.storage_profile.image_reference is not None):
-
-            image_reference = vm.storage_profile.image_reference
-            if (image_reference.publisher is not None and image_reference.publisher.lower() == "microsoftsqlserver" and
-                    image_reference.offer is not None and image_reference.offer.lower() != 'byol'):
-                sql_server_license_type = 'PAYG'
-            else:
-                sql_server_license_type = 'AHUB'
-        else:
-            sql_server_license_type = 'AHUB'
 
     tags = tags or {}
 

@@ -31,8 +31,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-sqlvirtualmachine==0.3.0',
-    'azure-mgmt-compute==5.0.0'
+    'azure-mgmt-sqlvirtualmachine==0.3.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
