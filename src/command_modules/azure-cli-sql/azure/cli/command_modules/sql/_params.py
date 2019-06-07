@@ -109,11 +109,13 @@ sku_component_arg_group = 'Performance Level (components)'
 
 server_configure_help = 'You can configure the default using `az configure --defaults sql-server=<name>`'
 
+
 def get_location_type_with_default_from_resource_group(cli_ctx):
     return CLIArgumentType(
         arg_type=get_location_type(cli_ctx),
         required=False,
         validator=get_default_location_from_resource_group)
+
 
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
@@ -884,7 +886,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
-                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
 
         # Create args that will be used to build up the Server object
         create_args_for_complex_type(
@@ -1104,7 +1106,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql mi create') as c:
         c.argument('location',
-                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
 
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
