@@ -3,6 +3,7 @@
 Release History
 ===============
 * webapp, functionapp: Updating to the latest Python SDK version
+* webapp: webapp up logged target URL ("You can launch the app at...") is now properly clickable in Azure Cloud Shell
 
 0.2.20
 ++++++
