@@ -36,9 +36,4 @@ then
     echo "Failed to verify:" $ext
 fi
 
-for ext in $output; do
-    az extension remove -n $ext
-    echo $ext "extension has been removed."
-done
-
 exit $exit_code
