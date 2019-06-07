@@ -2,9 +2,9 @@
 
 Release History
 ===============
-0.1.2
+0.2.0
 +++++
-* Now customer can set sql image sku type when creating or updating a sql vm.
+* Customer can set sql image sku type when creating or updating a sql vm.
 * Breaking change: --license-type is a required parameter for sql vm create.
 
 0.1.1
