@@ -3689,9 +3689,9 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
     elif network_security_group == '':  # clear it
         instance.network_security_group = None
-        
+
     _set_route_table(network_client_factory(cmd.cli_ctx), resource_group_name, route_table, instance)
-    
+
     if service_endpoints == ['']:
         instance.service_endpoints = None
     elif service_endpoints:
