@@ -40,14 +40,6 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
         # non-deterministic preparers have no recording of requests involved in creating the resource
         return self.moniker
 
-    @property
-    def moniker(self):
-        # temp workaround to keep test rg's unique enough for live runs
-        if self.test_class_instance._testMethodName not in self.name_prefix:  # pylint: disable=protected-access
-            self.name_prefix += self.test_class_instance._testMethodName  # pylint: disable=protected-access
-            self.name_len += len(self.test_class_instance._testMethodName)  # pylint: disable=protected-access
-        return super(NoTrafficRecordingPreparer, self).moniker
-
 
 # Resource Group Preparer and its shorthand decorator
 
