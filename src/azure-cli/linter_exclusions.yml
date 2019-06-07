@@ -1,4 +1,49 @@
 ---
+
+# exclusions for the network module
+
+network nic ip-config create:
+    parameters:
+        private_ip_address_version:
+            rule_exclusions:
+                - missing_parameter_help
+network nic ip-config update:
+    parameters:
+        private_ip_address_version:
+            rule_exclusions:
+                - missing_parameter_help
+network nsg rule create:
+    parameters:
+        access:
+            rule_exclusions:
+                - missing_parameter_help
+        direction:
+            rule_exclusions:
+                - missing_parameter_help
+network nsg rule update:
+    parameters:
+        access:
+            rule_exclusions:
+                - missing_parameter_help
+        direction:
+            rule_exclusions:
+                - missing_parameter_help
+network vnet peering list:
+    rule_exclusions:
+        - no_ids_for_list_commands
+network vnet subnet list:
+    rule_exclusions:
+        - no_ids_for_list_commands
+
+# exclusions for the sql module
+
+sql db export:
+    rule_exclusions:
+    - faulty_help_example_rule
+sql db import:
+    rule_exclusions:
+    - faulty_help_example_rule
+
 # exclusions for the vm module
 
 vmss create:
