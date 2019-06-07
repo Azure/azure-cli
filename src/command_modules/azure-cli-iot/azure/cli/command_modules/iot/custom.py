@@ -737,7 +737,7 @@ def digitaltwin_get_repository(cmd, client, repo_endpoint, repo_id):
     return get_digitaltwin_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def digitaltwin_remove_repository(cmd, client, repo_endpoint, repo_id):
+def digitaltwin_delete_repository(cmd, client, repo_endpoint, repo_id):
     headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
     return get_digitaltwin_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
