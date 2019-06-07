@@ -227,3 +227,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.')
         c.argument('ip_address', help='IPv4 address or CIDR range.')
+
+    with self.argument_context('acr check-health') as c:
+        c.argument('ignore_errors', options_list=['--ignore-errors'], help='Ignore errors, displaying them only at the final', action='store_true', required=False)

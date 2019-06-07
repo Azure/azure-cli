@@ -181,7 +181,7 @@ def acr_login(cmd,
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    docker_command = _get_docker_command()
+    docker_command, _ = get_docker_command()
 
     login_server, username, password = get_login_credentials(
         cmd=cmd,
@@ -224,9 +224,8 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
     return client.list_usages(resource_group_name, registry_name)
 
 
-def _get_docker_command():
-    docker_not_installed = "Please verify if docker is installed."
-    docker_not_available = "Please verify if docker daemon is running properly."
+def get_docker_command(is_diagnostics_context=False):
+    from ._errors import DOCKER_COMMAND_ERROR, DOCKER_DAEMON_ERROR
     docker_command = 'docker'
 
     from subprocess import PIPE, Popen, CalledProcessError
@@ -242,18 +241,26 @@ def _get_docker_command():
             _, stderr = p.communicate()
         except OSError as inner:
             logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(inner))
-            raise CLIError(docker_not_installed)
+            if is_diagnostics_context:
+                return None, DOCKER_COMMAND_ERROR
+            raise CLIError(DOCKER_COMMAND_ERROR.get_error_message())
         except CalledProcessError as inner:
             logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(inner))
-            raise CLIError(docker_not_available)
+            if is_diagnostics_context:
+                return docker_command, DOCKER_DAEMON_ERROR
+            raise CLIError(DOCKER_DAEMON_ERROR.get_error_message())
     except CalledProcessError as e:
         logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
-        raise CLIError(docker_not_available)
+        if is_diagnostics_context:
+            return docker_command, DOCKER_DAEMON_ERROR
+        raise CLIError(DOCKER_DAEMON_ERROR.get_error_message())
 
     if stderr:
-        raise CLIError(stderr.decode())
+        if is_diagnostics_context:
+            return None, DOCKER_COMMAND_ERROR.set_error_message(stderr.decode())
+        raise CLIError(DOCKER_COMMAND_ERROR.set_error_message(stderr.decode()).get_error_message())
 
-    return docker_command
+    return docker_command, None
 
 
 def _check_wincred(login_server):
