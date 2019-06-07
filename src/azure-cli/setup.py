@@ -114,7 +114,6 @@ DEPENDENCIES = [
     'applicationinsights~=0.11.1,!=0.11.8',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core',
-    'azure-cli-telemetry>=1.0.2,<2.0',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-authorization~=0.50.0',
