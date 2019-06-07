@@ -2484,7 +2484,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         view_in_browser(cmd, rg_name, name, None, logs)
     else:
         _url = _get_url(cmd, rg_name, name)
-        logger.warning("You can launch the app at '%s'", _url)
+        logger.warning("You can launch the app at %s", _url)
         create_json.update({'app_url': _url})
     if logs:
         _configure_default_logging(cmd, rg_name, name)
