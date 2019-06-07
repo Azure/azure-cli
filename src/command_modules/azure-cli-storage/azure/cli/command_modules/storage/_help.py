@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['storage'] = """
@@ -89,18 +89,18 @@ examples:
 """
 
 helps['storage account management-policy'] = """
-    type: group
-    short-summary: Manage storage account management policies.
+type: group
+short-summary: Manage storage account management policies.
 """
 
 helps['storage account management-policy create'] = """
-    type: command
-    short-summary: Creates the data policy rules associated with the specified storage account.
+type: command
+short-summary: Creates the data policy rules associated with the specified storage account.
 """
 
 helps['storage account management-policy update'] = """
-    type: command
-    short-summary: Updates the data policy rules associated with the specified storage account.
+type: command
+short-summary: Updates the data policy rules associated with the specified storage account.
 """
 
 helps['storage account network-rule'] = """
@@ -415,13 +415,13 @@ examples:
 """
 
 helps['storage blob sync'] = """
-    type: command
-    short-summary: Sync blobs recursively to a storage blob container.
-    examples:
-        - name: Sync a single blob to a container.
-          text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/file" -d NewBlob
-        - name: Sync a directory to a container.
-          text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/directory"
+type: command
+short-summary: Sync blobs recursively to a storage blob container.
+examples:
+  - name: Sync a single blob to a container.
+    text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/file" -d NewBlob
+  - name: Sync a directory to a container.
+    text: az storage blob sync -c MyContainer --account-name MyStorageAccount -s "path/to/directory"
 """
 
 helps['storage blob upload'] = """

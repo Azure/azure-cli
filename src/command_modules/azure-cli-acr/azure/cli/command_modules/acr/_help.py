@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['acr'] = """
@@ -34,6 +34,18 @@ examples:
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
+"""
+
+helps['acr check-health'] = """
+type: command
+short-summary: Gets health information on the environment and optionally a target registry.
+examples:
+  - name: Gets health state with target registry 'MyRegistry', skipping confirmation for pulling image.
+    text: >
+        az acr check-health -n MyRegistry -y
+  - name: Gets health state of the environment, without stopping on first error.
+    text: >
+        az acr check-health --ignore-errors
 """
 
 helps['acr check-name'] = """
@@ -276,6 +288,20 @@ examples:
         az acr network-rule remove -n MyRegistry --ip-address 23.45.1.0/24
 """
 
+helps['acr pack'] = """
+type: group
+short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
+"""
+
+helps['acr pack build'] = """
+type: command
+short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
+examples:
+  - name: Queue a build for the current directory with the default Oryx-based buildpack.
+    text: >
+        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+"""
+
 helps['acr replication'] = """
 type: group
 short-summary: Manage geo-replicated regions of Azure Container Registries.
@@ -433,20 +459,6 @@ examples:
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
 """
 
-helps['acr pack'] = """
-type: group
-short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
-"""
-
-helps['acr pack build'] = """
-type: command
-short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
-examples:
-  - name: Queue a build for the current directory with the default Oryx-based buildpack.
-    text: >
-        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
-"""
-
 helps['acr show'] = """
 type: command
 short-summary: Get the details of an Azure Container Registry.
@@ -537,53 +549,6 @@ examples:
             --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
-helps['acr task identity'] = """
-type: group
-short-summary: Managed Service Identities for Task.
-"""
-
-helps['acr task identity assign'] = """
-type: command
-short-summary: Update the managed service identity for a task.
-examples:
-  - name: Enable the system-assigned identity on an existing task. This will replace all existing user-assigned identities for that task.
-    text: >
-        az acr task identity assign -n MyTask -r MyRegistry
-  - name: Assign user-assigned managed identities to an existing task. This will remove the existing system-assigned identity.
-    text: |
-        az acr task identity assign -n MyTask -r MyRegistry \\
-            --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Assign both system-assigned and user-assigned managed identities to an existing task.
-    text: |
-        az acr task identity assign -n MyTask -r MyRegistry \\
-            --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-"""
-
-helps['acr task identity remove'] = """
-type: command
-short-summary: Remove managed service identities for a task.
-examples:
-  - name: Remove the system-assigned identity from a task.
-    text: >
-        az acr task identity remove -n MyTask -r MyRegistry
-  - name: Remove a user-assigned identity from a task.
-    text: |
-        az acr task identity remove -n MyTask -r MyRegistry \\
-            --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Remove all managed identities from a task.
-    text: >
-        az acr task identity remove -n MyTask -r MyRegistry --identities [all]
-"""
-
-helps['acr task identity show'] = """
-type: command
-short-summary: Display the managed service identities for task.
-examples:
-  - name: Display the managed service identities for a task.
-    text: >
-        az acr task identity show -n MyTask -r MyRegistry
-"""
-
 helps['acr task credential'] = """
 type: group
 short-summary: Manage credentials for a task
@@ -657,6 +622,53 @@ examples:
   - name: Delete a task from an Azure Container Registry.
     text: >
         az acr task delete -n MyTask -r MyRegistry
+"""
+
+helps['acr task identity'] = """
+type: group
+short-summary: Managed Service Identities for Task.
+"""
+
+helps['acr task identity assign'] = """
+type: command
+short-summary: Update the managed service identity for a task.
+examples:
+  - name: Enable the system-assigned identity on an existing task. This will replace all existing user-assigned identities for that task.
+    text: >
+        az acr task identity assign -n MyTask -r MyRegistry
+  - name: Assign user-assigned managed identities to an existing task. This will remove the existing system-assigned identity.
+    text: |
+        az acr task identity assign -n MyTask -r MyRegistry \\
+            --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+  - name: Assign both system-assigned and user-assigned managed identities to an existing task.
+    text: |
+        az acr task identity assign -n MyTask -r MyRegistry \\
+            --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+"""
+
+helps['acr task identity remove'] = """
+type: command
+short-summary: Remove managed service identities for a task.
+examples:
+  - name: Remove the system-assigned identity from a task.
+    text: >
+        az acr task identity remove -n MyTask -r MyRegistry
+  - name: Remove a user-assigned identity from a task.
+    text: |
+        az acr task identity remove -n MyTask -r MyRegistry \\
+            --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+  - name: Remove all managed identities from a task.
+    text: >
+        az acr task identity remove -n MyTask -r MyRegistry --identities [all]
+"""
+
+helps['acr task identity show'] = """
+type: command
+short-summary: Display the managed service identities for task.
+examples:
+  - name: Display the managed service identities for a task.
+    text: >
+        az acr task identity show -n MyTask -r MyRegistry
 """
 
 helps['acr task list'] = """
@@ -861,16 +873,4 @@ examples:
   - name: Disable a webhook.
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
-"""
-
-helps['acr check-health'] = """
-type: command
-short-summary: Gets health information on the environment and optionally a target registry.
-examples:
-  - name: Gets health state with target registry 'MyRegistry', skipping confirmation for pulling image.
-    text: >
-        az acr check-health -n MyRegistry -y
-  - name: Gets health state of the environment, without stopping on first error.
-    text: >
-        az acr check-health --ignore-errors
 """

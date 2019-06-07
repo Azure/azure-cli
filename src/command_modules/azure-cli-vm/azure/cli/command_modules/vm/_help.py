@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['disk'] = """
@@ -130,6 +130,31 @@ examples:
     text: az image update -n ImageName -g ResourceGroup --tags tag1=val1 tag2=val2
   - name: Remove all tags.
     text: az image update -n ImageName -g resourceGroup --tags
+"""
+
+helps['ppg'] = """
+type: group
+short-summary: Manage Proximity Placement Groups
+"""
+
+helps['ppg create'] = """
+type: command
+short-summary: Create a proximity placement group
+"""
+
+helps['ppg list'] = """
+type: command
+short-summary: List proximity placement groups
+"""
+
+helps['ppg show'] = """
+type: command
+short-summary: Get a proximity placement group
+"""
+
+helps['ppg update'] = """
+type: command
+short-summary: Update a proximity placement group
 """
 
 helps['sig'] = """
@@ -1898,11 +1923,9 @@ examples:
   - name: Update a VMSS' license type for Azure Hybrid Benefit.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --license-type windows_server
   - name: Update a VM instance's protection policies.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 \
-            --protect-from-scale-set-actions False --protect-from-scale-in
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4             --protect-from-scale-set-actions False --protect-from-scale-in
   - name: Update a VM instance's protection policies.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 \
-            --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4             --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
 
 """
 
@@ -1926,29 +1949,4 @@ examples:
     text: az vmss wait --updated --name MyScaleSet --resource-group MyResourceGroup
   - name: Place the CLI in a waiting state until the VMSS instance has been updated.
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
-"""
-
-helps['ppg'] = """
-type: group
-short-summary: Manage Proximity Placement Groups
-"""
-
-helps['ppg create'] = """
-type: command
-short-summary: Create a proximity placement group
-"""
-
-helps['ppg show'] = """
-type: command
-short-summary: Get a proximity placement group
-"""
-
-helps['ppg list'] = """
-type: command
-short-summary: List proximity placement groups
-"""
-
-helps['ppg update'] = """
-type: command
-short-summary: Update a proximity placement group
 """
