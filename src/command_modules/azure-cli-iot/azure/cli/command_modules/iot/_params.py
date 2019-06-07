@@ -182,17 +182,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'fails over to. Must be the paired region to the current IoT hub region.')
 
     # Arguments for IoT Digital Twin
-    with self.argument_context('iot pnp') as c:
-        c.argument('repo_endpoint', options_list=['--repo-rp', '--rp', '--endpoint', '-e'], help='PnP endpoint.')
-        c.argument('repo_id', options_list=['--repo-id', '--id'], help='Repository Id.')
+    with self.argument_context('iot digitaltwin') as c:
+        c.argument('repo_endpoint', options_list=['--endpoint', '-e'], help='DigitalTwin endpoint.')
+        c.argument('repo_id', options_list=['--repo', '-r'], help='DigitalTwin repository Id.')
 
-    with self.argument_context('iot pnp repository') as c:
-        c.argument('repo_name', options_list=['--repo-name', '--name', '-n'], help='Repository Name.')
+    with self.argument_context('iot digitaltwin repository') as c:
+        c.argument('repo_name', options_list=['--name', '-n'], help='DigitalTwin repository Name.')
 
-    with self.argument_context('iot pnp repository get-provision-status') as c:
-        c.argument('track_id', options_list=['--track-id', '--tid'], help='Tracking id (provisioningState).')
+    with self.argument_context('iot digitaltwin repository get-provision-status') as c:
+        c.argument('track_id', options_list=['--provisioning-State', '-s'],
+                   help='Provisioning state of the DigitalTwin repository.')
 
-    with self.argument_context('iot pnp authkey') as c:
-        c.argument('key_id', options_list=['--key-id', '--kid'], help='Key Id.')
-        c.argument('user_role', options_list=['--user-role', '--role', '--ur', '-r'], help='User role for the key.',
-                   arg_type=get_enum_type(UserRole))
+    with self.argument_context('iot digitaltwin key') as c:
+        c.argument('key_id', options_list=['--key', '-k'], help='Access key for the given DigitalTwin repository.')
+        c.argument('user_role', options_list=['--role'], arg_type=get_enum_type(UserRole),
+                   help='User role of the access key for the given DigitalTwin repository.')

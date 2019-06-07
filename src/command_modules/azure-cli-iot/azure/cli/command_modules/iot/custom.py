@@ -37,8 +37,8 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat
 
-from ._client_factory import resource_service_factory
-from ._utils import open_certificate
+from ._client_factory import resource_service_factory, get_digitaltwin_client
+from ._utils import open_certificate, generate_bearer_token
 
 
 # CUSTOM TYPE
@@ -719,79 +719,74 @@ def iot_hub_manual_failover(cmd, client, hub_name, failover_region, resource_gro
     return iot_hub_get(client, hub_name, resource_group_name)
 
 
-def pnp_create_repository(cmd, client, repo_endpoint, repo_name):
-    return _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name)
+def digitaltwin_create_repository(cmd, client, repo_endpoint, repo_name):
+    return _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name)
 
 
-def pnp_update_repository(cmd, client, repo_endpoint, repo_id, repo_name):
-    return _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id)
+def digitaltwin_update_repository(cmd, client, repo_endpoint, repo_id, repo_name):
+    return _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id)
 
 
-def pnp_list_repository(cmd, client, repo_endpoint):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).get_repositories_async(api_version=client.api_version, custom_headers=headers)
+def digitaltwin_list_repository(cmd, client, repo_endpoint):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).get_repositories_async(api_version=client.api_version, custom_headers=headers)
 
 
-def pnp_get_repository(cmd, client, repo_endpoint, repo_id):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
+def digitaltwin_get_repository(cmd, client, repo_endpoint, repo_id):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def pnp_remove_repository(cmd, client, repo_endpoint, repo_id):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
+def digitaltwin_remove_repository(cmd, client, repo_endpoint, repo_id):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def pnp_track_provision_status(cmd, client, repo_endpoint, repo_id, track_id):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).get_provision_status(repo_id, track_id, api_version=client.api_version, custom_headers=headers)
+def digitaltwin_track_provision_status(cmd, client, repo_endpoint, repo_id, track_id):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).get_provision_status(repo_id, track_id, api_version=client.api_version, custom_headers=headers)
 
 
-def pnp_create_authkeys(cmd, client, repo_endpoint, repo_id, user_role):
-    return _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role)
+def digitaltwin_create_key(cmd, client, repo_endpoint, repo_id, user_role):
+    return _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role)
 
 
-def pnp_update_authkeys(cmd, client, repo_endpoint, repo_id, key_id, user_role):
-    return _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id)
+def digitaltwin_update_key(cmd, client, repo_endpoint, repo_id, key_id, user_role):
+    return _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id)
 
 
-def pnp_list_authkeys(cmd, client, repo_endpoint, repo_id):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).get_keys_async(repository_id=repo_id, api_version=client.api_version, custom_headers=headers)
+def digitaltwin_list_key(cmd, client, repo_endpoint, repo_id):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).get_keys_async(repository_id=repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def pnp_get_authkeys(cmd, client, repo_endpoint, repo_id, key_id):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).get_key_async(repo_id, key_id, api_version=client.api_version, custom_headers=headers)
+def digitaltwin_get_key(cmd, client, repo_endpoint, repo_id, key_id):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).get_key_async(repo_id, key_id, api_version=client.api_version, custom_headers=headers)
 
 
-def pnp_remove_authkeys(cmd, client, repo_endpoint, repo_id, key_id):
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
-    return _get_pnp_client(repo_endpoint).delete_key_async(key_id, repo_id, api_version=client.api_version, custom_headers=headers)
+def digitaltwin_delete_key(cmd, client, repo_endpoint, repo_id, key_id):
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    return get_digitaltwin_client(repo_endpoint).delete_key_async(key_id, repo_id, api_version=client.api_version, custom_headers=headers)
 
 
-def _pnp_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id=None):
+def _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id=None):
     from .digitaltwinrepositoryprovisioningservice.models import RepositoryUpsertRequestProperties
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
     repositoryUpsertRequestProperties = RepositoryUpsertRequestProperties(id=repo_id, name=repo_name)
-    return _get_pnp_client(repo_endpoint).create_or_update_repository_async(api_version=client.api_version,
-                                                                            properties=repositoryUpsertRequestProperties,
-                                                                            custom_headers=headers)
+    return get_digitaltwin_client(repo_endpoint).create_or_update_repository_async(api_version=client.api_version,
+                                                                                   properties=repositoryUpsertRequestProperties,
+                                                                                   custom_headers=headers)
 
 
-def _pnp_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id=None):
+def _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id=None):
     from .digitaltwinrepositoryprovisioningservice.models import RepositoryKeyRequestProperties
-    headers = {'Authorization': '{}'.format(_generate_bearer_token(cmd))}
+    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
     repositoryKeyRequestProperties = RepositoryKeyRequestProperties(id=key_id, user_role=user_role)
-    return _get_pnp_client(repo_endpoint).create_or_update_key_async(repository_id=repo_id,
-                                                                     api_version=client.api_version,
-                                                                     properties=repositoryKeyRequestProperties,
-                                                                     custom_headers=headers)
-
-
-def _get_pnp_client(repo_endpoint):
-    from .digitaltwinrepositoryprovisioningservice.digital_twin_repository_provisioning_service import DigitalTwinRepositoryProvisioningService
-    return DigitalTwinRepositoryProvisioningService(repo_endpoint)
+    return get_digitaltwin_client(repo_endpoint).create_or_update_key_async(repository_id=repo_id,
+                                                                            api_version=client.api_version,
+                                                                            properties=repositoryKeyRequestProperties,
+                                                                            custom_headers=headers)
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):
@@ -913,13 +908,3 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
         endpoints.event_hubs = []
 
     return endpoints
-
-
-def _generate_bearer_token(cmd):
-    from azure.cli.core._profile import Profile
-    from ._constants import CLIENT_ID
-
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    account = profile.get_subscription()
-    access_token = profile.get_access_token_for_resource(account['user']['name'], account['tenantId'], CLIENT_ID)
-    return 'Bearer ' + access_token

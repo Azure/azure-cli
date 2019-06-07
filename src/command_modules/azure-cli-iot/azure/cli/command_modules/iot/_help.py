@@ -19,9 +19,9 @@ type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
 """
 
-helps['iot pnp'] = """
+helps['iot digitaltwin'] = """
 type: group
-short-summary: Manage DigitalTwin repository service. Provisions Repository and Access keys to a repository.
+short-summary: Manage DigitalTwin repositories and repository access keys.
 """
 
 helps['iot dps access-policy'] = """
@@ -699,111 +699,111 @@ examples:
         az iot hub manual-failover -n myhub --fr "West US"
 """
 
-helps['iot pnp repository'] = """
+helps['iot digitaltwin repository'] = """
 type: group
-short-summary: Manage DigitalTwin repository.
+short-summary: Manage DigitalTwin repositories.
 """
 
-helps['iot pnp repository create'] = """
+helps['iot digitaltwin repository create'] = """
 type: command
-short-summary: Create a repository.
+short-summary: Create a DigitalTwin repository.
 examples:
-  - name: Create a new repository "myrepo"
+  - name: Create a new DigitalTwin repository "myrepo"
     text: >
-        az iot pnp repository create -e "https://provider.azureiotrepository-test.com" --name myrepo
+        az iot digitaltwin repository create -e "https://provider.azureiotrepository-test.com" -n myrepo
 """
 
-helps['iot pnp repository list'] = """
+helps['iot digitaltwin repository list'] = """
 type: command
-short-summary: Gets all the repositories metadata belong to the user's tenant.
+short-summary: List DigitalTwin repositories.
 examples:
-  - name: Get all the repositories.
+  - name: List DigitalTwin repositories.
     text: >
-        az iot pnp repository list -e "https://provider.azureiotrepository-test.com"
+        az iot digitaltwin repository list -e "https://provider.azureiotrepository-test.com"
 """
 
-helps['iot pnp repository show'] = """
+helps['iot digitaltwin repository show'] = """
 type: command
-short-summary: Gets the repository metadata for the given repository id.
+short-summary: Gets the details for a DigitalTwin repository.
 examples:
-  - name: Gets the repository metadata for the given repository id.
+  - name: Gets the details for a DigitalTwin repository.
     text: >
-        az iot pnp repository show -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222
+        az iot digitaltwin repository show -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
 """
 
-helps['iot pnp repository remove'] = """
+helps['iot digitaltwin repository delete'] = """
 type: command
-short-summary: Deletes the repository for given repository id.
+short-summary: Delete a DigitalTwin repository.
 examples:
-  - name: Deletes the repository for given repository id.
+  - name: Delete a DigitalTwin repository.
     text: >
-        az iot pnp repository remove -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222
+        az iot digitaltwin repository delete -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
 """
 
-helps['iot pnp repository update'] = """
+helps['iot digitaltwin repository update'] = """
 type: command
-short-summary: Updates a repository.
+short-summary: Update a DigitalTwin repository.
 examples:
-  - name: Updates a repository.
+  - name: Update a DigitalTwin repository.
     text: >
-        az iot pnp repository update -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --name updatedreponame
+        az iot digitaltwin repository update -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -n updatedreponame
 """
 
-helps['iot pnp repository get-provision-status'] = """
+helps['iot digitaltwin repository get-provision-status'] = """
 type: command
-short-summary: Returns the repository provisioning status.
+short-summary: Returns the DigitalTwin repository provisioning status.
 examples:
-  - name: Returns the repository provisioning status.
+  - name: Returns the DigitalTwin repository provisioning status.
     text: >
-        az iot pnp repository get-provision-status -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --track-id  aaaabbbb11112222aaaabbbb1111333
+        az iot digitaltwin repository get-provision-status -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -s aaaabbbb11112222aaaabbbb1111333
 """
 
-helps['iot pnp authkey'] = """
+helps['iot digitaltwin key'] = """
 type: group
-short-summary: Manage access keys to a repository.
+short-summary: Manage access keys to a DigitalTwin repository.
 """
 
-helps['iot pnp authkey create'] = """
+helps['iot digitaltwin key create'] = """
 type: command
-short-summary: Creates a key for the given repository.
+short-summary: Create a key for the given repository.
 examples:
-  - name: Creates a key for the given repository
+  - name: Create a key for the given repository.
     text: >
-        az iot pnp authkey create -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --user-role Reader
+        az iot digitaltwin key create -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 --role Reader
 """
 
-helps['iot pnp authkey list'] = """
+helps['iot digitaltwin key list'] = """
 type: command
-short-summary: Gets all the keys associated to a repository.
+short-summary: List repository's keys.
 examples:
-  - name: Gets all the keys associated to a repository.
+  - name: List repository's keys.
     text: >
-        az iot pnp authkey list -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222
+        az iot digitaltwin key list -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
 """
 
-helps['iot pnp authkey show'] = """
+helps['iot digitaltwin key show'] = """
 type: command
-short-summary: Gets a key metadata information for the given key.
+short-summary: Get the details of a repository key.
 examples:
-  - name: Gets a key metadata information for the given key.
+  - name: Get the details of a repository key.
     text: >
-        az iot pnp authkey show -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --kid 12345
+        az iot digitaltwin key show -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345
 """
 
-helps['iot pnp authkey remove'] = """
+helps['iot digitaltwin key delete'] = """
 type: command
-short-summary: Deletes a key from the given repository.
+short-summary: Delete a key from the given repository.
 examples:
-  - name: Deletes a key from the given repository.
+  - name: Delete a key from the given repository.
     text: >
-        az iot pnp authkey remove -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --kid 12345
+        az iot digitaltwin key delete -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345
 """
 
-helps['iot pnp authkey update'] = """
+helps['iot digitaltwin key update'] = """
 type: command
-short-summary: Updates a key for the given repository.
+short-summary: Update the key for the given repository.
 examples:
-  - name: Updates a key for the given repository.
+  - name: Update the key for the given repository.
     text: >
-        az iot pnp authkey update -e "https://provider.azureiotrepository-test.com" --id aaaabbbb11112222aaaabbbb1111222 --kid 12345 --user-role admin
+        az iot digitaltwin key update -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345 --role admin
 """

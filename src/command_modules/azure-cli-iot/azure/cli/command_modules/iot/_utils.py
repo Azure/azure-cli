@@ -50,3 +50,13 @@ def open_certificate(certificate_path):
             except UnicodeError:
                 certificate = base64.b64encode(certificate).decode("utf-8")
     return certificate
+
+
+def generate_bearer_token(cmd):
+    from azure.cli.core._profile import Profile
+    from ._constants import CLIENT_ID
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    account = profile.get_subscription()
+    access_token = profile.get_access_token_for_resource(account['user']['name'], account['tenantId'], CLIENT_ID)
+    return 'Bearer ' + access_token
