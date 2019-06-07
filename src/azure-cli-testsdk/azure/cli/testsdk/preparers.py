@@ -8,36 +8,14 @@ from datetime import datetime
 
 from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
 
-from .base import LiveScenarioTest
+from .base import execute
 from .exceptions import CliTestError
 from .reverse_dependency import get_dummy_cli
-from .utilities import StorageAccountKeyReplacer, GraphClientPasswordReplacer
-
-
-# This preparer's traffic is not recorded.
-# As a result when tests are run in record mode, sdk calls cannot be made to return the prepared resource group.
-# Rather the deterministic prepared resource's information should be returned.
-class NoTrafficRecordingPreparer(AbstractPreparer):
-    from .base import execute as _raw_execute
-
-    def __init__(self, *args, **kwargs):
-        super(NoTrafficRecordingPreparer, self).__init__(disable_recording=True, *args, **kwargs)
-
-    def live_only_execute(self, cli_ctx, command, expect_failure=False):
-        try:
-            if self.test_class_instance.in_recording:
-                return self._raw_execute(cli_ctx, command, expect_failure)
-        except AttributeError:
-            # A test might not have an in_recording attribute. Run live if this is an instance of LiveScenarioTest
-            if isinstance(self.test_class_instance, LiveScenarioTest):
-                return self._raw_execute(cli_ctx, command, expect_failure)
-
-        return None
 
 
 # Resource Group Preparer and its shorthand decorator
 
-class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest.rg',
                  parameter_name='resource_group',
                  parameter_name_for_location='resource_group_location', location='westus',
@@ -63,22 +41,21 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
-        template = 'az group create --location {} --name {} --tag ' + tags
-        self.live_only_execute(self.cli_ctx, template.format(self.location, name))
 
+        template = 'az group create --location {} --name {} --tag ' + tags
+        execute(self.cli_ctx, template.format(self.location, name))
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
-        # delete group if test is being recorded and if the group is not a dev rg
         if not self.dev_setting_name:
-            self.live_only_execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait'.format(name))
+            execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait'.format(name))
 
 
 # Storage Account Preparer and its shorthand decorator
 
 # pylint: disable=too-many-instance-attributes
-class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', parameter_name='storage_account',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
@@ -97,25 +74,19 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
         if not self.dev_setting_name:
             template = 'az storage account create -n {} -g {} -l {} --sku {}'
-            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
+            execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
         else:
             name = self.dev_setting_name
 
-        try:
-            account_key = self.live_only_execute(self.cli_ctx,
-                                                 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
-                                                 .format(name, group)).output
-        except AttributeError:  # live only execute returns None if playing from record
-            account_key = None
-
+        account_key = execute(self.cli_ctx, 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
+                              .format(name, group)).output
         self.test_class_instance.kwargs[self.key] = name
-        return {self.parameter_name: name,
-                self.parameter_name + '_info': (name, account_key or StorageAccountKeyReplacer.KEY_REPLACEMENT)}
+        return {self.parameter_name: name, self.parameter_name + '_info': (name, account_key)}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az storage account delete -n {} -g {} --yes'.format(name, group))
+            execute(self.cli_ctx, 'az storage account delete -n {} -g {} --yes'.format(name, group))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -129,7 +100,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # KeyVault Preparer and its shorthand decorator
 
 # pylint: disable=too-many-instance-attributes
-class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
@@ -147,7 +118,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             template = 'az keyvault create -n {} -g {} -l {} --sku {}'
-            self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
+            execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
             return {self.parameter_name: name}
 
         self.test_class_instance.kwargs[self.key] = name
@@ -156,7 +127,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
+            execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -170,7 +141,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # Role based access control service principal preparer
 
 # pylint: disable=too-many-instance-attributes
-class RoleBasedServicePrincipalPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
+class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest',
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
@@ -189,17 +160,10 @@ class RoleBasedServicePrincipalPreparer(NoTrafficRecordingPreparer, SingleValueR
         if not self.dev_setting_sp_name:
             command = 'az ad sp create-for-rbac -n {}{}' \
                 .format(name, ' --skip-assignment' if self.skip_assignment else '')
-
-            try:
-                self.result = self.live_only_execute(self.cli_ctx, command).get_output_in_json()
-            except AttributeError:  # live only execute returns None if playing from record
-                pass
-
+            self.result = execute(self.cli_ctx, command).get_output_in_json()
             self.test_class_instance.kwargs[self.key] = name
             self.test_class_instance.kwargs['{}_pass'.format(self.key)] = self.parameter_password
-            return {self.parameter_name: name,
-                    self.parameter_password: self.result.get('password') or GraphClientPasswordReplacer.PWD_REPLACEMENT}
-
+            return {self.parameter_name: name, self.parameter_password: self.result['password']}
         self.test_class_instance.kwargs[self.key] = self.dev_setting_sp_name
         self.test_class_instance.kwargs['{}_pass'.format(self.key)] = self.dev_setting_sp_password
         return {self.parameter_name: self.dev_setting_sp_name,
@@ -207,15 +171,13 @@ class RoleBasedServicePrincipalPreparer(NoTrafficRecordingPreparer, SingleValueR
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
-            self.live_only_execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result.get('appId')))
+            execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
 
 # Managed Application preparer
 
 # pylint: disable=too-many-instance-attributes
 class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
-    from .base import execute
-
     def __init__(self, name_prefix='clitest', parameter_name='aad_client_app_id',
                  parameter_secret='aad_client_app_secret', app_name='app_name',
                  dev_setting_app_name='AZURE_CLI_TEST_DEV_APP_NAME',
@@ -234,8 +196,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_app_name:
             template = 'az ad app create --display-name {} --key-type Password --password {} --identifier-uris ' \
                        'http://{}'
-            self.result = self.execute(self.cli_ctx, template.format(name, name, name)).get_output_in_json()
-
+            self.result = execute(self.cli_ctx, template.format(name, name, name)).get_output_in_json()
             self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: self.result['appId'], self.parameter_secret: name}
         self.test_class_instance.kwargs[self.key] = name
@@ -244,8 +205,32 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_app_name:
-            self.execute(self.cli_ctx, 'az ad app delete --id {}'.format(self.result['appId']))
+            execute(self.cli_ctx, 'az ad app delete --id {}'.format(self.result['appId']))
 
+
+class AADGraphUserReplacer:
+    def __init__(self, test_user, mock_user):
+        self.test_user = test_user
+        self.mock_user = mock_user
+
+    def process_request(self, request):
+        test_user_encoded = self.test_user.replace('@', '%40')
+        if test_user_encoded in request.uri:
+            request.uri = request.uri.replace(test_user_encoded, self.mock_user.replace('@', '%40'))
+
+        if request.body:
+            body = str(request.body)
+            if self.test_user in body:
+                request.body = body.replace(self.test_user, self.mock_user)
+
+        return request
+
+    def process_response(self, response):
+        if response['body']['string']:
+            response['body']['string'] = response['body']['string'].replace(self.test_user,
+                                                                            self.mock_user)
+
+        return response
 # Utility
 
 
