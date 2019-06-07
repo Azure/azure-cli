@@ -533,9 +533,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         profile = Profile()
         token_info, _, _ = profile.get_raw_token(resource)
         logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
-        toke_type, token, _ = token_info
+        token_type, token, _ = token_info
         headers = headers or {}
-        headers['Authorization'] = '{} {}'.format(toke_type, token)
+        headers['Authorization'] = '{} {}'.format(token_type, token)
 
     r = requests.request(method, url, params=uri_parameters, data=body, headers=headers,
                          verify=not should_disable_connection_verify())

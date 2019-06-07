@@ -1196,7 +1196,7 @@ short-summary: Manage resource tags.
 
 helps['rest'] = """
     type: command
-    short-summary: invoke custom request
+    short-summary: invoke a custom request
     examples:
        - name: Get Audit log through Microsoft Graph
          text: >
