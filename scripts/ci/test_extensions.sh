@@ -27,12 +27,16 @@ for ext in $output; do
         exit_code=1
         echo "Failed to load:" $ext
     fi
-    azdev verify load-all
-    if [ $? != 0 ]
-    then
-        exit_code=1
-        echo "Failed to verify:" $ext
-    fi
+done
+
+azdev verify load-all
+if [ $? != 0 ]
+then
+    exit_code=1
+    echo "Failed to verify:" $ext
+fi
+
+for ext in $output; do
     az extension remove -n $ext
     echo $ext "extension has been removed."
 done
