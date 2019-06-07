@@ -29,20 +29,20 @@ steps:
 logger = get_logger(__name__)
 
 
-def acr_pack(cmd,  # pylint: disable=too-many-locals
-             client,
-             registry_name,
-             image_name,
-             source_location,
-             builder=ORYX_PACK_BUILDER_IMAGE,
-             pull=False,
-             no_format=False,
-             no_logs=False,
-             no_wait=False,
-             timeout=None,
-             resource_group_name=None,
-             platform=None,
-             auth_mode=None):
+def acr_pack_build(cmd,  # pylint: disable=too-many-locals
+                   client,
+                   registry_name,
+                   image_name,
+                   source_location,
+                   builder=ORYX_PACK_BUILDER_IMAGE,
+                   pull=False,
+                   no_format=False,
+                   no_logs=False,
+                   no_wait=False,
+                   timeout=None,
+                   resource_group_name=None,
+                   platform=None,
+                   auth_mode=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name)
 
     client_registries = cf_acr_registries(cmd.cli_ctx)

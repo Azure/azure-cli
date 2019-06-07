@@ -434,12 +434,17 @@ examples:
 """
 
 helps['acr pack'] = """
+type: group
+short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
+"""
+
+helps['acr pack build'] = """
 type: command
-short-summary: Queues a task that builds an app and pushes it into an Azure Container Registry.
+short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
 examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
     text: >
-        az acr pack -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
 """
 
 helps['acr show'] = """
@@ -856,4 +861,16 @@ examples:
   - name: Disable a webhook.
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
+"""
+
+helps['acr check-health'] = """
+type: command
+short-summary: Gets health information on the environment and optionally a target registry.
+examples:
+  - name: Gets health state with target registry 'MyRegistry', skipping confirmation for pulling image.
+    text: >
+        az acr check-health -n MyRegistry -y
+  - name: Gets health state of the environment, without stopping on first error.
+    text: >
+        az acr check-health --ignore-errors
 """
