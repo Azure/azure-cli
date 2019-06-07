@@ -34,6 +34,11 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
 
         return None
 
+    @property
+    def random_name(self):
+        # override random_name so that in play-back mode the name is deterministic.
+        # non-deterministic preparers have no recording of requests involved in creating the resource
+        return self.moniker
 
 # Resource Group Preparer and its shorthand decorator
 
