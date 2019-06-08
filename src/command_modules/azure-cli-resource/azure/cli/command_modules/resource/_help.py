@@ -1200,8 +1200,8 @@ helps['rest'] = """
     examples:
        - name: Get Audit log through Microsoft Graph
          text: >
-             az rest --method get --url https://graph.microsoft.com/beta/auditLogs/directoryAudits
-       - name: Update a Azure Active Directory Graph User's display name
+             az rest --method get --uri https://graph.microsoft.com/beta/auditLogs/directoryAudits
+       - name: Update a Azure Active Directory Graph User's display name in BASH
          text: >
-             az rest --method patch --headers "{\"Content-Type\": \"application/json\"}" --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\"displayName\":\"jondoe2\"}"
+             az rest --method patch --uri "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body '{"displayName": "jondoe2"}'
 """

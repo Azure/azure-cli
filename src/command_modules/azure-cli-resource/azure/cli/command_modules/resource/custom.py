@@ -1769,10 +1769,10 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-def rest_call(cmd, method, url, headers=None, uri_parameters=None,
+def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
               body=None, skip_authorization_header=False, resource=None, output_file=None):
     from azure.cli.core.util import send_raw_request
-    r = send_raw_request(cmd.cli_ctx, method, url, headers, uri_parameters, body,
+    r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
                          skip_authorization_header, resource, output_file)
     if not output_file and r.content:
         try:
