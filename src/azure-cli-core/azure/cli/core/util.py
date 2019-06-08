@@ -521,7 +521,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
-    if not skip_authorization_header:
+    if not skip_authorization_header and url.lower().startswith('https://'):
         from azure.cli.core._profile import Profile
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
@@ -531,14 +531,21 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                     resource = value
                     break
         profile = Profile()
-        token_info, _, _ = profile.get_raw_token(resource)
-        logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
-        token_type, token, _ = token_info
-        headers = headers or {}
-        headers['Authorization'] = '{} {}'.format(token_type, token)
+        if resource:
+            token_info, _, _ = profile.get_raw_token(resource)
+            logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
+            token_type, token, _ = token_info
+            headers = headers or {}
+            headers['Authorization'] = '{} {}'.format(token_type, token)
+        else:
+            logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
+                           "If access token is required, use --resource to specify the resource")
+    try:
+        r = requests.request(method, url, params=uri_parameters, data=body, headers=headers,
+                             verify=not should_disable_connection_verify())
+    except Exception as ex:  # pylint: disable=broad-except
+        raise CLIError(ex)
 
-    r = requests.request(method, url, params=uri_parameters, data=body, headers=headers,
-                         verify=not should_disable_connection_verify())
     if not r.ok:
         reason = r.reason
         if r.text:
