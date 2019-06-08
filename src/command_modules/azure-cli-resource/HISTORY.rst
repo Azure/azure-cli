@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* 'az rest': new command for making REST calls
 
 * `policy assignment list`: Fix error when using a resource group or subscription level `--scope`.
 
