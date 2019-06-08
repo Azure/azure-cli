@@ -286,6 +286,7 @@ def load_arguments(self, _):
         c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
         c.argument('body', help='request body')
         c.argument('output_file', help='save response payload to a file')
-        c.argument('resource', help='Resource which CLI would acquire token so to put on the "Authorization" header. '
-                   'By default, CLI can figure this out based on --url, unless you use ones not in the list '
-                   'of "az cloud show". E.g. --resource https://graph.microsoft.com/')
+        c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
+                   'the service. The token will be placed in the "Authorization" header. By default, '
+                   'CLI can figure this out based on "--url" argument, unless you use ones not in the list '
+                   'of "az cloud show --query endpoints"')
