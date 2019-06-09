@@ -491,7 +491,7 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     return success
 
 
-def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals
+def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid

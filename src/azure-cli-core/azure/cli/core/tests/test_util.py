@@ -13,7 +13,8 @@ import json
 
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
-     open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request)
+     open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
+     should_disable_connection_verify)
 
 
 class TestUtils(unittest.TestCase):
@@ -348,7 +349,7 @@ class TestHandleException(unittest.TestCase):
 
         request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
-                                        headers=expected_header, verify=True)
+                                        headers=expected_header, verify=(not should_disable_connection_verify()))
 
     @staticmethod
     def _get_mock_HttpOperationError(response_text):
