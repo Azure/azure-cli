@@ -41,3 +41,13 @@ class EncodingFormat(Enum):
     """
     JSON = 'json'
     AVRO = 'avro'
+
+
+# pylint: disable=too-few-public-methods
+class RenewKeyType(Enum):
+    """
+    Type of the RegenerateKey for the authorization policy.
+    """
+    Primary = 'primary'
+    Secondary = 'secondary'
+    Swap = 'swap'
