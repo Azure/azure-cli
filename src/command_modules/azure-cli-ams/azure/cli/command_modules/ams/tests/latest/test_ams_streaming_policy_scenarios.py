@@ -97,6 +97,26 @@ class AmsStreamingPolicyTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
+        policy_option_name1 = self.create_random_name(prefix='pon', length=12)
+        policy_option_name2 = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'description': 'ExampleDescription',
+            'playReadyPath': '@' + _get_test_data_file('validPlayReadyTemplate.json'),
+            'policyNameFromKeyToTrackMappings1': 'ckp',
+            'policyNameFromKeyToTrackMappings2': 'demoPolicy15',
+            'policyOptionName1': policy_option_name1,
+            'policyOptionName2': policy_option_name2
+        })
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {policyNameFromKeyToTrackMappings1} -g {rg} --description {description} --open-restriction --play-ready-template "{playReadyPath}"  --policy-option-name {policyOptionName1}', checks=[
+            self.check('name', '{policyNameFromKeyToTrackMappings1}')
+        ])
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {policyNameFromKeyToTrackMappings2} -g {rg} --description {description} --open-restriction --clear-key-configuration --policy-option-name {policyOptionName2}', checks=[
+            self.check('name', '{policyNameFromKeyToTrackMappings2}')
+        ])
+
         streamingPolicyName = self.create_random_name(prefix='spn', length=10)
 
         self.kwargs.update({
@@ -110,7 +130,7 @@ class AmsStreamingPolicyTests(ScenarioTest):
             'widevineUrlTemplate': 'widevineTemplate.foo.bar'
         })
 
-        self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cenc-protocols {protocols} --cenc-clear-tracks "{clearTracks}" --cenc-key-to-track-mappings "{keyToTrackMappings}" --cenc-default-key-label {label} --cenc-play-ready-template {playReadyUrlTemplate} --cenc-play-ready-attributes {playReadyAttributes} --cenc-widevine-template {widevineUrlTemplate}', checks=[
+        self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cenc-protocols {protocols} --cenc-clear-tracks "{clearTracks}" --cenc-key-to-track-mappings "{keyToTrackMappings}" --cenc-default-key-label {label} --cenc-default-key-policy-name {policyNameFromKeyToTrackMappings1} --cenc-play-ready-template {playReadyUrlTemplate} --cenc-play-ready-attributes {playReadyAttributes} --cenc-widevine-template {widevineUrlTemplate}', checks=[
             self.check('name', '{streamingPolicyName}'),
             self.check('commonEncryptionCenc.enabledProtocols.hls', True),
             self.check('commonEncryptionCenc.enabledProtocols.smoothStreaming', True),
@@ -134,6 +154,26 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'West US 2')
+        ])
+
+        policy_option_name1 = self.create_random_name(prefix='pon', length=12)
+        policy_option_name2 = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'description': 'ExampleDescription',
+            'playReadyPath': '@' + _get_test_data_file('validPlayReadyTemplate.json'),
+            'policyNameFromKeyToTrackMappings1': 'ckp',
+            'policyNameFromKeyToTrackMappings2': 'demoPolicy15',
+            'policyOptionName1': policy_option_name1,
+            'policyOptionName2': policy_option_name2
+        })
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {policyNameFromKeyToTrackMappings1} -g {rg} --description {description} --open-restriction --play-ready-template "{playReadyPath}"  --policy-option-name {policyOptionName1}', checks=[
+            self.check('name', '{policyNameFromKeyToTrackMappings1}')
+        ])
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {policyNameFromKeyToTrackMappings2} -g {rg} --description {description} --open-restriction --clear-key-configuration --policy-option-name {policyOptionName2}', checks=[
+            self.check('name', '{policyNameFromKeyToTrackMappings2}')
         ])
 
         streamingPolicyName = self.create_random_name(prefix='spn', length=10)
@@ -172,6 +212,26 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
             self.check('name', '{amsname}'),
             self.check('location', 'West US 2')
+        ])
+
+        policy_option_name1 = self.create_random_name(prefix='pon', length=12)
+        policy_option_name2 = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'description': 'ExampleDescription',
+            'playReadyPath': '@' + _get_test_data_file('validPlayReadyTemplate.json'),
+            'policyNameFromKeyToTrackMappings1': 'ckp',
+            'policyNameFromKeyToTrackMappings2': 'demoPolicy15',
+            'policyOptionName1': policy_option_name1,
+            'policyOptionName2': policy_option_name2
+        })
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {policyNameFromKeyToTrackMappings1} -g {rg} --description {description} --open-restriction --play-ready-template "{playReadyPath}"  --policy-option-name {policyOptionName1}', checks=[
+            self.check('name', '{policyNameFromKeyToTrackMappings1}')
+        ])
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {policyNameFromKeyToTrackMappings2} -g {rg} --description {description} --open-restriction --clear-key-configuration --policy-option-name {policyOptionName2}', checks=[
+            self.check('name', '{policyNameFromKeyToTrackMappings2}')
         ])
 
         streamingPolicyName = self.create_random_name(prefix='spn', length=10)
@@ -263,5 +323,5 @@ class AmsStreamingPolicyTests(ScenarioTest):
             self.check('commonEncryptionCbcs.enabledProtocols.dash', True),
             self.check('commonEncryptionCbcs.contentKeys.defaultKey.label', '{label}'),
             self.check('commonEncryptionCbcs.drm.fairPlay.customLicenseAcquisitionUrlTemplate', None),
-            self.check('commonEncryptionCbcs.drm.fairPlay.allowPersistentLicense', True),
+            self.check('commonEncryptionCbcs.drm.fairPlay.allowPersistentLicense', False),
         ])

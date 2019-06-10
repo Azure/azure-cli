@@ -116,6 +116,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('show', 'iot_hub_policy_get')
         g.custom_command('create', 'iot_hub_policy_create', transform=PolicyUpdateResultTransform(self.cli_ctx))
         g.custom_command('delete', 'iot_hub_policy_delete', transform=PolicyUpdateResultTransform(self.cli_ctx))
+        g.custom_command('regenerate-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
 
     # iot hub job commands
     with self.command_group('iot hub job', client_factory=iot_hub_service_factory) as g:

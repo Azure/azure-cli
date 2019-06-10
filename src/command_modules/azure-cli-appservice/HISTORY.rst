@@ -3,6 +3,7 @@
 Release History
 ===============
 * webapp, functionapp: Updating to the latest Python SDK version
+* functionapp: add slot support to functionapps
 
 0.2.20
 ++++++

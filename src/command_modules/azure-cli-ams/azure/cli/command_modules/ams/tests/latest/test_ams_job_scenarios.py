@@ -24,13 +24,17 @@ class AmsJobTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        assetName = self.create_random_name(prefix='asset', length=12)
+        inputAssetName = self.create_random_name(prefix='asset', length=12)
+        outputAssetName = self.create_random_name(prefix='asset', length=12)
 
         self.kwargs.update({
-            'assetName': assetName
+            'inputAssetName': inputAssetName,
+            'outputAssetName': outputAssetName
         })
 
-        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg}')
+        self.cmd('az ams asset create -a {amsname} -n {inputAssetName} -g {rg}')
+
+        self.cmd('az ams asset create -a {amsname} -n {outputAssetName} -g {rg}')
 
         transformName = self.create_random_name(prefix='tra', length=10)
 
@@ -51,7 +55,7 @@ class AmsJobTests(ScenarioTest):
             'outputLabel': 'outputLabel'
         })
 
-        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-assets {assetName}={outputLabel} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
+        self.cmd('az ams job start -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {inputAssetName} --output-assets {outputAssetName}={outputLabel} --priority {priority} --label {label} --correlation-data {correlationData}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('input.label', '{label}'),

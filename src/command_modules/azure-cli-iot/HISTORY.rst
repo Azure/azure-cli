@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.3.11
+++++++
+* Add support to regenerate authorization policy keys
+
 0.3.10
 ++++++
 * Add support for manual-failover
