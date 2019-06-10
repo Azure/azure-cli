@@ -135,13 +135,12 @@ def _extract_commands_from_example(example_text):
     lines = example_text.splitlines()
     example_text = ""
     quote = None
-    for line_idx in len(lines):
-        line = lines[line_idx]
-        for char_idx in len (line):
+    for line in lines:
+        for ch in line:
             if quote is None:
-                if line[char_idx] == '"' or line[char_idx] == "'":
-                    quote = line[char_idx]
-            elif line[char_idx] == quote:
+                if ch == '"' or ch == "'":
+                    quote = ch
+            elif ch == quote:
                 quote = None
         if quote is None and line[-1] == "\\":
             # attach this line with removed '\' and no '\n'
@@ -152,7 +151,6 @@ def _extract_commands_from_example(example_text):
         else:
             # attach this line with '\n' as no quote and no continuation
             example_text += line + "\n"
-
 
     commands = example_text.splitlines()
     processed_commands = []
