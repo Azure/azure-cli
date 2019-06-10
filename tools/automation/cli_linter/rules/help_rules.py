@@ -131,8 +131,29 @@ def _lint_example_command(command, parser, mocked_error_method, mocked_get_value
 def _extract_commands_from_example(example_text):
 
     # fold commands spanning multiple lines into one line. Split commands that use pipes
-    example_text = example_text.replace("\\\n", " ") # wrap escaped newline into one line.
-    example_text = example_text.replace("\\ ", " ")  # remove left over escape after wrapping
+    # handle single and double quotes properly
+    lines = example_text.splitlines()
+    example_text = ""
+    quote = None
+    for line_idx in len(lines):
+        line = lines[line_idx]
+        for char_idx in len (line):
+            if quote is None:
+                if line[char_idx] == '"' or line[char_idx] == "'":
+                    quote = line[char_idx]
+            else:
+                elif line[char_idx] == quote
+                    quote = None
+        if quote is None and line[-1] == "\\":
+            # attach this line with removed '\' and no '\n'
+            example_text += line[0:-1]
+        elif quote is not None:
+            # attach this line without '\n'
+            example_text += line
+        else:
+            # attach this line with '\n' as no quote and no continuation
+            example_text += line + "\n"
+
 
     commands = example_text.splitlines()
     processed_commands = []
