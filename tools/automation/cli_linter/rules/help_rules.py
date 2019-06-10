@@ -143,14 +143,16 @@ def _extract_commands_from_example(example_text):
             elif ch == quote:
                 quote = None
         if quote is None and line.endswith("\\"):
-            # attach this line with removed '\' and no '\n'
-            example_text += line[0:-1]
+            # attach this line with removed '\' and no '\n' (space at the end to keep consistent with initial algorithm)
+            example_text += line[0:-1] + " "
         elif quote is not None:
             # attach this line without '\n'
             example_text += line
         else:
             # attach this line with '\n' as no quote and no continuation
             example_text += line + "\n"
+    # this is also for consistency with original algorithm
+    example_text = example_text.replace("\\ ", " ")
 
     commands = example_text.splitlines()
     processed_commands = []
