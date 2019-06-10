@@ -6,19 +6,16 @@
 import argparse
 
 from knack.util import CLIError
-from knack.log import get_logger
 
 from azure.mgmt.cosmosdb.models import (
     Location
 )
 
-logger = get_logger(__name__)
 
-
-# pylint: disable=line-too-long
 class CreateLocation(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         if namespace.locations is None:
+            namespace.deprecated_location = False
             namespace.locations = []
 
         if any("regionname" in s.lower() for s in values):
@@ -41,14 +38,14 @@ class CreateLocation(argparse._AppendAction):
                 else:
                     raise CLIError('usage error: --locations [KEY=VALUE ...]')
             namespace.locations.append(
-                Location(location_name=_name, 
-                         failover_priority=_failover, 
+                Location(location_name=_name,
+                         failover_priority=_failover,
                          is_zone_redundant=_is_zr))
         else:
-            logger.warning('DEPRECATION WARNING: The regionName=failoverPriority method of specifying locations is deprecated. Use --locations [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
+            namespace.deprecated_location = True
             for item in values:
                 comps = item.split('=', 1)
                 namespace.locations.append(
-                    Location(location_name=comps[0], 
-                             failover_priority=int(comps[1]), 
+                    Location(location_name=comps[0],
+                             failover_priority=int(comps[1]),
                              is_zone_redundant=False))

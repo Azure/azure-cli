@@ -30,7 +30,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('account_name', completer=None)
             c.ignore('resource_group_location')
-            c.argument('locations', nargs='+', action=CreateLocation, help="space-separated key-value pairs for properties of a location formatted [KEY=VALUE ...]. Required keys are 'regionname' and 'failoverpriority'. Optional boolean key is 'iszoneredundant'. E.g. regionname=eastus failoverpriority=0 iszoneredundant=false. Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions. Default: single region account in the location of the specified resource group. Multiple locations can be specified by using more than one `--locations` argument.")
+            c.argument('locations', nargs='+', action=CreateLocation)
             c.argument('tags', arg_type=tags_type)
             c.argument('default_consistency_level', arg_type=get_enum_type(DefaultConsistencyLevel), help="default consistency level of the Cosmos DB database account")
             c.argument('max_staleness_prefix', type=int, help="when used with Bounded Staleness consistency, this value represents the number of stale requests tolerated. Accepted range for this value is 1 - 2,147,483,647")

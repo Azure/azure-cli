@@ -5,7 +5,7 @@ Release History
 
 0.2.11
 ++++++
-* Added support for setting "isZoneRedundant" property of location. Introduced new format for specifying location details of an account and deprecated the old format.
+* cosmsodb create/update: Added new format for --location to allow setting "isZoneRedundant" property. Deprecated old format.
 
 0.2.10
 ++++++
