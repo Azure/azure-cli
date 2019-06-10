@@ -278,13 +278,14 @@ def load_arguments(self, _):
         c.argument('parent_id', options_list=['--parent', '-p'])
 
     with self.argument_context('rest') as c:
-        c.argument('method', arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
+        c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
                    help='HTTP request method')
-        c.argument('url', help="request url")
+        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/".'
+                   ' Common tokens will also be replaced with real values including "{subscriptionId}"')
         c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
         c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
-        c.argument('body', help='request body')
+        c.argument('body', options_list=['--body', '-b'], help='request body')
         c.argument('output_file', help='save response payload to a file')
         c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
                    'the service. The token will be placed in the "Authorization" header. By default, '

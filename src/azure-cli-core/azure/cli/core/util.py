@@ -491,8 +491,9 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     return success
 
 
-def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals
-                     body=None, skip_authorization_header=False, resource=None, output_file=None):
+def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+                     body=None, skip_authorization_header=False, resource=None, output_file=None,
+                     generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
     import requests
     from azure.cli.core.commands.client_factory import UA_AGENT
@@ -508,8 +509,23 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     headers = result
     headers.update({
         'User-Agent': UA_AGENT,
-        'x-ms-client-request-id': str(uuid.uuid4()),
     })
+    if generated_client_request_id_name:
+        headers[generated_client_request_id_name] = str(uuid.uuid4())
+
+    # try to figure out the correct content type
+    if body:
+        try:
+            _ = shell_safe_json_parse(body)
+            if 'Content-Type' not in headers:
+                headers['Content-Type'] = 'application/json'
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    # add telemetry
+    headers['CommandName'] = cli_ctx.data['command']
+    if cli_ctx.data.get('safe_params'):
+        headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
 
     result = {}
     for s in uri_parameters or []:
@@ -521,16 +537,23 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
-    if not skip_authorization_header and url.lower().startswith('https://'):
-        from azure.cli.core._profile import Profile
+    if '://' not in uri:
+        uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+    # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
+    # Azure Rest API doc
+    from azure.cli.core._profile import Profile
+    profile = Profile()
+    if '{subscriptionId}' in uri:
+        uri = uri.replace('{subscriptionId}', profile.get_subscription_id())
+
+    if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
             for p in [x for x in dir(endpoints) if not x.startswith('_')]:
                 value = getattr(endpoints, p)
-                if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
+                if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
                     resource = value
                     break
-        profile = Profile()
         if resource:
             token_info, _, _ = profile.get_raw_token(resource)
             logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
@@ -541,7 +564,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
     try:
-        r = requests.request(method, url, params=uri_parameters, data=body, headers=headers,
+        r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
                              verify=not should_disable_connection_verify())
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
