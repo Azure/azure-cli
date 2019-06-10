@@ -142,7 +142,7 @@ def _extract_commands_from_example(example_text):
                     quote = ch
             elif ch == quote:
                 quote = None
-        if quote is None and line[-1] == "\\":
+        if quote is None and line.endswith("\\"):
             # attach this line with removed '\' and no '\n'
             example_text += line[0:-1]
         elif quote is not None:
