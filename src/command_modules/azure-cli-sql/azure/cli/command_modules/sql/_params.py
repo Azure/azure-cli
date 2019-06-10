@@ -1071,7 +1071,7 @@ def load_arguments(self, _):
                    help='The license type to apply for this managed instance.')
 
         c.argument('vcores',
-                   options_list=['--capacity', '-c'],
+                   arg_type=capacity_param_type,
                    help='The capacity of the managed instance in vcores.')
 
         c.argument('collation',

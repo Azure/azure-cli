@@ -159,8 +159,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Permissions of shared access policy. Use space-separated list for multiple permissions. '
                         'Possible values: {}'.format(permission_values))
 
-    with self.argument_context('iot hub policy regenerate-key') as c:
-        c.argument('regenerate_key', options_list=['--regenerate-key', '--rk'], arg_type=get_enum_type(RenewKeyType),
+    with self.argument_context('iot hub policy renew-key') as c:
+        c.argument('regenerate_key', options_list=['--renew-key', '--rk'], arg_type=get_enum_type(RenewKeyType),
                    help='Regenerate keys')
 
     with self.argument_context('iot hub job') as c:
