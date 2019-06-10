@@ -13,7 +13,8 @@ from ._utils import (
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_and_values
+    get_yaml_and_values,
+    build_timers_info
 )
 from ._stream_utils import stream_logs
 
@@ -153,18 +154,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 name=source_trigger_name
             )
         ]
-    
+
     timer_triggers = None
-    if schedules:
-        TimerTrigger, TriggerStatus = cmd.get_models(
-            'TimerTrigger', 'TriggerStatus')
-        timer_triggers = [
-            TimerTrigger(
-                name="MyTimerTrigger",
-                status=TriggerStatus.enabled.value if schedules else TriggerStatus.disabled.value,
-                schedule=schedules
-            )
-        ]
+    if schedules is not None:
+        timer_triggers = build_timers_info(cmd, schedules)
 
     base_image_trigger = None
     if base_image_trigger_enabled:
@@ -378,12 +371,12 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             BaseImageTriggerUpdateParameters = cmd.get_models(
                 'BaseImageTriggerUpdateParameters')
 
-            status = None
+            base_image_status = None
             if base_image_trigger_enabled is not None:
-                status = TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value
+                base_image_status = TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value
             base_image_trigger_update_params = BaseImageTriggerUpdateParameters(
                 base_image_trigger_type=base_image_trigger_type,
-                status=status,
+                status=base_image_status,
                 name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName"
             )
 

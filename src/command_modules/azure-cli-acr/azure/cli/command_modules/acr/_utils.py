@@ -497,6 +497,25 @@ def get_custom_registry_credentials(cmd,
     )
 
 
+def build_timers_info(cmd, schedules):
+    TimerTrigger, TriggerStatus = cmd.get_models(
+        'TimerTrigger', 'TriggerStatus')
+    timer_triggers = []
+
+    # Provide a default name for the timer if no name was provided.
+    for index, schedule in enumerate(schedules, start=1):
+        # space?
+        split_schedule = None
+        if ':' in schedule:
+            split_schedule = schedule.split(":")
+        timer_triggers.append(TimerTrigger(
+            name=split_schedule[0] if split_schedule else "defaultTimerTrigger" + str(index),
+            status=TriggerStatus.enabled.value,
+            schedule=split_schedule[0] if split_schedule else schedule
+        ))
+    return timer_triggers
+
+
 def is_vault_secret(cmd, credential):
     keyvault_dns = None
     try:

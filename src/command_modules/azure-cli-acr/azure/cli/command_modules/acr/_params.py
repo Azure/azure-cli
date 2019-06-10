@@ -173,7 +173,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('source_trigger_name', help="The name of the source trigger.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('pull_request_trigger_enabled', help="Indicates whether the source control pull request trigger is enabled.", arg_type=get_three_state_flag())
-        c.argument('schedules', help="The cron expressions for the timer triggers.")
+        c.argument('schedules', nargs='+', help="Space-separated list of schedules represented as cron expressions for the timer triggers.")
         c.argument('git_access_token', help="The access token used to access the source control provider.")
         c.argument('branch', help="The source control branch name.")
         c.argument('base_image_trigger_name', help="The name of the base image trigger.")
@@ -197,7 +197,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr task identity') as c:
         c.argument('identities', options_list=['--identities'], nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity.")
- 
+
     with self.argument_context('acr task credential') as c:
         # Custom registry credentials
         c.argument('login_server', help="The login server of the custom registry. For instance, 'myregistry.azurecr.io'.", required=True)
