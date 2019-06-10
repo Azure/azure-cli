@@ -70,11 +70,6 @@ def _parse_script(script_str):
             script["name"] = script_name
         script["is_url"] = True
     else:
-        # logger.info("{} does not look like a url. Assuming it is a file.".format(script_str))
-        # script["is_url"] = False
-        # if not os.path.isfile(script_str):
-        #     raise CLIError("Script file {} does not exist.".format(script_str))
-        # raise CLIError("Script file found. Please provide a publicly accessible url instead.")
         raise CLIError("Expected a url, got: {}", script_str)
 
     if script_str.lower().endswith(".sh"):

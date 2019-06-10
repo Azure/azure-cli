@@ -2197,7 +2197,7 @@ helps['image template update'] = """
 
 helps['image template wait'] = """
     type: command
-    short-summary: Place the CLI in a waiting state until a condition of the image builder template is met.
+    short-summary: Place the CLI in a waiting state until a condition of the template is met.
     examples:
         - name: Start a template build run and then wait for it to finish.
           text: |

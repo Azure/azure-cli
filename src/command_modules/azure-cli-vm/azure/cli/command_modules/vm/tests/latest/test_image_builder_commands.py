@@ -13,11 +13,17 @@ from msrestazure.tools import parse_resource_id
 # pylint: disable=too-many-lines
 
 #todo: store a local copy of this.
-TEST_SHELL_SCRIPT = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
-TEST_PWSH_SCRIPT = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"
+TEST_SHELL_SCRIPT_URL = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
+TEST_PWSH_SCRIPT_URL = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"
+TEST_PWSH_SCRIPT_INLINE = [
+                    '"mkdir c:\\buildActions"',
+                    '"echo Azure-Image-Builder-Was-Here  > c:\\buildActions\\buildActionsOutput.txt"'
+                ]
 
 LINUX_IMAGE_SOURCE = "Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
 WIN_IMAGE_SOURCE = "MicrosoftWindowsServer:WindowsServer:2019-Datacenter:2019.0.20190214"
+INDEX_FILE = "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html"
+
 
 class ImageTemplateTest(ScenarioTest):
     def _assign_ib_permissions(self, rg):   # need to manually give IB service permission to add image to grou
@@ -38,9 +44,6 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
-    def _clear_cli_ctx_cache_arg(self):
-        self.cli_ctx.data.pop('_cache', '')
-
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
     def test_image_template_basic(self, resource_group):
         self._assign_ib_permissions(resource_group)
@@ -50,31 +53,75 @@ class ImageTemplateTest(ScenarioTest):
             'tmpl_01': 'template01',
             'tmpl_02': 'template02',
             'img_src': LINUX_IMAGE_SOURCE,
-            'script': TEST_SHELL_SCRIPT,
+            'script': TEST_SHELL_SCRIPT_URL,
             'sub': subscription_id,
             'vhd_out': "my_vhd_output",
         })
 
-        # test template creation works.
-        self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --cache write',
+        # test template creation works. use cache
+        self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --defer',
                  checks=[
                      self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
                      self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', '18.04.201808140'),
                      self.check('properties.source.type', 'PlatformImage'),
                      self.check('length(properties.customize)', 2),
 
-                     self.check('properties.customize[0].name', 'customizeScript.sh'), self.check('properties.customize[0].scriptUri', TEST_SHELL_SCRIPT),
+                     self.check('properties.customize[0].name', 'customizeScript.sh'), self.check('properties.customize[0].scriptUri', TEST_SHELL_SCRIPT_URL),
                      self.check('properties.customize[0].type', 'Shell'),
-                     self.check('properties.customize[1].name', 'customizeScript.sh'), self.check('properties.customize[1].scriptUri', TEST_SHELL_SCRIPT),
+                     self.check('properties.customize[1].name', 'customizeScript.sh'), self.check('properties.customize[1].scriptUri', TEST_SHELL_SCRIPT_URL),
                      self.check('properties.customize[1].type', 'Shell'),
                  ])
 
-        self._clear_cli_ctx_cache_arg()
+        self.kwargs.update({
+            'new_img': 'new_img',
+            'new_loc': 'southcentralus'
+        })
+
+        # test managed image output
+        out_2 = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/images/{}".format(subscription_id, resource_group, 'new_img')
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {new_img} --managed-image-location {new_loc} --defer',
+                 checks=[
+                     self.check('properties.distribute[0].imageId', out_2),
+                     self.check('properties.distribute[0].location', '{new_loc}'),
+                     self.check('properties.distribute[0].runOutputName', '{new_img}'),
+                     self.check('properties.distribute[0].type', 'ManagedImage')
+                 ])
+
+        # test vhd output
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd --defer',
+                 checks=[
+                     self.check('properties.distribute[1].runOutputName', '{vhd_out}'),
+                     self.check('properties.distribute[1].type', 'VHD')
+                 ])
+
+
+        # finally send request to ARM using cached object
+        self.cmd('image template update -n {tmpl_01} -g {rg}',
+                 checks=[
+                     self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
+                     self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
+                     self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
+                     self.check('source.type', 'PlatformImage'),
+                     self.check('length(customize)', 2),
+                     self.check('length(distribute)', 2),
+
+                     self.check('customize[0].name', 'customizeScript.sh'),
+                     self.check('customize[0].scriptUri', TEST_SHELL_SCRIPT_URL), self.check('customize[0].type', 'Shell'),
+                     self.check('customize[1].name', 'customizeScript.sh'),
+                     self.check('customize[1].scriptUri', TEST_SHELL_SCRIPT_URL), self.check('customize[1].type', 'Shell'),
+
+                     self.check('distribute[0].imageId', out_2),
+                     self.check('distribute[0].location', '{new_loc}'),
+                     self.check('distribute[0].runOutputName', '{new_img}'),
+                     self.check('distribute[0].type', 'ManagedImage'),
+                     self.check('distribute[1].runOutputName', '{vhd_out}'),
+                     self.check('distribute[1].type', 'VHD')
+                 ])
 
         # test that outputs can be set through create command.
-        out_2 = "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2=centralus"
+        out_3 = "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2=centralus"
         self.cmd('image template create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} --build-timeout 22'
-                 ' --managed-image-destinations img_1=westus ' + out_2,
+                 ' --managed-image-destinations img_1=westus ' + out_3,
                  checks=[
                      self.check('name', '{tmpl_02}'), self.check('provisioningState', 'Succeeded'),
                      self.check('length(distribute)', 2),
@@ -89,52 +136,6 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('buildTimeoutInMinutes', 22)
                  ])
 
-        self.kwargs.update({
-            'new_img': 'new_img',
-            'new_loc': 'southcentralus'
-        })
-        out_3 = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/images/{}".format(subscription_id, resource_group, 'new_img')
-        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {new_img} --managed-image-location {new_loc} --cache read write',
-                 checks=[
-                     self.check('properties.distribute[0].imageId', out_3),
-                     self.check('properties.distribute[0].location', '{new_loc}'),
-                     self.check('properties.distribute[0].runOutputName', '{new_img}'),
-                     self.check('properties.distribute[0].type', 'ManagedImage')
-                 ])
-
-        self._clear_cli_ctx_cache_arg()
-
-        # test vhd output
-        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd --cache read write',
-                 checks=[
-                     self.check('properties.distribute[1].runOutputName', '{vhd_out}'),
-                     self.check('properties.distribute[1].type', 'VHD')
-                 ])
-
-        self._clear_cli_ctx_cache_arg()
-
-        self.cmd('image template update -n {tmpl_01} -g {rg} --cache read',
-                 checks=[
-                     self.check('name', '{tmpl_01}'), self.check('provisioningState', 'Succeeded'),
-                     self.check('source.offer', 'UbuntuServer'), self.check('source.publisher', 'Canonical'),
-                     self.check('source.sku', '18.04-LTS'), self.check('source.version', '18.04.201808140'),
-                     self.check('source.type', 'PlatformImage'),
-                     self.check('length(customize)', 2),
-                     self.check('length(distribute)', 2),
-
-                     self.check('customize[0].name', 'customizeScript.sh'),
-                     self.check('customize[0].scriptUri', TEST_SHELL_SCRIPT), self.check('customize[0].type', 'Shell'),
-                     self.check('customize[1].name', 'customizeScript.sh'),
-                     self.check('customize[1].scriptUri', TEST_SHELL_SCRIPT), self.check('customize[1].type', 'Shell'),
-
-                     self.check('distribute[0].imageId', out_3),
-                     self.check('distribute[0].location', '{new_loc}'),
-                     self.check('distribute[0].runOutputName', '{new_img}'),
-                     self.check('distribute[0].type', 'ManagedImage'),
-                     self.check('distribute[1].runOutputName', '{vhd_out}'),
-                     self.check('distribute[1].type', 'VHD')
-                 ])
-
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_template_basic_sig(self, resource_group):
         self._assign_ib_permissions(resource_group)
@@ -143,7 +144,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs.update({
             'tmpl_01': 'template01',
             'img_src': LINUX_IMAGE_SOURCE,
-            'script': TEST_SHELL_SCRIPT,
+            'script': TEST_SHELL_SCRIPT_URL,
             'sub': subscription_id,
             'gallery': self.create_random_name("sig1", 10),
             'sig1': 'image1'
@@ -177,20 +178,22 @@ class ImageTemplateTest(ScenarioTest):
         self._assign_ib_permissions(resource_group)
 
         self.kwargs.update({
-            'tmpl': 'template01',
+            'tmpl_1': 'template01',
+            'tmpl_2': 'template02',
             'img_src': LINUX_IMAGE_SOURCE,
-            'script': TEST_SHELL_SCRIPT,
+            'script': TEST_SHELL_SCRIPT_URL,
             'loc': resource_group_location,
             'vm': 'testvm',
-            'img': 'img_1'
+            'img_1': 'img_1',
+            'img_2': 'img_2'
         })
 
         # create and build image template
-        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --managed-image-destinations {img}={loc}')
-        self.cmd('image template run -n {tmpl} -g {rg}')
+        self.cmd('image template create -n {tmpl_1} -g {rg} --image-source {img_src} --managed-image-destinations {img_1}={loc} --scripts {script}')
+        self.cmd('image template run -n {tmpl_1} -g {rg}')
 
         # get the run output
-        output = self.cmd('image template show-runs -n {tmpl} -g {rg} --output-name {img}',
+        output = self.cmd('image template show-runs -n {tmpl_1} -g {rg} --output-name {img_1}',
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
 
@@ -199,6 +202,13 @@ class ImageTemplateTest(ScenarioTest):
         # check that vm successfully created from template.
         self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
+
+        # test template creation from managed image
+        img_tmpl = self.cmd('image template create -n {tmpl_2} -g {rg} --image-source{img_src} '
+                 '--managed-image-destinations {img_2}={loc} --scripts {script}').get_output_in_json()
+
+        self.assertEqual(img_tmpl['source']['imageId'].lower(), self.kwargs['image_id'].lower())
+        self.assertEqual(img_tmpl['source']['type'].lower(), 'managedimage')
 
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_sig')
@@ -209,8 +219,9 @@ class ImageTemplateTest(ScenarioTest):
             'img_src': LINUX_IMAGE_SOURCE,
             'gallery': self.create_random_name("sig2", 10),
             'sig1': 'image1',
+            'sig2': 'image2',
             'tmpl': 'template01',
-            'script': TEST_SHELL_SCRIPT,
+            'script': TEST_SHELL_SCRIPT_URL,
             'vm': 'custom-vm'
         })
 
@@ -218,13 +229,19 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
 
-        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --cache write')
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --defer')
         self.cmd('image template output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
-                 ' --gallery-replication-regions westus --cache read write',
+                 ' --gallery-replication-regions westus --defer',
                  checks=[
                      self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
                      self.check('properties.distribute[0].runOutputName', '{sig1}')
                  ])
+
+        # send put request using cached template object
+        self.cmd('image template update -n {tmpl} -g {rg}', checks=[
+            self.check('distribute[0].replicationRegions[0]', 'westus'),
+            self.check('distribute[0].runOutputName', '{sig1}')
+        ])
 
         # Takes a long time to build a SIG based image template.
         self.cmd('image template run -n {tmpl} -g {rg}')
@@ -242,69 +259,154 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
-    @ResourceGroupPreparer(name_prefix='img_tmpl_managed_win')
-    def test_image_build_managed_image_win(self, resource_group, resource_group_location):
+        # test template creation from sig image
+        img_tmpl = self.cmd('image template create -n {tmpl_2} -g {rg} --image-source{img_src} '
+                 '--managed-image-destinations {sig2}={loc} --scripts {script}').get_output_in_json()
+
+        self.assertEqual(img_tmpl['source']['image_version_id'].lower(), self.kwargs['image_id'].lower())
+        self.assertEqual(img_tmpl['source']['type'].lower(), 'sharedimageversion')
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
+    def test_image_builder_customizers(self, resource_group, resource_group_location):
         self._assign_ib_permissions(resource_group)
 
         self.kwargs.update({
             'tmpl': 'template01',
-            'img_src': WIN_IMAGE_SOURCE,
-            'script': TEST_PWSH_SCRIPT,
             'loc': resource_group_location,
             'vm': 'testvm',
             'img': 'img_1',
+            'img_src': WIN_IMAGE_SOURCE,
+
             'pwsh_name': 'powershell_script',
+            'pwsh_name_2': 'powershell_script_inline',
+            'shell_name': 'shell_script',
             'win_restart_name': 'windows_restart_name',
-            'win_restart_check_cmd': 'echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt'
+            'file_name': 'file_customizer_name',
+
+            'script_url': TEST_PWSH_SCRIPT_URL,
+            'inline_script': " ".join(TEST_PWSH_SCRIPT_INLINE),
+            'inline_shell_script': '"sudo apt install unattended-upgrades"',
+            'file_url': '"https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html"',
+            'file_dest_path': '"c:\\buildArtifacts\\index.html"',
+            'win_restart_check_cmd': 'echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt',
         })
 
         # create and build image template
-        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --managed-image-destinations {img}={loc}',
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --managed-image-destinations {img}={loc} --defer',
                  checks=[
-                     self.check('customize[0].name', self.kwargs['script'].rsplit("/", 1)[1]),
-                     self.check('customize[0].script', '{script}'),
-                     self.check('customize[0].type', 'PowerShell')
+                     self.check('properties.customize[0].name', self.kwargs['script_url'].rsplit("/", 1)[1]),
+                     self.check('properties.customize[0].script', '{script_url}'),
+                     self.check('properties.customize[0].type', 'PowerShell')
                  ])
 
         # Test customizer add, remove and clear..
 
-        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name} --type powershell -e 0 1 2 --script-url {script}',
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name} --type powershell -e 0 1 2 --script-url {script_url} --defer',
                  checks=[
-                     self.check('customize[1].name', '{pwsh_name}'),
-                     self.check('customize[1].script', '{script}'),
-                     self.check('customize[1].valid_exit_codes', '[0,1,2]'),
-                     self.check('customize[1].type', 'PowerShell')
+                     self.check('properties.customize[1].name', '{pwsh_name}'),
+                     self.check('properties.customize[1].script', '{script_url}'),
+                     self.check('properties.customize[1].valid_exit_codes', '[0,1,2]'),
+                     self.check('properties.customize[1].type', 'PowerShell')
                  ])
 
-
-        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {win_restart_name} -t windows-restart --restart-check-command "{win_restart_check_cmd}"',
+        img_tmpl = self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name_2} --type powershell -e 12 14 16 --inline-script {inline_script} --defer',
                  checks=[
-                     self.check('customize[2].name', '{win_restart_name}'),
-                     self.check('customize[2].restartCheckCommand', '{win_restart_check_cmd}'),
-                     self.check('customize[2].restartTimeout', '5m'),
-                     self.check('customize[2].type', 'WindowsRestart')
+                     self.check('properties.customize[2].name', '{pwsh_name}'),
+                     self.check('properties.customize[2].script', '{inline_script}'),
+                     self.check('properties.customize[2].valid_exit_codes', '[12,14,16]'),
+                     self.check('properties.customize[2].type', 'PowerShell')
+                 ]).get_output_in_json()
+
+        self.assertEqual(img_tmpl['properties']['customize'][2]['script'][0], TEST_PWSH_SCRIPT_INLINE[0])
+        self.assertEqual(img_tmpl['properties']['customize'][2]['script'][1], TEST_PWSH_SCRIPT_INLINE[1])
+
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {win_restart_name} -t windows-restart --restart-check-command "{win_restart_check_cmd}" --defer',
+                 checks=[
+                     self.check('properties.customize[3].name', '{win_restart_name}'),
+                     self.check('properties.customize[3].restartCheckCommand', '{win_restart_check_cmd}'),
+                     self.check('properties.customize[3].restartTimeout', '5m'),
+                     self.check('properties.customize[3].type', 'WindowsRestart')
                  ])
 
-        self.cmd('image template show -n {tmpl} -g {rg}')
+        # add file customizer
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {file_name} -t file --file-source {file_url} --dest-path {file_dest_path} --defer',
+                 checks=[
+                     self.check('properties.customize[4].name', '{file_name}'),
+                     self.check('properties.customize[4].source_uri', '{file_url}'),
+                     self.check('properties.customize[4].destination', '{file_dest_path}'),
+                     self.check('properties.customize[4].type', 'File')
+                 ])
 
-        # todo test customizer / distributor remove and clear commands / test win source.
-        # self.cmd('image template run -n {tmpl} -g {rg}')
-        #
-        # # get the run output
-        # output = self.cmd('image template show -n {tmpl} -g {rg} --output-name {img}',
-        #                   checks=self.check('provisioningState', 'Succeeded')
-        #                   ).get_output_in_json()
-        #
-        # self.kwargs['image_id'] = output['artifactId']
-        #
-        # # check that vm successfully created from template.
-        # self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
-        # self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
+        # add shell script argument even though this is a windows image template
+        self.cmd('image template customizer add -n {tmpl} -g {rg} --customizer-name {shell_name} --type shell --inline-script {inline_shell_script} --defer',
+                 checks=[
+                     self.check('properties.customize[5].name', '{shell_name}'),
+                     self.check('properties.customize[5].inline', '[{inline_shell_script}]'),
+                     self.check('properties.customize[5].type', 'Shell')
+                 ])
 
+        self.cmd('image template customizer remove -n {tmpl} -g {rg} --defer', checks=[
+                    self.check('length(properties.customize)', 4)
+                ])
 
-    def test_image_template_managed_image_source(self):
-        pass
+        # create image template from cache
+        self.cmd('image template update -n {tmpl} -g {rg}', checks=[
+            self.check('length(properties.customize)', 4)
+        ])
 
+        # test clear using object cache
+        self.cmd('image template customizer clear -n {tmpl} -g {rg} --defer', checks=[
+                    self.check('length(properties.customize)', 0)
+                ])
 
-    def test_image_template_customizers(self):
-        pass
+    @ResourceGroupPreparer(name_prefix='img_tmpl_customizers', location='westus2')
+    def test_image_template_output(self, resource_group, resource_group_location):
+        self._assign_ib_permissions(resource_group)
+
+        self.kwargs.update({
+            'tmpl_01': 'template01',
+            'img_src': LINUX_IMAGE_SOURCE,
+            'script': TEST_SHELL_SCRIPT_URL,
+            'loc': resource_group_location,
+            'img_1': 'managed_img_1',
+            'img_2': 'managed_img_2',
+            'vhd_out': 'vhd_1',
+        })
+
+        self.cmd('image template create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} --defer')
+
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {img_1} --managed-image-location {loc} --defer',
+                 checks=[
+                     self.check('properties.distribute[0].location', '{new_loc}'),
+                     self.check('properties.distribute[0].runOutputName', '{img_1}'),
+                     self.check('properties.distribute[0].type', 'ManagedImage')
+                 ])
+
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {img_2} --managed-image-location {loc} --defer',
+                 checks=[
+                     self.check('properties.distribute[1].location', '{new_loc}'),
+                     self.check('properties.distribute[1].runOutputName', '{img_1}'),
+                     self.check('properties.distribute[1].type', 'ManagedImage')
+                 ])
+
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd --defer',
+                 checks=[
+                     self.check('properties.distribute[2].runOutputName', '{vhd_out}'),
+                     self.check('properties.distribute[2].type', 'VHD')
+                 ])
+
+        self.cmd('image template output remove -n {tmpl_01} -g {rg} --output-name {img_2} --defer',
+                 checks=[
+                     self.check('length(properties.distribute)', 2)
+                 ])
+
+        # create image template from cache
+        self.cmd('image template update -n {tmpl} -g {rg}', checks=[
+            self.check('length(properties.customize)', 4)
+        ])
+
+        # test clear using object cacheå
+        self.cmd('image template output clear -n {tmpl_01} -g {rg} --defer',
+                 checks=[
+                     self.check('length(properties.distribute)', 0)
+                 ])
