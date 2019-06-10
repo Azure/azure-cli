@@ -34,7 +34,7 @@ def storage_blob_remove(cmd, client, target, recursive=None):
 
 def storage_blob_sync(cmd, client, source, destination):
     azcopy = _azcopy_blob_client(cmd, client)
-    azcopy.sync(source, _add_url_sas(destination, azcopy.creds.sas_token), flags=['--delete-destination true'])
+    azcopy.sync(source, _add_url_sas(destination, azcopy.creds.sas_token), flags=['--delete-destination', 'true'])
 
 
 def storage_run_command(cmd, command_args):
