@@ -6,18 +6,32 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands import CliCommandType
-from ._client_factory import (topics_factory, event_subscriptions_factory, topic_types_factory)
+from ._client_factory import (topics_factory, domains_factory, domain_topics_factory, event_subscriptions_factory, topic_types_factory)
 
 
 def load_command_table(self, _):
     topics_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#TopicsOperations.{}',
-        client_factory=topics_factory
+        client_factory=topics_factory,
+        client_arg_name='self'
+    )
+
+    domains_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#DomainsOperations.{}',
+        client_factory=domains_factory,
+        client_arg_name='self'
+    )
+
+    domain_topics_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations#DomainTopicsOperations.{}',
+        client_factory=domain_topics_factory,
+        client_arg_name='self'
     )
 
     topic_type_mgmt_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventgrid.operations#TopicTypesOperations.{}',
-        client_factory=topic_types_factory
+        client_factory=topic_types_factory,
+        client_arg_name='self'
     )
 
     with self.command_group('eventgrid topic', topics_mgmt_util, client_factory=topics_factory) as g:
@@ -31,6 +45,24 @@ def load_command_table(self, _):
                                  getter_name='get',
                                  setter_name='update',
                                  client_factory=topics_factory)
+
+    with self.command_group('eventgrid domain topic', domain_topics_mgmt_util, client_factory=domain_topics_factory) as g:
+        g.show_command('show', 'get')
+        g.custom_command('list', 'cli_domain_topic_list')
+        g.custom_command('delete', 'cli_domain_topic_delete')
+        g.custom_command('create', 'cli_domain_topic_create_or_update')
+
+    with self.command_group('eventgrid domain', domains_mgmt_util, client_factory=domains_factory) as g:
+        g.show_command('show', 'get')
+        g.command('key list', 'list_shared_access_keys')
+        g.command('key regenerate', 'regenerate_key')
+        g.custom_command('list', 'cli_domain_list')
+        g.custom_command('create', 'cli_domain_create_or_update')
+        g.command('delete', 'delete')
+        g.generic_update_command('update',
+                                 getter_name='get',
+                                 setter_name='update',
+                                 client_factory=domains_factory)
 
     custom_tmpl = 'azure.cli.command_modules.eventgrid.custom#{}'
     eventgrid_custom = CliCommandType(operations_tmpl=custom_tmpl)

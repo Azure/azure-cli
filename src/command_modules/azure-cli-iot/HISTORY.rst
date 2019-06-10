@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.3.11
+++++++
+* Add support to regenerate authorization policy keys
+* Add SDK and support for DigitalTwin Repository Provisioning Service.
+
 0.3.10
 ++++++
 * Add support for manual-failover

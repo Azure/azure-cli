@@ -5,6 +5,7 @@
 
 from os.path import exists, join
 import base64
+import random
 from OpenSSL import crypto
 
 
@@ -60,3 +61,11 @@ def generate_bearer_token(cmd):
     account = profile.get_subscription()
     access_token = profile.get_access_token_for_resource(account['user']['name'], account['tenantId'], CLIENT_ID)
     return 'Bearer ' + access_token
+
+
+def generateKey(byteLength=32):
+    key = ''
+    while byteLength > 0:
+        key += chr(random.randrange(1, 128))
+        byteLength -= 1
+    return base64.b64encode(key.encode()).decode('utf-8')

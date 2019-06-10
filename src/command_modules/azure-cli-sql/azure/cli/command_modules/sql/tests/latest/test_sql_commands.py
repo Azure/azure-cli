@@ -1747,6 +1747,21 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
         # Get all db capabilities
         self.cmd('sql db list-editions -l {}'.format(location),
                  checks=[
+                     # At least system, standard, and premium edition exist
+                     JMESPathCheckExists("[?name == 'System']"),
+                     JMESPathCheckExists("[?name == 'Standard']"),
+                     JMESPathCheckExists("[?name == 'Premium']"),
+                     # At least s0 and p1 service objectives exist
+                     JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
+                     JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'P1']"),
+                     # Max size data is omitted
+                     JMESPathCheck(db_max_size_length_jmespath, 0)])
+
+        # Get all available db capabilities
+        self.cmd('sql db list-editions -l {} --available'.format(location),
+                 checks=[
+                     # System edition is not available
+                     JMESPathCheck("length([?name == 'System'])", 0),
                      # At least standard and premium edition exist
                      JMESPathCheckExists("[?name == 'Standard']"),
                      JMESPathCheckExists("[?name == 'Premium']"),

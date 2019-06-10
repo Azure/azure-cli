@@ -134,7 +134,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set_secret)
 
-    with self.argument_context('acr pack') as c:
+    with self.argument_context('acr pack build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('image_name', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'.")
         c.argument('builder', options_list=['--builder', '-b'], help="The name and tag of a Buildpack builder image.")
@@ -227,3 +227,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.')
         c.argument('ip_address', help='IPv4 address or CIDR range.')
+
+    with self.argument_context('acr check-health') as c:
+        c.argument('ignore_errors', options_list=['--ignore-errors'], help='Ignore errors, displaying them only at the final', action='store_true', required=False)

@@ -173,14 +173,14 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-linux-cd', length=24)
         plan = 'plan-quick-linux-cd'
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|6.11"'.format(resource_group, webapp_name,
-                                                                                   plan, TEST_REPO_URL))
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "node|10.14"'.format(resource_group, webapp_name,
+                                                                                    plan, TEST_REPO_URL))
         time.sleep(45)  # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=240)
         # verify the web page
-        if 'Your App Service app is up and running' not in str(r.content):
+        if 'Hello world' not in str(r.content):
             # dump out more info for diagnose
-            self.fail("'Your App Service app is up and running' is not found in the web page. We get instead:" + str(r.content))
+            self.fail("'Hello world' is not found in the web page. We get instead:" + str(r.content))
 
     @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location')
     @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2')
@@ -273,7 +273,7 @@ class WebappConfigureTest(ScenarioTest):
 
         # verify the baseline
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck('alwaysOn', False),
+            JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', False),
             JMESPathCheck('phpVersion', '5.6'),
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
@@ -511,7 +511,6 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
 class LinuxWebappScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp(self, resource_group):
         runtime = 'node|6.6'
@@ -1203,6 +1202,92 @@ class FunctionAppServicePlanLinux(ScenarioTest):
             JMESPathCheck('sku.name', 'S1'),
             JMESPathCheck('kind', 'linux')
         ])
+
+
+class FunctionAppSlotTests(ScenarioTest):
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_slot_creation(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-slot', length=24)
+        slotname = self.create_random_name(prefix='slotname', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan,
+                                                                                        storage_account), checks=[
+            JMESPathCheck('name', functionapp)
+        ])
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname),
+                 checks=[
+            JMESPathCheck('name', slotname),
+            JMESPathCheck('type', 'Microsoft.Web/sites/slots'),
+        ])
+        pre_slot_list = self.cmd('functionapp deployment slot list -g {} -n {}'.format(resource_group, functionapp),
+                                 checks=[
+            JMESPathCheck("[?name=='{}'].type|[0]".format(slotname), 'Microsoft.Web/sites/slots')
+        ]).get_output_in_json()
+        self.assertEqual(len(pre_slot_list), 1)
+        self.cmd('functionapp deployment slot delete -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname))
+
+        deleted_slot_list = self.cmd('functionapp deployment slot list -g {} -n {}'.format(resource_group, functionapp)).get_output_in_json()
+        self.assertEqual(len(deleted_slot_list), 0)
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_slot_appsetting_update(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-slot', length=24)
+        slotname = self.create_random_name(prefix='slotname', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp, plan,
+                                                                                        storage_account), checks=[
+            JMESPathCheck('name', functionapp)
+        ])
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
+            JMESPathCheck('name', slotname)
+        ])
+        self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --slot-settings FOO=BAR'.format(resource_group, functionapp,
+                                                                                                           slotname), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR'),
+            JMESPathCheck("[?name=='FOO'].slotSetting|[0]", True)
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, functionapp, slotname), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR'),
+            JMESPathCheck("[?name=='FOO'].slotSetting|[0]", True)
+        ])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_slot_swap(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcappplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-slot', length=24)
+        slotname = self.create_random_name(prefix='slotname', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime node'.format(resource_group, functionapp,
+                                                                                        plan,
+                                                                                        storage_account), checks=[
+            JMESPathCheck('name', functionapp)
+        ])
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp,
+                                                                                   slotname), checks=[
+            JMESPathCheck('name', slotname)
+        ])
+        self.cmd('functionapp config appsettings set -g {} -n {} --slot {} --settings FOO=BAR'.format(resource_group, functionapp,
+                                                                                                      slotname), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR')
+        ])
+        self.cmd('functionapp deployment slot swap -g {} -n {} --slot {} --action swap'.format(resource_group, functionapp, slotname))
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", 'BAR')
+        ])
+        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
 class WebappAuthenticationTest(ScenarioTest):
