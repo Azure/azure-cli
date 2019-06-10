@@ -15,7 +15,7 @@ from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
                                                           AllocationPolicy,
                                                           AccessRightsDescription)
-from azure.cli.command_modules.iot.shared import EndpointType, RouteSourceType, EncodingFormat
+from azure.cli.command_modules.iot.shared import EndpointType, RouteSourceType, EncodingFormat, RenewKeyType
 
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
@@ -155,6 +155,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('permissions', nargs='*', validator=validate_policy_permissions, type=str.lower,
                    help='Permissions of shared access policy. Use space-separated list for multiple permissions. '
                         'Possible values: {}'.format(permission_values))
+
+    with self.argument_context('iot hub policy regenerate-key') as c:
+        c.argument('regenerate_key', options_list=['--regenerate-key', '--rk'], arg_type=get_enum_type(RenewKeyType),
+                   help='Regenerate keys')
 
     with self.argument_context('iot hub job') as c:
         c.argument('job_id', id_part='child_name_1', help='Job Id.')
