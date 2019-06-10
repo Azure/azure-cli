@@ -922,28 +922,34 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None,
                        credential_description=None, app_roles=None):
+
+    # propagate the values
+    app_patch_param = ApplicationUpdateParameters()
+    properties = [attr for attr in dir(instance)
+                  if not callable(getattr(instance, attr)) and
+                  not attr.startswith("_") and attr != 'additional_properties' and hasattr(app_patch_param, attr)]
+    for p in properties:
+        setattr(app_patch_param, p, getattr(instance, p))
+
+    # handle credentials. Note, we will not put existing ones on the wire to avoid roundtrip problems caused
+    # by time precision difference between SDK and Graph Services
     password_creds, key_creds = None, None
     if any([password, key_value]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage, start_date,
                                                              end_date, credential_description)
+    app_patch_param.key_credentials = key_creds
+    app_patch_param.password_credentials = password_creds
 
     if required_resource_accesses:
-        instance.required_resource_access = _build_application_accesses(required_resource_accesses)
+        app_patch_param.required_resource_access = _build_application_accesses(required_resource_accesses)
 
     if app_roles:
-        instance.app_roles = _build_app_roles(app_roles)
+        app_patch_param.app_roles = _build_app_roles(app_roles)
 
-    app_patch_param = ApplicationUpdateParameters(
-        display_name=display_name,
-        homepage=homepage,
-        identifier_uris=(identifier_uris or instance.identifier_uris),
-        reply_urls=(reply_urls or instance.reply_urls),
-        key_credentials=key_creds,
-        password_credentials=password_creds,
-        available_to_other_tenants=available_to_other_tenants,
-        required_resource_access=instance.required_resource_access,
-        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
-        app_roles=instance.app_roles)
+    app_patch_param.available_to_other_tenants = available_to_other_tenants
+    app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
+    app_patch_param.identifier_uris = identifier_uris
+    app_patch_param.reply_urls = reply_urls
 
     return app_patch_param
 
