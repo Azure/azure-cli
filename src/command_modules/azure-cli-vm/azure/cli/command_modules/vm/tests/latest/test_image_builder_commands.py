@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
-    StorageAccountPreparer)
+import unittest
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 from msrestazure.tools import parse_resource_id
 
@@ -250,9 +249,6 @@ class ImageTemplateTest(ScenarioTest):
                           checks=self.check('provisioningState', 'Succeeded')
                           ).get_output_in_json()
 
-        with open("/Users/tosin/Repos/azure-cli") as f:
-            f.write(output)
-
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
@@ -295,7 +291,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image template create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --managed-image-destinations {img}={loc} --defer',
                  checks=[
                      self.check('properties.customize[0].name', self.kwargs['script_url'].rsplit("/", 1)[1]),
-                     self.check('properties.customize[0].script', '{script_url}'),
+                     self.check('properties.customize[0].scriptUri', '{script_url}'),
                      self.check('properties.customize[0].type', 'PowerShell')
                  ])
 
@@ -377,20 +373,21 @@ class ImageTemplateTest(ScenarioTest):
 
         self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {img_1} --managed-image-location {loc} --defer',
                  checks=[
-                     self.check('properties.distribute[0].location', '{new_loc}'),
+                     self.check('properties.distribute[0].location', '{loc}'),
                      self.check('properties.distribute[0].runOutputName', '{img_1}'),
                      self.check('properties.distribute[0].type', 'ManagedImage')
                  ])
 
         self.cmd('image template output add -n {tmpl_01} -g {rg} --managed-image {img_2} --managed-image-location {loc} --defer',
                  checks=[
-                     self.check('properties.distribute[1].location', '{new_loc}'),
-                     self.check('properties.distribute[1].runOutputName', '{img_1}'),
+                     self.check('properties.distribute[1].location', '{loc}'),
+                     self.check('properties.distribute[1].runOutputName', '{img_2}'),
                      self.check('properties.distribute[1].type', 'ManagedImage')
                  ])
 
-        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --is-vhd --defer',
+        self.cmd('image template output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --artifact-tags "is_vhd=True" --is-vhd --defer',
                  checks=[
+                     self.check('properties.distribute[2].artifactTags.is_vhd', 'True'),
                      self.check('properties.distribute[2].runOutputName', '{vhd_out}'),
                      self.check('properties.distribute[2].type', 'VHD')
                  ])
@@ -401,7 +398,7 @@ class ImageTemplateTest(ScenarioTest):
                  ])
 
         # create image template from cache
-        self.cmd('image template update -n {tmpl} -g {rg}', checks=[
+        self.cmd('image template update -n {tmpl_01} -g {rg}', checks=[
             self.check('length(properties.customize)', 4)
         ])
 
@@ -410,3 +407,7 @@ class ImageTemplateTest(ScenarioTest):
                  checks=[
                      self.check('length(properties.distribute)', 0)
                  ])
+
+
+if __name__ == '__main__':
+    unittest.main()

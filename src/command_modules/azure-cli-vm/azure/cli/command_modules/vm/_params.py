@@ -171,7 +171,7 @@ def load_arguments(self, _):
 
     with self.argument_context('image template output add') as c:
         artifact_tags_help = "Tags that will be applied to the output artifact once it has been created by the distributor. " + tags_type.settings['help']
-        artifact_tags_type = CLIArgumentType(overrides=tags_type, help=artifact_tags_help)
+        artifact_tags_type = CLIArgumentType(overrides=tags_type, help=artifact_tags_help, options_list=["--artifact-tags"])
 
         ib_default_loc_help = " Defaults to resource group's location."
         c.argument('output_name', help= ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
@@ -185,9 +185,9 @@ def load_arguments(self, _):
         win_restart_type = CLIArgumentType(arg_group="Windows Restart")
         script_type = CLIArgumentType(arg_group="Shell and Powershell")
         powershell_type = CLIArgumentType(arg_group="Powershell")
-        file_type = CLIArgumentType(arg_group="File")
+        file_customizer_type = CLIArgumentType(arg_group="File")
 
-        c.argument('customizer_name', help="Name of the customizer to be added to the image template.")
+        c.argument('customizer_name', help="Name of the customizer.")
         c.argument('customizer_type', options_list=['--type', '-t'], help="Type of customizer to be added to the image template.", arg_type=get_enum_type(ScriptType))
 
         # Script Args
@@ -203,8 +203,8 @@ def load_arguments(self, _):
         c.argument('restart_timeout', arg_type=win_restart_type, help="Restart timeout specified as a string consisting of a magnitude and unit, e.g. '5m' (5 minutes) or '2h' (2 hours)", default="5m")
 
         # File Args
-        c.argument('file_source', arg_type=file_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
-        c.argument('dest_path', arg_type=file_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
+        c.argument('file_source', arg_type=file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
+        c.argument('dest_path', arg_type=file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
 
     # endregion
 
