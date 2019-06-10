@@ -99,8 +99,8 @@ class IoTHubTest(ScenarioTest):
             self.check('rights', 'RegistryWrite, ServiceConnect, DeviceConnect')
         ])
 
-        # Test 'az iot hub policy regenerate-key'
-        policy = self.cmd('iot hub policy regenerate-key --hub-name {0} -n {1} --regenerate-key Primary'.format(hub, policy_name),
+        # Test 'az iot hub policy renew-key'
+        policy = self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Primary'.format(hub, policy_name),
                           checks=[self.check('keyName', policy_name)]).get_output_in_json()
 
         policy_name_conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
@@ -111,8 +111,8 @@ class IoTHubTest(ScenarioTest):
             self.check_pattern('connectionString', policy_name_conn_str_pattern)
         ])
 
-        # Test swap keys 'az iot hub policy regenerate-key'
-        self.cmd('iot hub policy regenerate-key --hub-name {0} -n {1} --regenerate-key Swap'.format(hub, policy_name),
+        # Test swap keys 'az iot hub policy renew-key'
+        self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Swap'.format(hub, policy_name),
                  checks=[self.check('primaryKey', policy['secondaryKey']),
                          self.check('secondaryKey', policy['primaryKey'])])
 
