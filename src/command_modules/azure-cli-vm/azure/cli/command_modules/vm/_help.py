@@ -1975,32 +1975,41 @@ helps['image template customizer add'] = """
     type: command
     short-summary: Add an image builder customizer to an image builder template.
     examples:
-    - name: Create an image template with shell and file customizers
+    - name: Add an inline shell customizer to an image template
       text: |
             script="https://my-script-url.com/customize_script.sh"
             imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
 
             # create template object in local cli cache
             az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --cache write
-
-            # add url shell script
-            az image template output add -n mytemplate -g my-group --customizer-name shell-script-url \\
-                --type shell --script-url "https://my-script-url.com/customize_script.sh"
+                -g my-group --scripts $script --defer
 
             # add inline shell script
             az image template output add -n mytemplate -g my-group --customizer-name shell-script-inline \\
-                --type shell --inline-script "sudo mkdir /buildArtifacts" "sudo cp /tmp/index.html /buildArtifacts/index.html"
-
-            # add file customizer
-            az image template output add -n mytemplate -g my-group --customizer-name my-file \\
-                --type file --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html"
+                --inline-script "sudo mkdir /buildArtifacts" "sudo cp /tmp/index.html /buildArtifacts/index.html"
+                --type shell  --defer
 
             # send template create request to azure
-            az image template update -n mytemplate -g my-group --cache read
+            az image template update -n mytemplate -g my-group
 
             # finally, delete cache obj
             az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
+
+    - name: Add a file customizer to an image template in the object cache and create it
+      text: |
+            # add file customizer
+            az image template output add -n mytemplate -g my-group --customizer-name my-file --type file\\
+                --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html" --defer
+
+            # create template from object in cache
+            az image template update -n mytemplate -g my-group
+
+    - name: Add an shell script customizer to an image template in the object cache
+      text: |
+            # add url shell script
+            az image template output add -n mytemplate -g my-group --customizer-name shell-script-url \\
+                --type shell --script-url "https://my-script-url.com/customize_script.sh --defer"
+
 """
 
 helps['image template customizer remove'] = """
@@ -2026,15 +2035,14 @@ helps['image template output add'] = """
 
             # create template object in local cli cache
             az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --cache write
+                -g my-group --scripts $script --defer
 
             # update template object in local cli cache with managed image output
             az image template output add -n mytemplate -g my-group \\
-                --managed-image my_desired_image_name --output-name managed_image_run_01 \\
-                --cache read write
+                --managed-image my_desired_image_name --output-name managed_image_run_01 --defer
 
             # send template create request to azure (and update local cache)
-            az image template update -n mytemplate -g my-group --cache read write-through
+            az image template update -n mytemplate -g my-group
 
             # finally, delete cache obj
             az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
@@ -2042,37 +2050,18 @@ helps['image template output add'] = """
     - name: Add a shared image gallery output to a template. Optionally specify its replication regions.
       text: |
 
-            # create template object in local cli cache
-            az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --cache write
-
             # update template object in local cli cache with shared image gallery output
             az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
-            --gallery-image-definition linux_image_def --gallery-replication-regions westus brazilsouth \\
-            --cache read write
-
-            # send template create request to azure
-            az image template update -n mytemplate -g my-group --cache read
-
-            # finally, delete cache obj
-            az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
+                --gallery-replication-regions westus brazilsouth \\
+                --gallery-image-definition linux_image_def --defer
 
     - name: Add a VHD output to a template.
       text: |
 
-            # create template object in local cli cache
-            az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --cache write
-
             # update template object in local cli cache with vhd output
             az image template output add -n mytemplate -g my-group \\
-                --output-name my_vhd_image --is-vhd  --cache read write
+                --output-name my_vhd_image --is-vhd  --defer
 
-            # send template create request to azure  
-            az image template update -n mytemplate -g my-group --cache read
-
-            # finally, delete cache obj
-            az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
 """
 
 helps['image template output remove'] = """
@@ -2122,7 +2111,7 @@ helps['image template create'] = """
       - az vm image list
       - az vm image show
     examples:
-        - name: Create an image builder template that customizes an UbuntuLTS 18.04 image and distributes the output as a managed image and a shared image gallery image version (replicated in westus and uksouth) when it is run.
+        - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version
           text: |
             
             scripts="https://my-script-url.com/customize_script.sh"
@@ -2132,7 +2121,7 @@ helps['image template create'] = """
                 --scripts $scripts --managed-image-destinations image_1=westus \\
                 --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
         
-        - name: Create an image builder template and then add its output destinations one at a time. Uses cli object cache.
+        - name: Create an image builder template in the object cache and then add its output destinations one at a time
           text: |
 
             script="https://my-script-url.com/customize_script.sh"
@@ -2140,17 +2129,17 @@ helps['image template create'] = """
 
             # create and update template object in local cli cache
             az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --cache write
+                -g my-group --scripts $script --defer
 
             az image template output add -n mytemplate -g my-group \\
-                --managed-image my_desired_image_name --managed-image-location eastus --cache read write
+                --managed-image my_desired_image_name --managed-image-location eastus --defer
 
             az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
                 --gallery-image-definition linux_image_def \\ 
-                --gallery-replication-regions westus brazilsouth  --cache read write
+                --gallery-replication-regions westus brazilsouth  --defer
 
-            # send template create request to azure (optionally add write-through to update cache)
-            az image template update -n mytemplate -g my-group --cache read
+            # create the template from the object cache
+            az image template update -n mytemplate -g my-group
 
             # finally, delete cache obj
             az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
@@ -2180,16 +2169,16 @@ helps['image template update'] = """
             See "az image template create / output add / customizer add --help" and "az cache -h" for more information
           text: |    
             # create and write template object to local cli cache
-            az image template create --image-source {image_source} -n mytemplate \\
-                -g my-group --scripts {script} --managed-image-destinations image_1=westus --cache write
+            az image template create --image-source {image_source} -n mytemplate -g my-group \\
+                --scripts {script} --managed-image-destinations image_1=westus --defer
 
             # add customizers and outputs to local cache template object 
             #   via az image template output / customizer add
             #   can also update other cache object params through generic update args like --set
             # ...
 
-            # send template create request to azure to create template resource (optionally add write-through to update cache)
-            az image template update -n mytemplate -g my-group --cache read 
+            # send template create request to azure to create template resource
+            az image template update -n mytemplate -g my-group
             
             # finally, delete cache obj
             az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
