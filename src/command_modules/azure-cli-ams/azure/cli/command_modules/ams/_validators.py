@@ -35,7 +35,7 @@ def datetime_format(value):
 
 
 def validate_archive_window_length(ns):
-    """Validate the correct format of a datetime string and deserialize."""
+    """Validate the correct format of a datetime string and the range."""
     if ns.archive_window_length is not None:
         from msrest.serialization import Deserializer
         from msrest.exceptions import DeserializationError
@@ -54,11 +54,9 @@ def validate_archive_window_length(ns):
                 .format(ns.archive_window_length)
             raise ValueError(message)
 
-        ns.archive_window_length = datetime_obj
-
 
 def validate_key_frame_interval_duration(ns):
-    """Validate the correct format of a datetime string and deserialize."""
+    """Validate the correct format of a datetime string and the range."""
     if ns.key_frame_interval_duration is not None:
         from msrest.serialization import Deserializer
         from msrest.exceptions import DeserializationError
@@ -76,8 +74,6 @@ def validate_key_frame_interval_duration(ns):
             message = "key-frame-interval-duration '{}' is not in the range of PT1S and PT30S"\
                 .format(ns.key_frame_interval_duration)
             raise ValueError(message)
-
-        ns.key_frame_interval_duration = datetime_obj
 
 
 def validate_correlation_data(ns):
