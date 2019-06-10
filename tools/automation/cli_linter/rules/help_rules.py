@@ -141,9 +141,8 @@ def _extract_commands_from_example(example_text):
             if quote is None:
                 if line[char_idx] == '"' or line[char_idx] == "'":
                     quote = line[char_idx]
-            else:
-                elif line[char_idx] == quote
-                    quote = None
+            elif line[char_idx] == quote:
+                quote = None
         if quote is None and line[-1] == "\\":
             # attach this line with removed '\' and no '\n'
             example_text += line[0:-1]
