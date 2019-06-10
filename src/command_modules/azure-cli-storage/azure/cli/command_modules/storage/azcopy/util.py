@@ -9,13 +9,12 @@ import json
 import platform
 import subprocess
 import datetime
-import ssl
 import sys
 import zipfile
+import stat
 from six.moves.urllib.parse import urlparse
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import in_cloud_console
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -46,6 +45,8 @@ class AzCopy(object):
                 raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
             try:
                 _urlretrieve(file_url, install_location)
+                os.chmod(install_location,
+                         os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             except IOError as err:
                 raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
 
@@ -54,7 +55,6 @@ class AzCopy(object):
 
     def run_command(self, args):
         args = [self.executable] + args
-        args = ' '.join(args)
         logger.warning("Azcopy command: %s", args)
         env_kwargs = {}
         if self.creds and self.creds.token_info:
@@ -170,26 +170,27 @@ def _get_default_install_location():
     return install_location
 
 
-def _ssl_context():
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
-        try:
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-    return ssl.create_default_context()
-
-
 def _urlretrieve(url, install_location):
-    req = urlopen(url, context=_ssl_context())
-    if sys.version_info.major >= 3:
-        import io
-        zip_file = zipfile.ZipFile(io.BytesIO(req.read()))
+    import io
+    req = urlopen(url)
+    compressedFile = io.BytesIO(req.read())
+    if url.endswith('zip'):
+        if sys.version_info.major >= 3:
+            zip_file = zipfile.ZipFile(compressedFile)
+        else:
+            # If Python version is 2.X, use StringIO instead.
+            import StringIO  # pylint: disable=import-error
+            zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
+        for fileName in zip_file.namelist():
+            if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
+                with open(install_location, 'wb') as f:
+                    f.write(zip_file.read(fileName))
+    elif url.endswith('gz'):
+        import tarfile
+        with tarfile.open(fileobj=compressedFile, mode="r:gz") as tar:
+            for tarinfo in tar:
+                if tarinfo.isfile() and tarinfo.name.endswith('azcopy'):
+                    with open(install_location, 'wb') as f:
+                        f.write(tar.extractfile(tarinfo).read())
     else:
-        # If Python version is 2.X, use StringIO instead.
-        import StringIO  # pylint: disable=import-error
-        zip_file = zipfile.ZipFile(StringIO.StringIO(req.read()))
-    for fileName in zip_file.namelist():
-        if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
-            with open(install_location, 'wb') as f:
-                f.write(zip_file.read(fileName))
+        raise CLIError('Invalid downloading url {}'.format(url))
