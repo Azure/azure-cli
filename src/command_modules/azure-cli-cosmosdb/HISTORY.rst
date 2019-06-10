@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.11
+++++++
+* Added support for setting "isZoneRedundant" property of location. Introduced new format for specifying location details of an account and deprecated the old format.
+
 0.2.10
 ++++++
 * Minor fixes.
