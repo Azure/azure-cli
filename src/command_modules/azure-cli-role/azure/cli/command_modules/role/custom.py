@@ -549,10 +549,9 @@ def add_application_owner(cmd, owner_object_id, identifier):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     app_object_id = _resolve_application(graph_client.applications, identifier)
     owners = graph_client.applications.list_owners(app_object_id)
-    if next((x for x in owners if x.object_id == owner_object_id), None):
-        return
-    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
-    return graph_client.applications.add_owner(app_object_id, owner_url)
+    if not next((x for x in owners if x.object_id == owner_object_id), None):
+        owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
+        graph_client.applications.add_owner(app_object_id, owner_url)
 
 
 def remove_application_owner(cmd, owner_object_id, identifier):
@@ -680,10 +679,9 @@ def add_group_owner(cmd, owner_object_id, group_id):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     group_object_id = _resolve_group(graph_client.groups, group_id)
     owners = graph_client.groups.list_owners(group_object_id)
-    if next((x for x in owners if x.object_id == owner_object_id), None):
-        return
-    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
-    return graph_client.groups.add_owner(group_object_id, owner_url)
+    if not next((x for x in owners if x.object_id == owner_object_id), None):
+        owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
+        graph_client.groups.add_owner(group_object_id, owner_url)
 
 
 def remove_group_owner(cmd, owner_object_id, group_id):
