@@ -1,10 +1,12 @@
 {
 	"name": "Azure CLI Dev",
-	"image": "zikalino/azure-cli-dev",
+	"dockerFile": "Dockerfile",
+	"context": ".",
 	"extensions": [
 		"ms-python.python"
 	],
 	"settings": {
-		"python.pythonPath": "/azure-cli/env/bin/"
-	}
+		"python.pythonPath": "/env/bin/python3"
+	},
+	"postCreateCommand": "bash"
 }
