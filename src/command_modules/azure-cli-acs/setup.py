@@ -35,7 +35,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute==5.0.0',
     'azure-graphrbac==0.60.0',
     'azure-cli-core',
-    'paramiko>=2.0.8',
+    'paramiko>=2.0.8,<2.5.0',
     'pyyaml',
     'six',
     'scp',
