@@ -147,7 +147,7 @@ def load_arguments(self, _):
         c.argument('scripts', nargs='+', help="Space-separated list of shell or powershell scripts to customize the image with. Each script must be a publicly accessible URL."
                                               #"Or a path to an existing file. If a file path is given, the script will be uploaded to a storage account."
                                               " Infers type of script from file extension ('.sh' or'.ps1') or from source type. More more customizer options and flexibility, see: 'az image template customizer add'")
-        c.argument('source', options_list="--image-source", help="The base image to customize. Must be a valid platform image URN, platform image alias, Red Hat ISO image URI, managed image name/ID, or shared image version ID.")
+        c.argument('source', options_list=["--image-source", "-i"], help="The base image to customize. Must be a valid platform image URN, platform image alias, Red Hat ISO image URI, managed image name/ID, or shared image version ID.")
         c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
         c.argument('checksum', help="The SHA256 checksum of the Red Hat ISO image")
         c.argument('managed_image_destinations', nargs='+', help='Managed image distribution information. Space-separated list of key-value pairs. E.g "image_1=westus2 image_2=westus". Each key is the name or resource ID of the managed image to be created. Each value is the location of the image.')
