@@ -77,7 +77,6 @@ COMMAND_MODULES = [
     'azure-cli-lab',
     'azure-cli-maps',
     'azure-cli-monitor',
-    'azure-cli-natgateway',
     'azure-cli-nspkg',
     'azure-cli-policyinsights',
     'azure-cli-privatedns',
