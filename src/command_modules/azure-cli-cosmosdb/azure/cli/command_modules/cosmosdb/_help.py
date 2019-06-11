@@ -33,7 +33,7 @@ parameters:
   - name: --locations
     short-summary: Add a location to the Cosmos DB database account
     long-summary: |
-        Usage:          --locations [KEY=VALUE ...]
+        Usage:          --locations KEY=VALUE [KEY=VALUE ...]
         Required Keys:  regionName, failoverPriority
         Optional Key:   isZoneRedundant
         Default:        single region account in the location of the specified resource group.
@@ -128,7 +128,7 @@ parameters:
   - name: --locations
     short-summary: Add a location to the Cosmos DB database account
     long-summary: |
-        Usage:          --locations [KEY=VALUE ...]
+        Usage:          --locations KEY=VALUE [KEY=VALUE ...]
         Required Keys:  regionName, failoverPriority
         Optional Key:   isZoneRedundant
         Default:        single region account in the location of the specified resource group.

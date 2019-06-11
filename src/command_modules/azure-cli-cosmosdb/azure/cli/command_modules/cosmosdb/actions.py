@@ -48,7 +48,7 @@ class CreateLocation(argparse._AppendAction):
         else:
             # pylint: disable=line-too-long
             if not namespace._deprecated_location_format:
-                logger.warning('DEPRECATION WARNING: The regionName=failoverPriority method of specifying locations is deprecated. Use --locations [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
+                logger.warning('The regionName=failoverPriority method of specifying locations is deprecated. Use --locations KEY=VALUE [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
             namespace._deprecated_location_format = True
 
             for item in values:
