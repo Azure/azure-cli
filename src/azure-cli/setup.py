@@ -53,7 +53,6 @@ CLASSIFIERS = [
 
 COMMAND_MODULES = [
     'azure-cli-ams',
-    'azure-cli-appservice',
     'azure-cli-backup',
     'azure-cli-batch',
     'azure-cli-batchai',
@@ -102,9 +101,11 @@ DEPENDENCIES = [
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core',
     'azure-cli-telemetry>=1.0.2,<2.0',
+    'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
+    'azure-mgmt-applicationinsights~=0.1.1',
     'azure-mgmt-authorization~=0.50.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-cdn~=3.1',
@@ -122,8 +123,11 @@ DEPENDENCIES = [
     'azure-mgmt-sql~=0.12',
     'azure-mgmt-storage~=3.3',
     'azure-mgmt-trafficmanager~=0.51.0',
+    'azure-mgmt-web~=0.42',
     'azure-multiapi-storage~=0.2.3',
     'azure-storage-blob>=1.3.1,<2.0.0',
+    'cryptography>=2.3.1,<2.5.0',  # See https://github.com/Azure/azure-cli/pull/8324
+    'fabric~=2.4',
     'knack~=0.6.2',
     'paramiko>=2.0.8,<2.5.0',
     'pyOpenSSL~=19.0',
@@ -132,6 +136,9 @@ DEPENDENCIES = [
     'scp~=0.13.2',
     'six~=1.12',
     'sshtunnel~=0.1.4',
+    'urllib3[secure]~=1.18',
+    'vsts-cd-manager~=1.0.0,>=1.0.2',
+    'xmltodict~=0.12',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
