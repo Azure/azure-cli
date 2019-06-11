@@ -38,7 +38,7 @@ from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType
 
 from ._client_factory import resource_service_factory, get_digitaltwin_client
-from ._utils import open_certificate, generate_bearer_token, generateKey
+from ._utils import open_certificate, get_auth_header, generateKey
 
 
 # CUSTOM TYPE
@@ -755,22 +755,22 @@ def digitaltwin_update_repository(cmd, client, repo_endpoint, repo_id, repo_name
 
 
 def digitaltwin_list_repository(cmd, client, repo_endpoint):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).get_repositories_async(api_version=client.api_version, custom_headers=headers)
 
 
 def digitaltwin_get_repository(cmd, client, repo_endpoint, repo_id):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).get_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
 def digitaltwin_delete_repository(cmd, client, repo_endpoint, repo_id):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).delete_repository_async(repo_id, api_version=client.api_version, custom_headers=headers)
 
 
 def digitaltwin_track_provision_status(cmd, client, repo_endpoint, repo_id, track_id):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).get_provision_status(repo_id, track_id, api_version=client.api_version, custom_headers=headers)
 
 
@@ -783,23 +783,23 @@ def digitaltwin_update_key(cmd, client, repo_endpoint, repo_id, key_id, user_rol
 
 
 def digitaltwin_list_key(cmd, client, repo_endpoint, repo_id):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).get_keys_async(repository_id=repo_id, api_version=client.api_version, custom_headers=headers)
 
 
 def digitaltwin_get_key(cmd, client, repo_endpoint, repo_id, key_id):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).get_key_async(repo_id, key_id, api_version=client.api_version, custom_headers=headers)
 
 
 def digitaltwin_delete_key(cmd, client, repo_endpoint, repo_id, key_id):
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     return get_digitaltwin_client(repo_endpoint).delete_key_async(key_id, repo_id, api_version=client.api_version, custom_headers=headers)
 
 
 def _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name, repo_id=None):
     from .digitaltwinrepositoryprovisioningservice.models import RepositoryUpsertRequestProperties
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     repositoryUpsertRequestProperties = RepositoryUpsertRequestProperties(id=repo_id, name=repo_name)
     return get_digitaltwin_client(repo_endpoint).create_or_update_repository_async(api_version=client.api_version,
                                                                                    properties=repositoryUpsertRequestProperties,
@@ -808,7 +808,7 @@ def _digitaltwin_create_update_repository(cmd, client, repo_endpoint, repo_name,
 
 def _digitaltwin_create_update_authkeys(cmd, client, repo_endpoint, repo_id, user_role, key_id=None):
     from .digitaltwinrepositoryprovisioningservice.models import RepositoryKeyRequestProperties
-    headers = {'Authorization': '{}'.format(generate_bearer_token(cmd))}
+    headers = get_auth_header(cmd)
     repositoryKeyRequestProperties = RepositoryKeyRequestProperties(id=key_id, user_role=user_role)
     return get_digitaltwin_client(repo_endpoint).create_or_update_key_async(repository_id=repo_id,
                                                                             api_version=client.api_version,
