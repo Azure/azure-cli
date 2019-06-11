@@ -442,7 +442,10 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     client = web_client_factory(cli_ctx)
-    result = list(client.deleted_web_apps.list())
+    locations = _get_deleted_apps_locations(cli_ctx)
+    result = list()
+    for location in locations:
+        result = result + list(client.deleted_web_apps.list_by_location(location))
     if resource_group_name:
         result = [r for r in result if r.resource_group == resource_group_name]
     if name:
@@ -1441,6 +1444,17 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp))
     return webapp.location
+
+
+def _get_deleted_apps_locations(cli_ctx):
+    from azure.mgmt.resource import ResourceManagementClient
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    web_provider = client.providers.get('Microsoft.Web')
+    del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)
+    if del_sites_resource:
+        return del_sites_resource.locations
+    else:
+        return []
 
 
 def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
