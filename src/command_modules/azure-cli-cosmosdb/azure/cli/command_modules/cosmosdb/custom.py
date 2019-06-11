@@ -53,13 +53,8 @@ def cli_cosmosdb_create(cmd, client,
                         capabilities=None,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
-                        enable_multiple_write_locations=None,
-                        deprecated_location=None):
+                        enable_multiple_write_locations=None):
     """Create a new Azure Cosmos DB database account."""
-    # pylint: disable=line-too-long
-    if deprecated_location:
-        logger.warning('DEPRECATION WARNING: The regionName=failoverPriority method of specifying locations is deprecated. Use --locations [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
-
     consistency_policy = None
     if default_consistency_level is not None:
         consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
@@ -109,14 +104,9 @@ def cli_cosmosdb_update(client,
                         capabilities=None,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
-                        enable_multiple_write_locations=None,
-                        deprecated_location=None):
+                        enable_multiple_write_locations=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
-
-    # pylint: disable=line-too-long
-    if deprecated_location:
-        logger.warning('DEPRECATION WARNING: The regionName=failoverPriority method of specifying locations is deprecated. Use --locations [KEY=VALUE ...] to specify the regionName, failoverPriority, and isZoneRedundant properties of the location. Multiple locations can be specified by including more than one --locations argument.')
 
     # Workaround until PATCH support for all properties
     # pylint: disable=too-many-boolean-expressions
