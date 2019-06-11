@@ -5,6 +5,7 @@
 
 from os.path import exists, join
 import base64
+import random
 from OpenSSL import crypto
 
 
@@ -50,3 +51,11 @@ def open_certificate(certificate_path):
             except UnicodeError:
                 certificate = base64.b64encode(certificate).decode("utf-8")
     return certificate
+
+
+def generateKey(byteLength=32):
+    key = ''
+    while byteLength > 0:
+        key += chr(random.randrange(1, 128))
+        byteLength -= 1
+    return base64.b64encode(key.encode()).decode('utf-8')

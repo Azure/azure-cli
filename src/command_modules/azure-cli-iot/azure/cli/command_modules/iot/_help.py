@@ -487,6 +487,15 @@ examples:
     crafted: true
 """
 
+helps['iot hub policy renew-key'] = """
+type: command
+short-summary: Regenerate keys of a shared access policy of an IoT hub.
+examples:
+  - name: Regenerate primary key of a shared access policy of an IoT hub.
+    text: az iot hub policy renew-key --hub-name MyHub --name MySharedAccessPolicy --rk Primary
+    crafted: true
+"""
+
 helps['iot hub route'] = """
 type: group
 short-summary: Manage routes of an IoT hub.

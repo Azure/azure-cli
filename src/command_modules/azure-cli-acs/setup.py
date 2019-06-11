@@ -14,11 +14,9 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.3.11"
-# The full list of classifiers is available at
-# https://pypi.python.org/pypi?%3Aaction=list_classifiers
+VERSION = "2.4.3"
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
@@ -32,10 +30,16 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-iothub==0.8.2',
-    'azure-mgmt-iothubprovisioningservices==0.2.0',
-    'pyOpenSSL',
+    'azure-mgmt-authorization==0.50.0',
+    'azure-mgmt-containerservice==5.2.0',
+    'azure-mgmt-compute==5.0.0',
+    'azure-graphrbac==0.60.0',
     'azure-cli-core',
+    'paramiko>=2.0.8,<2.5.0',
+    'pyyaml',
+    'six',
+    'scp',
+    'sshtunnel'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -44,9 +48,9 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-iot',
+    name='azure-cli-acs',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools IoT Command Module',
+    description='Microsoft Azure Command-Line Tools ACS Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
@@ -57,11 +61,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.iot',
-        'azure.cli.command_modules.iot.mgmt_iot_hub_device',
-        'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib',
-        'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models',
-        'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.operations',
+        'azure.cli.command_modules.acs'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
