@@ -26,6 +26,7 @@ from azure.cli.command_modules.vm._validators import (
 from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
 from azure.cli.command_modules.vm._image_builder import ScriptType
 
+
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
 def load_arguments(self, _):
     # Model imports
@@ -145,7 +146,6 @@ def load_arguments(self, _):
 
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('scripts', nargs='+', help="Space-separated list of shell or powershell scripts to customize the image with. Each script must be a publicly accessible URL."
-                                              #"Or a path to an existing file. If a file path is given, the script will be uploaded to a storage account."
                                               " Infers type of script from file extension ('.sh' or'.ps1') or from source type. More more customizer options and flexibility, see: 'az image template customizer add'")
         c.argument('source', options_list=["--image-source", "-i"], help="The base image to customize. Must be a valid platform image URN, platform image alias, Red Hat ISO image URI, managed image name/ID, or shared image version ID.")
         c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
@@ -170,41 +170,41 @@ def load_arguments(self, _):
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help)
 
     with self.argument_context('image template output add') as c:
-        artifact_tags_help = "Tags that will be applied to the output artifact once it has been created by the distributor. " + tags_type.settings['help']
-        artifact_tags_type = CLIArgumentType(overrides=tags_type, help=artifact_tags_help, options_list=["--artifact-tags"])
-
+        ib_artifact_tags_help = "Tags that will be applied to the output artifact once it has been created by the distributor. " + tags_type.settings['help']
+        ib_artifact_tags_type = CLIArgumentType(overrides=tags_type, help=ib_artifact_tags_help, options_list=["--artifact-tags"])
         ib_default_loc_help = " Defaults to resource group's location."
-        c.argument('output_name', help= ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
+
+        c.argument('output_name', help=ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
         c.argument('is_vhd', arg_group="VHD", help="The output is a VHD distributor.", action='store_true')
-        c.argument('tags', arg_type=artifact_tags_type)
+        c.argument('tags', arg_type=ib_artifact_tags_type)
         c.ignore('location')
 
     with self.argument_context('image template customizer') as c:
-        win_restart_type = CLIArgumentType(arg_group="Windows Restart")
-        script_type = CLIArgumentType(arg_group="Shell and Powershell")
-        powershell_type = CLIArgumentType(arg_group="Powershell")
-        file_customizer_type = CLIArgumentType(arg_group="File")
+        ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")
+        ib_script_type = CLIArgumentType(arg_group="Shell and Powershell")
+        ib_powershell_type = CLIArgumentType(arg_group="Powershell")
+        ib_file_customizer_type = CLIArgumentType(arg_group="File")
 
         c.argument('customizer_name', help="Name of the customizer.")
         c.argument('customizer_type', options_list=['--type', '-t'], help="Type of customizer to be added to the image template.", arg_type=get_enum_type(ScriptType))
 
         # Script Args
-        c.argument('script_url', arg_type=script_type, help="URL of script to customize the image with. The URL must be publicly accessible.")
-        c.argument('inline_script', arg_type=script_type, nargs='+', help="Space-separated list of inline script lines to customize the image with.")
+        c.argument('script_url', arg_type=ib_script_type, help="URL of script to customize the image with. The URL must be publicly accessible.")
+        c.argument('inline_script', arg_type=ib_script_type, nargs='+', help="Space-separated list of inline script lines to customize the image with.")
 
         # Powershell Specific Args
-        c.argument('valid_exit_codes', options_list=['--exit-codes', '-e'], arg_type=powershell_type, nargs='+', help="Space-separated list of valid exit codes, as integers")
+        c.argument('valid_exit_codes', options_list=['--exit-codes', '-e'], arg_type=ib_powershell_type, nargs='+', help="Space-separated list of valid exit codes, as integers")
 
         # Windows Restart Specific Args
-        c.argument('restart_command', arg_type=win_restart_type, help="Command to execute the restart operation.")
-        c.argument('restart_check_command', arg_type=win_restart_type, help="Command to verify that restart succeeded.")
-        c.argument('restart_timeout', arg_type=win_restart_type, help="Restart timeout specified as a string consisting of a magnitude and unit, e.g. '5m' (5 minutes) or '2h' (2 hours)", default="5m")
+        c.argument('restart_command', arg_type=ib_win_restart_type, help="Command to execute the restart operation.")
+        c.argument('restart_check_command', arg_type=ib_win_restart_type, help="Command to verify that restart succeeded.")
+        c.argument('restart_timeout', arg_type=ib_win_restart_type, help="Restart timeout specified as a string consisting of a magnitude and unit, e.g. '5m' (5 minutes) or '2h' (2 hours)", default="5m")
 
         # File Args
-        c.argument('file_source', arg_type=file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
-        c.argument('dest_path', arg_type=file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
+        c.argument('file_source', arg_type=ib_file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
+        c.argument('dest_path', arg_type=ib_file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
 
     # endregion
 

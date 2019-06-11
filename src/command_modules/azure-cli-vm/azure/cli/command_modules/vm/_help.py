@@ -1955,17 +1955,17 @@ short-summary: Update a proximity placement group
 
 helps['image template'] = """
     type: group
-    short-summary: Manage and build image builder templates. 
+    short-summary: Manage and build image builder templates.
 """
 
 helps['image template customizer'] = """
     type: group
-    short-summary: Manage image builder template customizers. 
+    short-summary: Manage image builder template customizers.
 """
 
 helps['image template output'] = """
     type: group
-    short-summary: Manage image builder template output distributors. 
+    short-summary: Manage image builder template output distributors.
     long-summary: >
         A customized image can be distributed as a managed image,
         a shared image in a shared image gallery (SIG), or as a VHD blob.
@@ -2014,12 +2014,12 @@ helps['image template customizer add'] = """
 
 helps['image template customizer remove'] = """
     type: command
-    short-summary: Remove an image builder customizer from an image builder template. 
+    short-summary: Remove an image builder customizer from an image builder template.
 """
 
 helps['image template customizer clear'] = """
     type: command
-    short-summary: Remove all image builder customizers from an image builder template. 
+    short-summary: Remove all image builder customizers from an image builder template.
 """
 
 
@@ -2066,22 +2066,22 @@ helps['image template output add'] = """
 
 helps['image template output remove'] = """
     type: command
-    short-summary: Remove an image builder output distributor from an image builder template. 
+    short-summary: Remove an image builder output distributor from an image builder template.
 """
 
 helps['image template output clear'] = """
     type: command
-    short-summary: Remove all image builder output distributors from an image builder template. 
+    short-summary: Remove all image builder output distributors from an image builder template.
 """
 
 helps['image template run'] = """
     type: command
-    short-summary: Build an image builder template. 
+    short-summary: Build an image builder template.
     examples:
     - name: Start a template build run and then wait for it to finish.
       text: |
         az image template run -n mytemplate -g my-group --no-wait
-        
+
         az image template wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
 
@@ -2095,10 +2095,10 @@ helps['image template show-runs'] = """
     - name: Run a template build run and then view its run outputs.
       text: |
         az image template run -n mytemplate -g my-group --no-wait
-        
+
         az image template wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
-        
+
         az image template show-runs -n mytemplate -g my-group
 """
 
@@ -2113,14 +2113,14 @@ helps['image template create'] = """
     examples:
         - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version
           text: |
-            
+
             scripts="https://my-script-url.com/customize_script.sh"
             imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
-            
-            az image template create --image-source $imagesource -n mytemplate -g my-group \\ 
+
+            az image template create --image-source $imagesource -n mytemplate -g my-group \\
                 --scripts $scripts --managed-image-destinations image_1=westus \\
                 --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
-        
+
         - name: Create an image builder template in the object cache and then add its output destinations one at a time
           text: |
 
@@ -2135,7 +2135,7 @@ helps['image template create'] = """
                 --managed-image my_desired_image_name --managed-image-location eastus --defer
 
             az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
-                --gallery-image-definition linux_image_def \\ 
+                --gallery-image-definition linux_image_def \\
                 --gallery-replication-regions westus brazilsouth  --defer
 
             # create the template from the object cache
@@ -2167,19 +2167,19 @@ helps['image template update'] = """
         - name: |
             Create a template resource from a template object in the cli cache.
             See "az image template create / output add / customizer add --help" and "az cache -h" for more information
-          text: |    
+          text: |
             # create and write template object to local cli cache
             az image template create --image-source {image_source} -n mytemplate -g my-group \\
                 --scripts {script} --managed-image-destinations image_1=westus --defer
 
-            # add customizers and outputs to local cache template object 
+            # add customizers and outputs to local cache template object
             #   via az image template output / customizer add
             #   can also update other cache object params through generic update args like --set
             # ...
 
             # send template create request to azure to create template resource
             az image template update -n mytemplate -g my-group
-            
+
             # finally, delete cache obj
             az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
 """
@@ -2191,10 +2191,9 @@ helps['image template wait'] = """
         - name: Start a template build run and then wait for it to finish.
           text: |
             az image template run -n mytemplate -g my-group --no-wait
-            
+
             az image template wait -n mytemplate -g aibmdi \\
                 --custom "lastRunStatus.runState!='running'"
-            
+
             az image template show -n mytemplate -g my-group
-                
 """
