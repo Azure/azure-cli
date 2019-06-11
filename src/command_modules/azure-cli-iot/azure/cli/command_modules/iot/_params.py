@@ -191,7 +191,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT Digital Twin
     with self.argument_context('iot digitaltwin') as c:
         c.argument('repo_endpoint', options_list=['--endpoint', '-e'], help='DigitalTwin endpoint.')
-        c.argument('repo_id', options_list=['--repo', '-r'], help='DigitalTwin repository Id.')
+        c.argument('repo_id', options_list=['--repo-id', '-r'], help='DigitalTwin repository Id.')
 
     with self.argument_context('iot digitaltwin repository') as c:
         c.argument('repo_name', options_list=['--name', '-n'], help='DigitalTwin repository Name.')
@@ -201,6 +201,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Provisioning state of the DigitalTwin repository.')
 
     with self.argument_context('iot digitaltwin key') as c:
-        c.argument('key_id', options_list=['--key', '-k'], help='Access key for the given DigitalTwin repository.')
+        c.argument('key_id', options_list=['--key-id', '-k'], help='Access key for the given DigitalTwin repository.')
         c.argument('user_role', options_list=['--role'], arg_type=get_enum_type(UserRole),
                    help='User role of the access key for the given DigitalTwin repository.')
