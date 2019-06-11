@@ -80,17 +80,15 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        loc = 'westeurope'
-        user = admin_login
-
         # test create sql server with minimal required parameters
-        server_1 = self.cmd('sql server create -g {} --name {} -l {} '
+        server_1 = self.cmd('sql server create -g {} --name {} '
                             '--admin-user {} --admin-password {}'
-                            .format(resource_group_1, server_name_1, loc, user, admin_passwords[0]),
+                            .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
                             checks=[
                                 JMESPathCheck('name', server_name_1),
+                                JMESPathCheck('location', resource_group_location),
                                 JMESPathCheck('resourceGroup', resource_group_1),
-                                JMESPathCheck('administratorLogin', user),
+                                JMESPathCheck('administratorLogin', admin_login),
                                 JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test list sql server should be 1
@@ -102,7 +100,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test update without identity parameter, validate identity still exists
@@ -112,17 +110,18 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test create another sql server, with identity this time
         self.cmd('sql server create -g {} --name {} -l {} -i '
                  '--admin-user {} --admin-password {}'
-                 .format(resource_group_2, server_name_2, loc, user, admin_passwords[0]),
+                 .format(resource_group_2, server_name_2, resource_group_location, admin_login, admin_passwords[0]),
                  checks=[
                      JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test list sql server in that group should be 1
@@ -137,14 +136,14 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', admin_login)])
 
         self.cmd('sql server show --id {}'
                  .format(server_1['id']),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user)])
+                     JMESPathCheck('administratorLogin', admin_login)])
 
         self.cmd('sql server list-usages -g {} -n {}'
                  .format(resource_group_1, server_name_1),

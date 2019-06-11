@@ -43,6 +43,10 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type
 )
 
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group
+)
+
 from knack.arguments import CLIArgumentType, ignore_type
 
 from .custom import (
@@ -104,6 +108,14 @@ sku_arg_group = 'Performance Level'
 sku_component_arg_group = 'Performance Level (components)'
 
 server_configure_help = 'You can configure the default using `az configure --defaults sql-server=<name>`'
+
+
+def get_location_type_with_default_from_resource_group(cli_ctx):
+    return CLIArgumentType(
+        arg_type=get_location_type(cli_ctx),
+        required=False,
+        validator=get_default_location_from_resource_group)
+
 
 server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
@@ -873,6 +885,9 @@ def load_arguments(self, _):
                    'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server create') as c:
+        c.argument('location',
+                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+
         # Create args that will be used to build up the Server object
         create_args_for_complex_type(
             c, 'parameters', Server, [
@@ -1090,6 +1105,9 @@ def load_arguments(self, _):
                    'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
 
     with self.argument_context('sql mi create') as c:
+        c.argument('location',
+                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
