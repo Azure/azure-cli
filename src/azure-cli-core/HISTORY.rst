@@ -3,8 +3,6 @@
 Release History
 ===============
 
-2.0.67
-++++++
 * Remove min_profile
 
 2.0.66
