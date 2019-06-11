@@ -51,7 +51,7 @@ class AmsLiveOutputTests(ScenarioTest):
             self.check('outputSnapTime', '{outputSnapTime}')
         ]).get_output_in_json()
 
-        resource_states = ['Creating', 'Created']
+        resource_states = ['Creating', 'Created', 'Running']
 
         self.assertIn(live_output['resourceState'], resource_states)
 

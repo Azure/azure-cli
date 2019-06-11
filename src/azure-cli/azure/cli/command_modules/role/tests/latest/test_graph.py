@@ -322,7 +322,7 @@ def get_signed_in_user(test_case):
 
 class GraphOwnerScenarioTest(ScenarioTest):
 
-    def test_graph_ownership(self):
+    def test_graph_application_ownership(self):
         owner = get_signed_in_user(self)
         if not owner:
             return  # this test delete users which are beyond a SP's capacity, so quit...
@@ -336,6 +336,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
             self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
             self.kwargs['app_id'] = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()['appId']
             self.cmd('ad app owner add --owner-object-id {owner_object_id} --id {app_id}')
+            self.cmd('ad app owner add --owner-object-id {owner_object_id} --id {app_id}')  # test idempotent
             self.cmd('ad app owner list --id {app_id}', checks=self.check('[0].userPrincipalName', owner))
             self.cmd('ad app owner remove --owner-object-id {owner_object_id} --id {app_id}')
             self.cmd('ad app owner list --id {app_id}', checks=self.check('length([*])', 0))
@@ -343,8 +344,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
             if self.kwargs['app_id']:
                 self.cmd('ad sp delete --id {app_id}')
 
-    @unittest.skip("pending design review")
-    def test_set_graph_owner(self):
+    def test_graph_group_ownership(self):
         owner = get_signed_in_user(self)
         if not owner:
             return  # this test delete users which are beyond a SP's capacity, so quit...
@@ -352,18 +352,17 @@ class GraphOwnerScenarioTest(ScenarioTest):
         self.kwargs = {
             'owner': owner,
             'group': self.create_random_name('cli-grp', 15),
-            'app': self.create_random_name('cli-app-', 15)
         }
-        group_object_id, app_id = None, None
+        self.recording_processors.append(AADGraphUserReplacer(owner, 'example@example.com'))
         try:
-            self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()
-            self.cmd('ad sp create-for-rbac --name {app} --skip-assignment')
-            self.cmd('ad signed-in-user list-owned-objects', checks=self.check('length([*])', 2))
+            self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
+            self.kwargs['group_object_id'] = self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()['objectId']
+            self.cmd('ad group owner add -g {group_object_id} --owner-object-id {owner_object_id}')
+            self.cmd('ad group owner add -g {group_object_id} --owner-object-id {owner_object_id}')
+            self.cmd('ad group owner list -g {group_object_id}', checks=self.check('length([*])', 1))
         finally:
-            if group_object_id:
-                self.cmd('ad group delete -g ' + group_object_id)
-            if app_id:
-                self.cmd('ad app delete --id ' + app_id)
+            if self.kwargs['group_object_id']:
+                self.cmd('ad group delete -g ' + self.kwargs['group_object_id'])
 
 
 class GraphAppCredsScenarioTest(ScenarioTest):

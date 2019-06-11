@@ -47,8 +47,8 @@ class IoTHubTest(ScenarioTest):
         ])
 
         # Test 'az iot hub update'
-        property_to_update = 'properties.operationsMonitoringProperties.events.DeviceTelemetry'
-        updated_value = 'Error, Information'
+        property_to_update = 'properties.messagingEndpoints.fileNotifications.maxDeliveryCount'
+        updated_value = '20'
         self.cmd('iot hub update -n {0} --set {1}="{2}"'.format(hub, property_to_update, updated_value),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
@@ -98,6 +98,23 @@ class IoTHubTest(ScenarioTest):
             self.check('keyName', policy_name),
             self.check('rights', 'RegistryWrite, ServiceConnect, DeviceConnect')
         ])
+
+        # Test 'az iot hub policy renew-key'
+        policy = self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Primary'.format(hub, policy_name),
+                          checks=[self.check('keyName', policy_name)]).get_output_in_json()
+
+        policy_name_conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
+            hub, policy_name, policy['primaryKey'])
+
+        # Test policy_name connection-string 'az iot hub show-connection-string'
+        self.cmd('iot hub show-connection-string -n {0} --policy-name {1}'.format(hub, policy_name), checks=[
+            self.check_pattern('connectionString', policy_name_conn_str_pattern)
+        ])
+
+        # Test swap keys 'az iot hub policy renew-key'
+        self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Swap'.format(hub, policy_name),
+                 checks=[self.check('primaryKey', policy['secondaryKey']),
+                         self.check('secondaryKey', policy['primaryKey'])])
 
         # Test 'az iot hub policy delete'
         self.cmd('iot hub policy delete --hub-name {0} -n {1}'.format(hub, policy_name), checks=self.is_empty())
