@@ -508,11 +508,31 @@ def build_timers_info(cmd, schedules):
         split_schedule = None
         if ':' in schedule:
             split_schedule = schedule.split(":")
-        timer_triggers.append(TimerTrigger(
-            name=split_schedule[0] if split_schedule else "defaultTimerTrigger" + str(index),
-            status=TriggerStatus.enabled.value,
-            schedule=split_schedule[0] if split_schedule else schedule
-        ))
+        timer_triggers.append(
+            TimerTrigger(
+                name=split_schedule[0] if split_schedule else "defaultTimer" + str(index),
+                status=TriggerStatus.enabled.value,
+                schedule=split_schedule[1] if split_schedule else schedule
+            ))
+    return timer_triggers
+
+
+def remove_timer_trigger(task_name,
+                         timer_name,
+                         timer_triggers):
+    """Remove the timer trigger from the list of existing timer triggers for a task.
+    :param str task_name: The name of the task
+    :param str timer_name: The name of the timer trigger to be removed
+    :param str timer_triggers: The list of existing timer_triggers for a task
+    """
+
+    if not timer_triggers:
+        raise CLIError("No timer triggers exist for the task '{}'.".format(task_name))
+
+    for timer in timer_triggers:
+        if timer.name == timer_name:
+            timer_triggers.remove(timer)
+
     return timer_triggers
 
 

@@ -530,6 +530,16 @@ examples:
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
             --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays using the default trigger name.
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --schedules "0 12 * * Mon-Fri"
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays with the trigger name provided.
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --schedules "dailyTimer:0 12 * * Mon-Fri"
 """
 
 helps['acr task identity'] = """
@@ -643,6 +653,50 @@ examples:
     text: |
         az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io \\
             -u 'myusername2' -p 'mysecret'
+"""
+
+helps['acr task timer'] = """
+type: group
+short-summary: Manage timer triggers for a task
+"""
+
+helps['acr task timer add'] = """
+type: command
+short-summary: Add a timer trigger to a task.
+examples:
+  - name: Add a timer trigger to a task.
+    text: >
+        az acr task timer add -n taskname -r registryname --timer-name myTimer --schedule "30 9 * * 1-5"
+"""
+
+helps['acr task timer update'] = """
+type: command
+short-summary: Update the timer trigger for a task.
+examples:
+  - name: Update the schedule of a timer trigger for a task.
+    text: >
+        az acr task timer update -n taskname -r registryname --timer-name myTimer --schedule "0 12 * * *"
+  - name: Update the status of a timer trigger for a task.
+    text: >
+        az acr task timer update -n taskname -r registryname --timer-name myTimer --timer-enabled False
+"""
+
+helps['acr task timer remove'] = """
+type: command
+short-summary: Remove a timer trigger from a task.
+examples:
+  - name: Remove a timer trigger from a task.
+    text: >
+        az acr task timer remove -n taskname -r registryname --timer-name myTimer
+"""
+
+helps['acr task timer list'] = """
+type: command
+short-summary: List all timer triggers for a task.
+examples:
+  - name: List all timer triggers for a task.
+    text: >
+        az acr task timer list -n taskname -r registryname
 """
 
 helps['acr task delete'] = """

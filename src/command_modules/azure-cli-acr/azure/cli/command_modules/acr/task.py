@@ -14,7 +14,8 @@ from ._utils import (
     get_validate_platform,
     get_custom_registry_credentials,
     get_yaml_and_values,
-    build_timers_info
+    build_timers_info,
+    remove_timer_trigger
 )
 from ._stream_utils import stream_logs
 
@@ -629,12 +630,17 @@ def acr_task_timer_update(cmd,
 
     TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
         'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus')
+
+    trigger_status = None
+    if timer_enabled is not None:
+        trigger_status = TriggerStatus.enabled.value if timer_enabled else TriggerStatus.disabled.value
+
     taskUpdateParameters = TaskUpdateParameters(
         trigger=TriggerUpdateParameters(
             timer_triggers=[
                 TimerTriggerUpdateParameters(
                     name=timer_name,
-                    status=TriggerStatus.enabled.value if timer_enabled else TriggerStatus.disabled.value,
+                    status=trigger_status,
                     schedule=schedule
                 )
             ]
@@ -648,12 +654,31 @@ def acr_task_timer_remove(cmd,
                           client,
                           task_name,
                           registry_name,
+                          timer_name,
                           resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    resp = client.get_details(resource_group_name, registry_name, task_name).trigger
-    return {} if not resp else resp.timer_triggers
+    # Task triggers currently cannot be removed via PATCH
+    # Use PUT to remove the timer trigger
+
+    # Get the existing task
+    existingTask = client.get_details(resource_group_name, registry_name, task_name)
+    if existingTask.trigger:
+        # Remove the timer trigger
+        trimmed_timer_triggers = remove_timer_trigger(task_name, timer_name, existingTask.trigger.timer_triggers)
+        existingTask.trigger.timer_triggers = trimmed_timer_triggers
+
+        try:
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=existingTask)
+        except ValidationError as e:
+            raise CLIError(e)
+
+    else:
+        raise CLIError("No triggers exist for the task '{}'.".format(task_name))
 
 
 def acr_task_timer_list(cmd,
