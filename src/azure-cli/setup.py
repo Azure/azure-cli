@@ -93,7 +93,7 @@ COMMAND_MODULES = [
 
 DEPENDENCIES = [
     'azure-cli-command_modules-nspkg~=2.0',
-    'azure-cli-core',
+    'azure-cli-core=={}'.format(VERSION),
     'azure-cli-telemetry>=1.0.2,<2.0',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
