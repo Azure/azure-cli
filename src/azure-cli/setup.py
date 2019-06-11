@@ -59,7 +59,6 @@ COMMAND_MODULES = [
     'azure-cli-botservice',
     'azure-cli-configure',
     'azure-cli-consumption',
-    'azure-cli-container',
     'azure-cli-cosmosdb',
     'azure-cli-deploymentmanager',
     'azure-cli-dla',
@@ -110,11 +109,13 @@ DEPENDENCIES = [
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=3.0',
+    'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=2.8',
     'azure-mgmt-containerservice~=5.2',
     'azure-mgmt-compute~=5.0',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-keyvault~=1.1',
+    'azure-mgmt-loganalytics~=0.2',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-monitor~=0.5.2',
@@ -126,6 +127,7 @@ DEPENDENCIES = [
     'azure-mgmt-web~=0.42',
     'azure-multiapi-storage~=0.2.3',
     'azure-storage-blob>=1.3.1,<2.0.0',
+    'colorama~=0.4.1',
     'cryptography>=2.3.1,<2.5.0',  # See https://github.com/Azure/azure-cli/pull/8324
     'fabric~=2.4',
     'knack~=0.6.2',
@@ -138,6 +140,7 @@ DEPENDENCIES = [
     'sshtunnel~=0.1.4',
     'urllib3[secure]~=1.18',
     'vsts-cd-manager~=1.0.0,>=1.0.2',
+    'websocket-client~=0.56.0',
     'xmltodict~=0.12',
 ]
 
