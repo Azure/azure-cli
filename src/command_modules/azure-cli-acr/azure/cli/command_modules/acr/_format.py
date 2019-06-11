@@ -169,6 +169,7 @@ def _task_format_group(item):
         ('STATUS', _get_value(item, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
         ('SOURCE TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
+        ('TIMER TRIGGERS', _get_timer_triggers(item, 'trigger', 'timerTriggers')),
         ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType'))
     ])
 
@@ -221,6 +222,24 @@ def _get_value(item, *args):
         for arg in args:
             item = item[arg]
         return str(item) if item else ' '
+    except (KeyError, TypeError, IndexError):
+        return ' '
+
+
+def _get_timer_triggers(item, *args):
+    """Get timer trigger schedules from a dict.
+    :param dict item: The dict object
+    """
+    try:
+        for arg in args:
+            item = item[arg]
+        if item:
+            schedules = []
+            for trigger in item:
+                schedules.append(trigger['schedule'])
+            return ', '.join(schedules)
+        else:
+            return ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 
