@@ -64,7 +64,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('number_of_nodes_to_add', help='number of nodes to add.')
         c.argument('number_of_nodes_to_remove', help='number of nodes to remove.')
 
-    with self.argument_context('sf cluster durability') as c:
+    with self.argument_context('sf cluster node-type') as c:
+        c.argument('capacity', help='The capacity tag applied to nodes in the node type. The cluster resource manager uses these tags to understand how much capacity a node has.')
+        c.argument('vm_tier', help='The Vm tier.')
+
+    with self.argument_context('sf cluster') as c:
         c.argument('durability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
 
     with self.argument_context('sf cluster setting') as c:
