@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-dls',
     'azure-cli-dms',
     'azure-cli-eventhubs',
     'azure-cli-extension',
@@ -85,6 +84,7 @@ DEPENDENCIES = [
     'azure-cli-core=={}'.format(VERSION),
     'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cli-telemetry>=1.0.2,<2.0',
+    'azure-datalake-store~=0.0.39',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
