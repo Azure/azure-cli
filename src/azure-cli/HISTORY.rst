@@ -15,6 +15,12 @@ Release History
 
 * ad signed-in-user: fix a crash on listing owned objects 
 
+**VM**
+
+* vmss create `--single-placement-group`: Removed client-side validation. Does not fail if `--single-placement-group` is
+  set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
+  to the compute service.
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers

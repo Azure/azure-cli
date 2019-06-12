@@ -21,7 +21,7 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_v
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth,
                                                       _validate_vm_create_storage_profile,
-                                                      _validate_vmss_single_placement_group,
+                                                      _validate_vmss_zone_args,
                                                       _validate_vmss_create_load_balancer_or_app_gateway)
 
 
@@ -412,50 +412,6 @@ class TestBigVMSSDefaults(unittest.TestCase):
     @classmethod
     def _set_up_ns(cls, ns):
         ns.single_placement_group, ns.zones, ns.platform_fault_domain_count, ns.instance_count = None, None, None, 2
-
-    def test_vmss_disable_single_placement_group(self):
-        # default is enable single-placement-group
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        _validate_vmss_single_placement_group(ns)
-        self.assertEqual(ns.single_placement_group, None)
-
-        # disable on any zonal scale-set
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        ns.zones = ['1']
-        _validate_vmss_single_placement_group(ns)
-        self.assertEqual(ns.single_placement_group, False)
-
-        # disable on any big scale-set
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        ns.instance_count = 101
-        _validate_vmss_single_placement_group(ns)
-        self.assertEqual(ns.single_placement_group, False)
-
-        # disable on zonal + fd count
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        ns.platform_fault_domain_count = 1
-        ns.zones = ['1']
-        _validate_vmss_single_placement_group(ns)
-        self.assertEqual(ns.single_placement_group, False)
-
-        # error on conflicts
-        # can't enable it with zonal scale-set
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        ns.zones = ['1']
-        ns.single_placement_group = True
-        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
-
-        # can't enable it with big scale-set
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        ns.instance_count = 101
-        ns.single_placement_group = True
-        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
 
     def test_vmss_default_std_lb(self):
         cmd = mock.MagicMock()
