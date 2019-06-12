@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-dms',
     'azure-cli-eventhubs',
     'azure-cli-extension',
     'azure-cli-feedback',
@@ -105,6 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-cosmosdb~=0.5.2',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
+    'azure-mgmt-datamigration~=0.1.0',
     'azure-mgmt-deploymentmanager~=0.1.0',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
