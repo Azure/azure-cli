@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-find',
     'azure-cli-hdinsight',
     'azure-cli-interactive',
     'azure-cli-iot',
