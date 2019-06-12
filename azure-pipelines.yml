@@ -22,9 +22,10 @@ jobs:
       filePath: scripts/release/get_version.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: metadata'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
 
 - job: VerifyVersions
@@ -79,9 +80,10 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
@@ -92,11 +94,10 @@ jobs:
        build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
-      PathtoPublish: 'build_scripts/windows/out/'
-
+      TargetPath: 'build_scripts/windows/out/'
       ArtifactName: msi
 
 - job: TestWindowsMSI
@@ -108,9 +109,10 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
       artifactName: msi
 
   - task: PowerShell@2
@@ -146,9 +148,10 @@ jobs:
       filePath: scripts/release/docker/pipeline.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: docker
 
 
@@ -161,15 +164,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Docker Image'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
       artifactName: docker
 
 
@@ -208,9 +213,10 @@ jobs:
       filePath: scripts/release/pypi/build.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pypi
 
 
@@ -223,13 +229,14 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
       artifactName: pypi
@@ -275,9 +282,10 @@ jobs:
     displayName: 'Use Python 2.7'
     inputs:
       versionSpec: 2.7
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Python Wheels'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
   - bash: |
       pip install --force-reinstall wheel
@@ -298,9 +306,10 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Python Wheels'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
   - bash: |
       pip install --force-reinstall wheel
@@ -323,9 +332,10 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Python Wheels'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
   - bash: |
       pip install --force-reinstall wheel
@@ -349,9 +359,10 @@ jobs:
     displayName: 'Use Python 3.6'
     inputs:
       versionSpec: 3.6
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Python Wheels'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
   - bash: |
       pip install --force-reinstall wheel
@@ -372,15 +383,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
   - bash: |
@@ -413,9 +426,10 @@ jobs:
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: homebrew
 
 
@@ -428,15 +442,17 @@ jobs:
   pool:
     vmImage: 'macOS-10.13'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Homebrew'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
       artifactName: homebrew
 
 
@@ -476,9 +492,10 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
 
 
@@ -491,15 +508,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/yum'
       artifactName: yum
 
 
@@ -526,9 +545,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -541,9 +561,10 @@ jobs:
       DISTRO: xenial
       DISTRO_BASE_IMAGE: ubuntu:xenial
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian
 
 - job: BuildUbuntuTrusty
@@ -554,9 +575,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -570,9 +592,10 @@ jobs:
       DISTRO_BASE_IMAGE: ubuntu:trusty
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian
 
 
@@ -585,9 +608,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -601,9 +625,10 @@ jobs:
       DISTRO_BASE_IMAGE: ubuntu:bionic
 
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian
 
 - job: BuildUbuntuDisco
@@ -614,9 +639,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-    - task: DownloadBuildArtifacts@0
+    - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
       inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
         artifactName: pypi
 
 
@@ -630,9 +656,10 @@ jobs:
         DISTRO_BASE_IMAGE: ubuntu:disco
 
 
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@0
       displayName: 'Publish Artifact: debian'
       inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: debian
 
 
@@ -644,9 +671,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -659,9 +687,10 @@ jobs:
       DISTRO: jessie
       DISTRO_BASE_IMAGE: debian:jessie
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian
 
 
@@ -674,9 +703,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -689,9 +719,10 @@ jobs:
       DISTRO: stretch
       DISTRO_BASE_IMAGE: debian:stretch
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian
 
 
@@ -710,15 +741,17 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
 
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Debian Builds'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: debian
 
 
@@ -764,9 +797,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
-  - task: DownloadBuildArtifacts@0
+  - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -779,9 +813,10 @@ jobs:
       DISTRO: cosmic
       DISTRO_BASE_IMAGE: ubuntu:cosmic
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian
 
 
