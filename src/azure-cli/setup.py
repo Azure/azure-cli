@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-signalr',
     'azure-cli-sqlvm',
 ]
 
@@ -117,6 +116,7 @@ DEPENDENCIES = [
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.2.0',
+    'azure-mgmt-signalr~=0.1.1',
     'azure-mgmt-sql~=0.12',
     'azure-mgmt-storage~=3.3',
     'azure-mgmt-trafficmanager~=0.51.0',
