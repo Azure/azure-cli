@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-botservice',
     'azure-cli-configure',
     'azure-cli-consumption',
     'azure-cli-cosmosdb',
@@ -100,6 +99,7 @@ DEPENDENCIES = [
     'azure-mgmt-batch~=6.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
+    'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=3.0',
     'azure-mgmt-containerinstance~=1.4',
@@ -138,6 +138,7 @@ DEPENDENCIES = [
     'pyOpenSSL~=19.0',
     'pytz==2019.1',
     'pyyaml~=5.1',
+    'requests~=2.22',
     'scp~=0.13.2',
     'six~=1.12',
     'sshtunnel~=0.1.4',
