@@ -2,6 +2,7 @@
 
 Release History
 ===============
+* webapp: add location based routing for `az webapp deleted list` and `az webapp deleted restore`
 * webapp, functionapp: Updating to the latest Python SDK version
 * functionapp: add slot support to functionapps
 
