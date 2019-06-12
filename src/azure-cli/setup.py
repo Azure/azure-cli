@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-monitor',
     'azure-cli-policyinsights',
     'azure-cli-rdbms',
     'azure-cli-relay',
