@@ -128,10 +128,10 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.2.3',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'colorama~=0.4.1',
-    'cryptography>=2.3.1,<2.5.0',  # See https://github.com/Azure/azure-cli/pull/8324
+    'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'knack~=0.6.2',
-    'paramiko>=2.0.8,<2.5.0',
+    'paramiko>=2.0.8,<3.0.0',
     'pyOpenSSL~=19.0',
     'pytz==2019.1',
     'pyyaml~=5.1',
