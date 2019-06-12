@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-lab',
     'azure-cli-monitor',
     'azure-cli-policyinsights',
     'azure-cli-rdbms',
@@ -96,6 +95,7 @@ DEPENDENCIES = [
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
     'azure-mgmt-deploymentmanager~=0.1.0',
+    'azure-mgmt-devtestlabs~=2.2',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-eventhub~=2.6',
