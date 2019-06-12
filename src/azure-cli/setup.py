@@ -53,7 +53,6 @@ CLASSIFIERS = [
 
 COMMAND_MODULES = [
     'azure-cli-configure',
-    'azure-cli-cosmosdb',
     'azure-cli-deploymentmanager',
     'azure-cli-dla',
     'azure-cli-dls',
@@ -106,6 +105,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerregistry~=2.8',
     'azure-mgmt-containerservice~=5.2',
     'azure-mgmt-compute~=5.0',
+    'azure-mgmt-cosmosdb~=0.5.2',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-iotcentral~=1.0',
@@ -135,6 +135,7 @@ DEPENDENCIES = [
     'knack~=0.6.2',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
+    'pydocumentdb>=2.0.1,<3.0.0',
     'pyOpenSSL~=19.0',
     'pytz==2019.1',
     'pyyaml~=5.1',
