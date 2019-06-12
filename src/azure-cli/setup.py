@@ -53,7 +53,6 @@ CLASSIFIERS = [
 
 COMMAND_MODULES = [
     'azure-cli-configure',
-    'azure-cli-consumption',
     'azure-cli-cosmosdb',
     'azure-cli-deploymentmanager',
     'azure-cli-dla',
@@ -102,6 +101,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=3.0',
+    'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=2.8',
     'azure-mgmt-containerservice~=5.2',
