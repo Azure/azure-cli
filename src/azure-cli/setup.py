@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-batchai',
     'azure-cli-botservice',
     'azure-cli-configure',
     'azure-cli-consumption',
@@ -99,6 +98,7 @@ DEPENDENCIES = [
     'azure-mgmt-applicationinsights~=0.1.1',
     'azure-mgmt-authorization~=0.50.0',
     'azure-mgmt-batch~=6.0',
+    'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=3.0',
@@ -133,6 +133,7 @@ DEPENDENCIES = [
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'knack~=0.6.2',
+    'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
     'pyOpenSSL~=19.0',
     'pytz==2019.1',
