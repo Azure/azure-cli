@@ -1627,11 +1627,14 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     if not site:
         raise CLIError("'{}' app doesn't exist".format(name))
     configs = get_site_configs(cmd, resource_group_name, name)
-    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    host_name_split = site.default_host_name.split('.', 1)
+    host_name_suffix = '.' + host_name_split[1]
+    host_name_val = host_name_split[0]
     configs.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
-        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+        action_host_name_slot = host_name_val + "-" + slot
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=action_host_name_slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
                                                             name=slot))
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)

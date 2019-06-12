@@ -853,11 +853,11 @@ class WebappSlotTrafficRouting(ScenarioTest):
         # create an empty slot
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, webapp, slot))
         self.cmd('webapp traffic-routing set -g {} -n {} -d {}=15'.format(resource_group, webapp, slot), checks=[
-            JMESPathCheck("[0].actionHostName", slot + '.azurewebsites.net'),
+            JMESPathCheck("[0].actionHostName", webapp + '-' + slot + '.azurewebsites.net'),
             JMESPathCheck("[0].reroutePercentage", 15.0)
         ])
         self.cmd('webapp traffic-routing show -g {} -n {}'.format(resource_group, webapp), checks=[
-            JMESPathCheck("[0].actionHostName", slot + '.azurewebsites.net'),
+            JMESPathCheck("[0].actionHostName", webapp + '-' + slot + '.azurewebsites.net'),
             JMESPathCheck("[0].reroutePercentage", 15.0)
         ])
         self.cmd('webapp traffic-routing clear -g {} -n {}'.format(resource_group, webapp))
