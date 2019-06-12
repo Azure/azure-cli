@@ -52,8 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-extension',
-    'azure-cli-feedback',
     'azure-cli-find',
     'azure-cli-hdinsight',
     'azure-cli-interactive',
@@ -62,11 +60,9 @@ COMMAND_MODULES = [
     'azure-cli-lab',
     'azure-cli-monitor',
     'azure-cli-policyinsights',
-    'azure-cli-profile',
     'azure-cli-rdbms',
     'azure-cli-relay',
     'azure-cli-reservations',
-    'azure-cli-role',
     'azure-cli-search',
     'azure-cli-security',
     'azure-cli-servicebus',
