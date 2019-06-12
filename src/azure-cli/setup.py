@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-configure',
     'azure-cli-deploymentmanager',
     'azure-cli-dla',
     'azure-cli-dls',
