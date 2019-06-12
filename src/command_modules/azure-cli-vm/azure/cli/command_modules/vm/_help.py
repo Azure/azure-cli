@@ -1991,7 +1991,7 @@ helps['image template customizer add'] = """
 
     - name: Add a windows restart customizer to an image template in the cli object cache
       text: |
-            az image template customizer add -n mytemplate -g my-group
+            az image template customizer add -n mytemplate -g my-group \\
             --customizer-name shell-script-url \\
             --restart-check-command "echo Azure-Image-Builder-Restarted-the-VM  > \\
                                     c:\\buildArtifacts\\restart.txt" \\

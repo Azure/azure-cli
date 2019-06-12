@@ -298,7 +298,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
 # first argument is `cmd`, but it is unused. Feel free to substitute it in.
 def process_img_tmpl_customizer_add_namespace(cmd, namespace):  # pylint:disable=unused-argument
 
-    if namespace.customizer_type.lower() in [ScriptType.SHELL.value.lower(), ScriptType.POWERSHELL.value.lower()]:
+    if namespace.customizer_type.lower() in [ScriptType.SHELL.value.lower(), ScriptType.POWERSHELL.value.lower()]:  # pylint:disable=no-member, line-too-long
         if not (namespace.script_url or namespace.inline_script):
             raise CLIError("A script must be provided if the customizer type is one of: {} {}"
                            .format(ScriptType.SHELL.value, ScriptType.POWERSHELL.value))
@@ -306,7 +306,7 @@ def process_img_tmpl_customizer_add_namespace(cmd, namespace):  # pylint:disable
         if namespace.script_url and namespace.inline_script:
             raise CLIError("Cannot supply both script url and inline script.")
 
-    elif namespace.customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
+    elif namespace.customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():  # pylint:disable=no-member
         if namespace.script_url or namespace.inline_script:
             logger.warning("Ignoring the supplied script as scripts are not used for Windows Restart.")
 
@@ -544,16 +544,16 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
 
     new_customizer = None
 
-    if customizer_type.lower() == ScriptType.SHELL.value.lower():
+    if customizer_type.lower() == ScriptType.SHELL.value.lower():  # pylint:disable=no-member
         new_customizer = ImageTemplateShellCustomizer(name=customizer_name, script_uri=script_url, inline=inline_script)
-    elif customizer_type.lower() == ScriptType.POWERSHELL.value.lower():
+    elif customizer_type.lower() == ScriptType.POWERSHELL.value.lower():  # pylint:disable=no-member
         new_customizer = ImageTemplatePowerShellCustomizer(name=customizer_name, script_uri=script_url,
                                                            inline=inline_script, valid_exit_codes=valid_exit_codes)
-    elif customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():
+    elif customizer_type.lower() == ScriptType.WINDOWS_RESTART.value.lower():  # pylint:disable=no-member
         new_customizer = ImageTemplateRestartCustomizer(name=customizer_name, restart_command=restart_command,
                                                         restart_check_command=restart_check_command,
                                                         restart_timeout=restart_timeout)
-    elif customizer_type.lower() == ScriptType.FILE.value.lower():
+    elif customizer_type.lower() == ScriptType.FILE.value.lower():  # pylint:disable=no-member
         new_customizer = ImageTemplateFileCustomizer(name=customizer_name, source_uri=file_source,
                                                      destination=dest_path)
 
