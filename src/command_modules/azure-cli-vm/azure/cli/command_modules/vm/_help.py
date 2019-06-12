@@ -1974,91 +1974,62 @@ helps['image template output'] = """
 helps['image template customizer add'] = """
     type: command
     short-summary: Add an image builder customizer to an image builder template.
+    long-summary: Must be used with --defer
     examples:
-    - name: Add an inline shell customizer to an image template
+    - name: Add an inline shell customizer to an image template in the cli object cache
       text: |
-            script="https://my-script-url.com/customize_script.sh"
-            imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
+            az image template customizer add -n mytemplate -g my-group \\
+                --inline-script "sudo mkdir /buildArtifacts" \\
+                                "sudo cp /tmp/index.html /buildArtifacts/index.html" \\
+                --customizer-name shell-script-inline --type shell --defer
 
-            # create template object in local cli cache
-            az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --defer
-
-            # add inline shell script
-            az image template output add -n mytemplate -g my-group --customizer-name shell-script-inline \\
-                --inline-script "sudo mkdir /buildArtifacts" "sudo cp /tmp/index.html /buildArtifacts/index.html"
-                --type shell  --defer
-
-            # send template create request to azure
-            az image template update -n mytemplate -g my-group
-
-            # finally, delete cache obj
-            az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
-
-    - name: Add a file customizer to an image template in the object cache and create it
+    - name: Add a file customizer to an image template in the cli object cache
       text: |
-            # add file customizer
-            az image template output add -n mytemplate -g my-group --customizer-name my-file --type file\\
+            az image template customizer add -n mytemplate -g my-group \\
+                --customizer-name my-file --type file \\
                 --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html" --defer
 
-            # create template from object in cache
-            az image template update -n mytemplate -g my-group
-
-    - name: Add an shell script customizer to an image template in the object cache
+    - name: Add a windows restart customizer to an image template in the cli object cache
       text: |
-            # add url shell script
-            az image template output add -n mytemplate -g my-group --customizer-name shell-script-url \\
-                --type shell --script-url "https://my-script-url.com/customize_script.sh --defer"
+            az image template customizer add -n mytemplate -g my-group
+            --customizer-name shell-script-url \\
+            --restart-check-command "echo Azure-Image-Builder-Restarted-the-VM  > \\
+                                    c:\\buildArtifacts\\restart.txt" \\
+                --type windows-restart --restart-timeout 10m --defer
 
 """
 
 helps['image template customizer remove'] = """
     type: command
     short-summary: Remove an image builder customizer from an image builder template.
+    long-summary: Must be used with --defer
 """
 
 helps['image template customizer clear'] = """
     type: command
     short-summary: Remove all image builder customizers from an image builder template.
+    long-summary: Must be used with --defer
 """
 
 
 helps['image template output add'] = """
     type: command
     short-summary: Add an image builder output distributor to an image builder template.
-    long-summary: The output distributor can be a managed image, a gallery image, or as a VHD blob.
+    long-summary: Must be used with --defer. The output distributor can be a managed image, a gallery image, or as a VHD blob.
     examples:
-    - name: Add a managed image output to a template. Optionally specify the run output name.
+    - name: Add a managed image distributor to an image template in the cli object cache. Specify a run output name.
       text: |
-            script="https://my-script-url.com/customize_script.sh"
-            imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
-
-            # create template object in local cli cache
-            az image template create --image-source $imagesource -n mytemplate \\
-                -g my-group --scripts $script --defer
-
-            # update template object in local cli cache with managed image output
             az image template output add -n mytemplate -g my-group \\
                 --managed-image my_desired_image_name --output-name managed_image_run_01 --defer
 
-            # send template create request to azure (and update local cache)
-            az image template update -n mytemplate -g my-group
-
-            # finally, delete cache obj
-            az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
-
-    - name: Add a shared image gallery output to a template. Optionally specify its replication regions.
+    - name: Add a shared image gallery distributor to an image template in the cli object cache. Specify its replication regions.
       text: |
-
-            # update template object in local cli cache with shared image gallery output
             az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
                 --gallery-replication-regions westus brazilsouth \\
                 --gallery-image-definition linux_image_def --defer
 
-    - name: Add a VHD output to a template.
+    - name: Add a VHD distributor to an image template in the cli object cache.
       text: |
-
-            # update template object in local cli cache with vhd output
             az image template output add -n mytemplate -g my-group \\
                 --output-name my_vhd_image --is-vhd  --defer
 
@@ -2067,11 +2038,13 @@ helps['image template output add'] = """
 helps['image template output remove'] = """
     type: command
     short-summary: Remove an image builder output distributor from an image builder template.
+    long-summary: Must be used with --defer
 """
 
 helps['image template output clear'] = """
     type: command
     short-summary: Remove all image builder output distributors from an image builder template.
+    long-summary: Must be used with --defer
 """
 
 helps['image template run'] = """
@@ -2106,43 +2079,56 @@ helps['image template create'] = """
     type: command
     short-summary: Create an image builder template.
     parameters:
-    - name: --image-source
+    - name: --image-source -i
       populator-commands:
       - az vm image list
       - az vm image show
     examples:
         - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version
           text: |
-
-            scripts="https://my-script-url.com/customize_script.sh"
-            imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
+            scripts="https://my-script-url.net/customize_script.sh"
+            imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201903060"
 
             az image template create --image-source $imagesource -n mytemplate -g my-group \\
                 --scripts $scripts --managed-image-destinations image_1=westus \\
                 --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
 
-        - name: Create an image builder template in the object cache and then add its output destinations one at a time
+        - name: >
+            [Advanced] Create an image template with multiple customizers and distributors using
+            the CLI's object cache via --defer. Supports features such as: customizer and output names,
+            powershell exit codes, inline scripts, windows restart, file customizers, artifact tags and vhd output distributors.
           text: |
+            script="https://my-script-url.com/customize_script.ps1"
+            imagesource="MicrosoftWindowsServer:WindowsServer:2019-Datacenter:2019.0.20190214"
 
-            script="https://my-script-url.com/customize_script.sh"
-            imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201808140"
-
-            # create and update template object in local cli cache
+            # create and update template object in local cli cache. Defers put request to ARM
+            # Cache object ttl set via az configure.
             az image template create --image-source $imagesource -n mytemplate \\
                 -g my-group --scripts $script --defer
 
+            # add customizers
+            az image template customizer add -n mytemplate -g my-group  \\
+                --customizer-name my-pwsh-script --exit-codes 0 1 --inline-script \\
+                "mkdir c:\\buildActions" "echo Azure-Image-Builder-Was-Here \\
+                 > c:\\buildActions\\Output.txt" --type powershell --defer
+
+            az image template customizer add -n mytemplate -g my-group \\
+                --customizer-name my-file-customizer --type file \\
+                --file-source "https://my-file-source.net/file.txt"  \\
+                --dest-path "c:\\buildArtifacts\\file.txt" --defer
+
+            # add distributors
+            az image template output add -n mytemplate -g my-group --is-vhd \\
+                --output-name my-win-image-vhd --artifact-tags "is_vhd=True" --defer
+
             az image template output add -n mytemplate -g my-group \\
-                --managed-image my_desired_image_name --managed-image-location eastus --defer
+                --output-name my-win-image-managed --managed-image winImage \\
+                --managed-image-location eastus \\
+                --artifact-tags "is_vhd=False" --defer
 
-            az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
-                --gallery-image-definition linux_image_def \\
-                --gallery-replication-regions westus brazilsouth  --defer
-
-            # create the template from the object cache
+            # Stop deferring put request to ARM. Create the template from the object cache.
+            # Cache object will be deleted.
             az image template update -n mytemplate -g my-group
-
-            # finally, delete cache obj
-            az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
 """
 
 helps['image template list'] = """
@@ -2163,6 +2149,11 @@ helps['image template show'] = """
 helps['image template update'] = """
     type: command
     short-summary: Update an image builder template.
+    long-summary: >
+        Updating an image builder templates is currently unsupported. This command can be used in conjunction with --defer
+        to update an image template object within the CLI cache. Without --defer it retrieves the specified image template
+        from the cache and sends a request to Azure to create the image template.
+
     examples:
         - name: |
             Create a template resource from a template object in the cli cache.
@@ -2172,16 +2163,13 @@ helps['image template update'] = """
             az image template create --image-source {image_source} -n mytemplate -g my-group \\
                 --scripts {script} --managed-image-destinations image_1=westus --defer
 
-            # add customizers and outputs to local cache template object
-            #   via az image template output / customizer add
-            #   can also update other cache object params through generic update args like --set
-            # ...
+            # add customizers and outputs to local cache template object via az image template output / customizer add
+            # one can also update cache object properties through generic update options, such as: --set
+            az image template output add -n mytemplate -g my-group --output-name my-win-image-managed \\
+                --artifact-tags "is_vhd=False"  --managed-image winImage --managed-image-location eastus --defer
 
             # send template create request to azure to create template resource
             az image template update -n mytemplate -g my-group
-
-            # finally, delete cache obj
-            az cache delete -n mytemplate -g my-group -t VirtualMachineImageTemplate
 """
 
 helps['image template wait'] = """

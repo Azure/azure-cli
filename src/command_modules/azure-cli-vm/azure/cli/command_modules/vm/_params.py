@@ -150,14 +150,33 @@ def load_arguments(self, _):
         c.argument('source', options_list=["--image-source", "-i"], help="The base image to customize. Must be a valid platform image URN, platform image alias, Red Hat ISO image URI, managed image name/ID, or shared image version ID.")
         c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
         c.argument('checksum', help="The SHA256 checksum of the Red Hat ISO image")
-        c.argument('managed_image_destinations', nargs='+', help='Managed image distribution information. Space-separated list of key-value pairs. E.g "image_1=westus2 image_2=westus". Each key is the name or resource ID of the managed image to be created. Each value is the location of the image.')
-        c.argument('shared_image_destinations', nargs='+', help='Shared image gallery (sig) distribution information. Space-separated list of key-value pairs. E.g "my_gallery_1/image_def_1=eastus,westus  my_gallery_2/image_def_2=uksouth,canadaeast,francesouth." '
+        c.argument('managed_image_destinations', nargs='+', help='Managed image output distributor information. Space-separated list of key-value pairs. E.g "image_1=westus2 image_2=westus". Each key is the name or resource ID of the managed image to be created. Each value is the location of the image.')
+        c.argument('shared_image_destinations', nargs='+', help='Shared image gallery (sig) output distributor information. Space-separated list of key-value pairs. E.g "my_gallery_1/image_def_1=eastus,westus  my_gallery_2/image_def_2=uksouth,canadaeast,francesouth." '
                                                                 'Each key is the sig image definition ID or sig gallery name and sig image definition delimited by a "/". Each value is a comma-delimited list of replica locations.')
         c.argument('output_name', help=ib_output_name_help)
         c.ignore('destinations_lists', 'scripts_list', 'source_dict')
 
     with self.argument_context('image template create') as c:
+        ib_source_type = CLIArgumentType(arg_group="Image Source")
+        ib_customizer_type = CLIArgumentType(arg_group="Customizer")
+        ib_cutput_type = CLIArgumentType(arg_group="Output")
+
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
+
+        # Image Source Arguments
+        c.argument('source', arg_type=ib_source_type)
+        c.argument('checksum', arg_type=ib_source_type)
+        c.argument('', arg_type=ib_source_type)
+
+        # Image Customizer Arguments
+        c.argument('scripts', arg_type=ib_customizer_type)
+        c.argument('', arg_type=ib_customizer_type)
+        c.argument('', arg_type=ib_customizer_type)
+
+        # Image Output Arguments
+        c.argument('managed_image_destinations', arg_type=ib_cutput_type)
+        c.argument('shared_image_destinations', arg_type=ib_cutput_type)
+        c.argument('output_name', arg_type=ib_cutput_type)
 
     with self.argument_context('image template output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."

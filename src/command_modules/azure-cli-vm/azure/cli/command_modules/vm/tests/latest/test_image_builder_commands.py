@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from knack.util import CLIError
+
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 from msrestazure.tools import parse_resource_id
@@ -197,7 +199,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
-        self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
+        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from managed image
@@ -250,7 +252,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs['image_id'] = output['artifactId']
 
         # check that vm successfully created from template.
-        self.cmd('vm create --name {vm} -g {rg} --image {image_id}')
+        self.cmd('vm create --name {vm} -g {rg} --image {image_id} --generate-ssh-keys')
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from sig image
@@ -399,11 +401,46 @@ class ImageTemplateTest(ScenarioTest):
             self.check('length(distribute)', 2)
         ])
 
-        # test clear using object cacheå
+        # test clear using object cache
         self.cmd('image template output clear -n {tmpl_01} -g {rg} --defer',
                  checks=[
                      self.check('length(properties.distribute)', 0)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_customizers', location='westus2')
+    def test_defer_only_commands(self, resource_group, resource_group_location):
+        def _ensure_cmd_raises_defer_error(self, cmds):
+            for cmd in cmds:
+                with self.assertRaisesRegex(CLIError, "This command requires --defer"):
+                    self.cmd(cmd)
+
+        self._assign_ib_permissions(resource_group)
+
+        self.kwargs.update({
+            'tmpl': 'template01',
+            'img_src': WIN_IMAGE_SOURCE,
+            'script_url': TEST_PWSH_SCRIPT_URL,
+            'pwsh_name': 'powershell_script',
+            'vhd_name': 'example.vhd',
+        })
+
+        self.cmd('image template create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --defer')
+
+        # test that customizer commands require defer
+        customizer_commands = [
+            'image template customizer add -n {tmpl} -g {rg} --customizer-name {pwsh_name} --type powershell -e 0 1 2 --script-url {script_url}',
+            'image template customizer remove -n {tmpl} -g {rg} --customizer-name {pwsh_name}',
+            'image template customizer clear -n {tmpl} -g {rg}'
+        ]
+        _ensure_cmd_raises_defer_error(self, customizer_commands)
+
+        # test that output commands require defer
+        output_commands = [
+            'image template output add -n {tmpl} -g {rg} --is-vhd --output-name {vhd_name}',
+            'image template output remove -n {tmpl} -g {rg} --output-name {vhd_name}',
+            'image template output clear -n {tmpl} -g {rg}'
+        ]
+        _ensure_cmd_raises_defer_error(self, output_commands)
 
 
 if __name__ == '__main__':

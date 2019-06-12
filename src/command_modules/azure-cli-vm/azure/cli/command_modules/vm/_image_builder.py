@@ -65,6 +65,18 @@ def cf_img_bldr_image_templates(cli_ctx, _):
 # endregion
 
 
+def _no_white_space_or_err(words):
+    for char in words:
+        if char.isspace():
+            raise CLIError("Error: White space in {}".format(words))
+
+
+def _require_defer(cmd):
+    use_cache = cmd.cli_ctx.data.get('_cache', False)
+    if not use_cache:
+        raise CLIError("This command requires --defer")
+
+
 def _parse_script(script_str):
     script_name = script_str
     script = {"script": script_str, "name": script_name, "type": None}
@@ -81,12 +93,6 @@ def _parse_script(script_str):
         script["type"] = ScriptType.POWERSHELL
 
     return script
-
-
-def _no_white_space_or_err(words):
-    for char in words:
-        if char.isspace():
-            raise CLIError("Error: White space in {}".format(words))
 
 
 def _parse_image_destination(cmd, rg, destination, is_shared_image):
@@ -435,6 +441,9 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
                         output_name=None, is_vhd=None, tags=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
                         managed_image=None, managed_image_location=None):  # pylint: disable=line-too-long, unused-argument
+
+    _require_defer(cmd)
+
     from azure.mgmt.imagebuilder.models import (ImageTemplateManagedImageDistributor, ImageTemplateVhdDistributor,
                                                 ImageTemplateSharedImageDistributor)
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
@@ -474,6 +483,8 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
 
 
 def remove_template_output(cmd, client, resource_group_name, image_template_name, output_name):
+    _require_defer(cmd)
+
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
@@ -496,6 +507,8 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
 
 def clear_template_output(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
@@ -512,6 +525,8 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
                             script_url=None, inline_script=None, valid_exit_codes=None,
                             restart_command=None, restart_check_command=None, restart_timeout=None,
                             file_source=None, dest_path=None):
+    _require_defer(cmd)
+
     from azure.mgmt.imagebuilder.models import (ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateRestartCustomizer, ImageTemplateFileCustomizer)
 
@@ -555,6 +570,7 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
+    _require_defer(cmd)
 
     if not existing_image_template.customize:
         raise CLIError("No customizers to remove.")
@@ -575,6 +591,8 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
 
 
 def clear_template_customizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
