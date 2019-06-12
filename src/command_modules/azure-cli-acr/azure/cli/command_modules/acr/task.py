@@ -374,7 +374,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
             base_image_status = None
             if base_image_trigger_enabled is not None:
-                base_image_status = TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value
+                base_image_status = TriggerStatus.enabled.value if base_image_trigger_enabled \
+                    else TriggerStatus.disabled.value
             base_image_trigger_update_params = BaseImageTriggerUpdateParameters(
                 base_image_trigger_type=base_image_trigger_type,
                 status=base_image_status,
