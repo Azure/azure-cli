@@ -25,6 +25,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: metadata'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: metadata
 
 - job: VerifyVersions
@@ -95,8 +96,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
-      PathtoPublish: 'build_scripts/windows/out/'
-
+      TargetPath: '$(SYSTEM.ARTIFACTSTAGINGDIRECTORY)/build_scripts/windows/out/'
       ArtifactName: msi
 
 - job: TestWindowsMSI
@@ -149,6 +149,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: docker
 
 
@@ -211,6 +212,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: pypi
 
 
@@ -416,6 +418,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: homebrew
 
 
@@ -479,6 +482,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: yum
 
 
@@ -544,6 +548,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: debian
 
 - job: BuildUbuntuTrusty
@@ -573,6 +578,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: debian
 
 
@@ -604,6 +610,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: debian
 
 - job: BuildUbuntuDisco
@@ -633,6 +640,7 @@ jobs:
     - task: PublishPipelineArtifact@0
       displayName: 'Publish Artifact: debian'
       inputs:
+        TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
         ArtifactName: debian
 
 
@@ -662,6 +670,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: debian
 
 
@@ -692,6 +701,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: debian
 
 
@@ -782,6 +792,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
+      TargetPath: $(SYSTEM.ARTIFACTSTAGINGDIRECTORY)
       ArtifactName: debian
 
 
