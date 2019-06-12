@@ -202,8 +202,9 @@ examples:
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
   - name: Import an image from a registry in a different subscription.
-    text: >
-        az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
+    text: |
+        az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
+            -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
   - name: Import an image from a public repository in Docker Hub
     text: >
         az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
@@ -433,12 +434,17 @@ examples:
 """
 
 helps['acr pack'] = """
+type: group
+short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
+"""
+
+helps['acr pack build'] = """
 type: command
-short-summary: Queues a task that builds an app and pushes it into an Azure Container Registry.
+short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
 examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
     text: >
-        az acr pack -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
 """
 
 helps['acr show'] = """
@@ -490,29 +496,45 @@ examples:
     text: >
         cat task.yaml | az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers.
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false \\
+            --pull-request-trigger-enabled false
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image without triggers and uses a build argument.
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure/acr-builder.git -f Dockerfile --commit-trigger-enabled false \\
+            --pull-request-trigger-enabled false --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
   - name: Create a Linux task using a private GitHub repository which builds the hello-world image without triggers on Arm architecture (V7 variant)
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --commit-trigger-enabled false \\
+            --pull-request-trigger-enabled false --git-access-token 0000000000000000000000000000000000000000 --platform linux/arm/v7
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger. Note that this task does not use Source Registry (MyRegistry), so we can explicitly set Auth mode as None for it.
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --git-access-token 0000000000000000000000000000000000000000
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            --auth-mode None -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --git-access-token 0000000000000000000000000000000000000000
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
-    text: >
-        az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
+    text: |
+        az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry \\
+            -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false \\
+            --pull-request-trigger-enabled false --platform Windows/amd64
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with the system-assigned managed identity
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --assign-identity
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --assign-identity
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with a user-assigned managed identity
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --assign-identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --assign-identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with both system-assigned and user-assigned managed identities
-    text: >
-        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+    text: |
+        az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
+            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
 helps['acr task identity'] = """
@@ -528,11 +550,13 @@ examples:
     text: >
         az acr task identity assign -n MyTask -r MyRegistry
   - name: Assign user-assigned managed identities to an existing task. This will remove the existing system-assigned identity.
-    text: >
-        az acr task identity assign -n MyTask -r MyRegistry --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+    text: |
+        az acr task identity assign -n MyTask -r MyRegistry \\
+            --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
   - name: Assign both system-assigned and user-assigned managed identities to an existing task.
-    text: >
-        az acr task identity assign -n MyTask -r MyRegistry --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+    text: |
+        az acr task identity assign -n MyTask -r MyRegistry \\
+            --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
 helps['acr task identity remove'] = """
@@ -543,8 +567,9 @@ examples:
     text: >
         az acr task identity remove -n MyTask -r MyRegistry
   - name: Remove a user-assigned identity from a task.
-    text: >
-        az acr task identity remove -n MyTask -r MyRegistry --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
+    text: |
+        az acr task identity remove -n MyTask -r MyRegistry \\
+            --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
   - name: Remove all managed identities from a task.
     text: >
         az acr task identity remove -n MyTask -r MyRegistry --identities [all]
@@ -569,23 +594,32 @@ type: command
 short-summary: Add a custom registry login credential to the task
 examples:
   - name: Add a registry login credential to a task using a plain text username and password.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'mysecret'
+    text: |
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
+            -u 'myusername' -p 'mysecret'
   - name: Add a registry login credential to a task using key vault secret URIs for the username and password and the task system-assigned identity.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' --use-identity [system]
+    text: |
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
+            -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            --use-identity [system]
   - name: Add a registry login credential to a task using key vault secret URIs for the username and password and a task user-assigned identity given by its client id.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' --use-identity 00000000-0000-0000-0000-000000000000
+    text: |
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
+            -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            --use-identity 00000000-0000-0000-0000-000000000000
   - name: Add a registry login credential to a task using a plain text username and key vault secret URI for the password and the task user-assigned identity given by its client id.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' --use-identity 00000000-0000-0000-0000-000000000000
+    text: |
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
+            -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            --use-identity 00000000-0000-0000-0000-000000000000
   - name: Add a registry login credential to a task using a plain text username and key vault secret URI for the password and the default managed identity for the task if one exists.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword'
+    text: |
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
+            -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword'
   - name: Add a registry login credential to a task that uses only the task system-assigned identity to authenticate to the registry.
-    text: >
-        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io --use-identity [system]
+    text: |
+        az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
+            --use-identity [system]
 """
 
 helps['acr task credential list'] = """
@@ -611,8 +645,9 @@ type: command
 short-summary: Update the registry login credential for a task.
 examples:
   - name: Update the credential for a task
-    text: >
-        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io -u 'myusername2' -p 'mysecret'
+    text: |
+        az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io \\
+            -u 'myusername2' -p 'mysecret'
 """
 
 helps['acr task delete'] = """
@@ -826,4 +861,16 @@ examples:
   - name: Disable a webhook.
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
+"""
+
+helps['acr check-health'] = """
+type: command
+short-summary: Gets health information on the environment and optionally a target registry.
+examples:
+  - name: Gets health state with target registry 'MyRegistry', skipping confirmation for pulling image.
+    text: >
+        az acr check-health -n MyRegistry -y
+  - name: Gets health state of the environment, without stopping on first error.
+    text: >
+        az acr check-health --ignore-errors
 """

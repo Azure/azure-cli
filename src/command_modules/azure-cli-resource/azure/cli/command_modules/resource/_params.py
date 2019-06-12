@@ -276,3 +276,18 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('rest') as c:
+        c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
+                   help='HTTP request method')
+        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/".'
+                   ' Common tokens will also be replaced with real values including "{subscriptionId}"')
+        c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
+        c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
+        c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
+        c.argument('body', options_list=['--body', '-b'], help='request body')
+        c.argument('output_file', help='save response payload to a file')
+        c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
+                   'the service. The token will be placed in the "Authorization" header. By default, '
+                   'CLI can figure this out based on "--url" argument, unless you use ones not in the list '
+                   'of "az cloud show --query endpoints"')

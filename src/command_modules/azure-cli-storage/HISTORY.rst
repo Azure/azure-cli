@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.4.3
++++++
+* `storage container generate-sas`: Fix missing account key
+* `storage blob sync`: Fix issue for Linux
+
 2.4.2
 +++++
 * `storage blob sync`: add sync command for storage blob

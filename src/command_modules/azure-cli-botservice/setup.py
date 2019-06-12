@@ -36,7 +36,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-web==0.41.0',
+    'azure-mgmt-web==0.42.0',
     'azure-mgmt-botservice',
     'cryptography',
     'requests'

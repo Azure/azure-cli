@@ -1014,46 +1014,76 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     site = client.web_apps.get(resource_group_name, webapp)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(webapp))
+    if 'functionapp' in site.kind:
+        raise CLIError("'{}' is a function app. Please use `az functionapp deployment slot create`.".format(webapp))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
-    clone_from_prod = None
     slot_def.site_config = SiteConfig()
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
+
     if configuration_source:
-        clone_from_prod = configuration_source.lower() == webapp.lower()
-        site_config = get_site_configs(cmd, resource_group_name, webapp,
-                                       None if clone_from_prod else configuration_source)
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                'update_configuration', slot, site_config)
-
-    # slot create doesn't clone over the app-settings and connection-strings, so we do it here
-    # also make sure slot settings don't get propagated.
-    if configuration_source:
-        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, webapp)
-        src_slot = None if clone_from_prod else configuration_source
-        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                               'list_application_settings',
-                                               src_slot)
-        for a in slot_cfg_names.app_setting_names or []:
-            app_settings.properties.pop(a, None)
-
-        connection_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                                     'list_connection_strings',
-                                                     src_slot)
-        for a in slot_cfg_names.connection_string_names or []:
-            connection_strings.properties.pop(a, None)
-
-        _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                    'update_application_settings',
-                                    app_settings.properties, slot, client)
-        _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                    'update_connection_strings',
-                                    connection_strings.properties, slot, client)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source)
 
     result.name = result.name.split('/')[-1]
     return result
+
+
+def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None):
+    client = web_client_factory(cmd.cli_ctx)
+    site = client.web_apps.get(resource_group_name, name)
+    if not site:
+        raise CLIError("'{}' function app doesn't exist".format(name))
+    location = site.location
+    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+
+    slot_def.site_config = SiteConfig()
+
+    # function app slots need to have all the App Settings from the source
+    prodsite_appsettings = get_app_settings(cmd, resource_group_name, name)
+    slot_def.site_config.app_settings = prodsite_appsettings[:]
+
+    poller = client.web_apps.create_or_update_slot(resource_group_name, name, slot_def, slot)
+    result = LongRunningOperation(cmd.cli_ctx)(poller)
+
+    if configuration_source:
+        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source)
+
+    result.name = result.name.split('/')[-1]
+    return result
+
+
+def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None):
+    clone_from_prod = configuration_source.lower() == webapp.lower()
+    site_config = get_site_configs(cmd, resource_group_name, webapp,
+                                   None if clone_from_prod else configuration_source)
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                            'update_configuration', slot, site_config)
+
+    # slot create doesn't clone over the app-settings and connection-strings, so we do it here
+    # also make sure slot settings don't get propagated.
+
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, webapp)
+    src_slot = None if clone_from_prod else configuration_source
+    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                           'list_application_settings',
+                                           src_slot)
+    for a in slot_cfg_names.app_setting_names or []:
+        app_settings.properties.pop(a, None)
+
+    connection_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                                 'list_connection_strings',
+                                                 src_slot)
+    for a in slot_cfg_names.connection_string_names or []:
+        connection_strings.properties.pop(a, None)
+
+    _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                'update_application_settings',
+                                app_settings.properties, slot, client)
+    _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                'update_connection_strings',
+                                connection_strings.properties, slot, client)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals

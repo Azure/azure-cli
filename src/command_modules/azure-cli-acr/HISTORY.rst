@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.2.9
++++++
+* Add 'az acr check-health' command.
+* Improve error handling for AAD tokens and for retrieving external commands.
+
 2.2.8
 +++++
 * Add 'acr pack' command group for creating quick build Tasks using Buildpacks.
