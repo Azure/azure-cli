@@ -1453,8 +1453,7 @@ def _get_deleted_apps_locations(cli_ctx):
     del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)
     if del_sites_resource:
         return del_sites_resource.locations
-    else:
-        return []
+    return []
 
 
 def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
