@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-rdbms',
     'azure-cli-relay',
     'azure-cli-reservations',
     'azure-cli-search',
@@ -113,6 +112,7 @@ DEPENDENCIES = [
     'azure-mgmt-network~=3.0',
     'azure-mgmt-policyinsights~=0.3.1',
     'azure-mgmt-privatedns~=0.1.0',
+    'azure-mgmt-rdbms~=1.8',
     'azure-mgmt-recoveryservices~=0.1.1',
     'azure-mgmt-recoveryservicesbackup~=0.1.2',
     'azure-mgmt-redis~=6.0',
