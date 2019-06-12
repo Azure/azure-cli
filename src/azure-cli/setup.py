@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-backup',
     'azure-cli-batch',
     'azure-cli-batchai',
     'azure-cli-botservice',
@@ -119,6 +118,8 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=3.0',
     'azure-mgmt-privatedns~=0.1.0',
+    'azure-mgmt-recoveryservices~=0.1.1',
+    'azure-mgmt-recoveryservicesbackup~=0.1.2',
     'azure-mgmt-redis~=6.0',
     'azure-mgmt-resource~=2.1',
     'azure-mgmt-sql~=0.12',
