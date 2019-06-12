@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-ams',
     'azure-cli-backup',
     'azure-cli-batch',
     'azure-cli-batchai',
@@ -115,6 +114,7 @@ DEPENDENCIES = [
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
+    'azure-mgmt-media~=1.1,>=1.1.1',
     'azure-mgmt-monitor~=0.5.2',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-network~=3.0',
