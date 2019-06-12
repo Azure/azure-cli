@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-batch',
     'azure-cli-batchai',
     'azure-cli-botservice',
     'azure-cli-configure',
@@ -89,6 +88,7 @@ COMMAND_MODULES = [
 
 
 DEPENDENCIES = [
+    'azure-batch~=6.0',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cli-telemetry>=1.0.2,<2.0',
@@ -98,6 +98,7 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-applicationinsights~=0.1.1',
     'azure-mgmt-authorization~=0.50.0',
+    'azure-mgmt-batch~=6.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-cdn~=3.1',
     'azure-mgmt-cognitiveservices~=3.0',
