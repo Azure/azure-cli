@@ -662,20 +662,20 @@ class AzCliCommandInvoker(CommandInvoker):
         previews = [] + getattr(parsed_args, '_argument_previews', [])
         if cmd.preview_info:
             previews.append(cmd.preview_info)
+        else:
+            # search for implicit command preview status
+            path_comps = cmd.name.split()[:-1]
+            implicit_preview_info = None
+            while path_comps and not implicit_preview_info:
+                implicit_preview_info = resolve_preview_info(self.cli_ctx, ' '.join(path_comps))
+                del path_comps[-1]
 
-        # search for implicit preview
-        path_comps = cmd.name.split()[:-1]
-        implicit_preview_info = None
-        while path_comps and not implicit_preview_info:
-            implicit_preview_info = resolve_preview_info(self.cli_ctx, ' '.join(path_comps))
-            del path_comps[-1]
-
-        if implicit_preview_info:
-            preview_kwargs = implicit_preview_info.__dict__.copy()
-            preview_kwargs['object_type'] = 'command'
-            del preview_kwargs['_get_tag']
-            del preview_kwargs['_get_message']
-            previews.append(ImplicitPreviewItem(**preview_kwargs))
+            if implicit_preview_info:
+                preview_kwargs = implicit_preview_info.__dict__.copy()
+                preview_kwargs['object_type'] = 'command'
+                del preview_kwargs['_get_tag']
+                del preview_kwargs['_get_message']
+                previews.append(ImplicitPreviewItem(**preview_kwargs))
 
         colorama.init()
         for d in deprecations:
