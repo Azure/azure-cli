@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-relay',
     'azure-cli-reservations',
     'azure-cli-search',
     'azure-cli-security',
@@ -116,6 +115,7 @@ DEPENDENCIES = [
     'azure-mgmt-recoveryservices~=0.1.1',
     'azure-mgmt-recoveryservicesbackup~=0.1.2',
     'azure-mgmt-redis~=6.0',
+    'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-resource~=2.1',
     'azure-mgmt-sql~=0.12',
     'azure-mgmt-storage~=3.3',
