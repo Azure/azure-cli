@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-interactive',
     'azure-cli-iot',
     'azure-cli-kusto',
     'azure-cli-lab',
@@ -130,6 +129,7 @@ DEPENDENCIES = [
     'knack~=0.6.2',
     'mock~=2.0',
     'paramiko>=2.0.8,<3.0.0',
+    'prompt_toolkit~=1.0,>=1.0.15',
     'pydocumentdb>=2.0.1,<3.0.0',
     'pyOpenSSL~=19.0',
     'pytz==2019.1',
