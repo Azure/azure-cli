@@ -81,7 +81,7 @@ def _parse_script(script_str):
     script_name = script_str
     script = {"script": script_str, "name": script_name, "type": None}
     if urlparse(script_str).scheme and "://" in script_str:
-        _, script_name = script_str.rsplit(sep="/", maxsplit=1)
+        _, script_name = script_str.rsplit("/", 1)
         script["name"] = script_name
         script["is_url"] = True
     else:
@@ -101,7 +101,7 @@ def _parse_image_destination(cmd, rg, destination, is_shared_image):
         raise CLIError("Invalid Format: the given image destination {} must contain the '=' delimiter."
                        .format(destination))
 
-    rid, location = destination.rsplit(sep="=", maxsplit=1)
+    rid, location = destination.rsplit("=", 1)
     if not rid or not location:
         raise CLIError("Invalid Format: destination {} should have format 'destination=location'.".format(destination))
 
@@ -114,7 +114,7 @@ def _parse_image_destination(cmd, rg, destination, is_shared_image):
                 raise CLIError("Invalid Format: {} must have a shared image gallery name and definition. "
                                "They must be delimited by a '/'.".format(rid))
 
-            sig_name, sig_def = rid.rsplit(sep="/", maxsplit=1)
+            sig_name, sig_def = rid.rsplit("/", 1)
 
             rid = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=rg,
