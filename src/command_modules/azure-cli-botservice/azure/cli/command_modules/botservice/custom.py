@@ -424,7 +424,8 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         raise CLIError('\'az bot prepare-publish\' is only for v3 bots. Please use \'az bot publish\' to prepare and '
                        'publish a v4 bot.')
 
-    logger.warning('WARNING: `az bot prepare-publish` is in maintenance mode for v3 bots. We recommend developers '
+    logger.warning('WARNING: `az bot prepare-publish` is in maintenance mode for v3 bots as support for creating v3 '
+                   'SDK bots via `az bot create` will be discontinued on August 1st, 2019. We encourage developers '
                    'move to creating and deploying v4 bots.\n\nFor more information on creating and deploying v4 bots, '
                    'please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more information on v3 bot '
                    'creation deprecation, please visit this blog post: '
@@ -578,9 +579,10 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
                        ' to deploy your bot to Azure. For more information on how to deploy a v4 bot, see '
                        'https://aka.ms/deploy-your-bot.')
     else:
-        logger.warning('WARNING: `az bot publish` is in maintenance mode for v3 bots. We recommend developers move to '
-                       'creating and deploying v4 bots.\n\nFor more information on creating and deploying v4 bots, '
-                       'please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more information on v3 bot '
+        logger.warning('WARNING: `az bot publish` is in maintenance mode for v3 bots as support for creating v3 '
+                       'SDK bots via `az bot create` will be discontinued on August 1st, 2019. We encourage developers '
+                       'move to creating and deploying v4 bots.\n\nFor more information on creating and deploying v4 '
+                       'bots, please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more information on v3 bot '
                        'creation deprecation, please visit this blog post: '
                        'https://blog.botframework.com/2019/06/07/v3-bot-broadcast-message/')
 
