@@ -51,10 +51,6 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
 ]
 
-COMMAND_MODULES = [
-]
-
-
 DEPENDENCIES = [
     'azure-batch~=6.0',
     'azure-cli-command_modules-nspkg~=2.0',
@@ -166,6 +162,6 @@ setup(
         'az.bat',
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-    install_requires=COMMAND_MODULES + DEPENDENCIES,
+    install_requires=DEPENDENCIES,
     cmdclass=cmdclass
 )
