@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-deploymentmanager',
     'azure-cli-dla',
     'azure-cli-dls',
     'azure-cli-dms',
@@ -105,6 +104,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerregistry~=2.8',
     'azure-mgmt-containerservice~=5.2',
     'azure-mgmt-cosmosdb~=0.5.2',
+    'azure-mgmt-deploymentmanager~=0.1.0',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-iotcentral~=1.0',
