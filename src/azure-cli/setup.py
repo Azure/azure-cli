@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 COMMAND_MODULES = [
-    'azure-cli-hdinsight',
     'azure-cli-interactive',
     'azure-cli-iot',
     'azure-cli-kusto',
@@ -103,6 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-eventhub~=2.6',
+    'azure-mgmt-hdinsight~=0.2.1',
     'azure-mgmt-iotcentral~=1.0',
     'azure-mgmt-keyvault~=1.1',
     'azure-mgmt-loganalytics~=0.2',
