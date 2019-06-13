@@ -106,7 +106,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     target=target
                 )
         else:
-             raise CLIError("--file <Dockerfile> not found")
+            raise CLIError("--file <Dockerfile> not found")
     else:
         yaml_template, values_content = get_yaml_and_values(
             cmd_value, timeout, file)
