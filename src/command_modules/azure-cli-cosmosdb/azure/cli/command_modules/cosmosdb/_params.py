@@ -54,6 +54,9 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb network-rule list') as c:
         c.argument('account_name', id_part=None)
 
+    with self.argument_context('cosmosdb keys list') as c:
+        c.argument('account_name', id_part=None)
+
     with self.argument_context('cosmosdb network-rule add') as c:
         c.argument('subnet', help="Name or ID of the subnet")
         c.argument('virtual_network', help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
