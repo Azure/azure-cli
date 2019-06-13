@@ -6,12 +6,12 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 
 name_prefix = 'climanagedservices'
-managed_by_tenant_id = 'bab3375b-6197-4a15-a44b-16c41faa91d7'
+tenant_id = 'bab3375b-6197-4a15-a44b-16c41faa91d7'
 principal_id = 'd6f6c88a-5b7a-455e-ba40-ce146d4d3671'
 role_definition_id = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
-registration_definition_id = 'afee244e-9a4d-41c9-a64d-8d7fc7124717'
+definition_id = 'afee244e-9a4d-41c9-a64d-8d7fc7124717'
 msp_sub_id = '38bd4bef-41ff-45b5-b3af-d03e55a4ca15'
-registration_assignment_id = 'b61427a6-974b-4987-a4cc-007a11ec8396'
+assignment_id = 'b61427a6-974b-4987-a4cc-007a11ec8396'
 
 
 # ManagedServices RP is in a preview state. And we have to allow subscriptions to be able to use the functionality.
@@ -23,60 +23,60 @@ class ManagedServicesTests(ScenarioTest):
     def test_managedservices_commands(self):
         self.kwargs = {
             'name': self.create_random_name(prefix=name_prefix, length=24),
-            'managed-by-tenant-id': managed_by_tenant_id,
+            'tenant-id': tenant_id,
             'principal-id': principal_id,
             'role-definition-id': role_definition_id,
             'header_parameters': {},
-            'registration-definition-id': registration_definition_id,
+            'definition-id': definition_id,
             'subscription-id': msp_sub_id
         }
 
         # put definition
         result = self.cmd(
-            'az managedservices definitions create --name {name} --managed-by-tenant-id  {managed-by-tenant-id} '
-            '--principal-id {principal-id} --role-definition-id {role-definition-id} --registration-definition-id {'
-            'registration-definition-id} --subscription {subscription-id}').get_output_in_json()
+            'az managedservices definitions create --name {name} --tenant-id  {tenant-id} '
+            '--principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {'
+            'definition-id} --subscription {subscription-id}').get_output_in_json()
 
-        self.assertTrue(result['name'], registration_definition_id)
+        self.assertTrue(result['name'], definition_id)
         self.assertTrue(result['properties'] is not None)
         self.assertTrue(result['properties']['provisioningState'], "Succeeded")
-        self.assertTrue(result['properties']['managedByTenantId'], managed_by_tenant_id)
+        self.assertTrue(result['properties']['managedByTenantId'], tenant_id)
         self.assertTrue(result['properties']['authorizations'] is not None)
         self.assertTrue(result['properties']['authorizations'][0]['roleDefinitionId'], role_definition_id)
         self.assertTrue(result['properties']['authorizations'][0]['principalId'], principal_id)
 
         # get definition
-        self.cmd('az managedservices definitions show --name-or-id {registration-definition-id} --subscription {'
+        self.cmd('az managedservices definitions show --name-or-id {definition-id} --subscription {'
                  'subscription-id}',
                  checks=[
-                     self.check('name', '{registration-definition-id}'), ])
+                     self.check('name', '{definition-id}'), ])
 
         # registration assignment operation tests
         definition_resource_id = "/subscriptions/" + msp_sub_id + "/providers/Microsoft.ManagedServices/" \
                                                                   "registrationDefinitions/" \
-                                                                + registration_definition_id
+                                                                + definition_id
         self.kwargs.update({
-            'registration-assignment-id': registration_assignment_id,
+            'assignment-id': assignment_id,
             'registration-definition-resource-id': definition_resource_id
         })
         # put assignment
         result = self.cmd(
-            'az managedservices assignments create --registration-definition-id {'
-            'registration-definition-resource-id} --registration-assignment-id {registration-assignment-id} '
+            'az managedservices assignments create --definition-id {'
+            'registration-definition-resource-id} --assignment-id {assignment-id} '
             '--subscription {subscription-id}').get_output_in_json()
-        self.assertTrue(result['name'], registration_assignment_id)
+        self.assertTrue(result['name'], assignment_id)
         self.assertTrue(result['properties'] is not None)
         self.assertTrue(result['properties']['provisioningState'], "Succeeded")
         self.assertTrue(result['properties']['registrationDefinitionId'], definition_resource_id)
 
         # get assignment
-        self.cmd('az managedservices assignments show --name-or-id {registration-assignment-id} --subscription {'
+        self.cmd('az managedservices assignments show --name-or-id {assignment-id} --subscription {'
                  'subscription-id}',
                  checks=[
-                     self.check('name', '{registration-assignment-id}'), ])
+                     self.check('name', '{assignment-id}'), ])
 
         # delete assignment
-        self.cmd('az managedservices assignments delete --name-or-id {registration-assignment-id} --subscription {'
+        self.cmd('az managedservices assignments delete --name-or-id {assignment-id} --subscription {'
                  'subscription-id}')
 
         # list assignments
@@ -87,10 +87,10 @@ class ManagedServicesTests(ScenarioTest):
         for assignment in assignments_list:
             name = assignment['name']
             assignments.append(name)
-        self.assertTrue(registration_assignment_id not in assignments)
+        self.assertTrue(assignment_id not in assignments)
 
         # delete definition
-        self.cmd('az managedservices definitions delete --name-or-id {registration-definition-id} --subscription {'
+        self.cmd('az managedservices definitions delete --name-or-id {definition-id} --subscription {'
                  'subscription-id}')
 
         # list definitions
@@ -101,4 +101,4 @@ class ManagedServicesTests(ScenarioTest):
         for entry in definitions_list:
             name = entry['name']
             definitions.append(name)
-        self.assertTrue(registration_definition_id not in definitions)
+        self.assertTrue(definition_id not in definitions)
