@@ -394,7 +394,7 @@ def cli_cosmosdb_database_delete(client, database_id):
 
 def cli_cosmosdb_collection_exists(client, database_id, collection_id):
     """Returns a boolean indicating whether the collection exists """
-    return len(list(client.QueryCollections(
+    return len(list(client.QueryContainers(
         _get_database_link(database_id),
         {'query': 'SELECT * FROM root r WHERE r.id=@id',
          'parameters': [{'name': '@id', 'value': collection_id}]}))) > 0
@@ -402,19 +402,19 @@ def cli_cosmosdb_collection_exists(client, database_id, collection_id):
 
 def cli_cosmosdb_collection_show(client, database_id, collection_id):
     """Shows an Azure Cosmos DB collection and its offer """
-    collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
+    collection = client.ReadContainer(_get_collection_link(database_id, collection_id))
     offer = _find_offer(client, collection['_self'])
     return {'collection': collection, 'offer': offer}
 
 
 def cli_cosmosdb_collection_list(client, database_id):
     """Lists all Azure Cosmos DB collections """
-    return list(client.ReadCollections(_get_database_link(database_id)))
+    return list(client.ReadContainers(_get_database_link(database_id)))
 
 
 def cli_cosmosdb_collection_delete(client, database_id, collection_id):
     """Deletes an Azure Cosmos DB collection """
-    client.DeleteCollection(_get_collection_link(database_id, collection_id))
+    client.DeleteContainer(_get_collection_link(database_id, collection_id))
 
 
 def _populate_collection_definition(collection,
@@ -457,8 +457,8 @@ def cli_cosmosdb_collection_create(client,
                                     default_ttl,
                                     indexing_policy)
 
-    created_collection = client.CreateCollection(_get_database_link(database_id), collection,
-                                                 options)
+    created_collection = client.CreateContainer(_get_database_link(database_id), collection,
+                                                options)
     offer = _find_offer(client, created_collection['_self'])
     return {'collection': created_collection, 'offer': offer}
 
@@ -480,7 +480,7 @@ def cli_cosmosdb_collection_update(client,
                                    indexing_policy=None):
     """Updates an Azure Cosmos DB collection """
     logger.debug('reading collection')
-    collection = client.ReadCollection(_get_collection_link(database_id, collection_id))
+    collection = client.ReadContainer(_get_collection_link(database_id, collection_id))
     result = {}
 
     if (_populate_collection_definition(collection,
@@ -488,7 +488,7 @@ def cli_cosmosdb_collection_update(client,
                                         default_ttl,
                                         indexing_policy)):
         logger.debug('replacing collection')
-        result['collection'] = client.ReplaceCollection(
+        result['collection'] = client.ReplaceContainer(
             _get_collection_link(database_id, collection_id), collection)
 
     if throughput:
