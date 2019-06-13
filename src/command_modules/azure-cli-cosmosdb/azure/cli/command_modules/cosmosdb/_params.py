@@ -26,9 +26,11 @@ def load_arguments(self, _):
         c.argument('account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part='name')
         c.argument('database_id', options_list=['--db-name', '-d'], help='Database Name')
 
+    with self.argument_context('cosmosdb create') as c:
+        c.argument('account_name', completer=None)
+
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
-            c.argument('account_name', completer=None)
             c.ignore('resource_group_location')
             c.argument('locations', nargs='+', action=CreateLocation)
             c.argument('tags', arg_type=tags_type)
@@ -50,6 +52,9 @@ def load_arguments(self, _):
         c.argument('failover_policies', validator=validate_failover_policies, help="space-separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb network-rule list') as c:
+        c.argument('account_name', id_part=None)
+
+    with self.argument_context('cosmosdb keys list') as c:
         c.argument('account_name', id_part=None)
 
     with self.argument_context('cosmosdb network-rule add') as c:
