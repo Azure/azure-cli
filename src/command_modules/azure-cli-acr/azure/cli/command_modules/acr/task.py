@@ -83,27 +83,30 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             "-f myFile -c myContext, but not both.")
 
     if context_path:
-        if file.endswith(ALLOWED_TASK_FILE_TYPES):
-            FileTaskStep = cmd.get_models('FileTaskStep')
-            step = FileTaskStep(
-                task_file_path=file,
-                values_file_path=values,
-                context_path=context_path,
-                context_access_token=git_access_token,
-                values=(set_value if set_value else []) + (set_secret if set_secret else [])
-            )
+        if file:
+            if file.endswith(ALLOWED_TASK_FILE_TYPES):
+                FileTaskStep = cmd.get_models('FileTaskStep')
+                step = FileTaskStep(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                )
+            else:
+                DockerBuildStep = cmd.get_models('DockerBuildStep')
+                step = DockerBuildStep(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
         else:
-            DockerBuildStep = cmd.get_models('DockerBuildStep')
-            step = DockerBuildStep(
-                image_names=image_names,
-                is_push_enabled=not no_push,
-                no_cache=no_cache,
-                docker_file_path=file,
-                arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-                context_path=context_path,
-                context_access_token=git_access_token,
-                target=target
-            )
+             raise CLIError("--file <Dockerfile> not found")
     else:
         yaml_template, values_content = get_yaml_and_values(
             cmd_value, timeout, file)
