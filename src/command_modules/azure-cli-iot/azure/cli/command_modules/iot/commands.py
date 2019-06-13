@@ -6,7 +6,7 @@
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
-from ._client_factory import iot_digitaltwin_service_factory
+# from ._client_factory import iot_digitaltwin_service_factory
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods

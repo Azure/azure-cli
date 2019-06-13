@@ -737,7 +737,7 @@ examples:
 # # examples:
 # #   - name: Gets the details for a DigitalTwin repository.
 # #     text: >
-# #         az iot digitaltwin repository show -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
+# #         az iot digitaltwin repository show -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """
 
 # # helps['iot digitaltwin repository delete'] = """
@@ -746,7 +746,7 @@ examples:
 # # examples:
 # #   - name: Delete a DigitalTwin repository.
 # #     text: >
-# #         az iot digitaltwin repository delete -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
+# #         az iot digitaltwin repository delete -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """
 
 # # helps['iot digitaltwin repository update'] = """
@@ -755,7 +755,7 @@ examples:
 # # examples:
 # #   - name: Update a DigitalTwin repository.
 # #     text: >
-# #         az iot digitaltwin repository update -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -n updatedreponame
+# #         az iot digitaltwin repository update -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """
 
 # # helps['iot digitaltwin repository get-provision-status'] = """
@@ -764,7 +764,7 @@ examples:
 # # examples:
 # #   - name: Returns the DigitalTwin repository provisioning status.
 # #     text: >
-# #         az iot digitaltwin repository get-provision-status -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -s aaaabbbb11112222aaaabbbb1111333
+# #         az iot digitaltwin repository get-provision-status -e "https://provider.azureiotrepository-test.com"
 # # """
 
 # # helps['iot digitaltwin key'] = """
@@ -778,7 +778,7 @@ examples:
 # # examples:
 # #   - name: Create a key for the given repository.
 # #     text: >
-# #         az iot digitaltwin key create -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 --role Reader
+# #         az iot digitaltwin key create -e "https://provider.azureiotrepository-test.com"
 # # """
 
 # # helps['iot digitaltwin key list'] = """
@@ -787,7 +787,7 @@ examples:
 # # examples:
 # #   - name: List repository's keys.
 # #     text: >
-# #         az iot digitaltwin key list -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222
+# #         az iot digitaltwin key list -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """
 
 # # helps['iot digitaltwin key show'] = """
@@ -796,7 +796,7 @@ examples:
 # # examples:
 # #   - name: Get the details of a repository key.
 # #     text: >
-# #         az iot digitaltwin key show -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345
+# #         az iot digitaltwin key show -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """
 
 # # helps['iot digitaltwin key delete'] = """
@@ -805,7 +805,7 @@ examples:
 # # examples:
 # #   - name: Delete a key from the given repository.
 # #     text: >
-# #         az iot digitaltwin key delete -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345
+# #         az iot digitaltwin key delete -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """
 
 # # helps['iot digitaltwin key update'] = """
@@ -814,5 +814,5 @@ examples:
 # # examples:
 # #   - name: Update the key for the given repository.
 # #     text: >
-# #         az iot digitaltwin key update -e "https://provider.azureiotrepository-test.com" -r aaaabbbb11112222aaaabbbb1111222 -k 12345 --role admin
+# #         az iot digitaltwin key update -e "https://provider.azureiotrepository-test.com" -r aaaa
 # # """

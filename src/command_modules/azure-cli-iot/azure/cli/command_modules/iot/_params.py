@@ -18,8 +18,7 @@ from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
 from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
-                                                  RenewKeyType,
-                                                  UserRole)
+                                                  RenewKeyType)
 from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
 
