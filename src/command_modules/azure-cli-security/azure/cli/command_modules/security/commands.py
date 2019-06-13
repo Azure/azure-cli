@@ -172,3 +172,6 @@ def load_command_table(self, _):
         g.custom_command('show', 'get_security_workspace_setting')
         g.custom_command('create', 'create_security_workspace_setting')
         g.custom_command('delete', 'delete_security_workspace_setting')
+
+    with self.command_group('security', is_preview=True):
+        pass

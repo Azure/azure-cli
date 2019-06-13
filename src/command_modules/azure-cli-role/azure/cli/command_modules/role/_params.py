@@ -97,7 +97,7 @@ def load_arguments(self, _):
 
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                   deprecate_info=c.deprecate(hide=True))
+                   deprecate_info=c.deprecate(hide=True), help='Password.')
 
     with self.argument_context('ad sp credential reset') as c:
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
@@ -126,7 +126,10 @@ def load_arguments(self, _):
 
     with self.argument_context('ad user') as c:
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
-        c.argument('force_change_password_next_login', arg_type=get_three_state_flag())
+        c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in.')
+
+    with self.argument_context('ad user') as c:
+        c.argument('password', help='User password.')
 
     with self.argument_context('ad user get-member-groups') as c:
         c.argument('upn_or_object_id', help='The object ID or principal name of the user for which to get information')

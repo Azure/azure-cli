@@ -165,6 +165,10 @@ def load_arguments(self, _):
     with self.argument_context('keyvault secret download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
+
+    for scope in ['backup', 'restore']:
+        with self.argument_context('keyvault secret {}'.format(scope)) as c:
+            c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
     # endregion
 
     # region KeyVault Storage Account
@@ -188,7 +192,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault storage backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store storage account backup.')
 
-    with self.argument_context('keyvault storagerestore') as c:
+    with self.argument_context('keyvault storage restore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local key backup from which to restore storage account.')
 
     with self.argument_context('keyvault storage sas-definition', arg_group='Id') as c:
@@ -253,9 +257,11 @@ def load_arguments(self, _):
         c.argument('contact_phone', options_list=['--phone'], help='Contact phone number.')
 
     with self.argument_context('keyvault certificate issuer admin') as c:
-        c.argument('email', options_list=['--email'], help='Admin e-mail address. Must be unique within the vault.')
-        c.argument('name', options_list=['--name'], help='Full admin name.')
-        c.argument('phone', options_list=['--phone'], help='Amin phone number.')
+        c.argument('email', help='Admin e-mail address. Must be unique within the vault.')
+        c.argument('name', help='Full admin name.')
+        c.argument('phone', help='Admin phone number.')
+        c.argument('first_name', help='Admin first name.')
+        c.argument('last_name', help='Admin last name.')
 
     with self.argument_context('keyvault certificate issuer') as c:
         c.argument('issuer_name', help='Certificate issuer name.')

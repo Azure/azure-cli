@@ -29,15 +29,13 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus namespace') as c:
         c.argument('namespace_name', id_part='name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
+        c.argument('default_action', help='Default action for network rule set.')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
+        c.argument('capacity', type=int, choices=[1, 2, 4], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
 
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
-
-    for scope in ['servicebus namespace create', 'servicebus namespace update']:
-        with self.argument_context(scope) as c:
-            c.argument('tags', arg_type=tags_type)
-            c.argument('sku', arg_type=get_enum_type(SkuName))
-            c.argument('capacity', type=int, choices=[1, 2, 4], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
 
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -164,7 +162,7 @@ def load_arguments_sb(self, _):
             c.argument('default_message_time_to_live', validator=_validate_default_message_time_to_live, help='ISO 8601 or duration time format for Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.')
             c.argument('dead_lettering_on_message_expiration', options_list=['--enable-dead-lettering-on-message-expiration'], arg_type=get_three_state_flag(), help='A boolean Value that indicates whether a subscription has dead letter support when a message expires.')
             c.argument('max_delivery_count', type=int, help='Number of maximum deliveries.')
-            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']))
+            c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Enumerates the possible values for the status of a messaging entity.')
             c.argument('enable_batched_operations', arg_type=get_three_state_flag(), help='Allow server-side batched operations.')
             c.argument('auto_delete_on_idle', validator=_validate_auto_delete_on_idle, options_list=['--auto-delete-on-idle'], help='ISO 8601 timeSpan  or duration time format for idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.')
             c.argument('forward_to', help='Queue/Topic name to forward the messages')

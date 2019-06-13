@@ -121,15 +121,17 @@ def load_arguments(self, _):
     with self.argument_context('acs scale') as c:
         c.argument('new_agent_count', type=int)
 
-    with self.argument_context('acs dcos browse') as c:
-        c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
-                   completer=FilesCompleter(), help='Path to an SSH key file to use.')
+    for scope in ['dcos', 'kubernetes']:
+        with self.argument_context('acs {} browse'.format(scope)) as c:
+            c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
+                       completer=FilesCompleter(), help='Path to an SSH key file to use.')
 
     with self.argument_context('acs dcos install-cli') as c:
         c.argument('install_location', default=_get_default_install_location('dcos'))
 
     with self.argument_context('acs kubernetes get-credentials') as c:
         c.argument('path', options_list=['--file', '-f'])
+        c.argument('overwrite_existing', action='store_true', help='If specified, overwrite any existing credentials.')
 
     with self.argument_context('acs kubernetes install-cli') as c:
         c.argument('install_location', type=file_type, completer=FilesCompleter(),
@@ -183,16 +185,17 @@ def load_arguments(self, _):
 
     with self.argument_context('aks enable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
-        c.argument('subnet_name', options_list=['--subnet-name', '-s'])
+        c.argument('subnet_name', options_list=['--subnet-name', '-s'], help='Name of an existing subnet to use with the virtual-node add-on.')
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
 
-    with self.argument_context('aks install-cli') as c:
-        c.argument('client_version', validator=validate_k8s_client_version)
-        c.argument('install_location', default=_get_default_install_location('kubectl'))
+    for scope in ['aks', 'acs kubernetes', 'acs dcos']:
+        with self.argument_context('{} install-cli'.format(scope)) as c:
+            c.argument('client_version', validator=validate_k8s_client_version, help='Version of the client to install.')
+            c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install DC/OS.')
 
     with self.argument_context('aks install-connector') as c:
         c.argument('aci_resource_group', help='The resource group to create the ACI container groups')

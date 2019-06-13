@@ -53,12 +53,19 @@ def load_arguments(self, _):
     with self.argument_context('dla account blob-storage') as c:
         c.argument('access_key', help='the access key associated with this Azure Storage account that will be used to connect to it')
         c.argument('suffix', help='the optional suffix for the storage account')
+        c.argument('storage_account_name', help='Name of an existing storage account to link to.')
 
     # job
     with self.argument_context('dla job submit') as c:
         c.argument('compile_mode', arg_type=get_enum_type(CompileMode), help='Indicates the type of compilation to be done on this job. Valid values are: \'Semantic\' (Only performs semantic checks and necessary sanity checks), \'Full\' (full compilation) and \'SingleBox\' (Full compilation performed locally)')
         c.argument('compile_only', help='Indicates that the submission should only build the job and not execute if set to true.', action='store_true')
         c.argument('script', completer=FilesCompleter(), help="The script to submit. This is either the script contents or use `@<file path>` to load the script from a file")
+        c.argument('pipeline_id', help='Job relationship pipeline GUID.')
+        c.argument('pipeline_name', help='Friendly name of the job relationship pipeline.')
+        c.argument('pipeline_uri', help='Unique pipeline URI which links to the originating service for this pipeline.')
+        c.argument('run_id', help='GUID of the iteration of this pipeline.')
+        c.argument('recurrence_id', help='Recurrence GUID, unique per activity/script, regardless of iteration. Links different occurrences of the same job together.')
+        c.argument('recurrence_name', help='Friendly recurrence nae for the correlation between jobs.')
 
     with self.argument_context('dla job wait') as c:
         c.argument('max_wait_time_sec', help='The maximum amount of time to wait before erroring out. Default value is to never timeout. Any value <= 0 means never timeout', type=int)
@@ -75,6 +82,9 @@ def load_arguments(self, _):
         c.argument('recurrence_id', help='A filter which returns jobs only containing the specified recurrence_id.')
 
     # credential
+    with self.argument_context('dla catalog credential') as c:
+        c.argument('uri', help='URI of the external data source.')
+
     with self.argument_context('dla catalog credential create') as c:
         c.argument('credential_user_password', options_list=['--password', '-p'], help='Password for the credential user. Will prompt if not given.')
         c.argument('credential_user_name', options_list=['--user-name'])

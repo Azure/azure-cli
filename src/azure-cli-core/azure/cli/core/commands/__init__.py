@@ -1244,7 +1244,8 @@ def register_cache_arguments(cli_ctx):
                     nargs='?',
                     action=CacheAction,
                     help='Temporarily store the object in the local cache instead of sending to Azure. '
-                         'Use `az cache` commands to view/clear.'
+                         'Use `az cache` commands to view/clear.',
+                    is_preview=True
                 )
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_cache_arguments)

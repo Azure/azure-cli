@@ -7,7 +7,6 @@ Release History
 ++++++
 * output: Fix bug where commands fail if `--output yaml` is used with `--query`
 
-
 2.0.65
 ++++++
 * auth: polish common AAD service errors with actionables to overcome

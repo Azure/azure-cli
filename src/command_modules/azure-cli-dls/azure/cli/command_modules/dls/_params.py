@@ -39,6 +39,8 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False, help='If not specified, will attempt to discover the resource group for the specified Data Lake Store account.', validator=validate_resource_group_name)
         c.argument('tier', arg_type=get_enum_type(TierType), help='The desired commitment tier for this account to use.')
+        c.argument('default_group', help='Name of the default group to give permissions to for freshly created files and folders in the Data Lake Store account.')
+        c.argument('key_version', help='Key version for the user-assigned encryption type.')
 
     # account
     for scope in ['dls account show', 'dls account delete']:
@@ -95,6 +97,11 @@ def load_arguments(self, _):
     # filesystem
     with self.argument_context('dls fs') as c:
         c.argument('path', help='The path in the specified Data Lake Store account where the action should take place. In the format \'/folder/file.txt\', where the first \'/\' after the DNS indicates the root of the file system.')
+        c.argument('overwrite', help='Indicates that, if the destination file or folder exists, it should be overwritten', action='store_true')
+        c.argument('chunk_size', help='Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.', type=int, default=268435456, required=False)
+        c.argument('buffer_size', help='Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.', type=int, default=4194304, required=False)
+        c.argument('block_size', help='Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk.', type=int, default=4194304, required=False)
+        c.ignore('progress_callback')
 
     with self.argument_context('dls fs create') as c:
         c.argument('force', help='Indicates that, if the file or folder exists, it should be overwritten', action='store_true')
@@ -104,18 +111,10 @@ def load_arguments(self, _):
         c.argument('recurse', help='Indicates this should be a recursive delete of the folder.', action='store_true')
 
     with self.argument_context('dls fs upload') as c:
-        c.argument('overwrite', help='Indicates that, if the destination file or folder exists, it should be overwritten', action='store_true')
         c.argument('thread_count', help='Specify the parallelism of the upload. Default is the number of cores in the local machine.', type=int)
-        c.argument('chunk_size', help='Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.', type=int, default=268435456, required=False)
-        c.argument('buffer_size', help='Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.', type=int, default=4194304, required=False)
-        c.argument('block_size', help='Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk. ', type=int, default=4194304, required=False)
 
     with self.argument_context('dls fs download') as c:
-        c.argument('overwrite', help='Indicates that, if the destination file or folder exists, it should be overwritten', action='store_true')
         c.argument('thread_count', help='Specify the parallelism of the download. Default is the number of cores in the local machine.', type=int)
-        c.argument('chunk_size', help='Number of bytes for a chunk. Large files are split into chunks. Files smaller than this number will always be transferred in a single thread.', type=int, default=268435456, required=False)
-        c.argument('buffer_size', help='Number of bytes for internal buffer. This block cannot be bigger than a chunk and cannot be smaller than a block.', type=int, default=4194304, required=False)
-        c.argument('block_size', help='Number of bytes for a block. Within each chunk, we write a smaller block for each API call. This block cannot be bigger than a chunk.', type=int, default=4194304, required=False)
 
     with self.argument_context('dls fs preview') as c:
         c.argument('force', help='Indicates that, if the preview is larger than 1MB, still retrieve it. This can potentially be very slow, depending on how large the file is.', action='store_true')
