@@ -33,9 +33,10 @@ class NatGatewayScenarioTests(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('idleTimeoutInMinutes', '{idle_timeout}'),
             self.check("contains(publicIpAddresses[0].id, '{ip_addr}')", True),
+            self.check("contains(publicIpPrefixes[0].id, '{ip_prefix}')", True),
             self.check('sku.name', 'Standard'),
             self.check('location', '{location}'),
-            self.check('zones', "['2']")
+            self.check('zones[0]', '{zone}')
         ])
         self.cmd('az network nat gateway update -g {rg} --name {name} --idle-timeout {idle_timeout_updated}',
                  checks=self.check('idleTimeoutInMinutes', 5))
