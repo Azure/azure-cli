@@ -147,18 +147,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory) as g:
         g.custom_command('show', 'iot_hub_devicestream_show')
 
-    # iot digital twin commands
-    with self.command_group('iot digitaltwin repository', client_factory=iot_digitaltwin_service_factory) as g:
-        g.custom_command('list', 'digitaltwin_list_repository')
-        g.custom_show_command('show', 'digitaltwin_get_repository')
-        g.custom_command('create', 'digitaltwin_create_repository')
-        g.custom_command('delete', 'digitaltwin_delete_repository')
-        g.custom_command('update', 'digitaltwin_update_repository')
-        g.custom_command('get-provision-status', 'digitaltwin_track_provision_status')
+    # # iot digital twin commands
+    # with self.command_group('iot digitaltwin repository', client_factory=iot_digitaltwin_service_factory) as g:
+    #     g.custom_command('list', 'digitaltwin_list_repository')
+    #     g.custom_show_command('show', 'digitaltwin_get_repository')
+    #     g.custom_command('create', 'digitaltwin_create_repository')
+    #     g.custom_command('delete', 'digitaltwin_delete_repository')
+    #     g.custom_command('update', 'digitaltwin_update_repository')
+    #     g.custom_command('get-provision-status', 'digitaltwin_track_provision_status')
 
-    with self.command_group('iot digitaltwin key', client_factory=iot_digitaltwin_service_factory) as g:
-        g.custom_command('list', 'digitaltwin_list_key')
-        g.custom_show_command('show', 'digitaltwin_get_key')
-        g.custom_command('create', 'digitaltwin_create_key')
-        g.custom_command('delete', 'digitaltwin_delete_key')
-        g.custom_command('update', 'digitaltwin_update_key')
+    # with self.command_group('iot digitaltwin key', client_factory=iot_digitaltwin_service_factory) as g:
+    #     g.custom_command('list', 'digitaltwin_list_key')
+    #     g.custom_show_command('show', 'digitaltwin_get_key')
+    #     g.custom_command('create', 'digitaltwin_create_key')
+    #     g.custom_command('delete', 'digitaltwin_delete_key')
+    #     g.custom_command('update', 'digitaltwin_update_key')
