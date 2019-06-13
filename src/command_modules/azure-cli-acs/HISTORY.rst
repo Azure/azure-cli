@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.4.4
+++++++
 * Deprecated ACS commands are now hidden from help view.
 
 2.4.3

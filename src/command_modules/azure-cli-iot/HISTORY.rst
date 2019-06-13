@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 0.3.11
 ++++++
 * Add support to regenerate authorization policy keys

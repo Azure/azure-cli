@@ -3,13 +3,10 @@
 Release History
 ===============
 
-0.2.12
-++++++
-* Introduce `keys list` and deprecate `list-keys`. Minor fixes.
-
 0.2.11
 ++++++
-* cosmsodb create/update: Added new format for --location to allow setting "isZoneRedundant" property. Deprecated old format.
+* Added command `keys list` and deprecated `list-keys`.
+* `cosmsodb create/update`: Added new format for --location to allow setting "isZoneRedundant" property. Deprecated old format.
 
 0.2.10
 ++++++

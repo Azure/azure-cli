@@ -3,6 +3,8 @@
 Release History
 ===============
 
+0.2.2
++++++
 * Add "discontinued support"/"maintenance mode"-warning messages for commands that support the v3 SDK
 
 0.2.1
