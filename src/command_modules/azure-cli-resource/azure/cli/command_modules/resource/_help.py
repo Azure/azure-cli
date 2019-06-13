@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['account lock'] = """
@@ -1020,7 +1020,7 @@ short-summary: Create a new link between resources.
 parameters:
   - name: --link
     long-summary: >
-      Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
+        Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 examples:
   - name: Create a link from {SourceID} to {ResourceID} with notes
     text: >
@@ -1033,7 +1033,7 @@ short-summary: Delete a link between resources.
 parameters:
   - name: --link
     long-summary: >
-      Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
+        Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 examples:
   - name: Delete link {LinkID}
     text: >
@@ -1058,7 +1058,7 @@ short-summary: Update link between resources.
 parameters:
   - name: --link
     long-summary: >
-      Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
+        Format: /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
 examples:
   - name: Update the notes for {LinkID} notes "some notes to explain this link"
     text: >
@@ -1189,19 +1189,19 @@ type: command
 short-summary: Place the CLI in a waiting state until a condition of a resources is met.
 """
 
+helps['rest'] = """
+type: command
+short-summary: invoke a custom request
+examples:
+  - name: Get Audit log through Microsoft Graph
+    text: >
+        az rest --method get --uri https://graph.microsoft.com/beta/auditLogs/directoryAudits
+  - name: Update a Azure Active Directory Graph User's display name
+    text: >
+        az rest --method patch --uri "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"jondoe2\\"}"
+"""
+
 helps['tag'] = """
 type: group
 short-summary: Manage resource tags.
-"""
-
-helps['rest'] = """
-    type: command
-    short-summary: invoke a custom request
-    examples:
-       - name: Get Audit log through Microsoft Graph
-         text: >
-             az rest --method get --uri https://graph.microsoft.com/beta/auditLogs/directoryAudits
-       - name: Update a Azure Active Directory Graph User's display name
-         text: >
-             az rest --method patch --uri "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"jondoe2\\"}"
 """
