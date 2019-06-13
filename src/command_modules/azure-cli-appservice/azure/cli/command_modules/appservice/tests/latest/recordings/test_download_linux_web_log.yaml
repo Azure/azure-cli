@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-05-27T15:52:16Z"}}'
+      "date": "2019-06-07T22:23:06Z"}}'
     headers:
       Accept:
       - application/json
@@ -19,14 +19,14 @@ interactions:
       - --location --name --tag
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-27T15:52:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-07T22:23:06Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 27 May 2019 15:52:20 GMT
+      - Fri, 07 Jun 2019 22:23:10 GMT
       expires:
       - '-1'
       pragma:
@@ -64,14 +64,14 @@ interactions:
       - -g -n --is-linux
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-05-27T15:52:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-07T22:23:06Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -80,7 +80,113 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 27 May 2019 15:52:22 GMT
+      - Fri, 07 Jun 2019 22:23:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"name": "linux-log000003", "type": "Microsoft.Web/serverfarms", "location":
+      "westus", "properties": {"skuName": "B1", "needLinuxWorkers": true, "capacity":
+      1}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --is-linux
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Fri, 07 Jun 2019 22:23:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --is-linux
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-07T22:23:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 22:23:13 GMT
       expires:
       - '-1'
       pragma:
@@ -115,7 +221,7 @@ interactions:
       - -g -n --is-linux
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
@@ -123,17 +229,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","name":"linux-log000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
-        US","properties":{"serverFarmId":859,"name":"linux-log000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":"2019-06-26T15:52:25.4466667","tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-129_859","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+        US","properties":{"serverFarmId":27619,"name":"linux-log000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":"2019-07-07T22:23:16.2366667","tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-063_27619","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1519'
+      - '1523'
       content-type:
       - application/json
       date:
-      - Mon, 27 May 2019 15:52:30 GMT
+      - Fri, 07 Jun 2019 22:23:28 GMT
       expires:
       - '-1'
       pragma:
@@ -172,7 +278,7 @@ interactions:
       - -g -n --plan -i
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
@@ -180,17 +286,132 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","name":"linux-log000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
-        US","properties":{"serverFarmId":859,"name":"linux-log000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":"2019-06-26T15:52:25.4466667","tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-129_859","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+        US","properties":{"serverFarmId":27619,"name":"linux-log000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":"2019-07-07T22:23:16.2366667","tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-063_27619","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1519'
+      - '1523'
       content-type:
       - application/json
       date:
-      - Mon, 27 May 2019 15:52:31 GMT
+      - Fri, 07 Jun 2019 22:23:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''b\\\''{"name": "webapp-linux-log000002", "type": "Microsoft.Web/sites",
+      "location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003"}}\\\''\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '329'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan -i
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Fri, 07 Jun 2019 22:23:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan -i
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003?api-version=2018-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","name":"linux-log000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
+        US","properties":{"serverFarmId":27619,"name":"linux-log000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":"2019-07-07T22:23:16.2366667","tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-063_27619","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1523'
+      content-type:
+      - application/json
+      date:
+      - Fri, 07 Jun 2019 22:23:30 GMT
       expires:
       - '-1'
       pragma:
@@ -216,8 +437,8 @@ interactions:
     body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003",
       "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
       "v4.6", "linuxFxVersion": "DOCKER|patle/ruby-hello", "appSettings": [{"name":
-      "WEBSITES_ENABLE_APP_SERVICE_STORAGE", "value": "false"}], "alwaysOn": true,
-      "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped": false}}\'''''
+      "WEBSITES_ENABLE_APP_SERVICE_STORAGE", "value": "false"}], "localMySqlEnabled":
+      false, "http20Enabled": true}, "scmSiteAlsoStopped": false}}\'''''
     headers:
       Accept:
       - application/json
@@ -228,14 +449,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '590'
+      - '572'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --plan -i
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
@@ -243,18 +464,18 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-log000002","name":"webapp-linux-log000002","type":"Microsoft.Web/sites","kind":"app,linux,container","location":"West
-        US","properties":{"name":"webapp-linux-log000002","state":"Running","hostNames":["webapp-linux-log000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-129.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-log000002","repositorySiteName":"webapp-linux-log000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-log000002.azurewebsites.net","webapp-linux-log000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|patle/ruby-hello"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-log000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-log000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-05-27T15:52:34.54","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-log000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"40.112.243.2,104.209.34.13,23.99.90.66,104.209.43.22,104.209.45.216","possibleOutboundIpAddresses":"40.112.243.2,104.209.34.13,23.99.90.66,104.209.43.22,104.209.45.216,104.209.43.107,104.209.44.43,104.209.43.145,104.209.45.148,104.40.0.78","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-129","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-log000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"webapp-linux-log000002","state":"Running","hostNames":["webapp-linux-log000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-063.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-log000002","repositorySiteName":"webapp-linux-log000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-log000002.azurewebsites.net","webapp-linux-log000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|patle/ruby-hello"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-log000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-log000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-07T22:23:35.61","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-log000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"13.93.220.109,13.93.205.56,52.160.105.227,104.209.45.67,13.91.108.234","possibleOutboundIpAddresses":"13.93.220.109,13.93.205.56,52.160.105.227,104.209.45.67,13.91.108.234,13.93.235.174,52.160.85.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-063","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-log000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3424'
+      - '3384'
       content-type:
       - application/json
       date:
-      - Mon, 27 May 2019 15:52:51 GMT
+      - Fri, 07 Jun 2019 22:23:49 GMT
       etag:
-      - '"1D514A433920FA0"'
+      - '"1D51D7FA6747600"'
       expires:
       - '-1'
       pragma:
@@ -297,7 +518,7 @@ interactions:
       - -g -n --plan -i
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
@@ -306,19 +527,19 @@ interactions:
     body:
       string: <publishData><publishProfile profileName="webapp-linux-log000002 - Web
         Deploy" publishMethod="MSDeploy" publishUrl="webapp-linux-log000002.scm.azurewebsites.net:443"
-        msdeploySite="webapp-linux-log000002" userName="$webapp-linux-log000002" userPWD="gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c"
+        msdeploySite="webapp-linux-log000002" userName="$webapp-linux-log000002" userPWD="C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc"
         destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-linux-log000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-129.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-063.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-linux-log000002\$webapp-linux-log000002"
-        userPWD="gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
+        userPWD="C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="webapp-linux-log000002 - ReadOnly
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-129dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-063dr.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-linux-log000002\$webapp-linux-log000002"
-        userPWD="gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
+        userPWD="C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>
@@ -330,7 +551,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Mon, 27 May 2019 15:52:52 GMT
+      - Fri, 07 Jun 2019 22:23:51 GMT
       expires:
       - '-1'
       pragma:
@@ -372,9 +593,9 @@ interactions:
       content-type:
       - text/html
       date:
-      - Mon, 27 May 2019 15:56:51 GMT
+      - Fri, 07 Jun 2019 22:26:58 GMT
       set-cookie:
-      - ARRAffinity=0abd0ceb1833cf5185d8ce2c7c896595db6a2d5bb23affa72d7e14a337bb4f14;Path=/;HttpOnly;Domain=webapp-linux-logfxlkuezu.azurewebsites.net
+      - ARRAffinity=55310c53a2a6660a2f3721faf903f53afc86446dd328fe2381776d215e58007b;Path=/;HttpOnly;Domain=webapp-linux-log4u2aki75.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -393,7 +614,7 @@ interactions:
       - -g -n --log-file
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
@@ -401,18 +622,18 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-log000002","name":"webapp-linux-log000002","type":"Microsoft.Web/sites","kind":"app,linux,container","location":"West
-        US","properties":{"name":"webapp-linux-log000002","state":"Running","hostNames":["webapp-linux-log000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-129.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-log000002","repositorySiteName":"webapp-linux-log000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-log000002.azurewebsites.net","webapp-linux-log000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|patle/ruby-hello"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-log000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-log000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-05-27T15:52:34.97","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-log000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"40.112.243.2,104.209.34.13,23.99.90.66,104.209.43.22,104.209.45.216","possibleOutboundIpAddresses":"40.112.243.2,104.209.34.13,23.99.90.66,104.209.43.22,104.209.45.216,104.209.43.107,104.209.44.43,104.209.43.145,104.209.45.148,104.40.0.78","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-129","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-log000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"webapp-linux-log000002","state":"Running","hostNames":["webapp-linux-log000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-063.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-log000002","repositorySiteName":"webapp-linux-log000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-log000002.azurewebsites.net","webapp-linux-log000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"DOCKER|patle/ruby-hello"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-log000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-log000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/linux-log000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-07T22:23:36.8","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-log000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"13.93.220.109,13.93.205.56,52.160.105.227,104.209.45.67,13.91.108.234","possibleOutboundIpAddresses":"13.93.220.109,13.93.205.56,52.160.105.227,104.209.45.67,13.91.108.234,13.93.235.174,52.160.85.43","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-063","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-log000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3424'
+      - '3383'
       content-type:
       - application/json
       date:
-      - Mon, 27 May 2019 15:56:51 GMT
+      - Fri, 07 Jun 2019 22:26:59 GMT
       etag:
-      - '"1D514A433920FA0"'
+      - '"1D51D7FA6747600"'
       expires:
       - '-1'
       pragma:
@@ -453,7 +674,7 @@ interactions:
       - -g -n --log-file
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
@@ -462,19 +683,19 @@ interactions:
     body:
       string: <publishData><publishProfile profileName="webapp-linux-log000002 - Web
         Deploy" publishMethod="MSDeploy" publishUrl="webapp-linux-log000002.scm.azurewebsites.net:443"
-        msdeploySite="webapp-linux-log000002" userName="$webapp-linux-log000002" userPWD="gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c"
+        msdeploySite="webapp-linux-log000002" userName="$webapp-linux-log000002" userPWD="C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc"
         destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-linux-log000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-129.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-063.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-linux-log000002\$webapp-linux-log000002"
-        userPWD="gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
+        userPWD="C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="webapp-linux-log000002 - ReadOnly
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-129dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-063dr.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-linux-log000002\$webapp-linux-log000002"
-        userPWD="gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
+        userPWD="C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc" destinationAppUrl="http://webapp-linux-log000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>
@@ -486,7 +707,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Mon, 27 May 2019 15:56:52 GMT
+      - Fri, 07 Jun 2019 22:26:59 GMT
       expires:
       - '-1'
       pragma:
@@ -523,7 +744,7 @@ interactions:
       - -g -n --log-file
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
@@ -531,7 +752,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-log000002/publishingcredentials/$webapp-linux-log000002","name":"webapp-linux-log000002","type":"Microsoft.Web/sites/publishingcredentials","location":"West
-        US","properties":{"name":null,"publishingUserName":"$webapp-linux-log000002","publishingPassword":"gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$webapp-linux-log000002:gHleb6zGfl67E5HYLKX3qxKpLsNdtWMcvkSkZS0esTbnfTyRiAvp2RfdBg6c@webapp-linux-log000002.scm.azurewebsites.net"}}'
+        US","properties":{"name":null,"publishingUserName":"$webapp-linux-log000002","publishingPassword":"C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc","publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":"https://$webapp-linux-log000002:C43RyGarTXi1ufc4uroKHqZiQyW4ojA6ub2x2lsKyuDRm9rJJc8izHgaGkZc@webapp-linux-log000002.scm.azurewebsites.net"}}'
     headers:
       cache-control:
       - no-cache
@@ -540,7 +761,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 27 May 2019 15:56:54 GMT
+      - Fri, 07 Jun 2019 22:27:00 GMT
       expires:
       - '-1'
       pragma:
@@ -572,136 +793,132 @@ interactions:
   response:
     body:
       string: !!binary |
-        UEsDBBQAAAAAADF/u04AAAAAAAAAAAAAAAASAAAAZGVwbG95bWVudHMvdG9vbHMvUEsDBBQACAAI
-        AC5/u04AAAAAAAAAAAAAAABUAAAATG9nRmlsZXMva3VkdS90cmFjZS8yMDE5LTA1LTI3VDE1LTU3
-        LTI4XzBhYmQwY18wMDFfU3RhcnR1cF9HRVRfRGVmYXVsdC5jc2h0bWxfMHMueG1sfY9dT4MwFIbv
-        9yuOvV5XwNUJARLcjJIhLkKMd6SD6khKQXp64b+3fiUmJt6e57zPmzc2KCfAHpVMSIViRjvBg3y1
-        0iCBTqA7B54fUo/TYFP7POKbKLhceecBgV4bFLp1L544dl5LwM4qIWwnn4VVuGrNCQdFYJB4GruE
-        3FzXBPBtcoH5p2LqHeB86S8vCFTbu6ba54emqormMSvyXVbn96Xzf7GrvGwOWX3rOsYJ2d52lh17
-        7WA71J/ectSSQLoAiH8v2yoptFv2NCgoxhfz3zR/HRJgaXxGKXR2FtiPOgI/HAxQmi5i9iH+g/n6
-        m78DUEsHCEEmasfwAAAAUgEAAFBLAwQUAAgACAAwf7tOAAAAAAAAAAAAAAAAUAAAAExvZ0ZpbGVz
-        L2t1ZHUvdHJhY2UvMjAxOS0wNS0yN1QxNS01Ny0yOF8wYWJkMGNfMDAyX0dFVF9EZWZhdWx0LmNz
-        aHRtbF8yMDBfNXMueG1sdY9BT4NAEIXv/RXjnLuwQBFKgEtt1HhoYvgDKzttibCL7GD037s1Eo3G
-        zO3Ne3nvKx3TCNxxTxXem9YOnTnBI73M5BhBK/Z6LKOtkKmIsyZKizQr4jxIshyhM46Vab1Fqict
-        W4R56isMb+io5p6D1p156BEG4rPVFd7uGwR+H31gWirGzj/SdB2trxF21hhqubOmwmeiUai+eyWE
-        ZlLGHWkSez9R+4kVRnEWSH9RkcjcR++s479qvQIofzIeZj7ZC+NEbrTG0b+QSRLEMvneu9g9Ms9u
-        Z/VnSC5CQ2++//CAENbllRCg50ldSAqItoMDIepVGV6m/H5v8nTzZfgAUEsHCC9gmzz/AAAAjwEA
-        AFBLAwQUAAgACAAxf7tOAAAAAAAAAAAAAAAARwAAAExvZ0ZpbGVzL2t1ZHUvdHJhY2UvMjAxOS0w
-        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
-        AAAAAAAAAAAAAAAAEgAAAAAAAAAAAAAAAAAAAAAAZGVwbG95bWVudHMvdG9vbHMvUEsBAhQAFAAI
-        AAgALn+7TkEmasfwAAAAUgEAAFQAAAAAAAAAAAAAAAAAMAAAAExvZ0ZpbGVzL2t1ZHUvdHJhY2Uv
-        MjAxOS0wNS0yN1QxNS01Ny0yOF8wYWJkMGNfMDAxX1N0YXJ0dXBfR0VUX0RlZmF1bHQuY3NodG1s
-        XzBzLnhtbFBLAQIUABQACAAIADB/u04vYJs8/wAAAI8BAABQAAAAAAAAAAAAAAAAAKIBAABMb2dG
-        aWxlcy9rdWR1L3RyYWNlLzIwMTktMDUtMjdUMTUtNTctMjhfMGFiZDBjXzAwMl9HRVRfRGVmYXVs
-        dC5jc2h0bWxfMjAwXzVzLnhtbFBLAQIUABQACAAIADF/u05ShM9FnAEAAN4CAABHAAAAAAAAAAAA
-        AAAAAB8DAABMb2dGaWxlcy9rdWR1L3RyYWNlLzIwMTktMDUtMjdUMTUtNTctMzNfMGFiZDBjXzAw
-        M19HRVRfZHVtcF9wZW5kaW5nLnhtbFBLAQIUABQACAAIAC5/u07kMDWzlwAAAKwAAABJAAAAAAAA
-        AAAAAAAAADAFAABMb2dGaWxlcy9rdWR1L3RyYWNlL2NmZjFiNzczYjk4NC00NzgwNzIzYS1jMWNh
-        LTRhY2EtYmI1OC0wOTAyMDM2MWQ3YjUudHh0UEsBAhQAFAAAAAAAKn+7TgAAAAAAAAAAAAAAABcA
-        AAAAAAAAAAAAAAAAPgYAAExvZ0ZpbGVzL3dlYnNzaC9wbTIuZXJyUEsBAhQAFAAAAAAAKn+7TgAA
-        AAAAAAAAAAAAABcAAAAAAAAAAAAAAAAAcwYAAExvZ0ZpbGVzL3dlYnNzaC9wbTIubG9nUEsBAhQA
-        FAAIAAgAl367ToKBCYrwDwAA/XIAAC0AAAAAAAAAAAAAAAAAqAYAAExvZ0ZpbGVzLzIwMTlfMDVf
-        MjdfUkQwMDE1NURFNEJFQ0FfZG9ja2VyLmxvZ1BLAQIUABQACAAIABx/u06F20D6FAAAABQAAAAc
-        AAAAAAAAAAAAAAAAAPMWAABMb2dGaWxlcy9fX2xhc3RDaGVja1RpbWUudHh0UEsFBgAAAAAJAAkA
-        WwMAAFEXAAAAAA==
+        UEsDBBQAAAAAAHizx04AAAAAAAAAAAAAAAASAAAAZGVwbG95bWVudHMvdG9vbHMvUEsDBBQACAAI
+        AHWzx04AAAAAAAAAAAAAAABUAAAATG9nRmlsZXMva3VkdS90cmFjZS8yMDE5LTA2LTA3VDIyLTI3
+        LTQzXzU1MzEwY18wMDFfU3RhcnR1cF9HRVRfRGVmYXVsdC5jc2h0bWxfMHMueG1sfY9dT4MwFIbv
+        9yuOvV4HZcKUAAluRskQFyHGO1KhuialID298N/b+ZGYmHj7Pue8T97EoJgAJSqRkhr5jHaCB/Fm
+        hUECPUcXBz67pH5E/U0TBHGwic/XKxcRkNog1507CcM18zsCdlYp8XbihVuFq84ccVAEBoHHsU/J
+        zXVDAN8n9zD/KCbpQBgt2TIiUG/v2npfHNq6LtvHvCx2eVPcVynxv9hVUbWHvLl1jnFCb2976z1L
+        7WA3NJ+91agFgWwBkPxetlWCa7fsaVBQjq/mv2mMOZuXJWeUQm9njnLUMbBoMEBptki8U/EfzC6+
+        +QdQSwcI2i+nJO8AAABSAQAAUEsDBBQACAAIAHizx04AAAAAAAAAAAAAAABQAAAATG9nRmlsZXMv
+        a3VkdS90cmFjZS8yMDE5LTA2LTA3VDIyLTI3LTQzXzU1MzEwY18wMDJfR0VUX0RlZmF1bHQuY3No
+        dG1sXzIwMF81cy54bWx1j81OwzAQhO99imXPdWo7P22iJJdSAeJQCeUFomTbRiR2iDcI3h4HUYFA
+        aG+zM5r5csc0AnfcU4EPprFDZ87wRC8zOUZoa/a6lioVMhFyW2md6W0WhUEoFUJnHNem8ZY4DpVs
+        EOapL3BzS6d67jlo3IWHHmEgvti2wLtDhcDvow9M14qx8484Wat1grC3xlDDnTUFPhONou67V0Ko
+        ptq4E03i4Ce2fmKBSm8D6U9l0S7UCPfW8V+1XAHkPxmPM5/twjiRG61x9D/kLlBp9L33avfIPLu9
+        bT9D8ipU9Ob7j48ImzK/EQLaeaoXkgy0HhwIUa7yzTLl9ztKdfxl+ABQSwcIdhuVW/8AAACPAQAA
+        UEsDBBQACAAIAHizx04AAAAAAAAAAAAAAABHAAAATG9nRmlsZXMva3VkdS90cmFjZS8yMDE5LTA2
+        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
+        Z0ZpbGVzL2t1ZHUvdHJhY2UvMjAxOS0wNi0wN1QyMi0yNy00M181NTMxMGNfMDAyX0dFVF9EZWZh
+        dWx0LmNzaHRtbF8yMDBfNXMueG1sUEsBAhQAFAAIAAgAeLPHTnG+aSKeAQAA3AIAAEcAAAAAAAAA
+        AAAAAAAAHgMAAExvZ0ZpbGVzL2t1ZHUvdHJhY2UvMjAxOS0wNi0wN1QyMi0yNy00OF81NTMxMGNf
+        MDAzX0dFVF9kdW1wX3BlbmRpbmcueG1sUEsBAhQAFAAIAAgAdbPHTu2IV3GXAAAArAAAAEkAAAAA
+        AAAAAAAAAAAAMQUAAExvZ0ZpbGVzL2t1ZHUvdHJhY2UvNDMzOTkwM2RkZWJlLWUxZDY1ZDk4LWZl
+        NWEtNDZhYS1iNGVmLWE4NDFkOTBmMjUwYi50eHRQSwECFAAUAAAAAABxs8dOAAAAAAAAAAAAAAAA
+        FwAAAAAAAAAAAAAAAAA/BgAATG9nRmlsZXMvd2Vic3NoL3BtMi5lcnJQSwECFAAUAAAAAABxs8dO
+        AAAAAAAAAAAAAAAAFwAAAAAAAAAAAAAAAAB0BgAATG9nRmlsZXMvd2Vic3NoL3BtMi5sb2dQSwEC
+        FAAUAAgACAD7ssdO1Or8EQsPAACFbAAALQAAAAAAAAAAAAAAAACpBgAATG9nRmlsZXMvMjAxOV8w
+        Nl8wN19SRDAwMDNGRkQ4QzhGRF9kb2NrZXIubG9nUEsBAhQAFAAIAAgAYbPHTumzez4WAAAAFAAA
+        ABwAAAAAAAAAAAAAAAAADxYAAExvZ0ZpbGVzL19fbGFzdENoZWNrVGltZS50eHRQSwUGAAAAAAkA
+        CQBbAwAAbxYAAAAA
     headers:
       cache-control:
       - no-cache
       content-disposition:
-      - attachment; filename=dump-05-27-15-57-34.zip
+      - attachment; filename=dump-06-07-22-27-49.zip
       content-type:
       - application/zip
       date:
-      - Mon, 27 May 2019 15:57:34 GMT
+      - Fri, 07 Jun 2019 22:27:48 GMT
       expires:
       - '-1'
       pragma:
@@ -709,7 +926,7 @@ interactions:
       server:
       - Apache/2.4.10 (Debian)
       set-cookie:
-      - ARRAffinity=0abd0ceb1833cf5185d8ce2c7c896595db6a2d5bb23affa72d7e14a337bb4f14;Path=/;HttpOnly;Domain=webapp-linux-logfxlkuezu.scm.azurewebsites.net
+      - ARRAffinity=55310c53a2a6660a2f3721faf903f53afc86446dd328fe2381776d215e58007b;Path=/;HttpOnly;Domain=webapp-linux-log4u2aki75.scm.azurewebsites.net
       transfer-encoding:
       - chunked
       x-aspnet-version:
@@ -734,7 +951,7 @@ interactions:
       - --name --yes --no-wait
       User-Agent:
       - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: DELETE
@@ -748,11 +965,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 27 May 2019 15:57:36 GMT
+      - Fri, 07 Jun 2019 22:27:49 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdVM05CT0ZPN1M3QkNIQzRSRVdQRFpRWk1GQ0JTRUNLMlhUTnw4RTBFNEVCMDE1RjBERTE1LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdIVFJWVEtHUVU0NzRUM1laVkpaWENOSEZHRTIyTzZHTEU1WnxFRDg0ODJDQTZDRkY2NUExLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:

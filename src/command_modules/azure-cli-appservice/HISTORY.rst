@@ -3,6 +3,9 @@
 Release History
 ===============
 * webapp, functionapp: Updating to the latest Python SDK version
+* webapp: Fixing an issue where creating apps with the some sku's was failing with AlwaysOn error
+* webapp, appserviceplan: adding pre-validation to the ASP and webapp create
+* webapp, functionapp: traffic-routing set fixed to use the correct actionHostName
 * functionapp: add slot support to functionapps
 
 0.2.20
