@@ -3,6 +3,8 @@
 Release History
 ===============
 
+* [Breaking Change]: Not support min_profile any more, use resource type instead.
+
 2.0.66
 ++++++
 * output: Fix bug where commands fail if `--output yaml` is used with `--query`
