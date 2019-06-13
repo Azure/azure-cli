@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "eastus2", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-06-05T23:16:25Z"}}'
+      "date": "2019-06-13T00:00:49Z"}}'
     headers:
       Accept:
       - application/json
@@ -26,7 +26,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2019-06-05T23:16:25Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2019-06-13T00:00:49Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:27 GMT
+      - Thu, 13 Jun 2019 00:00:54 GMT
       expires:
       - '-1'
       pragma:
@@ -78,16 +78,16 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"pip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/pip\",\r\n
-        \ \"etag\": \"W/\\\"3e359ce7-3c56-4a90-9667-b7e07472c0eb\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"d974bd4f-feb6-4467-815e-86c8cdca27f0\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"71892a43-63d5-4a24-bdef-5ea79cbaa449\",\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"6d1caecf-1d19-4c1a-b9dd-5f5b273e8b58\",\r\n
         \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
         {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/9ff54400-ca11-4785-955c-5ceadee11273?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -95,7 +95,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:30 GMT
+      - Thu, 13 Jun 2019 00:00:57 GMT
       expires:
       - '-1'
       pragma:
@@ -129,7 +129,295 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
         Azure-SDK-For-Python AZURECLI/2.0.65
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/9ff54400-ca11-4785-955c-5ceadee11273?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 13 Jun 2019 00:00:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --zone --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 13 Jun 2019 00:01:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --zone --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 13 Jun 2019 00:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --zone --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 13 Jun 2019 00:01:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --zone --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 13 Jun 2019 00:01:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --zone --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 13 Jun 2019 00:01:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --location --zone --sku
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
+        Azure-SDK-For-Python AZURECLI/2.0.65
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/5a43fc7c-2b87-4004-b138-07da12a23c26?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -141,7 +429,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:32 GMT
+      - Thu, 13 Jun 2019 00:01:15 GMT
       expires:
       - '-1'
       pragma:
@@ -181,10 +469,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"pip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/pip\",\r\n
-        \ \"etag\": \"W/\\\"65ce03bf-a81f-4f65-a261-4fcef8019ec2\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"d0ffc74c-5c5b-4d50-8eb9-54b4632d3520\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"71892a43-63d5-4a24-bdef-5ea79cbaa449\",\r\n
-        \   \"ipAddress\": \"40.67.149.195\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"6d1caecf-1d19-4c1a-b9dd-5f5b273e8b58\",\r\n
+        \   \"ipAddress\": \"40.67.149.193\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
@@ -197,9 +485,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:31 GMT
+      - Thu, 13 Jun 2019 00:01:15 GMT
       etag:
-      - W/"65ce03bf-a81f-4f65-a261-4fcef8019ec2"
+      - W/"d0ffc74c-5c5b-4d50-8eb9-54b4632d3520"
       expires:
       - '-1'
       pragma:
@@ -246,16 +534,16 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"prefix\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPPrefixes/prefix\",\r\n
-        \ \"etag\": \"W/\\\"f449ba30-766a-48d3-98b7-fdce1ec6f070\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"270c72bf-f4de-4a68-bac5-b8d596dd49c1\\\"\",\r\n  \"type\":
         \"Microsoft.Network/publicIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"resourceGuid\": \"2ae067e7-a56e-4aeb-a17a-41cb08adc683\",\r\n
+        \"Updating\",\r\n    \"resourceGuid\": \"8c66a4f6-9cab-4df5-9c5e-4e7329bcffe1\",\r\n
         \   \"prefixLength\": 28,\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"ipTags\": []\r\n  },\r\n  \"sku\": {\r\n    \"name\": \"Standard\",\r\n
         \   \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/94702bb4-a688-412f-bbce-866fc9ac90e2?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f99c14a2-c65b-4b20-bf3e-310d0e5d1db3?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -263,7 +551,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:34 GMT
+      - Thu, 13 Jun 2019 00:01:17 GMT
       expires:
       - '-1'
       pragma:
@@ -297,7 +585,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
         Azure-SDK-For-Python AZURECLI/2.0.65
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/94702bb4-a688-412f-bbce-866fc9ac90e2?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/f99c14a2-c65b-4b20-bf3e-310d0e5d1db3?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -309,7 +597,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:38 GMT
+      - Thu, 13 Jun 2019 00:01:21 GMT
       expires:
       - '-1'
       pragma:
@@ -349,25 +637,24 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"prefix\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPPrefixes/prefix\",\r\n
-        \ \"etag\": \"W/\\\"978decfc-6d8f-4139-a1d7-26da3c565caf\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"0356bd86-477b-44a9-96b2-0e9c9071b70c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/publicIPPrefixes\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"2ae067e7-a56e-4aeb-a17a-41cb08adc683\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"8c66a4f6-9cab-4df5-9c5e-4e7329bcffe1\",\r\n
         \   \"prefixLength\": 28,\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
-        \   \"ipPrefix\": \"40.67.149.208/28\",\r\n    \"ipTags\": []\r\n  },\r\n
-        \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
-        \ }\r\n}"
+        \   \"ipPrefix\": \"40.67.150.64/28\",\r\n    \"ipTags\": []\r\n  },\r\n  \"sku\":
+        {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '703'
+      - '702'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:38 GMT
+      - Thu, 13 Jun 2019 00:01:22 GMT
       etag:
-      - W/"978decfc-6d8f-4139-a1d7-26da3c565caf"
+      - W/"0356bd86-477b-44a9-96b2-0e9c9071b70c"
       expires:
       - '-1'
       pragma:
@@ -417,7 +704,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"ng1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \ \"etag\": \"W/\\\"6e7a2d71-08ac-4845-a8f1-1b6390a27984\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9d275cd4-226b-4c32-96dc-0ff386d0e9b5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/natGateways\",\r\n  \"location\": \"eastus2\",\r\n  \"zones\":
         [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Updating\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"publicIpAddresses\":
@@ -428,7 +715,7 @@ interactions:
         \   \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1d4b81e2-d826-4f4e-8a2b-682c803a1cfa?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/ea5d7c32-a3e8-4dc1-af9c-5ab733549d73?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -436,7 +723,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:41 GMT
+      - Thu, 13 Jun 2019 00:01:25 GMT
       expires:
       - '-1'
       pragma:
@@ -471,7 +758,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
         Azure-SDK-For-Python AZURECLI/2.0.65
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/1d4b81e2-d826-4f4e-8a2b-682c803a1cfa?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/ea5d7c32-a3e8-4dc1-af9c-5ab733549d73?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -483,7 +770,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:51 GMT
+      - Thu, 13 Jun 2019 00:02:06 GMT
       expires:
       - '-1'
       pragma:
@@ -524,7 +811,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"ng1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \ \"etag\": \"W/\\\"bd0dd719-469f-47f4-b067-58759811cd45\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"0f2f439c-abc2-4575-aed3-cffe88e6c4a1\\\"\",\r\n  \"type\":
         \"Microsoft.Network/natGateways\",\r\n  \"location\": \"eastus2\",\r\n  \"zones\":
         [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"publicIpAddresses\":
@@ -541,9 +828,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:52 GMT
+      - Thu, 13 Jun 2019 00:02:07 GMT
       etag:
-      - W/"bd0dd719-469f-47f4-b067-58759811cd45"
+      - W/"0f2f439c-abc2-4575-aed3-cffe88e6c4a1"
       expires:
       - '-1'
       pragma:
@@ -585,7 +872,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"ng1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \ \"etag\": \"W/\\\"bd0dd719-469f-47f4-b067-58759811cd45\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"0f2f439c-abc2-4575-aed3-cffe88e6c4a1\\\"\",\r\n  \"type\":
         \"Microsoft.Network/natGateways\",\r\n  \"location\": \"eastus2\",\r\n  \"zones\":
         [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"publicIpAddresses\":
@@ -602,9 +889,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:53 GMT
+      - Thu, 13 Jun 2019 00:02:08 GMT
       etag:
-      - W/"bd0dd719-469f-47f4-b067-58759811cd45"
+      - W/"0f2f439c-abc2-4575-aed3-cffe88e6c4a1"
       expires:
       - '-1'
       pragma:
@@ -628,7 +915,7 @@ interactions:
       "location": "eastus2", "sku": {"name": "Standard"}, "properties": {"idleTimeoutInMinutes":
       5, "publicIpAddresses": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/pip"}],
       "publicIpPrefixes": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPPrefixes/prefix"}],
-      "provisioningState": "Succeeded"}, "zones": ["2"], "etag": "W/\\"bd0dd719-469f-47f4-b067-58759811cd45\\""}'''
+      "provisioningState": "Succeeded"}, "zones": ["2"], "etag": "W/\\"0f2f439c-abc2-4575-aed3-cffe88e6c4a1\\""}'''
     headers:
       Accept:
       - application/json
@@ -654,7 +941,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"ng1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \ \"etag\": \"W/\\\"9cc82240-ffc8-4413-8e96-a1a6e9ae9f9e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"ef73e05f-8d7f-4031-989a-0055644fa974\\\"\",\r\n  \"type\":
         \"Microsoft.Network/natGateways\",\r\n  \"location\": \"eastus2\",\r\n  \"zones\":
         [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Updating\",\r\n    \"idleTimeoutInMinutes\": 5,\r\n    \"publicIpAddresses\":
@@ -665,7 +952,7 @@ interactions:
         \   \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e91943c1-f81e-4de2-a7a6-c4fb3af519e1?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/4a7b1a7a-7a1e-4362-bac6-e0383b68e878?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
@@ -673,7 +960,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:16:55 GMT
+      - Thu, 13 Jun 2019 00:02:11 GMT
       expires:
       - '-1'
       pragma:
@@ -690,7 +977,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -711,7 +998,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
         Azure-SDK-For-Python AZURECLI/2.0.65
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e91943c1-f81e-4de2-a7a6-c4fb3af519e1?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/4a7b1a7a-7a1e-4362-bac6-e0383b68e878?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -723,7 +1010,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:17:05 GMT
+      - Thu, 13 Jun 2019 00:02:22 GMT
       expires:
       - '-1'
       pragma:
@@ -763,7 +1050,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"ng1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \ \"etag\": \"W/\\\"0a9de12c-a371-45ec-9522-d05963477658\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"c1fecad6-9ea1-4d46-8913-2a582acf4e7a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/natGateways\",\r\n  \"location\": \"eastus2\",\r\n  \"zones\":
         [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"idleTimeoutInMinutes\": 5,\r\n    \"publicIpAddresses\":
@@ -780,9 +1067,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:17:06 GMT
+      - Thu, 13 Jun 2019 00:02:22 GMT
       etag:
-      - W/"0a9de12c-a371-45ec-9522-d05963477658"
+      - W/"c1fecad6-9ea1-4d46-8913-2a582acf4e7a"
       expires:
       - '-1'
       pragma:
@@ -825,7 +1112,7 @@ interactions:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"ng1\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \     \"etag\": \"W/\\\"0a9de12c-a371-45ec-9522-d05963477658\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"c1fecad6-9ea1-4d46-8913-2a582acf4e7a\\\"\",\r\n      \"type\":
         \"Microsoft.Network/natGateways\",\r\n      \"location\": \"eastus2\",\r\n
         \     \"zones\": [\r\n        \"2\"\r\n      ],\r\n      \"properties\": {\r\n
         \       \"provisioningState\": \"Succeeded\",\r\n        \"idleTimeoutInMinutes\":
@@ -843,7 +1130,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:17:07 GMT
+      - Thu, 13 Jun 2019 00:02:23 GMT
       expires:
       - '-1'
       pragma:
@@ -885,7 +1172,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"ng1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways/ng1\",\r\n
-        \ \"etag\": \"W/\\\"0a9de12c-a371-45ec-9522-d05963477658\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"c1fecad6-9ea1-4d46-8913-2a582acf4e7a\\\"\",\r\n  \"type\":
         \"Microsoft.Network/natGateways\",\r\n  \"location\": \"eastus2\",\r\n  \"zones\":
         [\r\n    \"2\"\r\n  ],\r\n  \"properties\": {\r\n    \"provisioningState\":
         \"Succeeded\",\r\n    \"idleTimeoutInMinutes\": 5,\r\n    \"publicIpAddresses\":
@@ -902,9 +1189,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:17:08 GMT
+      - Thu, 13 Jun 2019 00:02:24 GMT
       etag:
-      - W/"0a9de12c-a371-45ec-9522-d05963477658"
+      - W/"c1fecad6-9ea1-4d46-8913-2a582acf4e7a"
       expires:
       - '-1'
       pragma:
@@ -950,17 +1237,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/8031df5c-edaa-4c98-9cfd-1afcb16591df?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e50bd029-1316-42fe-b4f2-8c9ff575de2f?api-version=2019-04-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 05 Jun 2019 23:17:11 GMT
+      - Thu, 13 Jun 2019 00:02:26 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/8031df5c-edaa-4c98-9cfd-1afcb16591df?api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operationResults/e50bd029-1316-42fe-b4f2-8c9ff575de2f?api-version=2019-04-01
       pragma:
       - no-cache
       server:
@@ -992,7 +1279,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 networkmanagementclient/3.0.0
         Azure-SDK-For-Python AZURECLI/2.0.65
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/8031df5c-edaa-4c98-9cfd-1afcb16591df?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/e50bd029-1316-42fe-b4f2-8c9ff575de2f?api-version=2019-04-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1004,7 +1291,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:17:22 GMT
+      - Thu, 13 Jun 2019 00:02:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1045,22 +1332,27 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/natGateways?api-version=2019-04-01
   response:
     body:
-      string: '{"value":[]}'
+      string: "{\r\n  \"value\": []\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '12'
+      - '19'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 05 Jun 2019 23:17:23 GMT
+      - Thu, 13 Jun 2019 00:02:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -1099,11 +1391,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 05 Jun 2019 23:17:25 GMT
+      - Thu, 13 Jun 2019 00:02:40 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdOM0JMT01MSFJBT09FTDdQWkpRSzRGWTVDM0ZHTENUTTRYT3w5NjNFRDc5NjZGNjY4MDlCLUVBU1RVUzIiLCJqb2JMb2NhdGlvbiI6ImVhc3R1czIifQ?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdXTEhWRlY1R1hEQUVCNUhDQjRERkVXUU1QTkc0REVSMjNXWnw1MzAxRTEwMUEwMkMyNDM5LUVBU1RVUzIiLCJqb2JMb2NhdGlvbiI6ImVhc3R1czIifQ?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:
