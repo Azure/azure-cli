@@ -465,12 +465,12 @@ examples:
 
 helps['functionapp devops-build'] = """
 type: group
-short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps.
+short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps. This command will be removed in 2.0.68
 """
 
 helps['functionapp devops-build create'] = """
 type: command
-short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command.
+short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command. This command will be removed in 2.0.68
 """
 
 helps['functionapp devops-pipeline'] = """

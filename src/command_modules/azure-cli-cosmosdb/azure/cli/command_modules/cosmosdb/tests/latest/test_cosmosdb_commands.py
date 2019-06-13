@@ -57,7 +57,7 @@ class CosmosDBTests(ScenarioTest):
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
 
         connection_strings = self.cmd('az cosmosdb list-connection-strings -n {acc} -g {rg}').get_output_in_json()
-        assert len(connection_strings['connectionStrings']) == 1
+        assert len(connection_strings['connectionStrings']) == 4
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_delete_database_account(self, resource_group):
@@ -141,7 +141,7 @@ class CosmosDBTests(ScenarioTest):
             'read_location': read_location
         })
 
-        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations {write_location}=0 {read_location}=1').get_output_in_json()
+        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
         assert len(account1['writeLocations']) == 1
         assert len(account1['readLocations']) == 2
         assert account1['writeLocations'][0]['failoverPriority'] == 0
@@ -158,6 +158,26 @@ class CosmosDBTests(ScenarioTest):
         assert account2['writeLocations'][0]['locationName'] == "West US"
         assert account2['readLocations'][0]['locationName'] == "East US" or account2['readLocations'][1]['locationName'] == "East US"
         assert account2['readLocations'][0]['failoverPriority'] == 1 or account2['readLocations'][1]['failoverPriority'] == 1
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_locations_both_formats_database_accounts(self, resource_group):
+
+        write_location = 'eastus'
+        read_location = 'westus'
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'write_location': write_location,
+            'read_location': read_location
+        })
+
+        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations {write_location}=0 --locations regionName={read_location} failoverPriority=1 isZoneRedundant=false').get_output_in_json()
+        assert len(account1['writeLocations']) == 1
+        assert len(account1['readLocations']) == 2
+        assert account1['writeLocations'][0]['failoverPriority'] == 0
+        assert account1['writeLocations'][0]['locationName'] == "East US"
+        assert account1['readLocations'][0]['locationName'] == "West US" or account1['readLocations'][1]['locationName'] == "West US"
+        assert account1['readLocations'][0]['failoverPriority'] == 1 or account1['readLocations'][1]['failoverPriority'] == 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_enable_multiple_write_locations(self, resource_group):

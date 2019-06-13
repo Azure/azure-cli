@@ -50,6 +50,7 @@ from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
+from .utils import _normalize_sku, get_sku_name
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
                            should_create_new_rg, set_location, should_create_new_app,
                            get_lang_from_content, get_num_apps_in_asp)
@@ -82,7 +83,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name not in ['F1', 'Free']:
+    if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
+                                                                                        'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
     helper = _StackRuntimeHelper(client, linux=is_linux)
@@ -295,27 +297,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
     return response
-
-
-def get_sku_name(tier):  # pylint: disable=too-many-return-statements
-    tier = tier.upper()
-    if tier in ['F1', 'FREE']:
-        return 'FREE'
-    if tier in ['D1', "SHARED"]:
-        return 'SHARED'
-    if tier in ['B1', 'B2', 'B3', 'BASIC']:
-        return 'BASIC'
-    if tier in ['S1', 'S2', 'S3']:
-        return 'STANDARD'
-    if tier in ['P1', 'P2', 'P3']:
-        return 'PREMIUM'
-    if tier in ['P1V2', 'P2V2', 'P3V2']:
-        return 'PREMIUMV2'
-    if tier in ['PC2', 'PC3', 'PC4']:
-        return 'PremiumContainer'
-    if tier in ['EP1', 'EP2', 'EP3']:
-        return 'ElasticPremium'
-    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -1216,14 +1197,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    # if is_linux and FREE SKU check the region is supported, FREE is supported on some select regions only
-    if is_linux and sku == 'F1':
-        geo_regions = list(filter(lambda x: location in x.name, list_locations(cmd, sku, is_linux)))
-        num_geo_regions = len(geo_regions)
-        if num_geo_regions == 0:
-            raise CLIError('Free SKU not supported in region "{}". Run the command with --location to use a '
-                           'supported region. See az appservice list-locations --sku F1 --linux-workers-enabled to see '
-                           'the list of supported regions'.format(location))
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
@@ -1421,15 +1394,6 @@ def _parse_frequency(frequency):
         raise CLIError('Frequency must be positive')
 
     return frequency_num, frequency_unit
-
-
-def _normalize_sku(sku):
-    sku = sku.upper()
-    if sku == 'FREE':
-        return 'F1'
-    elif sku == 'SHARED':
-        return 'D1'
-    return sku
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
@@ -1676,11 +1640,14 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     if not site:
         raise CLIError("'{}' app doesn't exist".format(name))
     configs = get_site_configs(cmd, resource_group_name, name)
-    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    host_name_split = site.default_host_name.split('.', 1)
+    host_name_suffix = '.' + host_name_split[1]
+    host_name_val = host_name_split[0]
     configs.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
-        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+        action_host_name_slot = host_name_val + "-" + slot
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=action_host_name_slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
                                                             name=slot))
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)
