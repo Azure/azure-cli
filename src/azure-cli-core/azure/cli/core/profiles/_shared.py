@@ -50,6 +50,40 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_STORAGE = ('azure.multiapi.storage', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
+    MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
+    MGMT_ADVISOR = ('azure.mgmt.advisor', None)
+    MGMT_MEDIA = ('azure.mgmt.media', None)
+    MGMT_BACKUP = ('azure.mgmt.recoveryservicesbackup', None)
+    MGMT_BATCH = ('azure.mgmt.batch', None)
+    MGMT_BATCHAI = ('azure.mgmt.batchai', None)
+    MGMT_BILLING = ('azure.mgmt.billing', None)
+    MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
+    MGMT_CDN = ('azure.mgmt.cdn', None)
+    MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
+    MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
+    MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
+    MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
+    MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
+    MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
+    MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
+    MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
+    MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
+    MGMT_IOT = ('azure.mgmt.iothub', None)
+    MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
+    MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
+    MGMT_MAPS = ('azure.mgmt.maps', None)
+    MGMT_MONITOR = ('azure.mgmt.monitor', None)
+    MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
+    MGMT_RDBMS = ('azure.mgmt.rdbms', None)
+    MGMT_REDIS = ('azure.mgmt.redis', None)
+    MGMT_RELAY = ('azure.mgmt.relay', None)
+    MGMT_RESERVATIONS = ('azure.mgmt.reservations', None)
+    MGMT_SEARCH = ('azure.mgmt.search', None)
+    MGMT_SERVICEBUS = ('azure.mgmt.servicebus', None)
+    MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
+    MGMT_SIGNALR = ('azure.mgmt.signalr', None)
+    MGMT_SQL = ('azure.mgmt.sql', None)
+    MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -126,7 +160,6 @@ AZURE_API_PROFILES = {
             'policy_assignments': '2016-12-01',
             'policy_definitions': '2016-12-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
@@ -145,7 +178,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
@@ -164,7 +196,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05'
     }
@@ -357,6 +388,15 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     return _validate_api_version(api_version_obj, min_api, max_api)
 
 
+def supported_resource_type(api_profile, resource_type):
+    if api_profile == 'latest' or resource_type is None:
+        return True
+    try:
+        return True if AZURE_API_PROFILES[api_profile][resource_type] else False
+    except KeyError:
+        return False
+
+
 def _get_attr(sdk_path, mod_attr_path, checked=True):
     try:
         attr_mod, attr_path = mod_attr_path.split('#') \
@@ -386,6 +426,8 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
                       azure.keyvault.v7_0.models.KeyVault
     """
     api_version = get_api_version(api_profile, resource_type)
+    if api_version is None:
+        return resource_type
     if isinstance(api_version, _ApiVersions):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))

@@ -12,10 +12,11 @@ class KustoCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         kusto_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.kusto.custom#{}')
         super(KustoCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                   custom_command_type=kusto_custom,
-                                                  min_profile='2017-03-10-profile')
+                                                  resource_type=ResourceType.MGMT_KUSTO)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.kusto.commands import load_command_table

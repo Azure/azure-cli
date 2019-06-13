@@ -12,10 +12,11 @@ class ServiceFabricCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         sf_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.servicefabric.custom#{}')
         super(ServiceFabricCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                           custom_command_type=sf_custom,
-                                                          min_profile='2017-03-10-profile')
+                                                          resource_type=ResourceType.MGMT_SERVICEFABRIC)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.servicefabric.commands import load_command_table

@@ -44,6 +44,12 @@ def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None, op
                                       operation_group=operation_group)
 
 
+def supported_resource_type(cli_ctx, resource_type):
+    from azure.cli.core.profiles._shared import supported_resource_type as _supported_resource_type
+    return _supported_resource_type(cli_ctx.cloud.profile,
+                                    resource_type=resource_type)
+
+
 def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
     """ Get any SDK object that's versioned using the current API version for resource_type.
         Supported keyword arguments:

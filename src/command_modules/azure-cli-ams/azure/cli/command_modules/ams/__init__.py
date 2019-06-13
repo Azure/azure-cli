@@ -12,7 +12,8 @@ import azure.cli.command_modules.ams._help
 class MediaServicesCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(MediaServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx, min_profile='2017-03-10-profile')
+        from azure.cli.core.profiles import ResourceType
+        super(MediaServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx, resource_type=ResourceType.MGMT_MEDIA)
 
     def load_command_table(self, args):
         super(MediaServicesCommandsLoader, self).load_command_table(args)
