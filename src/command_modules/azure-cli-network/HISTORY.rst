@@ -3,6 +3,8 @@
 Release History
 ===============
 
+2.5.2
++++++
 * Added command `list-service-tags`.
 * `dns zone import`: Fix issue where users could not import wildcard A records.
 * `watcher flow-log configure`: Fixed issue where flow logging could not be enabled in certain regions.

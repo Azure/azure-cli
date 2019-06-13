@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 0.2.4
 +++++
 * `domain create/update/delete/get/list`: Added new commands for the domain CRUD operations.

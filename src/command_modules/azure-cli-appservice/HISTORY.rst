@@ -2,8 +2,10 @@
 
 Release History
 ===============
+
+0.2.21
+++++++
 * webapp: add location based routing for `az webapp deleted list` and `az webapp deleted restore`
-* webapp, functionapp: Updating to the latest Python SDK version
 * webapp: webapp up logged target URL ("You can launch the app at...") is now properly clickable in Azure Cloud Shell
 * webapp: Fixing an issue where creating apps with the some sku's was failing with AlwaysOn error
 * webapp, appserviceplan: adding pre-validation to the ASP and webapp create
