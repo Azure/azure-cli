@@ -474,7 +474,7 @@ def _delete_manifest_confirmation(login_server,
         message += " and all the following images: {}".format(images)
 
     if yes:
-        print(message)
+        logger.warning(message)
         return manifest
 
     user_confirmation("{}.\nAre you sure you want to continue?".format(message))
