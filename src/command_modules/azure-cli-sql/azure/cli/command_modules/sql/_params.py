@@ -303,7 +303,6 @@ def load_arguments(self, _):
         c.argument('allow_data_loss',
                    help='If specified, the failover operation will allow data loss.')
 
-
     with self.argument_context('sql db') as c:
         c.argument('server_name',
                    arg_type=server_param_type)

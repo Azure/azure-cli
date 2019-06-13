@@ -259,7 +259,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault certificate issuer admin') as c:
         c.argument('email', help='Admin e-mail address. Must be unique within the vault.')
         c.argument('name', help='Full admin name.')
-        c.argument('phone', help='Amin phone number.')
+        c.argument('phone', help='Admin phone number.')
         c.argument('first_name', help='Admin first name.')
         c.argument('last_name', help='Admin last name.')
 

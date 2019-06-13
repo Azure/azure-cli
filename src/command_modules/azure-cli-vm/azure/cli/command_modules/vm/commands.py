@@ -177,12 +177,12 @@ def load_command_table(self, _):
         g.command('run', 'run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
 
-    with self.command_group('image template customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom, is_preview=True) as g:
+    with self.command_group('image template customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
         g.custom_command('remove', 'remove_template_customizer', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_customizer', supports_local_cache=True)
 
-    with self.command_group('image template output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom, is_preview=True) as g:
+    with self.command_group('image template output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_output', supports_local_cache=True, validator=process_img_tmpl_output_add_namespace)
         g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)

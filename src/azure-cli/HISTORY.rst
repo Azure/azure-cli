@@ -3,8 +3,6 @@
 Release History
 ===============
 
-2.0.67
-++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
   when a command group, command or argument is in preview status. This was previously
   called out in help text or communicated implicitly by the command module version number.
