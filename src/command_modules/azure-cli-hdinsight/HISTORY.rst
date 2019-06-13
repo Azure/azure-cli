@@ -4,21 +4,13 @@ Release History
 ===============
 0.4.0
 +++++
-*	Change OMS group to monitor
-  *	Change the 'oms' command group to 'monitor'
-  *	Change all instances of "Operations Management Suite (OMS)" in descriptions to "Azure Monitor logs integration”
-  *	Autocomplete workspace id and key (remove workspace key parameter)
-
-* ESP parameters updates
-  *	cluster-admin-account completer
-  *	cluster-users-group-dns completer
-  *	cluster-users-group-dns parameter should be mandatory for --esp clusters
-
-Other changes:
-*	Make the "--http-password -p" a required parameter
-*	Add time out for all existing argument auto-completers.
-*	Add time out for transforming recourse name to resource id.
-*	Allow auto-completers to select resources from any resource group. It can be a different resource group that '-g' specifies.
+* BREAKING CHANGE: Change OMS to monitor
+* Add cluster-admin-account, cluster-users-group-dns completer
+* cluster-users-group-dns parameter is required when --esp presents
+* BREAKING CHANGE: Make the "--http-password -p" a required parameter
+* Add time out for all existing argument auto-completers.
+* Add time out for transforming recourse name to resource id.
+* Allow auto-completers to select resources from any resource group. It can be a different resource group that '-g' specifies.
 
 0.3.5
 +++++
