@@ -297,10 +297,10 @@ class CosmosDBTests(ScenarioTest):
         vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
 
         assert len(vnet_rules) == 0
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
-        
+
         db_name = self.create_random_name(prefix='cli', length=15)
 
         self.kwargs.update({
@@ -314,7 +314,7 @@ class CosmosDBTests(ScenarioTest):
         assert database["id"] == db_name
 
         database_show = self.cmd('az cosmosdb database show -g {rg} -n {acc} -d {db_name}').get_output_in_json()
-        assert database["id"] == db_name
+        assert database_show["id"] == db_name
 
         assert self.cmd('az cosmosdb database exists -g {rg} -n {acc} -d {db_name}').get_output_in_json()
         assert not self.cmd('az cosmosdb database exists -g {rg} -n {acc} -d invalid').get_output_in_json()

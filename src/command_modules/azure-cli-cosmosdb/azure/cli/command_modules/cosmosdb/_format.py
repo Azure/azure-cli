@@ -12,6 +12,7 @@ def list_database_output(result):
         table.append(database_output(item))
     return table
 
+
 def database_output(result):
     result = OrderedDict([('Database Id', result['id']),
                           ('_colls', result['_colls']),
@@ -22,14 +23,17 @@ def database_output(result):
                           ('_users', result['_users'])])
     return result
 
+
 def list_collection_output(result):
     table = []
     for item in result:
         table.append(collection_output_helper(item))
     return table
 
+
 def collection_output(result):
     return collection_output_helper(result['collection'])
+
 
 def collection_output_helper(result):
     result = OrderedDict([('Collection Id', result['id']),
@@ -42,6 +46,7 @@ def collection_output_helper(result):
                           ('_triggers', result['_triggers']),
                           ('_ts', result['_ts'])])
     return result
+
 
 def list_connection_strings_output(result):
     table = []

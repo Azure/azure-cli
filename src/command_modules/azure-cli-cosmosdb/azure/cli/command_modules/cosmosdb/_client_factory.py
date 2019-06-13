@@ -34,7 +34,7 @@ def _add_headers(client):
     client.default_headers['User-Agent'] = ' '.join(agents)
 
 
-def cf_cosmosdb_document(cli_ctx, kwargs): 
+def cf_cosmosdb_document(cli_ctx, kwargs):
     from azure.cosmos import cosmos_client
     service_type = cosmos_client.CosmosClient
 

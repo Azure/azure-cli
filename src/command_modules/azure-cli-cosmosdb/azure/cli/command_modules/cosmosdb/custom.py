@@ -458,7 +458,7 @@ def cli_cosmosdb_collection_create(client,
                                     indexing_policy)
 
     created_collection = client.CreateContainer(_get_database_link(database_id), collection,
-                                                 options)
+                                                options)
     offer = _find_offer(client, created_collection['_self'])
     return {'collection': created_collection, 'offer': offer}
 
