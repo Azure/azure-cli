@@ -23,7 +23,8 @@ from azure.cli.command_modules.vm._validators import (
     validate_asg_names_or_ids, validate_keyvault, validate_proximity_placement_group,
     process_gallery_image_version_namespace)
 
-from ._vm_utils import MSI_LOCAL_ID
+from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
+from azure.cli.command_modules.vm._image_builder import ScriptType
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals
@@ -49,6 +50,7 @@ def load_arguments(self, _):
                                      id_part='name')
 
     extension_instance_name_type = CLIArgumentType(help="Name of the vm's instance of the extension. Default: name of the extension.")
+    image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -136,6 +138,93 @@ def load_arguments(self, _):
         c.argument('os_disk_caching', arg_type=get_enum_type(CachingTypes), help="Storage caching type for the image's OS disk.")
         c.argument('hyper_v_generation', arg_type=hyper_v_gen_sku, min_api="2019-03-01", help='The hypervisor generation of the Virtual Machine created from the image.')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
+    # endregion
+
+    # region Image Templates
+    with self.argument_context('image template') as c:
+        ib_output_name_help = "Name of the image builder run output."
+
+        c.argument('location', get_location_type(self.cli_ctx))
+        c.argument('scripts', nargs='+', help="Space-separated list of shell or powershell scripts to customize the image with. Each script must be a publicly accessible URL."
+                                              " Infers type of script from file extension ('.sh' or'.ps1') or from source type. More more customizer options and flexibility, see: 'az image template customizer add'")
+        c.argument('source', options_list=["--image-source", "-i"], help="The base image to customize. Must be a valid platform image URN, platform image alias, Red Hat ISO image URI, managed image name/ID, or shared image version ID.")
+        c.argument('image_template_name', image_template_name_type, help="The name of the image template.")
+        c.argument('checksum', help="The SHA256 checksum of the Red Hat ISO image")
+        c.argument('managed_image_destinations', nargs='+', help='Managed image output distributor information. Space-separated list of key-value pairs. E.g "image_1=westus2 image_2=westus". Each key is the name or resource ID of the managed image to be created. Each value is the location of the image.')
+        c.argument('shared_image_destinations', nargs='+', help='Shared image gallery (sig) output distributor information. Space-separated list of key-value pairs. E.g "my_gallery_1/image_def_1=eastus,westus  my_gallery_2/image_def_2=uksouth,canadaeast,francesouth." '
+                                                                'Each key is the sig image definition ID or sig gallery name and sig image definition delimited by a "/". Each value is a comma-delimited list of replica locations.')
+        c.argument('output_name', help=ib_output_name_help)
+        c.ignore('destinations_lists', 'scripts_list', 'source_dict')
+
+    with self.argument_context('image template create') as c:
+        ib_source_type = CLIArgumentType(arg_group="Image Source")
+        ib_customizer_type = CLIArgumentType(arg_group="Customizer")
+        ib_cutput_type = CLIArgumentType(arg_group="Output")
+
+        c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
+
+        # Image Source Arguments
+        c.argument('source', arg_type=ib_source_type)
+        c.argument('checksum', arg_type=ib_source_type)
+        c.argument('', arg_type=ib_source_type)
+
+        # Image Customizer Arguments
+        c.argument('scripts', arg_type=ib_customizer_type)
+        c.argument('', arg_type=ib_customizer_type)
+        c.argument('', arg_type=ib_customizer_type)
+
+        # Image Output Arguments
+        c.argument('managed_image_destinations', arg_type=ib_cutput_type)
+        c.argument('shared_image_destinations', arg_type=ib_cutput_type)
+        c.argument('output_name', arg_type=ib_cutput_type)
+
+    with self.argument_context('image template output') as c:
+        ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
+        ib_img_location_help = "Location where the customized image will be created."
+
+        c.argument('gallery_image_definition', arg_group="Shared Image Gallery", help="Name or ID of the existing SIG image definition to create the customized image version with.")
+        c.argument('gallery_name', arg_group="Shared Image Gallery", help="Shared image gallery name, if image definition name and not ID was provided.")
+        c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help)
+        c.argument('managed_image', arg_group="Managed Image", help="Name or ID of the customized managed image to be created.")
+        c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help)
+
+    with self.argument_context('image template output add') as c:
+        ib_artifact_tags_help = "Tags that will be applied to the output artifact once it has been created by the distributor. " + tags_type.settings['help']
+        ib_artifact_tags_type = CLIArgumentType(overrides=tags_type, help=ib_artifact_tags_help, options_list=["--artifact-tags"])
+        ib_default_loc_help = " Defaults to resource group's location."
+
+        c.argument('output_name', help=ib_output_name_help + " Defaults to the name of the managed image or sig image definition.")
+        c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
+        c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
+        c.argument('is_vhd', arg_group="VHD", help="The output is a VHD distributor.", action='store_true')
+        c.argument('tags', arg_type=ib_artifact_tags_type)
+        c.ignore('location')
+
+    with self.argument_context('image template customizer') as c:
+        ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")
+        ib_script_type = CLIArgumentType(arg_group="Shell and Powershell")
+        ib_powershell_type = CLIArgumentType(arg_group="Powershell")
+        ib_file_customizer_type = CLIArgumentType(arg_group="File")
+
+        c.argument('customizer_name', help="Name of the customizer.")
+        c.argument('customizer_type', options_list=['--type', '-t'], help="Type of customizer to be added to the image template.", arg_type=get_enum_type(ScriptType))
+
+        # Script Args
+        c.argument('script_url', arg_type=ib_script_type, help="URL of script to customize the image with. The URL must be publicly accessible.")
+        c.argument('inline_script', arg_type=ib_script_type, nargs='+', help="Space-separated list of inline script lines to customize the image with.")
+
+        # Powershell Specific Args
+        c.argument('valid_exit_codes', options_list=['--exit-codes', '-e'], arg_type=ib_powershell_type, nargs='+', help="Space-separated list of valid exit codes, as integers")
+
+        # Windows Restart Specific Args
+        c.argument('restart_command', arg_type=ib_win_restart_type, help="Command to execute the restart operation.")
+        c.argument('restart_check_command', arg_type=ib_win_restart_type, help="Command to verify that restart succeeded.")
+        c.argument('restart_timeout', arg_type=ib_win_restart_type, help="Restart timeout specified as a string consisting of a magnitude and unit, e.g. '5m' (5 minutes) or '2h' (2 hours)", default="5m")
+
+        # File Args
+        c.argument('file_source', arg_type=ib_file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")
+        c.argument('dest_path', arg_type=ib_file_customizer_type, help="The absolute destination path where the file specified in --file-source will be downloaded to in the image")
+
     # endregion
 
     # region AvailabilitySets
