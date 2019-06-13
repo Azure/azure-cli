@@ -23,7 +23,7 @@ helps['network nat gateway create'] = """
     short-summary: Create a NAT gateway.
     examples:
       - name: Create a NAT gateway.
-        text: az network nat gateway create --resource-group MyResourceGroup --name MyNatGateway --location MyLocation --public-ip-addresses  MyPublicIp --public-ip-prefixes  MyPublicIpPrefix --idle-timeout 4
+        text: az network nat gateway create --resource-group MyResourceGroup --name MyNatGateway --location MyLocation --public-ip-addresses  MyPublicIp --public-ip-prefixes  MyPublicIpPrefix --idle-timeout 4 --zone 2
 """
 
 helps['network nat gateway delete'] = """
