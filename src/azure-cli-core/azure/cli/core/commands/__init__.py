@@ -208,6 +208,11 @@ class CacheObject(object):
     def result(self):
         module = import_module(self._model_path)
         model_cls = getattr(module, self._model_name)
+        # model_cls = self._cmd.get_models(self._model_type)
+        # todo: Remove temp work around!!!
+        if model_cls is None:
+            from azure.mgmt.imagebuilder.models import ImageTemplate
+            model_cls = ImageTemplate
         return model_cls.deserialize(self._payload)
 
     def prop_dict(self):
@@ -662,20 +667,20 @@ class AzCliCommandInvoker(CommandInvoker):
         previews = [] + getattr(parsed_args, '_argument_previews', [])
         if cmd.preview_info:
             previews.append(cmd.preview_info)
+        else:
+            # search for implicit command preview status
+            path_comps = cmd.name.split()[:-1]
+            implicit_preview_info = None
+            while path_comps and not implicit_preview_info:
+                implicit_preview_info = resolve_preview_info(self.cli_ctx, ' '.join(path_comps))
+                del path_comps[-1]
 
-        # search for implicit preview
-        path_comps = cmd.name.split()[:-1]
-        implicit_preview_info = None
-        while path_comps and not implicit_preview_info:
-            implicit_preview_info = resolve_preview_info(self.cli_ctx, ' '.join(path_comps))
-            del path_comps[-1]
-
-        if implicit_preview_info:
-            preview_kwargs = implicit_preview_info.__dict__.copy()
-            preview_kwargs['object_type'] = 'command'
-            del preview_kwargs['_get_tag']
-            del preview_kwargs['_get_message']
-            previews.append(ImplicitPreviewItem(**preview_kwargs))
+            if implicit_preview_info:
+                preview_kwargs = implicit_preview_info.__dict__.copy()
+                preview_kwargs['object_type'] = 'command'
+                del preview_kwargs['_get_tag']
+                del preview_kwargs['_get_message']
+                previews.append(ImplicitPreviewItem(**preview_kwargs))
 
         colorama.init()
         for d in deprecations:

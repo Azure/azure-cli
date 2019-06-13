@@ -88,6 +88,13 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     webapp_kind = 'webapp'
     function_kind = 'function'
 
+    if version == 'v3':
+        logger.warning('WARNING: `az bot create` for v3 bots is being discontinued on August 1st, 2019. We encourage '
+                       'developers to move to creating and deploying v4 bots.\n\nFor more information on creating '
+                       'and deploying v4 bots, please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more '
+                       'information on v3 bot creation deprecation, please visit this blog post: '
+                       'https://blog.botframework.com/2019/06/07/v3-bot-broadcast-message/')
+
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
                        'and will been removed.', resource_name)
@@ -417,6 +424,13 @@ def prepare_publish(cmd, client, resource_group_name, resource_name, sln_name, p
         raise CLIError('\'az bot prepare-publish\' is only for v3 bots. Please use \'az bot publish\' to prepare and '
                        'publish a v4 bot.')
 
+    logger.warning('WARNING: `az bot prepare-publish` is in maintenance mode for v3 bots as support for creating v3 '
+                   'SDK bots via `az bot create` will be discontinued on August 1st, 2019. We encourage developers '
+                   'move to creating and deploying v4 bots.\n\nFor more information on creating and deploying v4 bots, '
+                   'please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more information on v3 bot '
+                   'creation deprecation, please visit this blog post: '
+                   'https://blog.botframework.com/2019/06/07/v3-bot-broadcast-message/')
+
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -564,6 +578,14 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
         logger.warning('DEPRECATION WARNING: `az bot publish` is deprecated for v4 bots. We recommend using `az webapp`'
                        ' to deploy your bot to Azure. For more information on how to deploy a v4 bot, see '
                        'https://aka.ms/deploy-your-bot.')
+    else:
+        logger.warning('WARNING: `az bot publish` is in maintenance mode for v3 bots as support for creating v3 '
+                       'SDK bots via `az bot create` will be discontinued on August 1st, 2019. We encourage developers '
+                       'move to creating and deploying v4 bots.\n\nFor more information on creating and deploying v4 '
+                       'bots, please visit https://aka.ms/create-and-deploy-v4-bot\n\nFor more information on v3 bot '
+                       'creation deprecation, please visit this blog post: '
+                       'https://blog.botframework.com/2019/06/07/v3-bot-broadcast-message/')
+
     # Get the bot information and ensure it's not only a registration bot.
     bot = client.bots.get(
         resource_group_name=resource_group_name,

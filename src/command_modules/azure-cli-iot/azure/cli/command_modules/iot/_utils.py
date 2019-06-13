@@ -5,6 +5,7 @@
 
 from os.path import exists, join
 import base64
+import random
 from OpenSSL import crypto
 
 
@@ -50,3 +51,21 @@ def open_certificate(certificate_path):
             except UnicodeError:
                 certificate = base64.b64encode(certificate).decode("utf-8")
     return certificate
+
+
+def get_auth_header(cmd):
+    from azure.cli.core._profile import Profile
+    from ._constants import CLIENT_ID
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    account = profile.get_subscription()
+    access_token = profile.get_access_token_for_resource(account['user']['name'], account['tenantId'], CLIENT_ID)
+    return {'Authorization': '{}'.format('Bearer ' + access_token)}
+
+
+def generateKey(byteLength=32):
+    key = ''
+    while byteLength > 0:
+        key += chr(random.randrange(1, 128))
+        byteLength -= 1
+    return base64.b64encode(key.encode()).decode('utf-8')

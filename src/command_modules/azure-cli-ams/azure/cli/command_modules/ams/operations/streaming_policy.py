@@ -54,10 +54,10 @@ def create_streaming_policy(cmd,  # pylint: disable=too-many-locals
     if any([envelope_protocols, envelope_clear_tracks, envelope_template,
             envelope_default_key_label, envelope_default_key_policy_name, envelope_key_to_track_mappings]):
         envelope_encryption = _envelope_encryption_factory(envelope_clear_tracks,
-                                                           envelope_protocols,
                                                            envelope_default_key_label,
                                                            envelope_default_key_policy_name,
                                                            envelope_key_to_track_mappings,
+                                                           envelope_protocols,
                                                            envelope_template)
 
     common_encryption_cenc = None
@@ -177,22 +177,15 @@ def _cbcs_encryption_factory(cbcs_clear_tracks,
         cbcs_play_ready_config = StreamingPolicyPlayReadyConfiguration(
             play_ready_custom_attributes=cbcs_play_ready_attributes,
             custom_license_acquisition_url_template=cbcs_play_ready_template)
-    else:
-        cbcs_play_ready_config = StreamingPolicyPlayReadyConfiguration()
 
     cbcs_widevine_config = None
     if cbcs_widevine_template:
         cbcs_widevine_config = StreamingPolicyWidevineConfiguration(
             custom_license_acquisition_url_template=cbcs_widevine_template)
-    else:
-        cbcs_widevine_config = StreamingPolicyWidevineConfiguration()
 
-    cbcs_fair_play_config = None
-#    if not cbcs_disable_fair_play:
-    if cbcs_fair_play_allow_persistent_license or cbcs_fair_play_template:
-        cbcs_fair_play_config = StreamingPolicyFairPlayConfiguration(
-            allow_persistent_license=cbcs_fair_play_allow_persistent_license,
-            custom_license_acquisition_url_template=cbcs_fair_play_template)
+    cbcs_fair_play_config = StreamingPolicyFairPlayConfiguration(
+        allow_persistent_license=cbcs_fair_play_allow_persistent_license,
+        custom_license_acquisition_url_template=cbcs_fair_play_template)
 
     cbcs_content_keys = StreamingPolicyContentKeys(
         default_key=DefaultKey(label=cbcs_default_key_label,

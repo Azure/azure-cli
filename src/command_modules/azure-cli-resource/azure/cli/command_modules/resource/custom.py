@@ -1769,6 +1769,20 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
+def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
+              body=None, skip_authorization_header=False, resource=None, output_file=None):
+    from azure.cli.core.util import send_raw_request
+    r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
+                         skip_authorization_header, resource, output_file)
+    if not output_file and r.content:
+        try:
+            return r.json()
+        except ValueError:
+            logger.warning('Not a json response, outputing to stdout. For binary data '
+                           'suggest use "--output-file" to write to a file')
+            print(r.text)
+
+
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,

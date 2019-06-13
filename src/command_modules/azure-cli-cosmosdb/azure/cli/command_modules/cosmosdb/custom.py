@@ -68,7 +68,8 @@ def cli_cosmosdb_create(cmd, client,
     resource_group_location = rg.location  # pylint: disable=no-member
 
     if not locations:
-        locations.append(Location(location_name=resource_group_location, failover_priority=0))
+        locations = []
+        locations.append(Location(location_name=resource_group_location, failover_priority=0, is_zone_redundant=False))
 
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
@@ -168,9 +169,12 @@ def cli_cosmosdb_update(client,
         consistency_policy = existing.consistency_policy
 
     if not locations:
+        locations = []
         for loc in existing.read_locations:
             locations.append(
-                Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+                Location(location_name=loc.location_name,
+                         failover_priority=loc.failover_priority,
+                         is_zone_redundant=loc.is_zone_redundant))
 
     if ip_range_filter is None:
         ip_range_filter = existing.ip_range_filter
@@ -270,7 +274,9 @@ def cli_cosmosdb_network_rule_add(cmd,
     locations = []
     for loc in existing.read_locations:
         locations.append(
-            Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+            Location(location_name=loc.location_name,
+                     failover_priority=loc.failover_priority,
+                     is_zone_redundant=loc.is_zone_redundant))
 
     params = DatabaseAccountCreateUpdateParameters(
         location=existing.location,
@@ -316,7 +322,9 @@ def cli_cosmosdb_network_rule_remove(cmd,
     locations = []
     for loc in existing.read_locations:
         locations.append(
-            Location(location_name=loc.location_name, failover_priority=loc.failover_priority))
+            Location(location_name=loc.location_name,
+                     failover_priority=loc.failover_priority,
+                     is_zone_redundant=loc.is_zone_redundant))
 
     params = DatabaseAccountCreateUpdateParameters(
         location=existing.location,
