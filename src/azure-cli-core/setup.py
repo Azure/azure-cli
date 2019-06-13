@@ -62,7 +62,7 @@ DEPENDENCIES = [
     'knack~=0.6.2',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
-    'paramiko>=2.0.8,<2.5.0',
+    'paramiko>=2.0.8,<3.0.0',
     'pip',
     'pygments',
     'PyJWT',
