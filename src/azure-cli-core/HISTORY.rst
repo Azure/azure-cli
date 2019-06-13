@@ -3,7 +3,7 @@
 Release History
 ===============
 
-* Remove min_profile
+* [Breaking Change]: Not support min_profile any more, use resource type instead.
 
 2.0.66
 ++++++
