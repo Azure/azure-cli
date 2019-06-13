@@ -117,8 +117,6 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
                     blob_container=blob_container,
                     archive_name_format=archive_name_format)
             )
-
-
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
