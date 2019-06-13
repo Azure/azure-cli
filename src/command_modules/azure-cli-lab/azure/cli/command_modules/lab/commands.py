@@ -150,3 +150,6 @@ def load_command_table(self, _):
         g.command('list', 'list', table_transformer=transform_arm_template_list)
         g.custom_show_command('show', 'show_arm_template', table_transformer=transform_arm_template,
                               client_factory=get_devtestlabs_arm_template_operation)
+
+    with self.command_group('lab', is_preview=True):
+        pass
