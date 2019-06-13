@@ -108,7 +108,7 @@ class HDInsightValidator():
                            'Please specify resource ID explicitly.'.format(self.resource_name, self.timeout))
 
         if self.exception:
-            raise self.exception
+            raise self.exception  # pylint: disable=raising-bad-type
 
         return self.resource_id
 
