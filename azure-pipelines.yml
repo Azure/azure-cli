@@ -28,7 +28,7 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
 
-- job: LockLinuxDependencies
+- job: LockLinux3Dependencies
   displayName: Lock Linux Python3 Dependencies
   condition: succeeded()
   pool:
@@ -42,11 +42,12 @@ jobs:
   - bash: |
       #! /usr/bin/env bash
 
-      set -ev
-
       pip install --upgrade pip
       python -m venv venv/
       source ./venv/bin/activate
+
+      set -ev
+
       find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip install
       pip freeze > linux-py3-requirements.txt
 
@@ -56,6 +57,36 @@ jobs:
     inputs:
       TargetPath: 'linux-py3-requirements.txt'
       ArtifactName: linux-python3-requirements
+
+- job: LockMacOS3Dependencies
+  displayName: Lock macOS Python3 Dependencies
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+  - bash: |
+      #! /usr/bin/env bash
+
+      pip install --upgrade pip
+      python -m venv venv/
+      source ./venv/bin/activate
+
+      set -ev
+
+      find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip install
+      pip freeze > macos-py3-requirements.txt
+
+    displayName: Install and Lock Requirements
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: Linux Python3 Requirements'
+    inputs:
+      TargetPath: 'macos-py3-requirements.txt'
+      ArtifactName: macos-python3-requirements
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
