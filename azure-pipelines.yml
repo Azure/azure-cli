@@ -48,13 +48,13 @@ jobs:
       python -m venv venv/
       source ./venv/bin/activate
       find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip3 install
-      pip3 freeze > requirements.txt
+      pip3 freeze > linux-py3-requirements.txt
 
     displayName: Install and Lock Requirements
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: MSI'
+    displayName: 'Publish Artifact: Linux Python3 Requirements'
     inputs:
-      TargetPath: 'requirements.txt'
+      TargetPath: 'linux-py3-requirements.txt'
       ArtifactName: linux-python3-requirements
 
 - job: VerifyVersions
