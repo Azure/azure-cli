@@ -24,3 +24,8 @@ class ManagedServicesCommandGroup(AzCommandGroup):
                                  help='Optional. When provided the assignment will be created under the resource '
                                       'group scope. Ex: /subscriptions/id/resourceGroups/rgName/.')
 
+            if "cli_assignment_list" == method_name or "cli_assignment_get" == method_name:
+                from azure.cli.core.commands.parameters import get_three_state_flag
+                command.add_argument('include_definition', arg_group=group_name, arg_type=get_three_state_flag(),
+                                 help='Optional: When provided, gets the associated registration definition details.')
+

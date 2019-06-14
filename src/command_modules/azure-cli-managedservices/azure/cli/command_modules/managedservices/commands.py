@@ -25,7 +25,7 @@ def load_command_table(self, _):
         g.managedservices_custom('show', 'cli_definition_get', client_factory=cf_registration_definitions)
 
     with self.command_group('managedservices definition assignment', msp_registration_assignments) as g:
-        g.custom_command('create', 'cli_assignment_create', client_factory=cf_registration_assignments)
-        g.custom_show_command('show', 'cli_assignment_get', client_factory=cf_registration_assignments)
-        g.custom_command('delete', 'cli_assignment_delete', client_factory=cf_registration_assignments)
+        g.managedservices_custom('create', 'cli_assignment_create', client_factory=cf_registration_assignments)
+        g.managedservices_custom('show', 'cli_assignment_get', client_factory=cf_registration_assignments)
+        g.managedservices_custom('delete', 'cli_assignment_delete', client_factory=cf_registration_assignments)
         g.managedservices_custom('list', 'cli_assignment_list', client_factory=cf_registration_assignments)

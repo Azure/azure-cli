@@ -101,7 +101,7 @@ def cli_definition_delete(cmd, client,
 def cli_assignment_create(cmd, client,
                           definition_id,
                           assignment_id=None,
-                          api_version=None, resource_group_name=None, subscription=None):
+                          **kwargs):
     from azure.mgmt.managedservices.models import RegistrationAssignmentProperties
     if not is_valid_resource_id(definition_id):
         raise ValueError(
@@ -110,6 +110,10 @@ def cli_assignment_create(cmd, client,
 
     if not assignment_id:
         assignment_id = str(uuid.uuid4())
+
+    subscription = kwargs.pop('subscription', None)
+    api_version = kwargs.pop('api_version', None)
+    resource_group_name= kwargs.pop('resource_group_name', None)
 
     sub_id = _get_subscription_id(cmd, subscription)
     scope = _get_scope(sub_id, resource_group_name)
@@ -125,8 +129,12 @@ def cli_assignment_create(cmd, client,
 # pylint: disable=unused-argument
 def cli_assignment_get(cmd, client,
                        assignment,
-                       api_version=None, resource_group_name=None, include_definition=False,
-                       subscription=None):
+                       **kwargs):
+    subscription = kwargs.pop('subscription', None)
+    api_version = kwargs.pop('api_version', None)
+    resource_group_name= kwargs.pop('resource_group_name', None)
+    include_definition = kwargs.pop('include_definition', None)
+
     if include_definition:
         if not bool(include_definition):
             raise ValueError("include_definition should either be set to True or False")
@@ -138,13 +146,16 @@ def cli_assignment_get(cmd, client,
         scope=scope,
         assignment_id=assignment_id,
         api_version=_get_api_version(api_version),
-        include_definition=include_definition)
+        expand_registration_definition=include_definition)
 
 
 # pylint: disable=unused-argument
 def cli_assignment_delete(cmd, client,
                           assignment,
-                          api_version=None, resource_group_name=None, subscription=None):
+                          *kwargs):
+    subscription = kwargs.pop('subscription', None)
+    api_version = kwargs.pop('api_version', None)
+    resource_group_name= kwargs.pop('resource_group_name', None)
     assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription,
                                                                          resource_group_name)
     scope = _get_scope(sub_id, rg_name)
@@ -156,11 +167,11 @@ def cli_assignment_delete(cmd, client,
 
 # pylint: disable=unused-argument
 def cli_assignment_list(cmd, client,
-                        include_definition=False,
                         **kwargs):
     subscription = kwargs.pop('subscription', None)
     api_version = kwargs.pop('api_version', None)
     resource_group_name= kwargs.pop('resource_group_name', None)
+    include_definition = kwargs.pop('include_definition', None)
 
     if include_definition:
         if not bool(include_definition):
@@ -172,7 +183,7 @@ def cli_assignment_list(cmd, client,
     return client.list(
         scope=scope,
         api_version=api_version,
-        include_definition=include_definition)
+        expand_registration_definition=include_definition)
 
 
 # endregion
