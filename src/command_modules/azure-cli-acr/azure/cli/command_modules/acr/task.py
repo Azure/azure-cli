@@ -82,45 +82,22 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             "--cmd myCommand -c /dev/null or "
             "-f myFile -c myContext, but not both.")
 
-    if context_path:
-        if file:
-            if file.endswith(ALLOWED_TASK_FILE_TYPES):
-                FileTaskStep = cmd.get_models('FileTaskStep')
-                step = FileTaskStep(
-                    task_file_path=file,
-                    values_file_path=values,
-                    context_path=context_path,
-                    context_access_token=git_access_token,
-                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
-                )
-            else:
-                DockerBuildStep = cmd.get_models('DockerBuildStep')
-                step = DockerBuildStep(
-                    image_names=image_names,
-                    is_push_enabled=not no_push,
-                    no_cache=no_cache,
-                    docker_file_path=file,
-                    arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-                    context_path=context_path,
-                    context_access_token=git_access_token,
-                    target=target
-                )
-        else:
-            raise CLIError("--file <Dockerfile> not found")
-    else:
-        yaml_template, values_content = get_yaml_and_values(
-            cmd_value, timeout, file)
-        import base64
-        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
-        step = EncodedTaskStep(
-            encoded_task_content=base64.b64encode(
-                yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(
-                values_content.encode()).decode(),
-            context_path=context_path,
-            context_access_token=git_access_token,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
-        )
+    step = create_task_step(
+        context_path=context_path,
+        cmd=cmd,
+        file=file,
+        image_names=image_names,
+        values=values,
+        git_access_token=git_access_token,
+        set_value=set_value,
+        set_secret=set_secret,
+        no_push=no_push,
+        no_cache=no_cache,
+        arg=arg,
+        secret_arg=secret_arg,
+        target=target,
+        cmd_value=cmd_value,
+        timeout=timeout)
 
     SourceControlType, SourceTriggerEvent = cmd.get_models(
         'SourceControlType', 'SourceTriggerEvent')
@@ -207,6 +184,62 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     except ValidationError as e:
         raise CLIError(e)
 
+
+def create_task_step(context_path,
+                     cmd,
+                     file,
+                     image_names,
+                     values,
+                     git_access_token,
+                     set_value,
+                     set_secret,
+                     no_push,
+                     no_cache,
+                     arg,
+                     secret_arg,
+                     target,
+                     cmd_value,
+                     timeout):
+    if context_path:
+        if file:
+            if file.endswith(ALLOWED_TASK_FILE_TYPES):
+                FileTaskStep = cmd.get_models('FileTaskStep')
+                step = FileTaskStep(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                )
+            else:
+                DockerBuildStep = cmd.get_models('DockerBuildStep')
+                step = DockerBuildStep(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
+        else:
+            raise CLIError("missing --file/-f argument")
+    else:
+        yaml_template, values_content = get_yaml_and_values(
+            cmd_value, timeout, file)
+        import base64
+        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
+        step = EncodedTaskStep(
+            encoded_task_content=base64.b64encode(
+                yaml_template.encode()).decode(),
+            encoded_values_content=base64.b64encode(
+                values_content.encode()).decode(),
+            context_path=context_path,
+            context_access_token=git_access_token,
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+        )
+    return step
 
 def acr_task_show(cmd,
                   client,
