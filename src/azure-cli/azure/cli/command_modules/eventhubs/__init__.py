@@ -16,10 +16,11 @@ class EventhubCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         eventhub_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.eventhubs.custom#{}')
         super(EventhubCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                      custom_command_type=eventhub_custom,
-                                                     min_profile='2019-03-02-hybrid',
+                                                     resource_type=ResourceType.MGMT_EVENTHUB,
                                                      suppress_extension=ModExtensionSuppress(__name__, 'eventhubs', '0.0.1',
                                                                                              reason='These commands are now in the CLI.',
                                                                                              recommend_remove=True))

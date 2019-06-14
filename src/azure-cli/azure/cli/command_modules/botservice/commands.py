@@ -77,3 +77,6 @@ def load_command_table(self, _):
 
     with self.command_group('bot webchat', channelOperations_commandType) as g:
         g.command('show', 'webchat_get')
+
+    with self.command_group('bot', is_preview=True):
+        pass

@@ -53,3 +53,6 @@ def load_command_table(self, _):
         p.custom_command('create', 'cli_consumption_create_budget', transform=transform_budget_create_update_output, validator=validate_budget_parameters)
 
         p.custom_command('delete', 'cli_consumption_delete_budget')
+
+    with self.command_group('consumption', is_preview=True):
+        pass

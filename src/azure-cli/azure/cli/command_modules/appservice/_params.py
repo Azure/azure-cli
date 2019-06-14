@@ -14,7 +14,7 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 
-from ._validators import validate_timeout_value
+from ._validators import validate_timeout_value, validate_site_create, validate_asp_create
 
 
 AUTH_TYPES = {
@@ -73,7 +73,8 @@ def load_arguments(self, _):
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
-        c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
+        c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None,
+                   validator=validate_asp_create)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
@@ -84,7 +85,7 @@ def load_arguments(self, _):
         c.ignore('allow_pending_state')
 
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new web app')
+        c.argument('name', options_list=['--name', '-n'], help='name of the new web app', validator=validate_site_create)
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")

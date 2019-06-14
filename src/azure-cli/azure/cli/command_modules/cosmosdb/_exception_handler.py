@@ -14,7 +14,7 @@ logger = get_logger(__name__)
 
 def duplicate_resource_exception_handler(ex):
     # wraps DocumentDB 409 error in CLIError
-    from pydocumentdb.errors import HTTPFailure
+    from azure.cosmos.errors import HTTPFailure
     if isinstance(ex, HTTPFailure) and ex.status_code == 409:
         raise CLIError(
             'Operation Failed: Resource Already Exists')
@@ -23,7 +23,7 @@ def duplicate_resource_exception_handler(ex):
 
 def resource_not_found_exception_handler(ex):
     # wraps DocumentDB 404 error in CLIError
-    from pydocumentdb.errors import HTTPFailure
+    from azure.cosmos.errors import HTTPFailure
     if isinstance(ex, HTTPFailure) and ex.status_code == 404:
         raise CLIError('Operation Failed: Resource Not Found')
     raise ex
@@ -31,7 +31,7 @@ def resource_not_found_exception_handler(ex):
 
 def invalid_arg_found_exception_handler(ex):
     # wraps DocumentDB 400 error in CLIError
-    from pydocumentdb.errors import HTTPFailure
+    from azure.cosmos.errors import HTTPFailure
     if isinstance(ex, HTTPFailure) and ex.status_code == 400:
         cli_error = None
         try:
@@ -53,7 +53,7 @@ def invalid_arg_found_exception_handler(ex):
 
 def unknown_server_failure_exception_handler(ex):
     # wraps unknown documentdb error in CLIError
-    from pydocumentdb.errors import HTTPFailure
+    from azure.cosmos.errors import HTTPFailure
     if isinstance(ex, HTTPFailure):
         raise CLIError('Operation Failed: {}'.format(str(ex)))
     raise ex

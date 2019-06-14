@@ -30,7 +30,7 @@ class InteractiveCommandsLoader(AzCommandsLoader):
     def load_command_table(self, _):
 
         with self.command_group('', operations_tmpl='azure.cli.command_modules.interactive.custom#{}') as g:
-            g.command('interactive', 'start_shell')
+            g.command('interactive', 'start_shell', is_preview=True)
         return self.command_table
 
     def load_arguments(self, _):

@@ -300,6 +300,8 @@ def load_arguments(self, _):
         c.argument('location_name', arg_type=get_location_type(self.cli_ctx))
         c.argument('usage_name', options_list=['--usage', '-u'])
         c.argument('tags', arg_type=tags_type)
+        c.argument('allow_data_loss',
+                   help='If specified, the failover operation will allow data loss.')
 
     with self.argument_context('sql db') as c:
         c.argument('server_name',
@@ -561,9 +563,6 @@ def load_arguments(self, _):
         c.argument('resource_group_name',
                    help='Name of the resource group containing the secondary replica that'
                    ' will become the new primary.')
-
-        c.argument('allow_data_loss',
-                   help='If specified, the failover operation will allow data loss.')
 
     with self.argument_context('sql db replica delete-link') as c:
         c.argument('partner_server_name',
@@ -957,17 +956,20 @@ def load_arguments(self, _):
                    arg_type=server_param_type)
 
         c.argument('dns_alias_name',
-                   options_list=('--name', '-n'))
+                   options_list=('--name', '-n'),
+                   help='Name of the DNS alias.')
 
         c.argument('original_server_name',
                    options_list=('--original-server'),
                    help='The name of the server to which alias is currently pointing')
 
         c.argument('original_resource_group_name',
-                   options_list=('--original-resource-group'))
+                   options_list=('--original-resource-group'),
+                   help='Name of the original resource group.')
 
         c.argument('original_subscription_id',
-                   options_list=('--original-subscription-id'))
+                   options_list=('--original-subscription-id'),
+                   help='ID of the original subscription.')
 
     #####
     #           sql server firewall-rule
