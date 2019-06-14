@@ -212,7 +212,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Timer trigger parameters
         c.argument('timer_name', help="The name of the timer trigger.", required=True)
         c.argument('schedule', help="The schedule of the timer trigger represented as a cron expression.")
-        c.argument('timer_enabled', help="Indicates whether the timer trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('enabled', help="Indicates whether the timer trigger is enabled.", arg_type=get_three_state_flag())
 
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

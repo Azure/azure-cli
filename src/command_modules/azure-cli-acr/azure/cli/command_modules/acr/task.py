@@ -593,7 +593,7 @@ def acr_task_timer_add(cmd,
                        registry_name,
                        timer_name,
                        schedule,
-                       timer_enabled=True,
+                       enabled=True,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -605,7 +605,7 @@ def acr_task_timer_add(cmd,
             timer_triggers=[
                 TimerTriggerUpdateParameters(
                     name=timer_name,
-                    status=TriggerStatus.enabled.value if timer_enabled else TriggerStatus.disabled.value,
+                    status=TriggerStatus.enabled.value if enabled else TriggerStatus.disabled.value,
                     schedule=schedule
                 )
             ]
@@ -621,7 +621,7 @@ def acr_task_timer_update(cmd,
                           registry_name,
                           timer_name,
                           schedule=None,
-                          timer_enabled=None,
+                          enabled=None,
                           resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
@@ -630,8 +630,8 @@ def acr_task_timer_update(cmd,
         'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus')
 
     trigger_status = None
-    if timer_enabled is not None:
-        trigger_status = TriggerStatus.enabled.value if timer_enabled else TriggerStatus.disabled.value
+    if enabled is not None:
+        trigger_status = TriggerStatus.enabled.value if enabled else TriggerStatus.disabled.value
 
     taskUpdateParameters = TaskUpdateParameters(
         trigger=TriggerUpdateParameters(
@@ -658,8 +658,7 @@ def acr_task_timer_remove(cmd,
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     # Task triggers currently cannot be removed via PATCH
-    # Use PUT to remove the timer trigger
-
+    # Use PUT to remove the timer trigger instead
     # Get the existing task
     existingTask = client.get_details(resource_group_name, registry_name, task_name)
     if existingTask.trigger:
