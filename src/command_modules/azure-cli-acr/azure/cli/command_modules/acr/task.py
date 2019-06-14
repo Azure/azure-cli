@@ -241,6 +241,7 @@ def create_task_step(context_path,
         )
     return step
 
+
 def acr_task_show(cmd,
                   client,
                   task_name,
