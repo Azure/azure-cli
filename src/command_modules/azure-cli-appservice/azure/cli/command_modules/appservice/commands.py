@@ -198,7 +198,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
 
-    with self.command_group('webapp deleted') as g:
+    with self.command_group('webapp deleted', is_preview=True) as g:
         g.custom_command('list', 'list_deleted_webapp')
         g.custom_command('restore', 'restore_deleted_webapp')
 

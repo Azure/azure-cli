@@ -3282,13 +3282,14 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
 
 
 def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            location=None, tags=None):
+                            location=None, tags=None, zone=None):
     PublicIPPrefix, PublicIPPrefixSku = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku')
     prefix = PublicIPPrefix(
         location=location,
         prefix_length=prefix_length,
         sku=PublicIPPrefixSku(name='Standard'),
         tags=tags,
+        zones=zone
     )
     return client.create_or_update(resource_group_name, public_ip_prefix_name, prefix)
 
@@ -3681,6 +3682,8 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
 
     if cmd.supported_api_version(min_api='2019-02-01') and nat_gateway:
         instance.nat_gateway = SubResource(id=nat_gateway)
+    elif nat_gateway == '':
+        instance.nat_gateway = None
 
     if network_security_group:
         instance.network_security_group = NetworkSecurityGroup(id=network_security_group)

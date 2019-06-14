@@ -16,7 +16,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.2.10"
+VERSION = "0.2.12"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -34,9 +34,9 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
 
-    'azure-mgmt-cosmosdb==0.5.2',
+    'azure-mgmt-cosmosdb==0.6.1',
     'azure-cli-core',
-    'pydocumentdb>=2.0.1'
+    'azure-cosmos>=3.0.2'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

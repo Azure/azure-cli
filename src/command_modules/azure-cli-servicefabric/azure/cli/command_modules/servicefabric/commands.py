@@ -33,3 +33,6 @@ def load_command_table(self, _):
 
     with self.command_group('sf application certificate') as g:
         g.custom_command('add', 'add_app_cert')
+
+    with self.command_group('sf', is_preview=True):
+        pass

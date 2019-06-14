@@ -73,3 +73,6 @@ def load_command_table(self, _):
     with self.command_group('backup restore files', backup_custom, client_factory=item_level_recovery_connections_cf) as g:
         g.command('mount-rp', 'restore_files_mount_rp')
         g.command('unmount-rp', 'restore_files_unmount_rp')
+
+    with self.command_group('backup', is_preview=True):
+        pass

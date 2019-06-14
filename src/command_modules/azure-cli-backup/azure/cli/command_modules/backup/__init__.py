@@ -12,9 +12,10 @@ class BackupCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         backup_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.backup.custom#{}')
         super(BackupCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                   min_profile='2017-03-10-profile',
+                                                   resource_type=ResourceType.MGMT_BACKUP,
                                                    custom_command_type=backup_custom)
 
     def load_command_table(self, args):

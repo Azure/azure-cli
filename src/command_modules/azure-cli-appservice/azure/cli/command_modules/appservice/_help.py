@@ -465,12 +465,12 @@ examples:
 
 helps['functionapp devops-build'] = """
 type: group
-short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps.
+short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps. This command will be removed in 2.0.68
 """
 
 helps['functionapp devops-build create'] = """
 type: command
-short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command.
+short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command. This command will be removed in 2.0.68
 """
 
 helps['functionapp devops-pipeline'] = """
@@ -1082,10 +1082,10 @@ long-summary: Restores the files and settings of a deleted web app to the specif
 examples:
   - name: Restore a deleted app to the Staging slot of MySite.
     text: >
-        az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234
+        az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/locations/location/deletedSites/1234
   - name: Restore a deleted app to the app MySite. Do not restore the deleted app's settings.
     text: >
-        az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234 --restore-content-only
+        az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/locations/location/deletedSites/1234 --restore-content-only
 """
 
 helps['webapp deployment'] = """

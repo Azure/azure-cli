@@ -89,3 +89,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'disable_monitoring')
+
+    with self.command_group('hdinsight', is_preview=True):
+        pass
