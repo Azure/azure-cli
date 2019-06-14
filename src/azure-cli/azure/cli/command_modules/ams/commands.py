@@ -227,3 +227,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.generic_update_command('update',
                                  custom_func_name='update_account_filter',
                                  custom_func_type=get_custom_sdk('account_filter', get_mediaservices_client))
+
+    with self.command_group('ams', is_preview=True):
+        pass

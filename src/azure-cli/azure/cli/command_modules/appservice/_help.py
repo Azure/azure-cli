@@ -1082,10 +1082,10 @@ long-summary: Restores the files and settings of a deleted web app to the specif
 examples:
   - name: Restore a deleted app to the Staging slot of MySite.
     text: >
-        az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234
+        az webapp deleted restore -g MyResourceGroup -n MySite -s Staging --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/locations/location/deletedSites/1234
   - name: Restore a deleted app to the app MySite. Do not restore the deleted app's settings.
     text: >
-        az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/deletedSites/1234 --restore-content-only
+        az webapp deleted restore -g MyResourceGroup -n MySite --deleted-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/locations/location/deletedSites/1234 --restore-content-only
 """
 
 helps['webapp deployment'] = """

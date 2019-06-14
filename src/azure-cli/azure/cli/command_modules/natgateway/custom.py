@@ -19,7 +19,7 @@ def network_client_factory(cli_ctx, **kwargs):
 
 def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                        location=None, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None, no_wait=False):
+                       public_ip_prefixes=None, idle_timeout=None, zone=None, no_wait=False):
 
     if not public_ip_addresses and not public_ip_prefixes:
         raise CLIError('usage error: --public-ip-addresses ADDRESSES | --public-ip-prefixes PREFIXES')
@@ -31,6 +31,7 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                              location=location,
                              sku=NatGatewaySku(name='Standard'),
                              idle_timeout_in_minutes=idle_timeout,
+                             zones=zone,
                              public_ip_addresses=public_ip_addresses,
                              public_ip_prefixes=public_ip_prefixes)
 

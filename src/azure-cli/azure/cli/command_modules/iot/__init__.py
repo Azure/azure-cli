@@ -32,11 +32,12 @@ For more info and install guide go to: https://github.com/Azure/azure-iot-cli-ex
 class IoTCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from azure.cli.core.profiles import ResourceType
         iot_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
         cli_ctx.register_event(EVENT_INVOKER_POST_PARSE_ARGS, handler)
         super(IoTCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                 custom_command_type=iot_custom,
-                                                min_profile='2017-03-10-profile')
+                                                resource_type=ResourceType.MGMT_IOT)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.iot.commands import load_command_table

@@ -49,14 +49,17 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     install_requires=[
-        'applicationinsights>=0.11.1,<0.11.8',
-        'portalocker==1.2.1',
+        'applicationinsights>=0.11.1,<0.12',
+        'portalocker~=1.2',
     ],
     packages=[
         'azure',
         'azure.cli',
         'azure.cli.telemetry',
         'azure.cli.telemetry.components'
+    ],
+    test_requires=[
+        'mock'
     ],
     cmdclass=cmdclass
 )

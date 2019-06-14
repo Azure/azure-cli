@@ -202,7 +202,7 @@ examples:
   - name: declare an application role
     text: |
         az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --app-roles @manifest.json
-        ("manifest.json" contains the following conten)
+        ("manifest.json" contains the following content)
         [{
             "allowedMemberTypes": [
               "User"
