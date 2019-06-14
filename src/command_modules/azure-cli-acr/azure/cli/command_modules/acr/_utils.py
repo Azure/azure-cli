@@ -510,7 +510,7 @@ def build_timers_info(cmd, schedules):
             split_schedule = schedule.split(":")
         timer_triggers.append(
             TimerTrigger(
-                name=(split_schedule[0] if split_schedule else "timer" + str(index)).strip(),
+                name=(split_schedule[0] if split_schedule else "t" + str(index)).strip(),
                 status=TriggerStatus.enabled.value,
                 schedule=split_schedule[1] if split_schedule else schedule
             ))
