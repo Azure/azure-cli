@@ -238,8 +238,6 @@ def _get_timer_triggers(item, *args):
             for trigger in item:
                 schedules.append(trigger['schedule'])
             return ', '.join(schedules)
-        else:
-            return ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 

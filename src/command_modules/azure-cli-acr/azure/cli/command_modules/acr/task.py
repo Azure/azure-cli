@@ -122,18 +122,15 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             values=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
 
-    SourceControlType, SourceTriggerEvent = cmd.get_models(
-        'SourceControlType', 'SourceTriggerEvent')
+    SourceControlType = cmd.get_models('SourceControlType')
     source_control_type = SourceControlType.visual_studio_team_service.value
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
 
     source_triggers = None
-    source_trigger_events = []
-    if commit_trigger_enabled:
-        source_trigger_events.append(SourceTriggerEvent.commit.value)
-    if pull_request_trigger_enabled:
-        source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
+    source_trigger_events = _get_trigger_event_list_put(cmd,
+                                                        commit_trigger_enabled,
+                                                        pull_request_trigger_enabled)
     # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
@@ -157,7 +154,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         ]
 
     timer_triggers = None
-    if schedules is not None:
+    if schedules:
         timer_triggers = build_timers_info(cmd, schedules)
 
     base_image_trigger = None
@@ -347,10 +344,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
                 'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
 
-            source_trigger_events = _get_trigger_event_list(cmd,
-                                                            source_triggers,
-                                                            commit_trigger_enabled,
-                                                            pull_request_trigger_enabled)
+            source_trigger_events = _get_trigger_event_list_patch(cmd,
+                                                                  source_triggers,
+                                                                  commit_trigger_enabled,
+                                                                  pull_request_trigger_enabled)
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -886,10 +883,22 @@ def _build_identities_info(cmd, identities, is_remove=False):
     return identity
 
 
-def _get_trigger_event_list(cmd,
-                            source_triggers,
-                            commit_trigger_enabled=None,
-                            pull_request_trigger_enabled=None):
+def _get_trigger_event_list_put(cmd,
+                                commit_trigger_enabled=None,
+                                pull_request_trigger_enabled=None):
+    SourceTriggerEvent = cmd.get_models('SourceTriggerEvent')
+    source_trigger_events = []
+    if commit_trigger_enabled:
+        source_trigger_events.append(SourceTriggerEvent.commit.value)
+    if pull_request_trigger_enabled:
+        source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
+    return source_trigger_events
+
+
+def _get_trigger_event_list_patch(cmd,
+                                  source_triggers,
+                                  commit_trigger_enabled=None,
+                                  pull_request_trigger_enabled=None):
     TriggerStatus, SourceTriggerEvent = cmd.get_models('TriggerStatus', 'SourceTriggerEvent')
 
     source_trigger_events = set()
