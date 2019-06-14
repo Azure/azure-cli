@@ -239,6 +239,7 @@ def _get_timer_triggers(item, *args):
                 if trigger['status'].lower() == "enabled":
                     schedules.append(trigger['schedule'])
             return ', '.join(schedules)
+        return ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 

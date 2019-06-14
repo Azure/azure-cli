@@ -51,7 +51,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=True,
-                    schedules=None,
+                    schedule=None,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -154,8 +154,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         ]
 
     timer_triggers = None
-    if schedules:
-        timer_triggers = build_timers_info(cmd, schedules)
+    if schedule:
+        timer_triggers = build_timers_info(cmd, schedule)
 
     base_image_trigger = None
     if base_image_trigger_enabled:

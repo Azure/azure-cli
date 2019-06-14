@@ -534,12 +534,12 @@ examples:
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
-            --schedules "0 12 * * Mon-Fri"
+            --schedule "0 12 * * Mon-Fri"
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays with the trigger name provided.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
-            --schedules "dailyTimer:0 12 * * Mon-Fri"
+            --schedule "dailyTimer:0 12 * * Mon-Fri"
 """
 
 helps['acr task identity'] = """
@@ -678,7 +678,7 @@ examples:
         az acr task timer update -n taskname -r registryname --timer-name myTimer --schedule "0 12 * * *"
   - name: Update the status of a timer trigger for a task.
     text: >
-        az acr task timer update -n taskname -r registryname --timer-name myTimer --timer-enabled False
+        az acr task timer update -n taskname -r registryname --timer-name myTimer --enabled False
 """
 
 helps['acr task timer remove'] = """
