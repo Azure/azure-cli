@@ -8,6 +8,7 @@ from azure.cli.core.extension import ext_compat_with_cli, WHEEL_INFO_RE
 from azure.cli.core.extension._index import get_index_extensions
 
 from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -73,3 +74,13 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
     if not download_url:
         raise NoExtensionCandidatesError("No download url found.")
     return download_url, digest
+
+def resolve_project_url_from_index(extension_name):
+    candidates = get_index_extensions().get(extension_name, [])
+    if not candidates:
+        raise CLIError("No extension found with name '{}'".format(extension_name))
+    try:
+        return candidates[0]['metadata']['extensions']['python.details']['project_urls']['Home']
+    except KeyError as ex:
+        logger.debug(ex)
+        raise CLIError('Could not find project information for extension {}.'.format(extension_name))
