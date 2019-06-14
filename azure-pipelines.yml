@@ -47,8 +47,8 @@ jobs:
       pip install --upgrade pip
       python -m venv venv/
       source ./venv/bin/activate
-      find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip3 install
-      pip3 freeze > linux-py3-requirements.txt
+      find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip install
+      pip freeze > linux-py3-requirements.txt
 
     displayName: Install and Lock Requirements
   - task: PublishPipelineArtifact@0
