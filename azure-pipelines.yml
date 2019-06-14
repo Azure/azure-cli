@@ -78,12 +78,12 @@ jobs:
 
       set -ev
 
-      find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip install
+      find src/ -name setup.py | xargs -I {} dirname {} | sort | uniq | xargs pip install
       pip freeze > macos-py3-requirements.txt
 
     displayName: Install and Lock Requirements
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: Linux Python3 Requirements'
+    displayName: 'Publish Artifact: macOS Python3 Requirements'
     inputs:
       TargetPath: 'macos-py3-requirements.txt'
       ArtifactName: macos-python3-requirements
