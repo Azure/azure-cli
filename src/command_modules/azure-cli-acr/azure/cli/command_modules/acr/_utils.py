@@ -528,9 +528,13 @@ def remove_timer_trigger(task_name,
     if not timer_triggers:
         raise CLIError("No timer triggers exist for the task '{}'.".format(task_name))
 
-    for timer in timer_triggers:
-        if timer.name == timer_name:
-            timer_triggers.remove(timer)
+    # Check that the timer trigger exists in the list and if not exit
+    if any(timer.name == timer_name for timer in timer_triggers):
+        for timer in timer_triggers:
+            if timer.name == timer_name:
+                timer_triggers.remove(timer)
+    else:
+        raise CLIError("The timer '{}' does not exist for the task '{}'.".format(timer_name, task_name))
 
     return timer_triggers
 
