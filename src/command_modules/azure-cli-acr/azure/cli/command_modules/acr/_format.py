@@ -227,7 +227,7 @@ def _get_value(item, *args):
 
 
 def _get_timer_triggers(item, *args):
-    """Get timer trigger schedules from a dict.
+    """Get all enabled timer trigger schedules from a dict.
     :param dict item: The dict object
     """
     try:
@@ -236,7 +236,8 @@ def _get_timer_triggers(item, *args):
         if item:
             schedules = []
             for trigger in item:
-                schedules.append(trigger['schedule'])
+                if trigger['status'].lower() == "enabled":
+                    schedules.append(trigger['schedule'])
             return ', '.join(schedules)
     except (KeyError, TypeError, IndexError):
         return ' '
