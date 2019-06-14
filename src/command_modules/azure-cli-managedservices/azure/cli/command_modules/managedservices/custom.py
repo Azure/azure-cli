@@ -50,7 +50,7 @@ def cli_definition_create(cmd, client,
     )
 
     return client.create_or_update(
-        definition_id=definition_id,
+        registration_definition_id=definition_id,
         api_version=_get_api_version(api_version),
         scope=scope,
         properties=properties)
@@ -66,7 +66,7 @@ def cli_definition_get(cmd, client,
     scope = _get_scope(sub_id, rg_name)
     return client.get(
         scope=scope,
-        definition_id=definition_id,
+        registration_definition_id=definition_id,
         api_version=_get_api_version(api_version))
 
 
@@ -89,7 +89,7 @@ def cli_definition_delete(cmd, client,
     scope = _get_scope(sub_id, rg_name)
     return client.delete(
         scope=scope,
-        definition_id=definition_id,
+        registration_definition_id=definition_id,
         api_version=_get_api_version(api_version))
 
 
@@ -118,10 +118,10 @@ def cli_assignment_create(cmd, client,
     sub_id = _get_subscription_id(cmd, subscription)
     scope = _get_scope(sub_id, resource_group_name)
     properties = RegistrationAssignmentProperties(
-        definition_id=definition_id)
+        registration_definition_id=definition_id)
     return client.create_or_update(
         scope=scope,
-        assignment_id=assignment_id,
+        registration_assignment_id=assignment_id,
         api_version=_get_api_version(api_version),
         properties=properties)
 
@@ -144,7 +144,7 @@ def cli_assignment_get(cmd, client,
     scope = _get_scope(sub_id, rg_name)
     return client.get(
         scope=scope,
-        assignment_id=assignment_id,
+        registration_assignment_id=assignment_id,
         api_version=_get_api_version(api_version),
         expand_registration_definition=include_definition)
 
@@ -161,7 +161,7 @@ def cli_assignment_delete(cmd, client,
     scope = _get_scope(sub_id, rg_name)
     return client.delete(
         scope=scope,
-        assignment_id=assignment_id,
+        registration_assignment_id=assignment_id,
         api_version=_get_api_version(api_version))
 
 
