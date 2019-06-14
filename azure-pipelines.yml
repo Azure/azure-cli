@@ -58,6 +58,36 @@ jobs:
       TargetPath: 'linux-py3-requirements.txt'
       ArtifactName: linux-python3-requirements
 
+- job: LockLinux2Dependencies
+  displayName: Lock Linux Python2 Dependencies
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+  - bash: |
+      #! /usr/bin/env bash
+
+      pip install --upgrade pip
+      python -m venv venv/
+      source ./venv/bin/activate
+
+      set -ev
+
+      find src/ -name setup.py | xargs dirname | sort | uniq | xargs pip install
+      pip freeze > linux-py2-requirements.txt
+
+    displayName: Install and Lock Requirements
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: Linux Python2 Requirements'
+    inputs:
+      TargetPath: 'linux-py2-requirements.txt'
+      ArtifactName: linux-python2-requirements
+
 - job: LockMacOS3Dependencies
   displayName: Lock macOS Python3 Dependencies
   condition: succeeded()
@@ -87,6 +117,36 @@ jobs:
     inputs:
       TargetPath: 'macos-py3-requirements.txt'
       ArtifactName: macos-python3-requirements
+
+- job: LockMacOS2Dependencies
+  displayName: Lock macOS Python2 Dependencies
+  condition: succeeded()
+  pool:
+    vmImage: 'macOS-10.13'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2.7'
+    inputs:
+      versionSpec: 2.7
+  - bash: |
+      #! /usr/bin/env bash
+
+      pip install --upgrade pip
+      python -m virtualenv venv/
+      source ./venv/bin/activate
+
+      set -ev
+
+      find src/ -name setup.py | xargs -I {} dirname {} | sort | uniq | xargs pip install
+      pip freeze > macos-py2-requirements.txt
+
+    displayName: Install and Lock Requirements
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: macOS Python2 Requirements'
+    inputs:
+      TargetPath: 'macos-py2-requirements.txt'
+      ArtifactName: macos-python2-requirements
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
