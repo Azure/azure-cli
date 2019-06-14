@@ -504,7 +504,6 @@ def build_timers_info(cmd, schedules):
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):
-        # space?
         split_schedule = None
         if ':' in schedule:
             split_schedule = schedule.split(":")
