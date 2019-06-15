@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.2.23
+++++++
+* [New Command Group]. image template: added image builder support via `image template`. These commands are in preview.
+
 2.2.22
 ++++++
 * vm create: can now create a vm from a managed image with data-disk luns that do not start from 0 or that skip numbers.

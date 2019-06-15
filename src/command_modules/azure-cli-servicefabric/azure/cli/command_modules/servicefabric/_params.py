@@ -26,7 +26,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name,if not given it will be cluster resource group name')
         c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
-        c.argument('vm_sku', help='The Vm Sku')
+        c.argument('vm_sku', help='VM Sku')
         c.argument('vm_user_name', help='The user name for logging to Vm. Default will be adminuser')
         c.argument('vm_os', arg_type=get_enum_type(['WindowsServer2012R2Datacenter',
                                                     'WindowsServer2016Datacenter',
@@ -64,7 +64,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('number_of_nodes_to_add', help='number of nodes to add.')
         c.argument('number_of_nodes_to_remove', help='number of nodes to remove.')
 
-    with self.argument_context('sf cluster durability') as c:
+    with self.argument_context('sf cluster node-type') as c:
+        c.argument('capacity', help='The capacity tag applied to nodes in the node type. The cluster resource manager uses these tags to understand how much capacity a node has.')
+        c.argument('vm_tier', help='VM tier.')
+
+    with self.argument_context('sf cluster') as c:
         c.argument('durability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
 
     with self.argument_context('sf cluster setting') as c:

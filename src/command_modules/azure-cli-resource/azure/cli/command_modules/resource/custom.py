@@ -1120,35 +1120,30 @@ def show_policy_assignment(cmd, name, resource_group_name=None, scope=None):
 
 
 def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_name=None, scope=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    if scope and not is_valid_resource_id(scope):
-        parts = scope.strip('/').split('/')
-        if len(parts) == 4:
-            resource_group_name = parts[3]
-        elif len(parts) == 2:
-            # rarely used, but still verify
-            if parts[1].lower() != policy_client.config.subscription_id.lower():
-                raise CLIError("Please use current active subscription's id")
-        else:
-            err = "Invalid scope '{}', it should point to a resource group or a resource"
-            raise CLIError(err.format(scope))
-        scope = None
-
-    _scope = _build_policy_scope(policy_client.config.subscription_id,
+    _scope = _build_policy_scope(get_subscription_id(cmd.cli_ctx),
                                  resource_group_name, scope)
-    if resource_group_name:
-        result = policy_client.policy_assignments.list_for_resource_group(resource_group_name)
-    elif scope:
-        # pylint: disable=redefined-builtin
-        id = parse_resource_id(scope)
-        parent_resource_path = '' if not id.get('child_name_1') else (id['type'] + '/' + id['name'])
-        resource_type = id.get('child_type_1') or id['type']
-        resource_name = id.get('child_name_1') or id['name']
+    id_parts = parse_resource_id(_scope)
+    subscription = id_parts.get('subscription')
+    resource_group = id_parts.get('resource_group')
+    resource_type = id_parts.get('child_type_1') or id_parts.get('type')
+    resource_name = id_parts.get('child_name_1') or id_parts.get('name')
+
+    if all([resource_type, resource_group, subscription]):
+        namespace = id_parts.get('namespace')
+        parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
         result = policy_client.policy_assignments.list_for_resource(
-            id['resource_group'], id['namespace'],
+            resource_group, namespace,
             parent_resource_path, resource_type, resource_name)
-    else:
+    elif resource_group:
+        result = policy_client.policy_assignments.list_for_resource_group(resource_group)
+    elif subscription:
         result = policy_client.policy_assignments.list()
+    elif scope:
+        raise CLIError('usage error `--scope`: must be a fully qualified ARM ID.')
+    else:
+        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME | --subscription ID')
 
     if not disable_scope_strict_match:
         result = [i for i in result if _scope.lower() == i.scope.lower()]
@@ -1772,6 +1767,20 @@ def list_resource_links(cmd, scope=None, filter_string=None):
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
 # endregion
+
+
+def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
+              body=None, skip_authorization_header=False, resource=None, output_file=None):
+    from azure.cli.core.util import send_raw_request
+    r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
+                         skip_authorization_header, resource, output_file)
+    if not output_file and r.content:
+        try:
+            return r.json()
+        except ValueError:
+            logger.warning('Not a json response, outputing to stdout. For binary data '
+                           'suggest use "--output-file" to write to a file')
+            print(r.text)
 
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes

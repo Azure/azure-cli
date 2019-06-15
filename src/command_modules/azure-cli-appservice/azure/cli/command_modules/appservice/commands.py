@@ -198,7 +198,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_auth_settings')
         g.custom_command('update', 'update_auth_settings')
 
-    with self.command_group('webapp deleted') as g:
+    with self.command_group('webapp deleted', is_preview=True) as g:
         g.custom_command('list', 'list_deleted_webapp')
         g.custom_command('restore', 'restore_deleted_webapp')
 
@@ -232,8 +232,8 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
-        g.custom_command('set', 'update_app_settings')
-        g.custom_command('delete', 'delete_app_settings')
+        g.custom_command('set', 'update_app_settings', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_app_settings', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
@@ -292,3 +292,10 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp devops-pipeline') as g:
         g.custom_command('create', 'create_devops_build')
+
+    with self.command_group('functionapp deployment slot') as g:
+        g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
+        g.custom_command('delete', 'delete_slot')
+        g.custom_command('auto-swap', 'config_slot_auto_swap')
+        g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())

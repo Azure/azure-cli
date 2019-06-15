@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.3.10"
+VERSION = "0.3.11"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
@@ -62,6 +62,8 @@ setup(
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models',
         'azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.operations',
+        'azure.cli.command_modules.iot.digitaltwinrepositoryprovisioningservice',
+        'azure.cli.command_modules.iot.digitaltwinrepositoryprovisioningservice.models',
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

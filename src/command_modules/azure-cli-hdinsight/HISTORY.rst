@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.3.5
++++++
+* Support for using `--ssh-public-key` parameter in `hdinsight create` command.
 
 0.3.4
 +++++

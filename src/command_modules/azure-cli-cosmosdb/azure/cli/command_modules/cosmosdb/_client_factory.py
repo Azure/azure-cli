@@ -35,8 +35,8 @@ def _add_headers(client):
 
 
 def cf_cosmosdb_document(cli_ctx, kwargs):
-    from pydocumentdb import document_client
-    service_type = document_client.DocumentClient
+    from azure.cosmos import cosmos_client
+    service_type = cosmos_client.CosmosClient
 
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
@@ -60,7 +60,7 @@ def cf_cosmosdb_document(cli_ctx, kwargs):
         if not key and not url_connection:
             raise CLIError(MISSING_CREDENTIALS_ERROR_MESSAGE)
         auth = {'masterKey': key}
-        client = document_client.DocumentClient(url_connection=url_connection, auth=auth)
+        client = cosmos_client.CosmosClient(url_connection=url_connection, auth=auth)
     except Exception as ex:
         if isinstance(ex, CLIError):
             raise ex

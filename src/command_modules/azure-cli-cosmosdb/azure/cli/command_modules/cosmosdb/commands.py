@@ -9,6 +9,14 @@ from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.cosmosdb._client_factory import cf_db_accounts
 
+from azure.cli.command_modules.cosmosdb._format import (
+    database_output,
+    list_database_output,
+    collection_output,
+    list_collection_output,
+    list_connection_strings_output
+)
+
 
 def load_command_table(self, _):
 
@@ -23,9 +31,9 @@ def load_command_table(self, _):
 
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get')
-        g.command('list-keys', 'list_keys')
+        g.command('list-keys', 'list_keys', deprecate_info=g.deprecate(redirect='cosmosdb keys list', hide=True))
         g.command('list-read-only-keys', 'list_read_only_keys')
-        g.command('list-connection-strings', 'list_connection_strings')
+        g.command('list-connection-strings', 'list_connection_strings', table_transformer=list_connection_strings_output)
         g.command('regenerate-key', 'regenerate_key')
         g.command('check-name-exists', 'check_name_exists')
         g.command('delete', 'delete')
@@ -40,19 +48,23 @@ def load_command_table(self, _):
         g.custom_command('add', 'cli_cosmosdb_network_rule_add')
         g.custom_command('remove', 'cli_cosmosdb_network_rule_remove')
 
+    # key operations
+    with self.command_group('cosmosdb keys', cosmosdb_sdk) as g:
+        g.command('list', 'list_keys')
+
     # # database operations
     with self.command_group('cosmosdb database') as g:
-        g.cosmosdb_custom('show', 'cli_cosmosdb_database_show')
-        g.cosmosdb_custom('list', 'cli_cosmosdb_database_list')
+        g.cosmosdb_custom('show', 'cli_cosmosdb_database_show', table_transformer=database_output)
+        g.cosmosdb_custom('list', 'cli_cosmosdb_database_list', table_transformer=list_database_output)
         g.cosmosdb_custom('exists', 'cli_cosmosdb_database_exists')
-        g.cosmosdb_custom('create', 'cli_cosmosdb_database_create')
+        g.cosmosdb_custom('create', 'cli_cosmosdb_database_create', table_transformer=database_output)
         g.cosmosdb_custom('delete', 'cli_cosmosdb_database_delete')
 
     # collection operations
     with self.command_group('cosmosdb collection') as g:
-        g.cosmosdb_custom('show', 'cli_cosmosdb_collection_show')
-        g.cosmosdb_custom('list', 'cli_cosmosdb_collection_list')
+        g.cosmosdb_custom('show', 'cli_cosmosdb_collection_show', table_transformer=collection_output)
+        g.cosmosdb_custom('list', 'cli_cosmosdb_collection_list', table_transformer=list_collection_output)
         g.cosmosdb_custom('exists', 'cli_cosmosdb_collection_exists')
-        g.cosmosdb_custom('create', 'cli_cosmosdb_collection_create')
+        g.cosmosdb_custom('create', 'cli_cosmosdb_collection_create', table_transformer=collection_output)
         g.cosmosdb_custom('delete', 'cli_cosmosdb_collection_delete')
         g.cosmosdb_custom('update', 'cli_cosmosdb_collection_update')

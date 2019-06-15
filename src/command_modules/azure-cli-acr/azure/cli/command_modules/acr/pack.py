@@ -29,20 +29,20 @@ steps:
 logger = get_logger(__name__)
 
 
-def acr_pack(cmd,  # pylint: disable=too-many-locals
-             client,
-             registry_name,
-             image_name,
-             source_location,
-             builder=ORYX_PACK_BUILDER_IMAGE,
-             pull=False,
-             no_format=False,
-             no_logs=False,
-             no_wait=False,
-             timeout=None,
-             resource_group_name=None,
-             platform=None,
-             auth_mode=None):
+def acr_pack_build(cmd,  # pylint: disable=too-many-locals
+                   client,
+                   registry_name,
+                   image_name,
+                   source_location,
+                   builder=ORYX_PACK_BUILDER_IMAGE,
+                   pull=False,
+                   no_format=False,
+                   no_logs=False,
+                   no_wait=False,
+                   timeout=None,
+                   resource_group_name=None,
+                   platform=None,
+                   auth_mode=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name)
 
     client_registries = cf_acr_registries(cmd.cli_ctx)
@@ -56,12 +56,15 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
+    if builder != ORYX_PACK_BUILDER_IMAGE:
+        logger.warning('Using a non-default builder image; `--pull` is probably needed as well')
+
     registry_prefixes = '{{.Run.Registry}}/', registry.login_server + '/'
     # If the image name doesn't have any required prefix, add it
     if all((not image_name.startswith(prefix) for prefix in registry_prefixes)):
         original_image_name = image_name
         image_name = registry_prefixes[0] + image_name
-        logger.debug("Modified image name from %s to %s", original_image_name, image_name)
+        logger.debug('Modified image name from %s to %s', original_image_name, image_name)
 
     yaml_body = PACK_TASK_YAML_FMT.format(
         image_name=image_name, builder=builder, no_pull='--no-pull' if not pull else '')
@@ -89,12 +92,12 @@ def acr_pack(cmd,  # pylint: disable=too-many-locals
         run_request=request))
 
     run_id = queued.run_id
-    logger.warning("Queued a run with ID: %s", run_id)
+    logger.warning('Queued a run with ID: %s', run_id)
 
     if no_wait:
         return queued
 
-    logger.warning("Waiting for an agent...")
+    logger.warning('Waiting for an agent...')
 
     if no_logs:
         from ._run_polling import get_run_with_polling

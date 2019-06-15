@@ -2,6 +2,21 @@
 
 Release History
 ===============
+
+* Introduced a new [Preview] status to tag to more clearly communicate to customers
+  when a command group, command or argument is in preview status. This was previously
+  called out in help text or communicated implicitly by the command module version number.
+  The CLI will be removing version numbers for individual packages in the future, so this
+  mechanism will be the sole way to communicate that a feature is in preview. Items which
+  are not labeled as being in preview can be considered to be GA. Not that if a command is
+  in preview, all of its arguments are as well, and, by extension, if a command group is
+  labeled as being in preview, then all commands and arguments are considered to be in
+  preview as well.
+
+  As a result of this change, several command groups may seem to "suddenly" appear to be
+  in a preview status with this release. What actually happened is that most packages were
+  in a preview status, but are being deemed GA with this release.
+
 2.0.66
 ++++++
 * Minor fixes.

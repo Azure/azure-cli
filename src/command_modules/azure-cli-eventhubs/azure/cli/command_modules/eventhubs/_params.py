@@ -35,20 +35,9 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
-
-    with self.argument_context('eventhubs namespace create') as c:
         c.argument('tags', arg_type=tags_type)
-        c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName))
+        c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName), help='Namespace SKU.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('capacity', type=int, help='Capacity for Sku')
-        c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
-        c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
-
-    with self.argument_context('eventhubs namespace update') as c:
-        c.argument('tags', arg_type=tags_type)
-        c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName))
         c.argument('capacity', type=int, help='Capacity for Sku')
         c.argument('is_auto_inflate_enabled', options_list=['--enable-auto-inflate'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether AutoInflate is enabled for eventhub namespace.')
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
@@ -82,7 +71,7 @@ def load_arguments_eh(self, _):
 
     for scope in ['eventhubs eventhub update', 'eventhubs eventhub create']:
         with self.argument_context(scope) as c:
-            c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days')
+            c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days and depends on Namespace sku. if Namespace sku is Basic than value should be one and is Manadatory parameter. Namespace sku is standard value should be 1 to 7 days, default is 7 days and is optional parameter')
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Status of Eventhub')
             c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture description is enabled.')

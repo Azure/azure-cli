@@ -12,6 +12,8 @@ helps['bot'] = """
 helps['bot create'] = """
     type: command
     short-summary: Create a new bot.
+    long-summary: Create a new bot. Support for creating v3 SDK bots will be deprecated on August 1st, 2019. For more
+                  information please visit this blog post, blog.botframework.com/2019/06/07/v3-bot-broadcast-message/
 """
 helps['bot show'] = """
     type: command
@@ -25,8 +27,8 @@ helps['bot show'] = """
 """
 helps['bot prepare-publish'] = """
     type: command
-    short-summary: Add scripts to your local source code directory to
-                   be able to publish back using `az bot publish`.
+    short-summary: (Maintenance mode) Add scripts to your local source code directory to
+                   be able to publish back using `az bot publish` for v3 SDK bots.
 """
 helps['bot prepare-deploy'] = """
     type: command
