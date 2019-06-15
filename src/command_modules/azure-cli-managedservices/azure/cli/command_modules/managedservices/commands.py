@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 
 # pylint: disable=line-too-long
 from azure.cli.command_modules.managedservices._client_factory import cf_registration_definitions, cf_registration_assignments
-from ._command_type import ManagedServicesCommandGroup
+
 
 def load_command_table(self, _):
     msp_registration_definitions = CliCommandType(

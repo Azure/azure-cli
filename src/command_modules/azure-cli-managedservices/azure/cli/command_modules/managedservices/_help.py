@@ -18,7 +18,7 @@ helps['managedservices definition'] = """
 
 helps['managedservices definition assignment'] = """
     type: group
-    short-summary: Manage111 the registration assignments in Azure.
+    short-summary: Manage the registration assignments in Azure.
 """
 
 helps['managedservices definition create'] = """
@@ -67,26 +67,34 @@ helps['managedservices definition show'] = """
     type: command
     short-summary: Gets a registration definition.
     long-summary: Gets a registration definition when given its identifier or the fully qualified resource id. When resource id is provided, the subscription paramter is ignored.
+    parameters:
+        - name: --definition
+          long-summary: |
+             The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.    
     examples:
         - name: Gets the registration definition given its identifier under the default subscription scope.
-          text: az managedservices definition show --name-or-id af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
+          text: az managedservices definition show --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
         - name: Gets the registration definition given its identifier and subscription id.
-          text: az managedservices definition show --name-or-id af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd --subscription 39033314-9b39-4c7b-84fd-0e26e55f15dc
+          text: az managedservices definition show --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd --subscription 39033314-9b39-4c7b-84fd-0e26e55f15dc
         - name: Gets the registration definition given its fully qualified resource id.
-          text: az managedservices definition show --name-or-id /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec
+          text: az managedservices definition show --definition /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec
 """
 
 helps['managedservices definition delete'] = """
     type: command
     short-summary: Deletes a registration definition.
     long-summary: Deletes a registration definition when given its identifier or the fully qualified resource id. When resource id is provided, the subscription paramter is ignored.
+    parameters:
+        - name: --definition
+          long-summary: |
+             The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.        
     examples:
         - name: Deletes the registration definition given its identifier under the default subscription scope.
-          text: az managedservices definition delete --name-or-id af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
+          text: az managedservices definition delete --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
         - name: Deletes the registration definition given its identifier and subscription id.
-          text: az managedservices definition delete --name-or-id af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd --subscription 39033314-9b39-4c7b-84fd-0e26e55f15dc
+          text: az managedservices definition delete --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd --subscription 39033314-9b39-4c7b-84fd-0e26e55f15dc
         - name: Deletes the registration definition given its fully qualified resource id.
-          text: az managedservices definition delete --name-or-id /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec
+          text: az managedservices definition delete --definition /subscriptions/39033314-9b39-4c7b-84fd-0e26e55f15dc/providers/Microsoft.ManagedServices/registrationDefinitions/1d693e4f-9e79-433a-b3a2-afce1f8b61ec
 """
 
 helps['managedservices definition list'] = """
@@ -123,24 +131,34 @@ helps['managedservices definition assignment show'] = """
     short-summary: Gets a registration assignment.
     long-summary: Gets the registration assignment given its identifier (guid) or the fully qualified resource id. When resource id is used, subscription id and resource group parameters are ignored.
     parameters:
+        - name: --assignment
+          long-summary: |
+             The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
+        - name: --include-definition
+          long-summary: |
+             When set to true, the result will include the associated definition details.
     examples:
         - name: Get an assignment given its identifier under the default subscription scope.
-          text: az managedservices definition assignment show --name-or-id d3087cf0-e180-4cca-b147-54ae00c7b504
+          text: az managedservices definition assignment show --assignment d3087cf0-e180-4cca-b147-54ae00c7b504
         - name: Get an assignment given its fully qualified resource id.
-          text: az managedservices definition assignment show --name-or-id /subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationAssignments/0c3e9687-b461-4615-b6e4-74d54998d6e4
+          text: az managedservices definition assignment show --assignment /subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationAssignments/0c3e9687-b461-4615-b6e4-74d54998d6e4
         - name: Get an assignment given its identifier under the default subscription scope with the registration definition details.
-          text: az managedservices definition assignment show --name-or-id d3087cf0-e180-4cca-b147-54ae00c7b504 --include-definition
+          text: az managedservices definition assignment show --assignment d3087cf0-e180-4cca-b147-54ae00c7b504 --include-definition true
 """
 
 helps['managedservices definition assignment delete'] = """
     type: command
     short-summary: Deletes the registration assignment.
-    long-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id. When resource id is used, subscription id and resource group parameters are ignored.
+    long-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id. 
+    parameters:
+        - name: --assignment
+          long-summary: |
+             The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.    
     examples:
         - name: Deletes an assignment given its identifier under the default subscription scope.
-          text: az managedservices definition assignment delete --name-or-id d3087cf0-e180-4cca-b147-54ae00c7b504
+          text: az managedservices definition assignment delete --assignment d3087cf0-e180-4cca-b147-54ae00c7b504
         - name: Deletes an assignment given its fully qualified resource id.
-          text: az managedservices definition assignment delete --name-or-id /subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationAssignments/0c3e9687-b461-4615-b6e4-74d54998d6e4
+          text: az managedservices definition assignment delete --assignment /subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationAssignments/0c3e9687-b461-4615-b6e4-74d54998d6e4
 """
 
 helps['managedservices definition assignment list'] = """
@@ -148,6 +166,9 @@ helps['managedservices definition assignment list'] = """
     short-summary: List all the registration assignments.
     long-summary: List all the registration assignments. Subscription id and resource group parameters can be used to override default values.
     parameters:
+        - name: --include-definition
+          long-summary: |
+             When set to true, the result will include the associated definition details.    
     examples:
         - name: Lists all the registration assignments under the default scope.
           text: az managedservices definition assignment list
@@ -156,5 +177,5 @@ helps['managedservices definition assignment list'] = """
         - name: Lists all the registration assignments under the given subscription and resource group.
           text: az managedservices definition assignment list --subscription 06bff45d-bf7d-4c1f-b826-f95cd6f34f4a --resource-group mygroup
         - name: Lists all the registration assignments under the default scope along with the associated registration definition details.
-          text: az managedservices definition assignment list --include-definition
+          text: az managedservices definition assignment list --include-definition true
 """
