@@ -22,4 +22,3 @@ def load_arguments(self, _):
     with self.argument_context('managedservices definition assignment') as c:
         c.argument('assignment', id_part='child_name_1',
                    help='The registration assignment name or the fully qualified resource id.')
-        # c.argument('include_definition', help='Optional: When provided, gets the associated registration definition details.')

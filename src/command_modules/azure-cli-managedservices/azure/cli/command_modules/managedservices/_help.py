@@ -70,7 +70,7 @@ helps['managedservices definition show'] = """
     parameters:
         - name: --definition
           long-summary: |
-             The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.    
+             The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.
     examples:
         - name: Gets the registration definition given its identifier under the default subscription scope.
           text: az managedservices definition show --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
@@ -87,7 +87,7 @@ helps['managedservices definition delete'] = """
     parameters:
         - name: --definition
           long-summary: |
-             The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.        
+             The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.
     examples:
         - name: Deletes the registration definition given its identifier under the default subscription scope.
           text: az managedservices definition delete --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
@@ -149,11 +149,11 @@ helps['managedservices definition assignment show'] = """
 helps['managedservices definition assignment delete'] = """
     type: command
     short-summary: Deletes the registration assignment.
-    long-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id. 
+    long-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id.
     parameters:
         - name: --assignment
           long-summary: |
-             The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.    
+             The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
     examples:
         - name: Deletes an assignment given its identifier under the default subscription scope.
           text: az managedservices definition assignment delete --assignment d3087cf0-e180-4cca-b147-54ae00c7b504
@@ -168,7 +168,7 @@ helps['managedservices definition assignment list'] = """
     parameters:
         - name: --include-definition
           long-summary: |
-             When set to true, the result will include the associated definition details.    
+             When set to true, the result will include the associated definition details.
     examples:
         - name: Lists all the registration assignments under the default scope.
           text: az managedservices definition assignment list

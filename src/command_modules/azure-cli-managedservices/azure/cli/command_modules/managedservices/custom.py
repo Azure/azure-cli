@@ -46,7 +46,7 @@ def cli_definition_create(cmd, client,
         description=description,
         authorizations=authorizations,
         registration_definition_name=name,
-        tenant_id=tenant_id,
+        managed_by_tenant_id=tenant_id,
         Plan=plan,
     )
 
@@ -152,8 +152,7 @@ def cli_assignment_get(cmd, client,
 # pylint: disable=unused-argument
 def cli_assignment_delete(cmd, client,
                           assignment,
-                          *kwargs):
-    # pylint: disable=E1101
+                          **kwargs):
     subscription = kwargs.pop('subscription', None)
     api_version = kwargs.pop('api_version', None)
     resource_group_name = kwargs.pop('resource_group_name', None)
