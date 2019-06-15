@@ -6,8 +6,6 @@
 # pylint: disable=line-too-long
 
 from knack.arguments import CLIArgumentType
-from azure.cli.command_modules.eventgrid.completers import (
-        get_keys_completion_list)
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_resource_name_completion_list,
@@ -47,11 +45,12 @@ domain_topic_name_type = CLIArgumentType(
     arg_type=name_type,
     options_list=['--domain-topic-name'])
 
+key_values = ['key1', 'key2']
+
 key_name_type = CLIArgumentType(
     help='Key name to regenerate, which can be either \'key1\' or \'key2\'.',
-    arg_type=name_type,
-    options_list=['--key-name'],
-    completer=get_keys_completion_list)
+    arg_type=get_enum_type(key_values),
+    options_list=['--key-name'])
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid') as c:
