@@ -9,13 +9,13 @@ import os
 
 from knack.util import CLIError
 from azure_functions_devops_build.exceptions import RoleAssignmentException
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 
 CURR_DIR = os.getcwd()
 TEST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'sample_dotnet_function'))
 
 
-class DevopsBuildCommandsTest(ScenarioTest):
+class DevopsBuildCommandsTest(LiveScenarioTest):
     def setUp(self):
         super().setUp()
         # You must be the organization owner and the subscription owner to run the following tests
