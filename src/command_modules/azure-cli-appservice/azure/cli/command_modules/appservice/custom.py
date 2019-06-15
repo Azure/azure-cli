@@ -2648,7 +2648,7 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
         create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
-def create_devops_build(
+def create_devops_pipeline(
         cmd,
         functionapp_name=None,
         organization_name=None,

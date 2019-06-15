@@ -9,25 +9,27 @@ import os
 
 from knack.util import CLIError
 from azure_functions_devops_build.exceptions import RoleAssignmentException
-from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 
 CURR_DIR = os.getcwd()
 TEST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'sample_dotnet_function'))
 
 
-class DevopsBuildCommandsTest(LiveScenarioTest):
+class DevopsBuildCommandsTest(ScenarioTest):
     def setUp(self):
         super().setUp()
+        # You must be the organization owner and the subscription owner to run the following tests
         # 1. Install devops extension 'az extension add --name azure-devops'
-        # 2. To login with 'az login' and 'az devops login' to run the tests (devops extension required)
-        # 3. Must be the organization owner and the subscription owner to run the test
-        self.azure_devops_organization = "azure-functions-devops-build-test"
+        # 2. Login with 'az login'
+        # 3. Go to dev.azure.com apply for a personal access token, and login with 'az devops login'
+        # 4. Change the self.azure_devops_organization to your Azure DevOps organization
+        self.azure_devops_organization = "<Your DevOps Organization>"
         self.os_type = "Windows"
         self.runtime = "dotnet"
 
-        self.functionapp = self.create_random_name(prefix='functionapp-e2e', length=24)
-        self.azure_devops_project = self.create_random_name(prefix='test-project-e2e', length=24)
-        self.azure_devops_repository = self.create_random_name(prefix='test-repository-e2e', length=24)
+        self.functionapp = self.create_random_name(prefix='test-functionapp-', length=24)
+        self.azure_devops_project = self.create_random_name(prefix='test-project-', length=24)
+        self.azure_devops_repository = self.create_random_name(prefix='test-repository-', length=24)
 
         self.kwargs.update({
             'ot': self.os_type,
@@ -45,11 +47,10 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
 
         # Test devops build command
         try:
-            result = self.cmd('functionapp devops-build create --organization-name {org} --project-name {proj}'
+            result = self.cmd('functionapp devops-pipeline create --organization-name {org} --project-name {proj}'
                               ' --repository-name {repo} --functionapp-name {fn} --allow-force-push true'
                               ' --overwrite-yaml true').get_output_in_json()
 
-            self.assertEqual(result['functionapp_name'], self.functionapp)
             self.assertEqual(result['functionapp_name'], self.functionapp)
             self.assertEqual(result['organization_name'], self.azure_devops_organization)
             self.assertEqual(result['project_name'], self.azure_devops_project)
@@ -68,7 +69,7 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
 
         # Test devops build command (mismatched local_runtime:dotnet vs remote_runtime:node)
         try:
-            self.cmd('functionapp devops-build create --organization-name {org} --project-name {proj} '
+            self.cmd('functionapp devops-pipeline create --organization-name {org} --project-name {proj} '
                      '--repository-name {repo} --functionapp-name {fn} --allow-force-push true '
                      '--overwrite-yaml true', expect_failure=True)
         finally:
@@ -79,11 +80,15 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
     def test_devops_build_mismatch_functionapp(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
 
+        # Overwrite functionapp name to use a mismatched value
+        self.kwargs.update({'fn': self.create_random_name(prefix='mismatch', length=24)})
+
         try:
-            self.cmd('functionapp devops-build create --functionapp-name {mismatch}'.format(
-                mismatch=self.create_random_name(prefix='mismatch_fn', length=24)
-            ), expect_failure=True)
+            self.cmd('functionapp devops-pipeline create --organization-name {org} --project-name {proj} '
+                     '--repository-name {repo} --functionapp-name {fn} --allow-force-push true '
+                     '--overwrite-yaml true', expect_failure=True)
         finally:
+            self.kwargs.update({'fn': self.functionapp})
             self._tearDownDevopsEnvironment()
 
     @ResourceGroupPreparer()
@@ -91,12 +96,15 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
     def test_devops_build_mismatch_organization(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
 
+        # Overwrite organization name to use a mismatched value
+        self.kwargs.update({'org': self.create_random_name(prefix='mismatch', length=24)})
+
         try:
-            self.cmd('functionapp devops-build create --functionapp-name {fn} --organization-name {mismatch}'.format(
-                fn=self.functionapp,
-                mismatch=self.create_random_name(prefix='mismatch_org', length=24)
-            ), expect_failure=True)
+            self.cmd('functionapp devops-pipeline create --organization-name {org} --project-name {proj} '
+                     '--repository-name {repo} --functionapp-name {fn} --allow-force-push true '
+                     '--overwrite-yaml true', expect_failure=True)
         finally:
+            self.kwargs.update({'org': self.azure_devops_organization})
             self._tearDownDevopsEnvironment()
 
     @ResourceGroupPreparer()
@@ -104,15 +112,15 @@ class DevopsBuildCommandsTest(LiveScenarioTest):
     def test_devops_build_mismatch_project(self, resource_group, resource_group_location, storage_account_for_test):
         self._setUpDevopsEnvironment(resource_group, resource_group_location, storage_account_for_test)
 
+        # Overwrite project name to use a mismatched value
+        self.kwargs.update({'proj': self.create_random_name(prefix='mismatch', length=24)})
+
         try:
-            self.cmd('functionapp devops-build create --functionapp-name {fn} --organization-name {org} '
-                     '--project-name {mismatch}'.format(
-                         fn=self.functionapp,
-                         org=self.azure_devops_organization,
-                         mismatch=self.create_random_name(prefix='mismatch_org', length=24)),
-                     expect_failure=True
-                     )
+            self.cmd('functionapp devops-pipeline create --organization-name {org} --project-name {proj} '
+                     '--repository-name {repo} --functionapp-name {fn} --allow-force-push true '
+                     '--overwrite-yaml true', expect_failure=True)
         finally:
+            self.kwargs.update({'proj': self.azure_devops_project})
             self._tearDownDevopsEnvironment()
 
     # Devops environment utilities
