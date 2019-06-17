@@ -46,8 +46,6 @@ _RAW_CLI_ISSUES_URL = "https://github.com/Azure/azure-cli/issues/new"
 _EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
 _RAW_EXTENSIONS_ISSUES_URL = "https://github.com/Azure/azure-cli-extensions/issues/new"
 
-_EXTENSION_REPOS_URL_TO_ISSUES_URL = '/issues/new'  
-
 _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
     'For more information on getting started, visit: {}\n' \
@@ -556,15 +554,17 @@ def _build_issue_info_tup(command_log_file=None):
     logger.debug("Total minified issue length is %s", len(minified_issue_body))
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
-    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), formatted_issues_url, original_issue_body
+    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), formatted_issues_url, original_issue_body, is_ext
 
 
 def  _get_extension_repo_url(ext_name, raw=False):
+    _GITHUB_URL_STR = 'https://github.com'
+    _NEW_ISSUES_STR = '/issues/new'
     try:
         project_url = resolve_project_url_from_index(extension_name=ext_name)
-        if 'https://github.com' in project_url:
-            return project_url.strip('/') + _EXTENSION_REPOS_URL_TO_ISSUES_URL
-    except BaseException as ex:
+        if _GITHUB_URL_STR in project_url:
+            return project_url.strip('/') + _NEW_ISSUES_STR
+    except CLIError as ex:
         # since this is going to feedback let it fall back to the generic extensions repo
         logger.debug(ex)
     return _RAW_EXTENSIONS_ISSUES_URL if raw else _EXTENSIONS_ISSUES_URL
@@ -719,20 +719,21 @@ def _prompt_issue(recent_command_list):
 
             # strip to short form
             ans = ans[0].lower() if ans else None
+    
+    is_ext = None
 
     if ans in ["y", "n"]:
         if ans == "y":
-            prefix, url, original_issue = _build_issue_info_tup()
+            prefix, url, original_issue, is_ext = _build_issue_info_tup()
         else:
             return False
     else:
         if ans in ["q", "quit"]:
             return False
         if ans == 0:
-            prefix, url, original_issue = _build_issue_info_tup()
+            prefix, url, original_issue, is_ext = _build_issue_info_tup()
         else:
-            prefix, url, original_issue = _build_issue_info_tup(recent_command_list[ans])
-
+            prefix, url, original_issue, is_ext = _build_issue_info_tup(recent_command_list[ans])
     print(prefix)
 
     # open issues page in browser and copy issue body to clipboard
@@ -741,8 +742,11 @@ def _prompt_issue(recent_command_list):
     #     pyperclip.copy(original_issue)
     # except pyperclip.PyperclipException as ex:
     #     logger.debug(ex)
-
     logger.info(original_issue)
+
+    logger.info('You can also file the issue in the Azure CLI %s repository by opening %s in the browser.',
+                'Extensions' if is_ext else '',
+                _EXTENSIONS_ISSUES_URL if is_ext else _CLI_ISSUES_URL)
     open_page_in_browser(url)
 
     return True
