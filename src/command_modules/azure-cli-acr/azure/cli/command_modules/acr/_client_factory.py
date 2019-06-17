@@ -7,6 +7,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 VERSION_2017_10_GA = "2017-10-01"
 
+
 def get_arm_service_client(cli_ctx):
     """Returns the client for managing ARM resources. """
     from azure.mgmt.resource import ResourceManagementClient

@@ -71,7 +71,7 @@ class AcrTaskCommandsTests(ScenarioTest):
         response = self.cmd('acr task run -n {task_no_context} -r {registry_name} --no-logs',
                             checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                                     self.check('status', 'Succeeded')]).get_output_in_json()
-        
+
         # trigger a run from the task
         response = self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
                             checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
