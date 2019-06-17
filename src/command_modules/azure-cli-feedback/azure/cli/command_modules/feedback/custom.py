@@ -21,7 +21,7 @@ from knack.log import get_logger
 from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
 
-from azure.cli.core.extension._resolve import resolve_project_url_from_index
+from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
 from azure.cli.core.util import get_az_version_string, open_page_in_browser
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 
@@ -41,10 +41,10 @@ _GET_STARTED_URL = "aka.ms/azcli/get-started"
 _QUESTIONS_URL = "aka.ms/azcli/questions"
 
 _CLI_ISSUES_URL = "aka.ms/azcli/issues"
-_RAW_CLI_ISSUES_URL = "https://github.com/Azure/azure-cli/issues/new"
+_RAW_CLI_ISSUES_URL = "https://github.com/azure/azure-cli/issues/new"
 
 _EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
-_RAW_EXTENSIONS_ISSUES_URL = "https://github.com/Azure/azure-cli-extensions/issues/new"
+_RAW_EXTENSIONS_ISSUES_URL = "https://github.com/azure/azure-cli-extensions/issues/new"
 
 _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
@@ -526,6 +526,7 @@ def _build_issue_info_tup(command_log_file=None):
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
 
     pretty_url_name = _get_extension_repo_url(ext_name) if is_ext else _CLI_ISSUES_URL
+
     # get issue body without minification
     original_issue_body = _ISSUES_TEMPLATE.format(**format_dict)
 
@@ -563,8 +564,12 @@ def _get_extension_repo_url(ext_name, raw=False):
     try:
         project_url = resolve_project_url_from_index(extension_name=ext_name)
         if _GITHUB_URL_STR in project_url:
-            return project_url.strip('/') + _NEW_ISSUES_STR
-    except CLIError as ex:
+            raw_url = project_url.lower().strip('/') + _NEW_ISSUES_STR
+            # Prettify the url for cli extensions repo
+            if not raw and raw_url == _RAW_EXTENSIONS_ISSUES_URL:
+                return _EXTENSIONS_ISSUES_URL
+            return raw_url
+    except (CLIError, NoExtensionCandidatesError) as ex:
         # since this is going to feedback let it fall back to the generic extensions repo
         logger.debug(ex)
     return _RAW_EXTENSIONS_ISSUES_URL if raw else _EXTENSIONS_ISSUES_URL

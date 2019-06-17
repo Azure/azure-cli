@@ -12,7 +12,8 @@ import unittest
 from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
 from azure.cli.command_modules.feedback.custom import (_get_command_log_files, _build_issue_info_tup,
-                                                       _CLI_ISSUES_URL, _EXTENSIONS_ISSUES_URL)
+                                                       _get_extension_repo_url, _CLI_ISSUES_URL,
+                                                       _EXTENSIONS_ISSUES_URL, _RAW_EXTENSIONS_ISSUES_URL)
 from azure.cli.core.commands import AzCliCommand
 
 from azure.cli.testsdk import ScenarioTest
@@ -65,6 +66,29 @@ class TestCommandLogFile(ScenarioTest):
         self._helper_test_log_metadata_correct()
         self._helper_test_log_contents_correct()
         self._helper_test_build_issue_info()
+        self._helper_test_get_repository_url_pretty()
+        self._helper_test_get_repository_url_raw()
+        self._helper_test_get_repository_url_with_no_extension_match_pretty()
+        self._helper_test_get_repository_url_with_no_extension_match_raw()
+
+    def _helper_test_get_repository_url_pretty(self):
+        # default behaviour is pretty url
+        repo_url = _get_extension_repo_url('alias')
+        self.assertEqual(_EXTENSIONS_ISSUES_URL, repo_url)
+
+    def _helper_test_get_repository_url_raw(self):
+        repo_url = _get_extension_repo_url('alias', raw=True)
+        self.assertEqual(_RAW_EXTENSIONS_ISSUES_URL, repo_url)
+
+    def _helper_test_get_repository_url_with_no_extension_match_pretty(self):
+        # default behaviour is pretty url
+        repo_url = _get_extension_repo_url('wrong_ext_name')
+        self.assertEqual(_EXTENSIONS_ISSUES_URL, repo_url)
+
+    def _helper_test_get_repository_url_with_no_extension_match_raw(self):
+        # default behaviour is pretty url
+        repo_url = _get_extension_repo_url('wrong_ext_name', raw=True)
+        self.assertEqual(_RAW_EXTENSIONS_ISSUES_URL, repo_url)
 
     def _helper_test_log_metadata_correct(self):
         time_now = datetime.datetime.now()

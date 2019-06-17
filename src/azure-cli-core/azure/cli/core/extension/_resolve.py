@@ -54,6 +54,9 @@ def _is_greater_than_cur_version(cur_version):
 
 
 def resolve_from_index(extension_name, cur_version=None, index_url=None):
+    """
+    Gets the download Url and digest for the matching extension
+    """
     candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
     if not candidates:
         raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
@@ -77,9 +80,12 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
 
 
 def resolve_project_url_from_index(extension_name):
+    """
+    Gets the project url of the matching extension from the index
+    """
     candidates = get_index_extensions().get(extension_name, [])
     if not candidates:
-        raise CLIError("No extension found with name '{}'".format(extension_name))
+        raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
     try:
         return candidates[0]['metadata']['extensions']['python.details']['project_urls']['Home']
     except KeyError as ex:
