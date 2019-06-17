@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
 # converted to live test until #8588 is resolved
-class AcrTaskCommandsTests(LiveScenarioTest):
+class AcrTaskCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_acr_task(self, resource_group):
@@ -15,13 +15,13 @@ class AcrTaskCommandsTests(LiveScenarioTest):
             'registry_name': self.create_random_name('clireg', 20),
             'task_name': 'testTask',
             'task_no_context': 'contextlessTask',
-            'rg_loc': 'westcentralus',
+            'rg_loc': 'westus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': 'c79e207682b7aeea3d94313f66f0dc328c1c4a62',
+            'git_access_token': '39435069783346fc3df98b42401344bb2c22ec00',
             'no_context': '/dev/null',
-            'context': 'https://github.com/ankurkhemani/acr-helloworld.git',
-            'file': './AcrHelloworld/Dockerfile',
+            'context': 'https://github.com/jaysterp/acr-build-helloworld-node.git',
+            'file': 'Dockerfile',
             'image': 'testtask:v1',
             'existing_image': 'bash',
             'commit_trigger_status': 'Enabled',
@@ -39,7 +39,7 @@ class AcrTaskCommandsTests(LiveScenarioTest):
         self.cmd('acr task create -n {task_name} -r {registry_name} --git-access-token {git_access_token} --context {context} --image {image} -f {file}',
                  checks=[self.check('name', '{task_name}'),
                          self.check('location', '{rg_loc}'),
-                         self.check('platform.os', 'Linux'),
+                         self.check('platform.os', 'linux'),
                          self.check('agentConfiguration.cpu', 2),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('status', 'Enabled'),
@@ -55,24 +55,23 @@ class AcrTaskCommandsTests(LiveScenarioTest):
 
         # Create a contextless task.
         self.cmd('acr task create -n {task_no_context} -r {registry_name} --cmd {existing_image} -c {no_context}',
-                 checks=[self.check('name', '{task_name}'),
+                 checks=[self.check('name', '{task_no_context}'),
                          self.check('location', '{rg_loc}'),
-                         self.check('platform.os', 'Linux'),
+                         self.check('platform.os', 'linux'),
                          self.check('agentConfiguration.cpu', 2),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('status', 'Enabled'),
                          self.check('timeout', 3600),
-                         self.check('step.isPushEnabled', True),
-                         self.check('step.noCache', False)])
-
+                         self.check('step.type', 'EncodedTask')])
+        # list tasks
         self.cmd('acr task list -r {registry_name}',
                  checks=[self.check('[0].name', '{task_name}')])
 
         # trigger a run for the contextless task
-        response = self.cmd('acr task run -n {task_no_context} -r {registry_name}',
+        response = self.cmd('acr task run -n {task_no_context} -r {registry_name} --no-logs',
                             checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
                                     self.check('status', 'Succeeded')]).get_output_in_json()
-
+        
         # trigger a run from the task
         response = self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs',
                             checks=[self.check('type', 'Microsoft.ContainerRegistry/registries/runs'),
@@ -93,9 +92,9 @@ class AcrTaskCommandsTests(LiveScenarioTest):
                  checks=[self.check('name', '{task_name}')])
 
         # update the first task using non-default parameter values
-        self.cmd('acr task update -n {task_name} -r {registry_name} --cpu 1',
+        self.cmd('acr task update -n {task_name} -r {registry_name} --branch test_branch',
                  checks=[self.check('name', '{task_name}'),
-                         self.check('agentConfiguration.cpu', 1)])
+                         self.check('trigger.sourceTriggers[0].sourceRepository.branch', 'test_branch')])
 
         # update a run of the first task
         self.cmd('acr task update-run -r {registry_name} --run-id {run_id} --no-archive false',
@@ -113,7 +112,7 @@ class AcrTaskCommandsTests(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_run(self, resource_group):
         self.kwargs.update({
-            'rg_loc': 'westcentralus',
+            'rg_loc': 'westus',
             'sku': 'Standard',
             'registry_name': self.create_random_name('runreg', 20),
             'command': '"docker ps"',

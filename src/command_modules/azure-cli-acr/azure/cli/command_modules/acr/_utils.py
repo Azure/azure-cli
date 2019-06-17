@@ -26,6 +26,8 @@ from ._client_factory import (
     get_acr_service_client
 )
 
+VERSION_2017_10_GA = "2017-10-01"
+
 logger = get_logger(__name__)
 
 
@@ -102,7 +104,7 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """
     resource_group_name = get_resource_group_name_by_registry_name(
         cli_ctx, registry_name, resource_group_name)
-    client = get_acr_service_client(cli_ctx).registries
+    client = get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
 
@@ -111,7 +113,7 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
     """Returns a Registry object for the specified name.
     :param str name: either the registry name or the login server of the registry.
     """
-    client = get_acr_service_client(cli_ctx).registries
+    client = get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
     registry_list = client.list()
 
     if registry_name:

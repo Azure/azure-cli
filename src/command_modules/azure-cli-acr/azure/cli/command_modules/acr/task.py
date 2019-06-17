@@ -719,8 +719,8 @@ def acr_task_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    from ._client_factory import cf_acr_registries
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries_tasks
+    client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     TaskRunRequest = cmd.get_models('TaskRunRequest')
 
     queued_run = LongRunningOperation(cmd.cli_ctx)(
