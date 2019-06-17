@@ -75,6 +75,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
         raise NoExtensionCandidatesError("No download url found.")
     return download_url, digest
 
+
 def resolve_project_url_from_index(extension_name):
     candidates = get_index_extensions().get(extension_name, [])
     if not candidates:

@@ -557,7 +557,7 @@ def _build_issue_info_tup(command_log_file=None):
     return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), formatted_issues_url, original_issue_body, is_ext
 
 
-def  _get_extension_repo_url(ext_name, raw=False):
+def _get_extension_repo_url(ext_name, raw=False):
     _GITHUB_URL_STR = 'https://github.com'
     _NEW_ISSUES_STR = '/issues/new'
     try:
@@ -719,7 +719,7 @@ def _prompt_issue(recent_command_list):
 
             # strip to short form
             ans = ans[0].lower() if ans else None
-    
+
     is_ext = None
 
     if ans in ["y", "n"]:
