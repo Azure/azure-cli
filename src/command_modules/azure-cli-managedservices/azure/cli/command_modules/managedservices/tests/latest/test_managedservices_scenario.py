@@ -33,9 +33,7 @@ class ManagedServicesTests(ScenarioTest):
 
         # put definition
         result = self.cmd(
-            'az managedservices definition create --name {name} --tenant-id  {tenant-id} '
-            '--principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {'
-            'definition-id} --subscription {subscription-id}').get_output_in_json()
+            'az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id} --subscription {subscription-id}').get_output_in_json()
 
         self.assertTrue(result['name'], definition_id)
         self.assertTrue(result['properties'] is not None)
@@ -46,8 +44,7 @@ class ManagedServicesTests(ScenarioTest):
         self.assertTrue(result['properties']['authorizations'][0]['principalId'], principal_id)
 
         # get definition
-        self.cmd('az managedservices definition show --definition {definition-id} --subscription {'
-                 'subscription-id}',
+        self.cmd('az managedservices definition show --definition {definition-id} --subscription {subscription-id}',
                  checks=[
                      self.check('name', '{definition-id}'), ])
 
@@ -61,17 +58,14 @@ class ManagedServicesTests(ScenarioTest):
         })
         # put assignment
         result = self.cmd(
-            'az managedservices definition assignment create --definition-id {'
-            'registration-definition-resource-id} --assignment-id {assignment-id} '
-            '--subscription {subscription-id}').get_output_in_json()
+            'az managedservices definition assignment create --definition-id {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}').get_output_in_json()
         self.assertTrue(result['name'], assignment_id)
         self.assertTrue(result['properties'] is not None)
         self.assertTrue(result['properties']['provisioningState'], "Succeeded")
         self.assertTrue(result['properties']['registrationDefinitionId'], definition_resource_id)
 
         # get assignment
-        self.cmd('az managedservices definition assignment show --assignment {assignment-id} --subscription {'
-                 'subscription-id}',
+        self.cmd('az managedservices definition assignment show --assignment {assignment-id} --subscription {subscription-id}',
                  checks=[
                      self.check('name', '{assignment-id}'), ])
 
@@ -88,8 +82,7 @@ class ManagedServicesTests(ScenarioTest):
             self.assertTrue(assignment_id not in assignments)
 
         # delete definition
-        self.cmd('az managedservices definition delete --definition {definition-id} --subscription {'
-                 'subscription-id}')
+        self.cmd('az managedservices definition delete --definition {definition-id} --subscription {subscription-id}')
 
         # list definitions
         definitions_list = self.cmd(
