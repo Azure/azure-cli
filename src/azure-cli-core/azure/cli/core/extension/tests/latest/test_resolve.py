@@ -23,7 +23,7 @@ class IndexPatch(object):
 
 
 def mock_ext(filename, version=None, download_url=None, digest=None, project_url=None):
-    return {'filename': filename, 'metadata': {'version': version, 'extensions': {'python.details': {'project_urls':{'Home': project_url or 'https://github.com/azure/some-extension'}}}}, 'downloadUrl': download_url or 'http://contoso.com/{}'.format(filename), 'sha256Digest': digest}
+    return {'filename': filename, 'metadata': {'version': version, 'extensions': {'python.details': {'project_urls': {'Home': project_url or 'https://github.com/azure/some-extension'}}}}, 'downloadUrl': download_url or 'http://contoso.com/{}'.format(filename), 'sha256Digest': digest}
 
 
 class TestResolveFromIndex(unittest.TestCase):
@@ -120,6 +120,7 @@ class TestResolveProjectUrlFromIndex(unittest.TestCase):
         index_data = {name: [mock_ext('myext-0.0.1-py2.py3-none-any.whl', '0.0.1')]}
         with IndexPatch(index_data):
             self.assertEqual(resolve_project_url_from_index(name), index_data[name][0]['metadata']['extensions']['python.details']['project_urls']['Home'])
+
 
 if __name__ == '__main__':
     unittest.main()
