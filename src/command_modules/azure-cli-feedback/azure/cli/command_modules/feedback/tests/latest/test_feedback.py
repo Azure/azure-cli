@@ -134,16 +134,17 @@ class TestCommandLogFile(ScenarioTest):
         command_log_files = _get_command_log_files(self.cli_ctx)
 
         log_file = command_log_files[0]
-        issue_prefix, _, original_issue_body = _build_issue_info_tup(log_file)
+        issue_prefix, _, original_issue_body, is_ext = _build_issue_info_tup(log_file)
         items.append((log_file, original_issue_body))
         self.assertTrue(_CLI_ISSUES_URL in issue_prefix)
 
         log_file = command_log_files[2]
-        issue_prefix, _, original_issue_body = _build_issue_info_tup(log_file)
+        issue_prefix, _, original_issue_body, is_ext = _build_issue_info_tup(log_file)
         items.append((log_file, original_issue_body))
         self.assertTrue(_EXTENSIONS_ISSUES_URL in issue_prefix)
         self.assertTrue(log_file.command_data_dict["extension_name"] in original_issue_body)
         self.assertTrue(log_file.command_data_dict["extension_version"] in original_issue_body)
+        self.assertTrue(is_ext)
 
         for log_file, original_issue_body in items:
             self.assertTrue(log_file.get_command_name_str() in original_issue_body)
