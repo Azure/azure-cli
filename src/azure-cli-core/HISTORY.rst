@@ -3,7 +3,9 @@
 Release History
 ===============
 
-* [Breaking Change]: Not support min_profile any more, use resource type instead.
+2.0.67
+++++++
+* BREAKING CHANGE: `min_profile` kwarg is no longer supported. Use `resource_type` instead.
 
 2.0.66
 ++++++
