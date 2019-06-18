@@ -6,7 +6,6 @@
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
 
 
-# converted to live test until #8588 is resolved
 class AcrTaskCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
