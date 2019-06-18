@@ -46,6 +46,13 @@ domain_topic_name_type = CLIArgumentType(
     arg_type=name_type,
     options_list=['--domain-topic-name'])
 
+key_values = ['key1', 'key2']
+
+key_name_type = CLIArgumentType(
+    help='Key name to regenerate, which can be either \'key1\' or \'key2\'.',
+    arg_type=get_enum_type(key_values),
+    options_list=['--key-name'])
+
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
     with self.argument_context('eventgrid') as c:
@@ -72,6 +79,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid topic key') as c:
         c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part=None, completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('key_name', arg_type=key_name_type)
 
     with self.argument_context('eventgrid topic list') as c:
         c.argument('odata_query', arg_type=odata_query_type, id_part=None)
@@ -84,6 +92,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     with self.argument_context('eventgrid domain key') as c:
         c.argument('domain_name', arg_type=domain_name_type, options_list=['--name', '-n'], id_part=None)
+        c.argument('key_name', arg_type=key_name_type)
 
     with self.argument_context('eventgrid domain topic') as c:
         c.argument('domain_name', arg_type=domain_name_type, id_part='name')

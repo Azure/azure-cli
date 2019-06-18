@@ -169,10 +169,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('set_value', options_list=['--set'], help="Task value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret task value in '--set-secret name[=value]' format. Multiples supported by passing --set-secret multiple times.", action='append', validator=validate_set_secret)
 
-        # Source Trigger parameters
+        # Trigger parameters
         c.argument('source_trigger_name', help="The name of the source trigger.")
         c.argument('commit_trigger_enabled', help="Indicates whether the source control commit trigger is enabled.", arg_type=get_three_state_flag())
         c.argument('pull_request_trigger_enabled', help="Indicates whether the source control pull request trigger is enabled.", arg_type=get_three_state_flag())
+        c.argument('schedule', help="Schedule for a timer trigger represented as a cron expression. An optional trigger name can be specified using `--schedule name:schedule` format. Multiples supported by passing --schedule multiple times.", action='append')
         c.argument('git_access_token', help="The access token used to access the source control provider.")
         c.argument('branch', help="The source control branch name.")
         c.argument('base_image_trigger_name', help="The name of the base image trigger.")
@@ -206,6 +207,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('username', options_list=['--username', '-u'], help="The username to login to the custom registry. This can be plain text or a key vault secret URI.")
             c.argument('password', options_list=['--password', '-p'], help="The password to login to the custom registry. This can be plain text or a key vault secret URI.")
             c.argument('use_identity', help="The task managed identity used for the credential. Use '[system]' to refer to the system-assigned identity or a client id to refer to a user-assigned identity.")
+
+    with self.argument_context('acr task timer') as c:
+        # Timer trigger parameters
+        c.argument('timer_name', help="The name of the timer trigger.", required=True)
+        c.argument('schedule', help="The schedule of the timer trigger represented as a cron expression.")
+        c.argument('enabled', help="Indicates whether the timer trigger is enabled.", arg_type=get_three_state_flag())
 
     with self.argument_context('acr helm') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))

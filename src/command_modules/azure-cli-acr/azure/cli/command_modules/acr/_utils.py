@@ -26,6 +26,8 @@ from ._client_factory import (
     get_acr_service_client
 )
 
+VERSION_2017_10_GA = "2017-10-01"
+
 logger = get_logger(__name__)
 
 
@@ -102,7 +104,7 @@ def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """
     resource_group_name = get_resource_group_name_by_registry_name(
         cli_ctx, registry_name, resource_group_name)
-    client = get_acr_service_client(cli_ctx).registries
+    client = get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
 
@@ -111,7 +113,7 @@ def get_registry_from_name_or_login_server(cli_ctx, login_server, registry_name=
     """Returns a Registry object for the specified name.
     :param str name: either the registry name or the login server of the registry.
     """
-    client = get_acr_service_client(cli_ctx).registries
+    client = get_acr_service_client(cli_ctx, VERSION_2017_10_GA).registries
     registry_list = client.list()
 
     if registry_name:
@@ -495,6 +497,48 @@ def get_custom_registry_credentials(cmd,
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
     )
+
+
+def build_timers_info(cmd, schedules):
+    TimerTrigger, TriggerStatus = cmd.get_models(
+        'TimerTrigger', 'TriggerStatus')
+    timer_triggers = []
+
+    # Provide a default name for the timer if no name was provided.
+    for index, schedule in enumerate(schedules, start=1):
+        split_schedule = None
+        if ':' in schedule:
+            split_schedule = schedule.split(":")
+        timer_triggers.append(
+            TimerTrigger(
+                name=(split_schedule[0] if split_schedule else "t" + str(index)).strip(),
+                status=TriggerStatus.enabled.value,
+                schedule=split_schedule[1] if split_schedule else schedule
+            ))
+    return timer_triggers
+
+
+def remove_timer_trigger(task_name,
+                         timer_name,
+                         timer_triggers):
+    """Remove the timer trigger from the list of existing timer triggers for a task.
+    :param str task_name: The name of the task
+    :param str timer_name: The name of the timer trigger to be removed
+    :param str timer_triggers: The list of existing timer_triggers for a task
+    """
+
+    if not timer_triggers:
+        raise CLIError("No timer triggers exist for the task '{}'.".format(task_name))
+
+    # Check that the timer trigger exists in the list and if not exit
+    if any(timer.name == timer_name for timer in timer_triggers):
+        for timer in timer_triggers:
+            if timer.name == timer_name:
+                timer_triggers.remove(timer)
+    else:
+        raise CLIError("The timer '{}' does not exist for the task '{}'.".format(timer_name, task_name))
+
+    return timer_triggers
 
 
 def is_vault_secret(cmd, credential):

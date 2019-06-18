@@ -18,7 +18,7 @@ from ._utils import (
     get_custom_registry_credentials,
     get_yaml_and_values
 )
-from ._client_factory import cf_acr_registries
+from ._client_factory import cf_acr_registries_tasks
 from ._archive_utils import upload_source_code, check_remote_source_code
 
 RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
@@ -53,7 +53,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             "--cmd myCommand /dev/null or "
             "-f myFile mySourceLocation, but not both.")
 
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     source_location = prepare_source_location(
         source_location, client_registries, registry_name, resource_group_name)
 
