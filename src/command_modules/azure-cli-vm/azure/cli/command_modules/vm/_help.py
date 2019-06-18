@@ -1207,6 +1207,9 @@ long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/
 helps['vm run-command invoke'] = """
 type: command
 short-summary: Execute a specific run command on a vm.
+long-summary: >
+    `az vm run-command show` returns helpful information on each run-command.
+    Discover Run command-id's via `az vmss run-command list`
 parameters:
   - name: --command-id
     type: string
@@ -1214,10 +1217,27 @@ parameters:
     populator-commands:
       - az vm run-command list
 examples:
-  - name: install nginx on a vm
+  - name: Install nginx on a linux VM.
     text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
-  - name: invoke command with parameters
+  - name: Run shell command on a linux VM with parameters.
     text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
+  - name: Run powershell script on a windows VM with parameters. Script supplied inline. Be wary of single-quoting in CMD.exe.
+    text: |-
+        az vm run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+            --scripts 'param([string]$arg1,[string]$arg2)' \\
+            'Write-Host This is a sample script with parameters $arg1 and $arg2' \\
+            --parameters 'arg1=somefoo' 'arg2=somebar'
+  - name: Run powershell script on a windows VM with parameters. Script supplied from file.
+    text: |-
+        # script.ps1
+        #   param(
+        #       [string]$arg1,
+        #       [string]$arg2
+        #   )
+        #   Write-Host This is a sample script with parameters $arg1 and $arg2
+
+        az vm run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+            --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar"
 """
 
 helps['vm run-command show'] = """
@@ -1809,6 +1829,9 @@ long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/
 helps['vmss run-command invoke'] = """
 type: command
 short-summary: Execute a specific run command on a Virtual Machine Scale Set instance.
+long-summary: >
+    `az vmss run-command show` returns helpful information on each run-command.
+    Discover Run command-id's via `az vmss run-command list`
 parameters:
   - name: --command-id
     type: string
@@ -1818,15 +1841,32 @@ parameters:
   - name: --instance-id
     short-summary: Scale set VM instance id.
 examples:
-  - name: install nginx on a VMSS instance
+  - name: Install nginx on a VMSS instance.
     text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 0 --scripts "sudo apt-get update && sudo apt-get install -y nginx"
-  - name: invoke a run-command with parameters on a VMSS instance
+  - name: Invoke a run-command with parameters on a VMSS instance.
     text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
-  - name: 'invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
-    text: |
+  - name: 'Invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
+    text: |-
         az vmss list-instances -n MyVMSS -g ova-test --query "[].id" --output tsv | \\
         az vmss run-command invoke --scripts 'echo $1 $2' --parameters hello world  \\
             --command-id RunShellScript --ids @-
+  - name: Run powershell script on a windows VMSS instance with parameters. Script supplied inline. Be wary of single-quoting in CMD.exe.
+    text: |-
+        az vmss run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+            --scripts 'param([string]$arg1,[string]$arg2)' \\
+            'Write-Host This is a sample script with parameters $arg1 and $arg2' \\
+            --parameters 'arg1=somefoo' 'arg2=somebar' --instance-id 2
+  - name: Run powershell script on a windows VMSS instance with parameters. Script supplied from file.
+    text: |-
+        # script.ps1
+        #   param(
+        #       [string]$arg1,
+        #       [string]$arg2
+        #   )
+        #   Write-Host This is a sample script with parameters $arg1 and $arg2
+
+        az vmss run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
+            --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar" --instance-id 5
 """
 
 helps['vmss run-command show'] = """
