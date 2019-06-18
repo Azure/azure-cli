@@ -17,15 +17,12 @@ class AcrTaskCommandsTests(ScenarioTest):
             'task_no_context': 'contextlessTask',
             'rg_loc': 'westus',
             'sku': 'Standard',
-            # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': 'a7be73a883b7f3d6d4faffb44f627c0775cc3120',
             'no_context': '/dev/null',
-            'context': 'https://github.com/jaysterp/acr-build-helloworld-node.git',
+            'context': 'https://github.com/SteveLasker/node-helloworld',
             'file': 'Dockerfile',
             'image': 'testtask:v1',
             'existing_image': 'bash',
-            'commit_trigger_status': 'Enabled',
-            'git_source_control_type': 'Github'
+            'trigger_enabled': 'False',
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
@@ -36,7 +33,7 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded')])
 
         # Create a docker build task.
-        self.cmd('acr task create -n {task_name} -r {registry_name} --git-access-token {git_access_token} --context {context} --image {image} -f {file}',
+        self.cmd('acr task create -n {task_name} -r {registry_name} --context {context} --image {image} -f {file} --commit-trigger-enabled {trigger_enabled} --pull-request-trigger-enabled {trigger_enabled}',
                  checks=[self.check('name', '{task_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('platform.os', 'linux'),
@@ -44,9 +41,6 @@ class AcrTaskCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('status', 'Enabled'),
                          self.check('timeout', 3600),
-                         self.check('trigger.sourceTriggers[0].sourceRepository.repositoryUrl', '{context}'),
-                         self.check('trigger.sourceTriggers[0].sourceRepository.sourceControlType', '{git_source_control_type}'),
-                         self.check('trigger.sourceTriggers[0].status', '{commit_trigger_status}'),
                          self.check('step.dockerFilePath', '{file}'),
                          self.check('step.imageNames', ['testtask:v1']),
                          self.check('step.arguments', []),
@@ -92,9 +86,10 @@ class AcrTaskCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{task_name}')])
 
         # update the first task using non-default parameter values
-        self.cmd('acr task update -n {task_name} -r {registry_name} --branch test_branch',
+        self.cmd('acr task update -n {task_name} -r {registry_name} --platform linux/arm',
                  checks=[self.check('name', '{task_name}'),
-                         self.check('trigger.sourceTriggers[0].sourceRepository.branch', 'test_branch')])
+                         self.check('platform.os', 'linux'),
+                         self.check('platform.architecture', 'arm')])
 
         # update a run of the first task
         self.cmd('acr task update-run -r {registry_name} --run-id {run_id} --no-archive false',
