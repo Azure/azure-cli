@@ -27,34 +27,34 @@ helps['managedservices definition create'] = """
     long-summary: Creates a new registration definition under the default scope or under the subscription provided.
     parameters:
         - name: --name -n
-          long-summary: |
+          short-summary: |
              The name of the registration definition.
         - name: --tenant-id
-          long-summary: |
+          short-summary: |
              The managed by tenant id.
         - name: --principal-id
-          long-summary: |
+          short-summary: |
              The principal id.
         - name: --role-definition-id
-          long-summary: |
+          short-summary: |
              The role definition id.
         - name: --description
-          long-summary: |
+          short-summary: |
              Optional: The friendly description.
         - name: --plan-name
-          long-summary: |
+          short-summary: |
              Optional: The plan name.
         - name: --plan-product
-          long-summary: |
+          short-summary: |
              Optional: The plan product.
         - name: --plan-publisher
-          long-summary: |
+          short-summary: |
              Optional: The plan publisher.
         - name: --plan-version
-          long-summary: |
+          short-summary: |
              Optional: The plan version.
         - name: --definition-id
-          long-summary: |
+          short-summary: |
              Optional:  Can be used to override the generated registration definition id.
     examples:
         - name: Creates a registration definition under the default subscription scope with the required parameters.
@@ -69,7 +69,7 @@ helps['managedservices definition show'] = """
     long-summary: Gets a registration definition when given its identifier or the fully qualified resource id. When resource id is provided, the subscription paramter is ignored.
     parameters:
         - name: --definition
-          long-summary: |
+          short-summary: |
              The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.
     examples:
         - name: Gets the registration definition given its identifier under the default subscription scope.
@@ -86,7 +86,7 @@ helps['managedservices definition delete'] = """
     long-summary: Deletes a registration definition when given its identifier or the fully qualified resource id. When resource id is provided, the subscription paramter is ignored.
     parameters:
         - name: --definition
-          long-summary: |
+          short-summary: |
              The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.
     examples:
         - name: Deletes the registration definition given its identifier under the default subscription scope.
@@ -114,10 +114,10 @@ helps['managedservices definition assignment create'] = """
     long-summary: Creates a new registration assignment when given the fully qualified resource id of the registration definition.
     parameters:
         - name: --definition-id
-          long-summary: |
+          short-summary: |
              The fully qualified resource id of the registration definition.
         - name: --assignment-id
-          long-summary: |
+          short-summary: |
              Optional: Can be used to override the generated registration assignment id.
     examples:
         - name: Create an assignment under the default subscription scope.
@@ -132,10 +132,10 @@ helps['managedservices definition assignment show'] = """
     long-summary: Gets the registration assignment given its identifier (guid) or the fully qualified resource id. When resource id is used, subscription id and resource group parameters are ignored.
     parameters:
         - name: --assignment
-          long-summary: |
+          short-summary: |
              The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
         - name: --include-definition
-          long-summary: |
+          short-summary: |
              When set to true, the result will include the associated definition details.
     examples:
         - name: Get an assignment given its identifier under the default subscription scope.
@@ -152,7 +152,7 @@ helps['managedservices definition assignment delete'] = """
     long-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id.
     parameters:
         - name: --assignment
-          long-summary: |
+          short-summary: |
              The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
     examples:
         - name: Deletes an assignment given its identifier under the default subscription scope.
@@ -167,7 +167,7 @@ helps['managedservices definition assignment list'] = """
     long-summary: List all the registration assignments. Subscription id and resource group parameters can be used to override default values.
     parameters:
         - name: --include-definition
-          long-summary: |
+          short-summary: |
              When set to true, the result will include the associated definition details.
     examples:
         - name: Lists all the registration assignments under the default scope.
