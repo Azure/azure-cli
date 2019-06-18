@@ -2,6 +2,8 @@
 
 Release History
 ===============
+**RBAC**
+* ad signed-in-user: fix a crash on listing owned objects 
 
 **ACR**
 
