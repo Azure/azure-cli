@@ -171,7 +171,7 @@ class CacheObject(object):
         model_path_regex = re.compile(r':rtype:.*(?P<path>azure.mgmt[a-zA-Z0-9_\.]*)')
         try:
             self._model_name = model_name_regex.search(doc_string).group('model')
-            if  not self._model_path:
+            if not self._model_path:
                 self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
         except AttributeError:
             return
