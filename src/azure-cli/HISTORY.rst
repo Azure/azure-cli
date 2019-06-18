@@ -11,6 +11,9 @@ Release History
 
 * Update ADLS version (0.0.45).
 
+**Profile**
+* Suppress `--subscription` argument for logout command.
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
