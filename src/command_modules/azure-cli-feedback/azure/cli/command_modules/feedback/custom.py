@@ -558,7 +558,7 @@ def _build_issue_info_tup(command_log_file=None):
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
     return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name, _CLI_ISSUES_URL, _EXTENSIONS_ISSUES_URL), \
-        formatted_issues_url, original_issue_body, is_ext
+        formatted_issues_url, original_issue_body
 
 
 def _get_extension_repo_url(ext_name, raw=False):
@@ -728,20 +728,18 @@ def _prompt_issue(recent_command_list):
             # strip to short form
             ans = ans[0].lower() if ans else None
 
-    is_ext = None
-
     if ans in ["y", "n"]:
         if ans == "y":
-            prefix, url, original_issue, is_ext = _build_issue_info_tup()
+            prefix, url, original_issue = _build_issue_info_tup()
         else:
             return False
     else:
         if ans in ["q", "quit"]:
             return False
         if ans == 0:
-            prefix, url, original_issue, is_ext = _build_issue_info_tup()
+            prefix, url, original_issue = _build_issue_info_tup()
         else:
-            prefix, url, original_issue, is_ext = _build_issue_info_tup(recent_command_list[ans])
+            prefix, url, original_issue = _build_issue_info_tup(recent_command_list[ans])
     print(prefix)
 
     # open issues page in browser and copy issue body to clipboard
