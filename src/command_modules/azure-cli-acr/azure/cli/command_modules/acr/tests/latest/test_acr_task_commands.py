@@ -18,7 +18,7 @@ class AcrTaskCommandsTests(ScenarioTest):
             'rg_loc': 'westus',
             'sku': 'Standard',
             # This token requires 'admin:repo_hook' access. Recycle the token after recording tests.
-            'git_access_token': '39435069783346fc3df98b42401344bb2c22ec00',
+            'git_access_token': 'a7be73a883b7f3d6d4faffb44f627c0775cc3120',
             'no_context': '/dev/null',
             'context': 'https://github.com/jaysterp/acr-build-helloworld-node.git',
             'file': 'Dockerfile',
@@ -108,22 +108,3 @@ class AcrTaskCommandsTests(ScenarioTest):
 
         # test acr delete
         self.cmd('acr delete -n {registry_name} -g {rg}')
-
-    @ResourceGroupPreparer()
-    def test_acr_run(self, resource_group):
-        self.kwargs.update({
-            'rg_loc': 'westus',
-            'sku': 'Standard',
-            'registry_name': self.create_random_name('runreg', 20),
-            'command': '"docker ps"',
-            'timeout': 400,
-            'source_location': '/dev/null'
-        })
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
-                 checks=[self.check('name', '{registry_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('sku.name', 'Standard'),
-                         self.check('sku.tier', 'Standard'),
-                         self.check('provisioningState', 'Succeeded')])
-        # Run a contextless command
-        self.cmd('acr run -r {registry_name} --timeout {timeout} --cmd {command} {source_location}')
