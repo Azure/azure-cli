@@ -1,0 +1,28 @@
+
+; Exported zone file from Azure DNS
+;      Zone name: zone7.com
+;      Resource Group Name: cli_dns_zone7_importmtzlvpygc33tyf7q3udlhricx677q7sekius2xlpvyq4um4rxmnmuhi
+;      Date and time (UTC): Thu, 30 May 2019 10:45:02 -0700
+
+$TTL 300
+$ORIGIN zone7.com.
+    
+@ 3600 IN SOA ns1-07.ppe.azure-dns.com. azuredns-hostmaster.microsoft.com. (
+              1 ; serial
+              3600 ; refresh
+              300 ; retry
+              2419200 ; expire
+              300 ; minimum
+              )
+
+  172800 IN NS ns1-07.ppe.azure-dns.com.
+  172800 IN NS ns2-07.ppe.azure-dns.net.
+  172800 IN NS ns3-07.ppe.azure-dns.org.
+  172800 IN NS ns4-07.ppe.azure-dns.info.
+
+  60 IN TXT "a\\b\255\000\;\"\"\"testtesttest\"\"\""
+
+cn1 3600 IN CNAME contoso.com.
+
+txt1 3600 IN TXT "ab\ cd"
+
