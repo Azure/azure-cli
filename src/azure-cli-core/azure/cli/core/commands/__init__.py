@@ -892,7 +892,6 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
 
 def _load_command_loader(loader, args, name, prefix):
-    from azure.cli.core.profiles import PROFILE_TYPE
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     command_table = {}
@@ -900,8 +899,7 @@ def _load_command_loader(loader, args, name, prefix):
     if loader_cls:
         command_loader = loader_cls(cli_ctx=loader.cli_ctx)
         loader.loaders.append(command_loader)  # This will be used by interactive
-        if command_loader.supported_api_version(min_api=command_loader.min_profile, max_api=command_loader.max_profile,
-                                                resource_type=PROFILE_TYPE):
+        if command_loader.supported_resource_type():
             command_table = command_loader.load_command_table(args)
             if command_table:
                 for cmd in list(command_table.keys()):
@@ -1244,7 +1242,8 @@ def register_cache_arguments(cli_ctx):
                     nargs='?',
                     action=CacheAction,
                     help='Temporarily store the object in the local cache instead of sending to Azure. '
-                         'Use `az cache` commands to view/clear.'
+                         'Use `az cache` commands to view/clear.',
+                    is_preview=True
                 )
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_cache_arguments)

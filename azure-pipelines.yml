@@ -239,6 +239,7 @@ jobs:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download PyPI Packages'
     inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
       artifactName: pypi
 
 
@@ -565,7 +566,7 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian
+      ArtifactName: ubuntu-xenial
 
 - job: BuildUbuntuTrusty
   displayName: Build Ubuntu Trusty Package
@@ -596,7 +597,7 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian
+      ArtifactName: ubuntu-trusty
 
 
 
@@ -629,7 +630,7 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian
+      ArtifactName: ubuntu-bionic
 
 - job: BuildUbuntuDisco
   displayName: Build Ubuntu Disco Package
@@ -660,7 +661,7 @@ jobs:
       displayName: 'Publish Artifact: debian'
       inputs:
         TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: debian
+        ArtifactName: ubuntu-disco
 
 
 - job: BuildDebianJessie
@@ -691,7 +692,7 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian
+      ArtifactName: debian-jessie
 
 
 
@@ -723,7 +724,7 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian
+      ArtifactName: debian-stretch
 
 
 
@@ -737,6 +738,7 @@ jobs:
    - BuildDebianJessie
    - BuildDebianStretch
    - BuildUbuntuCosmic
+   - BuildUbuntuDisco
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
@@ -749,10 +751,50 @@ jobs:
 
 
   - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian Builds'
+    displayName: 'Download Debian:Stretch Build'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian
+      artifactName: debian-stretch
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Debian:Jessie Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: debian-jessie
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Bionic Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-bionic
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Cosmic Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-cosmic
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Disco Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-disco
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Xenial Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-xenial
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Trusty Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-trusty
 
 
   - bash: |
@@ -775,8 +817,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic)
+       DISTROS=(bionic cosmic disco)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
@@ -817,6 +859,6 @@ jobs:
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian
+      ArtifactName: ubuntu-cosmic
 
 
