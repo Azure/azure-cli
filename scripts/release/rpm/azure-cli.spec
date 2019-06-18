@@ -44,7 +44,7 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 # Build the wheels from the source
 source_dir=%{repo_path}
 dist_dir=$(mktemp -d)
-for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-telemetry $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg $source_dir/src/command_modules/azure-cli-*/; \
+for d in $source_dir/src/azure-cli $source_dir/src/azure-cli-core $source_dir/src/azure-cli-telemetry $source_dir/src/azure-cli-nspkg $source_dir/src/azure-cli-command_modules-nspkg; \
 do cd $d; %{buildroot}%{cli_lib_dir}/bin/python setup.py bdist_wheel -d $dist_dir; cd -; done;
 
 [ -d $source_dir/privates ] && cp $source_dir/privates/*.whl $dist_dir

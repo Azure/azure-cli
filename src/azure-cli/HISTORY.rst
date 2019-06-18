@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.0.68
+++++++
+
+**ACR**
+
+* Support Timer Triggers for Task.
+
+**DLS**
+
+* Update ADLS version (0.0.45).
+
+
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
