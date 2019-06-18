@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.managedservices._help import helps  # pylint: disable=unused-import
 from ._command_type import ManagedServicesCommandGroup
 
@@ -14,7 +15,7 @@ class ManagedServicesCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         managedservices_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.managedservices.custom#{}')
         super(ManagedServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                            min_profile='2017-03-10-profile',
+                                                            resource_type=ResourceType.MGMT_MANAGEDSERVICES,
                                                             custom_command_type=managedservices_custom,
                                                             command_group_cls=ManagedServicesCommandGroup)
 

@@ -84,6 +84,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SIGNALR = ('azure.mgmt.signalr', None)
     MGMT_SQL = ('azure.mgmt.sql', None)
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
+    MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -197,7 +198,8 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
-        ResourceType.DATA_STORAGE: '2015-04-05'
+        ResourceType.DATA_STORAGE: '2015-04-05',
+        ResourceType.MGMT_MANAGEDSERVICES: '2018-06-01-preview'
     }
 }
 
