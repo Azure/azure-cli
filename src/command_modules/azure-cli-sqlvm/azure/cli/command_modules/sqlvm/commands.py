@@ -80,3 +80,6 @@ def load_command_table(self, _):
         g.command('list', 'list_by_group', transform=transform_aglistener_list)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('create', 'sqlvm_aglistener_create', transform=transform_aglistener_output, table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
+
+    with self.command_group('sql vm', is_preview=True):
+        pass

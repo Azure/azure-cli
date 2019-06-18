@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.2.8"
+VERSION = "2.3.0"
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -33,7 +33,7 @@ DEPENDENCIES = [
     'azure-cli-core',
     'azure-mgmt-storage==3.3.0',
     'azure-storage-blob==1.3.1',
-    'azure-mgmt-containerregistry==2.8.0',
+    'azure-mgmt-containerregistry==3.0.0rc2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

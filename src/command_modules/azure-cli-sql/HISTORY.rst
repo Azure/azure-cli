@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.5
++++++
+* az sql server create, az sql mi create: make location optional. If unspecified, use resource group location.
+
 2.2.4
 +++++
 * Minor fixes
@@ -10,6 +14,7 @@ Release History
 +++++
 * Added commands sql virtual-cluster list/show/delete
 * Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0
+* Fixed "'NoneType' object is not iterable" error for `az sql db list-editions --available`.
 
 2.2.2
 +++++

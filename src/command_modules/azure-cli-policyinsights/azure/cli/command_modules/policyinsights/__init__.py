@@ -13,6 +13,7 @@ class PolicyInsightsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         from ._exception_handler import policy_insights_exception_handler
 
         policyinsights_custom = CliCommandType(
@@ -21,7 +22,7 @@ class PolicyInsightsCommandsLoader(AzCommandsLoader):
 
         super(PolicyInsightsCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
-            min_profile='2017-03-10-profile',
+            resource_type=ResourceType.MGMT_POLICYINSIGHTS,
             custom_command_type=policyinsights_custom)
 
     def load_command_table(self, args):

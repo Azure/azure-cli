@@ -8,9 +8,8 @@ import unittest
 import datetime
 import dateutil
 import dateutil.parser
-from msrest.serialization import TZ_UTC
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
+from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
@@ -323,7 +322,7 @@ def get_signed_in_user(test_case):
 
 class GraphOwnerScenarioTest(ScenarioTest):
 
-    def test_graph_ownership(self):
+    def test_graph_application_ownership(self):
         owner = get_signed_in_user(self)
         if not owner:
             return  # this test delete users which are beyond a SP's capacity, so quit...
@@ -337,6 +336,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
             self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
             self.kwargs['app_id'] = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()['appId']
             self.cmd('ad app owner add --owner-object-id {owner_object_id} --id {app_id}')
+            self.cmd('ad app owner add --owner-object-id {owner_object_id} --id {app_id}')  # test idempotent
             self.cmd('ad app owner list --id {app_id}', checks=self.check('[0].userPrincipalName', owner))
             self.cmd('ad app owner remove --owner-object-id {owner_object_id} --id {app_id}')
             self.cmd('ad app owner list --id {app_id}', checks=self.check('length([*])', 0))
@@ -344,8 +344,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
             if self.kwargs['app_id']:
                 self.cmd('ad sp delete --id {app_id}')
 
-    @unittest.skip("pending design review")
-    def test_set_graph_owner(self):
+    def test_graph_group_ownership(self):
         owner = get_signed_in_user(self)
         if not owner:
             return  # this test delete users which are beyond a SP's capacity, so quit...
@@ -353,18 +352,17 @@ class GraphOwnerScenarioTest(ScenarioTest):
         self.kwargs = {
             'owner': owner,
             'group': self.create_random_name('cli-grp', 15),
-            'app': self.create_random_name('cli-app-', 15)
         }
-        group_object_id, app_id = None, None
+        self.recording_processors.append(AADGraphUserReplacer(owner, 'example@example.com'))
         try:
-            self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()
-            self.cmd('ad sp create-for-rbac --name {app} --skip-assignment')
-            self.cmd('ad signed-in-user list-owned-objects', checks=self.check('length([*])', 2))
+            self.kwargs['owner_object_id'] = self.cmd('ad user show --upn-or-object-id {owner}').get_output_in_json()['objectId']
+            self.kwargs['group_object_id'] = self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()['objectId']
+            self.cmd('ad group owner add -g {group_object_id} --owner-object-id {owner_object_id}')
+            self.cmd('ad group owner add -g {group_object_id} --owner-object-id {owner_object_id}')
+            self.cmd('ad group owner list -g {group_object_id}', checks=self.check('length([*])', 1))
         finally:
-            if group_object_id:
-                self.cmd('ad group delete -g ' + group_object_id)
-            if app_id:
-                self.cmd('ad app delete --id ' + app_id)
+            if self.kwargs['group_object_id']:
+                self.cmd('ad group delete -g ' + self.kwargs['group_object_id'])
 
 
 class GraphAppCredsScenarioTest(ScenarioTest):
@@ -375,17 +373,19 @@ class GraphAppCredsScenarioTest(ScenarioTest):
         self.kwargs = {
             'display_name': self.create_random_name('cli-app-', 15),
             'display_name2': self.create_random_name('cli-app-', 15),
+            'test_pwd': 'verysecretpwd123*'
         }
         self.kwargs['app'] = 'http://' + self.kwargs['display_name']
         self.kwargs['app2'] = 'http://' + self.kwargs['display_name2']
         app_id = None
+        app_id2 = None
         try:
             result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
             app_id = result['appId']
 
             result = self.cmd('ad sp credential list --id {app}').get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad sp credential reset -n {app} --password verySecert123 --append --credential-description newCred1')
+            self.cmd('ad sp credential reset -n {app} --password {test_pwd} --append --credential-description newCred1')
             self.cmd('ad sp credential list --id {app}', checks=[
                 self.check('length([*])', 2),
                 self.check('[0].customKeyIdentifier', 'newCred1'),
@@ -398,7 +398,7 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             # try the same through app commands
             result = self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1)).get_output_in_json()
             key_id = result[0]['keyId']
-            self.cmd('ad app credential reset --id {app} --password verySecert123 --append --credential-description newCred2')
+            self.cmd('ad app credential reset --id {app} --password {test_pwd} --append --credential-description newCred2')
             result = self.cmd('ad app credential list --id {app}', checks=[
                 self.check('length([*])', 2),
                 self.check('[0].customKeyIdentifier', 'newCred2'),
@@ -408,8 +408,8 @@ class GraphAppCredsScenarioTest(ScenarioTest):
             self.cmd('ad app credential list --id {app}', checks=self.check('length([*])', 1))
 
             # try use --end-date
-            self.cmd('ad sp credential reset -n {app} --password verySecert123 --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
-            self.cmd('ad app credential reset --id {app} --password verySecert123 --end-date "2100-12-31" --credential-description newCred4')
+            self.cmd('ad sp credential reset -n {app} --password {test_pwd} --end-date "2100-12-31T11:59:59+00:00" --credential-description newCred3')
+            self.cmd('ad app credential reset --id {app} --password {test_pwd} --end-date "2100-12-31" --credential-description newCred4')
 
             # ensure we can update other properties #7728
             self.cmd('ad app update --id {app} --set groupMembershipClaims=All')

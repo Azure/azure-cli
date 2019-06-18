@@ -27,14 +27,14 @@ for ext in $output; do
         exit_code=1
         echo "Failed to load:" $ext
     fi
-    azdev verify load-all
-    if [ $? != 0 ]
-    then
-        exit_code=1
-        echo "Failed to verify:" $ext
-    fi
-    az extension remove -n $ext
-    echo $ext "extension has been removed."
 done
+
+# Skip the test for now. It will be enable after release 2.0.67
+#azdev verify load-all
+#if [ $? != 0 ]
+#then
+#    exit_code=1
+#    echo "Failed to verify:" $ext
+#fi
 
 exit $exit_code

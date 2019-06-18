@@ -3,13 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
 
 class AcrCommandsTests(ScenarioTest):
 
-    def _core_registry_scenario(self, registry_name, resource_group, location,
-                                storage_account_for_update=None):
+    def _core_registry_scenario(self, registry_name, resource_group, location):
         self.cmd('acr check-name -n {}'.format(registry_name),
                  checks=[self.check('nameAvailable', False),
                          self.check('reason', 'AlreadyExists')])
@@ -63,13 +62,6 @@ class AcrCommandsTests(ScenarioTest):
         assert password != renewed_password
         assert password2 != renewed_password2
 
-        # test acr storage account update
-        if storage_account_for_update is not None:
-            self.cmd('acr update -n {} -g {} --storage-account-name {}'.format(
-                registry_name, resource_group, storage_account_for_update),
-                checks=[self.check('name', registry_name),
-                        self.check('location', location)])
-
         # test acr delete
         self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
 
@@ -83,56 +75,6 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr check-name -n {name}', checks=[
             self.check('nameAvailable', True)
         ])
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_update')
-    def test_acr_create_with_new_storage(self, resource_group, resource_group_location,
-                                         storage_account_for_update):
-        registry_name = self.create_random_name('clireg', 20)
-
-        self.kwargs.update({
-            'registry_name': registry_name,
-            'rg_loc': resource_group_location,
-            'sku': 'Classic',
-            'deployment_name': 'Microsoft.ContainerRegistry'
-        })
-
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
-                 checks=[self.check('name', '{registry_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('adminUserEnabled', False),
-                         self.check('sku.name', 'Classic'),
-                         self.check('sku.tier', 'Classic'),
-                         self.check('provisioningState', 'Succeeded')])
-        self._core_registry_scenario(registry_name, resource_group, resource_group_location,
-                                     storage_account_for_update)
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    @StorageAccountPreparer(parameter_name='storage_account_for_update')
-    def test_acr_create_with_existing_storage(self, resource_group, resource_group_location,
-                                              storage_account_for_update,
-                                              storage_account_for_create):
-        registry_name = self.create_random_name('clireg', 20)
-
-        self.kwargs.update({
-            'registry_name': registry_name,
-            'rg_loc': resource_group_location,
-            'sku': 'Classic',
-            'sa_for_create': storage_account_for_create,
-            'deployment_name': 'Microsoft.ContainerRegistry'
-        })
-
-        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --storage-account-name {sa_for_create} --deployment-name {deployment_name}',
-                 checks=[self.check('name', '{registry_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('adminUserEnabled', False),
-                         self.check('sku.name', 'Classic'),
-                         self.check('sku.tier', 'Classic'),
-                         self.check('provisioningState', 'Succeeded')])
-
-        self._core_registry_scenario(registry_name, resource_group, resource_group_location,
-                                     storage_account_for_update)
 
     @ResourceGroupPreparer()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):

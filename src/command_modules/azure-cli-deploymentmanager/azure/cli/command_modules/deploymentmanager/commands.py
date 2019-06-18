@@ -95,3 +95,6 @@ def load_command_table(self, _):
             'cli_rollout_restart',
             confirmation="Are you sure you want to restart the rollout? If you want to skip all the steps that succeeded on the previous run, use '--skip-succeeded' option.")
         g.command('delete', 'delete')
+
+    with self.command_group('deploymentmanager', is_preview=True):
+        pass

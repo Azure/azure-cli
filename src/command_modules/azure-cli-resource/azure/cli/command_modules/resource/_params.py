@@ -102,6 +102,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
 
     with self.argument_context('policy definition', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
+        from azure.mgmt.resource.policy.models import PolicyMode
         c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
         c.argument('rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
         c.argument('display_name', help='Display name of policy definition.')
@@ -110,11 +111,10 @@ def load_arguments(self, _):
         c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('subscription', arg_type=subscription_type)
         c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=['--mode', '-m'], help='Mode of the policy definition.', min_api='2016-12-01')
 
     with self.argument_context('policy definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        from azure.mgmt.resource.policy.models import PolicyMode
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy definition.')
-        c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=['--mode', '-m'], help='Mode of the new policy definition.', min_api='2016-12-01')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.ignore('_subscription')
@@ -205,7 +205,7 @@ def load_arguments(self, _):
 
     with self.argument_context('lock') as c:
         c.argument('lock_name', options_list=['--name', '-n'], validator=validate_lock_parameters)
-        c.argument('level', arg_type=get_enum_type(LockLevel), options_list=['--lock-type', '-t'])
+        c.argument('level', arg_type=get_enum_type(LockLevel), options_list=['--lock-type', '-t'], help='The type of lock restriction.')
         c.argument('parent_resource_path', resource_parent_type)
         c.argument('resource_provider_namespace', resource_namespace_type)
         c.argument('resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list)
@@ -233,7 +233,7 @@ def load_arguments(self, _):
     for scope in ['lock', 'account lock', 'group lock', 'resource lock']:
         with self.argument_context(scope) as c:
             c.argument('lock_name', options_list=['--name', '-n'], help='Name of the lock')
-            c.argument('level', options_list=['--lock-type', '-t'], arg_type=get_enum_type([LockLevel.can_not_delete, LockLevel.read_only]))
+            c.argument('level', options_list=['--lock-type', '-t'], arg_type=get_enum_type([LockLevel.can_not_delete, LockLevel.read_only]), help='The type of lock restriction.')
             c.argument('ids', nargs='+', options_list='--ids', help='One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.')
             c.argument('notes', help='Notes about this lock.')
 
@@ -253,7 +253,7 @@ def load_arguments(self, _):
         c.argument('parameters', help='JSON formatted string or a path to a file with such content', type=file_type)
 
     with self.argument_context('managedapp definition create') as c:
-        c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel))
+        c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
         c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
         c.argument('createUiDefinition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
@@ -276,3 +276,18 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('rest') as c:
+        c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
+                   help='HTTP request method')
+        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/".'
+                   ' Common tokens will also be replaced with real values including "{subscriptionId}"')
+        c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
+        c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
+        c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
+        c.argument('body', options_list=['--body', '-b'], help='request body')
+        c.argument('output_file', help='save response payload to a file')
+        c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
+                   'the service. The token will be placed in the "Authorization" header. By default, '
+                   'CLI can figure this out based on "--url" argument, unless you use ones not in the list '
+                   'of "az cloud show --query endpoints"')

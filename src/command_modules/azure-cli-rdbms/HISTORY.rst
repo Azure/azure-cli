@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.12
+++++++
+* Minor fixes
+
 0.3.11
 ++++++
 * Add postgres and mysql support for geo replication

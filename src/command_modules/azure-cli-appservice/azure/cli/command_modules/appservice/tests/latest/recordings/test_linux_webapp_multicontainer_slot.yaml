@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-03-25T23:32:20Z"}}'
+    body: '{"location": "westus2", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2019-06-10T19:49:41Z"}}'
     headers:
       Accept:
       - application/json
@@ -12,30 +12,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '110'
+      - '111'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - --location --name --tag
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-25T23:32:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2019-06-10T19:49:41Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:32:20 GMT
+      - Mon, 10 Jun 2019 19:49:42 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -63,24 +63,24 @@ interactions:
       ParameterSetName:
       - -g -n --is-linux --sku
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-25T23:32:20Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2019-06-10T19:49:41Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:32:21 GMT
+      - Mon, 10 Jun 2019 19:49:42 GMT
       expires:
       - '-1'
       pragma:
@@ -95,7 +95,113 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "properties": {"perSiteScaling": false, "reserved":
+    body: 'b''{"name": "plan-linux-multi000003", "type": "Microsoft.Web/serverfarms",
+      "location": "westus2", "properties": {"skuName": "S1", "needLinuxWorkers": true,
+      "capacity": 1}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '170'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --is-linux --sku
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 Jun 2019 19:49:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --is-linux --sku
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2019-06-10T19:49:41Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '385'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 10 Jun 2019 19:49:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"perSiteScaling": false, "reserved":
       true, "isXenon": false}, "sku": {"name": "S1", "tier": "STANDARD", "capacity":
       1}}'
     headers:
@@ -108,14 +214,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '157'
+      - '158'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --is-linux --sku
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
@@ -123,17 +229,132 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","name":"plan-linux-multi000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
-        US","properties":{"serverFarmId":8249,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-109_8249","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+        US 2","properties":{"serverFarmId":1264,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUS2webspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US 2","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-mwh-029_1264","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1500'
+      - '1505'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:32:26 GMT
+      - Mon, 10 Jun 2019 19:49:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --multicontainer-config-file --multicontainer-config-type
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003?api-version=2018-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","name":"plan-linux-multi000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
+        US 2","properties":{"serverFarmId":1264,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUS2webspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US 2","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-mwh-029_1264","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1505'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 Jun 2019 19:49:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''b\\\''{"name": "webapp-linux-multi000002", "type": "Microsoft.Web/sites",
+      "location": "West US 2", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003"}}\\\''\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan --multicontainer-config-file --multicontainer-config-type
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Mon, 10 Jun 2019 19:49:51 GMT
       expires:
       - '-1'
       pragma:
@@ -171,8 +392,8 @@ interactions:
       ParameterSetName:
       - -g -n --plan --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
@@ -180,17 +401,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","name":"plan-linux-multi000003","type":"Microsoft.Web/serverfarms","kind":"linux","location":"West
-        US","properties":{"serverFarmId":8249,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-109_8249","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+        US 2","properties":{"serverFarmId":1264,"name":"plan-linux-multi000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUS2webspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US 2","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"linux","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-mwh-029_1264","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1500'
+      - '1505'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:32:27 GMT
+      - Mon, 10 Jun 2019 19:49:51 GMT
       expires:
       - '-1'
       pragma:
@@ -213,11 +434,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003",
+    body: 'b''b\''{"location": "West US 2", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003",
       "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
       "v4.6", "linuxFxVersion": "COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo=",
-      "appSettings": [], "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
-      false}}\'''''
+      "appSettings": [], "alwaysOn": true, "localMySqlEnabled": false, "http20Enabled":
+      true}, "scmSiteAlsoStopped": false}}\'''''
     headers:
       Accept:
       - application/json
@@ -228,33 +449,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '676'
+      - '696'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --plan --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002","name":"webapp-linux-multi000002","type":"Microsoft.Web/sites","kind":"app,linux,container","location":"West
-        US","properties":{"name":"webapp-linux-multi000002","state":"Running","hostNames":["webapp-linux-multi000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-109.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002.azurewebsites.net","webapp-linux-multi000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:32:31.7033333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"104.42.78.153,40.118.225.64,104.42.151.111,104.42.252.192,104.42.254.180","possibleOutboundIpAddresses":"104.42.78.153,40.118.225.64,104.42.151.111,104.42.252.192,104.42.254.180,40.118.227.167,40.118.224.22,40.118.226.153","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-109","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US 2","properties":{"name":"webapp-linux-multi000002","state":"Running","hostNames":["webapp-linux-multi000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUS2webspace","selfLink":"https://waws-prod-mwh-029.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUS2webspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002.azurewebsites.net","webapp-linux-multi000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-10T19:49:54.62","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"13.77.182.13,13.77.161.10,52.183.26.12,52.175.235.45,13.77.178.124","possibleOutboundIpAddresses":"13.77.182.13,13.77.161.10,52.183.26.12,52.175.235.45,13.77.178.124,52.183.34.217,13.66.206.87,13.77.172.226,52.183.34.132,13.77.180.8","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-mwh-029","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3584'
+      - '3594'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:32:47 GMT
+      - Mon, 10 Jun 2019 19:50:10 GMT
       etag:
-      - '"1D4E36304C4E3AB"'
+      - '"1D51FC5AD1FECEB"'
       expires:
       - '-1'
       pragma:
@@ -296,24 +517,30 @@ interactions:
       ParameterSetName:
       - -g -n --plan --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/publishxml?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/publishxml?api-version=2018-11-01
   response:
     body:
       string: <publishData><publishProfile profileName="webapp-linux-multi000002 -
         Web Deploy" publishMethod="MSDeploy" publishUrl="webapp-linux-multi000002.scm.azurewebsites.net:443"
         msdeploySite="webapp-linux-multi000002" userName="$webapp-linux-multi000002"
-        userPWD="esb710MCzeuK3suhdonZ2Sx0s0qwirPucxbu75g8hKZBRz3ZhKutiegwDFra" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
+        userPWD="B9bBRs9em4viS6gX4xSqZ1ag9SS5ipcfBvxBWXSg8QRbQyFNrtspC5DJ3xCB" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="webapp-linux-multi000002 -
-        FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-109.ftp.azurewebsites.windows.net/site/wwwroot"
+        FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-mwh-029.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-linux-multi000002\$webapp-linux-multi000002"
-        userPWD="esb710MCzeuK3suhdonZ2Sx0s0qwirPucxbu75g8hKZBRz3ZhKutiegwDFra" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
+        userPWD="B9bBRs9em4viS6gX4xSqZ1ag9SS5ipcfBvxBWXSg8QRbQyFNrtspC5DJ3xCB" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile><publishProfile profileName="webapp-linux-multi000002 -
+        ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-mwh-029dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="webapp-linux-multi000002\$webapp-linux-multi000002"
+        userPWD="B9bBRs9em4viS6gX4xSqZ1ag9SS5ipcfBvxBWXSg8QRbQyFNrtspC5DJ3xCB" destinationAppUrl="http://webapp-linux-multi000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>
@@ -321,11 +548,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1150'
+      - '1730'
       content-type:
       - application/xml
       date:
-      - Mon, 25 Mar 2019 23:32:47 GMT
+      - Mon, 10 Jun 2019 19:50:12 GMT
       expires:
       - '-1'
       pragma:
@@ -355,39 +582,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
-    method: GET
-    uri: http://webapp-linux-multi000002.azurewebsites.net/
-  response:
-    body:
-      string: 'Hello World! I have been seen 2 times.
-
-        '
-    headers:
-      content-length:
-      - '39'
-      content-type:
-      - text/html; charset=utf-8
-      date:
-      - Mon, 25 Mar 2019 23:33:49 GMT
-      server:
-      - Werkzeug/0.14.1 Python/3.4.8
-      set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
@@ -401,11 +596,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:49 GMT
+      - Mon, 10 Jun 2019 19:50:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.8
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -419,71 +614,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
-    method: GET
-    uri: http://webapp-linux-multi000002.azurewebsites.net/
-  response:
-    body:
-      string: 'Hello World! I have been seen 5 times.
-
-        '
-    headers:
-      content-length:
-      - '39'
-      content-type:
-      - text/html; charset=utf-8
-      date:
-      - Mon, 25 Mar 2019 23:33:48 GMT
-      server:
-      - Werkzeug/0.14.1 Python/3.4.8
-      set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.21.0
-    method: GET
-    uri: http://webapp-linux-multi000002.azurewebsites.net/
-  response:
-    body:
-      string: 'Hello World! I have been seen 6 times.
-
-        '
-    headers:
-      content-length:
-      - '39'
-      content-type:
-      - text/html; charset=utf-8
-      date:
-      - Mon, 25 Mar 2019 23:33:49 GMT
-      server:
-      - Werkzeug/0.14.1 Python/3.4.8
-      set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
@@ -497,11 +628,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:50 GMT
+      - Mon, 10 Jun 2019 19:50:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.8
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -515,7 +646,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
@@ -529,11 +660,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:49 GMT
+      - Mon, 10 Jun 2019 19:50:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.8
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -547,7 +678,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
@@ -561,11 +692,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:49 GMT
+      - Mon, 10 Jun 2019 19:50:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.8
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -579,7 +710,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
@@ -593,11 +724,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:49 GMT
+      - Mon, 10 Jun 2019 19:50:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.8
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -611,39 +742,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
-    method: GET
-    uri: http://webapp-linux-multi000002.azurewebsites.net/
-  response:
-    body:
-      string: 'Hello World! I have been seen 11 times.
-
-        '
-    headers:
-      content-length:
-      - '40'
-      content-type:
-      - text/html; charset=utf-8
-      date:
-      - Mon, 25 Mar 2019 23:33:50 GMT
-      server:
-      - Werkzeug/0.14.1 Python/3.4.8
-      set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002.azurewebsites.net/
   response:
@@ -657,11 +756,139 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:50 GMT
+      - Mon, 10 Jun 2019 19:50:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.8
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
+  response:
+    body:
+      string: 'Hello World! I have been seen 13 times.
+
+        '
+    headers:
+      content-length:
+      - '40'
+      content-type:
+      - text/html; charset=utf-8
+      date:
+      - Mon, 10 Jun 2019 19:50:48 GMT
+      server:
+      - Werkzeug/0.14.1 Python/3.4.8
+      set-cookie:
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
+  response:
+    body:
+      string: 'Hello World! I have been seen 14 times.
+
+        '
+    headers:
+      content-length:
+      - '40'
+      content-type:
+      - text/html; charset=utf-8
+      date:
+      - Mon, 10 Jun 2019 19:50:49 GMT
+      server:
+      - Werkzeug/0.14.1 Python/3.4.8
+      set-cookie:
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
+  response:
+    body:
+      string: 'Hello World! I have been seen 15 times.
+
+        '
+    headers:
+      content-length:
+      - '40'
+      content-type:
+      - text/html; charset=utf-8
+      date:
+      - Mon, 10 Jun 2019 19:50:49 GMT
+      server:
+      - Werkzeug/0.14.1 Python/3.4.8
+      set-cookie:
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: http://webapp-linux-multi000002.azurewebsites.net/
+  response:
+    body:
+      string: 'Hello World! I have been seen 16 times.
+
+        '
+    headers:
+      content-length:
+      - '40'
+      content-type:
+      - text/html; charset=utf-8
+      date:
+      - Mon, 10 Jun 2019 19:50:49 GMT
+      server:
+      - Werkzeug/0.14.1 Python/3.4.8
+      set-cookie:
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -679,27 +906,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002","name":"webapp-linux-multi000002","type":"Microsoft.Web/sites","kind":"app,linux,container","location":"West
-        US","properties":{"name":"webapp-linux-multi000002","state":"Running","hostNames":["webapp-linux-multi000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-109.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002.azurewebsites.net","webapp-linux-multi000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:32:32.1866667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"104.42.78.153,40.118.225.64,104.42.151.111,104.42.252.192,104.42.254.180","possibleOutboundIpAddresses":"104.42.78.153,40.118.225.64,104.42.151.111,104.42.252.192,104.42.254.180,40.118.227.167,40.118.224.22,40.118.226.153","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-109","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US 2","properties":{"name":"webapp-linux-multi000002","state":"Running","hostNames":["webapp-linux-multi000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUS2webspace","selfLink":"https://waws-prod-mwh-029.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUS2webspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002.azurewebsites.net","webapp-linux-multi000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-10T19:49:55.0866667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"13.77.182.13,13.77.161.10,52.183.26.12,52.175.235.45,13.77.178.124","possibleOutboundIpAddresses":"13.77.182.13,13.77.161.10,52.183.26.12,52.175.235.45,13.77.178.124,52.183.34.217,13.66.206.87,13.77.172.226,52.183.34.132,13.77.180.8","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-mwh-029","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3584'
+      - '3599'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:33:50 GMT
+      - Mon, 10 Jun 2019 19:50:50 GMT
       etag:
-      - '"1D4E36304C4E3AB"'
+      - '"1D51FC5AD1FECEB"'
       expires:
       - '-1'
       pragma:
@@ -722,7 +949,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003",
+    body: 'b''b\''{"location": "West US 2", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003",
       "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
       "v4.6", "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
       false}}\'''''
@@ -736,33 +963,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '443'
+      - '445'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage","name":"webapp-linux-multi000002/stage","type":"Microsoft.Web/sites/slots","kind":"app,linux,container","location":"West
-        US","properties":{"name":"webapp-linux-multi000002(stage)","state":"Running","hostNames":["webapp-linux-multi000002-stage.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-109.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002-stage.azurewebsites.net","webapp-linux-multi000002-stage.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002-stage.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002-stage.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:33:53.4633333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002__0418","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"104.42.78.153,40.118.225.64,104.42.151.111,104.42.252.192,104.42.254.180","possibleOutboundIpAddresses":"104.42.78.153,40.118.225.64,104.42.151.111,104.42.252.192,104.42.254.180,40.118.227.167,40.118.224.22,40.118.226.153","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-109","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002-stage.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US 2","properties":{"name":"webapp-linux-multi000002(stage)","state":"Running","hostNames":["webapp-linux-multi000002-stage.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUS2webspace","selfLink":"https://waws-prod-mwh-029.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUS2webspace/sites/webapp-linux-multi000002","repositorySiteName":"webapp-linux-multi000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-linux-multi000002-stage.azurewebsites.net","webapp-linux-multi000002-stage.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo="},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-linux-multi000002-stage.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-linux-multi000002-stage.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-linux-multi000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-10T19:50:52.7333333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-linux-multi000002__096f","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app,linux,container","outboundIpAddresses":"13.77.182.13,13.77.161.10,52.183.26.12,52.175.235.45,13.77.178.124","possibleOutboundIpAddresses":"13.77.182.13,13.77.161.10,52.183.26.12,52.175.235.45,13.77.178.124,52.183.34.217,13.66.206.87,13.77.172.226,52.183.34.132,13.77.180.8","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-mwh-029","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-linux-multi000002-stage.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3657'
+      - '3672'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:08 GMT
+      - Mon, 10 Jun 2019 19:51:07 GMT
       etag:
-      - '"1D4E36304C4E3AB"'
+      - '"1D51FC5AD1FECEB"'
       expires:
       - '-1'
       pragma:
@@ -802,25 +1029,25 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{}}'
+        US 2","properties":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '331'
+      - '333'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:09 GMT
+      - Mon, 10 Jun 2019 19:51:09 GMT
       expires:
       - '-1'
       pragma:
@@ -858,25 +1085,25 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"webapp-linux-multi000002","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+        US 2","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '193'
+      - '195'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:10 GMT
+      - Mon, 10 Jun 2019 19:51:09 GMT
       expires:
       - '-1'
       pragma:
@@ -912,25 +1139,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web","name":"webapp-linux-multi000002","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo=","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux-multi000002__stage","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US 2","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcDoxLjAiDQogICAgcG9ydHM6DQogICAgIC0gIjUwMDA6NTAwMCINCiAgcmVkaXM6DQogICAgaW1hZ2U6ICJyZWRpczphbHBpbmUiDQo=","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux-multi000002__stage","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2937'
+      - '3191'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:10 GMT
+      - Mon, 10 Jun 2019 19:51:09 GMT
       expires:
       - '-1'
       pragma:
@@ -968,25 +1197,25 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{}}'
+        US 2","properties":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '319'
+      - '321'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:11 GMT
+      - Mon, 10 Jun 2019 19:51:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1024,25 +1253,25 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"webapp-linux-multi000002","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
+        US 2","properties":{"connectionStringNames":null,"appSettingNames":null,"azureStorageConfigNames":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '193'
+      - '195'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:10 GMT
+      - Mon, 10 Jun 2019 19:51:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1082,27 +1311,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/appsettings?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/appsettings?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{}}'
+        US 2","properties":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '319'
+      - '321'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:11 GMT
+      - Mon, 10 Jun 2019 19:51:16 GMT
       etag:
-      - '"1D4E363407F3695"'
+      - '"1D51FC5DCFF46B5"'
       expires:
       - '-1'
       pragma:
@@ -1133,13 +1362,17 @@ interactions:
       "", "pythonVersion": "", "nodeVersion": "", "linuxFxVersion": "COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcF9zbG90OmxhdGVzdCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg==",
       "requestTracingEnabled": false, "remoteDebuggingEnabled": false, "httpLoggingEnabled":
       false, "logsDirectorySizeLimit": 35, "detailedErrorLoggingEnabled": false, "publishingUsername":
-      "$webapp-linux-multi000002__stage", "azureStorageAccounts": {}, "scmType": "None",
-      "use32BitWorkerProcess": true, "webSocketsEnabled": false, "alwaysOn": false,
-      "appCommandLine": "", "managedPipelineMode": "Integrated", "virtualApplications":
-      [{"virtualPath": "/", "physicalPath": "site\\\\wwwroot", "preloadEnabled": false}],
-      "loadBalancing": "LeastRequests", "experiments": {"rampUpRules": []}, "autoHealEnabled":
-      false, "vnetName": "", "localMySqlEnabled": false, "http20Enabled": true, "minTlsVersion":
-      "1.2", "ftpsState": "AllAllowed", "reservedInstanceCount": 0}}'''
+      "$webapp-linux-multi000002__stage", "scmType": "None", "use32BitWorkerProcess":
+      true, "webSocketsEnabled": false, "alwaysOn": false, "appCommandLine": "", "managedPipelineMode":
+      "Integrated", "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\\\wwwroot",
+      "preloadEnabled": false}], "loadBalancing": "LeastRequests", "experiments":
+      {"rampUpRules": []}, "autoHealEnabled": false, "vnetName": "", "localMySqlEnabled":
+      false, "ipSecurityRestrictions": [{"ipAddress": "Any", "action": "Allow", "priority":
+      1, "name": "Allow all", "description": "Allow all access"}], "scmIpSecurityRestrictions":
+      [{"ipAddress": "Any", "action": "Allow", "priority": 1, "name": "Allow all",
+      "description": "Allow all access"}], "scmIpSecurityRestrictionsUseMain": false,
+      "http20Enabled": true, "minTlsVersion": "1.2", "ftpsState": "AllAllowed", "reservedInstanceCount":
+      0}}'''
     headers:
       Accept:
       - application/json
@@ -1150,33 +1383,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1265'
+      - '1563'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage","name":"webapp-linux-multi000002/stage","type":"Microsoft.Web/sites/slots","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcF9zbG90OmxhdGVzdCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg==","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux-multi000002__stage","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US 2","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcF9zbG90OmxhdGVzdCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg==","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux-multi000002__stage","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2947'
+      - '3201'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:13 GMT
+      - Mon, 10 Jun 2019 19:51:18 GMT
       etag:
-      - '"1D4E363356B9F20"'
+      - '"1D51FC5CFBEBD20"'
       expires:
       - '-1'
       pragma:
@@ -1194,7 +1429,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1214,25 +1449,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot --multicontainer-config-file --multicontainer-config-type
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-linux-multi000002/slots/stage/config/web","name":"webapp-linux-multi000002","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcF9zbG90OmxhdGVzdCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg==","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux-multi000002__stage","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US 2","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"","pythonVersion":"","nodeVersion":"","linuxFxVersion":"COMPOSE|dmVyc2lvbjogJzMnDQpzZXJ2aWNlczoNCiAgd2ViOg0KICAgIGltYWdlOiAicGF0bGUvcHl0aG9uX2FwcF9zbG90OmxhdGVzdCINCiAgICBwb3J0czoNCiAgICAgLSAiNTAwMDo1MDAwIg0KICByZWRpczoNCiAgICBpbWFnZTogInJlZGlzOmFscGluZSINCg==","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-linux-multi000002__stage","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2953'
+      - '3207'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:14 GMT
+      - Mon, 10 Jun 2019 19:51:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1264,7 +1501,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1278,11 +1515,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:51 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1296,7 +1533,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1310,11 +1547,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:51 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1328,7 +1565,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1342,11 +1579,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:51 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1360,7 +1597,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1374,11 +1611,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:51 GMT
+      - Mon, 10 Jun 2019 19:51:49 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1392,7 +1629,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1406,11 +1643,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:51 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1424,7 +1661,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1438,11 +1675,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:52 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1456,7 +1693,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1470,11 +1707,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:52 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1488,7 +1725,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1502,11 +1739,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:53 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1520,7 +1757,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1534,11 +1771,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:52 GMT
+      - Mon, 10 Jun 2019 19:51:49 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1552,7 +1789,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.21.0
+      - python-requests/2.22.0
     method: GET
     uri: http://webapp-linux-multi000002-stage.azurewebsites.net/
   response:
@@ -1566,11 +1803,11 @@ interactions:
       content-type:
       - text/html; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:34:52 GMT
+      - Mon, 10 Jun 2019 19:51:48 GMT
       server:
       - Werkzeug/0.14.1 Python/3.4.9
       set-cookie:
-      - ARRAffinity=5fc328affd4968eb9e74f9acbf8303b1d86107eaccc771fdc8f0394325e15748;Path=/;HttpOnly;Domain=webapp-linux-multifs76ho-stage.azurewebsites.net
+      - ARRAffinity=75f431076bfbcb7a538f8cfa3394da65bdbb77e8cc3c7589ce5fade1f7d11756;Path=/;HttpOnly;Domain=webapp-linux-multi3y5rip-stage.azurewebsites.net
     status:
       code: 200
       message: OK
@@ -1590,8 +1827,8 @@ interactions:
       ParameterSetName:
       - --name --yes --no-wait
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: DELETE
@@ -1605,11 +1842,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:34:53 GMT
+      - Mon, 10 Jun 2019 19:51:49 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdRR1VYVUJaNFIySVBZUk5HV1I0WDJOVjZCUEpLNFA1S05EQ3w0NkIxMTQ0NkY4MjdGQjAwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdQS0lVNlNYQVFCV0IzVldKTklMV01ITTJDRk1FS05KVUIyWHxCN0RBNjQ2NjUxRjQwREVBLVdFU1RVUzIiLCJqb2JMb2NhdGlvbiI6Indlc3R1czIifQ?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -1617,7 +1854,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14998'
     status:
       code: 202
       message: Accepted

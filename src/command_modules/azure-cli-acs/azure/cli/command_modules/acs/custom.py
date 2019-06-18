@@ -118,7 +118,7 @@ def wait_then_open_async(url):
     t.start()
 
 
-def acs_browse(cmd, client, resource_group, name, disable_browser=False, ssh_key_file=None):
+def acs_browse(cmd, client, resource_group_name, name, disable_browser=False, ssh_key_file=None):
     """
     Opens a browser to the web interface for the cluster orchestrator
 
@@ -131,30 +131,30 @@ def acs_browse(cmd, client, resource_group, name, disable_browser=False, ssh_key
     :param ssh_key_file: If set a path to an SSH key to use, only applies to DCOS
     :type ssh_key_file: string
     """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group)
-    _acs_browse_internal(cmd, client, acs_info, resource_group, name, disable_browser, ssh_key_file)
+    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
+    _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file)
 
 
-def _acs_browse_internal(cmd, client, acs_info, resource_group, name, disable_browser, ssh_key_file):
+def _acs_browse_internal(cmd, client, acs_info, resource_group_name, name, disable_browser, ssh_key_file):
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
 
     if str(orchestrator_type).lower() == 'kubernetes' or \
        orchestrator_type == ContainerServiceOrchestratorTypes.kubernetes or \
        (acs_info.custom_profile and acs_info.custom_profile.orchestrator == 'kubernetes'):  # pylint: disable=no-member
-        return k8s_browse(cmd, client, name, resource_group, disable_browser, ssh_key_file=ssh_key_file)
+        return k8s_browse(cmd, client, name, resource_group_name, disable_browser, ssh_key_file=ssh_key_file)
     elif str(orchestrator_type).lower() == 'dcos' or orchestrator_type == ContainerServiceOrchestratorTypes.dcos:
         return _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
     else:
         raise CLIError('Unsupported orchestrator type {} for browse'.format(orchestrator_type))
 
 
-def k8s_browse(cmd, client, name, resource_group, disable_browser=False, ssh_key_file=None):
+def k8s_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
     """
     Launch a proxy and browse the Kubernetes web UI.
     :param disable_browser: If true, don't launch a web browser after estabilishing the proxy
     :type disable_browser: bool
     """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group)
+    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
     _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file)
 
 
@@ -174,7 +174,7 @@ def _k8s_browse_internal(name, acs_info, disable_browser, ssh_key_file):
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy"])
 
 
-def dcos_browse(cmd, client, name, resource_group, disable_browser=False, ssh_key_file=None):
+def dcos_browse(cmd, client, name, resource_group_name, disable_browser=False, ssh_key_file=None):
     """
     Creates an SSH tunnel to the Azure container service, and opens the Mesosphere DC/OS dashboard in the browser.
 
@@ -187,7 +187,7 @@ def dcos_browse(cmd, client, name, resource_group, disable_browser=False, ssh_ke
     :param ssh_key_file: Path to the SSH key to use
     :type ssh_key_file: string
     """
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group)
+    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
     _dcos_browse_internal(acs_info, disable_browser, ssh_key_file)
 
 
@@ -231,8 +231,8 @@ def _dcos_browse_internal(acs_info, disable_browser, ssh_key_file):
     return
 
 
-def acs_install_cli(cmd, client, resource_group, name, install_location=None, client_version=None):
-    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group)
+def acs_install_cli(cmd, client, resource_group_name, name, install_location=None, client_version=None):
+    acs_info = _get_acs_info(cmd.cli_ctx, name, resource_group_name)
     orchestrator_type = acs_info.orchestrator_profile.orchestrator_type  # pylint: disable=no-member
     kwargs = {'install_location': install_location}
     if client_version:
@@ -1999,21 +1999,20 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # so mapped to EUS per discussion with log analytics team
     AzureCloudLocationToOmsRegionCodeMap = {
         "australiasoutheast": "ASE",
-        "australiaeast": "AEA",
-        "australiacentral": "ACE",
+        "australiaeast": "EAU",
+        "australiacentral": "CAU",
         "canadacentral": "CCA",
         "centralindia": "CIN",
         "centralus": "CUS",
-        "eastasia": "EAS",
+        "eastasia": "EA",
         "eastus": "EUS",
         "eastus2": "EUS2",
         "eastus2euap": "EAP",
-        "francecentral": "FCN",
+        "francecentral": "PAR",
         "japaneast": "EJP",
-        "koreacentral": "KCN",
-        "northcentralus": "NUS",
+        "koreacentral": "SE",
         "northeurope": "NEU",
-        "southcentralus": "SUS",
+        "southcentralus": "SCUS",
         "southeastasia": "SEA",
         "uksouth": "SUK",
         "usgovvirginia": "USGV",
@@ -2041,7 +2040,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "japanwest": "japaneast",
         "koreacentral": "koreacentral",
         "koreasouth": "koreacentral",
-        "northcentralus": "northcentralus",
+        "northcentralus": "eastus",
         "northeurope": "northeurope",
         "southafricanorth": "westeurope",
         "southafricawest": "westeurope",

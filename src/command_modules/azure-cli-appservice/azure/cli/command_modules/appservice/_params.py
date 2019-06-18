@@ -14,7 +14,7 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 
 from ._completers import get_hostname_completion_list
 
-from ._validators import validate_timeout_value
+from ._validators import validate_timeout_value, validate_site_create, validate_asp_create
 
 
 AUTH_TYPES = {
@@ -73,7 +73,8 @@ def load_arguments(self, _):
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
-        c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None)
+        c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None,
+                   validator=validate_asp_create)
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
@@ -84,7 +85,7 @@ def load_arguments(self, _):
         c.ignore('allow_pending_state')
 
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new web app')
+        c.argument('name', options_list=['--name', '-n'], help='name of the new web app', validator=validate_site_create)
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
@@ -383,8 +384,10 @@ def load_arguments(self, _):
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
 
     with self.argument_context('functionapp') as c:
-        c.ignore('app_instance', 'slot')
+        c.ignore('app_instance')
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
     with self.argument_context('functionapp create') as c:
@@ -446,3 +449,18 @@ def load_arguments(self, _):
         c.argument('allow_force_push', help="If Azure DevOps repository is not clean, should it overwrite remote content?", arg_type=get_three_state_flag(return_label=True), required=False)
         c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository", required=False)
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)", required=False)
+
+    with self.argument_context('functionapp deployment slot') as c:
+        c.argument('slot', help='the name of the slot')
+        # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
+        # The help will still show "-n or --name", so it should not be a problem to do it this way
+        c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app', id_part='name')
+        c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
+        c.argument('disable', help='disable auto swap', action='store_true')
+        c.argument('target_slot', help="target slot to swap, default to 'production'")
+    with self.argument_context('functionapp deployment slot create') as c:
+        c.argument('configuration_source', help="source slot to clone configurations from. Use function app's name to refer to the production slot")
+    with self.argument_context('functionapp deployment slot swap') as c:
+        c.argument('action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
+                   arg_type=get_enum_type(['swap', 'preview', 'reset']))

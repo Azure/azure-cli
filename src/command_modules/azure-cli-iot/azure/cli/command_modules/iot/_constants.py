@@ -5,3 +5,5 @@
 
 certificate_help = """For a detailed explanation of CA certificates in Azure IoT Hub,
                       see https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-x509ca-overview """
+# AAD application Id
+CLIENT_ID = '822c8694-ad95-4735-9c55-256f7db2f9b4'

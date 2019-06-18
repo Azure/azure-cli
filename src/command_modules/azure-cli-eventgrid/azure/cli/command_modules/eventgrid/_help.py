@@ -1,4 +1,3 @@
-# coding=utf-8
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -10,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['eventgrid'] = """
     type: group
-    short-summary: Manage Azure Event Grid topics and subscriptions.
+    short-summary: Manage Azure Event Grid topics, event subscriptions, domains and domain topics.
     """
 helps['eventgrid topic'] = """
     type: group
@@ -45,6 +44,10 @@ helps['eventgrid topic list'] = """
           text: az eventgrid topic list
         - name: List all topics in a resource group.
           text: az eventgrid topic list -g rg1
+        - name: List all topics in a resource group whose name contains the pattern "XYZ"
+          text: az eventgrid topic list -g rg1 --odata-query "Contains(name, 'XYZ')"
+        - name: List all topics in a resource group except the domain with name "name1"
+          text: az eventgrid topic list -g rg1 --odata-query "NOT (name eq 'name1')"
     """
 helps['eventgrid topic show'] = """
     type: command
@@ -67,15 +70,127 @@ helps['eventgrid topic key regenerate'] = """
     type: command
     short-summary: Regenerate a shared access key of a topic.
     """
+helps['eventgrid domain'] = """
+    type: group
+    short-summary: Manage event domains.
+    """
+helps['eventgrid domain create'] = """
+    type: command
+    short-summary: Create a domain.
+    examples:
+        - name: Create a new domain.
+          text: az eventgrid domain create -g rg1 --name domain1 -l westus2
+    """
+helps['eventgrid domain update'] = """
+    type: command
+    short-summary: Update a domain.
+    examples:
+        - name: Update the properties of an existing domain.
+          text: az eventgrid domain update -g rg1 --name domain1 --tags Dept=IT
+    """
+helps['eventgrid domain delete'] = """
+    type: command
+    short-summary: Delete a domain.
+    examples:
+        - name: Delete a domain.
+          text: az eventgrid domain delete -g rg1 --name domain1
+    """
+helps['eventgrid domain list'] = """
+    type: command
+    short-summary: List available domains.
+    examples:
+        - name: List all domains in the current Azure subscription.
+          text: az eventgrid domain list
+        - name: List all domains in a resource group.
+          text: az eventgrid domain list -g rg1
+        - name: List all domains in a resource group whose name contains the pattern "XYZ"
+          text: az eventgrid domain list -g rg1 --odata-query "Contains(name, 'XYZ')"
+        - name: List all domains in a resource group except the domain with name "name1"
+          text: az eventgrid domain list -g rg1 --odata-query "NOT (name eq 'name1')"
+    """
+helps['eventgrid domain show'] = """
+    type: command
+    short-summary: Get the details of a domain.
+    examples:
+        - name: Show the details of a domain.
+          text: az eventgrid domain show -g rg1 -n domain1
+        - name: Show the details of a domain based on resource ID.
+          text: az eventgrid domain show --ids /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/domain1
+    """
+helps['eventgrid domain key'] = """
+    type: group
+    short-summary: Manage shared access keys of a domain.
+    """
+helps['eventgrid domain topic'] = """
+    type: group
+    short-summary: Manage event domain topics.
+    """
+helps['eventgrid domain topic create'] = """
+    type: command
+    short-summary: Create a domain topic under a domain.
+    examples:
+        - name: Create a new domain topic under domain.
+          text: az eventgrid domain topic create -g rg1 --domain-name domain1 --name domaintopic1
+    """
+helps['eventgrid domain topic delete'] = """
+    type: command
+    short-summary: Delete a domain topic under a domain.
+    examples:
+        - name: Delete a domain topic.
+          text: az eventgrid domain topic delete -g rg1 --domain-name domain1 --name domaintopic1
+    """
+helps['eventgrid domain key list'] = """
+    type: command
+    short-summary: List shared access keys of a domain.
+    """
+helps['eventgrid domain key regenerate'] = """
+    type: command
+    short-summary: Regenerate a shared access key of a domain.
+    """
+helps['eventgrid domain topic list'] = """
+    type: command
+    short-summary: List available topics in a domain.
+    examples:
+        - name: List all topics in a domain.
+          text: az eventgrid domain topic list -g rg1 --domain-name domain1
+        - name: List all domain topics in a domain whose name contains the pattern "XYZ"
+          text: az eventgrid domain topic list -g rg1 --domain-name domain1 --odata-query "Contains(name, 'XYZ')"
+        - name: List all domain topics in a domain except the domain topic with name "name1"
+          text: az eventgrid domain topic list -g rg1 --domain-name domain1 --odata-query "NOT (name eq 'name1')"
+    """
+helps['eventgrid domain topic show'] = """
+    type: command
+    short-summary: Get the details of a domain topic.
+    examples:
+        - name: Show the details of a domain topic.
+          text: az eventgrid domain topic show -g rg1 --domain-name domain1 --name topic1
+    """
 helps['eventgrid event-subscription'] = """
     type: group
-    short-summary: Manage event subscriptions for an Event Grid topic or for an Azure resource.
-    long-summary: Manage event subscriptions for an Event Grid topic, Azure subscription, resource group or for any other Azure resource that supports event notifications.
+    short-summary: Manage event subscriptions.
+    long-summary: Manage event subscriptions for an Event Grid topic, domain, domain topic, Azure subscription, resource group or for any other Azure resource that supports event notifications.
     """
 helps['eventgrid event-subscription create'] = """
     type: command
-    short-summary: Create a new event subscription for an Event Grid topic or for an Azure resource.
+    short-summary: Create a new event subscription.
     parameters:
+        - name: --advanced-filter
+          short-summary: An advanced filter enables filtering of events based on a specific event property.
+          long-summary: |
+            Usage:                     --advanced-filter KEY[.INNERKEY] FILTEROPERATOR VALUE [VALUE ...]
+            StringIn:                  --advanced-filter data.Color StringIn Blue Red Orange Yellow
+            StringNotIn:               --advanced-filter data.Color StringNotIn Blue Red Orange Yellow
+            StringContains:            --advanced-filter subject StringContains Blue Red
+            StringBeginsWith:          --advanced-filter subject StringBeginsWith Blue Red
+            StringEndsWith:            --advanced-filter subject StringEndsWith img png jpg
+            NumberIn:                  --advanced-filter data.property1 NumberIn 5 10 20
+            NumberNotIn:               --advanced-filter data.property2 NumberNotIn 100 200 300
+            NumberLessThan:            --advanced-filter data.property3 NumberLessThan 100
+            NumberLessThanOrEquals:    --advanced-filter data.property2 NumberLessThanOrEquals 100
+            NumberGreaterThan:         --advanced-filter data.property3 NumberGreaterThan 100
+            NumberGreaterThanOrEquals: --advanced-filter data.property2 NumberGreaterThanOrEquals 100
+            BoolEquals:                --advanced-filter data.property3 BoolEquals true
+            Multiple advanced filters can be specified by using more than one `--advanced-filter` argument.
         - name: --source-resource-id
           short-summary: Fully qualified identifier of the Azure resource to which the event subscription needs to be created.
           long-summary: |
@@ -84,6 +199,8 @@ helps['eventgrid event-subscription create'] = """
             For resource group:         --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1
             For EventGrid topic:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/topics/t1
             For storage account:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageaccounts/sa1
+            For EventGrid domain:       --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1
+            For EventGrid domain topic: --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1/topics/t1
         - name: --deadletter-endpoint
           short-summary: The Azure resource ID of an Azure Storage blob container destination where EventGrid should deadletter undeliverable events for this event subscription.
           long-summary: |
@@ -112,6 +229,13 @@ helps['eventgrid event-subscription create'] = """
             az eventgrid event-subscription create --name es3 \\
                 --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/s1"  \\
                 --endpoint https://contoso.azurewebsites.net/api/f1?code=code
+        - name: Create a new event subscription for a storage account, using advanced filters.
+          text: |
+            az eventgrid event-subscription create  --name es3 \\
+                --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/s1" \\
+                --endpoint https://contoso.azurewebsites.net/api/f1?code=code
+                --advanced-filter data.blobType StringIn BlockBlob
+                --advanced-filter data.url StringBeginsWith https://myaccount.blob.core.windows.net
         - name: Create a new event subscription for an Azure subscription, with a filter specifying a subject prefix.
           text: |
             az eventgrid event-subscription create --name es4 \\
@@ -136,6 +260,12 @@ helps['eventgrid event-subscription create'] = """
                 --source-resource-id /subscriptions/{SubID} \\
                 --endpoint-type storagequeue \\
                 --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/sa1/queueservices/default/queues/q1
+        - name: Create a new event subscription for an Azure subscription, using default filters, and an Azure ServiceBusQueue as a destination.
+          text: |
+            az eventgrid event-subscription create --name es2 \\
+                --source-resource-id /subscriptions/{SubID} \\
+                --endpoint-type servicebusqueue \\
+                --endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.ServiceBus/namespaces/ns1/queues/queue1
         - name: Create a new event subscription for a storage account, with a deadletter destination and custom retry policy of maximum 10 delivery attempts and an Event TTL of 2 hours (whichever happens earlier).
           text: |
             az eventgrid event-subscription create --name es2 \\
@@ -143,6 +273,17 @@ helps['eventgrid event-subscription create'] = """
                 --endpoint https://contoso.azurewebsites.net/api/f1?code=code \\
                 --deadletter-endpoint /subscriptions/{SubID}/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/s2/blobServices/default/containers/blobcontainer1 \\
                 --max-delivery-attempts 10 --event-ttl 120
+        - name: Create a new event subscription for a domain topic.
+          text: |
+            az eventgrid event-subscription create --name es2 \\
+                --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/domain1/topics/t1" \\
+                --endpoint https://contoso.azurewebsites.net/api/f1?code=code
+        - name: Create a new event subscription (for a storage account) with an expiration date.
+          text: |
+            az eventgrid event-subscription create --name es2 \\
+                --source-resource-id "/subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.Storage/storageaccounts/sa1" \\
+                --endpoint https://contoso.azurewebsites.net/api/f1?code=code
+                --expiration-date "2018-10-31"
     """
 helps['eventgrid event-subscription update'] = """
     type: command
@@ -156,6 +297,8 @@ helps['eventgrid event-subscription update'] = """
             For resource group:         --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1
             For EventGrid topic:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/topics/t1
             For storage account:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageaccounts/sa1
+            For EventGrid domain:       --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1
+            For EventGrid domain topic: --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1/topics/t1
         - name: --endpoint-type
           short-summary: The type of the destination endpoint.
     examples:
@@ -198,11 +341,21 @@ helps['eventgrid event-subscription delete'] = """
             For resource group:         --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1
             For EventGrid topic:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/topics/t1
             For storage account:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageaccounts/sa1
+            For EventGrid domain:       --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1
+            For EventGrid domain topic: --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1/topics/t1
     examples:
         - name: Delete an event subscription for an Event Grid topic.
           text: |
             az eventgrid event-subscription delete --name es1 \\
                 --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/topics/topic1
+        - name: Delete an event subscription for an Event Grid domain topic.
+          text: |
+            az eventgrid event-subscription delete --name es1 \\
+                --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/domain1/topics/topic1
+        - name: Delete an event subscription for an Event Grid domain.
+          text: |
+            az eventgrid event-subscription delete --name es1 \\
+                --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/domain1
         - name: Delete an event subscription for an Azure subscription.
           text: |
             az eventgrid event-subscription delete --name es2 \\
@@ -242,6 +395,8 @@ helps['eventgrid event-subscription list'] = """
             For resource group:         --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1
             For EventGrid topic:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/topics/t1
             For storage account:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageaccounts/sa1
+            For EventGrid domain:       --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1
+            For EventGrid domain topic: --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1/topics/t1
     examples:
         - name: List all event subscriptions created for an Event Grid topic.
           text: |
@@ -255,6 +410,12 @@ helps['eventgrid event-subscription list'] = """
         - name: List all event subscriptions created for a resource group.
           text: |
             az eventgrid event-subscription list --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}
+        - name: List all event subscriptions for an Event Grid domain.
+          text: |
+            az eventgrid event-subscription list --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/d1
+        - name: List all event subscriptions for an Event Grid domain topic.
+          text: |
+            az eventgrid event-subscription list --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/d1/topics/topic1
         - name: List all Storage event subscriptions (under the currently selected Azure subscription) in westus2.
           text: |
             az eventgrid event-subscription list --topic-type Microsoft.Storage.StorageAccounts --location westus2
@@ -269,6 +430,12 @@ helps['eventgrid event-subscription list'] = """
           text: |
             az eventgrid event-subscription list --location westus2 --resource-group {RG}
             az eventgrid event-subscription list --location global --resource-group {RG}
+        - name: List all event subscriptions for an Event Grid domain whose name contains the pattern "XYZ"
+          text: |
+            az eventgrid event-subscription list --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/d1 --odata-query "Contains(name, 'XYZ')"
+        - name: List all event subscriptions for an Event Grid domain except the event subscription with name "name1"
+          text: |
+            az eventgrid event-subscription list --source-resource-id /subscriptions/{SubID}/resourceGroups/{RG}/providers/Microsoft.EventGrid/domains/d1 --odata-query "NOT (name eq 'name1')"
     """
 helps['eventgrid event-subscription show'] = """
     type: command
@@ -282,6 +449,8 @@ helps['eventgrid event-subscription show'] = """
             For resource group:         --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1
             For EventGrid topic:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/topics/t1
             For storage account:        --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.Storage/storageaccounts/sa1
+            For EventGrid domain:       --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1
+            For EventGrid domain topic: --source-resource-id /subscriptions/{SubID}/resourceGroups/rg1/providers/Microsoft.EventGrid/domains/d1/topics/t1
     examples:
         - name: Show the details of an event subscription for an Event Grid topic.
           text: |
@@ -315,4 +484,8 @@ helps['eventgrid topic-type show'] = """
 helps['eventgrid topic-type list-event-types'] = """
     type: command
     short-summary: List the event types supported by a topic type.
+    examples:
+        - name: List all event types supported by Azure Storage Accounts.
+          text: |
+            az eventgrid topic-type list-event-types -n Microsoft.Storage.StorageAccounts
     """

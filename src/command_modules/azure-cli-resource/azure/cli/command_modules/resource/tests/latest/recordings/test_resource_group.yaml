@@ -1,469 +1,790 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-07-06T20:29:45Z"}}'
+      "date": "2019-06-07T18:15:41Z"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '110'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --location --name --tag
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-07-06T20:29:45Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-07T18:15:41Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:29:53 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:15:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 06 Jul 2018 20:29:55 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 07 Jun 2019 18:15:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 06 Jul 2018 20:30:10 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 07 Jun 2019 18:16:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 06 Jul 2018 20:30:24 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 07 Jun 2019 18:16:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --yes
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 06 Jul 2018 20:30:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 07 Jun 2019 18:16:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group exists]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group exists
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: HEAD
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['167']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-failure-cause: [gateway]
-    status: {code: 404, message: Not Found}
+      cache-control:
+      - no-cache
+      content-length:
+      - '167'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
 - request:
     body: '{"location": "westus", "tags": {"a": "b", "c": ""}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['51']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '51'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -l --tag
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['327']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '327'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group exists]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group exists
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: HEAD
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 06 Jul 2018 20:30:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 204, message: No Content}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 07 Jun 2019 18:16:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['327']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '327'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --tag
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups?$filter=tagname%20eq%20%27a%27%20and%20tagvalue%20eq%20%27b%27&api-version=2018-05-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}]}'}
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['339']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:46 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '339'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --tags
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"b","c":""},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['327']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:47 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '327'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: 'b''{"name": "cli_test_rg_scenario000001", "properties": {}, "location":
-      "westus", "tags": {}}'''
+    body: '{"properties": {}, "location": "westus", "tags": {}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group update]
-      Connection: [keep-alive]
-      Content-Length: ['139']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '52'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --tags
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['313']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:51 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --set
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['313']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:51 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: 'b''{"name": "cli_test_rg_scenario000001", "properties": {}, "location":
-      "westus", "tags": {"a": "{\''k\'': \''v\''}"}}'''
+    body: '{"properties": {}, "location": "westus", "tags": {"a": "{''k'': ''v''}"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group update]
-      Connection: [keep-alive]
-      Content-Length: ['156']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --set
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"{''k'':
-        ''v''}"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"{''k'':
+        ''v''}"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['329']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --set --force-string
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"{''k'':
-        ''v''}"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"{''k'':
+        ''v''}"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['329']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:16:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: 'b''{"name": "cli_test_rg_scenario000001", "properties": {}, "location":
-      "westus", "tags": {"a": "{\''k\'': \''v\''}", "b": "{\\"k\\":\\"v\\"}"}}'''
+    body: '{"properties": {}, "location": "westus", "tags": {"a": "{''k'': ''v''}",
+      "b": "{\"k\":\"v\"}"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group update]
-      Connection: [keep-alive]
-      Content-Length: ['178']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '91'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --set --force-string
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"{''k'':
-        ''v''}","b":"{\"k\":\"v\"}"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rg_scenario000001","name":"cli_test_rg_scenario000001","location":"westus","tags":{"a":"{''k'':
+        ''v''}","b":"{\"k\":\"v\"}"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['349']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 06 Jul 2018 20:30:54 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '349'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 07 Jun 2019 18:18:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.42]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --yes --no-wait
+      User-Agent:
+      - python/3.7.3 (Darwin-18.0.0-x86_64-i386-64bit) msrest/0.6.6 msrest_azure/0.6.0
+        resourcemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_rg_scenario000001?api-version=2018-05-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 06 Jul 2018 20:30:54 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT042MkFFNTVLRUdBV0tNN0VRNUNLVnxFNjlBRDAyNkRBNUQ5MjcwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 07 Jun 2019 18:18:52 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkc6NUZTQ0VOQVJJT0s2WFM0V1BaUUNES09ETkRJNzdGVnwwMjFERUFFNjk1MTVEQ0Y5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 version: 1

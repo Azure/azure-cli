@@ -43,8 +43,8 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
-    from ._client_factory import cf_acr_registries
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries_tasks
+    client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
 
     if os.path.exists(source_location):
         if not os.path.isdir(source_location):

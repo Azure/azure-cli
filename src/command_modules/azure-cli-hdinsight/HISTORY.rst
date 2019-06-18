@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.5
++++++
+* Support for using `--ssh-public-key` parameter in `hdinsight create` command.
+
 0.3.4
 +++++
 * Upgrade azure-mgmt-storage from 3.1.1 to 3.3.0

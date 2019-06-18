@@ -547,8 +547,11 @@ def list_application_owners(cmd, identifier):
 
 def add_application_owner(cmd, owner_object_id, identifier):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
-    return graph_client.applications.add_owner(_resolve_application(graph_client.applications, identifier), owner_url)
+    app_object_id = _resolve_application(graph_client.applications, identifier)
+    owners = graph_client.applications.list_owners(app_object_id)
+    if not next((x for x in owners if x.object_id == owner_object_id), None):
+        owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
+        graph_client.applications.add_owner(app_object_id, owner_url)
 
 
 def remove_application_owner(cmd, owner_object_id, identifier):
@@ -674,8 +677,11 @@ def list_group_owners(cmd, group_id):
 
 def add_group_owner(cmd, owner_object_id, group_id):
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
-    return graph_client.groups.add_owner(_resolve_group(graph_client.groups, group_id), owner_url)
+    group_object_id = _resolve_group(graph_client.groups, group_id)
+    owners = graph_client.groups.list_owners(group_object_id)
+    if not next((x for x in owners if x.object_id == owner_object_id), None):
+        owner_url = _get_owner_url(cmd.cli_ctx, owner_object_id)
+        graph_client.groups.add_owner(group_object_id, owner_url)
 
 
 def remove_group_owner(cmd, owner_object_id, group_id):
@@ -854,31 +860,17 @@ def delete_permission(cmd, identifier, api):
 
 
 def admin_consent(cmd, identifier):
-    import requests
     from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.commands.client_factory import UA_AGENT
-    from azure.cli.core.util import should_disable_connection_verify
+    from azure.cli.core.util import send_raw_request
+
     if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
         raise CLIError('This command is not yet supported on sovereign clouds')
-    # we will leverage portal endpoints to get admin consent done
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     url = 'https://main.iam.ad.ext.azure.com/api/RegisteredApplications/{}/Consent?onBehalfOfAll=true'.format(
         application.app_id)
-    profile = Profile()
-
-    # the key is to get the access token to the portal resource:
-    access_token = profile.get_raw_token('74658136-14ec-4630-ad9b-26e160ff0fc6')
-    headers = {
-        'Authorization': "Bearer " + access_token[0][1],
-        'Accept-Encoding': 'gzip, deflate, br',
-        'x-ms-client-request-id': str(uuid.uuid4()),
-        'User-Agent': UA_AGENT
-    }
-    response = requests.post(url, headers=headers, verify=not should_disable_connection_verify())
-    if not response.ok:
-        raise CLIError(response.reason)
+    send_raw_request(cmd.cli_ctx, 'post', url, resource='74658136-14ec-4630-ad9b-26e160ff0fc6')
 
 
 def grant_application(cmd, identifier, api, consent_type=None, principal_id=None,
@@ -930,28 +922,34 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None,
                        credential_description=None, app_roles=None):
-    password_creds, key_creds, required_accesses = None, None, None
+
+    # propagate the values
+    app_patch_param = ApplicationUpdateParameters()
+    properties = [attr for attr in dir(instance)
+                  if not callable(getattr(instance, attr)) and
+                  not attr.startswith("_") and attr != 'additional_properties' and hasattr(app_patch_param, attr)]
+    for p in properties:
+        setattr(app_patch_param, p, getattr(instance, p))
+
+    # handle credentials. Note, we will not put existing ones on the wire to avoid roundtrip problems caused
+    # by time precision difference between SDK and Graph Services
+    password_creds, key_creds = None, None
     if any([password, key_value]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type, key_usage, start_date,
                                                              end_date, credential_description)
+    app_patch_param.key_credentials = key_creds
+    app_patch_param.password_credentials = password_creds
 
     if required_resource_accesses:
-        required_accesses = _build_application_accesses(required_resource_accesses)
+        app_patch_param.required_resource_access = _build_application_accesses(required_resource_accesses)
 
     if app_roles:
-        app_roles = _build_app_roles(app_roles)
+        app_patch_param.app_roles = _build_app_roles(app_roles)
 
-    app_patch_param = ApplicationUpdateParameters(
-        display_name=display_name,
-        homepage=homepage,
-        identifier_uris=identifier_uris,
-        reply_urls=reply_urls,
-        key_credentials=key_creds,
-        password_credentials=password_creds,
-        available_to_other_tenants=available_to_other_tenants,
-        required_resource_access=required_accesses,
-        oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
-        app_roles=app_roles)
+    app_patch_param.available_to_other_tenants = available_to_other_tenants
+    app_patch_param.oauth2_allow_implicit_flow = oauth2_allow_implicit_flow
+    app_patch_param.identifier_uris = identifier_uris
+    app_patch_param.reply_urls = reply_urls
 
     return app_patch_param
 

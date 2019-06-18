@@ -13,12 +13,13 @@ class BotServiceCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
 
         from azure.cli.core.commands import CliCommandType
+        from azure.cli.core.profiles import ResourceType
         custom_type = CliCommandType(
             operations_tmpl='azure.cli.command_modules.botservice.custom#{}',
             client_factory=get_botservice_management_client)
         super(BotServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=custom_type,
-                                                       min_profile='2017-03-10-profile',
+                                                       resource_type=ResourceType.MGMT_BOTSERVICE,
                                                        suppress_extension=ModExtensionSuppress(
                                                            __name__,
                                                            'botservice',

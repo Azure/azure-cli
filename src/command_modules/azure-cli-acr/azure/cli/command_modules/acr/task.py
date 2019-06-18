@@ -13,7 +13,9 @@ from ._utils import (
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_and_values
+    get_yaml_and_values,
+    build_timers_info,
+    remove_timer_trigger
 )
 from ._stream_utils import stream_logs
 
@@ -49,6 +51,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     source_trigger_name='defaultSourceTriggerName',
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=True,
+                    schedule=None,
                     branch='master',
                     no_push=False,
                     no_cache=False,
@@ -82,55 +85,32 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             "--cmd myCommand -c /dev/null or "
             "-f myFile -c myContext, but not both.")
 
-    if context_path:
-        if file.endswith(ALLOWED_TASK_FILE_TYPES):
-            FileTaskStep = cmd.get_models('FileTaskStep')
-            step = FileTaskStep(
-                task_file_path=file,
-                values_file_path=values,
-                context_path=context_path,
-                context_access_token=git_access_token,
-                values=(set_value if set_value else []) + (set_secret if set_secret else [])
-            )
-        else:
-            DockerBuildStep = cmd.get_models('DockerBuildStep')
-            step = DockerBuildStep(
-                image_names=image_names,
-                is_push_enabled=not no_push,
-                no_cache=no_cache,
-                docker_file_path=file,
-                arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
-                context_path=context_path,
-                context_access_token=git_access_token,
-                target=target
-            )
-    else:
-        yaml_template, values_content = get_yaml_and_values(
-            cmd_value, timeout, file)
-        import base64
-        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
-        step = EncodedTaskStep(
-            encoded_task_content=base64.b64encode(
-                yaml_template.encode()).decode(),
-            encoded_values_content=base64.b64encode(
-                values_content.encode()).decode(),
-            context_path=context_path,
-            context_access_token=git_access_token,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
-        )
+    step = create_task_step(
+        context_path=context_path,
+        cmd=cmd,
+        file=file,
+        image_names=image_names,
+        values=values,
+        git_access_token=git_access_token,
+        set_value=set_value,
+        set_secret=set_secret,
+        no_push=no_push,
+        no_cache=no_cache,
+        arg=arg,
+        secret_arg=secret_arg,
+        target=target,
+        cmd_value=cmd_value,
+        timeout=timeout)
 
-    SourceControlType, SourceTriggerEvent = cmd.get_models(
-        'SourceControlType', 'SourceTriggerEvent')
+    SourceControlType = cmd.get_models('SourceControlType')
     source_control_type = SourceControlType.visual_studio_team_service.value
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
 
     source_triggers = None
-    source_trigger_events = []
-    if commit_trigger_enabled:
-        source_trigger_events.append(SourceTriggerEvent.commit.value)
-    if pull_request_trigger_enabled:
-        source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
+    source_trigger_events = _get_trigger_event_list_put(cmd,
+                                                        commit_trigger_enabled,
+                                                        pull_request_trigger_enabled)
     # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
@@ -152,6 +132,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 name=source_trigger_name
             )
         ]
+
+    timer_triggers = None
+    if schedule:
+        timer_triggers = build_timers_info(cmd, schedule)
 
     base_image_trigger = None
     if base_image_trigger_enabled:
@@ -188,6 +172,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         ),
         trigger=TriggerProperties(
             source_triggers=source_triggers,
+            timer_triggers=timer_triggers,
             base_image_trigger=base_image_trigger
         ),
         credentials=get_custom_registry_credentials(
@@ -203,6 +188,63 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                              task_create_parameters=task_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
+
+
+def create_task_step(context_path,
+                     cmd,
+                     file,
+                     image_names,
+                     values,
+                     git_access_token,
+                     set_value,
+                     set_secret,
+                     no_push,
+                     no_cache,
+                     arg,
+                     secret_arg,
+                     target,
+                     cmd_value,
+                     timeout):
+    if context_path:
+        if file:
+            if file.endswith(ALLOWED_TASK_FILE_TYPES):
+                FileTaskStep = cmd.get_models('FileTaskStep')
+                step = FileTaskStep(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                )
+            else:
+                DockerBuildStep = cmd.get_models('DockerBuildStep')
+                step = DockerBuildStep(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
+        else:
+            raise CLIError("missing --file/-f argument")
+    else:
+        yaml_template, values_content = get_yaml_and_values(
+            cmd_value, timeout, file)
+        import base64
+        EncodedTaskStep = cmd.get_models('EncodedTaskStep')
+        step = EncodedTaskStep(
+            encoded_task_content=base64.b64encode(
+                yaml_template.encode()).decode(),
+            encoded_values_content=base64.b64encode(
+                values_content.encode()).decode(),
+            context_path=context_path,
+            context_access_token=git_access_token,
+            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+        )
+    return step
 
 
 def acr_task_show(cmd,
@@ -339,10 +381,10 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
                 'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
 
-            source_trigger_events = _get_trigger_event_list(cmd,
-                                                            source_triggers,
-                                                            commit_trigger_enabled,
-                                                            pull_request_trigger_enabled)
+            source_trigger_events = _get_trigger_event_list_patch(cmd,
+                                                                  source_triggers,
+                                                                  commit_trigger_enabled,
+                                                                  pull_request_trigger_enabled)
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
@@ -364,12 +406,13 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             BaseImageTriggerUpdateParameters = cmd.get_models(
                 'BaseImageTriggerUpdateParameters')
 
-            status = None
+            base_image_status = None
             if base_image_trigger_enabled is not None:
-                status = TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value
+                base_image_status = TriggerStatus.enabled.value if base_image_trigger_enabled \
+                    else TriggerStatus.disabled.value
             base_image_trigger_update_params = BaseImageTriggerUpdateParameters(
                 base_image_trigger_type=base_image_trigger_type,
-                status=status,
+                status=base_image_status,
                 name=base_image_trigger.name if base_image_trigger else "defaultBaseimageTriggerName"
             )
 
@@ -581,6 +624,109 @@ def acr_task_credential_list(cmd,
     return {} if not resp else resp.custom_registries
 
 
+def acr_task_timer_add(cmd,
+                       client,
+                       task_name,
+                       registry_name,
+                       timer_name,
+                       schedule,
+                       enabled=True,
+                       resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
+        'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus')
+    taskUpdateParameters = TaskUpdateParameters(
+        trigger=TriggerUpdateParameters(
+            timer_triggers=[
+                TimerTriggerUpdateParameters(
+                    name=timer_name,
+                    status=TriggerStatus.enabled.value if enabled else TriggerStatus.disabled.value,
+                    schedule=schedule
+                )
+            ]
+        )
+    )
+
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_timer_update(cmd,
+                          client,
+                          task_name,
+                          registry_name,
+                          timer_name,
+                          schedule=None,
+                          enabled=None,
+                          resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
+        'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus')
+
+    trigger_status = None
+    if enabled is not None:
+        trigger_status = TriggerStatus.enabled.value if enabled else TriggerStatus.disabled.value
+
+    taskUpdateParameters = TaskUpdateParameters(
+        trigger=TriggerUpdateParameters(
+            timer_triggers=[
+                TimerTriggerUpdateParameters(
+                    name=timer_name,
+                    status=trigger_status,
+                    schedule=schedule
+                )
+            ]
+        )
+    )
+
+    return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def acr_task_timer_remove(cmd,
+                          client,
+                          task_name,
+                          registry_name,
+                          timer_name,
+                          resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    # Task triggers currently cannot be removed via PATCH
+    # Use PUT to remove the timer trigger instead
+    # Get the existing task
+    existingTask = client.get_details(resource_group_name, registry_name, task_name)
+    if existingTask.trigger:
+        # Remove the timer trigger
+        trimmed_timer_triggers = remove_timer_trigger(task_name, timer_name, existingTask.trigger.timer_triggers)
+        existingTask.trigger.timer_triggers = trimmed_timer_triggers
+
+        try:
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=existingTask)
+        except ValidationError as e:
+            raise CLIError(e)
+
+    else:
+        raise CLIError("No triggers exist for the task '{}'.".format(task_name))
+
+
+def acr_task_timer_list(cmd,
+                        client,
+                        task_name,
+                        registry_name,
+                        resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
+
+    resp = client.get_details(resource_group_name, registry_name, task_name).trigger
+    return {} if not resp else resp.timer_triggers
+
+
 def acr_task_update_run(cmd,
                         client,
                         run_id,
@@ -610,8 +756,8 @@ def acr_task_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    from ._client_factory import cf_acr_registries
-    client_registries = cf_acr_registries(cmd.cli_ctx)
+    from ._client_factory import cf_acr_registries_tasks
+    client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     TaskRunRequest = cmd.get_models('TaskRunRequest')
 
     queued_run = LongRunningOperation(cmd.cli_ctx)(
@@ -773,10 +919,22 @@ def _build_identities_info(cmd, identities, is_remove=False):
     return identity
 
 
-def _get_trigger_event_list(cmd,
-                            source_triggers,
-                            commit_trigger_enabled=None,
-                            pull_request_trigger_enabled=None):
+def _get_trigger_event_list_put(cmd,
+                                commit_trigger_enabled=None,
+                                pull_request_trigger_enabled=None):
+    SourceTriggerEvent = cmd.get_models('SourceTriggerEvent')
+    source_trigger_events = []
+    if commit_trigger_enabled:
+        source_trigger_events.append(SourceTriggerEvent.commit.value)
+    if pull_request_trigger_enabled:
+        source_trigger_events.append(SourceTriggerEvent.pullrequest.value)
+    return source_trigger_events
+
+
+def _get_trigger_event_list_patch(cmd,
+                                  source_triggers,
+                                  commit_trigger_enabled=None,
+                                  pull_request_trigger_enabled=None):
     TriggerStatus, SourceTriggerEvent = cmd.get_models('TriggerStatus', 'SourceTriggerEvent')
 
     source_trigger_events = set()

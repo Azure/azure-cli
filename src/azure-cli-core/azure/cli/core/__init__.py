@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.65"
+__version__ = "2.0.67"
 
 import os
 import sys
@@ -310,16 +310,13 @@ class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
 class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
-                 command_group_cls=None, argument_context_cls=None, suppress_extension=None,
-                 **kwargs):
+    def __init__(self, cli_ctx=None, command_group_cls=None, argument_context_cls=None,
+                 suppress_extension=None, **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
         super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                command_cls=AzCliCommand,
                                                excluded_command_handler_args=EXCLUDED_PARAMS)
-        self.min_profile = min_profile
-        self.max_profile = max_profile
         self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None
@@ -395,14 +392,20 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         api_support = supported_api_version(
             cli_ctx=self.cli_ctx,
             resource_type=resource_type or self._get_resource_type(),
-            min_api=min_api or self.min_profile,
-            max_api=max_api or self.max_profile,
+            min_api=min_api,
+            max_api=max_api,
             operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
         if operation_group:
             return getattr(api_support, operation_group)
         return api_support
+
+    def supported_resource_type(self, resource_type=None):
+        from azure.cli.core.profiles import supported_resource_type
+        return supported_resource_type(
+            cli_ctx=self.cli_ctx,
+            resource_type=resource_type or self._get_resource_type())
 
     def get_sdk(self, *attr_args, **kwargs):
         from azure.cli.core.profiles import get_sdk

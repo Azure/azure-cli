@@ -50,6 +50,7 @@ from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
+from .utils import _normalize_sku, get_sku_name
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group,
                            should_create_new_rg, set_location, should_create_new_app,
                            get_lang_from_content, get_num_apps_in_asp)
@@ -82,7 +83,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
-    if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name not in ['F1', 'Free']:
+    if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
+                                                                                        'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags)
     helper = _StackRuntimeHelper(client, linux=is_linux)
@@ -297,27 +299,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     return response
 
 
-def get_sku_name(tier):  # pylint: disable=too-many-return-statements
-    tier = tier.upper()
-    if tier in ['F1', 'FREE']:
-        return 'FREE'
-    if tier in ['D1', "SHARED"]:
-        return 'SHARED'
-    if tier in ['B1', 'B2', 'B3', 'BASIC']:
-        return 'BASIC'
-    if tier in ['S1', 'S2', 'S3']:
-        return 'STANDARD'
-    if tier in ['P1', 'P2', 'P3']:
-        return 'PREMIUM'
-    if tier in ['P1V2', 'P2V2', 'P3V2']:
-        return 'PREMIUMV2'
-    if tier in ['PC2', 'PC3', 'PC4']:
-        return 'PremiumContainer'
-    if tier in ['EP1', 'EP2', 'EP3']:
-        return 'ElasticPremium'
-    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
-
-
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
                                 setting_properties, slot=None, client=None):
     client = client or web_client_factory(cli_ctx)
@@ -442,7 +423,10 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     client = web_client_factory(cli_ctx)
-    result = list(client.deleted_web_apps.list())
+    locations = _get_deleted_apps_locations(cli_ctx)
+    result = list()
+    for location in locations:
+        result = result + list(client.deleted_web_apps.list_by_location(location))
     if resource_group_name:
         result = [r for r in result if r.resource_group == resource_group_name]
     if name:
@@ -1014,46 +998,76 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     site = client.web_apps.get(resource_group_name, webapp)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(webapp))
+    if 'functionapp' in site.kind:
+        raise CLIError("'{}' is a function app. Please use `az functionapp deployment slot create`.".format(webapp))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
-    clone_from_prod = None
     slot_def.site_config = SiteConfig()
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
+
     if configuration_source:
-        clone_from_prod = configuration_source.lower() == webapp.lower()
-        site_config = get_site_configs(cmd, resource_group_name, webapp,
-                                       None if clone_from_prod else configuration_source)
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                'update_configuration', slot, site_config)
-
-    # slot create doesn't clone over the app-settings and connection-strings, so we do it here
-    # also make sure slot settings don't get propagated.
-    if configuration_source:
-        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, webapp)
-        src_slot = None if clone_from_prod else configuration_source
-        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                               'list_application_settings',
-                                               src_slot)
-        for a in slot_cfg_names.app_setting_names or []:
-            app_settings.properties.pop(a, None)
-
-        connection_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                                     'list_connection_strings',
-                                                     src_slot)
-        for a in slot_cfg_names.connection_string_names or []:
-            connection_strings.properties.pop(a, None)
-
-        _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                    'update_application_settings',
-                                    app_settings.properties, slot, client)
-        _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
-                                    'update_connection_strings',
-                                    connection_strings.properties, slot, client)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source)
 
     result.name = result.name.split('/')[-1]
     return result
+
+
+def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None):
+    client = web_client_factory(cmd.cli_ctx)
+    site = client.web_apps.get(resource_group_name, name)
+    if not site:
+        raise CLIError("'{}' function app doesn't exist".format(name))
+    location = site.location
+    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+
+    slot_def.site_config = SiteConfig()
+
+    # function app slots need to have all the App Settings from the source
+    prodsite_appsettings = get_app_settings(cmd, resource_group_name, name)
+    slot_def.site_config.app_settings = prodsite_appsettings[:]
+
+    poller = client.web_apps.create_or_update_slot(resource_group_name, name, slot_def, slot)
+    result = LongRunningOperation(cmd.cli_ctx)(poller)
+
+    if configuration_source:
+        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source)
+
+    result.name = result.name.split('/')[-1]
+    return result
+
+
+def update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source=None):
+    clone_from_prod = configuration_source.lower() == webapp.lower()
+    site_config = get_site_configs(cmd, resource_group_name, webapp,
+                                   None if clone_from_prod else configuration_source)
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                            'update_configuration', slot, site_config)
+
+    # slot create doesn't clone over the app-settings and connection-strings, so we do it here
+    # also make sure slot settings don't get propagated.
+
+    slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, webapp)
+    src_slot = None if clone_from_prod else configuration_source
+    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                           'list_application_settings',
+                                           src_slot)
+    for a in slot_cfg_names.app_setting_names or []:
+        app_settings.properties.pop(a, None)
+
+    connection_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                                 'list_connection_strings',
+                                                 src_slot)
+    for a in slot_cfg_names.connection_string_names or []:
+        connection_strings.properties.pop(a, None)
+
+    _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                'update_application_settings',
+                                app_settings.properties, slot, client)
+    _generic_settings_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                'update_connection_strings',
+                                connection_strings.properties, slot, client)
 
 
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
@@ -1183,14 +1197,6 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, s
     sku = _normalize_sku(sku)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    # if is_linux and FREE SKU check the region is supported, FREE is supported on some select regions only
-    if is_linux and sku == 'F1':
-        geo_regions = list(filter(lambda x: location in x.name, list_locations(cmd, sku, is_linux)))
-        num_geo_regions = len(geo_regions)
-        if num_geo_regions == 0:
-            raise CLIError('Free SKU not supported in region "{}". Run the command with --location to use a '
-                           'supported region. See az appservice list-locations --sku F1 --linux-workers-enabled to see '
-                           'the list of supported regions'.format(location))
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
@@ -1390,15 +1396,6 @@ def _parse_frequency(frequency):
     return frequency_num, frequency_unit
 
 
-def _normalize_sku(sku):
-    sku = sku.upper()
-    if sku == 'FREE':
-        return 'F1'
-    elif sku == 'SHARED':
-        return 'D1'
-    return sku
-
-
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.mgmt.resource import ResourceManagementClient
     client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
@@ -1411,6 +1408,16 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp))
     return webapp.location
+
+
+def _get_deleted_apps_locations(cli_ctx):
+    from azure.mgmt.resource import ResourceManagementClient
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    web_provider = client.providers.get('Microsoft.Web')
+    del_sites_resource = next((x for x in web_provider.resource_types if x.resource_type == 'deletedSites'), None)
+    if del_sites_resource:
+        return del_sites_resource.locations
+    return []
 
 
 def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
@@ -1633,11 +1640,14 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     if not site:
         raise CLIError("'{}' app doesn't exist".format(name))
     configs = get_site_configs(cmd, resource_group_name, name)
-    host_name_suffix = '.' + site.default_host_name.split('.', 1)[1]
+    host_name_split = site.default_host_name.split('.', 1)
+    host_name_suffix = '.' + host_name_split[1]
+    host_name_val = host_name_split[0]
     configs.experiments.ramp_up_rules = []
     for r in distribution:
         slot, percentage = r.split('=')
-        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=slot + host_name_suffix,
+        action_host_name_slot = host_name_val + "-" + slot
+        configs.experiments.ramp_up_rules.append(RampUpRule(action_host_name=action_host_name_slot + host_name_suffix,
                                                             reroute_percentage=float(percentage),
                                                             name=slot))
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', None, configs)
@@ -2484,7 +2494,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None,  # pylint: disable
         view_in_browser(cmd, rg_name, name, None, logs)
     else:
         _url = _get_url(cmd, rg_name, name)
-        logger.warning("You can launch the app at '%s'", _url)
+        logger.warning("You can launch the app at %s", _url)
         create_json.update({'app_url': _url})
     if logs:
         _configure_default_logging(cmd, rg_name, name)

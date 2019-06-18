@@ -42,3 +42,6 @@ def load_command_table(self, _):
         g.command('list', 'list_by_search_service')
         g.command('create', 'create')
         g.command('delete', 'delete')
+
+    with self.command_group('search', is_preview=True):
+        pass

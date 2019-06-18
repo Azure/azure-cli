@@ -3,6 +3,8 @@
 Release History
 ===============
 
+0.4.10
+++++++
 * BatchAI commands are now deprecated and hidden.
 
 0.4.9

@@ -47,3 +47,6 @@ def load_command_table(self, _):
 
     with self.command_group('reservations catalog', reservations_client_sdk) as g:
         g.show_command('show', 'get_catalog')
+
+    with self.command_group('reservations', is_preview=True):
+        pass

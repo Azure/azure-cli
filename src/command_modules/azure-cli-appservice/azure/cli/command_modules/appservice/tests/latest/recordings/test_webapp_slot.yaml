@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-03-25T23:33:33Z"}}'
+      "date": "2019-06-11T01:47:39Z"}}'
     headers:
       Accept:
       - application/json
@@ -18,15 +18,15 @@ interactions:
       ParameterSetName:
       - --location --name --tag
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-25T23:33:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-11T01:47:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:33 GMT
+      - Tue, 11 Jun 2019 01:47:43 GMT
       expires:
       - '-1'
       pragma:
@@ -45,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -63,15 +63,15 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-25T23:33:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-11T01:47:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -80,7 +80,112 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 25 Mar 2019 23:33:33 GMT
+      - Tue, 11 Jun 2019 01:47:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"name": "slot-test-plan000002", "type": "Microsoft.Web/serverfarms",
+      "location": "westus", "properties": {"skuName": "S1", "capacity": 1}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '143'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 Jun 2019 01:47:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-11T01:47:39Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 11 Jun 2019 01:47:47 GMT
       expires:
       - '-1'
       pragma:
@@ -113,8 +218,8 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
@@ -122,8 +227,8 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","name":"slot-test-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":18302,"name":"slot-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-089_18302","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+        US","properties":{"serverFarmId":18544,"name":"slot-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-101_18544","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -132,7 +237,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:33:40 GMT
+      - Tue, 11 Jun 2019 01:47:54 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +255,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -170,8 +275,8 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
@@ -179,8 +284,8 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","name":"slot-test-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":18302,"name":"slot-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-089_18302","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+        US","properties":{"serverFarmId":18544,"name":"slot-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-101_18544","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -189,7 +294,122 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:33:40 GMT
+      - Tue, 11 Jun 2019 01:47:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''b\\\''{"name": "slot-test-web000003", "type": "Microsoft.Web/sites",
+      "location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002"}}\\\''\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '329'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 Jun 2019 01:47:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002?api-version=2018-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","name":"slot-test-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":18544,"name":"slot-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-101_18544","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1499'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 Jun 2019 01:47:57 GMT
       expires:
       - '-1'
       pragma:
@@ -214,8 +434,9 @@ interactions:
 - request:
     body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002",
       "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
-      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "8.11.1"}],
-      "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped": false}}\'''''
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "10.14"}],
+      "alwaysOn": true, "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
+      false}}\'''''
     headers:
       Accept:
       - application/json
@@ -226,33 +447,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '521'
+      - '538'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003","name":"slot-test-web000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:33:43.1466667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:48:00.8933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3333'
+      - '3346'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:33:58 GMT
+      - Tue, 11 Jun 2019 01:48:17 GMT
       etag:
-      - '"1D4E3632F4C8B40"'
+      - '"1D51FF7B3F82BEB"'
       expires:
       - '-1'
       pragma:
@@ -294,23 +515,29 @@ interactions:
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/publishxml?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/publishxml?api-version=2018-11-01
   response:
     body:
       string: <publishData><publishProfile profileName="slot-test-web000003 - Web
         Deploy" publishMethod="MSDeploy" publishUrl="slot-test-web000003.scm.azurewebsites.net:443"
-        msdeploySite="slot-test-web000003" userName="$slot-test-web000003" userPWD="3ATdXMbL1v5dvztN7pRCrajJaB51dpFwfXnBuxN7gJva4tlGKyt3EEa9hpAN"
+        msdeploySite="slot-test-web000003" userName="$slot-test-web000003" userPWD="xtytpWbqL3Nza325XXgZvo5ga9FmM4K6GX9Ch4d2CdYXTy6BFuN78i5KcJbC"
         destinationAppUrl="http://slot-test-web000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="slot-test-web000003
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-089.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-101.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="slot-test-web000003\$slot-test-web000003"
-        userPWD="3ATdXMbL1v5dvztN7pRCrajJaB51dpFwfXnBuxN7gJva4tlGKyt3EEa9hpAN" destinationAppUrl="http://slot-test-web000003.azurewebsites.net"
+        userPWD="xtytpWbqL3Nza325XXgZvo5ga9FmM4K6GX9Ch4d2CdYXTy6BFuN78i5KcJbC" destinationAppUrl="http://slot-test-web000003.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile><publishProfile profileName="slot-test-web000003 - ReadOnly
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-101dr.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="slot-test-web000003\$slot-test-web000003"
+        userPWD="xtytpWbqL3Nza325XXgZvo5ga9FmM4K6GX9Ch4d2CdYXTy6BFuN78i5KcJbC" destinationAppUrl="http://slot-test-web000003.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>
@@ -318,11 +545,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1150'
+      - '1730'
       content-type:
       - application/xml
       date:
-      - Mon, 25 Mar 2019 23:33:59 GMT
+      - Tue, 11 Jun 2019 01:48:18 GMT
       expires:
       - '-1'
       pragma:
@@ -358,25 +585,25 @@ interactions:
       ParameterSetName:
       - -g -n --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"8.11.1"}}'
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"10.14"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '358'
+      - '357'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:33:59 GMT
+      - Tue, 11 Jun 2019 01:48:18 GMT
       expires:
       - '-1'
       pragma:
@@ -402,7 +629,7 @@ interactions:
       message: OK
 - request:
     body: '{"kind": "<class ''str''>", "properties": {"WEBSITE_NODE_DEFAULT_VERSION":
-      "8.11.1", "s1": "v1", "s2": "v2"}}'
+      "10.14", "s1": "v1", "s2": "v2"}}'
     headers:
       Accept:
       - application/json
@@ -413,33 +640,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '107'
+      - '106'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"8.11.1","s1":"v1","s2":"v2"}}'
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"10.14","s1":"v1","s2":"v2"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '378'
+      - '377'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:00 GMT
+      - Tue, 11 Jun 2019 01:48:20 GMT
       etag:
-      - '"1D4E363396F0BF5"'
+      - '"1D51FF7BF1E12E0"'
       expires:
       - '-1'
       pragma:
@@ -457,7 +684,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -477,12 +704,12 @@ interactions:
       ParameterSetName:
       - -g -n --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -495,7 +722,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:00 GMT
+      - Tue, 11 Jun 2019 01:48:20 GMT
       expires:
       - '-1'
       pragma:
@@ -535,12 +762,12 @@ interactions:
       ParameterSetName:
       - -g -n --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -553,7 +780,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:01 GMT
+      - Tue, 11 Jun 2019 01:48:22 GMT
       expires:
       - '-1'
       pragma:
@@ -571,7 +798,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -591,27 +818,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003","name":"slot-test-web000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:34:00.5433333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:48:20.11","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3333'
+      - '3341'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:02 GMT
+      - Tue, 11 Jun 2019 01:48:23 GMT
       etag:
-      - '"1D4E363396F0BF5"'
+      - '"1D51FF7BF1E12E0"'
       expires:
       - '-1'
       pragma:
@@ -654,27 +881,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging","name":"slot-test-web000003/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:34:05.03","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__1500","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:48:26.1133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__50e9","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3419'
+      - '3437'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:21 GMT
+      - Tue, 11 Jun 2019 01:48:42 GMT
       etag:
-      - '"1D4E363396F0BF5"'
+      - '"1D51FF7BF1E12E0"'
       expires:
       - '-1'
       pragma:
@@ -712,27 +939,27 @@ interactions:
       ParameterSetName:
       - -g -n --repo-url --branch -s --manual-integration
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003","name":"slot-test-web000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:34:00.5433333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:48:20.11","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3333'
+      - '3341'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:21 GMT
+      - Tue, 11 Jun 2019 01:48:44 GMT
       etag:
-      - '"1D4E363396F0BF5"'
+      - '"1D51FF7BF1E12E0"'
       expires:
       - '-1'
       pragma:
@@ -773,12 +1000,12 @@ interactions:
       ParameterSetName:
       - -g -n --repo-url --branch -s --manual-integration
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web","name":"slot-test-web000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
@@ -791,9 +1018,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:28 GMT
+      - Tue, 11 Jun 2019 01:48:50 GMT
       etag:
-      - '"1D4E3634A5F1600"'
+      - '"1D51FF7D151996B"'
       expires:
       - '-1'
       pragma:
@@ -807,7 +1034,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -827,15 +1054,15 @@ interactions:
       ParameterSetName:
       - -g -n --repo-url --branch -s --manual-integration
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web","name":"slot-test-web000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
-        US","properties":{"repoUrl":"https://github.com/yugangw-msft/azure-site-test","branch":"staging","isManualIntegration":true,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"InProgress","provisioningDetails":"2019-03-25T23:34:51.9254002
-        https://slot-test-web000003-staging.scm.azurewebsites.net/api/deployments/latest?deployer=GitHub&time=2019-03-25_23-34-41Z"}}'
+        US","properties":{"repoUrl":"https://github.com/yugangw-msft/azure-site-test","branch":"staging","isManualIntegration":true,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"InProgress","provisioningDetails":"2019-06-11T01:49:21.6020152
+        https://slot-test-web000003-staging.scm.azurewebsites.net/api/deployments/latest?deployer=GitHub&time=2019-06-11_01-49-00Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -844,9 +1071,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:34:59 GMT
+      - Tue, 11 Jun 2019 01:49:21 GMT
       etag:
-      - '"1D4E3634A5F1600"'
+      - '"1D51FF7D151996B"'
       expires:
       - '-1'
       pragma:
@@ -882,10 +1109,10 @@ interactions:
       ParameterSetName:
       - -g -n --repo-url --branch -s --manual-integration
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/sourcecontrols/web","name":"slot-test-web000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
@@ -898,9 +1125,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:35:29 GMT
+      - Tue, 11 Jun 2019 01:49:51 GMT
       etag:
-      - '"1D4E3634A5F1600"'
+      - '"1D51FF7D151996B"'
       expires:
       - '-1'
       pragma:
@@ -940,12 +1167,12 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/slotsswap?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/slotsswap?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -955,13 +1182,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:35:32 GMT
+      - Tue, 11 Jun 2019 01:49:55 GMT
       etag:
-      - '"1D4E363705D8BF5"'
+      - '"1D51FF7F791AC40"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -993,10 +1220,10 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -1006,11 +1233,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:35:48 GMT
+      - Tue, 11 Jun 2019 01:50:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -1040,10 +1267,10 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -1053,11 +1280,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:36:03 GMT
+      - Tue, 11 Jun 2019 01:50:26 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -1087,10 +1314,10 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -1100,11 +1327,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:36:18 GMT
+      - Tue, 11 Jun 2019 01:50:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -1134,25 +1361,25 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/14095dd8-7201-46bf-9ad6-0439c87026de?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/e6dc64c6-8069-45ad-bfe0-fca6e4a1585a?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging","name":"slot-test-web000003/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:36:27.6033333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-03-25T23:36:27.632Z","sourceSlotName":"staging","destinationSlotName":"Production"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:50:56.3666667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-06-11T01:50:56.427Z","sourceSlotName":"staging","destinationSlotName":"Production"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3519'
+      - '3532'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:35 GMT
+      - Tue, 11 Jun 2019 01:50:58 GMT
       etag:
-      - '"1D4E36391169F35"'
+      - '"1D51FF81C40F2EB"'
       expires:
       - '-1'
       pragma:
@@ -1190,25 +1417,25 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"8.11.1","s1":"v1"}}'
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"10.14","s1":"v1"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '382'
+      - '381'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:35 GMT
+      - Tue, 11 Jun 2019 01:50:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1246,12 +1473,12 @@ interactions:
       ParameterSetName:
       - -g -n -s
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -1264,7 +1491,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:35 GMT
+      - Tue, 11 Jun 2019 01:50:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1300,25 +1527,27 @@ interactions:
       ParameterSetName:
       - -g -n --php-version
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web","name":"slot-test-web000003","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2729'
+      - '2979'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:36 GMT
+      - Tue, 11 Jun 2019 01:51:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1347,13 +1576,17 @@ interactions:
       "5.6", "pythonVersion": "", "nodeVersion": "", "linuxFxVersion": "", "requestTracingEnabled":
       false, "remoteDebuggingEnabled": false, "httpLoggingEnabled": false, "logsDirectorySizeLimit":
       35, "detailedErrorLoggingEnabled": false, "publishingUsername": "$slot-test-web000003",
-      "azureStorageAccounts": {}, "scmType": "None", "use32BitWorkerProcess": true,
-      "webSocketsEnabled": false, "alwaysOn": false, "appCommandLine": "", "managedPipelineMode":
-      "Integrated", "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\\\wwwroot",
-      "preloadEnabled": false}], "loadBalancing": "LeastRequests", "experiments":
-      {"rampUpRules": []}, "autoHealEnabled": false, "vnetName": "", "localMySqlEnabled":
-      false, "http20Enabled": true, "minTlsVersion": "1.2", "ftpsState": "AllAllowed",
-      "reservedInstanceCount": 0}}'''
+      "scmType": "None", "use32BitWorkerProcess": true, "webSocketsEnabled": false,
+      "alwaysOn": true, "appCommandLine": "", "managedPipelineMode": "Integrated",
+      "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\\\wwwroot",
+      "preloadEnabled": true}], "loadBalancing": "LeastRequests", "experiments": {"rampUpRules":
+      []}, "autoHealEnabled": false, "vnetName": "", "localMySqlEnabled": false, "ipSecurityRestrictions":
+      [{"ipAddress": "Any", "action": "Allow", "priority": 1, "name": "Allow all",
+      "description": "Allow all access"}], "scmIpSecurityRestrictions": [{"ipAddress":
+      "Any", "action": "Allow", "priority": 1, "name": "Allow all", "description":
+      "Allow all access"}], "scmIpSecurityRestrictionsUseMain": false, "http20Enabled":
+      true, "minTlsVersion": "1.2", "ftpsState": "AllAllowed", "reservedInstanceCount":
+      0}}'''
     headers:
       Accept:
       - application/json
@@ -1364,33 +1597,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1057'
+      - '1353'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --php-version
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003","name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2715'
+      - '2965'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:37 GMT
+      - Tue, 11 Jun 2019 01:51:03 GMT
       etag:
-      - '"1D4E3637099908B"'
+      - '"1D51FF7F7EA2C80"'
       expires:
       - '-1'
       pragma:
@@ -1408,7 +1643,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1428,27 +1663,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003","name":"slot-test-web000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:36:38.3066667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__1500","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-03-25T23:36:27.632Z","sourceSlotName":"staging","destinationSlotName":"Production"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003","state":"Running","hostNames":["slot-test-web000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003.azurewebsites.net","slot-test-web000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:51:02.98","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__50e9","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-06-11T01:50:56.427Z","sourceSlotName":"staging","destinationSlotName":"Production"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3440'
+      - '3448'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:39 GMT
+      - Tue, 11 Jun 2019 01:51:04 GMT
       etag:
-      - '"1D4E3639777D22B"'
+      - '"1D51FF820321040"'
       expires:
       - '-1'
       pragma:
@@ -1491,27 +1726,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev","name":"slot-test-web000003/dev","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003(dev)","state":"Running","hostNames":["slot-test-web000003-dev.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-dev.azurewebsites.net","slot-test-web000003-dev.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-dev.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-dev.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:36:42.42","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__f692","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-dev.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003(dev)","state":"Running","hostNames":["slot-test-web000003-dev.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-dev.azurewebsites.net","slot-test-web000003-dev.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-dev.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-dev.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:51:07.9166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__29e4","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-dev.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3383'
+      - '3401'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:58 GMT
+      - Tue, 11 Jun 2019 01:51:24 GMT
       etag:
-      - '"1D4E3639777D22B"'
+      - '"1D51FF820321040"'
       expires:
       - '-1'
       pragma:
@@ -1549,25 +1784,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/web","name":"slot-test-web000003","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2733'
+      - '2983'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:36:58 GMT
+      - Tue, 11 Jun 2019 01:51:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1596,14 +1833,17 @@ interactions:
       "5.6", "pythonVersion": "", "nodeVersion": "", "linuxFxVersion": "", "requestTracingEnabled":
       false, "remoteDebuggingEnabled": false, "remoteDebuggingVersion": "VS2017",
       "httpLoggingEnabled": false, "logsDirectorySizeLimit": 35, "detailedErrorLoggingEnabled":
-      false, "publishingUsername": "$slot-test-web000003", "azureStorageAccounts":
-      {}, "scmType": "None", "use32BitWorkerProcess": true, "webSocketsEnabled": false,
-      "alwaysOn": false, "appCommandLine": "", "managedPipelineMode": "Integrated",
-      "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\\\wwwroot",
-      "preloadEnabled": false}], "loadBalancing": "LeastRequests", "experiments":
-      {"rampUpRules": []}, "autoHealEnabled": false, "vnetName": "", "localMySqlEnabled":
-      false, "http20Enabled": true, "minTlsVersion": "1.2", "ftpsState": "AllAllowed",
-      "reservedInstanceCount": 0}}'''
+      false, "publishingUsername": "$slot-test-web000003", "scmType": "None", "use32BitWorkerProcess":
+      true, "webSocketsEnabled": false, "alwaysOn": true, "appCommandLine": "", "managedPipelineMode":
+      "Integrated", "virtualApplications": [{"virtualPath": "/", "physicalPath": "site\\\\wwwroot",
+      "preloadEnabled": true}], "loadBalancing": "LeastRequests", "experiments": {"rampUpRules":
+      []}, "autoHealEnabled": false, "vnetName": "", "localMySqlEnabled": false, "ipSecurityRestrictions":
+      [{"ipAddress": "Any", "action": "Allow", "priority": 1, "name": "Allow all",
+      "description": "Allow all access"}], "scmIpSecurityRestrictions": [{"ipAddress":
+      "Any", "action": "Allow", "priority": 1, "name": "Allow all", "description":
+      "Allow all access"}], "scmIpSecurityRestrictionsUseMain": false, "http20Enabled":
+      true, "minTlsVersion": "1.2", "ftpsState": "AllAllowed", "reservedInstanceCount":
+      0}}'''
     headers:
       Accept:
       - application/json
@@ -1614,33 +1854,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1093'
+      - '1389'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev","name":"slot-test-web000003/dev","type":"Microsoft.Web/sites/slots","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003__dev","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003__dev","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2740'
+      - '2990'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:00 GMT
+      - Tue, 11 Jun 2019 01:51:28 GMT
       etag:
-      - '"1D4E3639A26776B"'
+      - '"1D51FF8236D1700"'
       expires:
       - '-1'
       pragma:
@@ -1658,7 +1900,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1678,12 +1920,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -1696,7 +1938,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:00 GMT
+      - Tue, 11 Jun 2019 01:51:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1734,12 +1976,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
@@ -1752,7 +1994,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:00 GMT
+      - Tue, 11 Jun 2019 01:51:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1792,12 +2034,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/connectionstrings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/connectionstrings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
@@ -1810,7 +2052,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:01 GMT
+      - Tue, 11 Jun 2019 01:51:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1853,12 +2095,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --configuration-source
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
@@ -1871,9 +2113,71 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:02 GMT
+      - Tue, 11 Jun 2019 01:51:32 GMT
       etag:
-      - '"1D4E363A614C475"'
+      - '"1D51FF831706E60"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kind": "<class ''str''>", "properties": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp deployment slot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '43'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --slot --configuration-source
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings?api-version=2018-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
+        US","properties":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '341'
+      content-type:
+      - application/json
+      date:
+      - Tue, 11 Jun 2019 01:51:33 GMT
+      etag:
+      - '"1D51FF83240F7CB"'
       expires:
       - '-1'
       pragma:
@@ -1898,68 +2202,6 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "<class ''str''>", "properties": {}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp deployment slot create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '43'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --slot --configuration-source
-      User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings?api-version=2018-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '341'
-      content-type:
-      - application/json
-      date:
-      - Mon, 25 Mar 2019 23:37:03 GMT
-      etag:
-      - '"1D4E363A6C13115"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
     body: null
     headers:
       Accept:
@@ -1973,25 +2215,27 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/web?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/web?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/web","name":"slot-test-web000003","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003__dev","publishingPassword":null,"appSettings":null,"azureStorageAccounts":{},"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0}}'
+        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":"VS2017","httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$slot-test-web000003__dev","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","ftpsState":"AllAllowed","reservedInstanceCount":0,"preWarmedInstanceCount":null,"healthCheckPath":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2748'
+      - '2998'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:04 GMT
+      - Tue, 11 Jun 2019 01:51:34 GMT
       expires:
       - '-1'
       pragma:
@@ -2029,12 +2273,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
@@ -2047,7 +2291,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:04 GMT
+      - Tue, 11 Jun 2019 01:51:35 GMT
       expires:
       - '-1'
       pragma:
@@ -2090,12 +2334,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
@@ -2108,9 +2352,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:05 GMT
+      - Tue, 11 Jun 2019 01:51:37 GMT
       etag:
-      - '"1D4E363A80A45E0"'
+      - '"1D51FF83443B2A0"'
       expires:
       - '-1'
       pragma:
@@ -2128,7 +2372,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2148,12 +2392,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -2166,7 +2410,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:06 GMT
+      - Tue, 11 Jun 2019 01:51:37 GMT
       expires:
       - '-1'
       pragma:
@@ -2207,12 +2451,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -2225,7 +2469,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:06 GMT
+      - Tue, 11 Jun 2019 01:51:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2243,7 +2487,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2265,12 +2509,12 @@ interactions:
       ParameterSetName:
       - -g -n -t --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
@@ -2283,7 +2527,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:07 GMT
+      - Tue, 11 Jun 2019 01:51:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2326,12 +2570,12 @@ interactions:
       ParameterSetName:
       - -g -n -t --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
@@ -2344,9 +2588,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:09 GMT
+      - Tue, 11 Jun 2019 01:51:41 GMT
       etag:
-      - '"1D4E363AA1C42F5"'
+      - '"1D51FF836D3D360"'
       expires:
       - '-1'
       pragma:
@@ -2364,7 +2608,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2384,12 +2628,12 @@ interactions:
       ParameterSetName:
       - -g -n -t --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -2402,7 +2646,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:09 GMT
+      - Tue, 11 Jun 2019 01:51:42 GMT
       expires:
       - '-1'
       pragma:
@@ -2443,12 +2687,12 @@ interactions:
       ParameterSetName:
       - -g -n -t --slot --settings --slot-settings
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -2461,7 +2705,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:11 GMT
+      - Tue, 11 Jun 2019 01:51:43 GMT
       expires:
       - '-1'
       pragma:
@@ -2479,7 +2723,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2503,12 +2747,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --target-slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/slotsswap?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/slotsswap?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -2518,13 +2762,13 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:37:13 GMT
+      - Tue, 11 Jun 2019 01:51:47 GMT
       etag:
-      - '"1D4E3639777D22B"'
+      - '"1D51FF820321040"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/baa13e26-b374-49be-b771-583b156cabd8?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -2536,7 +2780,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2556,10 +2800,10 @@ interactions:
       ParameterSetName:
       - -g -n --slot --target-slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/baa13e26-b374-49be-b771-583b156cabd8?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -2569,11 +2813,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:37:28 GMT
+      - Tue, 11 Jun 2019 01:52:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/baa13e26-b374-49be-b771-583b156cabd8?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -2603,10 +2847,10 @@ interactions:
       ParameterSetName:
       - -g -n --slot --target-slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/baa13e26-b374-49be-b771-583b156cabd8?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -2616,11 +2860,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:37:43 GMT
+      - Tue, 11 Jun 2019 01:52:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/baa13e26-b374-49be-b771-583b156cabd8?api-version=2018-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
       pragma:
       - no-cache
       server:
@@ -2650,25 +2894,72 @@ interactions:
       ParameterSetName:
       - -g -n --slot --target-slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/baa13e26-b374-49be-b771-583b156cabd8?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 11 Jun 2019 01:52:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp deployment slot swap
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --slot --target-slot
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/operationresults/f5a1fa96-bdaa-43e8-98bf-bb98bc809744?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging","name":"slot-test-web000003/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:37:56.78","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__f692","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-03-25T23:37:56.796Z","sourceSlotName":"staging","destinationSlotName":"dev"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
+        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:52:36.51","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__29e4","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-06-11T01:52:36.611Z","sourceSlotName":"staging","destinationSlotName":"dev"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3513'
+      - '3526'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:37:59 GMT
+      - Tue, 11 Jun 2019 01:52:49 GMT
       etag:
-      - '"1D4E363C63DE6C0"'
+      - '"1D51FF857F19BE0"'
       expires:
       - '-1'
       pragma:
@@ -2706,25 +2997,25 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"8.11.1","s1":"v1","s4":"v4"}}'
+        US","properties":{"WEBSITE_NODE_DEFAULT_VERSION":"10.14","s1":"v1","s4":"v4"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '388'
+      - '387'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:00 GMT
+      - Tue, 11 Jun 2019 01:52:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2762,12 +3053,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -2780,7 +3071,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:01 GMT
+      - Tue, 11 Jun 2019 01:52:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2818,12 +3109,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
@@ -2836,7 +3127,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:01 GMT
+      - Tue, 11 Jun 2019 01:52:52 GMT
       expires:
       - '-1'
       pragma:
@@ -2874,12 +3165,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -2892,7 +3183,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:02 GMT
+      - Tue, 11 Jun 2019 01:52:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2930,12 +3221,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/appsettings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/appsettings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
@@ -2948,7 +3239,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:02 GMT
+      - Tue, 11 Jun 2019 01:52:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2986,12 +3277,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -3004,7 +3295,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:03 GMT
+      - Tue, 11 Jun 2019 01:52:54 GMT
       expires:
       - '-1'
       pragma:
@@ -3042,12 +3333,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/connectionstrings/list?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/connectionstrings/list?api-version=2018-11-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging/config/connectionstrings","name":"connectionstrings","type":"Microsoft.Web/sites/config","location":"West
@@ -3060,7 +3351,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:03 GMT
+      - Tue, 11 Jun 2019 01:52:55 GMT
       expires:
       - '-1'
       pragma:
@@ -3078,7 +3369,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -3098,12 +3389,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/config/slotConfigNames?api-version=2018-11-01
   response:
     body:
       string: '{"id":null,"name":"slot-test-web000003","type":"Microsoft.Web/sites","location":"West
@@ -3116,7 +3407,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:04 GMT
+      - Tue, 11 Jun 2019 01:52:55 GMT
       expires:
       - '-1'
       pragma:
@@ -3152,28 +3443,28 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots?api-version=2018-11-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev","name":"slot-test-web000003/dev","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003(dev)","state":"Running","hostNames":["slot-test-web000003-dev.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-dev.azurewebsites.net","slot-test-web000003-dev.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":"Limited","hostNameSslStates":[{"name":"slot-test-web000003-dev.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-dev.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":"Dedicated","serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:37:13.07","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-dev.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-03-25T23:37:56.796Z","sourceSlotName":"staging","destinationSlotName":"dev"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging","name":"slot-test-web000003/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
-        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":"Limited","hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":"Dedicated","serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-03-25T23:37:56.78","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__f692","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-03-25T23:37:56.796Z","sourceSlotName":"staging","destinationSlotName":"dev"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}],"nextLink":null,"id":null}'
+        US","properties":{"name":"slot-test-web000003(dev)","state":"Running","hostNames":["slot-test-web000003-dev.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-dev.azurewebsites.net","slot-test-web000003-dev.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":"Limited","hostNameSslStates":[{"name":"slot-test-web000003-dev.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-dev.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":"Dedicated","serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:51:46.73","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-dev.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-06-11T01:52:36.611Z","sourceSlotName":"staging","destinationSlotName":"dev"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging","name":"slot-test-web000003/staging","type":"Microsoft.Web/sites/slots","kind":"app","location":"West
+        US","properties":{"name":"slot-test-web000003(staging)","state":"Running","hostNames":["slot-test-web000003-staging.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-101.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/slot-test-web000003","repositorySiteName":"slot-test-web000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["slot-test-web000003-staging.azurewebsites.net","slot-test-web000003-staging.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":"Limited","hostNameSslStates":[{"name":"slot-test-web000003-staging.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"slot-test-web000003-staging.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":"Dedicated","serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/slot-test-plan000002","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-06-11T01:52:36.51","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"slot-test-web000003__29e4","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227","possibleOutboundIpAddresses":"52.160.40.218,13.91.101.189,13.91.99.235,13.91.96.245,13.91.100.227,13.91.97.179,13.91.103.21,13.91.99.109","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-101","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"slot-test-web000003-staging.azurewebsites.net","slotSwapStatus":{"timestampUtc":"2019-06-11T01:52:36.611Z","sourceSlotName":"staging","destinationSlotName":"dev"},"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null}}],"nextLink":null,"id":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7047'
+      - '7073'
       content-type:
       - application/json
       date:
-      - Mon, 25 Mar 2019 23:38:04 GMT
+      - Tue, 11 Jun 2019 01:52:56 GMT
       etag:
-      - '"1D4E363C63DE6C0"'
+      - '"1D51FF857F19BE0"'
       expires:
       - '-1'
       pragma:
@@ -3211,12 +3502,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/staging?api-version=2018-11-01
   response:
     body:
       string: ''
@@ -3226,9 +3517,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:38:07 GMT
+      - Tue, 11 Jun 2019 01:52:58 GMT
       etag:
-      - '"1D4E363C63DE6C0"'
+      - '"1D51FF857F19BE0"'
       expires:
       - '-1'
       pragma:
@@ -3264,12 +3555,12 @@ interactions:
       ParameterSetName:
       - -g -n --slot --keep-dns-registration --keep-empty-plan --keep-metrics
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.40.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-web/0.42.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev?deleteMetrics=false&deleteEmptyServerFarm=false&api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/slot-test-web000003/slots/dev?deleteMetrics=false&deleteEmptyServerFarm=false&api-version=2018-11-01
   response:
     body:
       string: ''
@@ -3279,9 +3570,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:38:08 GMT
+      - Tue, 11 Jun 2019 01:53:04 GMT
       etag:
-      - '"1D4E363AC3048E0"'
+      - '"1D51FF83A45C8A0"'
       expires:
       - '-1'
       pragma:
@@ -3295,7 +3586,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
       x-powered-by:
       - ASP.NET
     status:
@@ -3317,8 +3608,8 @@ interactions:
       ParameterSetName:
       - --name --yes --no-wait
       User-Agent:
-      - python/3.7.0 (Windows-10-10.0.17763-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
+        Azure-SDK-For-Python AZURECLI/2.0.66
       accept-language:
       - en-US
     method: DELETE
@@ -3332,11 +3623,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 25 Mar 2019 23:38:09 GMT
+      - Tue, 11 Jun 2019 01:53:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdRUzM2QjVRMjc2SDIzSUZHR1pYQzRXQUM1SUNZS1lPTjRURXw2MjdCRDFBN0MzMzI4NUU4LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkcyQllUQ1BFTklaUFpVSE5BQzNCWEJLQlFFTkpWM1kyS1BUVXwyNUJDN0EyRDBBNzI3ODMyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -3344,7 +3635,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14999'
     status:
       code: 202
       message: Accepted

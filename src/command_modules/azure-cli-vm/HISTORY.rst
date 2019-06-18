@@ -3,9 +3,14 @@
 Release History
 ===============
 
+2.2.23
+++++++
+* [New Command Group]. image template: added image builder support via `image template`. These commands are in preview.
+
 2.2.22
 ++++++
-* vm create: allows for more flexibility with image data-disk luns. Image data-disk luns do not have to start from 0 and can skip numbers.
+* vm create: can now create a vm from a managed image with data-disk luns that do not start from 0 or that skip numbers.
+  Does not assume data-disk lun from the number of data disks in source managed image.
 
 2.2.21
 ++++++
