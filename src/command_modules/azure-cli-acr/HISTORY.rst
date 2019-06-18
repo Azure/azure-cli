@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.3.0
++++++
+* Support Timer Triggers for Task.
+
 2.2.9
 +++++
 * Add 'az acr check-health' command.
