@@ -106,7 +106,7 @@ setup(
         ':python_version<"3.0"': ['futures'],
         ":python_version<'3.0'": ['antlr4-python2-runtime'],
         ":python_version>='3.0'": ['antlr4-python3-runtime'],
-        "test": TESTS_REQUIRE
+        "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
