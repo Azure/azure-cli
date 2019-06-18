@@ -720,13 +720,6 @@ def _prompt_issue(recent_command_list):
 
     print(prefix)
 
-    # open issues page in browser and copy issue body to clipboard
-    # import pyperclip
-    # try:  # todo: if no longer using clipboard, remove dependency
-    #     pyperclip.copy(original_issue)
-    # except pyperclip.PyperclipException as ex:
-    #     logger.debug(ex)
-
     logger.info(original_issue)
     open_page_in_browser(url)
 

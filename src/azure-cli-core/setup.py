@@ -51,30 +51,28 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
 ]
 
-# TODO These dependencies should be updated to reflect only what this package needs
 DEPENDENCIES = [
-    'adal>=1.2.0',
-    'argcomplete>=1.8.0',
+    'adal~=1.2.0',
+    'argcomplete~=1.8.0',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
-    'humanfriendly>=4.7',
+    'humanfriendly~=4.7',
     'jmespath',
     'knack~=0.6.2',
     'msrest>=0.4.4',
     'msrestazure>=0.4.25',
     'paramiko>=2.0.8,<3.0.0',
-    'pip',
-    'pygments',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'pyyaml',
-    'requests>=2.20.0',
+    'requests~=2.20',
     'six',
-    'tabulate>=0.7.7',
     'wheel==0.30.0',
-    'azure-mgmt-resource==2.1.0',
-    'pyperclip>=1.7.0',
-    'psutil>=5.6.1'
+    'azure-mgmt-resource~=2.1',
+]
+
+TESTS_REQUIRE = [
+    'mock'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -107,8 +105,10 @@ setup(
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
         ':python_version<"3.0"': ['futures'],
         ":python_version<'3.0'": ['antlr4-python2-runtime'],
-        ":python_version>='3.0'": ['antlr4-python3-runtime']
+        ":python_version>='3.0'": ['antlr4-python3-runtime'],
+        "test": TESTS_REQUIRE
     },
+    tests_require=TESTS_REQUIRE,
     package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
     cmdclass=cmdclass
 )
