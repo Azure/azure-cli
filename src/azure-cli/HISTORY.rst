@@ -15,6 +15,12 @@ Release History
 
 * ad signed-in-user: fix a crash on listing owned objects 
 
+**VM**
+
+* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
+  the request but returns failure status code and returns an error mesage.
+* vm/vmss extension image list: Fix bug where command fails when used with --latest
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
