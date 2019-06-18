@@ -62,6 +62,8 @@ BEGIN TEMPLATE
 ===============
 **A browser has been opened to {} to create an issue.**
 **You can also run `az feedback --verbose` to emit the full output to stderr.**
+**Azure CLI repo: {}**
+**Azure CLI Extensions repo: {}**
 """
 
 _ISSUES_TEMPLATE = """
@@ -555,7 +557,8 @@ def _build_issue_info_tup(command_log_file=None):
     logger.debug("Total minified issue length is %s", len(minified_issue_body))
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
-    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), formatted_issues_url, original_issue_body, is_ext
+    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name, _CLI_ISSUES_URL, _EXTENSIONS_ISSUES_URL), \
+        formatted_issues_url, original_issue_body, is_ext
 
 
 def _get_extension_repo_url(ext_name, raw=False):
@@ -748,10 +751,6 @@ def _prompt_issue(recent_command_list):
     # except pyperclip.PyperclipException as ex:
     #     logger.debug(ex)
     logger.info(original_issue)
-
-    logger.info('You can also file the issue in the Azure CLI %s repository by opening %s in the browser.',
-                'Extensions' if is_ext else '',
-                _EXTENSIONS_ISSUES_URL if is_ext else _CLI_ISSUES_URL)
     open_page_in_browser(url)
 
     return True

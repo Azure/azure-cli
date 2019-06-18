@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.2.2
++++++
+* When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
+  extension from the index.
+
 2.2.1
 +++++
 * Minor fixes
