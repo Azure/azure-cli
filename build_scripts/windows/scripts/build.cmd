@@ -93,13 +93,6 @@ for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nsp
    %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
    popd
 )
-pushd %CLI_SRC%\command_modules
-for /D %%a in (*) do (
-   pushd %CLI_SRC%\command_modules\%%a
-   %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
-   popd
-)
-popd
 echo Built CLI packages successfully.
 
 if %errorlevel% neq 0 goto ERROR
