@@ -20,7 +20,7 @@ def get_repo_root():
 
 def get_all_module_paths():
     """List all core and command modules"""
-    return list(get_core_modules_paths()) + list(get_command_modules_paths(include_prefix=True))
+    return list(get_core_modules_paths()) + list(get_command_modules_paths())
 
 
 def get_config_dir():
@@ -43,13 +43,11 @@ def get_extensions_paths(include_prefix=False):
         yield name, path
 
 
-def get_command_modules_paths(include_prefix=False):
-    glob_pattern = os.path.normcase('/src/command_modules/{}*/setup.py'.format(COMMAND_MODULE_PREFIX))
+def get_command_modules_paths():
+    glob_pattern = os.path.normcase('/src/azure-cli/azure/cli/command_modules/*/__init__.py')
     for path in glob.glob(get_repo_root() + glob_pattern):
         folder = os.path.dirname(path)
         name = os.path.basename(folder)
-        if not include_prefix:
-            name = name[len(COMMAND_MODULE_PREFIX):]
         yield name, folder
 
 
