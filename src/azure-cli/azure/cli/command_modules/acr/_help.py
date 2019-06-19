@@ -443,8 +443,9 @@ type: command
 short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
 examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
-    text: >
-        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+  - name: Queue a build for the given GitHub repository with Heroku's buildpacks.
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
 helps['acr show'] = """
