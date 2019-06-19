@@ -460,9 +460,6 @@ def _delete_manifest_confirmation(login_server,
         username=username,
         password=password)
 
-    if yes:
-        return manifest
-
     tags = _obtain_data_from_registry(
         login_server=login_server,
         path=_get_tag_path(repository),
@@ -475,6 +472,11 @@ def _delete_manifest_confirmation(login_server,
     if filter_by_manifest:
         images = ", ".join(["'{}:{}'".format(repository, str(x)) for x in filter_by_manifest])
         message += " and all the following images: {}".format(images)
+
+    if yes:
+        logger.warning(message)
+        return manifest
+
     user_confirmation("{}.\nAre you sure you want to continue?".format(message))
 
     return manifest

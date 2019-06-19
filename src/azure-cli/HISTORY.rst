@@ -11,6 +11,12 @@ Release History
 
 * Update ADLS version (0.0.45).
 
+**RBAC**
+
+* role assignment: expose --assignee-principal-type from create command to avoid intermittent
+                   failures caused by AAD graph server replication latency 
+* ad signed-in-user: fix a crash on listing owned objects 
+
 **Managed Services**
 
 * Introducing managed service command module in preview.

@@ -125,13 +125,17 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scope, custom_ro
 
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
-                           scope=None):
+                           scope=None, assignee_principal_type=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
+    if assignee_principal_type and not assignee_object_id:
+        raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
+
     try:
         return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
-                                       resolve_assignee=(not assignee_object_id))
+                                       resolve_assignee=(not assignee_object_id),
+                                       assignee_principal_type=assignee_principal_type)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
             return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
@@ -139,7 +143,7 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
-                            resolve_assignee=True):
+                            resolve_assignee=True, assignee_principal_type=None):
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -149,7 +153,8 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     worker = MultiAPIAdaptor(cli_ctx)
-    return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope)
+    return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope,
+                                         assignee_principal_type)
 
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,

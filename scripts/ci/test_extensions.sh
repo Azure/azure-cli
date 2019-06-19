@@ -29,12 +29,11 @@ for ext in $output; do
     fi
 done
 
-# Skip the test for now. It will be enable after release 2.0.67
-#azdev verify load-all
-#if [ $? != 0 ]
-#then
-#    exit_code=1
-#    echo "Failed to verify:" $ext
-#fi
+azdev verify load-all
+if [ $? != 0 ]
+then
+    exit_code=1
+    echo "Failed to verify:" $ext
+fi
 
 exit $exit_code
