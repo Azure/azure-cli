@@ -21,7 +21,6 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_v
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth,
                                                       _validate_vm_create_storage_profile,
-                                                      _validate_vmss_zone_args,
                                                       _validate_vmss_create_load_balancer_or_app_gateway)
 
 
@@ -408,7 +407,7 @@ class TestVMImageDefaults(unittest.TestCase):
         self.assertEqual(ns.ultra_ssd_enabled, True)
 
 
-class TestBigVMSSDefaults(unittest.TestCase):
+class TestVMSSDefaults(unittest.TestCase):
     @classmethod
     def _set_up_ns(cls, ns):
         ns.single_placement_group, ns.zones, ns.platform_fault_domain_count, ns.instance_count = None, None, None, 2

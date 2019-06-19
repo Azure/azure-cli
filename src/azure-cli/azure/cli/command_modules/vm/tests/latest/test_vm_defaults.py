@@ -408,10 +408,25 @@ class TestVMImageDefaults(unittest.TestCase):
         self.assertEqual(ns.ultra_ssd_enabled, True)
 
 
-class TestBigVMSSDefaults(unittest.TestCase):
+class TestVMSSDefaults(unittest.TestCase):
     @classmethod
     def _set_up_ns(cls, ns):
-        ns.single_placement_group, ns.zones, ns.platform_fault_domain_count, ns.instance_count = None, None, None, 2
+        ns.zones, ns.platform_fault_domain_count = None, None
+
+    def test_vmss_validate_vmss_zone_args(self):
+        # test default
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        _validate_vmss_zone_args(ns)
+        self.assertEqual(ns.zones, None)
+        self.assertEqual(ns.platform_fault_domain_count, None)
+
+        # error if platform fault domain count is specified but zones unspecified
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.platform_fault_domain_count = 1
+        with self.assertRaisesRegexp(CLIError, "usage error:.*--platform-fault-domain-count.*--zones"):
+            _validate_vmss_zone_args(ns)
 
     def test_vmss_default_std_lb(self):
         cmd = mock.MagicMock()
