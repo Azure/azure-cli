@@ -340,7 +340,7 @@ examples:
     text: az acr repository delete -n MyRegistry --repository hello-world
   - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest' and all other tags referencing the manifest.
     text: az acr repository delete -n MyRegistry --image hello-world:latest
-  - name: Delete an image by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
+  - name: Delete an image by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' AND ALL TAGS referencing the manifest.
     text: az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
 """
 
