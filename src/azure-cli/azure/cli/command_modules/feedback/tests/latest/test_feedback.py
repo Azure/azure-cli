@@ -78,7 +78,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertFalse(_is_valid_github_project_url('https://github.com/'))
         self.assertFalse(_is_valid_github_project_url('https://github.com/Azure/azure-cli-extensions/tree/master/src/vm-repair'))
         self.assertFalse(_is_valid_github_project_url('https://docs.microsoft.com/en-us/azure/machine-learning/service/'))
-        
+
     def _helper_test_get_repository_url_pretty(self):
         # default behaviour is pretty url
         repo_url = _get_extension_repo_url('alias')
