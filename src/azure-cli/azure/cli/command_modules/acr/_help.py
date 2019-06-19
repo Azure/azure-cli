@@ -445,7 +445,7 @@ examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
     text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
   - name: Queue a build for the given GitHub repository with Heroku's buildpacks.
-    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/johnpapa/node-hello
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
 helps['acr show'] = """
