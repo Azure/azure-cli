@@ -2,8 +2,6 @@
 
 Release History
 ===============
-**RBAC**
-* ad signed-in-user: fix a crash on listing owned objects 
 
 **ACR**
 
@@ -12,6 +10,10 @@ Release History
 **DLS**
 
 * Update ADLS version (0.0.45).
+
+**RBAC**
+
+* ad signed-in-user: fix a crash on listing owned objects 
 
 2.0.67
 ++++++
