@@ -18,8 +18,12 @@ Release History
 **RBAC**
 
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
-                   failures caused by AAD graph server replication latency 
-* ad signed-in-user: fix a crash on listing owned objects 
+                   failures caused by AAD graph server replication latency
+* ad signed-in-user: fix a crash on listing owned objects
+
+**SQL**
+
+* Document allowed values for sql db create --sample-name
 
 2.0.67
 ++++++
