@@ -2,6 +2,9 @@
 
 Release History
 ===============
+**RDBMS**
+
+* Support replication for MariaDB.
 
 **ACR**
 
