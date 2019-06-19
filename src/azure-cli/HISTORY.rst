@@ -16,6 +16,11 @@ Release History
 * When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
   extension from the index.
 
+**RBAC**
+
+* ad signed-in-user: fix a crash on listing owned objects 
+
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
