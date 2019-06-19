@@ -13,6 +13,7 @@ from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
 from azure.cli.command_modules.feedback.custom import (_get_command_log_files, _build_issue_info_tup,
                                                        _get_extension_repo_url, _CLI_ISSUES_URL,
+                                                       _is_valid_github_project_url,
                                                        _EXTENSIONS_ISSUES_URL, _RAW_EXTENSIONS_ISSUES_URL)
 from azure.cli.core.commands import AzCliCommand
 
@@ -70,7 +71,14 @@ class TestCommandLogFile(ScenarioTest):
         self._helper_test_get_repository_url_raw()
         self._helper_test_get_repository_url_with_no_extension_match_pretty()
         self._helper_test_get_repository_url_with_no_extension_match_raw()
+        self._helper_test_is_valid_github_project_url()
 
+    def _helper_test_is_valid_github_project_url(self):
+        self.assertTrue(_is_valid_github_project_url('https://github.com/azure/devops-extension'))
+        self.assertFalse(_is_valid_github_project_url('https://github.com/'))
+        self.assertFalse(_is_valid_github_project_url('https://github.com/Azure/azure-cli-extensions/tree/master/src/vm-repair'))
+        self.assertFalse(_is_valid_github_project_url('https://docs.microsoft.com/en-us/azure/machine-learning/service/'))
+        
     def _helper_test_get_repository_url_pretty(self):
         # default behaviour is pretty url
         repo_url = _get_extension_repo_url('alias')

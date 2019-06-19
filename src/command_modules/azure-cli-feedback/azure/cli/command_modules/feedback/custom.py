@@ -562,11 +562,10 @@ def _build_issue_info_tup(command_log_file=None):
 
 
 def _get_extension_repo_url(ext_name, raw=False):
-    _GITHUB_URL_STR = 'https://github.com'
     _NEW_ISSUES_STR = '/issues/new'
     try:
         project_url = resolve_project_url_from_index(extension_name=ext_name)
-        if _GITHUB_URL_STR in project_url:
+        if _is_valid_github_project_url(url=project_url):
             raw_url = project_url.lower().strip('/') + _NEW_ISSUES_STR
             # Prettify the url for cli extensions repo
             if not raw and raw_url == _RAW_EXTENSIONS_ISSUES_URL:
@@ -576,6 +575,14 @@ def _get_extension_repo_url(ext_name, raw=False):
         # since this is going to feedback let it fall back to the generic extensions repo
         logger.debug(ex)
     return _RAW_EXTENSIONS_ISSUES_URL if raw else _EXTENSIONS_ISSUES_URL
+
+
+def _is_valid_github_project_url(url):
+    # valid project URL will be of format https://github.com/org/project
+    _GITHUB_URL_STR = 'https://github.com'
+    if url.startswith(_GITHUB_URL_STR):
+        return len(url.strip(_GITHUB_URL_STR).strip('/').split('/')) == 2
+    return False
 
 
 def _get_minified_issue_url(command_log_file, format_dict, is_ext, ext_name, capacity):
