@@ -21,6 +21,11 @@ Release History
 * Add time out for transforming recourse name to resource id.
 * Allow auto-completers to select resources from any resource group. It can be a different resource group that '-g' specifies.
 
+**RBAC**
+
+* ad signed-in-user: fix a crash on listing owned objects 
+
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
