@@ -11,6 +11,10 @@ Release History
 
 * Update ADLS version (0.0.45).
 
+**Managed Services**
+
+* Introducing managed service command module in preview.
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
