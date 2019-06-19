@@ -2018,7 +2018,7 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     os_type=None, runtime=None, consumption_plan_location=None,
-                    app_insights=None, app_insights_key=None, deployment_source_url=None,
+                    app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
@@ -2112,6 +2112,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                       value=con_string))
         site_config.app_settings.append(NameValuePair(name='WEBSITE_CONTENTSHARE', value=name.lower()))
 
+    create_app_insights = False
+
     if app_insights_key is not None:
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=app_insights_key))
@@ -2119,6 +2121,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
+    elif not disable_app_insights:
+        create_app_insights = True
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -2131,7 +2135,46 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
                                  deployment_source_branch, deployment_local_git)
 
+    if create_app_insights:
+        try:
+            try_create_application_insights(cmd, functionapp)
+        except Exception:  # pylint: disable=broad-except
+            logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
+                           'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+
     return functionapp
+
+
+def try_create_application_insights(cmd, functionapp):
+    creation_failed_warn = 'Unable to create the Application Insights for the Function App. ' \
+                           'Please use the Azure Portal to manually create and configure the Application Insights, ' \
+                           'if needed.'
+
+    ai_resource_group_name = functionapp.resource_group
+    ai_name = functionapp.name
+    ai_location = functionapp.location
+
+    app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
+    ai_properties = {
+        "name": ai_name,
+        "location": ai_location,
+        "kind": "web",
+        "properties": {
+            "Application_Type": "web"
+        }
+    }
+    appinsights = app_insights_client.components.create_or_update(ai_resource_group_name, ai_name, ai_properties)
+    if appinsights is None or appinsights.instrumentation_key is None:
+        logger.warning(creation_failed_warn)
+        return
+
+    # We make this success message as a warning to no interfere with regular JSON output in stdout
+    logger.warning('Application Insights \"%s\" was created for this Function App. '
+                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                   'Application Insights component', appinsights.name, appinsights.id)
+
+    update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                        ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
 
 
 def _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url=None,

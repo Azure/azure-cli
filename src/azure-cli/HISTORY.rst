@@ -7,6 +7,10 @@ Release History
 
 * Support Timer Triggers for Task.
 
+**Appservice**
+
+* functionapp: `az functionapp create` enables application insights by default
+
 **DLS**
 
 * Update ADLS version (0.0.45).
