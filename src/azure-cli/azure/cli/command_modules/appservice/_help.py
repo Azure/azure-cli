@@ -77,7 +77,7 @@ examples:
 
 helps['functionapp'] = """
 type: group
-short-summary: Manage function apps.
+short-summary: Manage function apps. To install the Azure Functions Core tools see https://github.com/Azure/azure-functions-core-tools
 """
 
 helps['functionapp config'] = """
@@ -253,7 +253,7 @@ examples:
         az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
   - name: remove all allowed origins
     text: >
-        az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+        az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins
 """
 
 helps['functionapp cors show'] = """
