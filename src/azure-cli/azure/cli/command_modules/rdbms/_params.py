@@ -50,11 +50,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
 
-        with self.argument_context('mysql server replica') as c:
-            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the master server to the create replica for.')
-            c.argument('location', options_list=['--location', '-l'], help='Location. Values from: `az account list-locations`. If not provided, the create replica will be in the same location as the master server')
-
-        with self.argument_context('postgres server replica') as c:
+        with self.argument_context('{} server replica'.format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the master server to the create replica for.')
             c.argument('location', options_list=['--location', '-l'], help='Location. Values from: `az account list-locations`. If not provided, the create replica will be in the same location as the master server')
 
@@ -123,8 +119,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
 
-    with self.argument_context('postgres server replica list') as c:
-        c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
-
-    with self.argument_context('mysql server replica list') as c:
-        c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
+    for scope in ['mariadb server replica list', 'mysql server replica list', 'postgres server replica list']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')

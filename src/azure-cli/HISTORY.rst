@@ -2,7 +2,6 @@
 
 Release History
 ===============
-
 **ACR**
 
 * Support Timer Triggers for Task.
@@ -24,6 +23,10 @@ Release History
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
                    failures caused by AAD graph server replication latency
 * ad signed-in-user: fix a crash on listing owned objects
+
+**RDBMS**
+
+* Support replication for MariaDB.
 
 2.0.67
 ++++++
