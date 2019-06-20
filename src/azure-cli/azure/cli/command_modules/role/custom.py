@@ -1237,7 +1237,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, password=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1272,7 +1272,7 @@ def create_service_principal_for_rbac(
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
         _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
-                                         password, keyvault)
+                                         None, keyvault)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)
