@@ -2,10 +2,6 @@
 
 Release History
 ===============
-**RDBMS**
-
-* Support replication for MariaDB.
-
 **ACR**
 
 * Support Timer Triggers for Task.
@@ -17,6 +13,10 @@ Release History
 **RBAC**
 
 * ad signed-in-user: fix a crash on listing owned objects 
+
+**RDBMS**
+
+* Support replication for MariaDB.
 
 2.0.67
 ++++++
