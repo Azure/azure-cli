@@ -240,7 +240,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 'nsg': 'nsg1'
             })
 
-            self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
             try:
@@ -286,6 +286,30 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role reader')
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_create_using_principal_type(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'rg': resource_group
+            })
+
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            try:
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
@@ -392,11 +416,19 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     now = datetime.datetime.utcnow()
                     start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
                                                              now.minute, now.second)
-                    time.sleep(60)
+                    time.sleep(120)
                     result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
                 else:
-                    # NOTE: get the time range from the recording file and use them below for playback
-                    start_time, end_time = '2019-05-01T03:18:45Z', '2019-05-02T03:19:48Z'
+                    # figure out the right time stamps from the recording file
+                    r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/microsoft.insights/eventtypes/management/' in r.uri)
+                    try:
+                        from urllib.parse import parse_qs, urlparse
+                    except ImportError:
+                        from urlparse import urlparse, parse_qs
+                    query_parts = parse_qs(urlparse(r.uri).query)['$filter'][0].split()
+                    start_index, end_index = [i + 2 for (i, j) in enumerate(query_parts) if j == 'eventTimestamp']
+                    start_time, end_time = query_parts[start_index], query_parts[end_index]
+
                     result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
                                       start_time, end_time)).get_output_in_json()
 
