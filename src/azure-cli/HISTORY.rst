@@ -24,12 +24,13 @@ Release History
 * Add time out for all existing argument auto-completers.
 * Add time out for transforming recourse name to resource id.
 * Allow auto-completers to select resources from any resource group. It can be a different resource group that '-g' specifies.
+* Support for using `--sub-domain-suffix` parameter and `--disable_gateway_auth` parameter in `hdinsight application create` command.
 
 **RBAC**
 
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
-                   failures caused by AAD graph server replication latency 
-* ad signed-in-user: fix a crash on listing owned objects 
+                   failures caused by AAD graph server replication latency
+* ad signed-in-user: fix a crash on listing owned objects
 
 2.0.67
 ++++++
