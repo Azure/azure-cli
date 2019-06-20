@@ -7,6 +7,10 @@ Release History
 
 * Support Timer Triggers for Task.
 
+**Appservice**
+
+* functionapp: `az functionapp create` enables application insights by default
+
 **DLS**
 
 * Update ADLS version (0.0.45).
@@ -23,6 +27,8 @@ Release History
 
 **RBAC**
 
+* role assignment: expose --assignee-principal-type from create command to avoid intermittent
+                   failures caused by AAD graph server replication latency 
 * ad signed-in-user: fix a crash on listing owned objects 
 
 2.0.67
