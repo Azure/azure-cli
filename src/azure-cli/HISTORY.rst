@@ -23,6 +23,7 @@ Release History
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
                    failures caused by AAD graph server replication latency
 * ad signed-in-user: fix a crash on listing owned objects
+* [BREAKING CHANGE] create-for-rbac: remove --password
 
 **RDBMS**
 
