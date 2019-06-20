@@ -56,7 +56,7 @@ class MediaV2Client():
         self._old_rp_api_version = '2015-10-01'
         self.v2_media_api_resource = cli_ctx.cloud.endpoints.media_resource_id
         self.api_endpoint = self._get_v2_api_endpoint(cli_ctx, resource_group_name, account_name)
-        self.access_token = self._get_v2_access_token(cli_ctx)
+        self.access_token = self._get_v2_access_token()
 
     def _get_v2_api_endpoint(self, cli_ctx, resource_group_name, account_name):
         from msrestazure.tools import resource_id
@@ -87,8 +87,7 @@ class MediaV2Client():
             raise CLIError('v2 Media API endpoint was not found.')
         return api_endpoint
 
-    def _get_v2_access_token(self, cli_ctx):
-        from adal import AuthenticationContext
+    def _get_v2_access_token(self):
         # pylint: disable=protected-access
         return self.profile.get_raw_token(resource=self.v2_media_api_resource)[0][2].get(_ACCESS_TOKEN)
 
