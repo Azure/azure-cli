@@ -159,6 +159,9 @@ def load_arguments(self, _):
                    help='The destination port to connect to.')
         c.argument('https_endpoint_location', arg_group='HTTPS Endpoint', help='The location of the endpoint.')
         c.argument('https_endpoint_public_port', arg_group='HTTPS Endpoint', help='The public port to connect to.')
+        c.argument('sub_domain_suffix', arg_group='HTTPS Endpoint', help='The subdomain suffix of the application.')
+        c.argument('disable_gateway_auth', arg_group='HTTPS Endpoint', arg_type=get_three_state_flag(),
+                   help='The flag of whether disabling gateway auth or not.')
         c.argument('ssh_endpoint_destination_port', arg_group='SSH Endpoint',
                    help='The destination port to connect to.')
         c.argument('ssh_endpoint_location', arg_group='SSH Endpoint', help='The location of the endpoint.')
