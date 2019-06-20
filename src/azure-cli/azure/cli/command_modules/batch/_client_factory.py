@@ -55,7 +55,7 @@ def file_client_factory(cli_ctx, kwargs):
 
 
 def compute_node_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs)._compute_node
+    return batch_data_service_factory(cli_ctx, kwargs).compute_node
 
 
 def batch_client_factory(cli_ctx, **_):
