@@ -11,11 +11,6 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.ams._completers import get_mru_type_completion_list
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core._profile import _ACCESS_TOKEN
-from azure.cli.core._profile import _REFRESH_TOKEN
-from azure.cli.core._profile import _SERVICE_PRINCIPAL
-from azure.cli.core._profile import _USER_ENTITY
-from azure.cli.core._profile import _USER_TYPE
-from azure.cli.core._profile import _USER
 
 _rut_dict = {0: 'S1',
              1: 'S2',
@@ -95,29 +90,7 @@ class MediaV2Client():
     def _get_v2_access_token(self, cli_ctx):
         from adal import AuthenticationContext
         # pylint: disable=protected-access
-
-        raw_token_obj = self.profile.get_raw_token()
-        raw_token = raw_token_obj[0][2]
-        clientId = raw_token['_clientId']
-        tenant = raw_token_obj[2]
-        authority = '{}/{}'.format(cli_ctx.cloud.endpoints.active_directory, tenant)
-        context = AuthenticationContext(authority)
-        account = self.profile.get_subscription()
-        user_type = account[_USER_ENTITY][_USER_TYPE]
-
-        if user_type == _USER:
-            refresh_token = raw_token[_REFRESH_TOKEN]
-            return context.acquire_token_with_refresh_token(refresh_token,
-                                                            clientId,
-                                                            self.v2_media_api_resource).get(_ACCESS_TOKEN)
-        if user_type == _SERVICE_PRINCIPAL:
-            sp_authinfo = self.profile.get_sp_auth_info()
-            acq_token = context.acquire_token_with_client_credentials(self.v2_media_api_resource,
-                                                                      sp_authinfo['clientId'],
-                                                                      sp_authinfo['clientSecret'])
-            return acq_token['accessToken']
-
-        raise CLIError('Unknown user type: ' + user_type)
+        return self.profile.get_raw_token(resource=self.v2_media_api_resource)[0][2].get(_ACCESS_TOKEN)
 
     def set_mru(self, account_id, count, type):
         headers = {}
