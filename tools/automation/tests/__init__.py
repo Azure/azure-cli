@@ -215,7 +215,8 @@ def discover_tests(args):
         try:
             contents = os.listdir(mod_data['filepath'])
             test_files = {x[:-len('.py')]: {} for x in contents if x.startswith('test_') and x.endswith('.py')}
-        except Exception:
+        except Exception as ex:
+            display(ex)
             # skip modules that don't have tests
             display("Module '{}' has no tests.".format(mod_name))
             continue

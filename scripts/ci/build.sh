@@ -62,7 +62,7 @@ fi
 # build test packages
 title 'Build Azure CLI tests package'
 
-for test_src in $(find src/command_modules -name tests -type d); do
+for test_src in $(find src/azure-cli/azure/cli/command_modules -name tests -type d); do
     rel_path=${test_src##src/command_modules/}
     rel_path=(${rel_path/\// })
     rel_path=${rel_path[1]}
@@ -125,7 +125,7 @@ if [ "$target_profile" == "latest" ]; then
     echo "        'azure.cli.core.tests'," >>$testsrc_dir/setup.py
 fi
 
-for name in `ls src/command_modules | grep azure-cli-`; do
+for name in `ls src/azure-cli/azure/cli/command_modules | grep azure-cli-`; do
     module_name=${name##azure-cli-}
     test_folder=src/command_modules/$name/azure/cli/command_modules/$module_name/tests
     if [ -d $test_folder ]; then
