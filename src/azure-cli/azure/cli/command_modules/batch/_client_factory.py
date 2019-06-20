@@ -55,7 +55,7 @@ def file_client_factory(cli_ctx, kwargs):
 
 
 def compute_node_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).compute_node
+    return batch_data_service_factory(cli_ctx, kwargs)._compute_node
 
 
 def batch_client_factory(cli_ctx, **_):
@@ -65,7 +65,7 @@ def batch_client_factory(cli_ctx, **_):
 
 
 def batch_data_service_factory(cli_ctx, kwargs):
-    import azure.batch.batch_service_client as batch
+    import azure.batch._batch_service_client as batch
     import azure.batch.batch_auth as batchauth
 
     account_name = kwargs.pop('account_name', None)

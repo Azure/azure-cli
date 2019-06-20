@@ -47,6 +47,11 @@ helps['batch account login'] = """
     short-summary: Log in to a Batch account through Azure Active Directory or Shared Key authentication.
 """
 
+helps['batch pool supported-images list'] = """
+    type: group
+    short-summary: Lists all Virtual Machine Images supported by the Azure Batch service.
+"""
+
 helps['batch account show'] = """
     type: command
     short-summary: Get a specified Batch account or the currently set account.
@@ -231,11 +236,6 @@ helps['batch pool usage-metrics'] = """
 helps['batch pool node-counts'] = """
     type: group
     short-summary: Get node counts for Batch pools.
-"""
-
-helps['batch pool node-agent-skus'] = """
-    type: group
-    short-summary: Retrieve node agent SKUs of Batch pools using a Virtual Machine Configuration.
 """
 
 helps['batch task'] = """
