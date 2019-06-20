@@ -4,7 +4,15 @@ Release History
 ===============
 **Core**
 
-* Fixed issue where `--subscription` would appear despite being not applicable.
+**Various*** Fixed issue where `--subscription` would appear despite being not applicable.
+
+**BATCH**
+
+* Updated to Batch SDK and Batch Management Plane SDK to 7.0.0
+* [Breaking] Replaced az batch pool node-agent-skus list with az batch pool supported-images list. The new command contains all of the same information originally available, but in a clearer format. New non-verified images are also now returned. Additional information about capabilities and batchSupportEndOfLife is accessible on the imageInformation object returned.
+* When using --json-file option of az batch pool create network security rules blocking network access to a pool based on the source port of the traffic is now supported. This is done via the SourcePortRanges property on NetworkSecurityGroupRule.
+* When using --json-file option of az batch task create and running a container, Batch now supports executing the task in the container working directory or in the Batch task working directory. This is controlled by the WorkingDirectory property on TaskContainerSettings.
+
 
 **RDBMS**
 
@@ -41,7 +49,7 @@ Release History
 * BREAKING CHANGE: Changed "oms" command group name to "monitor"
 * BREAKING CHANGE: Made "--http-password/-p" a required parameter 
 * Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer 
-* "cluster-users-group-dns" parameter is now required when "â€”esp" is present
+* "cluster-users-group-dns" parameter is now required when "—esp" is present
 * Added a timeout for all existing argument auto-completers
 * Added a timeout for transforming resource name to resource id
 * Auto-completers can now select resources from any resource group. It can be a different resource group than the one specified with "-g"
