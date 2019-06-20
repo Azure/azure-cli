@@ -164,6 +164,39 @@ examples:
     text: az mariadb server list -g testgroup
 """
 
+helps['mariadb server replica'] = """
+type: group
+short-summary: Manage read replicas.
+"""
+
+helps['mariadb server replica create'] = """
+type: command
+short-summary: Create a read replica for a server.
+examples:
+  - name: Create a read replica 'testreplsvr' for 'testsvr'.
+    text: az mariadb server replica create -n testreplsvr -g testgroup -s testsvr
+  - name: Create a read replica 'testreplsvr' for 'testsvr2', where 'testreplsvr' is in a different resource group.
+    text: |
+        az mariadb server replica create -n testreplsvr -g testgroup \\
+            -s "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMariaDB/servers/testsvr2"
+"""
+
+helps['mariadb server replica list'] = """
+type: command
+short-summary: List all read replicas for a given server.
+examples:
+  - name: List all read replicas for master server 'testsvr'.
+    text: az mariadb server replica list -g testgroup -s testsvr
+"""
+
+helps['mariadb server replica stop'] = """
+type: command
+short-summary: Stop replication to a read replica and make it a read/write server.
+examples:
+  - name: Stop replication to 'testreplsvr' and make it a read/write server.
+    text: az mariadb server replica stop -g testgroup -n testreplsvr
+"""
+
 helps['mariadb server restart'] = """
 type: command
 short-summary: Restart a server.
