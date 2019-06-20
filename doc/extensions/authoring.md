@@ -1,44 +1,31 @@
 Authoring
 =========
 
-Intro
------
-
-Extensions should have the following structure:
-
-```
-.
-|-- README.rst
-|-- azext_*
-|   |-- __init__.py
-|-- setup.cfg
-`-- setup.py
-```
-
-The `myexampleextension` directory gives a basic extension with 1 command.
-
-The commands for Command modules and Extensions are authored in the same way. See [Authoring Commands](https://github.com/Azure/azure-cli/blob/master/doc/authoring_command_modules/authoring_commands.md).
+The commands for Command modules and Extensions are authored in the same way. See [Authoring Commands](https://github.com/Azure/azure-cli/blob/master/doc/authoring_command_modules/authoring_commands.md) for authoring guidance.
 
 
-Developing
+Setup
 ----------
 
 Development of extensions have been simplified by the public release of the azdev CLI. Please visit https://github.com/Azure/azure-cli-dev-tools for more information.
 
-1. In a new virtual environment, install the azdev tool with `pip install azdev`
+1. In a new virtual environment, install azdev: `pip install azdev`
 2. Setup your CLI and install your extension:
-  - If you are only developing your extension run: `azdev setup -r <PATH> -e <NAME>` where PATH is the path to the local git folder your extension resides in and NAME is the name of your extension.
+  - If you prefer to be guided via an interactive experience, just run `adev setup` with no additional arguments.
+  - If you are creating a brand new extension, run `azdev setup -r <PATH>` to add the repo to your extension dev sources. From there you can run `azdev extension create` to generate and install starter code.
+  - If you are only developing on an existing extension, run: `azdev setup -r <PATH> -e <NAME>` where PATH is the path to the local git folder your extension resides in and NAME is the name of your extension. If you don't know the name of the extension, you can omit `-e` to complete the setup. Then you can run `azdev extension list -o table` to see which extensions are installable for your repo and add that extension with `azdev extension add <NAME>`.
   - If you would like to develop for a CLI module and your extension, run the above, but include `-c [<CLI_PATH>]` where CLI_PATH is the path to your local Azure CLI repo. If omitted, the command will attempt to find the repo.
+
+Creating
+--------
+
+Run `azdev extension create <NAME>` to create skeleton code for a new extension.
+
 
 Building
 --------
 
-Change directory to the source directory of your extension and build the package.
-
-```
-cd ~/Dev/myexampleextension
-python setup.py bdist_wheel
-```
+`azdev extension build <NAME>`
 
 This will create a `dist` directory containing your `.whl` extension.
 
