@@ -2,14 +2,44 @@
 
 Release History
 ===============
-
 **ACR**
 
 * Support Timer Triggers for Task.
 
+**Appservice**
+
+* functionapp: `az functionapp create` enables application insights by default
+
 **DLS**
 
 * Update ADLS version (0.0.45).
+
+**Feedback**
+
+* When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
+  extension from the index.
+
+**HDInsight**
+
+* Support for using `--sub-domain-suffix` parameter and `--disable_gateway_auth` parameter in `hdinsight application create` command.
+
+**RBAC**
+
+* role assignment: expose --assignee-principal-type from create command to avoid intermittent
+                   failures caused by AAD graph server replication latency
+* ad signed-in-user: fix a crash on listing owned objects
+* [BREAKING CHANGE] create-for-rbac: remove --password
+
+**RDBMS**
+
+* Support replication for MariaDB.
+
+
+**VM**
+
+* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
+  the request but returns failure status code and returns an error mesage.
+* vm/vmss extension image list: Fix bug where command fails when used with --latest
 
 2.0.67
 ++++++

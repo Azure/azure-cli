@@ -203,7 +203,11 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
 def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, **kwargs):
-    provider = 'Microsoft.DBForMySQL' if isinstance(client, MySqlServersOperations) else 'Microsoft.DBforPostgreSQL'
+    provider = 'Microsoft.DBforPostgreSQL'
+    if isinstance(client, MySqlServersOperations):
+        provider = 'Microsoft.DBforMySQL'
+    elif isinstance(client, MariaDBServersOperations):
+        provider = 'Microsoft.DBforMariaDB'
     # set source server id
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -236,6 +240,12 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
         parameters = postgresql.models.ServerForCreate(
             sku=postgresql.models.Sku(name=source_server_object.sku.name),
             properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
+            location=location)
+    elif provider == 'Microsoft.DBforMariaDB':
+        from azure.mgmt.rdbms import mariadb
+        parameters = mariadb.models.ServerForCreate(
+            sku=mariadb.models.Sku(name=source_server_object.sku.name),
+            properties=mariadb.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)

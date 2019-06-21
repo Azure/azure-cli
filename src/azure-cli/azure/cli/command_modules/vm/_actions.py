@@ -131,10 +131,13 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
             if show_latest:
                 # pylint: disable=no-member
                 versions.sort(key=lambda v: LooseVersion(v.name), reverse=True)
-                all_images.append({
-                    'publisher': publisher,
-                    'name': t.name,
-                    'version': versions[0].name})
+                try:
+                    all_images.append({
+                        'publisher': publisher,
+                        'name': t.name,
+                        'version': versions[0].name})
+                except IndexError:
+                    pass  # if no versions for this type continue to next type.
             else:
                 for v in versions:
                     all_images.append({

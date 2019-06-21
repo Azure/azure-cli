@@ -48,6 +48,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -85,7 +86,7 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-eventhub~=2.6',
-    'azure-mgmt-hdinsight~=0.2.1',
+    'azure-mgmt-hdinsight~=1.1.0',
     'azure-mgmt-imagebuilder~=0.2.1',
     'azure-mgmt-iotcentral~=1.0',
     'azure-mgmt-iothub~=0.8.2',
