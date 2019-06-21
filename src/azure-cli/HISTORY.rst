@@ -10,6 +10,10 @@ Release History
 
 * functionapp: `az functionapp create` enables application insights by default
 
+**Cosmos DB**
+
+* Added support for disabling TTL
+
 **DLS**
 
 * Update ADLS version (0.0.45).
