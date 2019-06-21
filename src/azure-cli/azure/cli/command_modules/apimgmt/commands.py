@@ -13,158 +13,158 @@ def load_command_table(self, _):
         client_factory=cf_apimgmt)
 
 
-    with self.command_group('apimgmt apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis')
-        g.custom_command('update', 'update_apimgmt_apis')
-        g.custom_command('delete', 'delete_apimgmt_apis')
-        g.custom_command('list', 'list_apimgmt_apis')
-        g.custom_command('show', 'show_apimgmt_apis')
-    with self.command_group('apimgmt apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis')
-        g.custom_command('list', 'list_apimgmt_apis')
-    with self.command_group('apimgmt apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_apis')
-    with self.command_group('apimgmt apis releases', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_releases')
-        g.custom_command('update', 'update_apimgmt_apis_releases')
-        g.custom_command('delete', 'delete_apimgmt_apis_releases')
-        g.custom_command('list', 'list_apimgmt_apis_releases')
-        g.custom_command('show', 'show_apimgmt_apis_releases')
-    with self.command_group('apimgmt apis releases', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_releases')
-        g.custom_command('list', 'list_apimgmt_apis_releases')
-    with self.command_group('apimgmt apis operations', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_operations')
-        g.custom_command('update', 'update_apimgmt_apis_operations')
-        g.custom_command('delete', 'delete_apimgmt_apis_operations')
-        g.custom_command('list', 'list_apimgmt_apis_operations')
-        g.custom_command('show', 'show_apimgmt_apis_operations')
-    with self.command_group('apimgmt apis operations', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_operations')
-        g.custom_command('list', 'list_apimgmt_apis_operations')
-    with self.command_group('apimgmt apis operations policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_operations_policies')
-        g.custom_command('delete', 'delete_apimgmt_apis_operations_policies')
-        g.custom_command('list', 'list_apimgmt_apis_operations_policies')
-        g.custom_command('show', 'show_apimgmt_apis_operations_policies')
-    with self.command_group('apimgmt apis operations policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_operations_policies')
-        g.custom_command('list', 'list_apimgmt_apis_operations_policies')
-    with self.command_group('apimgmt tags', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_tags')
-        g.custom_command('update', 'update_apimgmt_tags')
-        g.custom_command('delete', 'delete_apimgmt_tags')
-        g.custom_command('list', 'list_apimgmt_tags')
-        g.custom_command('show', 'show_apimgmt_tags')
-    with self.command_group('apimgmt tags apis products operations', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_tags_apis_products_operations')
-        g.custom_command('show', 'show_apimgmt_tags_apis_products_operations')
-    with self.command_group('apimgmt apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_apis')
-    with self.command_group('apimgmt apis policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_policies')
-        g.custom_command('delete', 'delete_apimgmt_apis_policies')
-        g.custom_command('list', 'list_apimgmt_apis_policies')
-        g.custom_command('show', 'show_apimgmt_apis_policies')
-    with self.command_group('apimgmt apis policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_policies')
-        g.custom_command('list', 'list_apimgmt_apis_policies')
-    with self.command_group('apimgmt apis schemas', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_schemas')
-        g.custom_command('delete', 'delete_apimgmt_apis_schemas')
-        g.custom_command('list', 'list_apimgmt_apis_schemas')
-        g.custom_command('show', 'show_apimgmt_apis_schemas')
-    with self.command_group('apimgmt apis schemas', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_schemas')
-        g.custom_command('list', 'list_apimgmt_apis_schemas')
-    with self.command_group('apimgmt apis diagnostics', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_diagnostics')
-        g.custom_command('update', 'update_apimgmt_apis_diagnostics')
-        g.custom_command('delete', 'delete_apimgmt_apis_diagnostics')
-        g.custom_command('list', 'list_apimgmt_apis_diagnostics')
-        g.custom_command('show', 'show_apimgmt_apis_diagnostics')
-    with self.command_group('apimgmt apis diagnostics', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_diagnostics')
-        g.custom_command('list', 'list_apimgmt_apis_diagnostics')
-    with self.command_group('apimgmt apis issues', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_issues')
-        g.custom_command('update', 'update_apimgmt_apis_issues')
-        g.custom_command('delete', 'delete_apimgmt_apis_issues')
-        g.custom_command('list', 'list_apimgmt_apis_issues')
-        g.custom_command('show', 'show_apimgmt_apis_issues')
-    with self.command_group('apimgmt apis issues', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_issues')
-        g.custom_command('list', 'list_apimgmt_apis_issues')
-    with self.command_group('apimgmt apis issues comments', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_issues_comments')
-        g.custom_command('delete', 'delete_apimgmt_apis_issues_comments')
-        g.custom_command('list', 'list_apimgmt_apis_issues_comments')
-        g.custom_command('show', 'show_apimgmt_apis_issues_comments')
-    with self.command_group('apimgmt apis issues comments', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_issues_comments')
-        g.custom_command('list', 'list_apimgmt_apis_issues_comments')
-    with self.command_group('apimgmt apis issues attachments', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_issues_attachments')
-        g.custom_command('delete', 'delete_apimgmt_apis_issues_attachments')
-        g.custom_command('list', 'list_apimgmt_apis_issues_attachments')
-        g.custom_command('show', 'show_apimgmt_apis_issues_attachments')
-    with self.command_group('apimgmt apis issues attachments', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_issues_attachments')
-        g.custom_command('list', 'list_apimgmt_apis_issues_attachments')
-    with self.command_group('apimgmt apis tagdescriptions', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apis_tagdescriptions')
-        g.custom_command('delete', 'delete_apimgmt_apis_tagdescriptions')
-        g.custom_command('list', 'list_apimgmt_apis_tagdescriptions')
-        g.custom_command('show', 'show_apimgmt_apis_tagdescriptions')
-    with self.command_group('apimgmt apis tagdescriptions', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis_tagdescriptions')
-        g.custom_command('list', 'list_apimgmt_apis_tagdescriptions')
-    with self.command_group('apimgmt apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_apis')
-    with self.command_group('apimgmt apiversionsets', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_apiversionsets')
-        g.custom_command('update', 'update_apimgmt_apiversionsets')
-        g.custom_command('delete', 'delete_apimgmt_apiversionsets')
-        g.custom_command('list', 'list_apimgmt_apiversionsets')
-        g.custom_command('show', 'show_apimgmt_apiversionsets')
-    with self.command_group('apimgmt apiversionsets', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apiversionsets')
-        g.custom_command('list', 'list_apimgmt_apiversionsets')
-    with self.command_group('apimgmt authorizationservers', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_authorizationservers')
-        g.custom_command('update', 'update_apimgmt_authorizationservers')
-        g.custom_command('delete', 'delete_apimgmt_authorizationservers')
-        g.custom_command('list', 'list_apimgmt_authorizationservers')
-        g.custom_command('show', 'show_apimgmt_authorizationservers')
-    with self.command_group('apimgmt authorizationservers', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_authorizationservers')
-        g.custom_command('list', 'list_apimgmt_authorizationservers')
-    with self.command_group('apimgmt backends', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_backends')
-        g.custom_command('update', 'update_apimgmt_backends')
-        g.custom_command('delete', 'delete_apimgmt_backends')
-        g.custom_command('list', 'list_apimgmt_backends')
-        g.custom_command('show', 'show_apimgmt_backends')
-    with self.command_group('apimgmt backends', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_backends')
-        g.custom_command('list', 'list_apimgmt_backends')
-    with self.command_group('apimgmt caches', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_caches')
-        g.custom_command('update', 'update_apimgmt_caches')
-        g.custom_command('delete', 'delete_apimgmt_caches')
-        g.custom_command('list', 'list_apimgmt_caches')
-        g.custom_command('show', 'show_apimgmt_caches')
-    with self.command_group('apimgmt caches', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_caches')
-        g.custom_command('list', 'list_apimgmt_caches')
-    with self.command_group('apimgmt certificates', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_certificates')
-        g.custom_command('delete', 'delete_apimgmt_certificates')
-        g.custom_command('list', 'list_apimgmt_certificates')
-        g.custom_command('show', 'show_apimgmt_certificates')
-    with self.command_group('apimgmt certificates', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_certificates')
-        g.custom_command('list', 'list_apimgmt_certificates')
+    with self.command_group('apimgmt api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api')
+        g.custom_command('update', 'update_apimgmt_api')
+        g.custom_command('delete', 'delete_apimgmt_api')
+        g.custom_command('list', 'list_apimgmt_api')
+        g.custom_command('show', 'show_apimgmt_api')
+    with self.command_group('apimgmt api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api')
+        g.custom_command('list', 'list_apimgmt_api')
+    with self.command_group('apimgmt api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_api')
+    with self.command_group('apimgmt api release', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_release')
+        g.custom_command('update', 'update_apimgmt_api_release')
+        g.custom_command('delete', 'delete_apimgmt_api_release')
+        g.custom_command('list', 'list_apimgmt_api_release')
+        g.custom_command('show', 'show_apimgmt_api_release')
+    with self.command_group('apimgmt api release', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_release')
+        g.custom_command('list', 'list_apimgmt_api_release')
+    with self.command_group('apimgmt api operation', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_operation')
+        g.custom_command('update', 'update_apimgmt_api_operation')
+        g.custom_command('delete', 'delete_apimgmt_api_operation')
+        g.custom_command('list', 'list_apimgmt_api_operation')
+        g.custom_command('show', 'show_apimgmt_api_operation')
+    with self.command_group('apimgmt api operation', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_operation')
+        g.custom_command('list', 'list_apimgmt_api_operation')
+    with self.command_group('apimgmt api operation policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_operation_policy')
+        g.custom_command('delete', 'delete_apimgmt_api_operation_policy')
+        g.custom_command('list', 'list_apimgmt_api_operation_policy')
+        g.custom_command('show', 'show_apimgmt_api_operation_policy')
+    with self.command_group('apimgmt api operation policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_operation_policy')
+        g.custom_command('list', 'list_apimgmt_api_operation_policy')
+    with self.command_group('apimgmt tag', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_tag')
+        g.custom_command('update', 'update_apimgmt_tag')
+        g.custom_command('delete', 'delete_apimgmt_tag')
+        g.custom_command('list', 'list_apimgmt_tag')
+        g.custom_command('show', 'show_apimgmt_tag')
+    with self.command_group('apimgmt tag api product operation', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_tag_api_product_operation')
+        g.custom_command('show', 'show_apimgmt_tag_api_product_operation')
+    with self.command_group('apimgmt api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_api')
+    with self.command_group('apimgmt api policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_policy')
+        g.custom_command('delete', 'delete_apimgmt_api_policy')
+        g.custom_command('list', 'list_apimgmt_api_policy')
+        g.custom_command('show', 'show_apimgmt_api_policy')
+    with self.command_group('apimgmt api policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_policy')
+        g.custom_command('list', 'list_apimgmt_api_policy')
+    with self.command_group('apimgmt api schema', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_schema')
+        g.custom_command('delete', 'delete_apimgmt_api_schema')
+        g.custom_command('list', 'list_apimgmt_api_schema')
+        g.custom_command('show', 'show_apimgmt_api_schema')
+    with self.command_group('apimgmt api schema', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_schema')
+        g.custom_command('list', 'list_apimgmt_api_schema')
+    with self.command_group('apimgmt api diagnostic', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_diagnostic')
+        g.custom_command('update', 'update_apimgmt_api_diagnostic')
+        g.custom_command('delete', 'delete_apimgmt_api_diagnostic')
+        g.custom_command('list', 'list_apimgmt_api_diagnostic')
+        g.custom_command('show', 'show_apimgmt_api_diagnostic')
+    with self.command_group('apimgmt api diagnostic', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_diagnostic')
+        g.custom_command('list', 'list_apimgmt_api_diagnostic')
+    with self.command_group('apimgmt api issue', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_issue')
+        g.custom_command('update', 'update_apimgmt_api_issue')
+        g.custom_command('delete', 'delete_apimgmt_api_issue')
+        g.custom_command('list', 'list_apimgmt_api_issue')
+        g.custom_command('show', 'show_apimgmt_api_issue')
+    with self.command_group('apimgmt api issue', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_issue')
+        g.custom_command('list', 'list_apimgmt_api_issue')
+    with self.command_group('apimgmt api issue comment', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_issue_comment')
+        g.custom_command('delete', 'delete_apimgmt_api_issue_comment')
+        g.custom_command('list', 'list_apimgmt_api_issue_comment')
+        g.custom_command('show', 'show_apimgmt_api_issue_comment')
+    with self.command_group('apimgmt api issue comment', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_issue_comment')
+        g.custom_command('list', 'list_apimgmt_api_issue_comment')
+    with self.command_group('apimgmt api issue attachment', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_issue_attachment')
+        g.custom_command('delete', 'delete_apimgmt_api_issue_attachment')
+        g.custom_command('list', 'list_apimgmt_api_issue_attachment')
+        g.custom_command('show', 'show_apimgmt_api_issue_attachment')
+    with self.command_group('apimgmt api issue attachment', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_issue_attachment')
+        g.custom_command('list', 'list_apimgmt_api_issue_attachment')
+    with self.command_group('apimgmt api tagdescription', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_api_tagdescription')
+        g.custom_command('delete', 'delete_apimgmt_api_tagdescription')
+        g.custom_command('list', 'list_apimgmt_api_tagdescription')
+        g.custom_command('show', 'show_apimgmt_api_tagdescription')
+    with self.command_group('apimgmt api tagdescription', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api_tagdescription')
+        g.custom_command('list', 'list_apimgmt_api_tagdescription')
+    with self.command_group('apimgmt api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_api')
+    with self.command_group('apimgmt apiversionset', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_apiversionset')
+        g.custom_command('update', 'update_apimgmt_apiversionset')
+        g.custom_command('delete', 'delete_apimgmt_apiversionset')
+        g.custom_command('list', 'list_apimgmt_apiversionset')
+        g.custom_command('show', 'show_apimgmt_apiversionset')
+    with self.command_group('apimgmt apiversionset', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_apiversionset')
+        g.custom_command('list', 'list_apimgmt_apiversionset')
+    with self.command_group('apimgmt authorizationserver', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_authorizationserver')
+        g.custom_command('update', 'update_apimgmt_authorizationserver')
+        g.custom_command('delete', 'delete_apimgmt_authorizationserver')
+        g.custom_command('list', 'list_apimgmt_authorizationserver')
+        g.custom_command('show', 'show_apimgmt_authorizationserver')
+    with self.command_group('apimgmt authorizationserver', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_authorizationserver')
+        g.custom_command('list', 'list_apimgmt_authorizationserver')
+    with self.command_group('apimgmt backend', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_backend')
+        g.custom_command('update', 'update_apimgmt_backend')
+        g.custom_command('delete', 'delete_apimgmt_backend')
+        g.custom_command('list', 'list_apimgmt_backend')
+        g.custom_command('show', 'show_apimgmt_backend')
+    with self.command_group('apimgmt backend', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_backend')
+        g.custom_command('list', 'list_apimgmt_backend')
+    with self.command_group('apimgmt cache', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_cache')
+        g.custom_command('update', 'update_apimgmt_cache')
+        g.custom_command('delete', 'delete_apimgmt_cache')
+        g.custom_command('list', 'list_apimgmt_cache')
+        g.custom_command('show', 'show_apimgmt_cache')
+    with self.command_group('apimgmt cache', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_cache')
+        g.custom_command('list', 'list_apimgmt_cache')
+    with self.command_group('apimgmt certificate', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_certificate')
+        g.custom_command('delete', 'delete_apimgmt_certificate')
+        g.custom_command('list', 'list_apimgmt_certificate')
+        g.custom_command('show', 'show_apimgmt_certificate')
+    with self.command_group('apimgmt certificate', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_certificate')
+        g.custom_command('list', 'list_apimgmt_certificate')
     with self.command_group('', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('list', 'list_')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
@@ -178,98 +178,98 @@ def load_command_table(self, _):
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('show', 'show_apimgmt')
         g.custom_command('list', 'list_apimgmt')
-    with self.command_group('apimgmt diagnostics', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_diagnostics')
-        g.custom_command('update', 'update_apimgmt_diagnostics')
-        g.custom_command('delete', 'delete_apimgmt_diagnostics')
-        g.custom_command('list', 'list_apimgmt_diagnostics')
-        g.custom_command('show', 'show_apimgmt_diagnostics')
-    with self.command_group('apimgmt diagnostics', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_diagnostics')
-        g.custom_command('list', 'list_apimgmt_diagnostics')
-    with self.command_group('apimgmt templates', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_templates')
-        g.custom_command('update', 'update_apimgmt_templates')
-        g.custom_command('delete', 'delete_apimgmt_templates')
-        g.custom_command('list', 'list_apimgmt_templates')
-        g.custom_command('show', 'show_apimgmt_templates')
-    with self.command_group('apimgmt templates', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_templates')
-        g.custom_command('list', 'list_apimgmt_templates')
-    with self.command_group('apimgmt groups', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_groups')
-        g.custom_command('update', 'update_apimgmt_groups')
-        g.custom_command('delete', 'delete_apimgmt_groups')
-        g.custom_command('list', 'list_apimgmt_groups')
-        g.custom_command('show', 'show_apimgmt_groups')
-    with self.command_group('apimgmt groups', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_groups')
-        g.custom_command('list', 'list_apimgmt_groups')
-    with self.command_group('apimgmt groups users', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_groups_users')
-        g.custom_command('delete', 'delete_apimgmt_groups_users')
-        g.custom_command('list', 'list_apimgmt_groups_users')
-    with self.command_group('apimgmt groups', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_groups')
-    with self.command_group('apimgmt identityproviders', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_identityproviders')
-        g.custom_command('update', 'update_apimgmt_identityproviders')
-        g.custom_command('delete', 'delete_apimgmt_identityproviders')
-        g.custom_command('list', 'list_apimgmt_identityproviders')
-        g.custom_command('show', 'show_apimgmt_identityproviders')
-    with self.command_group('apimgmt identityproviders', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_identityproviders')
-        g.custom_command('list', 'list_apimgmt_identityproviders')
-    with self.command_group('apimgmt issues', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_issues')
-        g.custom_command('list', 'list_apimgmt_issues')
-    with self.command_group('apimgmt loggers', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_loggers')
-        g.custom_command('update', 'update_apimgmt_loggers')
-        g.custom_command('delete', 'delete_apimgmt_loggers')
-        g.custom_command('list', 'list_apimgmt_loggers')
-        g.custom_command('show', 'show_apimgmt_loggers')
-    with self.command_group('apimgmt loggers', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_loggers')
-        g.custom_command('list', 'list_apimgmt_loggers')
-    with self.command_group('apimgmt locations', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_locations')
-    with self.command_group('apimgmt notifications', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_notifications')
-        g.custom_command('list', 'list_apimgmt_notifications')
-        g.custom_command('show', 'show_apimgmt_notifications')
-    with self.command_group('apimgmt notifications', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_notifications')
-        g.custom_command('list', 'list_apimgmt_notifications')
-    with self.command_group('apimgmt notifications recipientusers', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_notifications_recipientusers')
-        g.custom_command('delete', 'delete_apimgmt_notifications_recipientusers')
-        g.custom_command('list', 'list_apimgmt_notifications_recipientusers')
-    with self.command_group('apimgmt notifications', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_notifications')
-    with self.command_group('apimgmt notifications recipientemails', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_notifications_recipientemails')
-        g.custom_command('delete', 'delete_apimgmt_notifications_recipientemails')
-        g.custom_command('list', 'list_apimgmt_notifications_recipientemails')
-    with self.command_group('apimgmt notifications', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_notifications')
-    with self.command_group('apimgmt openidconnectproviders', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_openidconnectproviders')
-        g.custom_command('update', 'update_apimgmt_openidconnectproviders')
-        g.custom_command('delete', 'delete_apimgmt_openidconnectproviders')
-        g.custom_command('list', 'list_apimgmt_openidconnectproviders')
-        g.custom_command('show', 'show_apimgmt_openidconnectproviders')
-    with self.command_group('apimgmt openidconnectproviders', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_openidconnectproviders')
-        g.custom_command('list', 'list_apimgmt_openidconnectproviders')
-    with self.command_group('apimgmt policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_policies')
-        g.custom_command('delete', 'delete_apimgmt_policies')
-        g.custom_command('list', 'list_apimgmt_policies')
-        g.custom_command('show', 'show_apimgmt_policies')
-    with self.command_group('apimgmt policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_policies')
-        g.custom_command('list', 'list_apimgmt_policies')
+    with self.command_group('apimgmt diagnostic', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_diagnostic')
+        g.custom_command('update', 'update_apimgmt_diagnostic')
+        g.custom_command('delete', 'delete_apimgmt_diagnostic')
+        g.custom_command('list', 'list_apimgmt_diagnostic')
+        g.custom_command('show', 'show_apimgmt_diagnostic')
+    with self.command_group('apimgmt diagnostic', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_diagnostic')
+        g.custom_command('list', 'list_apimgmt_diagnostic')
+    with self.command_group('apimgmt template', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_template')
+        g.custom_command('update', 'update_apimgmt_template')
+        g.custom_command('delete', 'delete_apimgmt_template')
+        g.custom_command('list', 'list_apimgmt_template')
+        g.custom_command('show', 'show_apimgmt_template')
+    with self.command_group('apimgmt template', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_template')
+        g.custom_command('list', 'list_apimgmt_template')
+    with self.command_group('apimgmt group', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_group')
+        g.custom_command('update', 'update_apimgmt_group')
+        g.custom_command('delete', 'delete_apimgmt_group')
+        g.custom_command('list', 'list_apimgmt_group')
+        g.custom_command('show', 'show_apimgmt_group')
+    with self.command_group('apimgmt group', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_group')
+        g.custom_command('list', 'list_apimgmt_group')
+    with self.command_group('apimgmt group user', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_group_user')
+        g.custom_command('delete', 'delete_apimgmt_group_user')
+        g.custom_command('list', 'list_apimgmt_group_user')
+    with self.command_group('apimgmt group', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_group')
+    with self.command_group('apimgmt identityprovider', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_identityprovider')
+        g.custom_command('update', 'update_apimgmt_identityprovider')
+        g.custom_command('delete', 'delete_apimgmt_identityprovider')
+        g.custom_command('list', 'list_apimgmt_identityprovider')
+        g.custom_command('show', 'show_apimgmt_identityprovider')
+    with self.command_group('apimgmt identityprovider', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_identityprovider')
+        g.custom_command('list', 'list_apimgmt_identityprovider')
+    with self.command_group('apimgmt issue', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_issue')
+        g.custom_command('list', 'list_apimgmt_issue')
+    with self.command_group('apimgmt logger', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_logger')
+        g.custom_command('update', 'update_apimgmt_logger')
+        g.custom_command('delete', 'delete_apimgmt_logger')
+        g.custom_command('list', 'list_apimgmt_logger')
+        g.custom_command('show', 'show_apimgmt_logger')
+    with self.command_group('apimgmt logger', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_logger')
+        g.custom_command('list', 'list_apimgmt_logger')
+    with self.command_group('apimgmt location', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_location')
+    with self.command_group('apimgmt notification', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_notification')
+        g.custom_command('list', 'list_apimgmt_notification')
+        g.custom_command('show', 'show_apimgmt_notification')
+    with self.command_group('apimgmt notification', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_notification')
+        g.custom_command('list', 'list_apimgmt_notification')
+    with self.command_group('apimgmt notification recipientuser', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_notification_recipientuser')
+        g.custom_command('delete', 'delete_apimgmt_notification_recipientuser')
+        g.custom_command('list', 'list_apimgmt_notification_recipientuser')
+    with self.command_group('apimgmt notification', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_notification')
+    with self.command_group('apimgmt notification recipientemail', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_notification_recipientemail')
+        g.custom_command('delete', 'delete_apimgmt_notification_recipientemail')
+        g.custom_command('list', 'list_apimgmt_notification_recipientemail')
+    with self.command_group('apimgmt notification', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_notification')
+    with self.command_group('apimgmt openidconnectprovider', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_openidconnectprovider')
+        g.custom_command('update', 'update_apimgmt_openidconnectprovider')
+        g.custom_command('delete', 'delete_apimgmt_openidconnectprovider')
+        g.custom_command('list', 'list_apimgmt_openidconnectprovider')
+        g.custom_command('show', 'show_apimgmt_openidconnectprovider')
+    with self.command_group('apimgmt openidconnectprovider', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_openidconnectprovider')
+        g.custom_command('list', 'list_apimgmt_openidconnectprovider')
+    with self.command_group('apimgmt policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_policy')
+        g.custom_command('delete', 'delete_apimgmt_policy')
+        g.custom_command('list', 'list_apimgmt_policy')
+        g.custom_command('show', 'show_apimgmt_policy')
+    with self.command_group('apimgmt policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_policy')
+        g.custom_command('list', 'list_apimgmt_policy')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('list', 'list_apimgmt')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
@@ -290,84 +290,83 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_apimgmt')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('show', 'show_apimgmt')
-    with self.command_group('apimgmt products', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_products')
-        g.custom_command('update', 'update_apimgmt_products')
-        g.custom_command('delete', 'delete_apimgmt_products')
-        g.custom_command('list', 'list_apimgmt_products')
-        g.custom_command('show', 'show_apimgmt_products')
-    with self.command_group('apimgmt products', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_products')
-        g.custom_command('list', 'list_apimgmt_products')
-    with self.command_group('apimgmt products apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_products_apis')
-        g.custom_command('delete', 'delete_apimgmt_products_apis')
-        g.custom_command('list', 'list_apimgmt_products_apis')
-    with self.command_group('apimgmt products', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_products')
-    with self.command_group('apimgmt products groups', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_products_groups')
-        g.custom_command('delete', 'delete_apimgmt_products_groups')
-        g.custom_command('list', 'list_apimgmt_products_groups')
-    with self.command_group('apimgmt products', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_products')
-    with self.command_group('apimgmt products', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_products')
-    with self.command_group('apimgmt products policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_products_policies')
-        g.custom_command('delete', 'delete_apimgmt_products_policies')
-        g.custom_command('list', 'list_apimgmt_products_policies')
-        g.custom_command('show', 'show_apimgmt_products_policies')
-    with self.command_group('apimgmt products policies', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_products_policies')
-        g.custom_command('list', 'list_apimgmt_products_policies')
-    with self.command_group('apimgmt properties', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_properties')
-        g.custom_command('update', 'update_apimgmt_properties')
-        g.custom_command('delete', 'delete_apimgmt_properties')
-        g.custom_command('list', 'list_apimgmt_properties')
-        g.custom_command('show', 'show_apimgmt_properties')
-    with self.command_group('apimgmt properties', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_properties')
-        g.custom_command('list', 'list_apimgmt_properties')
-    with self.command_group('apimgmt quotas', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_quotas')
-    with self.command_group('apimgmt quotas periods', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_quotas_periods')
+    with self.command_group('apimgmt product', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_product')
+        g.custom_command('update', 'update_apimgmt_product')
+        g.custom_command('delete', 'delete_apimgmt_product')
+        g.custom_command('list', 'list_apimgmt_product')
+        g.custom_command('show', 'show_apimgmt_product')
+    with self.command_group('apimgmt product', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_product')
+        g.custom_command('list', 'list_apimgmt_product')
+    with self.command_group('apimgmt product api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_product_api')
+        g.custom_command('delete', 'delete_apimgmt_product_api')
+        g.custom_command('list', 'list_apimgmt_product_api')
+    with self.command_group('apimgmt product', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_product')
+    with self.command_group('apimgmt product group', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_product_group')
+        g.custom_command('delete', 'delete_apimgmt_product_group')
+        g.custom_command('list', 'list_apimgmt_product_group')
+    with self.command_group('apimgmt product', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_product')
+    with self.command_group('apimgmt product', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_product')
+    with self.command_group('apimgmt product policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_product_policy')
+        g.custom_command('delete', 'delete_apimgmt_product_policy')
+        g.custom_command('list', 'list_apimgmt_product_policy')
+        g.custom_command('show', 'show_apimgmt_product_policy')
+    with self.command_group('apimgmt product policy', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_product_policy')
+        g.custom_command('list', 'list_apimgmt_product_policy')
+    with self.command_group('apimgmt property', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_property')
+        g.custom_command('update', 'update_apimgmt_property')
+        g.custom_command('delete', 'delete_apimgmt_property')
+        g.custom_command('list', 'list_apimgmt_property')
+        g.custom_command('show', 'show_apimgmt_property')
+    with self.command_group('apimgmt property', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_property')
+        g.custom_command('list', 'list_apimgmt_property')
+    with self.command_group('apimgmt quota', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_quota')
+    with self.command_group('apimgmt quota period', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_quota_period')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('list', 'list_apimgmt')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('list', 'list_apimgmt')
-    with self.command_group('apimgmt subscriptions', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_subscriptions')
-        g.custom_command('update', 'update_apimgmt_subscriptions')
-        g.custom_command('delete', 'delete_apimgmt_subscriptions')
-        g.custom_command('list', 'list_apimgmt_subscriptions')
-        g.custom_command('show', 'show_apimgmt_subscriptions')
-    with self.command_group('apimgmt subscriptions', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_subscriptions')
-        g.custom_command('show', 'show_apimgmt_subscriptions')
+    with self.command_group('apimgmt subscription', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_subscription')
+        g.custom_command('update', 'update_apimgmt_subscription')
+        g.custom_command('delete', 'delete_apimgmt_subscription')
+        g.custom_command('list', 'list_apimgmt_subscription')
+        g.custom_command('show', 'show_apimgmt_subscription')
+    with self.command_group('apimgmt subscription', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_subscription')
+        g.custom_command('show', 'show_apimgmt_subscription')
     with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('list', 'list_apimgmt')
     with self.command_group('apimgmt tenant', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('show', 'show_apimgmt_tenant')
     with self.command_group('apimgmt tenant', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('show', 'show_apimgmt_tenant')
-    with self.command_group('apimgmt tenant', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-    with self.command_group('apimgmt users', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt_users')
-        g.custom_command('update', 'update_apimgmt_users')
-        g.custom_command('delete', 'delete_apimgmt_users')
-        g.custom_command('list', 'list_apimgmt_users')
-        g.custom_command('show', 'show_apimgmt_users')
-    with self.command_group('apimgmt users', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_users')
-        g.custom_command('list', 'list_apimgmt_users')
-    with self.command_group('apimgmt users', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_users')
-    with self.command_group('apimgmt users', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_users')
-    with self.command_group('apimgmt users', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('list', 'list_apimgmt_users')
-    with self.command_group('apimgmt apis', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('show', 'show_apimgmt_apis')
+    with self.command_group('apimgmt user', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_user')
+        g.custom_command('update', 'update_apimgmt_user')
+        g.custom_command('delete', 'delete_apimgmt_user')
+        g.custom_command('list', 'list_apimgmt_user')
+        g.custom_command('show', 'show_apimgmt_user')
+    with self.command_group('apimgmt user', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_user')
+        g.custom_command('list', 'list_apimgmt_user')
+    with self.command_group('apimgmt user', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_user')
+    with self.command_group('apimgmt user', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_user')
+    with self.command_group('apimgmt user', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('list', 'list_apimgmt_user')
+    with self.command_group('apimgmt api', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('show', 'show_apimgmt_api')
