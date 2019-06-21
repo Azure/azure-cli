@@ -14,6 +14,11 @@ Release History
 
 * Update ADLS version (0.0.45).
 
+**Feedback**
+
+* When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
+  extension from the index.
+
 **HDInsight**
 
 * Support for using `--sub-domain-suffix` parameter and `--disable_gateway_auth` parameter in `hdinsight application create` command.
@@ -28,6 +33,7 @@ Release History
 **RDBMS**
 
 * Support replication for MariaDB.
+
 
 2.0.67
 ++++++
