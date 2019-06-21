@@ -336,12 +336,12 @@ type: command
 short-summary: Delete a repository or image in an Azure Container Registry.
 long-summary: This command deletes all associated layer data that are not referenced by any other manifest in the container registry.
 examples:
+  - name: Delete an image manifest by tag. This deletes the manifest referenced by 'hello-world:latest' and all other tags referencing the same manifest.
+    text: az acr repository delete -n MyRegistry --image hello-world:latest
+  - name: Delete an image manifest by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
+    text: az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
   - name: Delete a repository from an Azure Container Registry. This deletes all manifests and tags under 'hello-world'.
     text: az acr repository delete -n MyRegistry --repository hello-world
-  - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest' and all other tags referencing the manifest.
-    text: az acr repository delete -n MyRegistry --image hello-world:latest
-  - name: Delete an image by sha256-based manifest digest. This deletes the manifest identified by 'hello-world@sha256:abc123' and all tags referencing the manifest.
-    text: az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
 """
 
 helps['acr repository list'] = """
@@ -443,8 +443,9 @@ type: command
 short-summary: Queues a quick build task that builds an app and pushes it into an Azure Container Registry.
 examples:
   - name: Queue a build for the current directory with the default Oryx-based buildpack.
-    text: >
-        az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} .
+  - name: Queue a build for the given GitHub repository with Heroku's buildpacks.
+    text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
 helps['acr show'] = """

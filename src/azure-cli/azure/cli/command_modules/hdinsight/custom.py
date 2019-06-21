@@ -333,6 +333,7 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
                            marketplace_identifier=None, application_type='CustomApplication', tags=None,
                            https_endpoint_access_mode=None, https_endpoint_location=None,
                            https_endpoint_destination_port=8080, https_endpoint_public_port=443,
+                           sub_domain_suffix=None, disable_gateway_auth=None,
                            ssh_endpoint_location=None, ssh_endpoint_destination_port=22, ssh_endpoint_public_port=22,
                            vnet_name=None, subnet=None):
     from .util import build_virtual_network_profile
@@ -374,6 +375,8 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
                 location=https_endpoint_location,
                 destination_port=https_endpoint_destination_port,
                 public_port=https_endpoint_public_port,
+                sub_domain_suffix=sub_domain_suffix,
+                disable_gateway_auth=disable_gateway_auth
             )
         )
 

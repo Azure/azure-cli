@@ -39,8 +39,7 @@ def load_command_table(self, _):
     )
 
     hdinsight_script_execution_history_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.script_execution_history_operations#'
-                        'ScriptExecutionHistoryOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#ScriptExecutionHistoryOperations.{}',
         client_factory=cf_hdinsight_script_execution_history
     )
 
