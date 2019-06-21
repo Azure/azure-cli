@@ -200,8 +200,7 @@ AZURE_API_PROFILES = {
             'classic_administrators': '2015-06-01'
         }),
         ResourceType.DATA_KEYVAULT: '2016-10-01',
-        ResourceType.DATA_STORAGE: '2015-04-05',
-        ResourceType.MGMT_MANAGEDSERVICES: '2018-06-01-preview'
+        ResourceType.DATA_STORAGE: '2015-04-05'
     }
 }
 
