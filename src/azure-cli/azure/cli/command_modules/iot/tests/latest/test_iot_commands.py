@@ -11,7 +11,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 class IoTHubTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location='westus2')
     def test_iot_hub(self, resource_group, resource_group_location):
         hub = 'iot-hub-for-test-1'
         rg = resource_group
@@ -308,10 +308,39 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub devicestream show'
         self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
 
-        # Test 'az iot hub manual-failover'
-        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'east us'),
-                 checks=[self.check('location', resource_group_location)])
+        # Test 'az iot hub message-enrichments create'
+        real_endpoints = 'events'
+        fake_endpoints = 'events fake_endpoint'
+        key = 'key'
+        fake_key = 'fake_key'
+        value = 'value'
 
+        self.cmd('iot hub message-enrichments create -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+                 .format(hub, rg, key, value, fake_endpoints), expect_failure=True)
+        self.cmd('iot hub message-enrichments create -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+                 .format(hub, rg, key, value, real_endpoints), checks=[self.check('length(properties.routing.enrichments)', 1)])
+
+        # Test 'az iot hub message-enrichments update'
+        self.cmd('iot hub message-enrichments update -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+                 .format(hub, rg, fake_key, value, real_endpoints), expect_failure=True)
+        self.cmd('iot hub message-enrichments update -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+                 .format(hub, rg, key, value, fake_endpoints), expect_failure=True)
+        self.cmd('iot hub message-enrichments update -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+                 .format(hub, rg, key, value, real_endpoints), checks=[self.check('length(properties.routing.enrichments)', 1)])
+
+        # Test 'az iot hub message-enrichments list'
+        self.cmd('iot hub message-enrichments list -n {0} -g {1}'.format(hub, rg),
+                 checks=[self.check('length([*])', 1)])
+
+        # Test 'az iot hub message-enrichments delete'
+        self.cmd('iot hub message-enrichments delete -n {0} -g {1} --key {2}'.format(hub, rg, fake_key),
+                 expect_failure=True)
+        self.cmd('iot hub message-enrichments delete -n {0} -g {1} --key {2}'.format(hub, rg, key),
+                 checks=[self.check('length(properties.routing.enrichments)', 0)])
+
+        # Test 'az iot hub manual-failover'
+        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'westcentralus'),
+                 checks=[self.check('location', location)])
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
