@@ -170,6 +170,7 @@ setup(
     install_requires=DEPENDENCIES,
     package_data={
         'azure.cli.core': ['auth_landing_pages/*.html'],
+        'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json'],
     },
     cmdclass=cmdclass
