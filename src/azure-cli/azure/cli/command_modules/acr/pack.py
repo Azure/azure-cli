@@ -56,7 +56,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
-    if builder != ORYX_PACK_BUILDER_IMAGE:
+    if builder != ORYX_PACK_BUILDER_IMAGE and not pull:
         logger.warning('Using a non-default builder image; `--pull` is probably needed as well')
 
     registry_prefixes = '{{.Run.Registry}}/', registry.login_server + '/'
