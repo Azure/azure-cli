@@ -62,9 +62,7 @@ class MediaV2Client():
         from msrestazure.tools import resource_id
         from azure.cli.command_modules.ams._sdk_utils import (get_media_namespace, get_media_type)
 
-        raw_token_obj = self.profile.get_raw_token()
-        raw_token = raw_token_obj[0][2]
-        access_token = raw_token[_ACCESS_TOKEN]
+        access_token = self.profile.get_raw_token()[0][2].get(_ACCESS_TOKEN)
 
         media_old_rp_url = resource_id(subscription=get_subscription_id(cli_ctx),
                                        resource_group=resource_group_name,
@@ -89,7 +87,8 @@ class MediaV2Client():
 
     def _get_v2_access_token(self):
         # pylint: disable=protected-access
-        return self.profile.get_raw_token(resource=self.v2_media_api_resource)[0][2].get(_ACCESS_TOKEN)
+        access_token = self.profile.get_raw_token(resource=self.v2_media_api_resource)[0][2].get(_ACCESS_TOKEN)
+        return access_token
 
     def set_mru(self, account_id, count, type):
         headers = {}
