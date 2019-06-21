@@ -13,7 +13,7 @@ Release History
 
 **Appservice**
 
-* functionapp: remove deprecated `az functionapp devops-build` command
+* BREAKING CHANGE: (functionapp) removes deprecated `az functionapp devops-build` command. Please use the new command `az functionapp devops-pipeline` instead.
 
 2.0.67
 ++++++
