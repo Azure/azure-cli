@@ -168,5 +168,17 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
+    package_data={
+        'azure.cli.core': ['auth_landing_pages/*.html'],
+        'azure.cli.command_modules.acr': ['*.json'],
+        'azure.cli.command_modules.botservice': ['*.json'],
+        'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
+        'azure.cli.command_modules.servicefabric': [
+            'template/windows/template.json',
+            'template/linux/template.json',
+            'template/windows/parameter.json',
+            'template/linux/parameter.json',
+        ],
+    },
     cmdclass=cmdclass
 )
