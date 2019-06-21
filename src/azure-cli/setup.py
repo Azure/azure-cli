@@ -172,6 +172,7 @@ setup(
         'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json'],
+        'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
     },
     cmdclass=cmdclass
 )
