@@ -173,6 +173,12 @@ setup(
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json'],
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
+        'azure.cli.command_modules.servicefabric': [
+            'template/windows/template.json',
+            'template/linux/template.json',
+            'template/windows/parameter.json',
+            'template/linux/parameter.json',
+        ],
     },
     cmdclass=cmdclass
 )
