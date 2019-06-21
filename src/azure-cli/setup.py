@@ -168,5 +168,8 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
+    package_data={
+        'azure.cli.command_modules.botservice': ['*.json'],
+    },
     cmdclass=cmdclass
 )
