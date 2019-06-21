@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from builtins import ValueError, bool
-
 import uuid
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
@@ -136,10 +134,6 @@ def cli_assignment_get(cmd, client,
     resource_group_name = kwargs.pop('resource_group_name', None)
     include_definition = kwargs.pop('include_definition', None)
 
-    if include_definition:
-        if not bool(include_definition):
-            raise ValueError("include_definition should either be set to True or False")
-
     assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
     scope = _get_scope(sub_id, rg_name)
     return client.get(
@@ -171,10 +165,6 @@ def cli_assignment_list(cmd, client,
     api_version = kwargs.pop('api_version', None)
     resource_group_name = kwargs.pop('resource_group_name', None)
     include_definition = kwargs.pop('include_definition', None)
-
-    if include_definition:
-        if not bool(include_definition):
-            raise ValueError("include_definition should either be set to True or False")
 
     sub_id = _get_subscription_id(cmd, subscription)
     scope = _get_scope(sub_id, resource_group_name)

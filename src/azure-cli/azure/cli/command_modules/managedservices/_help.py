@@ -134,9 +134,6 @@ helps['managedservices definition assignment show'] = """
         - name: --assignment
           short-summary: |
              The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
-        - name: --include-definition
-          short-summary: |
-             When set to true, the result will include the associated definition details.
     examples:
         - name: Get an assignment given its identifier under the default subscription scope.
           text: az managedservices definition assignment show --assignment d3087cf0-e180-4cca-b147-54ae00c7b504
@@ -165,10 +162,6 @@ helps['managedservices definition assignment list'] = """
     type: command
     short-summary: List all the registration assignments.
     long-summary: List all the registration assignments. Subscription id and resource group parameters can be used to override default values.
-    parameters:
-        - name: --include-definition
-          short-summary: |
-             When set to true, the result will include the associated definition details.
     examples:
         - name: Lists all the registration assignments under the default scope.
           text: az managedservices definition assignment list
