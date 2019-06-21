@@ -462,8 +462,6 @@ examples:
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
 """
 
-<<<<<<< HEAD
-=======
 helps['acr pack'] = """
 type: group
 short-summary: Manage Azure Container Registry Tasks that use Cloud Native Buildpacks.
@@ -479,7 +477,6 @@ examples:
     text: az acr pack build -r MyRegistry -t {{.Run.Registry}}/node-app:{{.Run.ID}} --pull --builder heroku/buildpacks:18 https://github.com/Azure-Samples/nodejs-docs-hello-world.git
 """
 
->>>>>>> 9feda7cfd4ddfe7a27a459eb1ef747fa979807d1
 helps['acr show'] = """
 type: command
 short-summary: Get the details of an Azure Container Registry.
