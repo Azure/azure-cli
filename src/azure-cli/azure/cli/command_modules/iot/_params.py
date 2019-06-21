@@ -188,6 +188,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('failover_region', options_list=['--failover-region', '--fr'], help='The region that the IoT hub'
                    'fails over to. Must be the paired region to the current IoT hub region.')
 
+    # Arguments for Message Enrichments
+    with self.argument_context('iot hub message-enrichments') as c:
+        c.argument('key', options_list=['--key', '-k'], help='The enrichment\'s key.')
+        c.argument('value', options_list=['--value', '-v'], help='The enrichment\'s value.')
+        c.argument('endpoint_names', options_list=['--endpoint-names', '--en'], nargs='*',
+                   help='Endpoint(s) to apply enrichments to. Use a space-separated list for multiple endpoints.')
+
     # Arguments for IoT Digital Twin
     with self.argument_context('iot pnp') as c:
         c.argument('repo_endpoint', options_list=['--endpoint', '-e'], help='IoT Plug and Play endpoint.')

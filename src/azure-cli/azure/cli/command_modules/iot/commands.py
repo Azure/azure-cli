@@ -133,6 +133,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_hub_routing_endpoint_delete',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
 
+    # iot hub message enrichment commands
+    with self.command_group('iot hub message-enrichments', client_factory=iot_hub_service_factory) as g:
+        g.custom_command('create', 'iot_message_enrichments_create')
+        g.custom_command('list', 'iot_message_enrichments_list')
+        g.custom_command('delete', 'iot_message_enrichments_delete')
+        g.custom_command('update', 'iot_message_enrichments_update')
+
     # iot hub route commands
     with self.command_group('iot hub route', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
