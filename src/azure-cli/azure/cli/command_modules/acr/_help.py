@@ -573,7 +573,7 @@ examples:
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
             --commit-trigger-enabled false --pull-request-trigger-enabled false \\
-            --schedule "0 12 * * Mon-Fri"
+            --assign-identity --schedule "0 12 * * Mon-Fri"
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays with the trigger name provided.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
