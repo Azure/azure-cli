@@ -1197,7 +1197,38 @@ def create_apimgmt(cmd, client,
                    id=None,
                    type=None,
                    etag=None):
-    return client.api_management_service.create()
+
+    parameters = {
+        tags: tags,
+        properties: properties,
+        notification_sender_email: notification_sender_email,
+        hostname_configurations: hostname_configurations,
+        virtual_network_configuration: virtual_network_configuration,
+        additional_locations: additional_locations,
+        custom_properties: custom_properties,
+        certificates: certificates,
+        enable_client_certificate: enable_client_certificate,
+        virtual_network_type: virtual_network_type,
+        publisher_email: publisher_email,
+        publisher_name: publisher_name,
+        provisioning_state: provisioning_state,
+        target_provisioning_state: target_provisioning_state,
+        created_at_utc: created_at_utc,
+        gateway_url: gateway_url,
+        gateway_regional_url: gateway_regional_url,
+        portal_url: portal_url,
+        management_api_url: management_api_url,
+        scm_url: scm_url,
+        public_ip_addresses: public_ip_addresses,
+        private_ip_addresses: private_ip_addresses,
+        sku: sku,
+        identity: identity,
+        location: location,
+        id: id,
+        type: type,
+        etag: etag
+    }
+    return client.api_management_service.create_or_update(resource_group, name, parameters)
 
 
 def update_apimgmt(cmd, client,
@@ -1887,14 +1918,14 @@ def list_apimgmt(cmd, client,
     return client.policy_snippet.list()
 
 
-def create_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   enabled=None,
-                   id=None,
-                   type=None):
-    return client.sign_in_settings.create()
+#def create_apimgmt(cmd, client,
+#                   resource_group,
+#                   name,
+#                   properties=None,
+#                   enabled=None,
+#                   id=None,
+#                   type=None):
+#    return client.sign_in_settings.create()
 
 
 def update_apimgmt(cmd, client,
@@ -1919,15 +1950,15 @@ def show_apimgmt(cmd, client,
     return client.sign_in_settings.show()
 
 
-def create_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   enabled=None,
-                   terms_of_service=None,
-                   id=None,
-                   type=None):
-    return client.sign_up_settings.create()
+#def create_apimgmt(cmd, client,
+#                   resource_group,
+#                   name,
+#                   properties=None,
+#                   enabled=None,
+#                   terms_of_service=None,
+#                   id=None,
+#                   type=None):
+#    return client.sign_up_settings.create()
 
 
 def update_apimgmt(cmd, client,
@@ -1953,17 +1984,17 @@ def show_apimgmt(cmd, client,
     return client.sign_up_settings.show()
 
 
-def create_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   url=None,
-                   validation_key=None,
-                   subscriptions=None,
-                   user_registration=None,
-                   id=None,
-                   type=None):
-    return client.delegation_settings.create()
+#def create_apimgmt(cmd, client,
+#                   resource_group,
+#                   name,
+#                   properties=None,
+#                   url=None,
+#                   validation_key=None,
+#                   subscriptions=None,
+#                   user_registration=None,
+#                   id=None,
+#                   type=None):
+#    return client.delegation_settings.create()
 
 
 def update_apimgmt(cmd, client,
