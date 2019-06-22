@@ -519,6 +519,9 @@ examples:
   - name: Create a task without the source location.
     text: >
         az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null
+  - name: Create a task without the source location and with a timer trigger that runs the image `MyImage` at the top of every hour using the default trigger name.
+    text: >
+        az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null --schedule "0 */1 * * *"
   - name: Create a task with the definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
@@ -565,10 +568,11 @@ examples:
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
             --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays using the default trigger name.
+  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a system-assigned managed identity and a timer trigger that runs that task at noon on Mondays through Fridays using the default trigger name.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            --commit-trigger-enabled false --pull-request-trigger-enabled false \\
             --schedule "0 12 * * Mon-Fri"
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays with the trigger name provided.
     text: |
