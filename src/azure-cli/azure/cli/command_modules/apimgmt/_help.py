@@ -38,31 +38,6 @@ helps['apimgmt api show'] = """
     short-summary: show a apimgmt api.
 """
 
-helps['apimgmt api'] = """
-    type: group
-    short-summary: Commands to manage Api.
-"""
-
-helps['apimgmt api show'] = """
-    type: command
-    short-summary: show a apimgmt api.
-"""
-
-helps['apimgmt api list'] = """
-    type: command
-    short-summary: list a apimgmt api.
-"""
-
-helps['apimgmt api'] = """
-    type: group
-    short-summary: Commands to manage ApiRevision.
-"""
-
-helps['apimgmt api list'] = """
-    type: command
-    short-summary: list a apimgmt api.
-"""
-
 helps['apimgmt api release'] = """
     type: group
     short-summary: Commands to manage ApiRelease.
@@ -91,21 +66,6 @@ helps['apimgmt api release list'] = """
 helps['apimgmt api release show'] = """
     type: command
     short-summary: show a apimgmt api release.
-"""
-
-helps['apimgmt api release'] = """
-    type: group
-    short-summary: Commands to manage ApiRelease.
-"""
-
-helps['apimgmt api release show'] = """
-    type: command
-    short-summary: show a apimgmt api release.
-"""
-
-helps['apimgmt api release list'] = """
-    type: command
-    short-summary: list a apimgmt api release.
 """
 
 helps['apimgmt api operation'] = """
@@ -138,21 +98,6 @@ helps['apimgmt api operation show'] = """
     short-summary: show a apimgmt api operation.
 """
 
-helps['apimgmt api operation'] = """
-    type: group
-    short-summary: Commands to manage ApiOperation.
-"""
-
-helps['apimgmt api operation show'] = """
-    type: command
-    short-summary: show a apimgmt api operation.
-"""
-
-helps['apimgmt api operation list'] = """
-    type: command
-    short-summary: list a apimgmt api operation.
-"""
-
 helps['apimgmt api operation policy'] = """
     type: group
     short-summary: Commands to manage ApiOperationPolicy.
@@ -161,6 +106,11 @@ helps['apimgmt api operation policy'] = """
 helps['apimgmt api operation policy create'] = """
     type: command
     short-summary: create a apimgmt api operation policy.
+"""
+
+helps['apimgmt api operation policy update'] = """
+    type: command
+    short-summary: update a apimgmt api operation policy.
 """
 
 helps['apimgmt api operation policy delete'] = """
@@ -176,21 +126,6 @@ helps['apimgmt api operation policy list'] = """
 helps['apimgmt api operation policy show'] = """
     type: command
     short-summary: show a apimgmt api operation policy.
-"""
-
-helps['apimgmt api operation policy'] = """
-    type: group
-    short-summary: Commands to manage ApiOperationPolicy.
-"""
-
-helps['apimgmt api operation policy show'] = """
-    type: command
-    short-summary: show a apimgmt api operation policy.
-"""
-
-helps['apimgmt api operation policy list'] = """
-    type: command
-    short-summary: list a apimgmt api operation policy.
 """
 
 helps['apimgmt tag'] = """
@@ -223,31 +158,6 @@ helps['apimgmt tag show'] = """
     short-summary: show a apimgmt tag.
 """
 
-helps['apimgmt tag api product operation'] = """
-    type: group
-    short-summary: Commands to manage Tag.
-"""
-
-helps['apimgmt tag api product operation list'] = """
-    type: command
-    short-summary: list a apimgmt tag api product operation.
-"""
-
-helps['apimgmt tag api product operation show'] = """
-    type: command
-    short-summary: show a apimgmt tag api product operation.
-"""
-
-helps['apimgmt api'] = """
-    type: group
-    short-summary: Commands to manage ApiProduct.
-"""
-
-helps['apimgmt api list'] = """
-    type: command
-    short-summary: list a apimgmt api.
-"""
-
 helps['apimgmt api policy'] = """
     type: group
     short-summary: Commands to manage ApiPolicy.
@@ -256,6 +166,11 @@ helps['apimgmt api policy'] = """
 helps['apimgmt api policy create'] = """
     type: command
     short-summary: create a apimgmt api policy.
+"""
+
+helps['apimgmt api policy update'] = """
+    type: command
+    short-summary: update a apimgmt api policy.
 """
 
 helps['apimgmt api policy delete'] = """
@@ -273,21 +188,6 @@ helps['apimgmt api policy show'] = """
     short-summary: show a apimgmt api policy.
 """
 
-helps['apimgmt api policy'] = """
-    type: group
-    short-summary: Commands to manage ApiPolicy.
-"""
-
-helps['apimgmt api policy show'] = """
-    type: command
-    short-summary: show a apimgmt api policy.
-"""
-
-helps['apimgmt api policy list'] = """
-    type: command
-    short-summary: list a apimgmt api policy.
-"""
-
 helps['apimgmt api schema'] = """
     type: group
     short-summary: Commands to manage ApiSchema.
@@ -296,6 +196,11 @@ helps['apimgmt api schema'] = """
 helps['apimgmt api schema create'] = """
     type: command
     short-summary: create a apimgmt api schema.
+"""
+
+helps['apimgmt api schema update'] = """
+    type: command
+    short-summary: update a apimgmt api schema.
 """
 
 helps['apimgmt api schema delete'] = """
@@ -311,21 +216,6 @@ helps['apimgmt api schema list'] = """
 helps['apimgmt api schema show'] = """
     type: command
     short-summary: show a apimgmt api schema.
-"""
-
-helps['apimgmt api schema'] = """
-    type: group
-    short-summary: Commands to manage ApiSchema.
-"""
-
-helps['apimgmt api schema show'] = """
-    type: command
-    short-summary: show a apimgmt api schema.
-"""
-
-helps['apimgmt api schema list'] = """
-    type: command
-    short-summary: list a apimgmt api schema.
 """
 
 helps['apimgmt api diagnostic'] = """
@@ -358,21 +248,6 @@ helps['apimgmt api diagnostic show'] = """
     short-summary: show a apimgmt api diagnostic.
 """
 
-helps['apimgmt api diagnostic'] = """
-    type: group
-    short-summary: Commands to manage ApiDiagnostic.
-"""
-
-helps['apimgmt api diagnostic show'] = """
-    type: command
-    short-summary: show a apimgmt api diagnostic.
-"""
-
-helps['apimgmt api diagnostic list'] = """
-    type: command
-    short-summary: list a apimgmt api diagnostic.
-"""
-
 helps['apimgmt api issue'] = """
     type: group
     short-summary: Commands to manage ApiIssue.
@@ -403,21 +278,6 @@ helps['apimgmt api issue show'] = """
     short-summary: show a apimgmt api issue.
 """
 
-helps['apimgmt api issue'] = """
-    type: group
-    short-summary: Commands to manage ApiIssue.
-"""
-
-helps['apimgmt api issue show'] = """
-    type: command
-    short-summary: show a apimgmt api issue.
-"""
-
-helps['apimgmt api issue list'] = """
-    type: command
-    short-summary: list a apimgmt api issue.
-"""
-
 helps['apimgmt api issue comment'] = """
     type: group
     short-summary: Commands to manage ApiIssueComment.
@@ -426,6 +286,11 @@ helps['apimgmt api issue comment'] = """
 helps['apimgmt api issue comment create'] = """
     type: command
     short-summary: create a apimgmt api issue comment.
+"""
+
+helps['apimgmt api issue comment update'] = """
+    type: command
+    short-summary: update a apimgmt api issue comment.
 """
 
 helps['apimgmt api issue comment delete'] = """
@@ -443,21 +308,6 @@ helps['apimgmt api issue comment show'] = """
     short-summary: show a apimgmt api issue comment.
 """
 
-helps['apimgmt api issue comment'] = """
-    type: group
-    short-summary: Commands to manage ApiIssueComment.
-"""
-
-helps['apimgmt api issue comment show'] = """
-    type: command
-    short-summary: show a apimgmt api issue comment.
-"""
-
-helps['apimgmt api issue comment list'] = """
-    type: command
-    short-summary: list a apimgmt api issue comment.
-"""
-
 helps['apimgmt api issue attachment'] = """
     type: group
     short-summary: Commands to manage ApiIssueAttachment.
@@ -466,6 +316,11 @@ helps['apimgmt api issue attachment'] = """
 helps['apimgmt api issue attachment create'] = """
     type: command
     short-summary: create a apimgmt api issue attachment.
+"""
+
+helps['apimgmt api issue attachment update'] = """
+    type: command
+    short-summary: update a apimgmt api issue attachment.
 """
 
 helps['apimgmt api issue attachment delete'] = """
@@ -483,21 +338,6 @@ helps['apimgmt api issue attachment show'] = """
     short-summary: show a apimgmt api issue attachment.
 """
 
-helps['apimgmt api issue attachment'] = """
-    type: group
-    short-summary: Commands to manage ApiIssueAttachment.
-"""
-
-helps['apimgmt api issue attachment show'] = """
-    type: command
-    short-summary: show a apimgmt api issue attachment.
-"""
-
-helps['apimgmt api issue attachment list'] = """
-    type: command
-    short-summary: list a apimgmt api issue attachment.
-"""
-
 helps['apimgmt api tagdescription'] = """
     type: group
     short-summary: Commands to manage ApiTagDescription.
@@ -506,6 +346,11 @@ helps['apimgmt api tagdescription'] = """
 helps['apimgmt api tagdescription create'] = """
     type: command
     short-summary: create a apimgmt api tagdescription.
+"""
+
+helps['apimgmt api tagdescription update'] = """
+    type: command
+    short-summary: update a apimgmt api tagdescription.
 """
 
 helps['apimgmt api tagdescription delete'] = """
@@ -521,31 +366,6 @@ helps['apimgmt api tagdescription list'] = """
 helps['apimgmt api tagdescription show'] = """
     type: command
     short-summary: show a apimgmt api tagdescription.
-"""
-
-helps['apimgmt api tagdescription'] = """
-    type: group
-    short-summary: Commands to manage ApiTagDescription.
-"""
-
-helps['apimgmt api tagdescription show'] = """
-    type: command
-    short-summary: show a apimgmt api tagdescription.
-"""
-
-helps['apimgmt api tagdescription list'] = """
-    type: command
-    short-summary: list a apimgmt api tagdescription.
-"""
-
-helps['apimgmt api'] = """
-    type: group
-    short-summary: Commands to manage Operation.
-"""
-
-helps['apimgmt api list'] = """
-    type: command
-    short-summary: list a apimgmt api.
 """
 
 helps['apimgmt apiversionset'] = """
@@ -578,21 +398,6 @@ helps['apimgmt apiversionset show'] = """
     short-summary: show a apimgmt apiversionset.
 """
 
-helps['apimgmt apiversionset'] = """
-    type: group
-    short-summary: Commands to manage ApiVersionSet.
-"""
-
-helps['apimgmt apiversionset show'] = """
-    type: command
-    short-summary: show a apimgmt apiversionset.
-"""
-
-helps['apimgmt apiversionset list'] = """
-    type: command
-    short-summary: list a apimgmt apiversionset.
-"""
-
 helps['apimgmt authorizationserver'] = """
     type: group
     short-summary: Commands to manage AuthorizationServer.
@@ -621,21 +426,6 @@ helps['apimgmt authorizationserver list'] = """
 helps['apimgmt authorizationserver show'] = """
     type: command
     short-summary: show a apimgmt authorizationserver.
-"""
-
-helps['apimgmt authorizationserver'] = """
-    type: group
-    short-summary: Commands to manage AuthorizationServer.
-"""
-
-helps['apimgmt authorizationserver show'] = """
-    type: command
-    short-summary: show a apimgmt authorizationserver.
-"""
-
-helps['apimgmt authorizationserver list'] = """
-    type: command
-    short-summary: list a apimgmt authorizationserver.
 """
 
 helps['apimgmt backend'] = """
@@ -668,21 +458,6 @@ helps['apimgmt backend show'] = """
     short-summary: show a apimgmt backend.
 """
 
-helps['apimgmt backend'] = """
-    type: group
-    short-summary: Commands to manage Backend.
-"""
-
-helps['apimgmt backend show'] = """
-    type: command
-    short-summary: show a apimgmt backend.
-"""
-
-helps['apimgmt backend list'] = """
-    type: command
-    short-summary: list a apimgmt backend.
-"""
-
 helps['apimgmt cache'] = """
     type: group
     short-summary: Commands to manage Cache.
@@ -713,21 +488,6 @@ helps['apimgmt cache show'] = """
     short-summary: show a apimgmt cache.
 """
 
-helps['apimgmt cache'] = """
-    type: group
-    short-summary: Commands to manage Cache.
-"""
-
-helps['apimgmt cache show'] = """
-    type: command
-    short-summary: show a apimgmt cache.
-"""
-
-helps['apimgmt cache list'] = """
-    type: command
-    short-summary: list a apimgmt cache.
-"""
-
 helps['apimgmt certificate'] = """
     type: group
     short-summary: Commands to manage Certificate.
@@ -736,6 +496,11 @@ helps['apimgmt certificate'] = """
 helps['apimgmt certificate create'] = """
     type: command
     short-summary: create a apimgmt certificate.
+"""
+
+helps['apimgmt certificate update'] = """
+    type: command
+    short-summary: update a apimgmt certificate.
 """
 
 helps['apimgmt certificate delete'] = """
@@ -751,41 +516,6 @@ helps['apimgmt certificate list'] = """
 helps['apimgmt certificate show'] = """
     type: command
     short-summary: show a apimgmt certificate.
-"""
-
-helps['apimgmt certificate'] = """
-    type: group
-    short-summary: Commands to manage Certificate.
-"""
-
-helps['apimgmt certificate show'] = """
-    type: command
-    short-summary: show a apimgmt certificate.
-"""
-
-helps['apimgmt certificate list'] = """
-    type: command
-    short-summary: list a apimgmt certificate.
-"""
-
-helps[''] = """
-    type: group
-    short-summary: Commands to manage ApiManagementOperation.
-"""
-
-helps[' list'] = """
-    type: command
-    short-summary: list a .
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage ApiManagementServiceSku.
-"""
-
-helps['apimgmt list'] = """
-    type: command
-    short-summary: list a apimgmt.
 """
 
 helps['apimgmt'] = """
@@ -818,21 +548,6 @@ helps['apimgmt show'] = """
     short-summary: show a apimgmt.
 """
 
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage ApiManagementService.
-"""
-
-helps['apimgmt show'] = """
-    type: command
-    short-summary: show a apimgmt.
-"""
-
-helps['apimgmt list'] = """
-    type: command
-    short-summary: list a apimgmt.
-"""
-
 helps['apimgmt diagnostic'] = """
     type: group
     short-summary: Commands to manage Diagnostic.
@@ -861,21 +576,6 @@ helps['apimgmt diagnostic list'] = """
 helps['apimgmt diagnostic show'] = """
     type: command
     short-summary: show a apimgmt diagnostic.
-"""
-
-helps['apimgmt diagnostic'] = """
-    type: group
-    short-summary: Commands to manage Diagnostic.
-"""
-
-helps['apimgmt diagnostic show'] = """
-    type: command
-    short-summary: show a apimgmt diagnostic.
-"""
-
-helps['apimgmt diagnostic list'] = """
-    type: command
-    short-summary: list a apimgmt diagnostic.
 """
 
 helps['apimgmt template'] = """
@@ -908,21 +608,6 @@ helps['apimgmt template show'] = """
     short-summary: show a apimgmt template.
 """
 
-helps['apimgmt template'] = """
-    type: group
-    short-summary: Commands to manage EmailTemplate.
-"""
-
-helps['apimgmt template show'] = """
-    type: command
-    short-summary: show a apimgmt template.
-"""
-
-helps['apimgmt template list'] = """
-    type: command
-    short-summary: list a apimgmt template.
-"""
-
 helps['apimgmt group'] = """
     type: group
     short-summary: Commands to manage Group.
@@ -953,21 +638,6 @@ helps['apimgmt group show'] = """
     short-summary: show a apimgmt group.
 """
 
-helps['apimgmt group'] = """
-    type: group
-    short-summary: Commands to manage Group.
-"""
-
-helps['apimgmt group show'] = """
-    type: command
-    short-summary: show a apimgmt group.
-"""
-
-helps['apimgmt group list'] = """
-    type: command
-    short-summary: list a apimgmt group.
-"""
-
 helps['apimgmt group user'] = """
     type: group
     short-summary: Commands to manage GroupUser.
@@ -986,16 +656,6 @@ helps['apimgmt group user delete'] = """
 helps['apimgmt group user list'] = """
     type: command
     short-summary: list a apimgmt group user.
-"""
-
-helps['apimgmt group'] = """
-    type: group
-    short-summary: Commands to manage GroupUser.
-"""
-
-helps['apimgmt group list'] = """
-    type: command
-    short-summary: list a apimgmt group.
 """
 
 helps['apimgmt identityprovider'] = """
@@ -1028,36 +688,6 @@ helps['apimgmt identityprovider show'] = """
     short-summary: show a apimgmt identityprovider.
 """
 
-helps['apimgmt identityprovider'] = """
-    type: group
-    short-summary: Commands to manage IdentityProvider.
-"""
-
-helps['apimgmt identityprovider show'] = """
-    type: command
-    short-summary: show a apimgmt identityprovider.
-"""
-
-helps['apimgmt identityprovider list'] = """
-    type: command
-    short-summary: list a apimgmt identityprovider.
-"""
-
-helps['apimgmt issue'] = """
-    type: group
-    short-summary: Commands to manage Issue.
-"""
-
-helps['apimgmt issue show'] = """
-    type: command
-    short-summary: show a apimgmt issue.
-"""
-
-helps['apimgmt issue list'] = """
-    type: command
-    short-summary: list a apimgmt issue.
-"""
-
 helps['apimgmt logger'] = """
     type: group
     short-summary: Commands to manage Logger.
@@ -1088,31 +718,6 @@ helps['apimgmt logger show'] = """
     short-summary: show a apimgmt logger.
 """
 
-helps['apimgmt logger'] = """
-    type: group
-    short-summary: Commands to manage Logger.
-"""
-
-helps['apimgmt logger show'] = """
-    type: command
-    short-summary: show a apimgmt logger.
-"""
-
-helps['apimgmt logger list'] = """
-    type: command
-    short-summary: list a apimgmt logger.
-"""
-
-helps['apimgmt location'] = """
-    type: group
-    short-summary: Commands to manage NetworkStatu.
-"""
-
-helps['apimgmt location list'] = """
-    type: command
-    short-summary: list a apimgmt location.
-"""
-
 helps['apimgmt notification'] = """
     type: group
     short-summary: Commands to manage Notification.
@@ -1123,6 +728,11 @@ helps['apimgmt notification create'] = """
     short-summary: create a apimgmt notification.
 """
 
+helps['apimgmt notification update'] = """
+    type: command
+    short-summary: update a apimgmt notification.
+"""
+
 helps['apimgmt notification list'] = """
     type: command
     short-summary: list a apimgmt notification.
@@ -1131,21 +741,6 @@ helps['apimgmt notification list'] = """
 helps['apimgmt notification show'] = """
     type: command
     short-summary: show a apimgmt notification.
-"""
-
-helps['apimgmt notification'] = """
-    type: group
-    short-summary: Commands to manage Notification.
-"""
-
-helps['apimgmt notification show'] = """
-    type: command
-    short-summary: show a apimgmt notification.
-"""
-
-helps['apimgmt notification list'] = """
-    type: command
-    short-summary: list a apimgmt notification.
 """
 
 helps['apimgmt notification recipientuser'] = """
@@ -1158,6 +753,11 @@ helps['apimgmt notification recipientuser create'] = """
     short-summary: create a apimgmt notification recipientuser.
 """
 
+helps['apimgmt notification recipientuser update'] = """
+    type: command
+    short-summary: update a apimgmt notification recipientuser.
+"""
+
 helps['apimgmt notification recipientuser delete'] = """
     type: command
     short-summary: delete a apimgmt notification recipientuser.
@@ -1166,16 +766,6 @@ helps['apimgmt notification recipientuser delete'] = """
 helps['apimgmt notification recipientuser list'] = """
     type: command
     short-summary: list a apimgmt notification recipientuser.
-"""
-
-helps['apimgmt notification'] = """
-    type: group
-    short-summary: Commands to manage NotificationRecipientUser.
-"""
-
-helps['apimgmt notification list'] = """
-    type: command
-    short-summary: list a apimgmt notification.
 """
 
 helps['apimgmt notification recipientemail'] = """
@@ -1188,6 +778,11 @@ helps['apimgmt notification recipientemail create'] = """
     short-summary: create a apimgmt notification recipientemail.
 """
 
+helps['apimgmt notification recipientemail update'] = """
+    type: command
+    short-summary: update a apimgmt notification recipientemail.
+"""
+
 helps['apimgmt notification recipientemail delete'] = """
     type: command
     short-summary: delete a apimgmt notification recipientemail.
@@ -1196,16 +791,6 @@ helps['apimgmt notification recipientemail delete'] = """
 helps['apimgmt notification recipientemail list'] = """
     type: command
     short-summary: list a apimgmt notification recipientemail.
-"""
-
-helps['apimgmt notification'] = """
-    type: group
-    short-summary: Commands to manage NotificationRecipientEmail.
-"""
-
-helps['apimgmt notification list'] = """
-    type: command
-    short-summary: list a apimgmt notification.
 """
 
 helps['apimgmt openidconnectprovider'] = """
@@ -1238,21 +823,6 @@ helps['apimgmt openidconnectprovider show'] = """
     short-summary: show a apimgmt openidconnectprovider.
 """
 
-helps['apimgmt openidconnectprovider'] = """
-    type: group
-    short-summary: Commands to manage OpenIdConnectProvider.
-"""
-
-helps['apimgmt openidconnectprovider show'] = """
-    type: command
-    short-summary: show a apimgmt openidconnectprovider.
-"""
-
-helps['apimgmt openidconnectprovider list'] = """
-    type: command
-    short-summary: list a apimgmt openidconnectprovider.
-"""
-
 helps['apimgmt policy'] = """
     type: group
     short-summary: Commands to manage Policy.
@@ -1261,6 +831,11 @@ helps['apimgmt policy'] = """
 helps['apimgmt policy create'] = """
     type: command
     short-summary: create a apimgmt policy.
+"""
+
+helps['apimgmt policy update'] = """
+    type: command
+    short-summary: update a apimgmt policy.
 """
 
 helps['apimgmt policy delete'] = """
@@ -1278,31 +853,6 @@ helps['apimgmt policy show'] = """
     short-summary: show a apimgmt policy.
 """
 
-helps['apimgmt policy'] = """
-    type: group
-    short-summary: Commands to manage Policy.
-"""
-
-helps['apimgmt policy show'] = """
-    type: command
-    short-summary: show a apimgmt policy.
-"""
-
-helps['apimgmt policy list'] = """
-    type: command
-    short-summary: list a apimgmt policy.
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage PolicySnippet.
-"""
-
-helps['apimgmt list'] = """
-    type: command
-    short-summary: list a apimgmt.
-"""
-
 helps['apimgmt'] = """
     type: group
     short-summary: Commands to manage SignInSetting.
@@ -1316,16 +866,6 @@ helps['apimgmt create'] = """
 helps['apimgmt update'] = """
     type: command
     short-summary: update a apimgmt.
-"""
-
-helps['apimgmt show'] = """
-    type: command
-    short-summary: show a apimgmt.
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage SignInSetting.
 """
 
 helps['apimgmt show'] = """
@@ -1355,16 +895,6 @@ helps['apimgmt show'] = """
 
 helps['apimgmt'] = """
     type: group
-    short-summary: Commands to manage SignUpSetting.
-"""
-
-helps['apimgmt show'] = """
-    type: command
-    short-summary: show a apimgmt.
-"""
-
-helps['apimgmt'] = """
-    type: group
     short-summary: Commands to manage DelegationSetting.
 """
 
@@ -1376,16 +906,6 @@ helps['apimgmt create'] = """
 helps['apimgmt update'] = """
     type: command
     short-summary: update a apimgmt.
-"""
-
-helps['apimgmt show'] = """
-    type: command
-    short-summary: show a apimgmt.
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage DelegationSetting.
 """
 
 helps['apimgmt show'] = """
@@ -1423,21 +943,6 @@ helps['apimgmt product show'] = """
     short-summary: show a apimgmt product.
 """
 
-helps['apimgmt product'] = """
-    type: group
-    short-summary: Commands to manage Product.
-"""
-
-helps['apimgmt product show'] = """
-    type: command
-    short-summary: show a apimgmt product.
-"""
-
-helps['apimgmt product list'] = """
-    type: command
-    short-summary: list a apimgmt product.
-"""
-
 helps['apimgmt product api'] = """
     type: group
     short-summary: Commands to manage ProductApi.
@@ -1446,6 +951,11 @@ helps['apimgmt product api'] = """
 helps['apimgmt product api create'] = """
     type: command
     short-summary: create a apimgmt product api.
+"""
+
+helps['apimgmt product api update'] = """
+    type: command
+    short-summary: update a apimgmt product api.
 """
 
 helps['apimgmt product api delete'] = """
@@ -1458,16 +968,6 @@ helps['apimgmt product api list'] = """
     short-summary: list a apimgmt product api.
 """
 
-helps['apimgmt product'] = """
-    type: group
-    short-summary: Commands to manage ProductApi.
-"""
-
-helps['apimgmt product list'] = """
-    type: command
-    short-summary: list a apimgmt product.
-"""
-
 helps['apimgmt product group'] = """
     type: group
     short-summary: Commands to manage ProductGroup.
@@ -1476,6 +976,11 @@ helps['apimgmt product group'] = """
 helps['apimgmt product group create'] = """
     type: command
     short-summary: create a apimgmt product group.
+"""
+
+helps['apimgmt product group update'] = """
+    type: command
+    short-summary: update a apimgmt product group.
 """
 
 helps['apimgmt product group delete'] = """
@@ -1488,26 +993,6 @@ helps['apimgmt product group list'] = """
     short-summary: list a apimgmt product group.
 """
 
-helps['apimgmt product'] = """
-    type: group
-    short-summary: Commands to manage ProductGroup.
-"""
-
-helps['apimgmt product list'] = """
-    type: command
-    short-summary: list a apimgmt product.
-"""
-
-helps['apimgmt product'] = """
-    type: group
-    short-summary: Commands to manage ProductSubscription.
-"""
-
-helps['apimgmt product list'] = """
-    type: command
-    short-summary: list a apimgmt product.
-"""
-
 helps['apimgmt product policy'] = """
     type: group
     short-summary: Commands to manage ProductPolicy.
@@ -1516,6 +1001,11 @@ helps['apimgmt product policy'] = """
 helps['apimgmt product policy create'] = """
     type: command
     short-summary: create a apimgmt product policy.
+"""
+
+helps['apimgmt product policy update'] = """
+    type: command
+    short-summary: update a apimgmt product policy.
 """
 
 helps['apimgmt product policy delete'] = """
@@ -1531,21 +1021,6 @@ helps['apimgmt product policy list'] = """
 helps['apimgmt product policy show'] = """
     type: command
     short-summary: show a apimgmt product policy.
-"""
-
-helps['apimgmt product policy'] = """
-    type: group
-    short-summary: Commands to manage ProductPolicy.
-"""
-
-helps['apimgmt product policy show'] = """
-    type: command
-    short-summary: show a apimgmt product policy.
-"""
-
-helps['apimgmt product policy list'] = """
-    type: command
-    short-summary: list a apimgmt product policy.
 """
 
 helps['apimgmt property'] = """
@@ -1578,61 +1053,6 @@ helps['apimgmt property show'] = """
     short-summary: show a apimgmt property.
 """
 
-helps['apimgmt property'] = """
-    type: group
-    short-summary: Commands to manage Property.
-"""
-
-helps['apimgmt property show'] = """
-    type: command
-    short-summary: show a apimgmt property.
-"""
-
-helps['apimgmt property list'] = """
-    type: command
-    short-summary: list a apimgmt property.
-"""
-
-helps['apimgmt quota'] = """
-    type: group
-    short-summary: Commands to manage QuotaByCounterKey.
-"""
-
-helps['apimgmt quota list'] = """
-    type: command
-    short-summary: list a apimgmt quota.
-"""
-
-helps['apimgmt quota period'] = """
-    type: group
-    short-summary: Commands to manage QuotaByPeriodKey.
-"""
-
-helps['apimgmt quota period show'] = """
-    type: command
-    short-summary: show a apimgmt quota period.
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage Region.
-"""
-
-helps['apimgmt list'] = """
-    type: command
-    short-summary: list a apimgmt.
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage Report.
-"""
-
-helps['apimgmt list'] = """
-    type: command
-    short-summary: list a apimgmt.
-"""
-
 helps['apimgmt subscription'] = """
     type: group
     short-summary: Commands to manage Subscription.
@@ -1663,56 +1083,6 @@ helps['apimgmt subscription show'] = """
     short-summary: show a apimgmt subscription.
 """
 
-helps['apimgmt subscription'] = """
-    type: group
-    short-summary: Commands to manage Subscription.
-"""
-
-helps['apimgmt subscription list'] = """
-    type: command
-    short-summary: list a apimgmt subscription.
-"""
-
-helps['apimgmt subscription show'] = """
-    type: command
-    short-summary: show a apimgmt subscription.
-"""
-
-helps['apimgmt'] = """
-    type: group
-    short-summary: Commands to manage TagResource.
-"""
-
-helps['apimgmt list'] = """
-    type: command
-    short-summary: list a apimgmt.
-"""
-
-helps['apimgmt tenant'] = """
-    type: group
-    short-summary: Commands to manage TenantAcces.
-"""
-
-helps['apimgmt tenant show'] = """
-    type: command
-    short-summary: show a apimgmt tenant.
-"""
-
-helps['apimgmt tenant'] = """
-    type: group
-    short-summary: Commands to manage TenantAccessGit.
-"""
-
-helps['apimgmt tenant show'] = """
-    type: command
-    short-summary: show a apimgmt tenant.
-"""
-
-helps['apimgmt tenant'] = """
-    type: group
-    short-summary: Commands to manage TenantConfiguration.
-"""
-
 helps['apimgmt user'] = """
     type: group
     short-summary: Commands to manage User.
@@ -1741,59 +1111,4 @@ helps['apimgmt user list'] = """
 helps['apimgmt user show'] = """
     type: command
     short-summary: show a apimgmt user.
-"""
-
-helps['apimgmt user'] = """
-    type: group
-    short-summary: Commands to manage User.
-"""
-
-helps['apimgmt user show'] = """
-    type: command
-    short-summary: show a apimgmt user.
-"""
-
-helps['apimgmt user list'] = """
-    type: command
-    short-summary: list a apimgmt user.
-"""
-
-helps['apimgmt user'] = """
-    type: group
-    short-summary: Commands to manage UserGroup.
-"""
-
-helps['apimgmt user list'] = """
-    type: command
-    short-summary: list a apimgmt user.
-"""
-
-helps['apimgmt user'] = """
-    type: group
-    short-summary: Commands to manage UserSubscription.
-"""
-
-helps['apimgmt user list'] = """
-    type: command
-    short-summary: list a apimgmt user.
-"""
-
-helps['apimgmt user'] = """
-    type: group
-    short-summary: Commands to manage UserIdentity.
-"""
-
-helps['apimgmt user list'] = """
-    type: command
-    short-summary: list a apimgmt user.
-"""
-
-helps['apimgmt api'] = """
-    type: group
-    short-summary: Commands to manage ApiExport.
-"""
-
-helps['apimgmt api show'] = """
-    type: command
-    short-summary: show a apimgmt api.
 """
