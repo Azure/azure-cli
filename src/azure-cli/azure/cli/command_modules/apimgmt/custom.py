@@ -120,7 +120,7 @@ def delete_apimgmt_api(cmd, client,
                        resource_group,
                        name,
                        api_id):
-    return client.api.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, If-Match=If-Match)
+    return client.api.delete(resource_group_name=resource_group, service_name=name, api_id=api_id)
 
 # module equivalent: azure_rm_apimanagementapi
 def list_apimgmt_api(cmd, client,
@@ -180,7 +180,7 @@ def delete_apimgmt_api_release(cmd, client,
                                name,
                                api_id,
                                release_id):
-    return client.api_release.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, release_id=release_id, If-Match=If-Match)
+    return client.api_release.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, release_id=release_id)
 
 # module equivalent: azure_rm_apimanagementapirelease
 def list_apimgmt_api_release(cmd, client,
@@ -262,7 +262,7 @@ def delete_apimgmt_api_operation(cmd, client,
                                  name,
                                  api_id,
                                  operation_id):
-    return client.api_operation.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, operation_id=operation_id, If-Match=If-Match)
+    return client.api_operation.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, operation_id=operation_id)
 
 # module equivalent: azure_rm_apimanagementapioperation
 def list_apimgmt_api_operation(cmd, client,
@@ -323,7 +323,7 @@ def delete_apimgmt_api_operation_policy(cmd, client,
                                         api_id,
                                         operation_id,
                                         policy_id):
-    return client.api_operation_policy.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, operation_id=operation_id, policy_id=policy_id, If-Match=If-Match)
+    return client.api_operation_policy.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, operation_id=operation_id, policy_id=policy_id)
 
 # module equivalent: azure_rm_apimanagementapioperationpolicy
 def list_apimgmt_api_operation_policy(cmd, client,
@@ -376,7 +376,7 @@ def delete_apimgmt_tag(cmd, client,
                        resource_group,
                        name,
                        tag_id):
-    return client.tag.delete(resource_group_name=resource_group, service_name=name, tag_id=tag_id, If-Match=If-Match)
+    return client.tag.delete(resource_group_name=resource_group, service_name=name, tag_id=tag_id)
 
 # module equivalent: azure_rm_apimanagementtag
 def list_apimgmt_tag(cmd, client,
@@ -432,7 +432,7 @@ def delete_apimgmt_api_policy(cmd, client,
                               name,
                               api_id,
                               policy_id):
-    return client.api_policy.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, policy_id=policy_id, If-Match=If-Match)
+    return client.api_policy.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, policy_id=policy_id)
 
 # module equivalent: azure_rm_apimanagementapipolicy
 def list_apimgmt_api_policy(cmd, client,
@@ -490,7 +490,7 @@ def delete_apimgmt_api_schema(cmd, client,
                               name,
                               api_id,
                               schema_id):
-    return client.api_schema.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, schema_id=schema_id, If-Match=If-Match)
+    return client.api_schema.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, schema_id=schema_id)
 
 # module equivalent: azure_rm_apimanagementapischema
 def list_apimgmt_api_schema(cmd, client,
@@ -564,7 +564,7 @@ def delete_apimgmt_api_diagnostic(cmd, client,
                                   name,
                                   api_id,
                                   diagnostic_id):
-    return client.api_diagnostic.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, diagnostic_id=diagnostic_id, If-Match=If-Match)
+    return client.api_diagnostic.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, diagnostic_id=diagnostic_id)
 
 # module equivalent: azure_rm_apimanagementapidiagnostic
 def list_apimgmt_api_diagnostic(cmd, client,
@@ -634,7 +634,7 @@ def delete_apimgmt_api_issue(cmd, client,
                              name,
                              api_id,
                              issue_id):
-    return client.api_issue.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, issue_id=issue_id, If-Match=If-Match)
+    return client.api_issue.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, issue_id=issue_id)
 
 # module equivalent: azure_rm_apimanagementapiissue
 def list_apimgmt_api_issue(cmd, client,
@@ -699,7 +699,7 @@ def delete_apimgmt_api_issue_comment(cmd, client,
                                      api_id,
                                      issue_id,
                                      comment_id):
-    return client.api_issue_comment.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, issue_id=issue_id, comment_id=comment_id, If-Match=If-Match)
+    return client.api_issue_comment.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, issue_id=issue_id, comment_id=comment_id)
 
 # module equivalent: azure_rm_apimanagementapiissuecomment
 def list_apimgmt_api_issue_comment(cmd, client,
@@ -766,7 +766,7 @@ def delete_apimgmt_api_issue_attachment(cmd, client,
                                         api_id,
                                         issue_id,
                                         attachment_id):
-    return client.api_issue_attachment.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, issue_id=issue_id, attachment_id=attachment_id, If-Match=If-Match)
+    return client.api_issue_attachment.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, issue_id=issue_id, attachment_id=attachment_id)
 
 # module equivalent: azure_rm_apimanagementapiissueattachment
 def list_apimgmt_api_issue_attachment(cmd, client,
@@ -834,7 +834,7 @@ def delete_apimgmt_api_tagdescription(cmd, client,
                                       name,
                                       api_id,
                                       tag_id):
-    return client.api_tag_description.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, tag_id=tag_id, If-Match=If-Match)
+    return client.api_tag_description.delete(resource_group_name=resource_group, service_name=name, api_id=api_id, tag_id=tag_id)
 
 # module equivalent: azure_rm_apimanagementapitagdescription
 def list_apimgmt_api_tagdescription(cmd, client,
@@ -901,7 +901,7 @@ def delete_apimgmt_apiversionset(cmd, client,
                                  resource_group,
                                  name,
                                  version_set_id):
-    return client.api_version_set.delete(resource_group_name=resource_group, service_name=name, version_set_id=version_set_id, If-Match=If-Match)
+    return client.api_version_set.delete(resource_group_name=resource_group, service_name=name, version_set_id=version_set_id)
 
 # module equivalent: azure_rm_apimanagementapiversionset
 def list_apimgmt_apiversionset(cmd, client,
@@ -1010,7 +1010,7 @@ def delete_apimgmt_authorizationserver(cmd, client,
                                        resource_group,
                                        name,
                                        authsid):
-    return client.authorization_server.delete(resource_group_name=resource_group, service_name=name, authsid=authsid, If-Match=If-Match)
+    return client.authorization_server.delete(resource_group_name=resource_group, service_name=name, authsid=authsid)
 
 # module equivalent: azure_rm_apimanagementauthorizationserver
 def list_apimgmt_authorizationserver(cmd, client,
@@ -1091,7 +1091,7 @@ def delete_apimgmt_backend(cmd, client,
                            resource_group,
                            name,
                            backend_id):
-    return client.backend.delete(resource_group_name=resource_group, service_name=name, backend_id=backend_id, If-Match=If-Match)
+    return client.backend.delete(resource_group_name=resource_group, service_name=name, backend_id=backend_id)
 
 # module equivalent: azure_rm_apimanagementbackend
 def list_apimgmt_backend(cmd, client,
@@ -1148,7 +1148,7 @@ def delete_apimgmt_cache(cmd, client,
                          resource_group,
                          name,
                          cache_id):
-    return client.cache.delete(resource_group_name=resource_group, service_name=name, cache_id=cache_id, If-Match=If-Match)
+    return client.cache.delete(resource_group_name=resource_group, service_name=name, cache_id=cache_id)
 
 # module equivalent: azure_rm_apimanagementcache
 def list_apimgmt_cache(cmd, client,
@@ -1213,7 +1213,7 @@ def delete_apimgmt_certificate(cmd, client,
                                resource_group,
                                name,
                                certificate_id):
-    return client.certificate.delete(resource_group_name=resource_group, service_name=name, certificate_id=certificate_id, If-Match=If-Match)
+    return client.certificate.delete(resource_group_name=resource_group, service_name=name, certificate_id=certificate_id)
 
 # module equivalent: azure_rm_apimanagementcertificate
 def list_apimgmt_certificate(cmd, client,
@@ -1420,7 +1420,7 @@ def delete_apimgmt_diagnostic(cmd, client,
                               resource_group,
                               name,
                               diagnostic_id):
-    return client.diagnostic.delete(resource_group_name=resource_group, service_name=name, diagnostic_id=diagnostic_id, If-Match=If-Match)
+    return client.diagnostic.delete(resource_group_name=resource_group, service_name=name, diagnostic_id=diagnostic_id)
 
 # module equivalent: azure_rm_apimanagementdiagnostic
 def list_apimgmt_diagnostic(cmd, client,
@@ -1489,7 +1489,7 @@ def delete_apimgmt_template(cmd, client,
                             resource_group,
                             service_name,
                             name):
-    return client.email_template.delete(resource_group_name=resource_group, service_name=service_name, template_name=name, If-Match=If-Match)
+    return client.email_template.delete(resource_group_name=resource_group, service_name=service_name, template_name=name)
 
 # module equivalent: azure_rm_apimanagementemailtemplate
 def list_apimgmt_template(cmd, client,
@@ -1552,7 +1552,7 @@ def delete_apimgmt_group(cmd, client,
                          resource_group,
                          name,
                          group_id):
-    return client.group.delete(resource_group_name=resource_group, service_name=name, group_id=group_id, If-Match=If-Match)
+    return client.group.delete(resource_group_name=resource_group, service_name=name, group_id=group_id)
 
 # module equivalent: azure_rm_apimanagementgroup
 def list_apimgmt_group(cmd, client,
@@ -1675,7 +1675,7 @@ def delete_apimgmt_identityprovider(cmd, client,
                                     resource_group,
                                     service_name,
                                     name):
-    return client.identity_provider.delete(resource_group_name=resource_group, service_name=service_name, identity_provider_name=name, If-Match=If-Match)
+    return client.identity_provider.delete(resource_group_name=resource_group, service_name=service_name, identity_provider_name=name)
 
 # module equivalent: azure_rm_apimanagementidentityprovider
 def list_apimgmt_identityprovider(cmd, client,
@@ -1740,7 +1740,7 @@ def delete_apimgmt_logger(cmd, client,
                           resource_group,
                           name,
                           logger_id):
-    return client.logger.delete(resource_group_name=resource_group, service_name=name, logger_id=logger_id, If-Match=If-Match)
+    return client.logger.delete(resource_group_name=resource_group, service_name=name, logger_id=logger_id)
 
 # module equivalent: azure_rm_apimanagementlogger
 def list_apimgmt_logger(cmd, client,
@@ -1933,7 +1933,7 @@ def delete_apimgmt_openidconnectprovider(cmd, client,
                                          resource_group,
                                          name,
                                          opid):
-    return client.open_id_connect_provider.delete(resource_group_name=resource_group, service_name=name, opid=opid, If-Match=If-Match)
+    return client.open_id_connect_provider.delete(resource_group_name=resource_group, service_name=name, opid=opid)
 
 # module equivalent: azure_rm_apimanagementopenidconnectprovider
 def list_apimgmt_openidconnectprovider(cmd, client,
@@ -1986,7 +1986,7 @@ def delete_apimgmt_policy(cmd, client,
                           resource_group,
                           name,
                           policy_id):
-    return client.policy.delete(resource_group_name=resource_group, service_name=name, policy_id=policy_id, If-Match=If-Match)
+    return client.policy.delete(resource_group_name=resource_group, service_name=name, policy_id=policy_id)
 
 # module equivalent: azure_rm_apimanagementpolicy
 def list_apimgmt_policy(cmd, client,
@@ -2003,46 +2003,46 @@ def show_apimgmt_policy(cmd, client,
     return client.policy.get(resource_group_name=resource_group, service_name=name, policy_id=policy_id)
 
 # module equivalent: azure_rm_apimanagementsigninsetting
-def create_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   enabled=None,
-                   id=None,
-                   type=None):
+def create_apimgmt_portalsetting(cmd, client,
+                                 resource_group,
+                                 name,
+                                 properties=None,
+                                 enabled=None,
+                                 id=None,
+                                 type=None):
     body={}
     body['properties'] = properties
     body['enabled'] = enabled
     return client.sign_in_settings.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
 
 # module equivalent: azure_rm_apimanagementsigninsetting
-def update_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   enabled=None,
-                   id=None,
-                   type=None):
+def update_apimgmt_portalsetting(cmd, client,
+                                 resource_group,
+                                 name,
+                                 properties=None,
+                                 enabled=None,
+                                 id=None,
+                                 type=None):
     body={}
     body['properties'] = properties
     body['enabled'] = enabled
     return client.sign_in_settings.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
 
 # module equivalent: azure_rm_apimanagementsigninsetting
-def show_apimgmt(cmd, client,
-                 resource_group,
-                 name):
+def show_apimgmt_portalsetting(cmd, client,
+                               resource_group,
+                               name):
     return client.sign_in_settings.get(resource_group_name=resource_group, service_name=name)
 
 # module equivalent: azure_rm_apimanagementsignupsetting
-def create_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   enabled=None,
-                   terms_of_service=None,
-                   id=None,
-                   type=None):
+def create_apimgmt_portalsetting(cmd, client,
+                                 resource_group,
+                                 name,
+                                 properties=None,
+                                 enabled=None,
+                                 terms_of_service=None,
+                                 id=None,
+                                 type=None):
     body={}
     body['properties'] = properties
     body['enabled'] = enabled
@@ -2050,14 +2050,14 @@ def create_apimgmt(cmd, client,
     return client.sign_up_settings.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
 
 # module equivalent: azure_rm_apimanagementsignupsetting
-def update_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   enabled=None,
-                   terms_of_service=None,
-                   id=None,
-                   type=None):
+def update_apimgmt_portalsetting(cmd, client,
+                                 resource_group,
+                                 name,
+                                 properties=None,
+                                 enabled=None,
+                                 terms_of_service=None,
+                                 id=None,
+                                 type=None):
     body={}
     body['properties'] = properties
     body['enabled'] = enabled
@@ -2065,22 +2065,22 @@ def update_apimgmt(cmd, client,
     return client.sign_up_settings.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
 
 # module equivalent: azure_rm_apimanagementsignupsetting
-def show_apimgmt(cmd, client,
-                 resource_group,
-                 name):
+def show_apimgmt_portalsetting(cmd, client,
+                               resource_group,
+                               name):
     return client.sign_up_settings.get(resource_group_name=resource_group, service_name=name)
 
 # module equivalent: azure_rm_apimanagementdelegationsetting
-def create_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   url=None,
-                   validation_key=None,
-                   subscriptions=None,
-                   user_registration=None,
-                   id=None,
-                   type=None):
+def create_apimgmt_portalsetting(cmd, client,
+                                 resource_group,
+                                 name,
+                                 properties=None,
+                                 url=None,
+                                 validation_key=None,
+                                 subscriptions=None,
+                                 user_registration=None,
+                                 id=None,
+                                 type=None):
     body={}
     body['properties'] = properties
     body['url'] = url
@@ -2090,16 +2090,16 @@ def create_apimgmt(cmd, client,
     return client.delegation_settings.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
 
 # module equivalent: azure_rm_apimanagementdelegationsetting
-def update_apimgmt(cmd, client,
-                   resource_group,
-                   name,
-                   properties=None,
-                   url=None,
-                   validation_key=None,
-                   subscriptions=None,
-                   user_registration=None,
-                   id=None,
-                   type=None):
+def update_apimgmt_portalsetting(cmd, client,
+                                 resource_group,
+                                 name,
+                                 properties=None,
+                                 url=None,
+                                 validation_key=None,
+                                 subscriptions=None,
+                                 user_registration=None,
+                                 id=None,
+                                 type=None):
     body={}
     body['properties'] = properties
     body['url'] = url
@@ -2109,9 +2109,9 @@ def update_apimgmt(cmd, client,
     return client.delegation_settings.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
 
 # module equivalent: azure_rm_apimanagementdelegationsetting
-def show_apimgmt(cmd, client,
-                 resource_group,
-                 name):
+def show_apimgmt_portalsetting(cmd, client,
+                               resource_group,
+                               name):
     return client.delegation_settings.get(resource_group_name=resource_group, service_name=name)
 
 # module equivalent: azure_rm_apimanagementproduct
@@ -2171,7 +2171,7 @@ def delete_apimgmt_product(cmd, client,
                            resource_group,
                            name,
                            product_id):
-    return client.product.delete(resource_group_name=resource_group, service_name=name, product_id=product_id, If-Match=If-Match)
+    return client.product.delete(resource_group_name=resource_group, service_name=name, product_id=product_id)
 
 # module equivalent: azure_rm_apimanagementproduct
 def list_apimgmt_product(cmd, client,
@@ -2391,7 +2391,7 @@ def delete_apimgmt_product_policy(cmd, client,
                                   name,
                                   product_id,
                                   policy_id):
-    return client.product_policy.delete(resource_group_name=resource_group, service_name=name, product_id=product_id, policy_id=policy_id, If-Match=If-Match)
+    return client.product_policy.delete(resource_group_name=resource_group, service_name=name, product_id=product_id, policy_id=policy_id)
 
 # module equivalent: azure_rm_apimanagementproductpolicy
 def list_apimgmt_product_policy(cmd, client,
@@ -2454,7 +2454,7 @@ def delete_apimgmt_property(cmd, client,
                             resource_group,
                             name,
                             prop_id):
-    return client.property.delete(resource_group_name=resource_group, service_name=name, prop_id=prop_id, If-Match=If-Match)
+    return client.property.delete(resource_group_name=resource_group, service_name=name, prop_id=prop_id)
 
 # module equivalent: azure_rm_apimanagementproperty
 def list_apimgmt_property(cmd, client,
@@ -2553,7 +2553,7 @@ def delete_apimgmt_subscription(cmd, client,
                                 resource_group,
                                 name,
                                 sid):
-    return client.subscription.delete(resource_group_name=resource_group, service_name=name, sid=sid, If-Match=If-Match)
+    return client.subscription.delete(resource_group_name=resource_group, service_name=name, sid=sid)
 
 # module equivalent: azure_rm_apimanagementsubscription
 def list_apimgmt_subscription(cmd, client,
@@ -2638,7 +2638,7 @@ def delete_apimgmt_user(cmd, client,
                         resource_group,
                         name,
                         user_id):
-    return client.user.delete(resource_group_name=resource_group, service_name=name, user_id=user_id, If-Match=If-Match)
+    return client.user.delete(resource_group_name=resource_group, service_name=name, user_id=user_id)
 
 # module equivalent: azure_rm_apimanagementuser
 def list_apimgmt_user(cmd, client,

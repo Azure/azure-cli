@@ -1570,7 +1570,7 @@ def load_arguments(self, _):
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 
-    with self.argument_context('apimgmt create') as c:
+    with self.argument_context('apimgmt portalsetting create') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('properties', id_part=None, help='Sign-in settings contract properties.')
@@ -1579,7 +1579,7 @@ def load_arguments(self, _):
         c.argument('type', id_part=None, help='Resource type for API Management resource.')
         c.argument('resource_id', name_arg_type, id_part=None)
 
-    with self.argument_context('apimgmt update') as c:
+    with self.argument_context('apimgmt portalsetting update') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('properties', id_part=None, help='Sign-in settings contract properties.')
@@ -1588,7 +1588,7 @@ def load_arguments(self, _):
         c.argument('type', id_part=None, help='Resource type for API Management resource.')
         c.argument('resource_id', name_arg_type, id_part=None)
 
-    with self.argument_context('apimgmt show') as c:
+    with self.argument_context('apimgmt portalsetting show') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('resource_id', name_arg_type, id_part=None)
@@ -1596,7 +1596,7 @@ def load_arguments(self, _):
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 
-    with self.argument_context('apimgmt create') as c:
+    with self.argument_context('apimgmt portalsetting create') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('properties', id_part=None, help='Sign-up settings contract properties.')
@@ -1606,7 +1606,7 @@ def load_arguments(self, _):
         c.argument('type', id_part=None, help='Resource type for API Management resource.')
         c.argument('resource_id', name_arg_type, id_part=None)
 
-    with self.argument_context('apimgmt update') as c:
+    with self.argument_context('apimgmt portalsetting update') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('properties', id_part=None, help='Sign-up settings contract properties.')
@@ -1616,7 +1616,7 @@ def load_arguments(self, _):
         c.argument('type', id_part=None, help='Resource type for API Management resource.')
         c.argument('resource_id', name_arg_type, id_part=None)
 
-    with self.argument_context('apimgmt show') as c:
+    with self.argument_context('apimgmt portalsetting show') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('resource_id', name_arg_type, id_part=None)
@@ -1624,7 +1624,7 @@ def load_arguments(self, _):
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 
-    with self.argument_context('apimgmt create') as c:
+    with self.argument_context('apimgmt portalsetting create') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('properties', id_part=None, help='Delegation settings contract properties.')
@@ -1636,7 +1636,7 @@ def load_arguments(self, _):
         c.argument('type', id_part=None, help='Resource type for API Management resource.')
         c.argument('resource_id', name_arg_type, id_part=None)
 
-    with self.argument_context('apimgmt update') as c:
+    with self.argument_context('apimgmt portalsetting update') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('properties', id_part=None, help='Delegation settings contract properties.')
@@ -1648,7 +1648,7 @@ def load_arguments(self, _):
         c.argument('type', id_part=None, help='Resource type for API Management resource.')
         c.argument('resource_id', name_arg_type, id_part=None)
 
-    with self.argument_context('apimgmt show') as c:
+    with self.argument_context('apimgmt portalsetting show') as c:
         c.argument('resource_group', id_part=None, help='The name of the resource group.')
         c.argument('name', id_part=None, help='The name of the API Management service.')
         c.argument('resource_id', name_arg_type, id_part=None)

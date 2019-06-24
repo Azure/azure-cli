@@ -853,64 +853,64 @@ helps['apimgmt policy show'] = """
     short-summary: show a apimgmt policy.
 """
 
-helps['apimgmt'] = """
+helps['apimgmt portalsetting'] = """
     type: group
     short-summary: Commands to manage SignInSetting.
 """
 
-helps['apimgmt create'] = """
+helps['apimgmt portalsetting create'] = """
     type: command
-    short-summary: create a apimgmt.
+    short-summary: create a apimgmt portalsetting.
 """
 
-helps['apimgmt update'] = """
+helps['apimgmt portalsetting update'] = """
     type: command
-    short-summary: update a apimgmt.
+    short-summary: update a apimgmt portalsetting.
 """
 
-helps['apimgmt show'] = """
+helps['apimgmt portalsetting show'] = """
     type: command
-    short-summary: show a apimgmt.
+    short-summary: show a apimgmt portalsetting.
 """
 
-helps['apimgmt'] = """
+helps['apimgmt portalsetting'] = """
     type: group
     short-summary: Commands to manage SignUpSetting.
 """
 
-helps['apimgmt create'] = """
+helps['apimgmt portalsetting create'] = """
     type: command
-    short-summary: create a apimgmt.
+    short-summary: create a apimgmt portalsetting.
 """
 
-helps['apimgmt update'] = """
+helps['apimgmt portalsetting update'] = """
     type: command
-    short-summary: update a apimgmt.
+    short-summary: update a apimgmt portalsetting.
 """
 
-helps['apimgmt show'] = """
+helps['apimgmt portalsetting show'] = """
     type: command
-    short-summary: show a apimgmt.
+    short-summary: show a apimgmt portalsetting.
 """
 
-helps['apimgmt'] = """
+helps['apimgmt portalsetting'] = """
     type: group
     short-summary: Commands to manage DelegationSetting.
 """
 
-helps['apimgmt create'] = """
+helps['apimgmt portalsetting create'] = """
     type: command
-    short-summary: create a apimgmt.
+    short-summary: create a apimgmt portalsetting.
 """
 
-helps['apimgmt update'] = """
+helps['apimgmt portalsetting update'] = """
     type: command
-    short-summary: update a apimgmt.
+    short-summary: update a apimgmt portalsetting.
 """
 
-helps['apimgmt show'] = """
+helps['apimgmt portalsetting show'] = """
     type: command
-    short-summary: show a apimgmt.
+    short-summary: show a apimgmt portalsetting.
 """
 
 helps['apimgmt product'] = """

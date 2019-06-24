@@ -182,18 +182,18 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_apimgmt_policy')
         g.custom_command('list', 'list_apimgmt_policy')
         g.custom_command('show', 'show_apimgmt_policy')
-    with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt')
-        g.custom_command('update', 'update_apimgmt')
-        g.custom_command('show', 'show_apimgmt')
-    with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt')
-        g.custom_command('update', 'update_apimgmt')
-        g.custom_command('show', 'show_apimgmt')
-    with self.command_group('apimgmt', apimgmt_sdk, client_factory=cf_apimgmt) as g:
-        g.custom_command('create', 'create_apimgmt')
-        g.custom_command('update', 'update_apimgmt')
-        g.custom_command('show', 'show_apimgmt')
+    with self.command_group('apimgmt portalsetting', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_portalsetting')
+        g.custom_command('update', 'update_apimgmt_portalsetting')
+        g.custom_command('show', 'show_apimgmt_portalsetting')
+    with self.command_group('apimgmt portalsetting', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_portalsetting')
+        g.custom_command('update', 'update_apimgmt_portalsetting')
+        g.custom_command('show', 'show_apimgmt_portalsetting')
+    with self.command_group('apimgmt portalsetting', apimgmt_sdk, client_factory=cf_apimgmt) as g:
+        g.custom_command('create', 'create_apimgmt_portalsetting')
+        g.custom_command('update', 'update_apimgmt_portalsetting')
+        g.custom_command('show', 'show_apimgmt_portalsetting')
     with self.command_group('apimgmt product', apimgmt_sdk, client_factory=cf_apimgmt) as g:
         g.custom_command('create', 'create_apimgmt_product')
         g.custom_command('update', 'update_apimgmt_product')
