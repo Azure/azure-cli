@@ -563,7 +563,7 @@ examples:
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
             --assign-identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Create a Linux multi-task from a public GitHub repository with a git commit trigger and with both system-assigned and user-assigned managed identities
+  - name: Create a Linux multi-step task from a public GitHub repository with a git commit trigger and with both system-assigned and user-assigned managed identities
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
             -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
