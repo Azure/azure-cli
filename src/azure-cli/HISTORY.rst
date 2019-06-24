@@ -11,6 +11,10 @@ Release History
 * functionapp: `az functionapp create` enables application insights by default
 * BREAKING CHANGE: (functionapp) removes deprecated `az functionapp devops-build` command. Please use the new command `az functionapp devops-pipeline` instead.
 
+**Cosmos DB**
+
+* Added support for disabling TTL
+
 **DLS**
 
 * Update ADLS version (0.0.45).
