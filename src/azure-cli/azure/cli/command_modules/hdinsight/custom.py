@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait
 from ._client_factory import cf_hdinsight_script_actions, cf_hdinsight_script_execution_history
@@ -13,8 +14,8 @@ logger = get_logger(__name__)
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, unused-argument
-def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type, location=None, tags=None,
-                   no_wait=False, cluster_version='default', cluster_tier=None,
+def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
+                   location=None, tags=None, no_wait=False, cluster_version='default', cluster_tier=None,
                    cluster_configurations=None, component_version=None,
                    headnode_size='large', workernode_size='large', zookeepernode_size=None, edgenode_size=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
@@ -30,7 +31,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    cluster_users_group_dns=None,
                    assign_identity=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
-                   encryption_algorithm='RSA-OAEP', esp=False):
+                   encryption_algorithm='RSA-OAEP', esp=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
@@ -73,20 +74,19 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     if http_username and 'restAuthCredential.username' in gateway_config:
         raise CLIError('An HTTP username must be specified either as a command-line parameter '
                        'or in the cluster configuration, but not both.')
-    else:
+    if not http_username:
         http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
-    is_password_in_cluster_config = 'restAuthCredential.password' in gateway_config
-    if http_password and is_password_in_cluster_config:
-        raise CLIError('An HTTP password must be specified either as a command-line parameter '
-                       'or in the cluster configuration, but not both.')
-    if not (http_password or is_password_in_cluster_config):
-        raise CLIError('An HTTP password is required.')
+
+    if not http_password:
+        try:
+            http_password = prompt_pass('HTTP password for the cluster:', confirm=True)
+        except NoTTYException:
+            raise CLIError('Please specify --http-password in non-interactive mode.')
 
     # Update the cluster config with the HTTP credentials
     gateway_config['restAuthCredential.isEnabled'] = 'true'  # HTTP credentials are required
     http_username = http_username or gateway_config['restAuthCredential.username']
     gateway_config['restAuthCredential.username'] = http_username
-    http_password = http_password or gateway_config['restAuthCredential.password']
     gateway_config['restAuthCredential.password'] = http_password
     cluster_configurations['gateway'] = gateway_config
 
@@ -112,22 +112,21 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         key = get_key_for_storage_account(cmd, storage_account)
         if not key:
             raise CLIError('Storage account key could not be inferred from storage account.')
-        else:
-            storage_account_key = key
+        storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
     if not storage_default_container and is_wasb:
-        storage_default_container = cluster_name
+        storage_default_container = cluster_name.lower()
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
     elif not storage_default_filesystem and not is_wasb:
-        storage_default_filesystem = cluster_name
+        storage_default_filesystem = cluster_name.lower()
         logger.warning('Default ADLS file system not specified, using "%s".', storage_default_filesystem)
 
     # Validate storage info parameters
     if is_wasb and not _all_or_none(storage_account, storage_account_key, storage_default_container):
         raise CLIError('If storage details are specified, the storage account, storage account key, '
                        'and the default container must be specified.')
-    elif not is_wasb and not _all_or_none(storage_account, storage_default_filesystem):
+    if not is_wasb and not _all_or_none(storage_account, storage_default_filesystem):
         raise CLIError('If storage details are specified, the storage account, '
                        'and the default filesystem must be specified.')
 
@@ -335,7 +334,7 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
                            https_endpoint_destination_port=8080, https_endpoint_public_port=443,
                            sub_domain_suffix=None, disable_gateway_auth=None,
                            ssh_endpoint_location=None, ssh_endpoint_destination_port=22, ssh_endpoint_public_port=22,
-                           vnet_name=None, subnet=None):
+                           vnet_name=None, subnet=None, no_validation_timeout=False):
     from .util import build_virtual_network_profile
     from azure.mgmt.hdinsight.models import Application, ApplicationProperties, ComputeProfile, RuntimeScriptAction, \
         Role, LinuxOperatingSystemProfile, HardwareProfile, \
@@ -417,8 +416,28 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
 
 
 # pylint: disable=unused-argument
-def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace_id, primary_key=None):
-    return client.enable_monitoring(resource_group_name, cluster_name, workspace_id, primary_key)
+def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace, no_validation_timeout=False):
+    from msrestazure.tools import parse_resource_id
+    from ._client_factory import cf_log_analytics
+
+    parsed_workspace = parse_resource_id(workspace)
+    workspace_resource_group_name = parsed_workspace['resource_group']
+    workspace_name = parsed_workspace['resource_name']
+
+    log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+    log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+    if not log_analytics_workspace:
+        raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+    shared_keys = log_analytics_client.workspaces.get_shared_keys(workspace_resource_group_name, workspace_name)
+    if not shared_keys:
+        raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+    return client.enable_monitoring(
+        resource_group_name,
+        cluster_name,
+        log_analytics_workspace.customer_id,
+        shared_keys.primary_shared_key)
 
 
 # pylint: disable=unused-argument
