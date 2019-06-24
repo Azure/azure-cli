@@ -21,7 +21,7 @@ from azure.cli.command_modules.acs._format import version_to_tuple
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
-    # Remove when issue #9392 is addressed.
+    # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -192,6 +192,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
+    # TODO: remove when issue #9392 is addressed.
+    @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
@@ -272,7 +274,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.cmd(create_cmd)
         self.assertIn('--max-pods', str(err.exception))
 
-    # Remove when issue #9392 is addressed.
+    # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -317,7 +319,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-    # Remove when issue #9392 is addressed.
+    # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -346,7 +348,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-    # Remove when issue #9392 is addressed.
+    # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -371,7 +373,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
 
-    # It works in --live mode but fails in replay mode.get rid off @live_only attribute once this resolved
+    # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
