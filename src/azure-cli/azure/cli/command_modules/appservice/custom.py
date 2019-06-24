@@ -1022,12 +1022,6 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
 
-    slot_def.site_config = SiteConfig()
-
-    # function app slots need to have all the App Settings from the source
-    prodsite_appsettings = get_app_settings(cmd, resource_group_name, name)
-    slot_def.site_config.app_settings = prodsite_appsettings[:]
-
     poller = client.web_apps.create_or_update_slot(resource_group_name, name, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
