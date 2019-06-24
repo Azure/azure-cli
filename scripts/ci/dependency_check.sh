@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
+
+# Install everything from our repository first.
+find ${REPO_ROOT}/src -name setup.py -type f | xargs dirname | xargs pip3 install
+
+pip3 install -r ${REPO_ROOT}/src/azure-cli
+
+pip3 check

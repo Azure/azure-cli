@@ -28,7 +28,7 @@ jobs:
       python: 3.6
     - stage: precheck
       env: PURPOSE='Dependency Check'
-      script: pip install -r ./src/azure-cli/requirements.py3.linux.txt && pip check
+      script: ./scripts/ci/dependency_check.sh
       python: 3.6
 #    - stage: verify
 #      env: PURPOSE='Lint Command Table and Help'
