@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ev
 
 REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
 
