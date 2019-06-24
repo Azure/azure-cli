@@ -1172,6 +1172,8 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
                                                                                     functionapp_name)).get_output_in_json()
         self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [kp['name'] for kp in app_set])
 
+    # TODO: Remove when issue #9769 is resolved.
+    @live_only()
     @ResourceGroupPreparer(location='westcentralus')
     @StorageAccountPreparer()
     def test_functionapp_unavailable_location_app_insights(self, resource_group, storage_account):
