@@ -26,7 +26,14 @@ Release History
 
 **HDInsight**
 
-* Support for using `--sub-domain-suffix` parameter and `--disable_gateway_auth` parameter in `hdinsight application create` command.
+* BREAKING CHANGE: Changed "oms" command group name to "monitor"
+* BREAKING CHANGE: Made "--http-password/-p" a required parameter 
+* Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer 
+* "cluster-users-group-dns" parameter is now required when "—esp" is present
+* Added a timeout for all existing argument auto-completers
+* Added a timeout for transforming resource name to resource id
+* Auto-completers can now select resources from any resource group. It can be a different resource group than the one specified with "-g"
+* Added support for "--sub-domain-suffix" and "--disable_gateway_auth" parameters in the "az hdinsight application create" command
 
 **RBAC**
 
