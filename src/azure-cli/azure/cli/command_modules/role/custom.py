@@ -115,16 +115,16 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
 
 
 def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_role_only=False):
-    roles = []
     for scope in scopes:
-        temp = list(definitions_client.list(scopes))
+        roles = list(definitions_client.list(scope))
         worker = MultiAPIAdaptor(cli_ctx)
         if name:
-            temp = [r for r in temp if r.name == name or worker.get_role_property(r, 'role_name') == name]
+            roles = [r for r in roles if r.name == name or worker.get_role_property(r, 'role_name') == name]
         if custom_role_only:
-            temp = [r for r in temp if worker.get_role_property(r, 'role_type') == 'CustomRole']
-        roles += temp
-    return roles
+            roles = [r for r in roles if worker.get_role_property(r, 'role_type') == 'CustomRole']
+        if roles:
+            return roles
+    return []
 
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
