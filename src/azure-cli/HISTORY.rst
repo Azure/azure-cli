@@ -15,6 +15,11 @@ Release History
 
 * ad signed-in-user: fix a crash on listing owned objects 
 
+**Storage**
+
+* storage blob generate-sas: User delegation SAS token support with --as-user
+* storage container generate-sas: User delegation SAS token support with --as-user
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
