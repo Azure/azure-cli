@@ -9,9 +9,10 @@ from mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
+
+# Directive not in latest release of sphinx, need to pip install sphinx==1.6.7
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
-
 
 from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.commands import AzCliCommandInvoker
@@ -88,14 +89,14 @@ class AzHelpGenDirective(Directive):
                             pass
                         yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
                     if arg.value_sources:
-                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(_get_populator_commands(arg)))
+                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
                     yield ''
             yield ''
             if len(help_file.examples) > 0:
                for e in help_file.examples:
-                  yield '{}.. cliexample:: {}'.format(INDENT, e.short_summary)
+                  yield '{}.. cliexample:: {}'.format(INDENT, e.name)
                   yield ''
-                  yield DOUBLEINDENT + e.command.replace("\\", "\\\\")
+                  yield DOUBLEINDENT + e.text.replace("\\", "\\\\")
                   yield ''
 
     def run(self):

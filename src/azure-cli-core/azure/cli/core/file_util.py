@@ -5,13 +5,13 @@
 
 from __future__ import print_function
 
-from azure.cli.core._help import CliCommandHelpFile, CliGroupHelpFile
-
-from knack.log import get_logger
 from knack.util import CLIError
+from knack.help import GroupHelpFile
+from knack.log import get_logger
+
+from azure.cli.core._help import CliCommandHelpFile
 
 logger = get_logger(__name__)
-
 
 def get_all_help(cli_ctx, skip=True):
     invoker = cli_ctx.invocation
@@ -32,8 +32,7 @@ def get_all_help(cli_ctx, skip=True):
     help_errors = {}
     for cmd, parser in zip(sub_parser_keys, sub_parser_values):
         try:
-            help_ctx.update_loaders_with_help_file_contents(cmd.split())
-            help_file = CliGroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) \
+            help_file = GroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) \
                 else CliCommandHelpFile(help_ctx, cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
