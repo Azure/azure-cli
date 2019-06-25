@@ -167,10 +167,7 @@ def _task_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
-        ('SOURCE TRIGGER', _get_value(item, 'trigger', 'sourceTriggers', 0, 'status')),
-        ('TIMER TRIGGERS', _get_timer_triggers(item, 'trigger', 'timerTriggers')),
-        ('BASE IMAGE TRIGGER', _get_value(item, 'trigger', 'baseImageTrigger', 'baseImageTriggerType'))
+        ('TRIGGERS'), _get_triggers(item),
     ])
 
 
@@ -214,6 +211,21 @@ def _helm_format_group(item):
     ])
 
 
+def _get_triggers(item):
+    """Get a nested value from a dict.
+    :param dict item: The dict object
+    """
+    triggers = []
+    if _get_trigger_status(item, 'trigger', 'sourceTriggers'):
+        triggers.append('SOURCE TRIGGER')
+    if _get_trigger_status(item, 'trigger', 'timerTriggers'):
+        triggers.append('TIMER TRIGGER')
+    # if _get_trigger_status(item, 'trigger', 'baseImageTrigger'):
+    #     triggers.append('BASE IMAGE TRIGGER')
+    print(triggers)
+    return ', '.join(triggers)
+
+
 def _get_value(item, *args):
     """Get a nested value from a dict.
     :param dict item: The dict object
@@ -226,22 +238,24 @@ def _get_value(item, *args):
         return ' '
 
 
-def _get_timer_triggers(item, *args):
+def _get_trigger_status(item, *args):
     """Get all enabled timer trigger schedules from a dict.
     :param dict item: The dict object
     """
     try:
         for arg in args:
             item = item[arg]
+        enabled = False
         if item:
-            schedules = []
             for trigger in item:
+                print(trigger)
                 if trigger['status'].lower() == "enabled":
-                    schedules.append(trigger['schedule'])
-            return ', '.join(schedules)
-        return ' '
+                    print("HERE")
+                    enabled = True
+        print(enabled)
+        return enabled
     except (KeyError, TypeError, IndexError):
-        return ' '
+        return False
 
 
 def _get_build_trigger(image_update_trigger, git_source_trigger, timer_trigger=None):
