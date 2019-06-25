@@ -167,7 +167,10 @@ def _get_helm_version(ignore_errors):
 
     # Display an error message if the current helm version < min required version
     if match_obj and StrictVersion(output) < StrictVersion(MIN_HELM_VERSION):
-        print_error("Current Helm version is obsolete. Please upgrade to at least {}".format(MIN_HELM_VERSION))
+        obsolete_ver_error = HELM_VERSION_ERROR.set_error_message(
+            "Current Helm client version is not recommended. Please upgrade your Helm client to at least version {}."
+            .format(MIN_HELM_VERSION))
+        _handle_error(obsolete_ver_error, ignore_errors)
 
 
 def _check_health_environment(ignore_errors, yes):
