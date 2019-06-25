@@ -12,6 +12,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mariadb_virtual_network_rules_operations,
     cf_mariadb_config,
     cf_mariadb_log,
+    cf_mariadb_replica,
     cf_mysql_servers,
     cf_mysql_db,
     cf_mysql_firewall_rules,
@@ -46,6 +47,11 @@ def load_command_table(self, _):
     postgres_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServersOperations.{}',
         client_factory=cf_postgres_servers
+    )
+
+    mariadb_replica_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mariadb.operations#ReplicasOperations.{}',
+        client_factory=cf_mariadb_replica
     )
 
     mysql_replica_sdk = CliCommandType(
@@ -174,6 +180,13 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_postgresql_get')
         g.command('restart', 'restart')
+
+    with self.command_group('mariadb server replica', mariadb_replica_sdk) as g:
+        g.command('list', 'list_by_server')
+
+    with self.command_group('mariadb server replica', mariadb_servers_sdk, client_factory=cf_mariadb_servers) as g:
+        g.custom_command('create', '_replica_create', supports_no_wait=True)
+        g.custom_command('stop', '_replica_stop', confirmation=True)
 
     with self.command_group('mysql server replica', mysql_replica_sdk) as g:
         g.command('list', 'list_by_server')

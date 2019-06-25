@@ -77,7 +77,7 @@ examples:
 
 helps['functionapp'] = """
 type: group
-short-summary: Manage function apps.
+short-summary: Manage function apps. To install the Azure Functions Core tools see https://github.com/Azure/azure-functions-core-tools
 """
 
 helps['functionapp config'] = """
@@ -253,7 +253,7 @@ examples:
         az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
   - name: remove all allowed origins
     text: >
-        az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+        az functionapp cors remove -g {myRG} -n {myAppName} --allowed-origins
 """
 
 helps['functionapp cors show'] = """
@@ -461,16 +461,6 @@ examples:
     text: >
         az functionapp deployment slot swap  -g MyResourceGroup -n MyUniqueApp --slot staging \\
             --target-slot production
-"""
-
-helps['functionapp devops-build'] = """
-type: group
-short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps. This command will be removed in 2.0.68
-"""
-
-helps['functionapp devops-build create'] = """
-type: command
-short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command. This command will be removed in 2.0.68
 """
 
 helps['functionapp devops-pipeline'] = """
@@ -1031,7 +1021,7 @@ examples:
         az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
   - name: remove all allowed origins
     text: >
-        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins
 """
 
 helps['webapp cors show'] = """

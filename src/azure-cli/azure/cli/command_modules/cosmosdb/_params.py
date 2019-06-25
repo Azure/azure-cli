@@ -71,7 +71,7 @@ def load_arguments(self, _):
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
-        c.argument('default_ttl', type=int, help='Default TTL')
+        c.argument('default_ttl', type=int, help='Default TTL. Provide 0 to disable.')
 
     with self.argument_context('cosmosdb database') as c:
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')

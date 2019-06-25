@@ -54,22 +54,18 @@ def validate_cert(namespace):
     cert = namespace.cert
     create_cert = namespace.create_cert
     keyvault = namespace.keyvault
-    password = namespace.password
 
     # validate allowed parameter combinations
-    if not any((cert, create_cert, password, keyvault)):
+    if not any((cert, create_cert, keyvault)):
         # 1 - Simplest scenario. Use random password
         pass
-    elif password and not any((cert, create_cert, keyvault)):
-        # 2 - Password supplied -- no certs
-        pass
-    elif create_cert and not any((cert, keyvault, password)):
+    elif create_cert and not any((cert, keyvault)):
         # 3 - User-supplied public cert data
         pass
-    elif cert and not any((create_cert, keyvault, password)):
+    elif cert and not any((create_cert, keyvault)):
         # 4 - Create local self-signed cert
         pass
-    elif cert and keyvault and not password:
+    elif cert and keyvault:
         # 5 - Create self-signed cert in KeyVault
         # 6 - Use existing cert from KeyVault
         pass

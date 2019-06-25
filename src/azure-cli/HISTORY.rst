@@ -2,17 +2,59 @@
 
 Release History
 ===============
-
 **ACR**
 
 * Support Timer Triggers for Task.
+
+**Appservice**
+
+* functionapp: `az functionapp create` enables application insights by default
+* BREAKING CHANGE: (functionapp) removes deprecated `az functionapp devops-build` command. Please use the new command `az functionapp devops-pipeline` instead.
+
+**Cosmos DB**
+
+* Added support for disabling TTL
 
 **DLS**
 
 * Update ADLS version (0.0.45).
 
+**Feedback**
+
+* When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
+  extension from the index.
+
+**HDInsight**
+
+* BREAKING CHANGE: Changed "oms" command group name to "monitor"
+* BREAKING CHANGE: Made "--http-password/-p" a required parameter 
+* Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer 
+* "cluster-users-group-dns" parameter is now required when "—esp" is present
+* Added a timeout for all existing argument auto-completers
+* Added a timeout for transforming resource name to resource id
+* Auto-completers can now select resources from any resource group. It can be a different resource group than the one specified with "-g"
+* Added support for "--sub-domain-suffix" and "--disable_gateway_auth" parameters in the "az hdinsight application create" command
+
 **Profile**
 * Suppress `--subscription` argument for logout command.
+
+**RBAC**
+
+* role assignment: expose --assignee-principal-type from create command to avoid intermittent
+                   failures caused by AAD graph server replication latency
+* ad signed-in-user: fix a crash on listing owned objects
+* [BREAKING CHANGE] create-for-rbac: remove --password
+
+**RDBMS**
+
+* Support replication for MariaDB.
+
+
+**VM**
+
+* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
+  the request but returns failure status code and returns an error mesage.
+* vm/vmss extension image list: Fix bug where command fails when used with --latest
 
 2.0.67
 ++++++

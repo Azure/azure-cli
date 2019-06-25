@@ -9,7 +9,7 @@ import json
 import requests
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.ams._completers import get_mru_type_completion_list
-
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 _rut_dict = {0: 'S1',
              1: 'S2',
@@ -55,15 +55,13 @@ class MediaV2Client():
         self._old_rp_api_version = '2015-10-01'
         self.v2_media_api_resource = cli_ctx.cloud.endpoints.media_resource_id
         self.api_endpoint = self._get_v2_api_endpoint(cli_ctx, resource_group_name, account_name)
-        self.access_token = self._get_v2_access_token(cli_ctx)
+        self.access_token = self._get_v2_access_token()
 
     def _get_v2_api_endpoint(self, cli_ctx, resource_group_name, account_name):
         from msrestazure.tools import resource_id
         from azure.cli.command_modules.ams._sdk_utils import (get_media_namespace, get_media_type)
-        from azure.cli.core.commands.client_factory import get_subscription_id
 
-        refresh_token_obj = self.profile.get_refresh_token()
-        access_token = refresh_token_obj[2]
+        access_token = self.profile.get_raw_token()[0][2].get('accessToken')
 
         media_old_rp_url = resource_id(subscription=get_subscription_id(cli_ctx),
                                        resource_group=resource_group_name,
@@ -84,24 +82,12 @@ class MediaV2Client():
         api_endpoint = next((x for x in api_endpoints if x.get('majorVersion') == '2'), api_endpoints[0])
         if not api_endpoint:
             raise CLIError('v2 Media API endpoint was not found.')
-
         return api_endpoint
 
-    def _get_v2_access_token(self, cli_ctx):
-        from adal import AuthenticationContext
-
-        refresh_token_obj = self.profile.get_refresh_token()
-
-        refresh_token = refresh_token_obj[1]
-        tenant = refresh_token_obj[3]
+    def _get_v2_access_token(self):
         # pylint: disable=protected-access
-        client_id = self.profile.get_login_credentials()[0]._token_retriever()[2]['_clientId']
-
-        authority = '{}/{}'.format(cli_ctx.cloud.endpoints.active_directory, tenant)
-        context = AuthenticationContext(authority)
-        return context.acquire_token_with_refresh_token(refresh_token,
-                                                        client_id,
-                                                        self.v2_media_api_resource).get('accessToken')
+        access_token = self.profile.get_raw_token(resource=self.v2_media_api_resource)[0][2].get('accessToken')
+        return access_token
 
     def set_mru(self, account_id, count, type):
         headers = {}

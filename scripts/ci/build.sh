@@ -62,10 +62,8 @@ fi
 # build test packages
 title 'Build Azure CLI tests package'
 
-for test_src in $(find src/command_modules -name tests -type d); do
-    rel_path=${test_src##src/command_modules/}
-    rel_path=(${rel_path/\// })
-    rel_path=${rel_path[1]}
+for test_src in $(find src/azure-cli/azure/cli/command_modules -name tests -type d); do
+    rel_path=${test_src##src/azure-cli/}
 
     mkdir -p $testsrc_dir/$rel_path
     cp -R $test_src/* $testsrc_dir/$rel_path
@@ -125,13 +123,12 @@ if [ "$target_profile" == "latest" ]; then
     echo "        'azure.cli.core.tests'," >>$testsrc_dir/setup.py
 fi
 
-for name in `ls src/command_modules | grep azure-cli-`; do
-    module_name=${name##azure-cli-}
-    test_folder=src/command_modules/$name/azure/cli/command_modules/$module_name/tests
+for name in `ls src/azure-cli/azure/cli/command_modules`; do
+    test_folder=src/azure-cli/azure/cli/command_modules/$name/tests
     if [ -d $test_folder ]; then
-        echo "        'azure.cli.command_modules.$module_name.tests'," >>$testsrc_dir/setup.py
+        echo "        'azure.cli.command_modules.$name.tests'," >>$testsrc_dir/setup.py
         if [ -d $test_folder/$target_profile ]; then
-            echo "        'azure.cli.command_modules.$module_name.tests.$target_profile'," >>$testsrc_dir/setup.py
+            echo "        'azure.cli.command_modules.$name.tests.$target_profile'," >>$testsrc_dir/setup.py
         fi
     fi
 done

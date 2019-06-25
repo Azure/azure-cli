@@ -10,6 +10,8 @@ from azure.graphrbac.models import ConsentType
 
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag, get_location_type, tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
+from azure.cli.core.profiles import ResourceType
+
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
 from azure.cli.command_modules.role._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
@@ -94,10 +96,6 @@ def load_arguments(self, _):
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
             c.argument('credential_description', help="the description of the password", arg_group='Credential')
-
-    with self.argument_context('ad sp create-for-rbac') as c:
-        c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                   deprecate_info=c.deprecate(hide=True), help='Password.')
 
     with self.argument_context('ad sp credential reset') as c:
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
@@ -189,6 +187,12 @@ def load_arguments(self, _):
     with self.argument_context('role assignment list-changelogs') as c:
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
+
+    with self.argument_context('role assignment create') as c:
+        PrincipalType = self.get_models('PrincipalType', resource_type=ResourceType.MGMT_AUTHORIZATION)
+        if PrincipalType:
+            c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
+                       help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
 
     with self.argument_context('role assignment delete') as c:
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Continue to delete all assignments under the subscription')
