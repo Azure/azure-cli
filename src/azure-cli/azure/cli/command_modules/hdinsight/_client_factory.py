@@ -24,6 +24,31 @@ def cf_network(cli_ctx, aux_subscriptions=None, **_):
                                    aux_subscriptions=aux_subscriptions)
 
 
+def cf_graph(cli_ctx, **_):
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import configure_common_settings
+    from azure.graphrbac import GraphRbacManagementClient
+    profile = Profile(cli_ctx=cli_ctx)
+    cred, _, tenant_id = profile.get_login_credentials(
+        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    client = GraphRbacManagementClient(cred, tenant_id,
+                                       base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    configure_common_settings(cli_ctx, client)
+    return client
+
+
+def cf_resources(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+
+def cf_log_analytics(cli_ctx, *_, **__):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.loganalytics import LogAnalyticsManagementClient
+    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient)
+
+
 def cf_hdinsight(cli_ctx, *_, **__):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.hdinsight import HDInsightManagementClient

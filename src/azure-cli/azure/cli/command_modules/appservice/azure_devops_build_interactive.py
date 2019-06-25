@@ -611,7 +611,11 @@ class AzureDevopsBuildInteractive(object):
 
             # Log streaming
             if self.logger.isEnabledFor(logging.INFO):
-                curr_log_status = self.adbp.get_build_logs_status(self.organization_name, self.project_name, self.build.id)
+                curr_log_status = self.adbp.get_build_logs_status(
+                    self.organization_name,
+                    self.project_name,
+                    self.build.id
+                )
                 log_content = self.adbp.get_build_logs_content_from_statuses(
                     organization_name=self.organization_name,
                     project_name=self.project_name,
@@ -661,7 +665,11 @@ class AzureDevopsBuildInteractive(object):
         release = self.adbp.get_latest_release(self.organization_name, self.project_name, self.release_definition_name)
         if release is None:
             try:
-                release = self.adbp.create_release(self.organization_name, self.project_name, self.release_definition_name)
+                release = self.adbp.create_release(
+                    self.organization_name,
+                    self.project_name,
+                    self.release_definition_name
+                )
             except ReleaseErrorException:
                 raise CLIError("Sorry, your release has failed in Azure Pipelines.{ls}"
                                "To view details on why your release has failed please visit "
@@ -676,7 +684,6 @@ class AzureDevopsBuildInteractive(object):
                                 proj=self.project_name,
                                 release_id=release.id
                             ))
-        return
 
     def _check_if_force_push_required(self, remote_url, remote_branches):
         force_push_required = False
@@ -900,17 +907,18 @@ class CmdSelectors(object):
                               if organization.accountName == organization_name]
         if not organization_match:
             raise CLIError("Error finding organization. "
-                           "Please check that the organization exists by navigating to the Azure DevOps portal at dev.azure.com")
+                           "Please check that the organization exists by "
+                           "navigating to the Azure DevOps portal at dev.azure.com")
 
         return organization_match[0]
 
     def cmd_project(self, organization_name, project_name):
         projects = self.adbp.list_projects(organization_name)
-        project_match = \
-            [project for project in projects.value if project.name == project_name]
+        project_match = [project for project in projects.value if project.name == project_name]
 
         if not project_match:
             raise CLIError("Error finding project. "
-                           "Please check that the project exists by navigating to the Azure DevOps portal at dev.azure.com")
+                           "Please check that the project exists by "
+                           "navigating to the Azure DevOps portal at dev.azure.com")
 
         return project_match[0]

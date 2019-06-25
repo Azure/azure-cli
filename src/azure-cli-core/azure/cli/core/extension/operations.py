@@ -231,8 +231,8 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
 
 def remove_extension(extension_name):
     def log_err(func, path, exc_info):
-        logger.debug("Error occurred attempting to delete item from the extension '%s'.", extension_name)
-        logger.debug("%s: %s - %s", func, path, exc_info)
+        logger.warning("Error occurred attempting to delete item from the extension '%s'.", extension_name)
+        logger.warning("%s: %s - %s", func, path, exc_info)
 
     try:
         # Get the extension and it will raise an error if it doesn't exist

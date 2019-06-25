@@ -39,8 +39,7 @@ def load_command_table(self, _):
     )
 
     hdinsight_script_execution_history_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.hdinsight.operations.script_execution_history_operations#'
-                        'ScriptExecutionHistoryOperations.{}',
+        operations_tmpl='azure.mgmt.hdinsight.operations#ScriptExecutionHistoryOperations.{}',
         client_factory=cf_hdinsight_script_execution_history
     )
 
@@ -84,8 +83,8 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
 
-    # OMS operations
-    with self.command_group('hdinsight oms', hdinsight_extensions_sdk, client_factory=cf_hdinsight_extensions) as g:
+    # Monitoring operations
+    with self.command_group('hdinsight monitor', hdinsight_extensions_sdk, client_factory=cf_hdinsight_extensions) as g:
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'disable_monitoring')

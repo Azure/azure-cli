@@ -121,7 +121,6 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client = mock.MagicMock()
         graph_client_mock.return_value = faked_graph_client
 
-        test_pwd = 'verySecret'
         name = 'mysp'
         test_app_id = 'app_id_123'
         app = Application(app_id=test_app_id)
@@ -132,10 +131,9 @@ class TestRoleMocked(unittest.TestCase):
         # action
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
-        result = create_service_principal_for_rbac(cmd, name, test_pwd, 12, skip_assignment=True)
+        result = create_service_principal_for_rbac(cmd, name, 12, skip_assignment=True)
 
         # assert
-        self.assertEqual(result['password'], test_pwd)
         self.assertEqual(result['name'], 'http://' + name)
         self.assertEqual(result['displayName'], name)
         self.assertEqual(result['appId'], test_app_id)
