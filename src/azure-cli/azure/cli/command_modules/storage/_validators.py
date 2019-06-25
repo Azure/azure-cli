@@ -1043,3 +1043,24 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
     namespace.destination = url
     del namespace.destination_container
     del namespace.destination_path
+
+
+def as_user_validator(namespace):
+    if namespace.as_user:
+        if namespace.expiry is None:
+            import argparse
+            raise argparse.ArgumentError(
+                None, 'incorrect usage: specify --expiry when as-user is enabled')
+
+        expiry = get_datetime_type(False)(namespace.expiry)
+
+        from datetime import datetime, timedelta
+        if expiry > datetime.utcnow() + timedelta(days=7):
+            import argparse
+            raise argparse.ArgumentError(
+                None, 'incorrect usage: --expiry should be within 7 days from now')
+
+        if not hasattr(namespace, 'token_credential') or namespace.token_credential is None:
+            import argparse
+            raise argparse.ArgumentError(
+                None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
