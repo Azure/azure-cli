@@ -167,7 +167,7 @@ def _task_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
-        ('TRIGGERS'), _get_triggers(item),
+        ('TRIGGERS', _get_triggers(item))
     ])
 
 
@@ -216,14 +216,13 @@ def _get_triggers(item):
     :param dict item: The dict object
     """
     triggers = []
-    if _get_trigger_status(item, 'trigger', 'sourceTriggers'):
-        triggers.append('SOURCE TRIGGER')
+    if _get_value(item, 'trigger', 'sourceTriggers', 0, 'status').lower() == 'enabled':
+        triggers.append('SOURCE')
     if _get_trigger_status(item, 'trigger', 'timerTriggers'):
-        triggers.append('TIMER TRIGGER')
-    # if _get_trigger_status(item, 'trigger', 'baseImageTrigger'):
-    #     triggers.append('BASE IMAGE TRIGGER')
-    print(triggers)
-    return ', '.join(triggers)
+        triggers.append('TIMER')
+    if _get_value(item, 'trigger', 'baseImageTrigger', 'status').lower() == 'enabled':
+        triggers.append('BASE IMAGE')
+    return ' ' if not triggers else str(', '.join(triggers))
 
 
 def _get_value(item, *args):
@@ -239,7 +238,7 @@ def _get_value(item, *args):
 
 
 def _get_trigger_status(item, *args):
-    """Get all enabled timer trigger schedules from a dict.
+    """Check if at least one enabled trigger exists in a list.
     :param dict item: The dict object
     """
     try:
@@ -248,11 +247,9 @@ def _get_trigger_status(item, *args):
         enabled = False
         if item:
             for trigger in item:
-                print(trigger)
                 if trigger['status'].lower() == "enabled":
-                    print("HERE")
                     enabled = True
-        print(enabled)
+                    break
         return enabled
     except (KeyError, TypeError, IndexError):
         return False
