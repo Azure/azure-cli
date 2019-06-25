@@ -221,7 +221,8 @@ def _get_triggers(item):
     if _get_trigger_status(item, 'trigger', 'timerTriggers'):
         triggers.append('TIMER')
     if _get_value(item, 'trigger', 'baseImageTrigger', 'status').lower() == 'enabled':
-        triggers.append('BASE IMAGE')
+        triggers.append('BASE_IMAGE')
+    triggers.sort()
     return ' ' if not triggers else str(', '.join(triggers))
 
 
