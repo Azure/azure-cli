@@ -167,6 +167,7 @@ def _task_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('PLATFORM', _get_value(item, 'platform', 'os')),
         ('STATUS', _get_value(item, 'status')),
+        ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
         ('TRIGGERS', _get_triggers(item))
     ])
 
