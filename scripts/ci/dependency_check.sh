@@ -4,6 +4,9 @@ set -ev
 
 REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
 
+pip3 list
+pip3 check
+
 # Install everything from our repository first.
 find ${REPO_ROOT}/src -name setup.py -type f | xargs dirname | xargs pip3 install --no-deps
 
