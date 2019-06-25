@@ -4,6 +4,9 @@ set -ev
 
 REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
 
+# Uninstall any cruft that can poison the rest of the checks in this script.
+pip3 freeze > baseline_deps.txt
+pip3 uninstall -y -r baseline_deps.txt
 pip3 list
 pip3 check
 
