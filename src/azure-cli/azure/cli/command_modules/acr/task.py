@@ -629,7 +629,7 @@ def acr_task_timer_add(cmd,
                        task_name,
                        registry_name,
                        timer_name,
-                       schedule,
+                       timer_schedule,
                        enabled=True,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -643,7 +643,7 @@ def acr_task_timer_add(cmd,
                 TimerTriggerUpdateParameters(
                     name=timer_name,
                     status=TriggerStatus.enabled.value if enabled else TriggerStatus.disabled.value,
-                    schedule=schedule
+                    schedule=timer_schedule
                 )
             ]
         )
@@ -657,7 +657,7 @@ def acr_task_timer_update(cmd,
                           task_name,
                           registry_name,
                           timer_name,
-                          schedule=None,
+                          timer_schedule=None,
                           enabled=None,
                           resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -676,7 +676,7 @@ def acr_task_timer_update(cmd,
                 TimerTriggerUpdateParameters(
                     name=timer_name,
                     status=trigger_status,
-                    schedule=schedule
+                    schedule=timer_schedule
                 )
             ]
         )

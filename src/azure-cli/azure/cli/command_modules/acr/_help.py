@@ -658,7 +658,7 @@ short-summary: Add a timer trigger to a task.
 examples:
   - name: Add a timer trigger to a task.
     text: >
-        az acr task timer add -n taskname -r registryname --timer-name myTimer --schedule "30 9 * * 1-5"
+        az acr task timer add -n taskname -r registryname --timer-name t2 --schedule "30 9 * * 1-5"
 """
 
 helps['acr task timer update'] = """
@@ -667,10 +667,10 @@ short-summary: Update the timer trigger for a task.
 examples:
   - name: Update the schedule of a timer trigger for a task.
     text: >
-        az acr task timer update -n taskname -r registryname --timer-name myTimer --schedule "0 12 * * *"
+        az acr task timer update -n taskname -r registryname --timer-name t2 --schedule "0 12 * * *"
   - name: Update the status of a timer trigger for a task.
     text: >
-        az acr task timer update -n taskname -r registryname --timer-name myTimer --enabled False
+        az acr task timer update -n taskname -r registryname --timer-name t2 --enabled False
 """
 
 helps['acr task timer remove'] = """
@@ -679,7 +679,7 @@ short-summary: Remove a timer trigger from a task.
 examples:
   - name: Remove a timer trigger from a task.
     text: >
-        az acr task timer remove -n taskname -r registryname --timer-name myTimer
+        az acr task timer remove -n taskname -r registryname --timer-name t2
 """
 
 helps['acr task timer list'] = """
