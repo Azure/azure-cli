@@ -163,11 +163,11 @@ def _get_helm_version(ignore_errors):
     if match_obj:
         output = match_obj.group(1)
 
-    print("Helm version:\n{}".format(output))
+    print("Helm version: {}".format(output))
 
-    # Warn the user if current helm version < min required version
+    # Display an error message if the current helm version < min required version
     if match_obj and StrictVersion(output) < StrictVersion(MIN_HELM_VERSION):
-        print_warning("Current Helm version is obsolete. Please upgrade to at least {}".format(MIN_HELM_VERSION))
+        print_error("Current Helm version is obsolete. Please upgrade to at least {}".format(MIN_HELM_VERSION))
 
 
 def _check_health_environment(ignore_errors, yes):
