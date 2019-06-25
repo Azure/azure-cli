@@ -1021,7 +1021,7 @@ examples:
         az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
   - name: remove all allowed origins
     text: >
-        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins
 """
 
 helps['webapp cors show'] = """
