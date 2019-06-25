@@ -77,7 +77,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scopes = (scopes_in_definition if scopes_in_definition else
-                 ['/subscriptions/' + definitions_client.config.subscription_id])
+                  ['/subscriptions/' + definitions_client.config.subscription_id])
         if role_resource_id:
             from msrestazure.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
