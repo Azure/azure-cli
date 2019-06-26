@@ -46,7 +46,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter
-from azure.cli.core import __version__
+from azure.cli.core.commands.client_factory import UA_AGENT
 
 from .tunnel import TunnelServer
 
@@ -282,21 +282,18 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=N
     app = client.web_apps.get(resource_group_name, name)
     parse_plan_id = parse_resource_id(app.server_farm_id)
     plan_info = None
-    retries = 5
     retry_delay = 10  # seconds
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,
     # it can take a couple of tries before it gets the plan
-    while retries > 0:
+    for _ in range(5):
         plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
                                                  parse_plan_id['name'])
         if plan_info is not None:
             break
-        retries -= 1
         time.sleep(retry_delay)
     if is_plan_consumption(plan_info) and app.reserved:
-        upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
-    else:
-        return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
+        return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
@@ -310,7 +307,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
     headers['content-type'] = 'application/octet-stream'
-    headers['User-Agent'] = 'azure-cli:{}'.format(__version__)
+    headers['User-Agent'] = UA_AGENT
 
     import requests
     import os
@@ -350,13 +347,11 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         filled_length = int(round(total_length * current) / float(total))
         percents = round(100.0 * current / float(total), 1)
         progress_bar = '=' * filled_length + '-' * (total_length - filled_length)
-        print('\r{} {}%'.format(progress_bar, percents), flush=True, end="")
+        progress_message = 'Uploading {} {}%'.format(progress_bar, percents)
+        cmd.cli_ctx.get_progress_controller().add(message=progress_message)
 
-    print('Uploading...')
     block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
                                              progress_callback=progress_callback)
-    # For a new line
-    print('')
 
     now = datetime.datetime.now()
     blob_start = now - datetime.timedelta(minutes=10)
@@ -369,12 +364,11 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
     website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
-    print('Upload to storage complete.')
     update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting])
-    print('Syncing triggers...')
     client = web_client_factory(cmd.cli_ctx)
 
     try:
+        logger.info('\nSyncing Triggers...')
         if slot is not None:
             client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
         else:
@@ -383,7 +377,6 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         # This SDK function throws an error if Status Code is 200
         if ce.status_code != 200:
             raise ce
-    print('Deployment completed successfully.')
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
