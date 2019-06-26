@@ -55,6 +55,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')
+            c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account') as c:
             c.argument('subscription', options_list=['--subscription', '-s'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
