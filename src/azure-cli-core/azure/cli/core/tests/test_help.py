@@ -41,6 +41,7 @@ def _get_parser_name(parser):
     # pylint:disable=protected-access
     return (parser._prog_prefix if hasattr(parser, '_prog_prefix') else parser.prog)[len('az '):]
 
+
 def create_invoker_and_load_cmds_and_args(cli_ctx):
     from knack import events
     from azure.cli.core.commands import register_cache_arguments
@@ -76,12 +77,15 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
     invoker.parser.load_command_table(invoker.commands_loader)
 
+
 # Command loader module
 MOCKED_COMMAND_LOADER_MOD = "test_help"
+
 
 # mock command loader method so that only the mock command loader can be loaded.
 def mock_load_command_loader(loader, args, name, prefix):
     return _load_command_loader(loader, args, name, "azure.cli.core.tests.")
+
 
 # region TestCommandLoader
 class TestCommandLoader(AzCommandsLoader):
@@ -110,6 +114,7 @@ class TestCommandLoader(AzCommandsLoader):
         self._update_command_definitions()  # pylint: disable=protected-access
 
 
+# handler for command to test getting help from docstring
 def dummy_handler(arg1, arg2=None, arg3=None, arg4=None):
     """
     Short summary here. Long summary here. Still long summary.
@@ -119,6 +124,7 @@ def dummy_handler(arg1, arg2=None, arg3=None, arg4=None):
     :param arg4: arg4's docstring help text
     """
     pass
+
 
 COMMAND_LOADER_CLS = TestCommandLoader
 # endregion

@@ -13,6 +13,7 @@ from azure.cli.core._help import CliCommandHelpFile
 
 logger = get_logger(__name__)
 
+
 def get_all_help(cli_ctx, skip=True):
     invoker = cli_ctx.invocation
     help_ctx = cli_ctx.help_cls(cli_ctx)

@@ -140,6 +140,7 @@ class ArgumentGroupRegistry(KnackArgumentGroupRegistry):  # pylint: disable=too-
             self.priorities[group] = priority
             priority += 1
 
+
 # override to add support for supported and unsupported profiles
 class HelpExample(KnackHelpExample):  # pylint: disable=too-few-public-methods
 
