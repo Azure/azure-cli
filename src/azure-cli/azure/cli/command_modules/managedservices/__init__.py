@@ -6,15 +6,6 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.managedservices._help import helps  # pylint: disable=unused-import
-from azure.cli.core.commands import AzCommandGroup
-
-
-class ManagedServicesCommandGroup(AzCommandGroup):
-
-    def managedservices_custom(self, name, method_name=None, **kwargs):
-        command = self.command_loader.command_table[self.custom_command(name, method_name, **kwargs)]
-        if not command:
-            return
 
 
 class ManagedServicesCommandsLoader(AzCommandsLoader):
@@ -24,8 +15,7 @@ class ManagedServicesCommandsLoader(AzCommandsLoader):
         managedservices_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.managedservices.custom#{}')
         super(ManagedServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                             resource_type=ResourceType.MGMT_MANAGEDSERVICES,
-                                                            custom_command_type=managedservices_custom,
-                                                            command_group_cls=ManagedServicesCommandGroup)
+                                                            custom_command_type=managedservices_custom)
 
     def load_command_table(self, args):
         from .commands import load_command_table

@@ -9,10 +9,6 @@ from azure.cli.core.commands.parameters import get_three_state_flag
 
 def load_arguments(self, _):
 
-    group_name = 'ManagedServices'
-    with self.argument_context('managedservices') as c:
-        c.argument('api_version', arg_group=group_name, help='The API Version to target.')
-
     for item in ['managedservices definition show', 'managedservices definition delete']:
         with self.argument_context(item) as c:
             c.argument('definition', help='The identifier (guid) or the fully qualified resource id of the registration definition. When resource id is used, subscription id and resource group parameters are ignored.')

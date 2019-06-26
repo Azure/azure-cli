@@ -21,14 +21,14 @@ def load_command_table(self, _):
     with self.command_group('managedservices', is_preview=True) as g:
         pass
 
-    with self.command_group('managedservices definition', msp_registration_definitions) as g:
-        g.managedservices_custom('create', 'cli_definition_create', client_factory=cf_registration_definitions)
-        g.managedservices_custom('list', 'cli_definition_list', client_factory=cf_registration_definitions)
-        g.managedservices_custom('delete', 'cli_definition_delete', client_factory=cf_registration_definitions)
-        g.managedservices_custom('show', 'cli_definition_get', client_factory=cf_registration_definitions)
+    with self.command_group('managedservices definition', msp_registration_definitions, client_factory=cf_registration_definitions) as g:
+        g.custom_command('create', 'cli_definition_create')
+        g.custom_command('list', 'cli_definition_list')
+        g.custom_command('delete', 'cli_definition_delete')
+        g.custom_command('show', 'cli_definition_get')
 
-    with self.command_group('managedservices assignment', msp_registration_assignments) as g:
-        g.managedservices_custom('create', 'cli_assignment_create', client_factory=cf_registration_assignments)
-        g.managedservices_custom('show', 'cli_assignment_get', client_factory=cf_registration_assignments)
-        g.managedservices_custom('delete', 'cli_assignment_delete', client_factory=cf_registration_assignments)
-        g.managedservices_custom('list', 'cli_assignment_list', client_factory=cf_registration_assignments)
+    with self.command_group('managedservices assignment', msp_registration_assignments, client_factory=cf_registration_assignments) as g:
+        g.custom_command('create', 'cli_assignment_create')
+        g.custom_command('show', 'cli_assignment_get')
+        g.custom_command('delete', 'cli_assignment_delete')
+        g.custom_command('list', 'cli_assignment_list')

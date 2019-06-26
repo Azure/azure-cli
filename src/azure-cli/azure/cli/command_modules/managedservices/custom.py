@@ -7,7 +7,11 @@ from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 logger = get_logger(__name__)
-default_api_version = '2018-06-01-preview'
+
+# The API version is not being set correctly in the generated Python SDK.
+# Opened an issue #https://github.com/Azure/azure-sdk-for-python/issues/6112 to track it.
+# Ideally, the SDK should set the version accordingly based on Swagger spec.
+API_VERSION_PREVIEW = '2018-06-01-preview'
 
 
 # region Definitions Custom Commands
@@ -16,8 +20,7 @@ default_api_version = '2018-06-01-preview'
 def cli_definition_create(cmd, client,
                           name, tenant_id, principal_id, role_definition_id,
                           plan_name=None, plan_product=None, plan_publisher=None, plan_version=None, description=None,
-                          definition_id=None,
-                          api_version=None):
+                          definition_id=None):
     from azure.mgmt.managedservices.models import RegistrationDefinitionProperties, Plan, \
         Authorization
 
@@ -48,44 +51,40 @@ def cli_definition_create(cmd, client,
 
     return client.create_or_update(
         registration_definition_id=definition_id,
-        api_version=_get_api_version(api_version),
+        api_version=API_VERSION_PREVIEW,
         scope=scope,
         properties=properties)
 
 
 # pylint: disable=unused-argument
 def cli_definition_get(cmd, client,
-                       definition,
-                       api_version=None):
+                       definition):
     subscription = _get_subscription_id_from_cmd(cmd)
     definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
     scope = _get_scope(sub_id, rg_name)
     return client.get(
         scope=scope,
         registration_definition_id=definition_id,
-        api_version=_get_api_version(api_version))
+        api_version=API_VERSION_PREVIEW)
 
 
 # pylint: disable=unused-argument
-def cli_definition_list(cmd, client,
-                        api_version=None):
+def cli_definition_list(cmd, client):
     subscription = _get_subscription_id_from_cmd(cmd)
     scope = _get_scope(subscription)
     return client.list(
         scope=scope,
-        api_version=_get_api_version(api_version))
+        api_version=API_VERSION_PREVIEW)
 
 
-def cli_definition_delete(cmd, client,
-                          definition,
-                          api_version=None):
+def cli_definition_delete(cmd, client,definition):
     subscription = _get_subscription_id_from_cmd(cmd)
     definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
     scope = _get_scope(sub_id, rg_name)
     return client.delete(
         scope=scope,
         registration_definition_id=definition_id,
-        api_version=_get_api_version(api_version))
+        api_version=API_VERSION_PREVIEW)
 
 
 # endregion
@@ -96,7 +95,6 @@ def cli_definition_delete(cmd, client,
 def cli_assignment_create(cmd, client,
                           definition,
                           assignment_id=None,
-                          api_version=None,
                           resource_group_name=None):
     from azure.mgmt.managedservices.models import RegistrationAssignmentProperties
     if not is_valid_resource_id(definition):
@@ -114,14 +112,13 @@ def cli_assignment_create(cmd, client,
     return client.create_or_update(
         scope=scope,
         registration_assignment_id=assignment_id,
-        api_version=_get_api_version(api_version),
+        api_version=API_VERSION_PREVIEW,
         properties=properties)
 
 
 # pylint: disable=unused-argument
 def cli_assignment_get(cmd, client,
                        assignment,
-                       api_version=None,
                        resource_group_name=None,
                        include_definition=None):
     subscription = _get_subscription_id_from_cmd(cmd)
@@ -130,14 +127,13 @@ def cli_assignment_get(cmd, client,
     return client.get(
         scope=scope,
         registration_assignment_id=assignment_id,
-        api_version=_get_api_version(api_version),
+        api_version=API_VERSION_PREVIEW,
         expand_registration_definition=include_definition)
 
 
 # pylint: disable=unused-argument
 def cli_assignment_delete(cmd, client,
                           assignment,
-                          api_version=None,
                           resource_group_name=None):
     subscription = _get_subscription_id_from_cmd(cmd)
     assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
@@ -145,36 +141,29 @@ def cli_assignment_delete(cmd, client,
     return client.delete(
         scope=scope,
         registration_assignment_id=assignment_id,
-        api_version=_get_api_version(api_version))
+        api_version=API_VERSION_PREVIEW)
 
 
 # pylint: disable=unused-argument
 def cli_assignment_list(cmd, client,
                         resource_group_name=None,
-                        include_definition=None,
-                        api_version=None):
+                        include_definition=None):
     sub_id = _get_subscription_id_from_cmd(cmd)
     scope = _get_scope(sub_id, resource_group_name)
-    api_version = _get_api_version(api_version)
     return client.list(
         scope=scope,
-        api_version=api_version,
+        api_version=API_VERSION_PREVIEW,
         expand_registration_definition=include_definition)
-
 
 # endregion
 
 # region private methods
+
+
 def _get_subscription_id_from_cmd(cmd):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription = get_subscription_id(cmd.cli_ctx)
     return subscription
-
-
-def _get_api_version(api_version=None):
-    if not api_version:
-        api_version = default_api_version
-    return api_version
 
 
 def _get_resource_id_parts(cmd, name_or_id, subscription=None, resource_group_name=None):
