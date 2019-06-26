@@ -6,6 +6,7 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import unittest
 
+
 class WindowsManagedDiskCreateRestoreTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='westus2')

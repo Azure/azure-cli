@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=broad-except, line-too-long
 from datetime import datetime
 from json import loads
 from re import match, search
@@ -16,8 +17,6 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 from .exceptions import AzCommandError
 from .repair_utils import _call_az_command, _get_repair_resource_tag, _uses_encrypted_disk, _resolve_api_version, _is_linux_os
-
-# pylint: disable=line-too-long, broad-except
 
 logger = get_logger(__name__)
 

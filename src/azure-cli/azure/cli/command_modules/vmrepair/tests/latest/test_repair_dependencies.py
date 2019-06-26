@@ -8,6 +8,7 @@ import mock
 from azure.cli.command_modules.vm.custom import get_vm
 from azure.cli.core.mock import DummyCli
 
+
 class TestModuleDependencies(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
@@ -28,31 +29,27 @@ class TestModuleDependencies(unittest.TestCase):
         mock_client.virtual_machines.get.assert_called_with(rg, vmname, expand=None)
         assert val == return_val
 
-
     def test_msrestazure_tools_parse_resource_id(self):
         from msrestazure.tools import parse_resource_id
         resource_id = '/subscriptions/88fd8cb2-8248-499e-9a2d-4929a4b0133c/resourceGroups/testrg/providers/Microsoft.Compute/disks/testdisk'
         resource = parse_resource_id(resource_id)
-        
-        assert 'testrg' == resource['resource_group']
 
+        assert 'testrg' == resource['resource_group']
 
     def test_msrestazure_tools_valid_resource_id(self):
         from msrestazure.tools import is_valid_resource_id
         resource_id = '/subscriptions/88fd8cb2-8248-499e-9a2d-4929a4b0133c/resourceGroups/testrg/providers/Microsoft.Compute/disks/testdisk'
         valid = is_valid_resource_id(resource_id)
 
-        assert True == valid
-
+        assert valid
 
     def test_msrestazure_tools_invalid_resource_id(self):
         from msrestazure.tools import is_valid_resource_id
         resource_id = '/subscriptiofd8cb2-8248-499e-9a2d-4929a4b0133c/rerg/providers/Microsoft.Compute/disks/testdisk/'
-        invalid = is_valid_resource_id(resource_id)
+        valid = is_valid_resource_id(resource_id)
 
-        assert False == invalid
+        assert not valid
 
-    
     def test_storage_module_storage_resource_identifier(self):
         from azure.cli.command_modules.storage.storage_url_helpers import StorageResourceIdentifier
         disk_uri = 'https://vhdstorage64a4b896267ec5.blob.core.windows.net/vhds/osdisk_50faed183e.vhd'
@@ -64,6 +61,7 @@ class TestModuleDependencies(unittest.TestCase):
         assert 'vhdstorage64a4b896267ec5' == storage_account.account_name
         assert 'osdisk_50faed183e.vhd' == storage_account.blob
         assert 'vhds' == storage_account.container
+
 
 if __name__ == '__main__':
     unittest.main()

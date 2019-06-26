@@ -185,7 +185,7 @@ def create(cmd, vm_name, resource_group_name, repair_password=None, repair_usern
     return_dict['resourceTag'] = resource_tag
     return_dict['createdResources'] = created_resources
 
-    logger.info('\n' + return_dict['message'] + '\n')
+    logger.info('\n%s\n', return_dict['message'])
     return return_dict
 
 
@@ -262,5 +262,5 @@ def restore(cmd, vm_name, resource_group_name, disk_name=None, repair_vm_id=None
                              'you may choose to delete the source OS disk \'{src_disk}\' within resource group \'{rg}\' manually if you no longer need it, to avoid any undesired costs.' \
                              .format(disk=disk_name, n=vm_name, src_disk=source_disk, rg=resource_group_name)
 
-    logger.info('\n' + return_dict['message'] + '\n')
+    logger.info('\n%s\n', return_dict['message'])
     return return_dict

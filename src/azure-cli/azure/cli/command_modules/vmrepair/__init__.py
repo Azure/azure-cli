@@ -7,6 +7,7 @@ from azure.cli.core import AzCommandsLoader
 import azure.cli.command_modules.vmrepair._help  # pylint: disable=unused-import
 from azure.cli.core import ModExtensionSuppress
 
+
 class VmRepairCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
@@ -22,7 +23,7 @@ class VmRepairCommandsLoader(AzCommandsLoader):
                                                      # Suppress extension vm-repair up to and including version 0.1.1
                                                      suppress_extension=ModExtensionSuppress(__name__, 'vm-repair',
                                                                                              '0.1.1',
-                                                                                             reason='These commands are now in the CLI.',
+                                                                                             reason='These commands are now in the CLI.',  # pylint: disable=line-too-long
                                                                                              recommend_remove=True))
 
     def load_command_table(self, args):
