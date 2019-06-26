@@ -13,11 +13,10 @@ class ManagedServicesCommandGroup(AzCommandGroup):
     def _register_common_arguments(self, name, method_name=None, **kwargs):
         command = self.command_loader.command_table[self.custom_command(name, method_name, **kwargs)]
 
-        group_name = 'ManagedServices'
-        command.add_argument('api_version', required=False, default=None,
-                             arg_group=group_name, help='The API Version to target.')
+        #group_name = 'ManagedServices'
+        #command.add_argument('api_version', required=False, default=None,
+        #                     arg_group=group_name, help='The API Version to target.') #this doesnt
 
-        if method_name in ("cli_assignment_list", "cli_assignment_get"):
-            from azure.cli.core.commands.parameters import get_three_state_flag
-            command.add_argument('include_definition', arg_group=group_name, arg_type=get_three_state_flag(),
-                                 help='When provided, gets the associated registration definition details.')
+        #if method_name in ("cli_assignment_list", "cli_assignment_get"):
+        #    command.add_argument('include_definition', arg_group=group_name, arg_type=get_three_state_flag(),
+        #                         help='When provided, gets the associated registration definition details.')

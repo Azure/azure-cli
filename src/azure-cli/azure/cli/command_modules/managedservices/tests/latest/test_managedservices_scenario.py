@@ -58,22 +58,22 @@ class ManagedServicesTests(ScenarioTest):
         })
         # put assignment
         result = self.cmd(
-            'az managedservices definition assignment create --definition-id {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}').get_output_in_json()
+            'az managedservices assignment  create --definition-id {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}').get_output_in_json()
         self.assertTrue(result['name'], assignment_id)
         self.assertTrue(result['properties'] is not None)
         self.assertTrue(result['properties']['provisioningState'], "Succeeded")
         self.assertTrue(result['properties']['registrationDefinitionId'], definition_resource_id)
 
         # get assignment
-        self.cmd('az managedservices definition assignment show --assignment {assignment-id} --subscription {subscription-id}',
+        self.cmd('az managedservices assignment  show --assignment {assignment-id} --subscription {subscription-id}',
                  checks=[
                      self.check('name', '{assignment-id}'), ])
 
         # delete assignment
-        self.cmd('az managedservices definition assignment delete --assignment {assignment-id} --subscription {subscription-id}')
+        self.cmd('az managedservices assignment  delete --assignment {assignment-id} --subscription {subscription-id}')
 
         # list assignments
-        assignments_list = self.cmd('az managedservices definition assignment list --subscription {subscription-id}').get_output_in_json()
+        assignments_list = self.cmd('az managedservices assignment  list --subscription {subscription-id}').get_output_in_json()
         self.assertTrue(assignments_list is not None)
         assignments = []
         for assignment in assignments_list:

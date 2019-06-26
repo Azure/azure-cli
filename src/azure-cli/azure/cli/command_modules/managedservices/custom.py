@@ -16,18 +16,16 @@ default_api_version = '2018-06-01-preview'
 def cli_definition_create(cmd, client,
                           name, tenant_id, principal_id, role_definition_id,
                           plan_name=None, plan_product=None, plan_publisher=None, plan_version=None, description=None,
-                          definition_id=None, **kwargs):
+                          definition_id=None,
+                          api_version=None):
     from azure.mgmt.managedservices.models import RegistrationDefinitionProperties, Plan, \
         Authorization
-
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
 
     if not definition_id:
         definition_id = str(uuid.uuid4())
 
-    sub_id = _get_subscription_id(cmd, subscription)
-    scope = _get_scope(sub_id)
+    subscription = _get_subscription_id_from_cmd(cmd)
+    scope = _get_scope(subscription)
 
     if plan_name and plan_product and plan_publisher and plan_version:
         plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
@@ -58,9 +56,8 @@ def cli_definition_create(cmd, client,
 # pylint: disable=unused-argument
 def cli_definition_get(cmd, client,
                        definition,
-                       **kwargs):
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
+                       api_version=None):
+    subscription = _get_subscription_id_from_cmd(cmd)
     definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
     scope = _get_scope(sub_id, rg_name)
     return client.get(
@@ -70,20 +67,19 @@ def cli_definition_get(cmd, client,
 
 
 # pylint: disable=unused-argument
-def cli_definition_list(cmd, client, **kwargs):
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
-    sub_id = _get_subscription_id(cmd, subscription)
-    scope = _get_scope(sub_id)
+def cli_definition_list(cmd, client, 
+                        api_version=None):
+    subscription = _get_subscription_id_from_cmd(cmd)
+    scope = _get_scope(subscription)
     return client.list(
         scope=scope,
         api_version=_get_api_version(api_version))
 
 
 def cli_definition_delete(cmd, client,
-                          definition, **kwargs):
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
+                          definition, 
+                          api_version=None):
+    subscription = _get_subscription_id_from_cmd(cmd)
     definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
     scope = _get_scope(sub_id, rg_name)
     return client.delete(
@@ -98,26 +94,23 @@ def cli_definition_delete(cmd, client,
 
 # pylint: disable=unused-argument
 def cli_assignment_create(cmd, client,
-                          definition_id,
+                          definition,
                           assignment_id=None,
-                          **kwargs):
+                          api_version=None,
+                          resource_group_name=None):
     from azure.mgmt.managedservices.models import RegistrationAssignmentProperties
-    if not is_valid_resource_id(definition_id):
+    if not is_valid_resource_id(definition):
         raise ValueError(
-            "registration_definition_resource_id should be a valid resource id. For example, "
+            "definition should be a valid resource id. For example, "
             "/subscriptions/id/providers/Microsoft.ManagedServices/registrationDefinitions/id")
 
     if not assignment_id:
         assignment_id = str(uuid.uuid4())
 
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
-    resource_group_name = kwargs.pop('resource_group_name', None)
-
-    sub_id = _get_subscription_id(cmd, subscription)
-    scope = _get_scope(sub_id, resource_group_name)
+    subscription = _get_subscription_id_from_cmd(cmd)
+    scope = _get_scope(subscription , resource_group_name)
     properties = RegistrationAssignmentProperties(
-        registration_definition_id=definition_id)
+        registration_definition_id=definition)
     return client.create_or_update(
         scope=scope,
         registration_assignment_id=assignment_id,
@@ -128,12 +121,10 @@ def cli_assignment_create(cmd, client,
 # pylint: disable=unused-argument
 def cli_assignment_get(cmd, client,
                        assignment,
-                       **kwargs):
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
-    resource_group_name = kwargs.pop('resource_group_name', None)
-    include_definition = kwargs.pop('include_definition', None)
-
+                       api_version=None,
+                       resource_group_name=None,
+                       include_definition=None):
+    subscription = _get_subscription_id_from_cmd(cmd)
     assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
     scope = _get_scope(sub_id, rg_name)
     return client.get(
@@ -146,10 +137,9 @@ def cli_assignment_get(cmd, client,
 # pylint: disable=unused-argument
 def cli_assignment_delete(cmd, client,
                           assignment,
-                          **kwargs):
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
-    resource_group_name = kwargs.pop('resource_group_name', None)
+                       api_version=None,
+                       resource_group_name=None):
+    subscription = _get_subscription_id_from_cmd(cmd)
     assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
     scope = _get_scope(sub_id, rg_name)
     return client.delete(
@@ -160,13 +150,10 @@ def cli_assignment_delete(cmd, client,
 
 # pylint: disable=unused-argument
 def cli_assignment_list(cmd, client,
-                        **kwargs):
-    subscription = kwargs.pop('subscription', None)
-    api_version = kwargs.pop('api_version', None)
-    resource_group_name = kwargs.pop('resource_group_name', None)
-    include_definition = kwargs.pop('include_definition', None)
-
-    sub_id = _get_subscription_id(cmd, subscription)
+                        resource_group_name=None,
+                        include_definition=None,
+                        api_version=None):
+    sub_id = _get_subscription_id_from_cmd(cmd)
     scope = _get_scope(sub_id, resource_group_name)
     api_version = _get_api_version(api_version)
     return client.list(
@@ -178,15 +165,18 @@ def cli_assignment_list(cmd, client,
 # endregion
 
 # region private methods
+def _get_subscription_id_from_cmd(cmd):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription = get_subscription_id(cmd.cli_ctx)
+    return subscription
 
-def _get_subscription_id(cmd, subscription=None):
-    if not subscription:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        sub_id = get_subscription_id(cmd.cli_ctx)
-    else:
-        sub_id = subscription
-    return sub_id
-
+#def _get_subscription_id(cmd, subscription=None):
+#    if not subscription:
+#        from azure.cli.core.commands.client_factory import get_subscription_id
+#        sub_id = get_subscription_id(cmd.cli_ctx)
+#    else:
+#        sub_id = subscription
+#    return sub_id
 
 def _get_api_version(api_version=None):
     if not api_version:
@@ -205,7 +195,7 @@ def _get_resource_id_parts(cmd, name_or_id, subscription=None, resource_group_na
     else:
         rg_name = resource_group_name
         name = name_or_id
-        sub_id = _get_subscription_id(cmd, subscription)
+        sub_id = _get_subscription_id_from_cmd(cmd)
     return name, sub_id, rg_name
 
 
