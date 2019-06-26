@@ -35,6 +35,9 @@ Release History
 * Auto-completers can now select resources from any resource group. It can be a different resource group than the one specified with "-g"
 * Added support for "--sub-domain-suffix" and "--disable_gateway_auth" parameters in the "az hdinsight application create" command
 
+**Profile**
+* Suppress `--subscription` argument for logout command.
+
 **RBAC**
 
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
