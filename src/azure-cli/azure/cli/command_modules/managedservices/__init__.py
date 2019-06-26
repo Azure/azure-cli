@@ -8,12 +8,14 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.managedservices._help import helps  # pylint: disable=unused-import
 from azure.cli.core.commands import AzCommandGroup
 
-class ManagedServicesCommandGroup(AzCommandGroup):
-    def managedservices_custom(self, name, method_name=None, **kwargs):
-        self._register_common_arguments(name, method_name, **kwargs)
 
-    def _register_common_arguments(self, name, method_name=None, **kwargs):
+class ManagedServicesCommandGroup(AzCommandGroup):
+
+    def managedservices_custom(self, name, method_name=None, **kwargs):
         command = self.command_loader.command_table[self.custom_command(name, method_name, **kwargs)]
+        if not command:
+            return
+
 
 class ManagedServicesCommandsLoader(AzCommandsLoader):
 

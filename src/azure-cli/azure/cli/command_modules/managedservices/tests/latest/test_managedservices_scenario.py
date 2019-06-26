@@ -34,11 +34,11 @@ class ManagedServicesTests(ScenarioTest):
         # put definition
         self.cmd('az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id} --subscription {subscription-id}',
                  checks=[
-                    self.check('name', '{definition-id}'),
-                    self.check('properties.provisioningState', 'Succeeded'),
-                    self.check('properties.managedByTenantId', '{tenant-id}'),
-                    self.check('properties.authorizations[0].roleDefinitionId', '{role-definition-id}'),
-                    self.check('properties.authorizations[0].principalId', '{principal-id}')])
+                     self.check('name', '{definition-id}'),
+                     self.check('properties.provisioningState', 'Succeeded'),
+                     self.check('properties.managedByTenantId', '{tenant-id}'),
+                     self.check('properties.authorizations[0].roleDefinitionId', '{role-definition-id}'),
+                     self.check('properties.authorizations[0].principalId', '{principal-id}')])
 
         # get definition
         self.cmd('az managedservices definition show --definition {definition-id} --subscription {subscription-id}',
@@ -56,9 +56,9 @@ class ManagedServicesTests(ScenarioTest):
         # put assignment
         self.cmd('az managedservices assignment  create --definition {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}',
                  checks=[
-                    self.check('name', '{assignment-id}'),
-                    self.check('properties.provisioningState', 'Succeeded'),
-                    self.check('properties.registrationDefinitionId', '{registration-definition-resource-id}')])
+                     self.check('name', '{assignment-id}'),
+                     self.check('properties.provisioningState', 'Succeeded'),
+                     self.check('properties.registrationDefinitionId', '{registration-definition-resource-id}')])
 
         # get assignment
         self.cmd('az managedservices assignment  show --assignment {assignment-id} --subscription {subscription-id}',

@@ -108,9 +108,9 @@ helps['managedservices assignment create'] = """
              Can be used to override the generated registration assignment id.
     examples:
         - name: Create an assignment under the default subscription scope.
-          text: az managedservices assignment create --definition-id "/subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationDefinitions/0c3e9687-b461-4615-b6e4-74d54998d6e4"
+          text: az managedservices assignment create --definition "/subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationDefinitions/0c3e9687-b461-4615-b6e4-74d54998d6e4"
         - name: Create an assignment under a given subscription and resource group scope.
-          text: az managedservices assignment create --definition-id "/subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationDefinitions/0c3e9687-b461-4615-b6e4-74d54998d6e4" --subscription 59ebfa63-a27a-421d-8c99-9c09c9cfed99 --resource-group mygroup
+          text: az managedservices assignment create --definition "/subscriptions/a62076fa-768a-403c-9d9d-6a9919aae441/providers/Microsoft.ManagedServices/registrationDefinitions/0c3e9687-b461-4615-b6e4-74d54998d6e4" --subscription 59ebfa63-a27a-421d-8c99-9c09c9cfed99 --resource-group mygroup
 """
 
 helps['managedservices assignment show'] = """

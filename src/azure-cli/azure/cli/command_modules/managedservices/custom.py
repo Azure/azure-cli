@@ -67,7 +67,7 @@ def cli_definition_get(cmd, client,
 
 
 # pylint: disable=unused-argument
-def cli_definition_list(cmd, client, 
+def cli_definition_list(cmd, client,
                         api_version=None):
     subscription = _get_subscription_id_from_cmd(cmd)
     scope = _get_scope(subscription)
@@ -77,7 +77,7 @@ def cli_definition_list(cmd, client,
 
 
 def cli_definition_delete(cmd, client,
-                          definition, 
+                          definition,
                           api_version=None):
     subscription = _get_subscription_id_from_cmd(cmd)
     definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
@@ -108,7 +108,7 @@ def cli_assignment_create(cmd, client,
         assignment_id = str(uuid.uuid4())
 
     subscription = _get_subscription_id_from_cmd(cmd)
-    scope = _get_scope(subscription , resource_group_name)
+    scope = _get_scope(subscription, resource_group_name)
     properties = RegistrationAssignmentProperties(
         registration_definition_id=definition)
     return client.create_or_update(
@@ -137,8 +137,8 @@ def cli_assignment_get(cmd, client,
 # pylint: disable=unused-argument
 def cli_assignment_delete(cmd, client,
                           assignment,
-                       api_version=None,
-                       resource_group_name=None):
+                          api_version=None,
+                          resource_group_name=None):
     subscription = _get_subscription_id_from_cmd(cmd)
     assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
     scope = _get_scope(sub_id, rg_name)
@@ -170,13 +170,6 @@ def _get_subscription_id_from_cmd(cmd):
     subscription = get_subscription_id(cmd.cli_ctx)
     return subscription
 
-#def _get_subscription_id(cmd, subscription=None):
-#    if not subscription:
-#        from azure.cli.core.commands.client_factory import get_subscription_id
-#        sub_id = get_subscription_id(cmd.cli_ctx)
-#    else:
-#        sub_id = subscription
-#    return sub_id
 
 def _get_api_version(api_version=None):
     if not api_version:

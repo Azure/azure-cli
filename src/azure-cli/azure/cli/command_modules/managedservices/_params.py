@@ -4,15 +4,14 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands.parameters import get_resource_name_completion_list
 from azure.cli.core.commands.parameters import get_three_state_flag
-from azure.cli.core.api import get_subscription_id_list
+
 
 def load_arguments(self, _):
 
     group_name = 'ManagedServices'
     with self.argument_context('managedservices') as c:
-        c.argument('api_version', arg_group=group_name, help='The API Version to target.') #this works
+        c.argument('api_version', arg_group=group_name, help='The API Version to target.')
 
     for item in ['managedservices definition show', 'managedservices definition delete']:
         with self.argument_context(item) as c:
@@ -20,12 +19,10 @@ def load_arguments(self, _):
 
     for item in ['managedservices assignment list', 'managedservices assignment show']:
         with self.argument_context(item) as c:
-            c.argument('include_definition', arg_type=get_three_state_flag(), 
-                   help='When provided, gets the associated registration definition details.')
+            c.argument('include_definition', arg_type=get_three_state_flag(),
+                       help='When provided, gets the associated registration definition details.')
 
     for item in ['managedservices assignment show', 'managedservices assignment delete']:
         with self.argument_context(item) as c:
             c.argument('assignment',
                        help='The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.')
-
-
