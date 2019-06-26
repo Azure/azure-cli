@@ -519,6 +519,9 @@ examples:
   - name: Create a task without the source location.
     text: >
         az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null
+  - name: Create a task without the source location and with a timer trigger that runs the image `MyImage` at the top of every hour using the default trigger name.
+    text: >
+        az acr task create -n hello-world -r MyRegistry --cmd MyImage -c /dev/null --schedule "0 */1 * * *"
   - name: Create a task with the definition from the standard input. Either 'Ctrl + Z'(Windows) or 'Ctrl + D'(Linux) terminates the input stream.
     text: >
         az acr task create -n hello-world -r MyRegistry -f - -c /dev/null
@@ -548,28 +551,29 @@ examples:
   - name: Create a Windows task from a public GitHub repository which builds the Azure Container Builder image on Amd64 architecture.
     text: |
         az acr task create -t acb:{{.Run.ID}} -n acb-win -r MyRegistry \\
-            -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --commit-trigger-enabled false \\
-            --pull-request-trigger-enabled false --platform Windows/amd64
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with the system-assigned managed identity
+            -c https://github.com/Azure/acr-builder.git -f Windows.Dockerfile \\
+            --commit-trigger-enabled false --pull-request-trigger-enabled false --platform Windows/amd64
+  - name: Create a Linux multi-step task from a public GitHub repository with a git commit trigger and with the system-assigned managed identity
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
             --assign-identity
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with a user-assigned managed identity
+  - name: Create a Linux multi-step task from a public GitHub repository with a git commit trigger and with a user-assigned managed identity
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
             --assign-identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and with both system-assigned and user-assigned managed identities
+  - name: Create a Linux multi-step task from a public GitHub repository with a git commit trigger and with both system-assigned and user-assigned managed identities
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
+            -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
             --assign-identity [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
-  - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays using the default trigger name.
+  - name: Create a Linux multi-step task from a public GitHub repository with a system-assigned managed identity and a timer trigger that runs that task at noon on Mondays through Fridays using the default trigger name.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
-            -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile \\
-            --schedule "0 12 * * Mon-Fri"
+            -c https://github.com/Azure-Samples/acr-tasks.git#:multipleRegistries -f testtask.yaml \\
+            --commit-trigger-enabled false --pull-request-trigger-enabled false \\
+            --assign-identity --schedule "0 12 * * Mon-Fri"
   - name: Create a Linux task from a public GitHub repository which builds the hello-world image with a git commit trigger and a timer trigger that runs that task at noon on Mondays through Fridays with the trigger name provided.
     text: |
         az acr task create -t hello-world:{{.Run.ID}} -n hello-world -r MyRegistry \\
@@ -654,7 +658,7 @@ short-summary: Add a timer trigger to a task.
 examples:
   - name: Add a timer trigger to a task.
     text: >
-        az acr task timer add -n taskname -r registryname --timer-name myTimer --schedule "30 9 * * 1-5"
+        az acr task timer add -n taskname -r registryname --timer-name t2 --schedule "30 9 * * 1-5"
 """
 
 helps['acr task timer update'] = """
@@ -663,10 +667,10 @@ short-summary: Update the timer trigger for a task.
 examples:
   - name: Update the schedule of a timer trigger for a task.
     text: >
-        az acr task timer update -n taskname -r registryname --timer-name myTimer --schedule "0 12 * * *"
+        az acr task timer update -n taskname -r registryname --timer-name t2 --schedule "0 12 * * *"
   - name: Update the status of a timer trigger for a task.
     text: >
-        az acr task timer update -n taskname -r registryname --timer-name myTimer --enabled False
+        az acr task timer update -n taskname -r registryname --timer-name t2 --enabled False
 """
 
 helps['acr task timer remove'] = """
@@ -675,7 +679,7 @@ short-summary: Remove a timer trigger from a task.
 examples:
   - name: Remove a timer trigger from a task.
     text: >
-        az acr task timer remove -n taskname -r registryname --timer-name myTimer
+        az acr task timer remove -n taskname -r registryname --timer-name t2
 """
 
 helps['acr task timer list'] = """
