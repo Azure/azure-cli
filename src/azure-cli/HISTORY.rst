@@ -56,6 +56,12 @@ Release History
   the request but returns failure status code and returns an error mesage.
 * vm/vmss extension image list: Fix bug where command fails when used with --latest
 
+**VM**
+
+* vmss create `--single-placement-group`: Removed client-side validation. Does not fail if `--single-placement-group` is
+  set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
+  to the compute service.
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
