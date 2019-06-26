@@ -32,21 +32,18 @@ class ManagedServicesTests(ScenarioTest):
         }
 
         # put definition
-        result = self.cmd(
-            'az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id} --subscription {subscription-id}').get_output_in_json()
-
-        self.assertTrue(result['name'], definition_id)
-        self.assertTrue(result['properties'] is not None)
-        self.assertTrue(result['properties']['provisioningState'], "Succeeded")
-        self.assertTrue(result['properties']['managedByTenantId'], tenant_id)
-        self.assertTrue(result['properties']['authorizations'] is not None)
-        self.assertTrue(result['properties']['authorizations'][0]['roleDefinitionId'], role_definition_id)
-        self.assertTrue(result['properties']['authorizations'][0]['principalId'], principal_id)
+        self.cmd('az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id} --subscription {subscription-id}',
+                 checks=[
+                    self.check('name', '{definition-id}'),
+                    self.check('properties.provisioningState', 'Succeeded'),
+                    self.check('properties.managedByTenantId', '{tenant-id}'),
+                    self.check('properties.authorizations[0].roleDefinitionId', '{role-definition-id}'),
+                    self.check('properties.authorizations[0].principalId', '{principal-id}')])
 
         # get definition
         self.cmd('az managedservices definition show --definition {definition-id} --subscription {subscription-id}',
                  checks=[
-                     self.check('name', '{definition-id}'), ])
+                     self.check('name', '{definition-id}')])
 
         # registration assignment operation tests
         definition_resource_id = "/subscriptions/" + msp_sub_id + "/providers/Microsoft.ManagedServices/" \
@@ -57,12 +54,11 @@ class ManagedServicesTests(ScenarioTest):
             'registration-definition-resource-id': definition_resource_id
         })
         # put assignment
-        result = self.cmd(
-            'az managedservices assignment  create --definition-id {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}').get_output_in_json()
-        self.assertTrue(result['name'], assignment_id)
-        self.assertTrue(result['properties'] is not None)
-        self.assertTrue(result['properties']['provisioningState'], "Succeeded")
-        self.assertTrue(result['properties']['registrationDefinitionId'], definition_resource_id)
+        self.cmd('az managedservices assignment  create --definition {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}',
+                 checks=[
+                    self.check('name', '{assignment-id}'),
+                    self.check('properties.provisioningState', 'Succeeded'),
+                    self.check('properties.registrationDefinitionId', '{registration-definition-resource-id}')])
 
         # get assignment
         self.cmd('az managedservices assignment  show --assignment {assignment-id} --subscription {subscription-id}',
@@ -74,7 +70,6 @@ class ManagedServicesTests(ScenarioTest):
 
         # list assignments
         assignments_list = self.cmd('az managedservices assignment  list --subscription {subscription-id}').get_output_in_json()
-        self.assertTrue(assignments_list is not None)
         assignments = []
         for assignment in assignments_list:
             name = assignment['name']
@@ -85,9 +80,7 @@ class ManagedServicesTests(ScenarioTest):
         self.cmd('az managedservices definition delete --definition {definition-id} --subscription {subscription-id}')
 
         # list definitions
-        definitions_list = self.cmd(
-            'az managedservices definition list --subscription {subscription-id}').get_output_in_json()
-        self.assertTrue(definitions_list is not None)
+        definitions_list = self.cmd('az managedservices definition list --subscription {subscription-id}').get_output_in_json()
         definitions = []
         for entry in definitions_list:
             name = entry['name']

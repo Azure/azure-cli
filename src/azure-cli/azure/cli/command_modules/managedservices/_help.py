@@ -24,9 +24,8 @@ helps['managedservices assignment'] = """
 helps['managedservices definition create'] = """
     type: command
     short-summary: Creates a new registration definition.
-    long-summary: under the default scope or under the subscription provided.
     parameters:
-        - name: --name -n
+        - name: --name
           short-summary: |
              The name of the registration definition.
         - name: --tenant-id
@@ -65,7 +64,7 @@ helps['managedservices definition create'] = """
 
 helps['managedservices definition show'] = """
     type: command
-    short-summary: Gets a registration definition when given its identifier or the fully qualified resource id. When resource id is provided, the subscription paramter is ignored.
+    short-summary: Gets a registration definition.
     examples:
         - name: Gets the registration definition given its identifier under the default subscription scope.
           text: az managedservices definition show --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
@@ -77,7 +76,7 @@ helps['managedservices definition show'] = """
 
 helps['managedservices definition delete'] = """
     type: command
-    short-summary: Deletes a registration definition when given its identifier or the fully qualified resource id. When resource id is provided, the subscription paramter is ignored.
+    short-summary: Deletes a registration.
     examples:
         - name: Deletes the registration definition given its identifier under the default subscription scope.
           text: az managedservices definition delete --definition af8772a0-fd9c-4ddc-8ad0-7d4b3913d7dd
@@ -99,7 +98,7 @@ helps['managedservices definition list'] = """
 
 helps['managedservices assignment create'] = """
     type: command
-    short-summary: Creates a new registration assignment when given the fully qualified resource id of the registration definition.
+    short-summary: Creates a new registration assignment.
     parameters:
         - name: --definition
           short-summary: |
@@ -116,11 +115,7 @@ helps['managedservices assignment create'] = """
 
 helps['managedservices assignment show'] = """
     type: command
-    short-summary: Gets a registration assignment given its identifier (guid) or the fully qualified resource id. When resource id is used, subscription id and resource group parameters are ignored.
-    parameters:
-        - name: --assignment
-          short-summary: |
-             The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
+    short-summary: Gets a registration assignment.
     examples:
         - name: Get an assignment given its identifier under the default subscription scope.
           text: az managedservices assignment show --assignment d3087cf0-e180-4cca-b147-54ae00c7b504
@@ -132,11 +127,7 @@ helps['managedservices assignment show'] = """
 
 helps['managedservices assignment delete'] = """
     type: command
-    short-summary: Deletes the registration assignment given its identifier (guid) or the fully qualified resource id.
-    parameters:
-        - name: --assignment
-          short-summary: |
-             The identifier (guid) or the fully qualified resource id of the registration assignment. When resource id is used, subscription id and resource group parameters are ignored.
+    short-summary: Deletes the registration assignment.
     examples:
         - name: Deletes an assignment given its identifier under the default subscription scope.
           text: az managedservices assignment delete --assignment d3087cf0-e180-4cca-b147-54ae00c7b504
@@ -146,7 +137,7 @@ helps['managedservices assignment delete'] = """
 
 helps['managedservices assignment list'] = """
     type: command
-    short-summary: List all the registration assignments. Subscription id and resource group parameters can be used to override default values.
+    short-summary: List all the registration assignments.
     examples:
         - name: Lists all the registration assignments under the default scope.
           text: az managedservices assignment list
