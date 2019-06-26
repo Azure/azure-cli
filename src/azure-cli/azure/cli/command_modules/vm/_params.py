@@ -416,7 +416,7 @@ def load_arguments(self, _):
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-        c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Enable replicate using fault domains within the same cluster. Default to 'false' for any zonals, or with 100+ instances"
+        c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Limit the scale set to a single placement group."
                    " See https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-placement-groups for details")
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count for each placement group in the availability zone', min_api='2017-12-01')
         c.argument('vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.')
