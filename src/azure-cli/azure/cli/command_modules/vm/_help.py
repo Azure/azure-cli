@@ -122,236 +122,6 @@ type: command
 short-summary: List custom VM images.
 """
 
-helps['image template'] = """
-type: group
-short-summary: Manage and build image builder templates.
-"""
-
-helps['image template create'] = """
-type: command
-short-summary: Create an image builder template.
-parameters:
-  - name: --image-source -i
-    populator-commands:
-      - az vm image list
-      - az vm image show
-examples:
-  - name: Create an image builder template from an UbuntuLTS 18.04 image. Distribute it as a managed image and a shared image gallery image version
-    text: |
-        scripts="https://my-script-url.net/customize_script.sh"
-        imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201903060"
-
-        az image template create --image-source $imagesource -n mytemplate -g my-group \\
-            --scripts $scripts --managed-image-destinations image_1=westus \\
-            --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
-
-  - name: >
-        [Advanced] Create an image template with multiple customizers and distributors using the CLI's object cache via --defer. Supports features such as: customizer and output names, powershell exit codes, inline scripts, windows restart, file customizers, artifact tags and vhd output distributors.
-    text: |
-        script="https://my-script-url.com/customize_script.ps1"
-        imagesource="MicrosoftWindowsServer:WindowsServer:2019-Datacenter:2019.0.20190214"
-
-        # create and update template object in local cli cache. Defers put request to ARM
-        # Cache object ttl set via az configure.
-        az image template create --image-source $imagesource -n mytemplate \\
-            -g my-group --scripts $script --defer
-
-        # add customizers
-        az image template customizer add -n mytemplate -g my-group  \\
-            --customizer-name my-pwsh-script --exit-codes 0 1 --inline-script \\
-            "mkdir c:\\buildActions" "echo Azure-Image-Builder-Was-Here \\
-             > c:\\buildActions\\Output.txt" --type powershell --defer
-
-        az image template customizer add -n mytemplate -g my-group \\
-            --customizer-name my-file-customizer --type file \\
-            --file-source "https://my-file-source.net/file.txt"  \\
-            --dest-path "c:\\buildArtifacts\\file.txt" --defer
-
-        # add distributors
-        az image template output add -n mytemplate -g my-group --is-vhd \\
-            --output-name my-win-image-vhd --artifact-tags "is_vhd=True" --defer
-
-        az image template output add -n mytemplate -g my-group \\
-            --output-name my-win-image-managed --managed-image winImage \\
-            --managed-image-location eastus \\
-            --artifact-tags "is_vhd=False" --defer
-
-        # Stop deferring put request to ARM. Create the template from the object cache.
-        # Cache object will be deleted.
-        az image template update -n mytemplate -g my-group
-"""
-
-helps['image template customizer'] = """
-type: group
-short-summary: Manage image builder template customizers.
-"""
-
-helps['image template customizer add'] = """
-type: command
-short-summary: Add an image builder customizer to an image builder template.
-long-summary: Must be used with --defer
-examples:
-  - name: Add an inline shell customizer to an image template in the cli object cache
-    text: |
-        az image template customizer add -n mytemplate -g my-group \\
-            --inline-script "sudo mkdir /buildArtifacts" \\
-                            "sudo cp /tmp/index.html /buildArtifacts/index.html" \\
-            --customizer-name shell-script-inline --type shell --defer
-
-  - name: Add a file customizer to an image template in the cli object cache
-    text: |
-        az image template customizer add -n mytemplate -g my-group \\
-            --customizer-name my-file --type file \\
-            --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html" --defer
-
-  - name: Add a windows restart customizer to an image template in the cli object cache
-    text: |
-        az image template customizer add -n mytemplate -g my-group \\
-        --customizer-name shell-script-url \\
-        --restart-check-command "echo Azure-Image-Builder-Restarted-the-VM  > \\
-                                c:\\buildArtifacts\\restart.txt" \\
-            --type windows-restart --restart-timeout 10m --defer
-
-"""
-
-helps['image template customizer clear'] = """
-type: command
-short-summary: Remove all image builder customizers from an image builder template.
-long-summary: Must be used with --defer
-"""
-
-helps['image template customizer remove'] = """
-type: command
-short-summary: Remove an image builder customizer from an image builder template.
-long-summary: Must be used with --defer
-"""
-
-helps['image template delete'] = """
-type: command
-short-summary: Delete image builder template.
-"""
-
-helps['image template list'] = """
-type: command
-short-summary: List image builder templates.
-"""
-
-helps['image template output'] = """
-type: group
-short-summary: Manage image builder template output distributors.
-long-summary: >
-    A customized image can be distributed as a managed image,
-    a shared image in a shared image gallery (SIG), or as a VHD blob.
-"""
-
-helps['image template output add'] = """
-type: command
-short-summary: Add an image builder output distributor to an image builder template.
-long-summary: Must be used with --defer. The output distributor can be a managed image, a gallery image, or as a VHD blob.
-examples:
-  - name: Add a managed image distributor to an image template in the cli object cache. Specify a run output name.
-    text: |
-        az image template output add -n mytemplate -g my-group \\
-            --managed-image my_desired_image_name --output-name managed_image_run_01 --defer
-
-  - name: Add a shared image gallery distributor to an image template in the cli object cache. Specify its replication regions.
-    text: |
-        az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
-            --gallery-replication-regions westus brazilsouth \\
-            --gallery-image-definition linux_image_def --defer
-
-  - name: Add a VHD distributor to an image template in the cli object cache.
-    text: |
-        az image template output add -n mytemplate -g my-group \\
-            --output-name my_vhd_image --is-vhd  --defer
-
-"""
-
-helps['image template output clear'] = """
-type: command
-short-summary: Remove all image builder output distributors from an image builder template.
-long-summary: Must be used with --defer
-"""
-
-helps['image template output remove'] = """
-type: command
-short-summary: Remove an image builder output distributor from an image builder template.
-long-summary: Must be used with --defer
-"""
-
-helps['image template run'] = """
-type: command
-short-summary: Build an image builder template.
-examples:
-  - name: Start a template build run and then wait for it to finish.
-    text: |
-        az image template run -n mytemplate -g my-group --no-wait
-
-        az image template wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
-
-        az image template show -n mytemplate -g my-group
-"""
-
-helps['image template show'] = """
-type: command
-short-summary: Show an image builder template.
-"""
-
-helps['image template show-runs'] = """
-type: command
-short-summary: Show an image builder template's run outputs.
-examples:
-  - name: Run a template build run and then view its run outputs.
-    text: |
-        az image template run -n mytemplate -g my-group --no-wait
-
-        az image template wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
-
-        az image template show-runs -n mytemplate -g my-group
-"""
-
-helps['image template update'] = """
-type: command
-short-summary: Update an image builder template.
-long-summary: >
-    Updating an image builder templates is currently unsupported. This command can be used in conjunction with --defer
-    to update an image template object within the CLI cache. Without --defer it retrieves the specified image template
-    from the cache and sends a request to Azure to create the image template.
-
-examples:
-  - name: |
-        Create a template resource from a template object in the cli cache.
-        See "az image template create / output add / customizer add --help" and "az cache -h" for more information
-    text: |
-        # create and write template object to local cli cache
-        az image template create --image-source {image_source} -n mytemplate -g my-group \\
-            --scripts {script} --managed-image-destinations image_1=westus --defer
-
-        # add customizers and outputs to local cache template object via az image template output / customizer add
-        # one can also update cache object properties through generic update options, such as: --set
-        az image template output add -n mytemplate -g my-group --output-name my-win-image-managed \\
-            --artifact-tags "is_vhd=False"  --managed-image winImage --managed-image-location eastus --defer
-
-        # send template create request to azure to create template resource
-        az image template update -n mytemplate -g my-group
-"""
-
-helps['image template wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of the template is met.
-examples:
-  - name: Start a template build run and then wait for it to finish.
-    text: |
-        az image template run -n mytemplate -g my-group --no-wait
-
-        az image template wait -n mytemplate -g aibmdi \\
-            --custom "lastRunStatus.runState!='running'"
-
-        az image template show -n mytemplate -g my-group
-"""
-
 helps['image update'] = """
 type: command
 short-summary: Update custom VM images.
@@ -370,19 +140,11 @@ short-summary: Manage Proximity Placement Groups
 helps['ppg create'] = """
 type: command
 short-summary: Create a proximity placement group
-examples:
-  - name: Create a proximity placement group (autogenerated)
-    text: az ppg create --name MyProximityPlacementGroup --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['ppg list'] = """
 type: command
 short-summary: List proximity placement groups
-examples:
-  - name: List proximity placement groups (autogenerated)
-    text: az ppg list --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['ppg show'] = """
@@ -809,9 +571,6 @@ examples:
         az vm generalize --ids {vms_ids}
         az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
 
-  - name: Deallocate a VM. (autogenerated)
-    text: az vm deallocate --name MyVm --no-wait --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['vm delete'] = """
@@ -992,9 +751,6 @@ examples:
   - name: encrypt a VM using a key vault in the same resource group
     text: >
         az vm encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault MyVault
-  - name: Enable disk encryption on the OS disk and/or data disks. Encrypt mounted disks. (autogenerated)
-    text: az vm encryption enable --disk-encryption-keyvault MyVault --name MyVm --resource-group MyResourceGroup --volume-type DATA
-    crafted: true
 """
 
 helps['vm encryption show'] = """
@@ -1134,9 +890,6 @@ short-summary: Place the CLI in a waiting state until a condition of a virtual m
 examples:
   - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
     text: az vm extension wait --created --name MyExtension --resource-group MyResourceGroup --vm-name MyVm
-    crafted: true
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: az vm extension wait --exists --name MyExtension --resource-group MyResourceGroup --vm-name MyVm
     crafted: true
 """
 
@@ -1290,9 +1043,6 @@ examples:
         latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
             "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
         az vm image show -l westus -f CentOS -p OpenLogic --sku 7.3 --version {latest}
-  - name: Get the details for a VM image available in the Azure Marketplace. (autogenerated)
-    text: az vm image show --location westus --urn publisher:offer:sku:version
-    crafted: true
 """
 
 helps['vm list'] = """
@@ -1401,9 +1151,6 @@ short-summary: Configure settings of a NIC attached to a VM.
 examples:
   - name: Set a NIC on a VM to be the primary interface.
     text: az vm nic set -g MyResourceGroup --vm-name MyVm --nic nic_name1 nic_name2 --primary-nic nic_name2
-  - name: Configure settings of a NIC attached to a VM. (autogenerated)
-    text: az vm nic set --nics nic_name1 nic_name2 --primary-nic nic_name2 --resource-group MyResourceGroup --vm-name MyVm
-    crafted: true
 """
 
 helps['vm nic show'] = """
@@ -1485,9 +1232,6 @@ long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/
 helps['vm run-command invoke'] = """
 type: command
 short-summary: Execute a specific run command on a vm.
-long-summary: >
-    `az vm run-command show` returns helpful information on each run-command.
-    Discover Run command-id's via `az vmss run-command list`
 parameters:
   - name: --command-id
     type: string
@@ -1495,27 +1239,10 @@ parameters:
     populator-commands:
       - az vm run-command list
 examples:
-  - name: Install nginx on a linux VM.
+  - name: install nginx on a vm
     text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts "sudo apt-get update && sudo apt-get install -y nginx"
-  - name: Run shell command on a linux VM with parameters.
+  - name: invoke command with parameters
     text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $1 $2' --parameters hello world
-  - name: Run powershell script on a windows VM with parameters. Script supplied inline. Be wary of single-quoting in CMD.exe.
-    text: |-
-        az vm run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
-            --scripts 'param([string]$arg1,[string]$arg2)' \\
-            'Write-Host This is a sample script with parameters $arg1 and $arg2' \\
-            --parameters 'arg1=somefoo' 'arg2=somebar'
-  - name: Run powershell script on a windows VM with parameters. Script supplied from file.
-    text: |-
-        # script.ps1
-        #   param(
-        #       [string]$arg1,
-        #       [string]$arg2
-        #   )
-        #   Write-Host This is a sample script with parameters $arg1 and $arg2
-
-        az vm run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
-            --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar"
 """
 
 helps['vm run-command show'] = """
@@ -1605,9 +1332,6 @@ examples:
     text: >
         az vm start --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 
-  - name: Start a stopped VM. (autogenerated)
-    text: az vm start --name MyVm --no-wait --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['vm stop'] = """
@@ -1918,9 +1642,6 @@ examples:
   - name: encrypt a VM scale set using a key vault in the same resource group
     text: >
         az vmss encryption enable -g MyResourceGroup -n MyVmss --disk-encryption-keyvault MyVault
-  - name: Encrypt a VMSS with managed disks. (autogenerated)
-    text: az vmss encryption enable --disk-encryption-keyvault MyVault --name MyVmss --resource-group MyResourceGroup --volume-type DATA
-    crafted: true
 """
 
 helps['vmss encryption show'] = """
@@ -2031,7 +1752,7 @@ examples:
 
 helps['vmss identity remove'] = """
 type: command
-short-summary: Remove user assigned identities from a VM scaleset.
+short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
 examples:
   - name: Remove system assigned identity
     text: az vmss identity remove -g MyResourceGroup -n MyVmss
@@ -2085,8 +1806,8 @@ parameters:
   - name: --instance-id
     short-summary: VM instance ID. If missing, reimage all instances.
 examples:
-  - name: Reimage VMs within a VMSS. (autogenerated)
-    text: az vmss reimage --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+  - name: Reimage VMs within a VMSS
+    text: az vmss reimage --instance-id instanceId --name MyScaleSet --no-wait --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -2113,9 +1834,6 @@ long-summary: 'For more information, see https://docs.microsoft.com/en-us/azure/
 helps['vmss run-command invoke'] = """
 type: command
 short-summary: Execute a specific run command on a Virtual Machine Scale Set instance.
-long-summary: >
-    `az vmss run-command show` returns helpful information on each run-command.
-    Discover Run command-id's via `az vmss run-command list`
 parameters:
   - name: --command-id
     type: string
@@ -2125,32 +1843,15 @@ parameters:
   - name: --instance-id
     short-summary: Scale set VM instance id.
 examples:
-  - name: Install nginx on a VMSS instance.
+  - name: install nginx on a VMSS instance
     text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 0 --scripts "sudo apt-get update && sudo apt-get install -y nginx"
-  - name: Invoke a run-command with parameters on a VMSS instance.
+  - name: invoke a run-command with parameters on a VMSS instance
     text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
-  - name: 'Invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
-    text: |-
+  - name: 'invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
+    text: |
         az vmss list-instances -n MyVMSS -g ova-test --query "[].id" --output tsv | \\
         az vmss run-command invoke --scripts 'echo $1 $2' --parameters hello world  \\
             --command-id RunShellScript --ids @-
-  - name: Run powershell script on a windows VMSS instance with parameters. Script supplied inline. Be wary of single-quoting in CMD.exe.
-    text: |-
-        az vmss run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
-            --scripts 'param([string]$arg1,[string]$arg2)' \\
-            'Write-Host This is a sample script with parameters $arg1 and $arg2' \\
-            --parameters 'arg1=somefoo' 'arg2=somebar' --instance-id 2
-  - name: Run powershell script on a windows VMSS instance with parameters. Script supplied from file.
-    text: |-
-        # script.ps1
-        #   param(
-        #       [string]$arg1,
-        #       [string]$arg2
-        #   )
-        #   Write-Host This is a sample script with parameters $arg1 and $arg2
-
-        az vmss run-command invoke  --command-id RunPowerShellScript -n tosin-win-vm -g ova-test \\
-            --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar" --instance-id 5
 """
 
 helps['vmss run-command show'] = """

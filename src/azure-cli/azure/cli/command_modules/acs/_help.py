@@ -4,7 +4,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps
+from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 helps['acs'] = """
@@ -380,7 +380,7 @@ short-summary: Download and install kubectl, the Kubernetes command-line tool.
 
 helps['aks install-connector'] = """
 type: command
-short-summary: Install the ACI Connector on a managed Kubernetes cluster.
+short-summary: (PREVIEW) Install the ACI Connector on a managed Kubernetes cluster.
 parameters:
   - name: --chart-url
     type: string
@@ -437,7 +437,7 @@ short-summary: List managed Kubernetes clusters.
 
 helps['aks remove-connector'] = """
 type: command
-short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
+short-summary: (PREVIEW) Remove the ACI Connector from a managed Kubernetes cluster.
 parameters:
   - name: --connector-name
     type: string
@@ -520,7 +520,7 @@ parameters:
 
 examples:
   - name: Update an existing Kubernetes cluster with new service principal.
-    text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
+    text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
   - name: Update an existing Azure Active Directory Kubernetes cluster with new server app secret key.
     text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-aad --aad-server-app-id MyExistingAADServerAppID --aad-server-app-secret MyNewAADServerAppSecret --aad-client-app-id MyExistingAADClientAppID --aad-tenant-id MyAADTenantID
 """
@@ -543,7 +543,7 @@ examples:
 
 helps['aks upgrade-connector'] = """
 type: command
-short-summary: Upgrade the ACI Connector on a managed Kubernetes cluster.
+short-summary: (PREVIEW) Upgrade the ACI Connector on a managed Kubernetes cluster.
 parameters:
   - name: --chart-url
     type: string
