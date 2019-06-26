@@ -31,6 +31,10 @@ def _call_az_command(command_string, run_async=False, secure_params=None):
     """
 
     tokenized_command = shlex.split(command_string)
+    # If command does not start with 'az' then raise exception
+    if tokenized_command[0] != 'az':
+        raise AzCommandError("The command string is not an 'az' command!")
+
     # If run on windows, add 'cmd /c'
     windows_os_name = 'nt'
     if os.name == windows_os_name:
@@ -40,7 +44,7 @@ def _call_az_command(command_string, run_async=False, secure_params=None):
     if secure_params:
         for param in secure_params:
             command_string = command_string.replace(param, '********')
-    logger.debug("Calling: %s", command_string)
+    logger.debug('Calling: %s', command_string)
     process = subprocess.Popen(tokenized_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
     # Wait for process to terminate and fetch stdout and stderror
