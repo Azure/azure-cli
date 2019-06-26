@@ -1077,7 +1077,8 @@ def create_apimgmt(cmd, client,
                    virtual_network_type=None,
                    publisher_email=None,
                    publisher_name=None,
-                   sku=None,
+                   sku_name=None,
+                   sku_capacity=None,
                    identity=None,
                    location=None):
     body={}
@@ -1092,7 +1093,8 @@ def create_apimgmt(cmd, client,
     body['virtual_network_type'] = virtual_network_type
     body['publisher_email'] = publisher_email
     body['publisher_name'] = publisher_name
-    body['sku'] = sku
+    body.setdefault('sku', {})['name'] = sku_name
+    body.setdefault('sku', {})['capacity'] = sku_capacity
     body['identity'] = identity
     body['location'] = location
     return client.api_management_service.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
@@ -1112,7 +1114,8 @@ def update_apimgmt(cmd, client,
                    virtual_network_type=None,
                    publisher_email=None,
                    publisher_name=None,
-                   sku=None,
+                   sku_name=None,
+                   sku_capacity=None,
                    identity=None,
                    location=None):
     body={}
@@ -1127,7 +1130,8 @@ def update_apimgmt(cmd, client,
     body['virtual_network_type'] = virtual_network_type
     body['publisher_email'] = publisher_email
     body['publisher_name'] = publisher_name
-    body['sku'] = sku
+    body.get('sku', {}).get('name', {})['name'] = name
+    body.get('sku', {}).get('capacity', {})['capacity'] = capacity
     body['identity'] = identity
     body['location'] = location
     return client.api_management_service.create_or_update(resource_group_name=resource_group, service_name=name, parameters=body)
