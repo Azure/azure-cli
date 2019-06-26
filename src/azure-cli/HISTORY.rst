@@ -44,6 +44,7 @@ Release History
                    failures caused by AAD graph server replication latency
 * ad signed-in-user: fix a crash on listing owned objects
 * [BREAKING CHANGE] create-for-rbac: remove --password
+* ad sp: use the right approach to find the application from a service principal 
 
 **RDBMS**
 
