@@ -430,7 +430,10 @@ def _populate_collection_definition(collection,
         collection['partitionKey'] = {'paths': [partition_key_path], 'kind': 'Hash'}
 
     if default_ttl is not None:
-        collection['defaultTtl'] = default_ttl
+        if default_ttl == 0 and "defaultTtl" in collection:
+            del collection['defaultTtl']
+        elif default_ttl != 0:
+            collection['defaultTtl'] = default_ttl
 
     if indexing_policy is not None:
         collection['indexingPolicy'] = indexing_policy

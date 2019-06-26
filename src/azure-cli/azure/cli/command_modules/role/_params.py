@@ -97,10 +97,6 @@ def load_arguments(self, _):
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
             c.argument('credential_description', help="the description of the password", arg_group='Credential')
 
-    with self.argument_context('ad sp create-for-rbac') as c:
-        c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                   deprecate_info=c.deprecate(hide=True), help='Password.')
-
     with self.argument_context('ad sp credential reset') as c:
         c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
                    help="If missing, CLI will generate a strong password")

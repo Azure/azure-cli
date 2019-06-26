@@ -463,16 +463,6 @@ examples:
             --target-slot production
 """
 
-helps['functionapp devops-build'] = """
-type: group
-short-summary: (DEPRECATED) Azure Function specific integration with Azure DevOps. This command will be removed in 2.0.68
-"""
-
-helps['functionapp devops-build create'] = """
-type: command
-short-summary: (DEPRECATED) Create an Azure DevOps pipeline for a function app. Please use the devops-pipeline create command. This command will be removed in 2.0.68
-"""
-
 helps['functionapp devops-pipeline'] = """
 type: group
 short-summary: Azure Function specific integration with Azure DevOps. Please visit https://aka.ms/functions-azure-devops for more information.
@@ -1031,7 +1021,7 @@ examples:
         az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins https://myapps.com
   - name: remove all allowed origins
     text: >
-        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins *
+        az webapp cors remove -g {myRG} -n {myAppName} --allowed-origins
 """
 
 helps['webapp cors show'] = """

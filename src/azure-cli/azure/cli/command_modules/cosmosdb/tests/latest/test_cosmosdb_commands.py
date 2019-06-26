@@ -345,7 +345,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb database create -g {rg} -n {acc} -d {db_name}')
 
-        collection = self.cmd('az cosmosdb collection create -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
+        collection = self.cmd('az cosmosdb collection create -g {rg} -n {acc} -d {db_name} -c {col} --default-ttl 0').get_output_in_json()
         assert collection["collection"]["id"] == col
 
         collection_show = self.cmd('az cosmosdb collection show -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
@@ -362,8 +362,12 @@ class CosmosDBTests(ScenarioTest):
         assert throughput_update["offer"]["content"]["offerThroughput"] == throughput
 
         # update ttl
-        throughput_update = self.cmd('az cosmosdb collection update --default-ttl {ttl} -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
-        assert throughput_update["collection"]["defaultTtl"] == default_ttl
+        ttl_update = self.cmd('az cosmosdb collection update --default-ttl {ttl} -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
+        assert ttl_update["collection"]["defaultTtl"] == default_ttl
+
+        # remove ttl
+        disable_ttl = self.cmd('az cosmosdb collection update --default-ttl 0 -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
+        assert "defaultTtl" not in disable_ttl["collection"]
 
         self.cmd('az cosmosdb collection delete -g {rg} -n {acc} -d {db_name} -c {col}')
         assert not self.cmd('az cosmosdb collection exists -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()

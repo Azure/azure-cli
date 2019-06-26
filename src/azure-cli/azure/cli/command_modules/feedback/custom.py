@@ -21,9 +21,9 @@ from knack.log import get_logger
 from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
 
-from azure.cli.core.util import get_az_version_string
+from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
+from azure.cli.core.util import get_az_version_string, open_page_in_browser
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
-from azure.cli.core.util import open_page_in_browser
 
 _ONE_MIN_IN_SECS = 60
 
@@ -41,10 +41,10 @@ _GET_STARTED_URL = "aka.ms/azcli/get-started"
 _QUESTIONS_URL = "aka.ms/azcli/questions"
 
 _CLI_ISSUES_URL = "aka.ms/azcli/issues"
-_RAW_CLI_ISSUES_URL = "https://github.com/Azure/azure-cli/issues/new"
+_RAW_CLI_ISSUES_URL = "https://github.com/azure/azure-cli/issues/new"
 
 _EXTENSIONS_ISSUES_URL = "aka.ms/azcli/ext/issues"
-_RAW_EXTENSIONS_ISSUES_URL = "https://github.com/Azure/azure-cli-extensions/issues/new"
+_RAW_EXTENSIONS_ISSUES_URL = "https://github.com/azure/azure-cli-extensions/issues/new"
 
 _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
@@ -62,6 +62,8 @@ BEGIN TEMPLATE
 ===============
 **A browser has been opened to {} to create an issue.**
 **You can also run `az feedback --verbose` to emit the full output to stderr.**
+**Azure CLI repo: {}**
+**Azure CLI Extensions repo: {}**
 """
 
 _ISSUES_TEMPLATE = """
@@ -496,6 +498,7 @@ def _build_issue_info_tup(command_log_file=None):
                    "executed_command": ""}
 
     is_ext = False
+    ext_name = None
     # Get command information, if applicable
     if command_log_file:
         command_name = command_log_file.metadata_tup.cmd
@@ -511,6 +514,7 @@ def _build_issue_info_tup(command_log_file=None):
             if extension_name:
                 extension_info = "\nExtension Name: {}. Version: {}.".format(extension_name, extension_version)
                 is_ext = True
+                ext_name = extension_name
 
             format_dict["errors_string"] = ErrorMinifier(errors_list)
             format_dict["executed_command"] = "az " + executed_command if executed_command else executed_command
@@ -523,13 +527,14 @@ def _build_issue_info_tup(command_log_file=None):
     format_dict["shell"] = "Shell: {}".format(_get_parent_proc_name())
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
 
-    pretty_url_name = _EXTENSIONS_ISSUES_URL if is_ext else _CLI_ISSUES_URL
+    pretty_url_name = _get_extension_repo_url(ext_name) if is_ext else _CLI_ISSUES_URL
+
     # get issue body without minification
     original_issue_body = _ISSUES_TEMPLATE.format(**format_dict)
 
     # First try
     capacity = _MAX_URL_LENGTH  # some browsers support a max of roughly 2000 characters
-    res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, capacity)
+    res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, ext_name, capacity)
     formatted_issues_url, minified_issue_body = res
     capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
 
@@ -537,7 +542,7 @@ def _build_issue_info_tup(command_log_file=None):
     tries = 0
     while len(formatted_issues_url) > _MAX_URL_LENGTH and tries < 25:
         # reduce capacity by difference if formatted_issues_url is too long because of url escaping
-        res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, capacity)
+        res = _get_minified_issue_url(command_log_file, format_dict.copy(), is_ext, ext_name, capacity)
         formatted_issues_url, minified_issue_body = res
         capacity = capacity - (len(formatted_issues_url) - _MAX_URL_LENGTH)
         tries += 1
@@ -552,10 +557,35 @@ def _build_issue_info_tup(command_log_file=None):
     logger.debug("Total minified issue length is %s", len(minified_issue_body))
     logger.debug("Total formatted url length is %s", len(formatted_issues_url))
 
-    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name), formatted_issues_url, original_issue_body
+    return _ISSUES_TEMPLATE_PREFIX.format(pretty_url_name, _CLI_ISSUES_URL, _EXTENSIONS_ISSUES_URL), \
+        formatted_issues_url, original_issue_body
 
 
-def _get_minified_issue_url(command_log_file, format_dict, is_ext, capacity):
+def _get_extension_repo_url(ext_name, raw=False):
+    _NEW_ISSUES_STR = '/issues/new'
+    try:
+        project_url = resolve_project_url_from_index(extension_name=ext_name)
+        if _is_valid_github_project_url(url=project_url):
+            raw_url = project_url.lower().strip('/') + _NEW_ISSUES_STR
+            # Prettify the url for cli extensions repo
+            if not raw and raw_url == _RAW_EXTENSIONS_ISSUES_URL:
+                return _EXTENSIONS_ISSUES_URL
+            return raw_url
+    except (CLIError, NoExtensionCandidatesError) as ex:
+        # since this is going to feedback let it fall back to the generic extensions repo
+        logger.debug(ex)
+    return _RAW_EXTENSIONS_ISSUES_URL if raw else _EXTENSIONS_ISSUES_URL
+
+
+def _is_valid_github_project_url(url):
+    # valid project URL will be of format https://github.com/org/project
+    _GITHUB_URL_STR = 'https://github.com'
+    if url.startswith(_GITHUB_URL_STR):
+        return len(url.strip(_GITHUB_URL_STR).strip('/').split('/')) == 2
+    return False
+
+
+def _get_minified_issue_url(command_log_file, format_dict, is_ext, ext_name, capacity):
     # get issue body without errors
     minified_errors = format_dict["errors_string"]
     format_dict["errors_string"] = ""
@@ -571,7 +601,7 @@ def _get_minified_issue_url(command_log_file, format_dict, is_ext, capacity):
 
     # prefix formatted url with 'https://' if necessary and supply empty body to remove any existing issue template
     # aka.ms doesn't work well for long urls / query params
-    formatted_issues_url = _RAW_EXTENSIONS_ISSUES_URL if is_ext else _RAW_CLI_ISSUES_URL
+    formatted_issues_url = _get_extension_repo_url(ext_name, raw=True) if is_ext else _RAW_CLI_ISSUES_URL
     if not formatted_issues_url.startswith("http"):
         formatted_issues_url = "https://" + formatted_issues_url
     query_dict = {'body': minified_issue_body}
@@ -717,7 +747,6 @@ def _prompt_issue(recent_command_list):
             prefix, url, original_issue = _build_issue_info_tup()
         else:
             prefix, url, original_issue = _build_issue_info_tup(recent_command_list[ans])
-
     print(prefix)
 
     logger.info(original_issue)
