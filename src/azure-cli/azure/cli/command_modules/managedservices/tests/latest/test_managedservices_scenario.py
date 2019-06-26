@@ -6,7 +6,9 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 
 # ManagedServices RP is in a preview state. And we have to allow subscriptions to be able to use the functionality.
-# We could have use the CLI test subscription but it had locks on it, which is not supported by the RP yet.
+# We could have used the CLI test subscription but it had locks on it, which is not supported by the RP yet.
+# So for the time being, tests are being marked record_only
+
 name_prefix = 'climanagedservices'
 tenant_id = 'bab3375b-6197-4a15-a44b-16c41faa91d7'
 principal_id = 'd6f6c88a-5b7a-455e-ba40-ce146d4d3671'
@@ -16,10 +18,9 @@ msp_sub_id = '38bd4bef-41ff-45b5-b3af-d03e55a4ca15'
 assignment_id = 'b61427a6-974b-4987-a4cc-007a11ec8396'
 
 
-# So for the time being, tests are being marked record_only
-@record_only()
 class ManagedServicesTests(ScenarioTest):
 
+    @record_only()
     def test_managedservices_commands(self):
         self.kwargs = {
             'name': self.create_random_name(prefix=name_prefix, length=24),
@@ -32,7 +33,7 @@ class ManagedServicesTests(ScenarioTest):
         }
 
         # put definition
-        self.cmd('az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id} --subscription {subscription-id}',
+        self.cmd('az managedservices definition create --name {name} --tenant-id  {tenant-id} --principal-id {principal-id} --role-definition-id {role-definition-id} --definition-id {definition-id}',
                  checks=[
                      self.check('name', '{definition-id}'),
                      self.check('properties.provisioningState', 'Succeeded'),
@@ -41,7 +42,7 @@ class ManagedServicesTests(ScenarioTest):
                      self.check('properties.authorizations[0].principalId', '{principal-id}')])
 
         # get definition
-        self.cmd('az managedservices definition show --definition {definition-id} --subscription {subscription-id}',
+        self.cmd('az managedservices definition show --definition {definition-id}',
                  checks=[
                      self.check('name', '{definition-id}')])
 
@@ -54,22 +55,21 @@ class ManagedServicesTests(ScenarioTest):
             'registration-definition-resource-id': definition_resource_id
         })
         # put assignment
-        self.cmd('az managedservices assignment  create --definition {registration-definition-resource-id} --assignment-id {assignment-id} --subscription {subscription-id}',
+        self.cmd('az managedservices assignment  create --definition {registration-definition-resource-id} --assignment-id {assignment-id}',
                  checks=[
                      self.check('name', '{assignment-id}'),
-                     self.check('properties.provisioningState', 'Succeeded'),
-                     self.check('properties.registrationDefinitionId', '{registration-definition-resource-id}')])
+                     self.check('properties.provisioningState', 'Succeeded')])
 
         # get assignment
-        self.cmd('az managedservices assignment  show --assignment {assignment-id} --subscription {subscription-id}',
+        self.cmd('az managedservices assignment  show --assignment {assignment-id}',
                  checks=[
                      self.check('name', '{assignment-id}'), ])
 
         # delete assignment
-        self.cmd('az managedservices assignment  delete --assignment {assignment-id} --subscription {subscription-id}')
+        self.cmd('az managedservices assignment  delete --assignment {assignment-id}')
 
         # list assignments
-        assignments_list = self.cmd('az managedservices assignment  list --subscription {subscription-id}').get_output_in_json()
+        assignments_list = self.cmd('az managedservices assignment  list').get_output_in_json()
         assignments = []
         for assignment in assignments_list:
             name = assignment['name']
@@ -77,10 +77,10 @@ class ManagedServicesTests(ScenarioTest):
             self.assertTrue(assignment_id not in assignments)
 
         # delete definition
-        self.cmd('az managedservices definition delete --definition {definition-id} --subscription {subscription-id}')
+        self.cmd('az managedservices definition delete --definition {definition-id}')
 
         # list definitions
-        definitions_list = self.cmd('az managedservices definition list --subscription {subscription-id}').get_output_in_json()
+        definitions_list = self.cmd('az managedservices definition list').get_output_in_json()
         definitions = []
         for entry in definitions_list:
             name = entry['name']
