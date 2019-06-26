@@ -495,7 +495,7 @@ class AzCliCommandInvoker(CommandInvoker):
         self.commands_loader.command_name = command
         self.commands_loader.load_arguments(command)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=self.commands_loader)
-        self.commands_loader._update_command_definitions()
+        self.commands_loader._update_command_definitions()  # pylint: disable=protected-access
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(self.commands_loader)
 

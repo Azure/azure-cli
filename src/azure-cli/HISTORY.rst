@@ -3,9 +3,8 @@
 Release History
 ===============
 
-**Core**
-
-* Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
+**Various**
+* Fixed issue where `--subscription` would appear despite being not applicable.
 
 **ACR**
 
