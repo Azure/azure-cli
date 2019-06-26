@@ -9,8 +9,9 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id
 logger = get_logger(__name__)
 
 # The API version is not being set correctly in the generated Python SDK.
-# Opened an issue #https://github.com/Azure/azure-sdk-for-python/issues/6112 to track it.
+# Opened an issue https://github.com/Azure/azure-cli/issues/9813 to track it.
 # Ideally, the SDK should set the version accordingly based on Swagger spec.
+# TODO: Remove when azure-cli issue #9813 is resolved.
 API_VERSION_PREVIEW = '2018-06-01-preview'
 
 
@@ -77,7 +78,7 @@ def cli_definition_list(cmd, client):
         api_version=API_VERSION_PREVIEW)
 
 
-def cli_definition_delete(cmd, client,definition):
+def cli_definition_delete(cmd, client, definition):
     subscription = _get_subscription_id_from_cmd(cmd)
     definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
     scope = _get_scope(sub_id, rg_name)
