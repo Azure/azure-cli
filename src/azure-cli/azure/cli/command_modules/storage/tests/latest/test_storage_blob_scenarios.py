@@ -441,23 +441,23 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
                             'r --https-only --as-user --auth-mode login'.format(storage_account, b, c, expiry)).output
         self.assertIn('&sig=', blob_sas)
-        self.assertIn('&skoid=', blob_sas)
-        self.assertIn('&sktid=', blob_sas)
-        self.assertIn('&skt=', blob_sas)
-        self.assertIn('&ske=', blob_sas)
-        self.assertIn('&sks=', blob_sas)
-        self.assertIn('&skv=', blob_sas)
+        self.assertIn('skoid=', blob_sas)
+        self.assertIn('sktid=', blob_sas)
+        self.assertIn('skt=', blob_sas)
+        self.assertIn('ske=', blob_sas)
+        self.assertIn('sks=', blob_sas)
+        self.assertIn('skv=', blob_sas)
 
         container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
                                  'r --https-only --as-user --auth-mode login'.format(storage_account, c, expiry)).output
         self.assertIn('&sig=', container_sas)
-        self.assertIn('&skoid=', container_sas)
-        self.assertIn('&sktid=', container_sas)
-        self.assertIn('&skt=', container_sas)
-        self.assertIn('&ske=', container_sas)
-        self.assertIn('&sks=', container_sas)
-        self.assertIn('&skv=', container_sas)
-        self.assertIn('&skv=', container_sas)
+        self.assertIn('skoid=', container_sas)
+        self.assertIn('sktid=', container_sas)
+        self.assertIn('skt=', container_sas)
+        self.assertIn('ske=', container_sas)
+        self.assertIn('sks=', container_sas)
+        self.assertIn('skv=', container_sas)
+        self.assertIn('skv=', container_sas)
 
 
 if __name__ == '__main__':

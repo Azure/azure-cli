@@ -1060,7 +1060,8 @@ def as_user_validator(namespace):
             raise argparse.ArgumentError(
                 None, 'incorrect usage: --expiry should be within 7 days from now')
 
-        if not hasattr(namespace, 'token_credential') or namespace.token_credential is None:
+        if ((not hasattr(namespace, 'token_credential') or namespace.token_credential is None) and
+                (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
             import argparse
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
