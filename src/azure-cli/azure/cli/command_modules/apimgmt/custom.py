@@ -47,7 +47,7 @@ def create_apimgmt_api(cmd, client,
     body['display_name'] = display_name
     body['service_url'] = service_url
     body['path'] = path
-    body['protocols'] = protocols
+    body['protocols'] = ['http'] # protocols
     body['api_version_set'] = api_version_set
     body['value'] = value
     body['format'] = format
