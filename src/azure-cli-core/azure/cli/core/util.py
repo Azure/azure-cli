@@ -230,11 +230,38 @@ def read_file_content(file_path, allow_binary=False):
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
+def preprocess_json(original):
+    lines = original.splitlines()
+    for i in range(len(lines)):
+        line = lines[i]
+        if "#" in line or "//" in line:
+            outside = True
+            escape = False
+            for ci in range(len(line)):
+                if outside:
+                    if line[ci] == "\"":
+                        outside = False
+                    elif line[ci] == "#" or (line[ci] == "/" and ci < (len(line) - 1) and line[ci + 1] == "/"):
+                        line = line[:ci]
+                        break
+                else:
+                    if escape:
+                        escape = False
+                    else:
+                        if line[ci] == "\\":
+                            escape = True
+                        elif line[ci] == "\"":
+                            outside = True
+            lines[i] = line
+    return "".join(lines)
+
+
 def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
     """ Allows the passing of JSON or Python dictionary strings. This is needed because certain
     JSON strings in CMD shell are not received in main's argv. This allows the user to specify
     the alternative notation, which does not have this problem (but is technically not JSON). """
     try:
+        json_or_dict_string = preprocess_json(json_or_dict_string)
         if not preserve_order:
             return json.loads(json_or_dict_string)
         from collections import OrderedDict
