@@ -46,7 +46,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
         g.command('check-name', 'check_name_availability')
-        g.custom_command('create', 'create_storage_account', min_api='2016-01-01')
+        g.custom_command('create', 'create_storage_account')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get_properties')
         g.custom_command('list', 'list_storage_accounts')
@@ -212,7 +212,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('create', 'create_container',
                                 transform=create_boolean_result_output_transformer('created'),
                                 table_transformer=transform_boolean_for_table)
-        g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature')
+        g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature',
+                                       min_api='2018-11-09')
+        g.storage_command_oauth('generate-sas', 'generate_container_shared_access_signature', max_api='2018-03-28')
         g.storage_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'),
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('set-permission', 'set_container_acl')

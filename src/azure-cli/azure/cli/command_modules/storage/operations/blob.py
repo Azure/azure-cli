@@ -418,16 +418,19 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False, as_user=False):
-    user_delegation_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
-
-    sas_token = client.generate_blob_shared_access_signature(
-        container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-        content_encoding=content_encoding, content_language=content_language, content_type=content_type,
-        user_delegation_key=user_delegation_key)
+        sas_token = client.generate_blob_shared_access_signature(
+            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+            content_encoding=content_encoding, content_language=content_language, content_type=content_type,
+            user_delegation_key=user_delegation_key)
+    else:
+        sas_token = client.generate_blob_shared_access_signature(
+            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+            content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
         return client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token)
     return sas_token

@@ -225,8 +225,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
         c.register_sas_arguments()
-        c.extra('full_uri')
-        c.extra('as_user')
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
                                          'using this shared access signature.')
         c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
@@ -482,7 +480,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from .completers import get_storage_acl_name_completion_list
         t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
         c.register_sas_arguments()
-        c.extra('as_user')
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
