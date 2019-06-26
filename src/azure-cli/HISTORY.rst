@@ -39,6 +39,9 @@ Release History
 
 * Introducing managed service command module in preview.
 
+**Profile**
+* Suppress `--subscription` argument for logout command.
+
 **RBAC**
 
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent

@@ -166,11 +166,13 @@ class CacheObject(object):
                 break
 
         doc_string = doc_string.replace('\r', '').replace('\n', ' ')
+        doc_string = re.sub(' +', ' ', doc_string)
         model_name_regex = re.compile(r':return: (.*that returns )?(?P<model>[a-zA-Z]*)')
         model_path_regex = re.compile(r':rtype:.*(?P<path>azure.mgmt[a-zA-Z0-9_\.]*)')
         try:
             self._model_name = model_name_regex.search(doc_string).group('model')
-            self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
+            if not self._model_path:
+                self._model_path = model_path_regex.search(doc_string).group('path').rsplit('.', 1)[0]
         except AttributeError:
             return
 
@@ -222,13 +224,13 @@ class CacheObject(object):
             'group': self._resource_group
         }
 
-    def __init__(self, cmd, payload, operation):
+    def __init__(self, cmd, payload, operation, model_path=None):
         self._cmd = cmd
         self._operation = operation
         self._resource_group = None
         self._resource_name = None
         self._model_name = None
-        self._model_path = None
+        self._model_path = model_path
         self._payload = payload
         self.last_saved = None
         self._resolve_model()
@@ -379,7 +381,10 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
     if not cmd_obj.command_kwargs.get('supports_local_cache', False):
         return _get_operation()
 
-    cache_obj = CacheObject(cmd_obj, None, operation)
+    # allow overriding model path, e.g. for extensions
+    model_path = cmd_obj.command_kwargs.get('model_path', None)
+
+    cache_obj = CacheObject(cmd_obj, None, operation, model_path=model_path)
     try:
         cache_obj.load(args, kwargs)
         if _is_stale(cmd_obj.cli_ctx, cache_obj):
@@ -412,7 +417,10 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
     if not use_cache:
         result = _put_operation()
 
-    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation)
+    # allow overriding model path, e.g. for extensions
+    model_path = cmd_obj.command_kwargs.get('model_path', None)
+
+    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation, model_path=model_path)
     if use_cache:
         cache_obj.save(args, kwargs)
         return cache_obj
@@ -511,6 +519,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
+
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
