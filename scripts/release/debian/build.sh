@@ -34,6 +34,8 @@ make
 make install
 
 export PATH=$PATH:$WORKDIR/python_env/bin
+alias python=python3
+alias pip=pip3
 
 bash ${SCRIPT_DIR}/../../install_full.sh
 
