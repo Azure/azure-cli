@@ -35,20 +35,7 @@ make install
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
-# note: This installation step could happen in debian/rules but was unable to escape $ char.
-# It does not affect the built .deb file though.
-pip3 install wheel
-
-if [ -d $WORKDIR/privates ]; then
-    # The private pages are used when a dependency is not published yet
-    find $WORKDIR/private -name '*.whl' | xargs pip3 install
-fi
-
-# The product whl are expected to be pre-built
-find /mnt/artifacts/pypi -name '*.whl' | xargs pip3 install
-
-pip3 install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
-pip3 install --force-reinstall urllib3==1.24.2
+bash ${SCRIPT_DIR}/../install_full.sh
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
