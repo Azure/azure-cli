@@ -232,29 +232,28 @@ def read_file_content(file_path, allow_binary=False):
 
 def preprocess_json(original):
     lines = original.splitlines()
-    for i in range(len(lines)):
-        line = lines[i]
-        if "#" in line or "//" in line:
-            quote = None
-            escape = None
-            for ci in range(len(line)):
-                cc = line[ci]
-                nc = line[ci + 1] if ci < (len(line) - 1) else None
-                if quote is None:
-                    if cc == "\"" or cc == "\'":
-                        quote = cc
-                    elif cc == "#" or (cc == "/" and nc == "/"):
-                        line = line[:ci]
-                        break
-                else:
-                    if escape is None:
-                        escape = None
-                    else:
-                        if cc == "\\":
-                            escape = cc
-                        elif line[ci] == quote:
-                            quote = None
-            lines[i] = line
+    for line_index, line in enumerate(lines):
+        if not ("#" in line or "//" in line):
+            continue
+        quote = None
+        escape = None
+        for i, cc in enumerate(line):
+            if quote is None and (cc == "\"" or cc == "\'"):
+                quote = cc
+                continue
+            
+            if quote is None:
+                nc = line[i + 1] if i < (len(line) - 1) else None
+                if cc == "#" or (cc == "/" and nc == "/"):
+                    line = line[:i]
+                    break
+            elif escape is not None:
+                escape = None
+            elif cc == "\\":
+                escape = cc
+            elif cc == quote:
+                quote = None
+        lines[line_index] = line
     return "".join(lines)
 
 
