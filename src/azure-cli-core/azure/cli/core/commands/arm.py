@@ -349,21 +349,35 @@ def register_global_subscription_argument(cli_ctx):
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table
 
-        subscription_kwargs = {
+        default_subscription_kwargs = {
             'help': 'Name or ID of subscription. You can configure the default subscription '
                     'using `az account set -s NAME_OR_ID`',
             'completer': get_subscription_id_list,
             'arg_group': 'Global',
             'action': SubscriptionNameOrIdAction,
             'configured_default': 'subscription',
-            'id_part': 'subscription'
+            'id_part': 'subscription',
+            'options_list': ['--subscription']
         }
+
+        def get_subscription_kwargs(cmd, sub_dest):
+            sub_kwargs = {}
+            arg_scopes = [
+                key for key in commands_loader.argument_registry.arguments.keys() if cmd.name.startswith(key)
+            ]
+            arg_scopes.sort(key=len)
+            for scope in arg_scopes:
+                sub_args = commands_loader.argument_registry.arguments[scope].get(sub_dest)
+                if not sub_args:
+                    continue
+                sub_kwargs.update(sub_args.settings)
+            return sub_kwargs
 
         for _, cmd in cmd_tbl.items():
             sub_dest = 'subscription' if 'subscription' in cmd.arguments else '_subscription'
-            cmd.add_argument(sub_dest, '--subscription', **subscription_kwargs)
-        # need to reapply the argument registry in case user has provided overrides
-        commands_loader._update_command_definitions()
+            sub_kwargs = get_subscription_kwargs(cmd, sub_dest) or default_subscription_kwargs
+            options = sub_kwargs.pop('options_list', [])
+            cmd.add_argument(sub_dest, *options, **sub_kwargs)
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
 
