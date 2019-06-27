@@ -14,9 +14,11 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 from binascii import hexlify
 from os import urandom
+import datetime
 import json
 import ssl
 import sys
+import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error, ungrouped-imports
 import OpenSSL.crypto
 from fabric import Connection
@@ -38,11 +40,13 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    DeletedAppRestoreRequest, DefaultErrorResponseException,
                                    SnapshotRestoreRequest, SnapshotRecoverySource)
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
+from azure.storage.blob import BlockBlobService, BlobPermissions
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter
+from azure.cli.core.commands.client_factory import UA_AGENT
 
 from .tunnel import TunnelServer
 
@@ -273,6 +277,25 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
+def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name)
+    parse_plan_id = parse_resource_id(app.server_farm_id)
+    plan_info = None
+    retry_delay = 10  # seconds
+    # We need to retry getting the plan because sometimes if the plan is created as part of function app,
+    # it can take a couple of tries before it gets the plan
+    for _ in range(5):
+        plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
+                                                 parse_plan_id['name'])
+        if plan_info is not None:
+            break
+        time.sleep(retry_delay)
+    if is_plan_consumption(plan_info) and app.reserved:
+        return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
+
+
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
@@ -284,6 +307,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
     headers['content-type'] = 'application/octet-stream'
+    headers['User-Agent'] = UA_AGENT
 
     import requests
     import os
@@ -297,6 +321,62 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                             authorization, timeout)
     return response
+
+
+def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+
+    storage_connection = None
+    for keyval in settings:
+        if keyval['name'] == 'AzureWebJobsStorage':
+            storage_connection = str(keyval['value'])
+
+    if storage_connection is None:
+        raise CLIError('Could not find a \'AzureWebJobsStorage\' application setting')
+
+    container_name = "function-releases"
+    blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
+
+    block_blob_service = BlockBlobService(connection_string=storage_connection)
+    if not block_blob_service.exists(container_name):
+        block_blob_service.create_container(container_name)
+
+    # https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
+    def progress_callback(current, total):
+        total_length = 30
+        filled_length = int(round(total_length * current) / float(total))
+        percents = round(100.0 * current / float(total), 1)
+        progress_bar = '=' * filled_length + '-' * (total_length - filled_length)
+        progress_message = 'Uploading {} {}%'.format(progress_bar, percents)
+        cmd.cli_ctx.get_progress_controller().add(message=progress_message)
+
+    block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
+                                             progress_callback=progress_callback)
+
+    now = datetime.datetime.now()
+    blob_start = now - datetime.timedelta(minutes=10)
+    blob_end = now + datetime.timedelta(weeks=520)
+    blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
+                                                                          blob_name,
+                                                                          permission=BlobPermissions(read=True),
+                                                                          expiry=blob_end,
+                                                                          start=blob_start)
+
+    blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
+    website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
+    update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting])
+    client = web_client_factory(cmd.cli_ctx)
+
+    try:
+        logger.info('\nSyncing Triggers...')
+        if slot is not None:
+            client.web_apps.sync_function_triggers_slot(resource_group_name, name, slot)
+        else:
+            client.web_apps.sync_function_triggers(resource_group_name, name)
+    except CloudError as ce:
+        # This SDK function throws an error if Status Code is 200
+        if ce.status_code != 200:
+            raise ce
 
 
 def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
@@ -1260,8 +1340,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     if not backup_name:
-        from datetime import datetime
-        backup_name = '{0}_{1}'.format(webapp_name, datetime.utcnow().strftime('%Y%m%d%H%M'))
+        backup_name = '{0}_{1}'.format(webapp_name, datetime.datetime.utcnow().strftime('%Y%m%d%H%M'))
 
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
