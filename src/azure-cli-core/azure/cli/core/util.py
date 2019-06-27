@@ -235,23 +235,25 @@ def preprocess_json(original):
     for i in range(len(lines)):
         line = lines[i]
         if "#" in line or "//" in line:
-            outside = True
-            escape = False
+            quote = None
+            escape = None
             for ci in range(len(line)):
-                if outside:
-                    if line[ci] == "\"":
-                        outside = False
-                    elif line[ci] == "#" or (line[ci] == "/" and ci < (len(line) - 1) and line[ci + 1] == "/"):
+                cc = line[ci]
+                nc = line[ci + 1] if ci < (len(line) - 1) else None
+                if quote is None:
+                    if cc == "\"" or cc == "\'":
+                        quote = cc
+                    elif cc == "#" or (cc == "/" and nc == "/"):
                         line = line[:ci]
                         break
                 else:
-                    if escape:
-                        escape = False
+                    if escape is None:
+                        escape = None
                     else:
-                        if line[ci] == "\\":
-                            escape = True
-                        elif line[ci] == "\"":
-                            outside = True
+                        if cc == "\\":
+                            escape = cc
+                        elif line[ci] == quote:
+                            quote = None
             lines[i] = line
     return "".join(lines)
 
