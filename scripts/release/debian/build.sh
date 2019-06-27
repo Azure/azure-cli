@@ -35,7 +35,8 @@ make install
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
-bash -c "echo \${PATH}; ls ${WORKDIR}/python_env/bin; alias python=python3; alias pip=pip3; ${SCRIPT_DIR}/../../install_full.sh"
+find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
+pip3 install -r ./src/azure-cli/requirements.py3.$(uname).txt
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
