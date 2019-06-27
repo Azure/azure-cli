@@ -277,6 +277,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.load_arguments(command)  # this adds entries to the argument registries
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
+                loader._update_command_definitions()  # pylint: disable=protected-access
 
 
 class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods

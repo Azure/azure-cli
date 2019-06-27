@@ -106,7 +106,6 @@ def create_invoker_and_load_cmds_and_args(cli_ctx):
     register_ids_argument(cli_ctx)  # global subscription must be registered first!
     register_cache_arguments(cli_ctx)
     cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=invoker.commands_loader)
-    invoker.commands_loader._update_command_definitions()  # pylint: disable=protected-access
     invoker.parser.load_command_table(invoker.commands_loader)
 
 
