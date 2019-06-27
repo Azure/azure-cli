@@ -241,7 +241,6 @@ def preprocess_json(original):
             if quote is None and (cc == "\"" or cc == "\'"):
                 quote = cc
                 continue
-            
             if quote is None:
                 nc = line[i + 1] if i < (len(line) - 1) else None
                 if cc == "#" or (cc == "/" and nc == "/"):
