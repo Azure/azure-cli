@@ -18,7 +18,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None):
+                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled'):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -38,7 +38,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb)),
+                    storage_mb=storage_mb,
+                    storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
     elif provider == 'Microsoft.DBforPostgreSQL':
@@ -53,7 +54,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb)),
+                    storage_mb=storage_mb,
+                    storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
     elif provider == 'Microsoft.DBforMariaDB':
@@ -68,7 +70,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb)),
+                    storage_mb=storage_mb,
+                    storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
 
@@ -276,7 +279,8 @@ def _server_update_custom_func(instance,
                                backup_retention=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
-                               tags=None):
+                               tags=None,
+                               auto_grow=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -295,6 +299,9 @@ def _server_update_custom_func(instance,
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
+
+    if auto_grow:
+        instance.storage_profile.storage_autogrow = auto_grow
 
     params = ServerUpdateParameters(sku=instance.sku,
                                     storage_profile=instance.storage_profile,
