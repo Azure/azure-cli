@@ -348,6 +348,7 @@ def register_global_subscription_argument(cli_ctx):
 
         commands_loader = kwargs['commands_loader']
         cmd_tbl = commands_loader.command_table
+
         subscription_kwargs = {
             'help': 'Name or ID of subscription. You can configure the default subscription '
                     'using `az account set -s NAME_OR_ID`',
@@ -357,9 +358,12 @@ def register_global_subscription_argument(cli_ctx):
             'configured_default': 'subscription',
             'id_part': 'subscription'
         }
+
         for _, cmd in cmd_tbl.items():
-            if 'subscription' not in cmd.arguments:
-                cmd.add_argument('_subscription', '--subscription', **subscription_kwargs)
+            sub_dest = 'subscription' if 'subscription' in cmd.arguments else '_subscription'
+            cmd.add_argument(sub_dest, '--subscription', **subscription_kwargs)
+        # need to reapply the argument registry in case user has provided overrides
+        commands_loader._update_command_definitions()
 
     cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_subscription_parameter)
 
