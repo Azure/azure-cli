@@ -1106,14 +1106,11 @@ def delete_service_principal(cmd, identifier):
 
 def _get_app_object_id_from_sp_object_id(client, sp_object_id):
     sp = client.service_principals.get(sp_object_id)
-    app_object_id = None
+    result = list(client.applications.list(filter="appId eq '{}'".format(sp.app_id)))
 
-    if sp.service_principal_names:
-        result = list(client.applications.list(
-            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
-        if result:
-            app_object_id = result[0].object_id
-    return app_object_id
+    if result:
+        return result[0].object_id
+    raise CLIError("Can't find associated application id from '{}'".format(sp_object_id))
 
 
 def list_service_principal_owners(cmd, identifier):
@@ -1237,7 +1234,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, password=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1272,7 +1269,7 @@ def create_service_principal_for_rbac(
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
         _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
-                                         password, keyvault)
+                                         None, keyvault)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
         _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date)

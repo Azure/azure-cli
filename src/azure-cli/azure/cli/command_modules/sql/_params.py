@@ -24,8 +24,8 @@ from azure.mgmt.sql.models import (
     CatalogCollationType,
     CreateMode,
     DatabaseLicenseType,
-    # DatabaseReadScale,
     ElasticPoolLicenseType,
+    SampleName,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
     ServerConnectionType,
@@ -326,7 +326,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(CatalogCollationType))
 
         c.argument('sample_name',
-                   arg_group=creation_arg_group)
+                   arg_group=creation_arg_group,
+                   arg_type=get_enum_type(SampleName))
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType))

@@ -28,11 +28,9 @@ What an Extension is not
 Doc Sections
 ------------
 
-- [Authoring](authoring.md) - How to author and develop an extension
+- [Authoring](authoring.md) - How to author, develop and publish an extension
 
 - [Command Guidelines](../command_guidelines.md) - Command Guidelines
-
-- [Publishing](publishing.md) - How to publish an extension
 
 - [Summary Guidelines](extension_summary_guidelines.md) - Summary guidelines for extensions to be published
 

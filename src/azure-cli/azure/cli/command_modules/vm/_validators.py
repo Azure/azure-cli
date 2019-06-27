@@ -1090,15 +1090,9 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
     return values[0]
 
 
-def _validate_vmss_single_placement_group(namespace):
+def _validate_vmss_zone_args(namespace):
     if namespace.platform_fault_domain_count is not None and namespace.zones is None:
         raise CLIError('usage error: --platform-fault-domain-count COUNT --zones ZONES')
-    if namespace.zones or namespace.instance_count > 100:
-        if namespace.single_placement_group is None:
-            namespace.single_placement_group = False
-        elif namespace.single_placement_group:
-            raise CLIError("usage error: '--single-placement-group' should be turned off for zonal scale-sets or with"
-                           " 100+ instances")
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
@@ -1239,7 +1233,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
-    _validate_vmss_single_placement_group(namespace)
+    _validate_vmss_zone_args(namespace)
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)

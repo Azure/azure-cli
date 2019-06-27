@@ -2,7 +2,6 @@
 
 Release History
 ===============
-
 **ACR**
 
 * Support Timer Triggers for Task.
@@ -10,16 +9,67 @@ Release History
 **Appservice**
 
 * functionapp: `az functionapp create` enables application insights by default
+* BREAKING CHANGE: (functionapp) removes deprecated `az functionapp devops-build` command. Please use the new command `az functionapp devops-pipeline` instead.
+* functionapp: `az functionapp deployment config-zip` now works for Linux Consumption Function app plans
+
+**Cosmos DB**
+
+* Added support for disabling TTL
 
 **DLS**
 
 * Update ADLS version (0.0.45).
 
+**Feedback**
+
+* When reporting a failed extension command, `az feedback` now attempts to open the browser to the project/repo url of the
+  extension from the index.
+
+**HDInsight**
+
+* BREAKING CHANGE: Changed "oms" command group name to "monitor"
+* BREAKING CHANGE: Made "--http-password/-p" a required parameter 
+* Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer 
+* "cluster-users-group-dns" parameter is now required when "—esp" is present
+* Added a timeout for all existing argument auto-completers
+* Added a timeout for transforming resource name to resource id
+* Auto-completers can now select resources from any resource group. It can be a different resource group than the one specified with "-g"
+* Added support for "--sub-domain-suffix" and "--disable_gateway_auth" parameters in the "az hdinsight application create" command
+
+**Managed Services**
+
+* Introducing managed service command module in preview.
+
+**Profile**
+* Suppress `--subscription` argument for logout command.
+
 **RBAC**
 
+* [BREAKING CHANGE] create-for-rbac: remove --password
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
-                   failures caused by AAD graph server replication latency 
-* ad signed-in-user: fix a crash on listing owned objects 
+                   failures caused by AAD graph server replication latency
+* ad signed-in-user: fix a crash on listing owned objects
+* ad sp: use the right approach to find the application from a service principal 
+
+**RDBMS**
+
+* Support replication for MariaDB.
+
+**SQL**
+
+* Document allowed values for sql db create --sample-name
+
+**VM**
+
+* vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
+  the request but returns failure status code and returns an error mesage.
+* vm/vmss extension image list: Fix bug where command fails when used with --latest
+
+**VM**
+
+* vmss create `--single-placement-group`: Removed client-side validation. Does not fail if `--single-placement-group` is
+  set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
+  to the compute service.
 
 2.0.67
 ++++++

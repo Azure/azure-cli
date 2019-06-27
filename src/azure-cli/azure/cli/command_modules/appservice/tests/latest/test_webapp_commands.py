@@ -1172,22 +1172,6 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
                                                                                     functionapp_name)).get_output_in_json()
         self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [kp['name'] for kp in app_set])
 
-    @ResourceGroupPreparer(location='westcentralus')
-    @StorageAccountPreparer()
-    def test_functionapp_unavailable_location_app_insights(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name('functionappwithappinsights', 40)
-
-        self.cmd('functionapp create -g {} -n {} -c westcentralus -s {} --os-type Windows'
-                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('kind', 'functionapp'),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
-
-        app_set = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group,
-                                                                                    functionapp_name)).get_output_in_json()
-        self.assertTrue('APPINSIGHTS_INSTRUMENTATIONKEY' not in [kp['name'] for kp in app_set])
-
 
 class FunctionAppOnLinux(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
