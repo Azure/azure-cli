@@ -98,7 +98,8 @@ def show_storage_account_usage_no_location(cmd):
 # pylint: disable=too-many-locals
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
-                           access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
+                           access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
+                           bypass=None, default_action=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -129,6 +130,10 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
+    if enable_files_aadds is not None:
+        AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
+        params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+            directory_service_options='AADDS' if enable_files_aadds else 'None')
     if assign_identity:
         params.identity = Identity()
 
