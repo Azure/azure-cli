@@ -5,8 +5,9 @@
 
 from __future__ import print_function
 
-from knack.help import (HelpExample as KnackHelpExample, HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
-                        CLIHelp, ArgumentGroupRegistry as KnackArgumentGroupRegistry, HelpAuthoringException)
+from knack.help import (CLIHelp, HelpAuthoringException,
+                        HelpExample as KnackHelpExample, HelpFile as KnackHelpFile,
+                        CommandHelpFile as KnackCommandHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry)
 
 from knack.log import get_logger
 from azure.cli.core.commands import ExtensionCommandSource
