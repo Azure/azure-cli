@@ -441,26 +441,6 @@ def generate_container_shared_access_signature(client, container_name, permissio
                                                protocol=None, cache_control=None, content_disposition=None,
                                                content_encoding=None, content_language=None,
                                                content_type=None, as_user=False):
-    '''
-    Generates a shared access signature for the container.
-    Use the returned signature with the sas_token parameter of any BlobService.
-
-    :param str cache_control:
-        Response header value for Cache-Control when resource is accessed
-        using this shared access signature.
-    :param str content_disposition:
-        Response header value for Content-Disposition when resource is accessed
-        using this shared access signature.
-    :param str content_encoding:
-        Response header value for Content-Encoding when resource is accessed
-        using this shared access signature.
-    :param str content_language:
-        Response header value for Content-Language when resource is accessed
-        using this shared access signature.
-    :param str content_type:
-        Response header value for Content-Type when resource is accessed
-        using this shared access signature.
-    '''
     user_delegation_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
