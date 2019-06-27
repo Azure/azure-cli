@@ -8,6 +8,7 @@
 """Constants in the Azure Configuration service.
 """
 
+
 class HttpMethods:
     """Constants of http methods.
     """
@@ -15,6 +16,7 @@ class HttpMethods:
     Get = 'GET'
     Put = 'PUT'
     Delete = 'DELETE'
+
 
 class HttpHeaders:
     """Constants of http headers.
@@ -31,13 +33,16 @@ class HttpHeaders:
     RetryAfter = 'Retry-After'
     RetryAfterMs = 'retry-after-ms'
 
+
 class HttpHeaderValues:
     MediaTypeApplication = 'application/json;'
     MediaTypeKeyValueApplication = "application/vnd.microsoft.appconfig.kv+json;"
 
+
 class HttpResponseContent:
     Detail = 'detail'
     Title = 'title'
+
 
 class StatusCodes:
     """HTTP status codes returned by the REST operations
@@ -68,10 +73,12 @@ class StatusCodes:
     INTERNAL_SERVER_ERROR = 500
     SERVICE_UNAVAILABLE = 503
 
+
 class Versions:
     """Constants of versions.
     """
     SDKVersion = '0.0.1'
+
 
 class Validator:
     """Constants used in validator

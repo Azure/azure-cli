@@ -80,7 +80,7 @@ helps['appconfig credential regenerate'] = """
 
 helps['appconfig kv'] = """
     type: group
-    short-summary: Manage key-values stored in an App Configuration. 
+    short-summary: Manage key-values stored in an App Configuration.
     """
 
 helps['appconfig kv import'] = """
@@ -100,9 +100,9 @@ helps['appconfig kv import'] = """
 
 helps['appconfig kv export'] = """
     type: command
-    short-summary: Export configurations to another place from your App Configuration. 
+    short-summary: Export configurations to another place from your App Configuration.
     examples:
-        - name: Export all keys with label test to a json file. 
+        - name: Export all keys with label test to a json file.
           text:
             az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
         - name: Export all keys with null label to another App Configuration.
@@ -159,7 +159,7 @@ helps['appconfig kv list'] = """
         - name: List a specfic key for any label start with v1. using connection string.
           text:
             az appconfig kv list --color --connection-string MyConnectionString --label v1.*
-        - name: List all keys with any labels and query only key, value and tags. 
+        - name: List all keys with any labels and query only key, value and tags.
           text:
             az appconfig kv list --connection-string MyConnectionString --fields key value tags --datetime "2019-05-01T11:24:12Z"
         - name: List 150 key-values with any labels.
@@ -174,7 +174,7 @@ helps['appconfig revision'] = """
 
 helps['appconfig revision list'] = """
     type: command
-    short-summary: Lists revision history of key-values. 
+    short-summary: Lists revision history of key-values.
     examples:
         - name: List revision history of key "color" label "test" using App Configuration name.
           text:

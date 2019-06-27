@@ -5,6 +5,7 @@
 
 # pylint: disable=too-few-public-methods
 
+
 class RequestMessage(object):
 
     def __init__(self, method, headers, url, body):

@@ -5,6 +5,7 @@
 
 import azure.cli.command_modules.appconfig.azconfig.models as models
 
+
 def map_json_to_keyvalue(json_object):
     keyvalue = models.KeyValue(
         __get_value(json_object, 'key'),
@@ -18,11 +19,13 @@ def map_json_to_keyvalue(json_object):
 
     return keyvalue
 
+
 def map_json_to_keyvalues(json_objects):
     keyvalue_list = []
     for json_object in json_objects:
         keyvalue_list.append(map_json_to_keyvalue(json_object))
     return keyvalue_list
+
 
 def __get_value(item, argument):
     try:
