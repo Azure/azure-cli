@@ -53,6 +53,8 @@ Release History
 
 **RDBMS**
 
+* Support storage auto-grow for MySQL, PostgreSQL and MariaDB
+
 * Support replication for MariaDB.
 
 **SQL**
