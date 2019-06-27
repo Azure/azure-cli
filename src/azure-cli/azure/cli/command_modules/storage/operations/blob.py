@@ -6,6 +6,7 @@
 from __future__ import print_function
 
 import os
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -416,14 +417,40 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
                           expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
-                          content_type=None, full_uri=False):
-    sas_token = client.generate_blob_shared_access_signature(
-        container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
-        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
-        content_encoding=content_encoding, content_language=content_language, content_type=content_type)
+                          content_type=None, full_uri=False, as_user=False):
+    if as_user:
+        user_delegation_key = client.get_user_delegation_key(
+            _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
+        sas_token = client.generate_blob_shared_access_signature(
+            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+            content_encoding=content_encoding, content_language=content_language, content_type=content_type,
+            user_delegation_key=user_delegation_key)
+    else:
+        sas_token = client.generate_blob_shared_access_signature(
+            container_name, blob_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+            protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+            content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
         return client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token)
     return sas_token
+
+
+def generate_container_shared_access_signature(client, container_name, permission=None,
+                                               expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+                                               protocol=None, cache_control=None, content_disposition=None,
+                                               content_encoding=None, content_language=None,
+                                               content_type=None, as_user=False):
+    user_delegation_key = None
+    if as_user:
+        user_delegation_key = client.get_user_delegation_key(
+            _get_datetime_from_string(start) if start else datetime.utcnow(), _get_datetime_from_string(expiry))
+
+    return client.generate_container_shared_access_signature(
+        container_name, permission=permission, expiry=expiry, start=start, id=id, ip=ip,
+        protocol=protocol, cache_control=cache_control, content_disposition=content_disposition,
+        content_encoding=content_encoding, content_language=content_language, content_type=content_type,
+        user_delegation_key=user_delegation_key)
 
 
 def create_blob_url(client, container_name, blob_name, protocol=None, snapshot=None):
@@ -461,3 +488,14 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
     except AzureException as ex:
         error_template = 'Failed to copy file {} to container {}. {}'
         raise CLIError(error_template.format(source_file_name, destination_container, ex))
+
+
+def _get_datetime_from_string(dt_str):
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
+        try:
+            return datetime.strptime(dt_str, form)
+        except ValueError:
+            continue
+    raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))

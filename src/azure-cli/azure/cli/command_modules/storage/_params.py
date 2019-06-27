@@ -14,7 +14,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_table_payload_format, validate_key, add_progress_callback, process_resource_group,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
-                          validate_storage_data_plane_list, validate_azcopy_upload_destination_url)
+                          validate_storage_data_plane_list, validate_azcopy_upload_destination_url, as_user_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -225,7 +225,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
         t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
         c.register_sas_arguments()
-        c.extra('full_uri')
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
                                          'using this shared access signature.')
         c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
@@ -238,6 +237,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                         'using this shared access signature.')
         c.argument('full_uri', action='store_true',
                    help='Indicates that this command return the full blob URI and the shared access signature token.')
+        c.argument('as_user', min_api='2018-11-09', is_preview=True, action='store_true',
+                   validator=as_user_validator,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
@@ -484,7 +487,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
-
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('as_user', min_api='2018-11-09', is_preview=True, action='store_true',
+                   validator=as_user_validator,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
     with self.argument_context('storage container lease') as c:
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)

@@ -163,7 +163,7 @@ def _get_default_install_location():
         if not home_dir:
             return None
         install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
-    elif system == 'Linux' or system == 'Darwin':
+    elif system in ('Linux', 'Darwin'):
         install_location = '/usr/local/bin/azcopy'
     else:
         install_location = None
