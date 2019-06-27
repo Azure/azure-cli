@@ -109,37 +109,11 @@ class AzHelpGenDirective(Directive):
         nested_parse_with_titles(self.state, result, node)
         return node.children
 
+
 def setup(app):
     app.add_directive('azhelpgen', AzHelpGenDirective)
 
 
-def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):
-    for s in parser.subparsers.values():
-        parser_keys.append(_get_parser_name(s))
-        parser_values.append(s)
-        if _is_group(s):
-            for c in s.choices.values():
-                sub_parser_keys.append(_get_parser_name(c))
-                sub_parser_values.append(c)
-                _store_parsers(c, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
-
 def _load_doc_source_map():
     with open('azhelpgen/doc_source_map.json') as open_file:
         return json.load(open_file)
-
-def _is_group(parser):
-    return getattr(parser, '_subparsers', None) is not None \
-        or getattr(parser, 'choices', None) is not None
-
-def _get_parser_name(s):
-    return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]
-
-
-def _get_populator_commands(param):
-    commands = []
-    for value_source in param.value_sources:
-        try:
-            commands.append(value_source["link"]["command"])
-        except KeyError:
-            continue
-    return commands
