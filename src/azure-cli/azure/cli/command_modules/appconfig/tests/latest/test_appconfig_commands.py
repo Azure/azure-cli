@@ -78,7 +78,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         assert len(credential_list) == 4
         assert next(credential['connectionString']
-                    for credential in credential_list if credential['readOnly'] == False)
+                    for credential in credential_list if not credential['readOnly'])
 
         self.kwargs.update({
             'id': credential_list[0]['id']
@@ -229,5 +229,4 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 
 def _create_config_store(test, kwargs):
-    config_store = test.cmd(
-        'appconfig create -n {config_store_name} -g {rg} -l {rg_loc}')
+    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc}')

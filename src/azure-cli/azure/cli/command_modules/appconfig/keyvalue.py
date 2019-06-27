@@ -542,7 +542,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         for kv in key_values:
             name = kv.key
             value = kv.value
-            if not 'AppService:SlotSetting' in kv.tags:
+            if 'AppService:SlotSetting' not in kv.tags:
                 raise CLIError(
                     "key-values must contain 'AppService:SlotSetting' tag in order to export to AppService correctly.")
             is_slot_setting = (kv.tags['AppService:SlotSetting'] == 'true')

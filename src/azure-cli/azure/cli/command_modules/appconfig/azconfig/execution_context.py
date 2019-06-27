@@ -1,18 +1,19 @@
-# -------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License in the project root for
-# license information.
-# --------------------------------------------------------------------------
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
 """Internal class for query execution context implementation in the Azure Configuration service.
 """
 
 from collections import deque
 
+
 class QueryExecutionContext(object):
     """
     This is the execution context class.
     """
+
     def __init__(self, client, options, fetch_function):
         """
         Constructor
@@ -94,7 +95,7 @@ class QueryExecutionContext(object):
             if not self._has_started:
                 self._has_started = True
 
-            fetched_items, self._continuation = fetch_function(self._options, self._continuation)
+            fetched_items, self._continuation = fetch_function(
+                self._options, self._continuation)
 
         return fetched_items
-        

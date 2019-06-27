@@ -35,9 +35,10 @@ def validate_datetime(namespace):
 def validate_connection_string(namespace):
     ''' Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx'''
     connection_string = namespace.connection_string
-    if not is_valid_connection_string(connection_string):
-        raise CLIError('''The connection string is invalid.
-                Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx ''')
+    if connection_string:
+        if not is_valid_connection_string(connection_string):
+            raise CLIError('''The connection string is invalid. \
+Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx ''')
 
 
 def validate_import_depth(namespace):
