@@ -732,28 +732,28 @@ def iot_hub_route_test(client, hub_name, route_name=None, source_type=None, body
     return client.iot_hub_resource.test_all_routes(test_all_routes_input, hub_name, resource_group_name)
 
 
-def iot_message_enrichments_create(client, hub_name, key, value, endpoint_names, resource_group_name=None):
+def iot_message_enrichment_create(client, hub_name, key, value, endpoints, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     if hub.properties.routing.enrichments is None:
         hub.properties.routing.enrichments = []
-    hub.properties.routing.enrichments.append(EnrichmentProperties(key=key, value=value, endpoint_names=endpoint_names))
+    hub.properties.routing.enrichments.append(EnrichmentProperties(key=key, value=value, endpoint_names=endpoints))
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
 
 
-def iot_message_enrichments_update(client, hub_name, key, value, endpoint_names, resource_group_name=None):
+def iot_message_enrichment_update(client, hub_name, key, value, endpoints, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     to_update = next((endpoint for endpoint in hub.properties.routing.enrichments if endpoint.key == key), None)
     if to_update:
         to_update.key = key
         to_update.value = value
-        to_update.endpoint_names = endpoint_names
+        to_update.endpoint_names = endpoints
         return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
     raise CLIError('No message enrichment with that key exists')
 
 
-def iot_message_enrichments_delete(client, hub_name, key, resource_group_name=None):
+def iot_message_enrichment_delete(client, hub_name, key, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     to_remove = next((endpoint for endpoint in hub.properties.routing.enrichments if endpoint.key == key), None)
@@ -763,7 +763,7 @@ def iot_message_enrichments_delete(client, hub_name, key, resource_group_name=No
     raise CLIError('No message enrichment with that key exists')
 
 
-def iot_message_enrichments_list(client, hub_name, resource_group_name=None):
+def iot_message_enrichment_list(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(client, hub_name, resource_group_name)
     return hub.properties.routing.enrichments

@@ -308,34 +308,34 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub devicestream show'
         self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
 
-        # Test 'az iot hub message-enrichments create'
+        # Test 'az iot hub message-enrichment create'
         real_endpoints = 'events'
         fake_endpoints = 'events fake_endpoint'
         key = 'key'
         fake_key = 'fake_key'
         value = 'value'
 
-        self.cmd('iot hub message-enrichments create -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+        self.cmd('iot hub message-enrichment create -n {0} -g {1} --key {2} --value {3} --endpoints {4}'
                  .format(hub, rg, key, value, fake_endpoints), expect_failure=True)
-        self.cmd('iot hub message-enrichments create -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+        self.cmd('iot hub message-enrichment create -n {0} -g {1} --key {2} --value {3} --endpoints {4}'
                  .format(hub, rg, key, value, real_endpoints), checks=[self.check('length(properties.routing.enrichments)', 1)])
 
-        # Test 'az iot hub message-enrichments update'
-        self.cmd('iot hub message-enrichments update -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+        # Test 'az iot hub message-enrichment update'
+        self.cmd('iot hub message-enrichment update -n {0} -g {1} --key {2} --value {3} --endpoints {4}'
                  .format(hub, rg, fake_key, value, real_endpoints), expect_failure=True)
-        self.cmd('iot hub message-enrichments update -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+        self.cmd('iot hub message-enrichment update -n {0} -g {1} --key {2} --value {3} --endpoints {4}'
                  .format(hub, rg, key, value, fake_endpoints), expect_failure=True)
-        self.cmd('iot hub message-enrichments update -n {0} -g {1} --key {2} --value {3} --endpoint-names {4}'
+        self.cmd('iot hub message-enrichment update -n {0} -g {1} --key {2} --value {3} --endpoints {4}'
                  .format(hub, rg, key, value, real_endpoints), checks=[self.check('length(properties.routing.enrichments)', 1)])
 
-        # Test 'az iot hub message-enrichments list'
-        self.cmd('iot hub message-enrichments list -n {0} -g {1}'.format(hub, rg),
+        # Test 'az iot hub message-enrichment list'
+        self.cmd('iot hub message-enrichment list -n {0} -g {1}'.format(hub, rg),
                  checks=[self.check('length([*])', 1)])
 
-        # Test 'az iot hub message-enrichments delete'
-        self.cmd('iot hub message-enrichments delete -n {0} -g {1} --key {2}'.format(hub, rg, fake_key),
+        # Test 'az iot hub message-enrichment delete'
+        self.cmd('iot hub message-enrichment delete -n {0} -g {1} --key {2}'.format(hub, rg, fake_key),
                  expect_failure=True)
-        self.cmd('iot hub message-enrichments delete -n {0} -g {1} --key {2}'.format(hub, rg, key),
+        self.cmd('iot hub message-enrichment delete -n {0} -g {1} --key {2}'.format(hub, rg, key),
                  checks=[self.check('length(properties.routing.enrichments)', 0)])
 
         # Test 'az iot hub manual-failover'
