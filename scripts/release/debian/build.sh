@@ -35,7 +35,7 @@ make install
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
-bash ${SCRIPT_DIR}/../install_full.sh
+bash ${SCRIPT_DIR}/../../install_full.sh
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
