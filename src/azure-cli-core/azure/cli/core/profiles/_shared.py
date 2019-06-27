@@ -139,7 +139,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2017-04-01'
     },

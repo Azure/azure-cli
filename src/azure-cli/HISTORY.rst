@@ -71,6 +71,11 @@ Release History
   set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
   to the compute service.
 
+**Storage**
+
+* storage blob generate-sas: User delegation SAS token support with --as-user
+* storage container generate-sas: User delegation SAS token support with --as-user
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
