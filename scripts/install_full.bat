@@ -4,7 +4,7 @@ pushd %~dp0..
  
 set cmd="dir .\src\ /b | findstr /v azure-cli-testsdk"
 for /f "tokens=*" %%e in (' %cmd% ') do (
-    pip install --no-deps %%e
+    pip install --no-deps .\src\%%e
 )
 
 set cmd="python .\scripts\get-python-version.py"
