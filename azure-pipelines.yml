@@ -51,6 +51,30 @@ jobs:
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py2.Linux.txt'
 
+
+- job: VerifyDarwinRequirements
+  displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
+  condition: succeeded()
+  pool:
+    vmImage: 'macOS-10.13'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
+
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 2'
+    inputs:
+      versionSpec: 2.x
+
+  - bash: ./scripts/ci/dependency_check.sh
+    displayName: 'Verify src/azure-cli/requirements.py2.Darwin.txt'
+
 - job: VerifyVersions
   displayName: Verify Command Module Versions
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
