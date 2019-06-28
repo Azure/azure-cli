@@ -176,13 +176,13 @@ helps['netappfiles pool create'] = """
           short-summary: The size for the ANF pool. Must be an integer number of tebibytes in multiples of 4
         - name: --service-level
           type: string
-          short-summary: The service level for the ANF pool ["Standard"|"Premium"|"Ultra"]
+          short-summary: The service level for the ANF pool
         - name: --tags
           short-summary: Space-separated tags in `key[=value]` format
     examples:
         - name: Create an ANF pool
           text: >
-            az netappfiles pool create -g mygroup --account-name myaccountname --name mypoolname -l westus2 --size 8 --service-level "Premium"
+            az netappfiles pool create -g mygroup --account-name myaccountname --name mypoolname -l westus2 --size 8 --service-level premium
 """
 
 helps['netappfiles pool update'] = """
@@ -200,13 +200,13 @@ helps['netappfiles pool update'] = """
           short-summary: The size for the ANF pool. Must be an integer number of tebibytes in multiples of 4
         - name: --service-level
           type: string
-          short-summary: The service level for the ANF pool ["Standard"|"Premium"|"Ultra"]
+          short-summary: The service level for the ANF pool
         - name: --tags
           short-summary: Space-separated tags in `key[=value]` format
     examples:
         - name: Update specific values for an ANF pool
           text: >
-            az netappfiles pool update -g mygroup --account-name myaccname --name mypoolname --service-level "Ultra" --tags mytag1=abcd mytag2=efgh
+            az netappfiles pool update -g mygroup --account-name myaccname --name mypoolname --service-level ultra --tags mytag1=abcd mytag2=efgh
 """
 
 helps['netappfiles pool delete'] = """
@@ -276,7 +276,7 @@ helps['netappfiles volume create'] = """
           short-summary: The name of the ANF volume
         - name: --service-level
           type: string
-          short-summary: The service level [Standard|Premium|Ultra]
+          short-summary: The service level
         - name: --usage-threshold
           type: int
           short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
@@ -294,7 +294,7 @@ helps['netappfiles volume create'] = """
     examples:
         - name: Create an ANF volume
           text: >
-            az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level "Premium" --usage-threshold 100 --creation-token "unique-file-path" --vnet myvnet --subnet mysubnet
+            az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --creation-token "unique-file-path" --vnet myvnet --subnet mysubnet
 """
 
 helps['netappfiles volume update'] = """
@@ -312,7 +312,7 @@ helps['netappfiles volume update'] = """
           short-summary: The name of the ANF volume
         - name: --service-level
           type: string
-          short-summary: The service level ["Standard"|"Premium"|"Ultra"]
+          short-summary: The service level
         - name: --usage-threshold
           type: int
           short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
@@ -321,7 +321,7 @@ helps['netappfiles volume update'] = """
     examples:
         - name: Update an ANF volume
           text: >
-            az netappfiles volume update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --service-level level --usage-threshold 100 --tags mytag=specialvol
+            az netappfiles volume update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --service-level ultra --usage-threshold 100 --tags mytag=specialvol
 """
 
 helps['netappfiles volume delete'] = """

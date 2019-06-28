@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.commands.parameters import tags_type, resource_group_name_type
+from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type
 from knack.arguments import CLIArgumentType
 
 
@@ -21,6 +21,7 @@ def load_arguments(self, _):
         c.argument('volume_name', volume_name_type)
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='The name of the ANF snapshot')
         c.argument('tag', tags_type)
+        c.argument('service_level', options_list=['--service-level'], arg_type=get_enum_type(['Standard', 'Premium', 'Ultra']), help='Service level')
 
     with self.argument_context('netappfiles account') as c:
         c.argument('account_name', account_name_type, options_list=['--name', '--account-name', '-n', '-a'])
