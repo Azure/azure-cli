@@ -802,7 +802,7 @@ def __compact_key_values(key_values):
     return compacted
 
 
-class Undef(object): # pylint: disable=too-few-public-methods
+class Undef(object):  # pylint: disable=too-few-public-methods
     '''
     Dummy undef class used to preallocate space for kv exporting.
 
