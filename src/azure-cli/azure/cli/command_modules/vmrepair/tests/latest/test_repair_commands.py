@@ -88,7 +88,7 @@ class LinuxManagedDiskCreateRestoreTest(ScenarioTest):
         assert len(vms) == 1
 
         # Test create
-        result = self.cmd('vm repair create -g {rg} -n {vm} --repair-username azureadmin --repair-password !Passw0rd2018').get_output_in_json()
+        result = self.cmd('vm repair create -g {rg} -n {vm} --repair-password !Passw0rd2018').get_output_in_json()
 
         # Check repair VM
         repair_vms = self.cmd('vm list -g {}'.format(result['repairResouceGroup'])).get_output_in_json()
@@ -121,7 +121,7 @@ class LinuxUnmanagedDiskCreateRestoreTest(ScenarioTest):
         assert len(vms) == 1
 
         # Test create
-        result = self.cmd('vm repair create -g {rg} -n {vm} --repair-password !Passw0rd2018 --repair-username azureadmin').get_output_in_json()
+        result = self.cmd('vm repair create -g {rg} -n {vm} --repair-password !Passw0rd2018').get_output_in_json()
 
         # Check repair VM
         repair_vms = self.cmd('vm list -g {}'.format(result['repairResouceGroup'])).get_output_in_json()
