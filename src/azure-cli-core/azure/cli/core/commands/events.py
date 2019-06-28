@@ -5,6 +5,8 @@
 
 EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE = 'CommandInvoker.OnPreCommandTableTruncate'
 EVENT_INVOKER_ON_TAB_COMPLETION = 'CommandInvoker.OnTabCompletion'
+EVENT_INVOKER_PRE_LOAD_ARGUMENTS = 'CommandInvoker.OnPreArgumentLoad'
+EVENT_INVOKER_POST_LOAD_ARGUMENTS = 'CommandInvoker.OnPostArgumentLoad'
 
 # special events used for Interactive and Alias extension communication
 EVENT_INTERACTIVE_PRE_COMPLETER_TEXT_PARSING = 'Interactive.PreCompleterTextParsing'
