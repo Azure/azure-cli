@@ -3191,10 +3191,14 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ppg1': 'my_ppg_1',
             'ppg2': 'my_ppg_2',
+            'ppg3': 'my_ppg_3',
             'loc': resource_group_location
         })
 
-        self.cmd('ppg create -n {ppg1} -t standard -g {rg}', checks=[
+        # fails because not a valid type
+        self.cmd('ppg create -n fail_ppg -g {rg} -t notAvalidType', expect_failure=True)
+
+        self.cmd('ppg create -n {ppg1} -t StandarD -g {rg}', checks=[
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
             self.check('proximityPlacementGroupType', 'Standard')
@@ -3204,6 +3208,11 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('name', '{ppg2}'),
             self.check('location', '{loc}'),
             self.check('proximityPlacementGroupType', 'Ultra')
+        ])
+
+        self.cmd('ppg create -n {ppg3} -g {rg}', checks=[
+            self.check('name', '{ppg3}'),
+            self.check('location', '{loc}'),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
