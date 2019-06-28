@@ -3,34 +3,9 @@ FROM ${base_image} AS build-env
 
 # Update APT packages
 RUN apt-get update
-RUN apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev wget
-
-# Download Python source code
-ARG python_version="3.6.5"
-ENV PYTHON_SRC_DIR=/usr/src/python
-RUN mkdir -p ${PYTHON_SRC_DIR} && \
-    wget -qO- https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz \
-    | tar -xz -C "${PYTHON_SRC_DIR}"
-
-WORKDIR /azure-cli
-RUN ${PYTHON_SRC_DIR}/*/configure --srcdir ${PYTHON_SRC_DIR}/* --prefix $(pwd)/python_env &&\
-    make && \
-    make install && \
-    ln /azure-cli/python_env/bin/python3 /azure-cli/python_env/bin/python && \
-    ln /azure-cli/python_env/bin/pip3 /azure-cli/python_env/bin/pip
-
-ENV PATH=/azure-cli/python_env/bin:$PATH
-
-RUN pip install wheel
+RUN apt-get install -y libssl-dev libffi-dev python3-dev python3-venv debhelper zlib1g-dev wget
 
 COPY . .
-
-RUN mkdir -p ./bin/pypi && \
-    BUILD_STAGINGDIRECTORY=/azure-cli/bin/pypi ./scripts/release/pypi/build.sh && \
-    if [ -d ./privates ]; then find ./privates -name '*.whl' | xargs pip install; fi && \
-    find ./bin/pypi -name '*.whl' | xargs pip install && \
-    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg && \
-    pip install --force-reinstall urllib3==1.24.2
 
 ARG cli_version=0.0.0-dev
 ARG cli_version_revision=1
