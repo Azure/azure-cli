@@ -2,6 +2,8 @@
 
 Release History
 ===============
+2.0.68
+++++++
 **ACR**
 
 * Support Timer Triggers for Task.
