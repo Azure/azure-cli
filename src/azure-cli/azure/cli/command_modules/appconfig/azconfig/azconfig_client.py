@@ -526,12 +526,12 @@ class AzconfigClient(object):
     def __parse_link_header(link_header):
         # link header looks like "</kv?after=last>; rel="next", </kv?before=first>; rel="before""
         uri_start = 0
-        for i in range(len(link_header)):
-            if link_header[i] == '<':
-                uri_start = i
-            elif link_header[i] == '>':
-                if str(link_header[i + 3: i + 13]) == '''rel="next"''':
-                    return str(link_header[uri_start + 1: i])
+        for index, char in enumerate(link_header):
+            if char == '<':
+                uri_start = index
+            elif char == '>':
+                if str(link_header[index + 3: index + 13]) == '''rel="next"''':
+                    return str(link_header[uri_start + 1: index])
         return None
 
     @staticmethod

@@ -9,6 +9,7 @@ import azure.cli.command_modules.appconfig.azconfig.constants as constants
 
 
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-instance-attributes
 
 class KeyValue(object):
     '''
@@ -76,7 +77,7 @@ class QueryKeyValueOptions(object):
     def __init__(self,
                  label=empty_label,
                  query_datetime=None,
-                 fields=[QueryFields.ALL],
+                 fields=None,
                  client_request_id=None,
                  correlation_request_id=None):
         self.label = label
@@ -114,7 +115,7 @@ class QueryKeyValueCollectionOptions(object):
                  key_filter=any_key,
                  label_filter=any_label,
                  query_datetime=None,
-                 fields=[QueryFields.ALL],
+                 fields=None,
                  client_request_id=None,
                  correlation_request_id=None):
         self.key_filter = key_filter

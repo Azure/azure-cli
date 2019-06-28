@@ -128,7 +128,7 @@ def __parse_connection_string(connection_string):
 def __encode_keyword(string):
     if six.PY2:
         # python 2 compatible
-        return None if string is None else urllib.quote(string, safe='')
+        return None if string is None else urllib.quote(string, safe='')  # pylint: disable=E1101
 
     return None if string is None else urllib.parse.quote(string, safe='')
 

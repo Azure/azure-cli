@@ -23,8 +23,8 @@ class KeyValueIterable(object):
         """
 
         self._client = client
-        self._query_options = query_options
-        self._fetch_function = fetch_function
+        self.query_options = query_options
+        self.fetch_function = fetch_function
         self._ex_context = None
 
     def __iter__(self):
@@ -37,7 +37,7 @@ class KeyValueIterable(object):
             self._iterable = iterable
             self._finished = False
             self._ex_context = execution_context.QueryExecutionContext(
-                self._iterable, self._iterable._query_options, self._iterable._fetch_function)
+                self._iterable, self._iterable.query_options, self._iterable.fetch_function)
 
         def __iter__(self):
             # Always returns self
@@ -65,6 +65,6 @@ class KeyValueIterable(object):
         if self._ex_context is None:
             # initiates execution context for the first time
             self._ex_context = execution_context.QueryExecutionContext(
-                self, self._query_options, self._fetch_function)
+                self, self.query_options, self.fetch_function)
 
         return self._ex_context.fetch_next_block()

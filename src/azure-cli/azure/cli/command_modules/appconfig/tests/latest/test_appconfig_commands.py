@@ -6,8 +6,11 @@
 # pylint: disable=line-too-long
 
 import json
+import os
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -193,26 +196,19 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
-        entry_key = "Color"
+        imported_file_path = os.path.join(TEST_DIR, 'import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export.json')
 
-        entry_value = "Red"
-        entry_content_type = 'text'
-        entry_label = 'v1.0.0'
-        import_source = 'file'
-        imported_format = 'json'
-        separator = '/'
-        imported_file_path = '../doc/import.json'
-        exported_file_path = '../doc/export.json'
         self.kwargs.update({
-            'key': entry_key,
-            'value': entry_value,
-            'label': entry_label,
-            'content_type': entry_content_type,
-            'import_source': import_source,
-            'imported_format': imported_format,
-            'separator': separator,
-            'imported_file_path': imported_file_path,
-            'exported_file_path': exported_file_path
+            'key': "Color",
+            'value': "Red",
+            'label': 'v1.0.0',
+            'content_type': 'text',
+            'import_source': 'file',
+            'imported_format': 'json',
+            'separator': '/',
+            'imported_file_path': imported_file_path.replace('\\', '\\\\'),
+            'exported_file_path': exported_file_path.replace('\\', '\\\\')
         })
 
         self.cmd(

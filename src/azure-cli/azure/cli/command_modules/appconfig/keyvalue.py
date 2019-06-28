@@ -45,8 +45,7 @@ def import_config(cmd,
                   src_key=None,
                   src_label=None,
                   # from-appservice parameters
-                  appservice_account=None
-                  ):
+                  appservice_account=None):
     # fetch key values from source
     if source == 'file':
         src_kvs = __read_kv_from_file(
@@ -94,8 +93,7 @@ def export_config(cmd,
                   dest_connection_string=None,
                   dest_label=None,
                   # to-app-service parameters
-                  appservice_account=None
-                  ):
+                  appservice_account=None):
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
@@ -129,7 +127,8 @@ def export_config(cmd,
 
     # export to destination
     if destination == 'file':
-        __write_kv_to_file(file_path=path.lower(), key_values=src_kvs, format_=format_, separator=separator)
+        __write_kv_to_file(file_path=path.lower(
+        ), key_values=src_kvs, format_=format_, separator=separator)
     elif destination == 'appconfig':
         __write_kv_to_config_store(cmd, key_values=src_kvs, name=dest_name,
                                    connection_string=dest_connection_string, label=dest_label)
@@ -343,6 +342,7 @@ def list_key(cmd,
              connection_string=None,
              top=None,
              all_=False):
+    print()
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -437,7 +437,8 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
             elif format_ == 'properties':
                 config_data = javaproperties.load(config_file)
     except ValueError:
-        raise CLIError('The input is not a well formatted %s file.' % (format_))
+        raise CLIError(
+            'The input is not a well formatted %s file.' % (format_))
     except OSError:
         raise CLIError('File is not available.')
     flattened_data = {}
@@ -651,9 +652,9 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
             if separator is None or not separator:
                 raise CLIError(
                     "A non-empty separator is required for importing hierarchical configurations.")
-            for index in range(len(value)):
+            for index, item in enumerate(value):
                 __flatten_key_value(
-                    key + separator + str(index), value[index], flattened_data, depth, separator)
+                    key + separator + str(index), item, flattened_data, depth, separator)
         elif isinstance(value, dict):
             if separator is None or not separator:
                 raise CLIError(
@@ -727,8 +728,7 @@ def __export_keyvalues(fetched_items, format_, separator, prefix=None):
             if previous_kv is not None and previous_kv.key == key:
                 if previous_kv.value != kv.value:
                     raise CLIError(
-                        "The key %s has two labels %s and %s, which conflicts with each other.",
-                        previous_kv.key, previous_kv.label, kv.label)
+                        "The key {} has two labels {} and {}, which conflicts with each other.".format(previous_kv.key, previous_kv.label, kv.label))
                 continue
             previous_kv = KeyValue(key, kv.value)
 
@@ -802,7 +802,7 @@ def __compact_key_values(key_values):
     return compacted
 
 
-class Undef(object):
+class Undef(object): # pylint: disable=too-few-public-methods
     '''
     Dummy undef class used to preallocate space for kv exporting.
 
