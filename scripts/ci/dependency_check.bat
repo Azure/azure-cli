@@ -8,7 +8,7 @@ pip check
 if %errorlevel% neq 0 exit /b %errorlevel%
 del baseline_deps.txt
 
-# Install everything from our repository first.
+Rem Install everything from our repository first.
 .\scripts\install_full.bat
 if %errorlevel% neq 0 exit /b %errorlevel%
 
