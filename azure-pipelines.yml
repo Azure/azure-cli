@@ -62,16 +62,6 @@ jobs:
 
     displayName: 'Verify History'
 
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
-      azdev cli check-versions
-    displayName: 'Verify Versions'
-    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
-
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
 
