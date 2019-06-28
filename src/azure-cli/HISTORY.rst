@@ -28,8 +28,8 @@ Release History
 **HDInsight**
 
 * BREAKING CHANGE: Changed "oms" command group name to "monitor"
-* BREAKING CHANGE: Made "--http-password/-p" a required parameter 
-* Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer 
+* BREAKING CHANGE: Made "--http-password/-p" a required parameter
+* Added completers for "--cluster-admin-account" and "cluster-users-group-dns" parameters completer
 * "cluster-users-group-dns" parameter is now required when "—esp" is present
 * Added a timeout for all existing argument auto-completers
 * Added a timeout for transforming resource name to resource id
@@ -40,6 +40,10 @@ Release History
 
 * Introducing managed service command module in preview.
 
+**NetAppFiles**
+
+* GA release.
+
 **Profile**
 * Suppress `--subscription` argument for logout command.
 
@@ -49,7 +53,7 @@ Release History
 * role assignment: expose --assignee-principal-type from create command to avoid intermittent
                    failures caused by AAD graph server replication latency
 * ad signed-in-user: fix a crash on listing owned objects
-* ad sp: use the right approach to find the application from a service principal 
+* ad sp: use the right approach to find the application from a service principal
 
 **RDBMS**
 
