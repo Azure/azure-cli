@@ -1,5 +1,7 @@
-pushd %~dp0..
+Rem This script is the windows counter-part to ./install_full.sh
 
+pushd %~dp0..
+ 
 set cmd="dir .\src\ /b | findstr /v azure-cli-testsdk"
 for /f "tokens=*" %%e in (' %cmd% ') do (
     pip install --no-deps %%e
