@@ -196,8 +196,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
-        imported_file_path = os.path.join(TEST_DIR, 'import.json')
-        exported_file_path = os.path.join(TEST_DIR, 'export.json')
+        imported_file_path = 'import.json'
+        exported_file_path = 'export.json'
 
         self.kwargs.update({
             'key': "Color",
@@ -207,8 +207,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'import_source': 'file',
             'imported_format': 'json',
             'separator': '/',
-            'imported_file_path': imported_file_path.replace('\\', '\\\\'),
-            'exported_file_path': exported_file_path.replace('\\', '\\\\')
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path
         })
 
         self.cmd(
