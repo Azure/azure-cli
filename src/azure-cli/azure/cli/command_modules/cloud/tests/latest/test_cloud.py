@@ -43,3 +43,14 @@ class CloudTests(ScenarioTest):
 
     def test_cloud_set_unregistered_cloud_name(self):
         self.cmd('az cloud set -n azCloud', expect_failure=True)
+
+
+class SubscriptionSuppressionTest(ScenarioTest):
+
+    def test_subscription_suppression(self):
+        from knack.util import CLIError
+        self.cmd('az cloud list')
+
+        # this should fail with an "unrecognized argument" error
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            self.cmd('az cloud list --subscription foo')
