@@ -2,6 +2,10 @@
 
 Release History
 ===============
+
+**Various**
+* Fixed issue where `--subscription` would appear despite being not applicable.
+
 **ACR**
 
 * Support Timer Triggers for Task.

@@ -109,9 +109,10 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
         c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
-        c.argument('subscription', arg_type=subscription_type)
         c.argument('management_group', arg_type=management_group_name_type)
         c.argument('mode', arg_type=get_enum_type(PolicyMode), options_list=['--mode', '-m'], help='Mode of the policy definition.', min_api='2016-12-01')
+        c.argument('subscription', arg_type=subscription_type)
+        c.ignore('_subscription')  # disable global subscription
 
     with self.argument_context('policy definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy definition.')
@@ -151,8 +152,9 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy set definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
         c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
-        c.argument('subscription', arg_type=subscription_type)
         c.argument('management_group', arg_type=management_group_name_type)
+        c.argument('subscription', arg_type=subscription_type)
+        c.ignore('_subscription')  # disable global subscription
 
     with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new policy set definition.')
@@ -260,10 +262,10 @@ def load_arguments(self, _):
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)
+        c.ignore('_subscription')  # hide global subscription parameter
 
     with self.argument_context('account management-group') as c:
         c.argument('group_name', options_list=['--name', '-n'])
-        c.ignore('_subscription')  # hide global subscription parameter
 
     with self.argument_context('account management-group show') as c:
         c.argument('expand', options_list=['--expand', '-e'], action='store_true')
