@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.1.2
++++++
+* Marking this package as deprecated. Please use azure-cli instead.
+
 2.1.1
 +++++
 * `az cloud set`: support cloud name case insensitive
