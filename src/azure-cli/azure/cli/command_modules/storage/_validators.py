@@ -5,7 +5,6 @@
 
 # pylint: disable=protected-access
 
-from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -15,6 +14,7 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
+from knack.log import get_logger
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
