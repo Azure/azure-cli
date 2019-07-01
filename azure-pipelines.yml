@@ -51,7 +51,6 @@ jobs:
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py2.Linux.txt'
 
-
 - job: VerifyDarwinRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
@@ -74,7 +73,6 @@ jobs:
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py2.Darwin.txt'
-
 
 - job: VerifyWindowsRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
@@ -115,27 +113,23 @@ jobs:
     inputs:
       versionSpec: 3.7
 
-  - bash: |
-      #!/usr/bin/env bash
-
-      set -ev
-
-      pip install virtualenv
-      python -m virtualenv venv/
-      . ./venv/bin/activate
-      pip install azdev
-      azdev setup -c $(pwd)
+  - bash: ./scripts/ci/install_azdev.sh
     displayName: 'Install azdev'
 
   - bash: |
       #!/usr/bin/env bash
       . ./venv/bin/activate
-
       set -ev
-
       azdev verify history
-
     displayName: 'Verify History'
+
+  - bash: |
+      #!/usr/bin/env bash
+      . ./venv/bin/activate
+      set -ev
+      azdev cli check-versions
+    displayName: 'Verify Versions'
+    condition: succeededOrFailed() # This step should run regardless of whether or not history was found to be invalid.
 
 - job: BuildWindowsMSI
   displayName: Build Windows MSI
@@ -219,8 +213,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: docker
 
-
-
 - job: TestDockerImage
   displayName: Test Docker Image
 
@@ -256,7 +248,6 @@ jobs:
        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && sleep 5"
     displayName: 'Bash Script'
 
-
 - job: BuildPythonWheel
   displayName: Build Python Wheels
 
@@ -283,8 +274,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pypi
-
-
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
@@ -335,7 +324,6 @@ jobs:
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
-
 
 - job: RunAutomationFullPython2
   displayName: Run Automation, Python 2
@@ -440,7 +428,6 @@ jobs:
     env:
       AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
 
-
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
@@ -498,8 +485,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: homebrew
 
-
-
 - job: TestHomebrewFormula
   displayName: Test Homebrew Formula
 
@@ -542,7 +527,6 @@ jobs:
 
     displayName: 'Bash Script'
 
-
 - job: BuildYumPackage
   displayName: Build Yum Package
 
@@ -563,8 +547,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
-
-
 
 - job: TestYumPackage
   displayName: Test Yum Package
@@ -601,7 +583,6 @@ jobs:
        docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
 
     displayName: 'Bash Script'
-
 
 - job: BuildUbuntuXenial
   displayName: Build Ubuntu Xenial Package
@@ -663,8 +644,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: ubuntu-trusty
-
-
 
 - job: BuildUbuntuBionic
   displayName: Build Ubuntu Bionic Package
@@ -728,7 +707,6 @@ jobs:
         TargetPath: $(Build.ArtifactStagingDirectory)
         ArtifactName: ubuntu-disco
 
-
 - job: BuildDebianJessie
   displayName: Build Debian Jessie Package
 
@@ -759,8 +737,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian-jessie
 
-
-
 - job: BuildDebianStretch
   displayName: Build Debian Stretch Package
 
@@ -790,8 +766,6 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: debian-stretch
-
-
 
 - job: TestLinuxPackages
   displayName: Test Linux Packages
@@ -925,5 +899,3 @@ jobs:
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: ubuntu-cosmic
-
-
