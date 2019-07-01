@@ -16,11 +16,11 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.2.11"
+VERSION = "0.2.12"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 7 - Inactive',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',

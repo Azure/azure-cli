@@ -9,6 +9,8 @@ from azure.cli.core import AzCommandsLoader
 
 from azure.cli.command_modules.cosmosdb._help import helps  # pylint: disable=unused-import
 
+import warnings
+warnings.warn("deprecated", DeprecationWarning)
 
 def _documentdb_deprecate(_, args):
     if args[0] == 'documentdb':
