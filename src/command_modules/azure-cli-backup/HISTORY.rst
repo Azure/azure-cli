@@ -2,6 +2,9 @@
 
 Release History
 ===============
+1.2.6
++++++
+* Marking this package as deprecated. Please use azure-cli instead.
 
 1.2.5
 +++++

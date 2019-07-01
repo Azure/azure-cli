@@ -7,6 +7,8 @@ from azure.cli.core import AzCommandsLoader
 
 from azure.cli.command_modules.backup._help import helps  # pylint: disable=unused-import
 
+import warnings
+warnings.warn("deprecated", DeprecationWarning)
 
 class BackupCommandsLoader(AzCommandsLoader):
 
