@@ -211,8 +211,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
 
-        print(imported_file_path)
-        print(os.getcwd())
         self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
         self.cmd(

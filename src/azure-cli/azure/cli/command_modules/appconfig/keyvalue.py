@@ -127,8 +127,7 @@ def export_config(cmd,
 
     # export to destination
     if destination == 'file':
-        __write_kv_to_file(file_path=path.lower(
-        ), key_values=src_kvs, format_=format_, separator=separator)
+        __write_kv_to_file(file_path=path, key_values=src_kvs, format_=format_, separator=separator)
     elif destination == 'appconfig':
         __write_kv_to_config_store(cmd, key_values=src_kvs, name=dest_name,
                                    connection_string=dest_connection_string, label=dest_label)
@@ -425,7 +424,6 @@ def list_revision(cmd,
 
 
 def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", depth=None):
-    file_path = file_path.lower()
     config_data = {}
     try:
         with open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
