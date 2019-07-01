@@ -2,6 +2,11 @@
 
 Release History
 ===============
+**RDBMS**
+
+* Add optional parameter to specify replica SKU for create replica command.
+* Fix the issue with CI test failure with creating MySQL replica. 
+
 **ACR**
 
 * Support Timer Triggers for Task.
