@@ -9,6 +9,8 @@ import azure.cli.command_modules.cognitiveservices._help  # pylint: disable=unus
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts
 
+import warnings
+warnings.warn("deprecated", DeprecationWarning)
 
 class CognitiveServicesCommandsLoader(AzCommandsLoader):
 
