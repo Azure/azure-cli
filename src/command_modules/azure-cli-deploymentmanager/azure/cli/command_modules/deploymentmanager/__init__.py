@@ -7,6 +7,9 @@ from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.deploymentmanager._help  # pylint: disable=unused-import
 
+import warnings
+warnings.warn("deprecated", DeprecationWarning)
+
 
 class DeploymentManagerCommandsLoader(AzCommandsLoader):
 
