@@ -12,6 +12,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
+
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
