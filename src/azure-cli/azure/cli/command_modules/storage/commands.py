@@ -237,8 +237,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
 
     blob_container_mgmt_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.storage.operations.blob_containers_operations'
-                        '#BlobContainersOperations.{}',
+        operations_tmpl='azure.mgmt.storage.operations#BlobContainersOperations.{}',
         client_factory=cf_blob_container_mgmt,
         resource_type=ResourceType.MGMT_STORAGE
     )

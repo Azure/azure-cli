@@ -7,9 +7,7 @@ from __future__ import print_function
 
 import os
 from datetime import datetime
-from knack.log import get_logger
-from knack.util import CLIError
-
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
                                                     create_short_lived_share_sas,
@@ -17,7 +15,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
-from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
+from knack.log import get_logger
+from knack.util import CLIError
 
 
 def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
