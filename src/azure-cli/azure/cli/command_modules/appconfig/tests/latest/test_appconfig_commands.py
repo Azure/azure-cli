@@ -12,7 +12,6 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
-
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -196,8 +195,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
         _create_config_store(self, self.kwargs)
 
-        imported_file_path = 'import.json'
-        exported_file_path = 'export.json'
+        imported_file_path = os.path.join(TEST_DIR, 'import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export.json')
 
         self.kwargs.update({
             'key': "Color",
@@ -211,10 +210,12 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
 
+        print(imported_file_path)
+        print(os.getcwd())
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path {imported_file_path} --format {imported_format} --separator {separator} -y')
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path {exported_file_path} --format {imported_format} --separator {separator} -y')
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
 
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
