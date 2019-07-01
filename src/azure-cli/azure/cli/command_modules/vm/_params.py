@@ -32,7 +32,7 @@ def load_arguments(self, _):
     # Model imports
     StorageAccountTypes, DiskStorageAccountTypes, SnapshotStorageAccountTypes = self.get_models('StorageAccountTypes', 'DiskStorageAccountTypes', 'SnapshotStorageAccountTypes')
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
-    ProximityPlacementGroupType, HyperVGenerationTypes, HyperVGeneration = self.get_models('ProximityPlacementGroupType', 'HyperVGenerationTypes', 'HyperVGeneration')
+    HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -728,7 +728,7 @@ def load_arguments(self, _):
         c.argument('proximity_placement_group_name', arg_type=name_arg_type, help="The name of the proximity placement group.")
 
     with self.argument_context('ppg create', min_api='2018-04-01') as c:
-        c.argument('ppg_type', options_list=['--type', '-t'], arg_type=get_enum_type(ProximityPlacementGroupType), help="The type of the proximity placement group.")
+        c.argument('ppg_type', options_list=['--type', '-t'], help="The type of the proximity placement group. Allowed values: Standard.")
         c.argument('tags', tags_type)
 
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'), ('vm availability-set create', 'availability set')]:

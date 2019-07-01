@@ -444,7 +444,8 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
                                   EVENT_INVOKER_POST_PARSE_ARGS,
                                   EVENT_INVOKER_FILTER_RESULT)
-        from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+        from azure.cli.core.commands.events import (
+            EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
@@ -493,7 +494,9 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
         self.commands_loader.command_name = command
+        self.cli_ctx.raise_event(EVENT_INVOKER_PRE_LOAD_ARGUMENTS, commands_loader=self.commands_loader)
         self.commands_loader.load_arguments(command)
+        self.cli_ctx.raise_event(EVENT_INVOKER_POST_LOAD_ARGUMENTS, commands_loader=self.commands_loader)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_CMD_TBL_CREATE, commands_loader=self.commands_loader)
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(self.commands_loader)

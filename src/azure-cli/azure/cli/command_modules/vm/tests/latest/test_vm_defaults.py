@@ -21,7 +21,6 @@ from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_v
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth,
                                                       _validate_vm_create_storage_profile,
-                                                      _validate_vmss_zone_args,
                                                       _validate_vmss_create_load_balancer_or_app_gateway)
 
 
@@ -412,21 +411,6 @@ class TestVMSSDefaults(unittest.TestCase):
     @classmethod
     def _set_up_ns(cls, ns):
         ns.zones, ns.platform_fault_domain_count = None, None
-
-    def test_vmss_validate_vmss_zone_args(self):
-        # test default
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        _validate_vmss_zone_args(ns)
-        self.assertEqual(ns.zones, None)
-        self.assertEqual(ns.platform_fault_domain_count, None)
-
-        # error if platform fault domain count is specified but zones unspecified
-        ns = argparse.Namespace()
-        self._set_up_ns(ns)
-        ns.platform_fault_domain_count = 1
-        with self.assertRaisesRegexp(CLIError, "usage error:.*--platform-fault-domain-count.*--zones"):
-            _validate_vmss_zone_args(ns)
 
     def test_vmss_default_std_lb(self):
         cmd = mock.MagicMock()

@@ -5,7 +5,7 @@
 
 import unittest
 import mock
-from argparse import Namespace
+from argparse import (Namespace, ArgumentError)
 from six import StringIO
 
 from knack import CLI
@@ -19,7 +19,7 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client,
                                                            validate_encryption_source, validate_source_uri,
-                                                           validate_encryption_services)
+                                                           validate_encryption_services, as_user_validator)
 from azure.cli.testsdk import api_version_constraint
 
 
@@ -48,7 +48,7 @@ class MockCmd(object):
         return get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, *attr_args, **kwargs)
 
 
-class TestStorageValidators(unittest.TestCase):
+class TestCmdModuleStorageValidators(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
         self.cli = MockCLI()
@@ -279,6 +279,28 @@ class TestGetSourceClientValidator(unittest.TestCase):
             get_source_file_or_blob_service_client(
                 MockCmd(self.cli),
                 self._create_namespace(source_container='container_name', source_share='share_name'))
+
+    def test_as_user_validator(self):
+        ns = self._create_namespace(as_user=None)
+        as_user_validator(ns)
+
+        ns = self._create_namespace(as_user=False)
+        as_user_validator(ns)
+
+        ns = self._create_namespace(as_user=True, expiry=None)
+        with self.assertRaises(ArgumentError):
+            as_user_validator(ns)
+
+        ns = self._create_namespace(as_user=True, expiry='2019-01-01')
+        with self.assertRaises(ArgumentError):
+            as_user_validator(ns)
+
+        ns = self._create_namespace(as_user=True, expiry='2019-01-01', token_credential=None)
+        with self.assertRaises(ArgumentError):
+            as_user_validator(ns)
+
+        ns = self._create_namespace(as_user=True, expiry='2019-01-01', token_credential='token')
+        as_user_validator(ns)
 
     def _create_namespace(self, **kwargs):
         ns = Namespace(account_key='my_storage_key', account_name='storage_name', connection_string=None, dryrun=False,

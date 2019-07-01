@@ -7,6 +7,9 @@ Release History
 * Add optional parameter to specify replica SKU for create replica command.
 * Fix the issue with CI test failure with creating MySQL replica. 
 
+**Various**
+* Fixed issue where `--subscription` would appear despite being not applicable.
+
 **ACR**
 
 * Support Timer Triggers for Task.
@@ -69,12 +72,16 @@ Release History
 * vmss create: Fix bug where command returns an error message when run with `--no-wait`. The command succesfully sends
   the request but returns failure status code and returns an error mesage.
 * vm/vmss extension image list: Fix bug where command fails when used with --latest
-
-**VM**
-
 * vmss create `--single-placement-group`: Removed client-side validation. Does not fail if `--single-placement-group` is
   set to true and`--instance-count` is greater than 100 or availability zones are specified, but leaves this validation
   to the compute service.
+* vmss create `--platform-fault-domain-count`: Removed client-side validation. Allows platform fault domain count to be
+  specified without specifying zone information, via `--zones`.
+
+**Storage**
+
+* storage blob generate-sas: User delegation SAS token support with --as-user
+* storage container generate-sas: User delegation SAS token support with --as-user
 
 2.0.67
 ++++++

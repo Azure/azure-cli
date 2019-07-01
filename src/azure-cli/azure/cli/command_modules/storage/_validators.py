@@ -5,7 +5,6 @@
 
 # pylint: disable=protected-access
 
-from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -15,6 +14,7 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
+from knack.log import get_logger
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -1043,3 +1043,25 @@ def validate_azcopy_upload_destination_url(cmd, namespace):
     namespace.destination = url
     del namespace.destination_container
     del namespace.destination_path
+
+
+def as_user_validator(namespace):
+    if namespace.as_user:
+        if namespace.expiry is None:
+            import argparse
+            raise argparse.ArgumentError(
+                None, 'incorrect usage: specify --expiry when as-user is enabled')
+
+        expiry = get_datetime_type(False)(namespace.expiry)
+
+        from datetime import datetime, timedelta
+        if expiry > datetime.utcnow() + timedelta(days=7):
+            import argparse
+            raise argparse.ArgumentError(
+                None, 'incorrect usage: --expiry should be within 7 days from now')
+
+        if ((not hasattr(namespace, 'token_credential') or namespace.token_credential is None) and
+                (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
+            import argparse
+            raise argparse.ArgumentError(
+                None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")

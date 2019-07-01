@@ -139,7 +139,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-04-01',
         ResourceType.DATA_KEYVAULT: '7.0',
-        ResourceType.DATA_STORAGE: '2018-03-28',
+        ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2017-04-01'
     },
@@ -395,7 +395,7 @@ def supported_resource_type(api_profile, resource_type):
     if api_profile == 'latest' or resource_type is None:
         return True
     try:
-        return True if AZURE_API_PROFILES[api_profile][resource_type] else False
+        return bool(AZURE_API_PROFILES[api_profile][resource_type])
     except KeyError:
         return False
 
