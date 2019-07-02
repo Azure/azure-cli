@@ -32,7 +32,7 @@ class WebappBasicE2ETest(ScenarioTest):
         plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
 
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)) # test idempotency
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))  # test idempotency
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -50,7 +50,7 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('name', webapp_name),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan))  # test idempotency
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
