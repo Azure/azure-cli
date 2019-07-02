@@ -60,6 +60,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_lang_from_content, get_num_apps_in_asp)
 from ._constants import (NODE_RUNTIME_NAME, OS_DEFAULT, STATIC_RUNTIME_NAME, PYTHON_RUNTIME_NAME,
                          RUNTIME_TO_IMAGE, NODE_VERSION_DEFAULT)
+from azure.mgmt.relay import operations as relay_operations
 
 logger = get_logger(__name__)
 
@@ -147,6 +148,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                              deployment_source_branch, deployment_local_git)
 
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name)
+    relay_operations.namespaces_operations.NamespacesOperations.list()
 
     return webapp
 
@@ -1252,7 +1254,7 @@ def sync_site_repo(cmd, resource_group_name, name, slot=None):
 def list_app_service_plans(cmd, resource_group_name=None):
     client = web_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
-        plans = list(client.app_service_plans.list())
+        plans = list(client.app_service_plans.list(detailed=True))
     else:
         plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
