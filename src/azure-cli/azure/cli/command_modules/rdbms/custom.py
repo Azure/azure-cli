@@ -202,7 +202,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
-def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, **kwargs):
+def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, **kwargs):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -228,23 +228,26 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
     if location is None:
         location = source_server_object.location
 
+    if sku_name is None:
+        sku_name = source_server_object.sku.name
+
     parameters = None
-    if provider == 'Microsoft.DBForMySQL':
+    if provider == 'Microsoft.DBforMySQL':
         from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=source_server_object.sku.name),
+            sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=source_server_object.sku.name),
+            sku=postgresql.models.Sku(name=sku_name),
             properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
     elif provider == 'Microsoft.DBforMariaDB':
         from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
-            sku=mariadb.models.Sku(name=source_server_object.sku.name),
+            sku=mariadb.models.Sku(name=sku_name),
             properties=mariadb.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
 
