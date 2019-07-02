@@ -76,16 +76,26 @@ def sign_request(method, url, body, connection_string):
     signed_headers = "x-ms-date;host;x-ms-content-sha256"
 
     utc_now = __get_current_utc_time()
-    content_digest = hashlib.sha256((bytes(body, 'utf-8'))).digest()
-    content_hash = base64.b64encode(content_digest).decode('utf-8')
 
+    if six.PY2:
+        content_digest = hashlib.sha256(bytes(body)).digest()
+    else:
+        content_digest = hashlib.sha256(bytes(body, 'utf-8')).digest()
+
+    content_hash = base64.b64encode(content_digest).decode('utf-8')
     string_to_sign = verb + '\n' + query_url + '\n' + \
         utc_now + ';' + host + ';' + content_hash
 
     # decode secret
-    decoded_secret = base64.b64decode(secret, validate=True)
-    digest = hmac.new(decoded_secret, bytes(
-        string_to_sign, 'utf-8'), hashlib.sha256).digest()
+    if six.PY2:
+        decoded_secret = base64.b64decode(secret)
+        digest = hmac.new(decoded_secret, bytes(
+            string_to_sign), hashlib.sha256).digest()
+    else:
+        decoded_secret = base64.b64decode(secret, validate=True)
+        digest = hmac.new(decoded_secret, bytes(
+            string_to_sign, 'utf-8'), hashlib.sha256).digest()
+
     signature = base64.b64encode(digest).decode('utf-8')
 
     return {

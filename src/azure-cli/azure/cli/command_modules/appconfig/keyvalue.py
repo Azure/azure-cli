@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 
+import io
 import json
 import sys
 import time
@@ -341,7 +342,6 @@ def list_key(cmd,
              connection_string=None,
              top=None,
              all_=False):
-    print()
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -426,7 +426,7 @@ def list_revision(cmd,
 def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", depth=None):
     config_data = {}
     try:
-        with open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
+        with io.open(file_path, 'r', encoding=__check_file_encoding(file_path)) as config_file:
             if format_ == 'json':
                 config_data = json.load(config_file)
             elif format_ == 'yaml':
