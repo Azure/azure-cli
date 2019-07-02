@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 from knack.util import CLIError
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
@@ -15,6 +16,8 @@ DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
 IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
 FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/faq for more information."
+MIN_HELM_VERSION = "2.11.0"
+HELM_VERSION_REGEX = re.compile(r'SemVer:"v([.\d]+)"', re.I)
 
 
 # Utilities functions
@@ -136,6 +139,7 @@ def _get_cli_version():
 # Get helm versions
 def _get_helm_version(ignore_errors):
     from ._errors import HELM_VERSION_ERROR
+    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
 
     # Helm command check
     helm_command, error = get_helm_command(is_diagnostics_context=True)
@@ -153,7 +157,20 @@ def _get_helm_version(ignore_errors):
 
     if warning:
         print_warning(warning)
-    print("Helm version:\n{}".format(output))
+
+    # Retrieve the helm version if regex pattern is found
+    match_obj = HELM_VERSION_REGEX.search(output)
+    if match_obj:
+        output = match_obj.group(1)
+
+    print("Helm version: {}".format(output))
+
+    # Display an error message if the current helm version < min required version
+    if match_obj and LooseVersion(output) < LooseVersion(MIN_HELM_VERSION):
+        obsolete_ver_error = HELM_VERSION_ERROR.set_error_message(
+            "Current Helm client version is not recommended. Please upgrade your Helm client to at least version {}."
+            .format(MIN_HELM_VERSION))
+        _handle_error(obsolete_ver_error, ignore_errors)
 
 
 def _check_health_environment(ignore_errors, yes):
