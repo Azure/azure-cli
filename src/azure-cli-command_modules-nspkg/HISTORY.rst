@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.3
++++++
+* Indicate Python 3.7 support.
 
 2.0.2
 ++++++
