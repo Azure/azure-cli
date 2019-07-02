@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type
+from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type, get_three_state_flag
 from knack.arguments import CLIArgumentType
 
 
@@ -52,6 +52,13 @@ def load_arguments(self, _):
         c.argument('account_name', id_part=None)
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
+
+    with self.argument_context('netappfiles volume export-policy add') as c:
+        c.argument('unix_read_only', help="Indication of read only access", arg_type=get_three_state_flag())
+        c.argument('unix_read_write', help="Indication of read and write access", arg_type=get_three_state_flag())
+        c.argument('cifs', help="Indication that CIFS protocol is allowed", arg_type=get_three_state_flag())
+        c.argument('nfsv3', help="Indication that NFSv3 protocol is allowed", arg_type=get_three_state_flag())
+        c.argument('nfsv4', help="Indication that NFSv4 protocol is allowed", arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles snapshot') as c:
         c.argument('account_name', account_name_type)

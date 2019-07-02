@@ -16,10 +16,6 @@ gib_scale = 1024 * 1024 * 1024
 tib_scale = gib_scale * 1024
 
 
-def str2bool(v):
-    return v.lower() in ("yes", "true", "t", "1")
-
-
 def _update_mapper(existing, new, keys):
     for key in keys:
         existing_value = getattr(existing, key)
@@ -120,7 +116,7 @@ def patch_volume(cmd, instance, usage_threshold=None, service_level=None, tags=N
 def add_export_policy_rule(cmd, instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv4):
     rules = []
 
-    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=str2bool(unix_read_only), unix_read_write=str2bool(unix_read_write), cifs=str2bool(cifs), nfsv3=str2bool(nfsv3), nfsv4=str2bool(nfsv4), allowed_clients=allowed_clients)
+    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only, unix_read_write=unix_read_write, cifs=cifs, nfsv3=nfsv3, nfsv4=nfsv4, allowed_clients=allowed_clients)
 
     rules.append(export_policy)
     for rule in instance.export_policy.rules:
