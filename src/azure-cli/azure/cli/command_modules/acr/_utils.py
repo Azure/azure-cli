@@ -397,20 +397,17 @@ def get_validate_platform(cmd, platform):
     return platform_os, platform_arch, platform_variant
 
 
-def get_yaml_and_values(cmd_value, timeout, file):
-    """Generates yaml template and its value content if applicable
+def get_yaml_template(cmd_value, timeout, file):
+    """Generates yaml template
     :param str cmd_value: The command to execute in each step
     :param str timeout: The timeout for each step
     :param str file: The task definition
     """
     yaml_template = ""
-    values_content = ""
     if cmd_value:
-        yaml_template = "steps: \n  - cmd: {{ .Values.command }}\n"
-        values_content = "command: {0}\n".format(cmd_value)
+        yaml_template = "steps: \n  - cmd: {0}\n".format(cmd_value)
         if timeout:
-            yaml_template += "    timeout: {{ .Values.timeout }}\n"
-            values_content += "timeout: {0}\n".format(timeout)
+            yaml_template += "    timeout: {0}\n".format(timeout)
     else:
         if not file:
             file = ACR_TASK_YAML_DEFAULT_NAME
@@ -431,7 +428,7 @@ def get_yaml_and_values(cmd_value, timeout, file):
     if not yaml_template:
         raise CLIError("Failed to initialize yaml template.")
 
-    return yaml_template, values_content
+    return yaml_template
 
 
 def get_custom_registry_credentials(cmd,
