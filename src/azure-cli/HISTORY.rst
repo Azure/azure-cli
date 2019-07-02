@@ -22,6 +22,7 @@ Release History
 * functionapp: `az functionapp create` enables application insights by default
 * BREAKING CHANGE: (functionapp) removes deprecated `az functionapp devops-build` command. Please use the new command `az functionapp devops-pipeline` instead.
 * functionapp: `az functionapp deployment config-zip` now works for Linux Consumption Function app plans
+* appservice: restore the idempotency of "appservice plan create" and "webapp create"
 
 **Cosmos DB**
 
