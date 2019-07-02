@@ -2,9 +2,11 @@
 
 Release History
 ===============
-
-* extension removal: surface io errors as warnings instead of verbose info
 * Fixed issue where `--subscription` would appear despite being suppressed on certain commands.
+
+2.0.68
+++++++
+* extension removal: surface io errors as warnings instead of verbose info
 
 2.0.67
 ++++++
