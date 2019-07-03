@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.2.6
++++++
+* Marking this package as deprecated. Please use azure-cli instead.
+
 2.2.5
 +++++
 * az sql server create, az sql mi create: make location optional. If unspecified, use resource group location.
