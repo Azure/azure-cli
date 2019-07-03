@@ -42,7 +42,7 @@ Release History
 
 **NetAppFiles**
 
-* GA release.
+* Initial version relating to the R4 version of the RP.
 
 **Profile**
 * Suppress `--subscription` argument for logout command.
