@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+**Appservice**
+
+* restore the idempotency of "appservice plan create" and "webapp create"
+
 **Core**
 
 * Fixed issue where `--subscription` would appear despite being not applicable.

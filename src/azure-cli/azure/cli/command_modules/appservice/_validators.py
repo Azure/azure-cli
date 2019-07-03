@@ -40,7 +40,7 @@ def validate_site_create(cmd, namespace):
             }
         }
         validation = client.validate(resource_group_name, validation_payload)
-        if validation.status.lower() == "failure":
+        if validation.status.lower() == "failure" and validation.error.code != 'SiteAlreadyExists':
             raise CLIError(validation.error.message)
 
 
@@ -69,5 +69,5 @@ def validate_asp_create(cmd, namespace):
             }
         }
         validation = client.validate(resource_group_name, validation_payload)
-        if validation.status.lower() == "failure":
+        if validation.status.lower() == "failure" and validation.error.code != 'ServerFarmAlreadyExists':
             raise CLIError(validation.error.message)
