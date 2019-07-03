@@ -904,8 +904,23 @@ jobs:
 #       TargetPath: $(Build.ArtifactStagingDirectory)
 #       ArtifactName: ubuntu-cosmic
 
-- job: CheckCLIStyle
+- job: CheckStyle
   displayName: "Check CLI Style"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      pip list
+      azdev style
+
+- job: CheckHeaders
+  displayName: "Check License, History, and DocMap"
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -915,5 +930,35 @@ jobs:
     inputs:
       versionSpec: 3.6
   - bash: |
-      . .scripts/ci/install_azdev.sh
-      azdev style
+      . scripts/ci/install_azdev.sh
+      azdev verify license
+      azdev verify history
+      azdev verify document-map
+
+- job: CheckLoadPerformance
+  displayName: "Check Module Load Performance"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev perf load-times
+
+- job: CheckLinter
+  displayName: "Check CLI Linter"
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+  - bash: |
+      . scripts/ci/install_azdev.sh
+      azdev linter --ci-exclusions

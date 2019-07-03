@@ -310,8 +310,6 @@ parameters:
   - name: --create-cert
     short-summary: Create a self-signed certificate to use for the credential.
     long-summary: Use with `--keyvault` to create the certificate in Key Vault. Otherwise, a certificate will be created locally.
-  - name: --password -p
-    short-summary: The password used to login.
   - name: --keyvault
     short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
   - name: --years

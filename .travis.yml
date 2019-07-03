@@ -11,7 +11,7 @@ addons:
       - libssl-dev
       - libffi-dev
       - python-dev
-install: pip install tox azdev==0.1.3 -qq
+install: pip install tox
 cache: pip
 jobs:
   include:
@@ -19,17 +19,9 @@ jobs:
       env: PURPOSE='Reject PRs to master'
       script: ./scripts/ci/reject_master_prs.sh
     - stage: precheck
-      env: PURPOSE='License, History, DocMap'
-      script: ./scripts/ci/precheck_header.sh
-      python: 3.6
-    - stage: precheck
       env: PURPOSE='Dependency Check'
       script: ./scripts/ci/dependency_check.sh
       python: 3.6
-#    - stage: verify
-#      env: PURPOSE='Lint Command Table and Help'
-#      script: ./scripts/ci/verify_linter.sh
-#      python: 3.6
     - stage: unittest
       python: 3.6
       env: TOXENV=py36
@@ -46,10 +38,6 @@ jobs:
       script: ./scripts/ci/test_profile_integration.sh
       env: PURPOSE='Integration for profiles'
       python: 2.7
-    - stage: verify
-      script: ./scripts/ci/test_perf.sh
-      env: PURPOSE='Module Load Performance'
-      python: 3.6
     - stage: verify
       script: ./scripts/ci/test_ref_doc.sh
       env: PURPOSE='RefDocVerify'
