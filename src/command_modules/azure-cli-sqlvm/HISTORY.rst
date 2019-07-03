@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.1
++++++
+* Marking this package as deprecated. Please use azure-cli instead.
+
 0.2.0
 +++++
 * Customer can set sql image sku type when creating or updating a sql vm.
