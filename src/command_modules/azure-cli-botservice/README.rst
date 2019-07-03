@@ -4,7 +4,7 @@ Microsoft Azure CLI 'bot service' Command Module
 This package is for the 'bot service' module.
 i.e. 'az botservice'
 
-This packages is now deprecated. The modules previously maintained here have been moved to the
+This package is now deprecated. The modules previously maintained here have been moved to the
 `azure-cli package`__.
 
 __ https://pypi.org/project/azure-cli/
