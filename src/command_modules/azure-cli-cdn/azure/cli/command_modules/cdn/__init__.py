@@ -7,8 +7,6 @@ import azure.cli.command_modules.cdn._help
 
 from azure.cli.core import AzCommandsLoader
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
 
 class CdnCommandsLoader(AzCommandsLoader):
 
