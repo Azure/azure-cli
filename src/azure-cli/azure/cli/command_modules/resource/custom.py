@@ -24,7 +24,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
+from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
@@ -245,6 +245,16 @@ def _urlretrieve(url):
     return req.read()
 
 
+def _covert_deployment_template_to_json(template):
+    from jsmin import jsmin
+    #TODO: catch exceptions
+    # deal with line comments
+    minified = jsmin(template)
+    # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
+    result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
+    return shell_safe_json_parse(result, preserve_order=True)
+
+
 def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
@@ -252,17 +262,17 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
-    template = None
     template_link = None
     template_obj = None
     on_error_deployment = None
-
+    template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = shell_safe_json_parse(_urlretrieve(template_uri).decode('utf-8'), preserve_order=True)
+        template_content = _urlretrieve(template_uri).decode('utf-8')
+        template_obj = _covert_deployment_template_to_json(template_content)
     else:
-        template = get_file_json(template_file, preserve_order=True)
-        template_obj = template
+        template_content = read_file_content(template_file)
+        template_obj = _covert_deployment_template_to_json(template_content)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -274,10 +284,9 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
 
-    template = json.loads(json.dumps(template))
     parameters = json.loads(json.dumps(parameters))
 
-    properties = DeploymentProperties(template=template, template_link=template_link,
+    properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
