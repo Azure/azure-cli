@@ -162,12 +162,6 @@ def acr_update_set(cmd,
 
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
-    if registry.sku.name in get_managed_sku(cmd) and parameters.storage_account is not None:
-        parameters.storage_account = None
-        logger.warning(
-            "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
-            registry_name, registry.sku.name)
-
     return client.update(resource_group_name, registry_name, parameters)
 
 
