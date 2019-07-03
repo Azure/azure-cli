@@ -16,7 +16,7 @@ except ImportError:
 
 VERSION = "2.4.5"
 CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable',
+    'Development Status :: 7 - Inactive',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
