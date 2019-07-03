@@ -9,8 +9,6 @@ import azure.cli.command_modules.batch._help  # pylint: disable=unused-import
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.cli.command_modules.batch._command_type import BatchCommandGroup
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
 
 class BatchCommandsLoader(AzCommandsLoader):
 

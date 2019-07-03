@@ -3,9 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
-
 from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.acr._help  # pylint: disable=unused-import

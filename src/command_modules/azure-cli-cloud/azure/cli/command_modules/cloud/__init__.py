@@ -12,8 +12,6 @@ from azure.cli.command_modules.cloud._completers import (
     get_cloud_name_completion_list, get_custom_cloud_name_completion_list)
 import azure.cli.command_modules.cloud._help  # pylint: disable=unused-import
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
 
 class CloudCommandsLoader(AzCommandsLoader):
 

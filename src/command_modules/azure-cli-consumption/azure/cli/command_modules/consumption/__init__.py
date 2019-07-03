@@ -7,9 +7,6 @@ from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.consumption._help  # pylint: disable=unused-import
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
-
 
 class ConsumptionCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):

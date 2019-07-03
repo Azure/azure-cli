@@ -5,9 +5,6 @@
 
 # pylint: disable=unused-import
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
-
 from azure.cli.core import AzCommandsLoader
 import azure.cli.command_modules.ams._help
 

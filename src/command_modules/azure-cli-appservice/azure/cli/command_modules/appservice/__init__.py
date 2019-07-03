@@ -7,8 +7,6 @@ from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.appservice._help  # pylint: disable=unused-import
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
 
 class AppserviceCommandsLoader(AzCommandsLoader):
 

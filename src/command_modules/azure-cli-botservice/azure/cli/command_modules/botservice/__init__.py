@@ -7,8 +7,6 @@ from azure.cli.core import AzCommandsLoader, ModExtensionSuppress
 from azure.cli.command_modules.botservice._help import helps  # pylint: disable=unused-import
 from azure.cli.command_modules.botservice._client_factory import get_botservice_management_client
 
-import warnings
-warnings.warn("deprecated", DeprecationWarning)
 
 class BotServiceCommandsLoader(AzCommandsLoader):
 
