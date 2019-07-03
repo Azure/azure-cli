@@ -19,10 +19,6 @@ jobs:
       env: PURPOSE='Reject PRs to master'
       script: ./scripts/ci/reject_master_prs.sh
     - stage: precheck
-      env: PURPOSE='PEP8 Check'
-      script: ./scripts/ci/precheck_pep8.sh
-      python: 3.6
-    - stage: precheck
       env: PURPOSE='License, History, DocMap'
       script: ./scripts/ci/precheck_header.sh
       python: 3.6
@@ -42,10 +38,6 @@ jobs:
       python: 2.7
       env: TOXENV=py27
       script: ./scripts/ci/unittest.sh
-    - stage: verify
-      script: ./scripts/ci/test_static.sh
-      env: PURPOSE='Static Check'
-      python: 3.6
     - stage: verify
       script: ./scripts/ci/test_profile_integration.sh
       env: PURPOSE='Integration for profiles'
