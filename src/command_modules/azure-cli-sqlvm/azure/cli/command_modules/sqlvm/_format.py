@@ -54,6 +54,7 @@ def transform_sqlvm_output(result):
                               ('provisioningState', result.provisioning_state),
                               ('sqlImageOffer', result.sql_image_offer),
                               ('sqlImageSku', result.sql_image_sku),
+                              ('sqlManagementMode', result.sql_management_mode),
                               ('resourceGroup', resource_group),
                               ('sqlServerLicenseType', result.sql_server_license_type),
                               ('virtualMachineResourceId', result.virtual_machine_resource_id),

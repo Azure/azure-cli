@@ -16,7 +16,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     DiskConfigurationType,
     DayOfWeek,
     SqlVmGroupImageSku,
-    SqlImageSku
+    SqlImageSku,
+    SqlManagementMode
 )
 
 from azure.cli.core.commands.parameters import (
@@ -158,6 +159,10 @@ def load_arguments(self, _):
         c.argument('expand',
                    help='Get the SQLIaaSExtension configuration settings.',
                    arg_type=get_enum_type(['*']))
+        c.argument('sql_management_mode',
+                   help='SQL Server management type.',
+                   options_list=['--sql-mgmt-type'],
+                   arg_type=get_enum_type(SqlManagementMode))
 
     with self.argument_context('sql vm', arg_group='SQL Server License') as c:
         c.argument('sql_server_license_type',

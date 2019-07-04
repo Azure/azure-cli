@@ -171,7 +171,7 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type,
-                 location=None, sql_image_sku=None, enable_auto_patching=None,
+                 location=None, sql_image_sku=None, enable_auto_patching=None, sql_management_mode="LightWeight",
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
@@ -253,6 +253,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
                                      sql_image_sku=sql_image_sku,
+                                     sql_management_mode=sql_management_mode,
                                      auto_patching_settings=auto_patching_object,
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
