@@ -89,9 +89,9 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
-            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {}'
+            param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} --tags {}'
             param_string = param_format.format(name, self.resource_group, 'Win2012R2Datacenter', name,
-                                               '%j^VYw9Q3Z@Cu$*h')
+                                               '%j^VYw9Q3Z@Cu$*h', 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No')
             cmd = 'az vm create {}'.format(param_string)
             execute(self.cli_ctx, cmd.format(name, self.resource_group, name))
             return {self.parameter_name: name}
